@@ -2779,6 +2779,20 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         }
     }
 
+    @Then("The Working Capital Loan {string} transaction is retrievable by its own external id")
+    public void workingCapitalLoanTransactionIsRetrievableByExternalId(final String transactionType) {
+        final Long loanId = getCreatedLoanId();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = latestActiveTransactionOfType(
+                TransactionType.valueOf(transactionType));
+        assertThat(transaction.getExternalId()).as("WC %s transaction must have a non-blank externalId to be addressable", transactionType)
+                .isNotBlank();
+        final GetWorkingCapitalLoanTransactionIdResponse byExternalId = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .retrieveWorkingCapitalLoanTransactionByExternalTransactionId(loanId, transaction.getExternalId()));
+        assertThat(byExternalId.getId())
+                .as("WC transaction fetched by external id %s must be the same transaction", transaction.getExternalId())
+                .isEqualTo(transaction.getId());
+    }
+
     @Then("Add discount with {string} amount on Working Capital loan account failed due to date diff from disbursement date")
     public void updateDiscountWithAmountOnWorkingCapitalLoanAccountFailedDueToDateDiffFromDisbursementDate(String discountAmount) {
         String errorMessage = ErrorMessageHelper.discountDiffDateFromDisburseFailure();

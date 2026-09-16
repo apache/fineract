@@ -24,7 +24,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
-import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanAccrualTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -63,6 +63,7 @@ public class WorkingCapitalLoanChargeAccrualService {
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
     private final WorkingCapitalLoanTransactionFinder transactionFinder;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final ExternalIdFactory externalIdFactory;
 
     /**
      * When {@code wcl-charge-accrual-time} is real-time, posts the charge accrual immediately on add. The COB sweep
@@ -146,8 +147,8 @@ public class WorkingCapitalLoanChargeAccrualService {
         if (accrualDate == null || !MathUtil.isGreaterThanZero(toAccrue)) {
             return;
         }
-        final WorkingCapitalLoanTransaction accrualTransaction = WorkingCapitalLoanTransaction.accrual(loan, ExternalId.empty(), toAccrue,
-                accrualDate);
+        final WorkingCapitalLoanTransaction accrualTransaction = WorkingCapitalLoanTransaction.accrual(loan, externalIdFactory.create(),
+                toAccrue, accrualDate);
         final WorkingCapitalLoanTransactionRelation relation = WorkingCapitalLoanTransactionRelation.linkToCharge(accrualTransaction,
                 charge, LoanTransactionRelationTypeEnum.RELATED);
         accrualTransaction.getLoanTransactionRelations().add(relation);
