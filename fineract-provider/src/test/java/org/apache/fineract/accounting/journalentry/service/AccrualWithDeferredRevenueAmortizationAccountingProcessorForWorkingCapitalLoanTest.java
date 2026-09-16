@@ -167,6 +167,8 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
                 Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 5, 1), BusinessDateType.COB_DATE, LocalDate.of(2026, 4, 30))));
 
         lenient().when(loan.getClient()).thenReturn(client);
+        lenient().when(loanProduct.getAccountingRule()).thenReturn(WorkingCapitalAccountingRuleType.ACC_DEF_REV_AM);
+        lenient().when(loan.getLoanProduct()).thenReturn(loanProduct);
         lenient().when(client.getOffice()).thenReturn(office);
         lenient().when(office.getId()).thenReturn(1L);
         lenient().when(loan.getLoanProduct()).thenReturn(loanProduct);

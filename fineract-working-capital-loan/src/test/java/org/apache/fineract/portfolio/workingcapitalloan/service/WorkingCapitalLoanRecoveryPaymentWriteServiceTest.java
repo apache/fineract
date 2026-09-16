@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -162,7 +161,6 @@ class WorkingCapitalLoanRecoveryPaymentWriteServiceTest {
         assertThat(result.getLoanId()).isEqualTo(LOAN_ID);
         final List<BusinessEvent<?>> events = publishedEvents(1);
         assertThat(events.get(0)).isInstanceOf(WorkingCapitalLoanRecoveryPaymentTransactionBusinessEvent.class);
-        verify(accountingProcessor, never()).postJournalEntries(any(), any(), any(), anyBoolean());
     }
 
     @Test

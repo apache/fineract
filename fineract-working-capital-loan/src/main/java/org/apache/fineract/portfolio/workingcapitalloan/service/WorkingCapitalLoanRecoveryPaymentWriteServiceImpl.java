@@ -110,7 +110,9 @@ public class WorkingCapitalLoanRecoveryPaymentWriteServiceImpl implements Workin
 
         createNote(command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName), loan, changes);
 
-        postJournalEntries(loan, transaction);
+        // No allocation: the whole amount is recovery income, not a repayment split across principal, fees and
+        // penalties. The processor books Dr Fund Source / Cr Income from Recovery from the transaction amount.
+        this.accountingProcessor.postJournalEntries(loan, transaction, null, loan.isChargedOff());
         this.businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanRecoveryPaymentTransactionBusinessEvent(transaction, loan.getId()));
 
@@ -154,25 +156,11 @@ public class WorkingCapitalLoanRecoveryPaymentWriteServiceImpl implements Workin
                 : null;
         createNote(noteText, loan, changes);
 
-        postReversalJournalEntries(loan, transaction);
+        this.accountingProcessor.postReversalJournalEntries(loan, transaction);
 
         this.adjustTransactionEventPublisher.publishReversal(loan.getId(), transaction);
 
         return buildResult(command, loan, transaction, changes);
-    }
-
-    private void postJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            // No allocation: the whole amount is recovery income, not a repayment split across principal, fees and
-            // penalties. The processor books Dr Fund Source / Cr Income from Recovery from the transaction amount.
-            this.accountingProcessor.postJournalEntries(loan, transaction, null, loan.isChargedOff());
-        }
-    }
-
-    private void postReversalJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            this.accountingProcessor.postReversalJournalEntries(loan, transaction);
-        }
     }
 
     /**

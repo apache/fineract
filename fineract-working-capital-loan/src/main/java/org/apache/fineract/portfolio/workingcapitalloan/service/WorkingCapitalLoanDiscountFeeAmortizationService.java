@@ -50,7 +50,7 @@ public interface WorkingCapitalLoanDiscountFeeAmortizationService {
      * accounting posting is enabled.
      */
     void restateFinalDiscountFeeAmortization(WorkingCapitalLoan loan, WorkingCapitalLoanBalance balance,
-            WorkingCapitalLoanTransaction relatedTransaction, boolean accountingEnabled);
+            WorkingCapitalLoanTransaction relatedTransaction);
 
     /**
      * Recomputes {@code realizedIncomeFromDiscountFee} on the loan balance from the database aggregate of non-reversed

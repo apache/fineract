@@ -471,11 +471,9 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         loanChargeRepository.saveAndFlush(wcCharge);
         balanceRepository.saveAndFlush(balance);
 
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntriesForChargeWaiver(loan, waiverTx, isPenalty ? BigDecimal.ZERO : recognizedPortion,
-                    isPenalty ? recognizedPortion : BigDecimal.ZERO,
-                    transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, waiverTx));
-        }
+        accountingProcessor.postJournalEntriesForChargeWaiver(loan, waiverTx, isPenalty ? BigDecimal.ZERO : recognizedPortion,
+                isPenalty ? recognizedPortion : BigDecimal.ZERO,
+                transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, waiverTx));
 
         // A waiver dated to a past due date can land before an active charge-off, which then wrote off a fee the
         // borrower no longer owed as of that date. Replaying restates the charge-off's snapshot and everything routed

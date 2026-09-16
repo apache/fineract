@@ -1542,3 +1542,129 @@ Feature: WorkingCapitalLoanAccount
       | Type      | Account code | Account name              | Debit  | Credit |
       | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
+
+
+  @TestRailId:TODO_01
+  Scenario: Discount fee reversal and journal entry is correct via undo disbursement after undone repayment - separate discount fee application
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin stores the last Working Capital loan disbursement transaction id for later reference
+    And Working capital loan account has the correct data:
+      | status | principal | totalDiscountFee | unrealizedIncome |
+      | Active | 9000.0    | 0.0              | 0.0              |
+    When Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+    And Working capital loan account has the correct data:
+      | status | principal | discount | totalDiscountFee | unrealizedIncome |
+      | Active | 10000.0   | 1000.0   | 1000.0           | 1000.0           |
+
+    Then Working Capital Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
+
+    And Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    And Customer makes repayment on "03 January 2026" with 50 transaction amount on Working Capital loan
+
+    And Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    When Customer undo "1"th working capital transaction made on "03 January 2026"
+
+    And Admin successfully undo Working Capital disbursal
+
+    Then Working Capital Loan Transactions tab has a reversed "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
+      | ASSET     | 112601       | Loans Receivable          |        | 9000.0 |
+      | LIABILITY | 145023       | Suspense/Clearing account | 9000.0 |        |
+
+    Then Working Capital Loan Transactions tab has a reversed "REPAYMENT" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 50.0  |        |
+      | ASSET     | 112601       | Loans Receivable          |       | 50.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 50.0   |
+      | ASSET     | 112601       | Loans Receivable          | 50.0  |        |
+
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_AMORTIZATION" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           |       | 9.61   |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 9.61  |        |
+      | INCOME    | 404000       | Interest Income           | 9.61  |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 9.61   |
+
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
+      | ASSET     | 112601       | Loans Receivable          |        | 1000.0 |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
+
+  @TestRailId:TODO_02
+  Scenario: Discount fee reversal and journal entry is correct via undo disbursement after undone repayment - discountfee with disbursement
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+
+    And Working capital loan account has the correct data:
+      | status | principal | discount | totalDiscountFee | unrealizedIncome |
+      | Active | 10000.0   | 1000.0   | 1000.0           | 1000.0           |
+
+    Then Working Capital Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
+
+    And Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    And Customer makes repayment on "03 January 2026" with 50 transaction amount on Working Capital loan
+
+    And Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    When Customer undo "1"th working capital transaction made on "03 January 2026"
+
+    And Admin successfully undo Working Capital disbursal
+
+    Then Working Capital Loan Transactions tab has a reversed "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
+      | ASSET     | 112601       | Loans Receivable          |        | 9000.0 |
+      | LIABILITY | 145023       | Suspense/Clearing account | 9000.0 |        |
+
+    Then Working Capital Loan Transactions tab has a reversed "REPAYMENT" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 50.0  |        |
+      | ASSET     | 112601       | Loans Receivable          |       | 50.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 50.0   |
+      | ASSET     | 112601       | Loans Receivable          | 50.0  |        |
+
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_AMORTIZATION" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           |       | 9.61   |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 9.61  |        |
+      | INCOME    | 404000       | Interest Income           | 9.61  |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 9.61   |
+
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
+      | ASSET     | 112601       | Loans Receivable          |        | 1000.0 |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |

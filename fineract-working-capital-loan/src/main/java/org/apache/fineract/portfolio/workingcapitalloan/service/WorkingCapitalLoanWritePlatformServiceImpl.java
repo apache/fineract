@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -401,9 +402,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnDisbursement(loan, transactionAmount, actualDisbursementDate);
         generateInitialDelinquencyAndBreachPeriods(loan);
 
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntries(loan, disbursementTransaction, allocation, false);
-        }
+        accountingProcessor.postJournalEntries(loan, disbursementTransaction, allocation, false);
 
         this.loanRepository.saveAndFlush(loan);
         changes.put("status", loan.getLoanStatus());
@@ -510,9 +509,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         amortizationScheduleWriteService.applyDiscountFeeAdjustment(loan);
 
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntriesForDiscountFee(loan, discountTransaction);
-        }
+        accountingProcessor.postJournalEntriesForDiscountFee(loan, discountTransaction);
 
         businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanDiscountFeeTransactionBusinessEvent(discountTransaction));
@@ -666,9 +663,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         saveNewTransactionRelation(adjustmentTransaction, relatedDiscountTransaction, LoanTransactionRelationTypeEnum.RELATED);
         allocationRepository.saveAndFlush(WorkingCapitalLoanTransactionAllocation.forDiscountFeeAdjustment(adjustmentTransaction, amount));
 
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntriesForDiscountFeeAdjustment(loan, adjustmentTransaction);
-        }
+        accountingProcessor.postJournalEntriesForDiscountFeeAdjustment(loan, adjustmentTransaction);
 
         if (loan.getLoanProductRelatedDetails() == null) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.discount.not.available",
@@ -784,9 +779,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         transactionProcessor.recalculateOverpaidOnDate(loan, waiverTransaction);
         loanRepository.saveAndFlush(loan);
 
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postReversalJournalEntries(loan, waiverTransaction);
-        }
+        accountingProcessor.postReversalJournalEntries(loan, waiverTransaction);
 
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
         createNote(noteText, loan);
@@ -813,6 +806,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         validator.validateUndoDiscountAdjustmentTransaction(loan, adjustmentTransaction);
 
         reverseTransaction(adjustmentTransaction);
+        accountingProcessor.postReversalJournalEntries(loan, adjustmentTransaction);
         reverseDiscountFeeAmortizationAdjustments(loan, adjustmentTransaction);
 
         final BigDecimal currentDiscount = loan.getLoanProductRelatedDetails().getDiscount();
@@ -1038,10 +1032,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         this.loanRepository.saveAndFlush(loan);
 
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntries(loan, creditBalanceRefundTransaction, allocation,
-                    transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, creditBalanceRefundTransaction));
-        }
+        accountingProcessor.postJournalEntries(loan, creditBalanceRefundTransaction, allocation,
+                transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, creditBalanceRefundTransaction));
 
         businessEventNotifierService.notifyPostBusinessEvent(
                 new WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent(creditBalanceRefundTransaction, loan.getId()));
@@ -1202,9 +1194,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
         }
 
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postReversalJournalEntries(loan, transaction);
-        }
+        accountingProcessor.postReversalJournalEntries(loan, transaction);
 
         stateMachine.determineAndTransition(loan, DateUtils.getBusinessLocalDate());
         transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
@@ -1378,23 +1368,32 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
         final WorkingCapitalLoanTransaction txn = activeDisbursements.getFirst();
 
-        final List<WorkingCapitalLoanTransaction> accrualsToReverse = transactions.stream()
-                .filter(t -> t.getTypeOf() == LoanTransactionType.ACCRUAL && !t.isReversed()).toList();
-
-        transactions.forEach(this::markReversed);
-
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postReversalJournalEntries(loan, txn);
+        // Only the still-live transactions are reversed: one undone earlier keeps its own reversal date and external
+        // id, and its journal entries are already cancelled. Each reversal also backs its journal entries out, so the
+        // discount fee (and adjustments), amortization (and adjustments) and charge accruals leave the ledger together
+        // with the disbursement.
+        final List<WorkingCapitalLoanTransaction> reversedTransactions = new ArrayList<>();
+        for (final WorkingCapitalLoanTransaction transaction : transactions) {
+            if (transaction.isReversed()) {
+                continue;
+            }
+            markReversed(transaction);
+            accountingProcessor.postReversalJournalEntries(loan, transaction);
+            reversedTransactions.add(transaction);
         }
 
-        this.transactionRepository.saveAll(transactions);
+        this.transactionRepository.saveAll(reversedTransactions);
         this.transactionRepository.flush();
 
-        // Reverse the journal entries of any charge accrual so the recognized income/receivable is backed out with the
-        // disbursement; marking the transaction reversed alone would leave the GL postings in place.
-        accrualsToReverse.forEach(accrual -> accountingProcessor.postReversalJournalEntries(loan, accrual));
-        accrualsToReverse.forEach(accrual -> businessEventNotifierService
-                .notifyPostBusinessEvent(new WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent(accrual, loan.getId())));
+        // The disbursement's own reversal is announced by the caller's undo disbursal transaction event.
+        for (final WorkingCapitalLoanTransaction reversed : reversedTransactions) {
+            if (reversed.getTypeOf() == LoanTransactionType.ACCRUAL) {
+                businessEventNotifierService
+                        .notifyPostBusinessEvent(new WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent(reversed, loan.getId()));
+            } else if (reversed.getTypeOf() != LoanTransactionType.DISBURSEMENT) {
+                adjustTransactionEventPublisher.publishReversal(loan.getId(), reversed);
+            }
+        }
 
         // Operate on loan.getBalance() directly: it is the single managed balance instance that
         // recalculateRealizedIncome writes to, so all updates here apply to the same object that gets persisted.

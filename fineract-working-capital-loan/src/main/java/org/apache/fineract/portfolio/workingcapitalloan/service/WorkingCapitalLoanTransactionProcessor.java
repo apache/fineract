@@ -131,10 +131,8 @@ public class WorkingCapitalLoanTransactionProcessor {
                 delinquencyRangeScheduleService.applyRepayment(loan, transactionDate, transactionAmount);
             }
 
-            if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-                accountingProcessor.postJournalEntries(loan, transaction, allocation,
-                        transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, transaction));
-            }
+            accountingProcessor.postJournalEntries(loan, transaction, allocation,
+                    transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, transaction));
         }
 
         // Breach schedule is maintained incrementally here; reprocessing does not rebuild it.
