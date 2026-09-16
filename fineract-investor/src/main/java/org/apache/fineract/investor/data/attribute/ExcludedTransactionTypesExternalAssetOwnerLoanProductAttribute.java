@@ -84,7 +84,26 @@ public class ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute impl
         return String.join(SEPARATOR, normalizedTokens);
     }
 
-    private String normalizeToken(String token) {
+    /**
+     * Tells whether the given loan transaction type is listed in an already persisted attribute value. Tolerant by
+     * design: the stored value is re-normalised rather than assumed canonical, because rows can also arrive through SQL
+     * or a migration, and tokens that do not resolve to a {@link LoanTransactionType} are ignored instead of failing.
+     * This runs on the journal entry and external event paths, where throwing would roll back the surrounding loan
+     * operation.
+     */
+    public static boolean containsType(final String attributeValue, final LoanTransactionType type) {
+        if (attributeValue == null || attributeValue.isBlank() || type == null) {
+            return false;
+        }
+        for (String token : attributeValue.split(SEPARATOR, -1)) {
+            if (type.name().equals(normalizeToken(token))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String normalizeToken(String token) {
         return token.trim();
     }
 }
