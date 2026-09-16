@@ -19,7 +19,7 @@
 package org.apache.fineract.cob.resolver;
 
 import org.apache.fineract.cob.COBConstant;
-import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.step.StepExecution;
 
 public final class CatchUpFlagResolver {
 

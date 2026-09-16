@@ -21,8 +21,8 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import java.math.MathContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public interface ProjectedAmortizationScheduleModelParserService {
 

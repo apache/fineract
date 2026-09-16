@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import org.springframework.lang.NonNull;
 
 public class CreditAllocationsValidatorTest {
 

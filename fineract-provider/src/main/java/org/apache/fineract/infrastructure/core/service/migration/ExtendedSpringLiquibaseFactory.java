@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.core.service.migration;
 
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
+import org.springframework.boot.liquibase.autoconfigure.LiquibaseProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;

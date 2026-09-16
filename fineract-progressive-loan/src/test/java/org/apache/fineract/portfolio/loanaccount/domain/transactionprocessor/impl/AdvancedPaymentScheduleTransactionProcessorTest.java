@@ -91,6 +91,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -102,7 +103,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.lang.NonNull;
 
 @ExtendWith(MockitoExtension.class)
 class AdvancedPaymentScheduleTransactionProcessorTest {

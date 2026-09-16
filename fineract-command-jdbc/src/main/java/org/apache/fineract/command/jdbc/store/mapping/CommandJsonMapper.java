@@ -20,13 +20,13 @@ package org.apache.fineract.command.jdbc.store.mapping;
 
 import static org.apache.fineract.command.core.CommandConstants.COMMAND_JSON_CLASS_ATTRIBUTE;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,7 +41,7 @@ public final class CommandJsonMapper {
             return null;
         }
 
-        var canonicalName = source.get(COMMAND_JSON_CLASS_ATTRIBUTE).asText();
+        var canonicalName = source.get(COMMAND_JSON_CLASS_ATTRIBUTE).asString();
 
         try {
             return (T) mapper.convertValue(source, Class.forName(canonicalName));
@@ -59,7 +59,7 @@ public final class CommandJsonMapper {
 
         var json = mapper.convertValue(source, ObjectNode.class);
 
-        json.set(COMMAND_JSON_CLASS_ATTRIBUTE, new TextNode(source.getClass().getCanonicalName()));
+        json.set(COMMAND_JSON_CLASS_ATTRIBUTE, new StringNode(source.getClass().getCanonicalName()));
 
         return json;
     }

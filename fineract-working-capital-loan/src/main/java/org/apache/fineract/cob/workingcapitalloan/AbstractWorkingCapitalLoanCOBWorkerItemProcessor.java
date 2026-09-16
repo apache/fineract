@@ -22,7 +22,7 @@ import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.processor.AbstractItemProcessor;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanModelProcessingService;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public abstract class AbstractWorkingCapitalLoanCOBWorkerItemProcessor extends AbstractItemProcessor<WorkingCapitalLoan> {
 

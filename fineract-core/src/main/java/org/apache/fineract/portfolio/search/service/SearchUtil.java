@@ -54,8 +54,8 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.portfolio.search.data.ColumnFilterData;
 import org.apache.fineract.portfolio.search.data.FilterData;
+import org.jspecify.annotations.NonNull;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Slf4j

@@ -66,7 +66,7 @@ import org.apache.fineract.infrastructure.creditbureau.domain.TokenRepositoryWra
 import org.apache.fineract.infrastructure.creditbureau.serialization.CreditBureauTokenCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
