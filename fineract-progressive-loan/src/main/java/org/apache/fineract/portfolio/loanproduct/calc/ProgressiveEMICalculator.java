@@ -1812,12 +1812,15 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final int gracePeriods = Math.min(graceOnPrincipalPayment, allPeriods.size());
         final LocalDate sliceFirstDueDate = repaymentPeriods.getFirst().getDueDate();
         allPeriods.subList(0, gracePeriods).forEach(period -> {
-            period.setPrincipalPaymentGrace(true);
-            // only rewrite EMI for periods inside the slice being recalculated
+            // Only rewrite EMI for periods inside the slice being recalculated. Periods before the slice keep
+            // whatever principal they already have (e.g. after re-amortization); the grace sticker follows that.
             if (!period.getDueDate().isBefore(sliceFirstDueDate)) {
                 final Money interestOnlyEmi = period.getDueInterest();
                 period.setEmi(interestOnlyEmi);
                 period.setOriginalEmi(interestOnlyEmi);
+                period.setPrincipalPaymentGrace(true);
+            } else if (period.getDuePrincipal().isZero()) {
+                period.setPrincipalPaymentGrace(true);
             }
         });
         final List<RepaymentPeriod> amortizingPeriods = repaymentPeriods.stream().filter(rp -> !rp.isPrincipalPaymentGrace()).toList();

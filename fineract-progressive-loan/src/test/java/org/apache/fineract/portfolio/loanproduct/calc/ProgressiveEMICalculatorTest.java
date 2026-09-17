@@ -5712,6 +5712,40 @@ class ProgressiveEMICalculatorTest {
         assertPrincipalGraceLiftedAndFutureEmisEqualized(interestSchedule);
     }
 
+    /**
+     * After re-amortization puts principal onto a former grace period, a later mid-loan recalc must not restamp
+     * principalPaymentGrace on that period. The flag means interest-only, so it has to follow the money.
+     *
+     * <p>
+     * Probe: N=8, grace=3, disburse 100 on 1 January, re-amortize on 15 February, change the rate on 1 April. Period 2
+     * (due 1 March) sits before the rate-change slice, so the current engine flags it as grace while it still carries
+     * principal.
+     */
+    @Test
+    public void test_principalGrace_reAmortThenRateChange_flagFollowsZeroPrincipal() {
+        final ProgressiveLoanInterestScheduleModel interestSchedule = generatePrincipalGraceScheduleForReAmortProbe();
+
+        emiCalculator.updateModelRepaymentPeriodsDuringReAmortization(interestSchedule, LocalDate.of(2024, 2, 15));
+        emiCalculator.changeInterestRate(interestSchedule, LocalDate.of(2024, 4, 1), BigDecimal.valueOf(24));
+
+        final List<RepaymentPeriod> repaymentPeriods = interestSchedule.repaymentPeriods();
+        final RepaymentPeriod period2 = repaymentPeriods.get(1);
+        Assertions.assertTrue(toDouble(period2.getDuePrincipal()) > 0.0,
+                "Period 2 must still carry principal after re-amortization; this test does not rewrite old money");
+        Assertions.assertFalse(period2.isPrincipalPaymentGrace(),
+                "Period 2 has principal, so it must not keep the principalPaymentGrace sticker");
+
+        for (int idx = 0; idx < repaymentPeriods.size(); idx++) {
+            final RepaymentPeriod period = repaymentPeriods.get(idx);
+            if (period.isPrincipalPaymentGrace()) {
+                Assertions.assertEquals(0.0, toDouble(period.getDuePrincipal()), 0.01,
+                        "Period " + idx + " is flagged principalPaymentGrace but still has principal");
+            }
+        }
+        final double totalPrincipal = repaymentPeriods.stream().mapToDouble(rp -> toDouble(rp.getDuePrincipal())).sum();
+        Assertions.assertEquals(100.0, totalPrincipal, 0.01, "All principal must still be scheduled");
+    }
+
     private ProgressiveLoanInterestScheduleModel generatePrincipalGraceBulletSchedule() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
         expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
