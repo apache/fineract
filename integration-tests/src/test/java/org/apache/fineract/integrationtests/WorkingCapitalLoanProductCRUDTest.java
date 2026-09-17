@@ -25,13 +25,21 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.Headers;
+import feign.Param;
+import feign.RequestLine;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.DeleteWorkingCapitalLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.EnumOptionData;
 import org.apache.fineract.client.models.GetDelinquencyBucket;
 import org.apache.fineract.client.models.GetDelinquencyRange;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsProductIdResponse;
@@ -47,6 +55,7 @@ import org.apache.fineract.client.models.WorkingCapitalBreachData;
 import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalNearBreachData;
 import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalNearBreachHelper;
@@ -56,6 +65,8 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class WorkingCapitalLoanProductCRUDTest {
 
@@ -84,6 +95,49 @@ public class WorkingCapitalLoanProductCRUDTest {
         assertNotNull(response.getResourceId());
         final Long productId = response.getResourceId();
         wclProductHelper.deleteWorkingCapitalLoanProductById(productId);
+    }
+
+    // Raw request bodies allow testing values excluded by the generated client's enum.
+    @Headers({ "Accept: application/json", "Content-Type: application/json" })
+    public interface PaymentAllocationValidationApi {
+
+        @RequestLine("POST /v1/working-capital-loan-products")
+        PostWorkingCapitalLoanProductsResponse create(Map<String, Object> request);
+
+        @RequestLine("PUT /v1/working-capital-loan-products/{productId}")
+        PutWorkingCapitalLoanProductsProductIdResponse update(@Param("productId") Long productId, Map<String, Object> request);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "DOWN_PAYMENT", "INTEREST_REFUND", "MERCHANT_ISSUED_REFUND", "default", " REPAYMENT " })
+    public void testRejectUnsupportedPaymentAllocationOnCreateAndUpdate(final String transactionType) {
+        final WorkingCapitalLoanProductTestBuilder builder = new WorkingCapitalLoanProductTestBuilder()
+                .withName("Test wcl Product " + UUID.randomUUID().toString().substring(0, 8))
+                .withShortName(Utils.uniqueRandomStringGenerator("", 4));
+        final Long productId = wclProductHelper.createWorkingCapitalLoanProduct(builder.build()).getResourceId();
+        try {
+            final PaymentAllocationValidationApi api = FineractFeignClientHelper.getFineractFeignClient()
+                    .create(PaymentAllocationValidationApi.class);
+            final Map<String, Object> request = new ObjectMapper()
+                    .convertValue(builder.withName("Rejected wcl " + UUID.randomUUID().toString().substring(0, 8))
+                            .withShortName(Utils.uniqueRandomStringGenerator("", 4)).build(), new TypeReference<>() {});
+            final List<PaymentAllocationOrder> allocationOrder = builder.build().getPaymentAllocation().getFirst()
+                    .getPaymentAllocationOrder();
+            request.put("paymentAllocation", List.of(Map.of("transactionType", "DEFAULT", "paymentAllocationOrder", allocationOrder),
+                    Map.of("transactionType", transactionType, "paymentAllocationOrder", allocationOrder)));
+            final CallFailedRuntimeException createError = assertThrows(CallFailedRuntimeException.class,
+                    () -> FeignCalls.ok(() -> api.create(request)));
+            assertThat(createError.getStatus()).isEqualTo(400);
+            assertThat(createError.getResponseBody()).contains("wc-payment-allocation.with.not.valid.transaction.type");
+
+            final Map<String, Object> updateRequest = Map.of("paymentAllocation", request.get("paymentAllocation"));
+            final CallFailedRuntimeException updateError = assertThrows(CallFailedRuntimeException.class,
+                    () -> FeignCalls.ok(() -> api.update(productId, updateRequest)));
+            assertThat(updateError.getStatus()).isEqualTo(400);
+            assertThat(updateError.getResponseBody()).contains("wc-payment-allocation.with.not.valid.transaction.type");
+        } finally {
+            wclProductHelper.deleteWorkingCapitalLoanProductById(productId);
+        }
     }
 
     @Test
@@ -178,6 +232,17 @@ public class WorkingCapitalLoanProductCRUDTest {
         assertNotNull(response.getAdvancedPaymentAllocationTransactionTypes());
         assertFalse(response.getAdvancedPaymentAllocationTransactionTypes().isEmpty(),
                 "Payment allocation transaction type options should not be empty");
+        // Verify Payment allocation transaction types contains expected values
+        final List<String> expectedPaymentAllocationTransactionTypes = List.of("DEFAULT", "REPAYMENT", "PAYOUT_REFUND", "GOODWILL_CREDIT",
+                "CHARGE_ADJUSTMENT");
+        final List<String> actualPaymentAllocationTransactionTypes = response.getAdvancedPaymentAllocationTransactionTypes().stream()
+                .map(EnumOptionData::getCode).toList();
+        assertTrue(actualPaymentAllocationTransactionTypes.containsAll(expectedPaymentAllocationTransactionTypes),
+                "Payment allocation transaction types should contain all expected types");
+        assertEquals(expectedPaymentAllocationTransactionTypes, actualPaymentAllocationTransactionTypes);
+        assertEquals(List.of(1L, 2L, 5L, 6L, 8L),
+                response.getAdvancedPaymentAllocationTransactionTypes().stream().map(EnumOptionData::getId).toList());
+
         // Verify payment allocation types contain expected values
         final List<String> expectedPaymentAllocationTypes = List.of("DUE_PENALTY", "DUE_FEE", "DUE_PRINCIPAL", "IN_ADVANCE_PENALTY",
                 "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL");

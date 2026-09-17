@@ -201,9 +201,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
 
             private PostPaymentAllocation() {}
 
-            @Schema(example = "DEFAULT", allowableValues = { "DEFAULT", "REPAYMENT", "DOWN_PAYMENT", "MERCHANT_ISSUED_REFUND",
-                    "PAYOUT_REFUND", "GOODWILL_CREDIT", "CHARGE_REFUND", "CHARGE_ADJUSTMENT", "WAIVE_INTEREST", "CHARGE_PAYMENT",
-                    "REFUND_FOR_ACTIVE_LOAN", "INTEREST_PAYMENT_WAIVER", "INTEREST_REFUND", "CAPITALIZED_INCOME_ADJUSTMENT" })
+            @Schema(example = "DEFAULT", allowableValues = { "DEFAULT", "REPAYMENT", "PAYOUT_REFUND", "GOODWILL_CREDIT",
+                    "CHARGE_ADJUSTMENT" })
             public String transactionType;
             public List<PaymentAllocationOrder> paymentAllocationOrder;
 
