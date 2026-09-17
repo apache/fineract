@@ -4110,6 +4110,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final GetBalance balance = retrieveLoanDetails(getCreatedLoanId()).getBalance();
         assertNotNull(balance, "Balance payload should not be null");
         final BigDecimal actual = switch (field) {
+            case "totalDiscountFee" -> balance.getTotalDiscountFee();
+            case "totalDiscountFeeAdjustment" -> balance.getTotalDiscountFeeAdjustment();
             case "overpaymentAmount" -> balance.getOverpaymentAmount();
             case "principalOutstanding" -> balance.getPrincipalOutstanding();
             case "totalPaidPrincipal" -> balance.getPrincipalPaid();

@@ -449,3 +449,64 @@ Feature: Working Capital Loan Charge-off
       | 10 January 2026 | Repayment    | 60.0              | 60.0             | 0.0               | 0.0                   | false    |
       | 15 January 2026 | Charge-off   | 60.0              | 60.0             | 0.0               | 0.0                   | true     |
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:TODO_ADD_01
+  Scenario: Verify Working Capital Charge-off transactions - Backdated discount fee adjustment on a re-charged-off loan should correct realized income
+# Step 1: WC loan 9000 / total payment volume 100000 / rate 18, approve and disburse on 01 January 2026 with discount 1000.
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    And Admin loads discount fee transaction from Working Capital loan for adjustment
+
+# Step 2: 02 January 2026 -> repayment 50; run COB (amortization 9.61).
+    And Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    When Customer makes "REPAYMENT" transaction on "02 January 2026" with 50.0 transaction amount on Working Capital loan
+
+# Step 3: 04 January 2026 -> charge off (9950, final amortization 990.39 to charge-off expense).
+    And Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    When Admin charges off the Working Capital loan on "04 January 2026"
+
+# Step 4: 05 January 2026 -> repayment 9950 dated 03 January 2026 (charge-off is lifted, loan CLOSED, amortization 990.39 posted to income, realized 1000.00).
+    And Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    When Customer makes "REPAYMENT" transaction on "03 January 2026" with 9950.0 transaction amount on Working Capital loan
+
+# Step 5: Undo that repayment (loan ACTIVE, outstanding 9950, not charged off, realized still 1000.00).
+    When Customer undo "1"th working capital transaction made on "03 January 2026"
+
+# Step 6: Charge off again on 05 January 2026 (no final amortization, deferred income already 0).
+    When Admin charges off the Working Capital loan on "05 January 2026"
+
+# Step 7: Discount fee adjustment 100 dated 03 January 2026 (before the charge-off date, accepted).
+    And Admin adds Discount fee adjustment with "100" amount on transaction date "03 January 2026" on Working Capital loan account for last discount
+
+# Step 8: Run COB on the following days.
+    And Admin sets the business date to "06 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+
+    And Working Capital loan balance payload contains the following fields:
+      | field                      | value  |
+      | totalDiscountFee           | 1000.0 |
+      | totalDiscountFeeAdjustment | 100.0  |
+      | realizedIncome             | 900.0  |
+      | unrealizedIncome           | 0.0    |
+
+# Step 9: Undo the Discount Fee adjustment
+    When Admin undo the Discount fee adjustment with "100.0" amount on Working Capital loan account
+
+# Step 10: Run COB on the following days.
+    And Admin sets the business date to "07 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+
+    And Working Capital loan balance payload contains the following fields:
+      | field                      | value  |
+      | totalDiscountFee           | 1000.0 |
+      | totalDiscountFeeAdjustment | 000.0  |
+      | realizedIncome             | 1000.0 |
+      | unrealizedIncome           | 0.0    |
