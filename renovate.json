@@ -7,8 +7,7 @@
     "helpers:pinGitHubActionDigests"
   ],
   "ignorePaths": [
-    "docs/**",
-    "fineract-client/**"
+    "docs/**"
   ],
   "ignoreDeps": [
     "com.gradle.develocity"
@@ -22,6 +21,12 @@
   {
     "matchPackageNames": ["org.glassfish.jaxb:jaxb-runtime"],
     "allowedVersions": "<=2.3.6"
+  },
+  {
+    "matchPackageNames": ["jakarta.annotation:jakarta.annotation-api"],
+    "matchFileNames": ["fineract-client/dependencies.gradle"],
+    "allowedVersions": "<2.0.0",
+    "description": "The OpenAPI Generator emits javax.annotation.Generated, which only exists in the 1.x line; 2.x+ moved it to the jakarta.annotation namespace. Unrelated to the Java baseline -- fineract-client targets Java 17."
   },
   {
     "matchPackageNames": ["com.sun.mail:jakarta.mail", "com.icegreen:greenmail-junit5"],

@@ -99,13 +99,7 @@ jar {
 compileJava {
     dependsOn buildJavaSdk
     source = sourceSets.main.java.srcDirs
-    options.compilerArgs += ['-parameters', '-proc:none', '-Xlint:-options']
-}
-
-java {
-    // keep this at Java 8, not 17
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    options.compilerArgs += ['-parameters', '-proc:none']
 }
 
 tasks.withType(JavaCompile).configureEach {
