@@ -80,6 +80,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsPaymentDetailRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsResponse;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdDisbursementPaymentDetails;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
@@ -1392,6 +1393,23 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         PostWorkingCapitalLoansLoanIdRequest disburseRequest = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoanDisburseRequest()
                 .actualDisbursementDate(actualDisbursementDate)//
                 .transactionAmount(new BigDecimal(transactionAmount));
+        testContext().set(TestContextKey.LOAN_DISBURSE_REQUEST, disburseRequest);
+
+        executeStateTransition("disburse", disburseRequest, TestContextKey.LOAN_DISBURSE_RESPONSE, false);
+        verifyStateTransitionSuccess(TestContextKey.LOAN_DISBURSE_RESPONSE, "disbursement");
+        checkChangesExpectedStatus(TestContextKey.LOAN_DISBURSE_RESPONSE, ACTIVE);
+    }
+
+    @And("Admin successfully disburse the Working Capital loan on {string} with {string} EUR transaction amount and {string} payment type")
+    public void disburseWCLoanWithPaymentType(final String actualDisbursementDate, final String transactionAmount,
+            final String paymentTypeName) {
+        final long paymentTypeId = paymentTypeResolver.resolve(DefaultPaymentType.valueOf(paymentTypeName));
+        final PostWorkingCapitalLoansLoanIdRequest disburseRequest = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoanDisburseRequest() //
+                .actualDisbursementDate(actualDisbursementDate) //
+                .transactionAmount(new BigDecimal(transactionAmount)) //
+                .paymentDetails(
+                        new PostWorkingCapitalLoansLoanIdDisbursementPaymentDetails().paymentTypeId(Math.toIntExact(paymentTypeId)));
         testContext().set(TestContextKey.LOAN_DISBURSE_REQUEST, disburseRequest);
 
         executeStateTransition("disburse", disburseRequest, TestContextKey.LOAN_DISBURSE_RESPONSE, false);
