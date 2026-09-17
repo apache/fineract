@@ -696,6 +696,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         stateMachine.determineAndTransition(loan, transactionDate);
         transactionProcessor.recalculateOverpaidOnDate(loan, adjustmentTransaction);
+        transactionProcessor.recalculateClosedOnDate(loan);
         transactionProcessor.triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
         // A discount-fee adjustment can pay down principal and close the loan, so accrue any pending charge income.
         chargeAccrualService.accrueOnClosure(loan, transactionDate);
@@ -1141,6 +1142,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         stateMachine.determineAndTransition(loan, DateUtils.getBusinessLocalDate());
         transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
+        transactionProcessor.recalculateClosedOnDate(loan);
 
         changes.put("status", loan.getLoanStatus());
 

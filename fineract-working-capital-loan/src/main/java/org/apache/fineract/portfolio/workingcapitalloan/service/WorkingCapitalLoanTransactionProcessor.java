@@ -142,6 +142,7 @@ public class WorkingCapitalLoanTransactionProcessor {
 
         stateMachine.determineAndTransition(loan, transactionDate);
         recalculateOverpaidOnDate(loan, transaction);
+        recalculateClosedOnDate(loan);
         triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
         // On early closure the loan leaves the COB scope, so any charge whose due-date accrual has not been posted yet
         // is accrued as of the closing date to make sure the income is recognized before the loan is closed.
@@ -212,8 +213,77 @@ public class WorkingCapitalLoanTransactionProcessor {
                     && MathUtil.isGreaterThanZero(loan.getBalance().getRealizedIncomeFromDiscountFee());
 
             if (MathUtil.isGreaterThanZero(discount) || adjustmentNeeded) {
-                discountFeeAmortizationService.processDiscountFeeAmortization(loan, transactionDate);
+                discountFeeAmortizationService.processDiscountFeeAmortization(loan, settlementDate(loan, transactionDate));
             }
         }
+    }
+
+    /**
+     * Re-derives {@code closedOnDate} and the maturity date beside it, correcting the optimistic values the lifecycle
+     * state machine stamps when a loan settles.
+     * <p>
+     * The same defect {@link #recalculateOverpaidOnDate} fixes on the neighbouring field, and it reaches the API the
+     * same way - {@code WorkingCapitalLoanSummaryMapper.buildTimeline} publishes both as {@code timeline.closedOnDate}
+     * and {@code timeline.actualMaturityDate}. The machine stamps whichever transaction triggered the transition, which
+     * is the day the loan closed only when that transaction is also the chronologically last one. A backdated repayment
+     * completing an already part-paid loan is not: the money that finished the settlement arrived later, so the stored
+     * dates would say the loan closed before it was actually paid off.
+     * <p>
+     * Settled exactly means every payment was needed, so the latest of them is the day the loan closed. Only ever moved
+     * later: settlement can be completed by something that is not a repayment at all - a discount fee adjustment that
+     * reduces what is owed to what has already been paid, a waiver, a charge adjustment - and for those the
+     * transition's own date is the day the loan settled and remains the best answer.
+     * <p>
+     * Must be called wherever {@code determineAndTransition} can stamp a closure, alongside
+     * {@link #recalculateOverpaidOnDate(WorkingCapitalLoan, WorkingCapitalLoanTransaction)}: the repayment path here, a
+     * discount fee adjustment, and a transaction undo. {@link #settlementDate} reads the field this writes, so a site
+     * that transitions without correcting it would date the closing amortization from the raw stamp.
+     */
+    public void recalculateClosedOnDate(final WorkingCapitalLoan loan) {
+        if (loan.getLoanStatus() == null || !loan.getLoanStatus().isClosedObligationsMet()) {
+            return;
+        }
+        final LocalDate settledOn = transactionRepository.findLatestActiveTransactionDateByTypes(loan.getId(),
+                LoanTransactionType.getRepaymentLikeTransactionTypes());
+        if (settledOn == null) {
+            return;
+        }
+        if (DateUtils.isBefore(loan.getClosedOnDate(), settledOn)) {
+            loan.setClosedOnDate(settledOn);
+        }
+        if (DateUtils.isBefore(loan.getMaturedOnDate(), settledOn)) {
+            loan.setMaturedOnDate(settledOn);
+        }
+    }
+
+    /**
+     * The day the loan actually became settled, which is the day the whole discount is earned - not the date of
+     * whichever transaction happened to trigger the recalculation.
+     * <p>
+     * The two are the same only when the triggering transaction is also the chronologically last one. A backdated
+     * repayment that completes an already part-paid loan is not: it carries an earlier date, while the money that
+     * finished the settlement arrived later. Dating the closing amortization on the trigger would recognize the income
+     * before that cash came in.
+     * <p>
+     * Mirrors core's {@code getFinalAccrualTransactionDate}: it reads the loan's settlement state rather than the
+     * transaction in hand. Both fields it reads are re-derived immediately before this runs, by
+     * {@link #recalculateOverpaidOnDate(WorkingCapitalLoan, WorkingCapitalLoanTransaction)} and
+     * {@link #recalculateClosedOnDate(WorkingCapitalLoan)}, so the income and the closure the API reports are dated
+     * from the same answer rather than drifting apart.
+     * <p>
+     * Never earlier than the triggering transaction. Settlement can be completed by something that is not a repayment
+     * at all - a write-off, a waiver, a charge adjustment - and for those the trigger's own date remains the best
+     * answer, so this only ever moves the recognition later, never earlier than it is booked today.
+     */
+    private LocalDate settlementDate(final WorkingCapitalLoan loan, final LocalDate transactionDate) {
+        final LocalDate settledOn;
+        if (loan.isOverpaid()) {
+            settledOn = loan.getOverpaidOnDate();
+        } else if (loan.isClosedObligationsMet()) {
+            settledOn = loan.getClosedOnDate();
+        } else {
+            settledOn = null;
+        }
+        return settledOn == null || !settledOn.isAfter(transactionDate) ? transactionDate : settledOn;
     }
 }
