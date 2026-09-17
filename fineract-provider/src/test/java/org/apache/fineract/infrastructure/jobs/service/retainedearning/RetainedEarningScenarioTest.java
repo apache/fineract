@@ -29,6 +29,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.fineract.accounting.retainedearning.domain.AccountGLJournalEntryAnnualSummaryRepository;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.data.AccountGLJournalEntryAnnualSummaryData;
@@ -149,6 +151,66 @@ class RetainedEarningScenarioTest {
     }
 
     @Test
+    void shouldSplitRetainedEarningsByOriginatorWithinSameOwner() {
+        List<AccountGLJournalEntryAnnualSummaryData> trialBalanceData = new ArrayList<>();
+        trialBalanceData.add(buildRecordWithOriginator("401001", "self", new BigDecimal("-150000.00"), "ALPHA-01, ZETA-01"));
+        trialBalanceData.add(buildRecordWithOriginator("801001", "self", new BigDecimal("50000.00"), "ALPHA-01, ZETA-01"));
+        trialBalanceData.add(buildRecordWithOriginator("401002", "self", new BigDecimal("-200000.00"), "ALPHA-01"));
+        trialBalanceData.add(buildRecordWithOriginator("801002", "self", new BigDecimal("75000.00"), "ALPHA-01"));
+        setupConfigMocks();
+
+        List<AccountGLJournalEntryAnnualSummaryData> results = retainedEarningDataService.processTrialBalanceData(trialBalanceData,
+                FISCAL_YEAR_END);
+
+        List<AccountGLJournalEntryAnnualSummaryData> retainedEarningResults = results.stream()
+                .filter(r -> r.getGlAccountCode().equals(RETAINED_EARNING_GL)).toList();
+
+        assertEquals(2, retainedEarningResults.size(), "Should have 2 retained earning records, one per distinct originator");
+
+        AccountGLJournalEntryAnnualSummaryData multiOriginatorRE = retainedEarningResults.stream()
+                .filter(r -> "ALPHA-01, ZETA-01".equals(r.getOriginatorExternalIds())).findFirst().orElse(null);
+        assertNotNull(multiOriginatorRE, "Should have a retained earning record for the ALPHA-01, ZETA-01 originator bucket");
+        assertEquals(0, new BigDecimal("-100000.00").compareTo(multiOriginatorRE.getOpeningBalanceAmount()));
+
+        AccountGLJournalEntryAnnualSummaryData singleOriginatorRE = retainedEarningResults.stream()
+                .filter(r -> "ALPHA-01".equals(r.getOriginatorExternalIds())).findFirst().orElse(null);
+        assertNotNull(singleOriginatorRE, "Should have a separate retained earning record for the ALPHA-01 originator bucket");
+        assertEquals(0, new BigDecimal("-125000.00").compareTo(singleOriginatorRE.getOpeningBalanceAmount()));
+
+        Map<String, String> originatorByIncomeExpenseGl = results.stream().filter(r -> !r.getGlAccountCode().equals(RETAINED_EARNING_GL))
+                .collect(Collectors.toMap(AccountGLJournalEntryAnnualSummaryData::getGlAccountCode,
+                        AccountGLJournalEntryAnnualSummaryData::getOriginatorExternalIds));
+        assertEquals(Map.of("401001", "ALPHA-01, ZETA-01", "801001", "ALPHA-01, ZETA-01", "401002", "ALPHA-01", "801002", "ALPHA-01"),
+                originatorByIncomeExpenseGl);
+    }
+
+    @Test
+    void shouldKeepNullOriginatorBucketSeparateFromValuedBucket() {
+        List<AccountGLJournalEntryAnnualSummaryData> trialBalanceData = new ArrayList<>();
+        trialBalanceData.add(buildRecordWithOriginator("401001", "self", new BigDecimal("-150000.00"), null));
+        trialBalanceData.add(buildRecordWithOriginator("401002", "self", new BigDecimal("-200000.00"), "ALPHA-01"));
+        setupConfigMocks();
+
+        List<AccountGLJournalEntryAnnualSummaryData> results = retainedEarningDataService.processTrialBalanceData(trialBalanceData,
+                FISCAL_YEAR_END);
+
+        List<AccountGLJournalEntryAnnualSummaryData> retainedEarningResults = results.stream()
+                .filter(r -> r.getGlAccountCode().equals(RETAINED_EARNING_GL)).toList();
+
+        assertEquals(2, retainedEarningResults.size());
+
+        AccountGLJournalEntryAnnualSummaryData noOriginatorRE = retainedEarningResults.stream()
+                .filter(r -> r.getOriginatorExternalIds() == null).findFirst().orElse(null);
+        assertNotNull(noOriginatorRE);
+        assertEquals(0, new BigDecimal("-150000.00").compareTo(noOriginatorRE.getOpeningBalanceAmount()));
+
+        AccountGLJournalEntryAnnualSummaryData valuedOriginatorRE = retainedEarningResults.stream()
+                .filter(r -> "ALPHA-01".equals(r.getOriginatorExternalIds())).findFirst().orElse(null);
+        assertNotNull(valuedOriginatorRE);
+        assertEquals(0, new BigDecimal("-200000.00").compareTo(valuedOriginatorRE.getOpeningBalanceAmount()));
+    }
+
+    @Test
     void shouldNotCreateRetainedEarningWhenNetBalanceIsZero() {
         List<AccountGLJournalEntryAnnualSummaryData> trialBalanceData = new ArrayList<>();
         trialBalanceData.add(buildRecord("401001", "10001", new BigDecimal("-500.00")));
@@ -241,5 +303,10 @@ class RetainedEarningScenarioTest {
         return AccountGLJournalEntryAnnualSummaryData.builder().glAccountCode(glAccountId).productName("GPL_DE_PI30").officeId(1L)
                 .ownerExternalId(ExternalIdFactory.produce(ownerExternalId)).openingBalanceAmount(BigDecimal.ZERO)
                 .endingBalanceAmount(endingBalance).yearEndDate(FISCAL_YEAR_END).manualEntry(false).build();
+    }
+
+    private AccountGLJournalEntryAnnualSummaryData buildRecordWithOriginator(String glAccountId, String ownerExternalId,
+            BigDecimal endingBalance, String originatorExternalIds) {
+        return buildRecord(glAccountId, ownerExternalId, endingBalance).toBuilder().originatorExternalIds(originatorExternalIds).build();
     }
 }

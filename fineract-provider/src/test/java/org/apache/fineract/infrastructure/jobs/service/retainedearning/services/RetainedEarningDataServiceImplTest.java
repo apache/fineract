@@ -77,7 +77,8 @@ class RetainedEarningDataServiceImplTest {
         LocalDate yearEndDate = LocalDate.of(2024, 12, 31);
         List<AccountGLJournalEntryAnnualSummaryData> summaries = List.of(AccountGLJournalEntryAnnualSummaryData.builder()
                 .glAccountCode("400001").productId(10L).officeId(1L).ownerExternalId(ExternalIdFactory.produce("OWNER1"))
-                .openingBalanceAmount(new BigDecimal("1000.50")).yearEndDate(yearEndDate).currencyCode("USD").manualEntry(false).build());
+                .originatorExternalIds("ALPHA-01, ZETA-01").openingBalanceAmount(new BigDecimal("1000.50")).yearEndDate(yearEndDate)
+                .currencyCode("USD").manualEntry(false).build());
 
         retainedEarningDataService.insertRetainedEarningSummaryBatch(summaries);
 
@@ -93,6 +94,7 @@ class RetainedEarningDataServiceImplTest {
         assertEquals(10L, entity.getProductId());
         assertEquals(1L, entity.getOfficeId());
         assertEquals(ExternalIdFactory.produce("OWNER1"), entity.getOwnerExternalId());
+        assertEquals("ALPHA-01, ZETA-01", entity.getOriginatorExternalIds());
         assertEquals(new BigDecimal("1000.50"), entity.getOpeningBalanceAmount());
         assertEquals(yearEndDate, entity.getYearEndDate());
         assertEquals("USD", entity.getCurrencyCode());
@@ -153,9 +155,9 @@ class RetainedEarningDataServiceImplTest {
         Response mockResponse = mockOkResponse("json-content");
         when(reportingProcessService.processRequest(eq(reportName), any())).thenReturn(mockResponse);
 
-        List<AccountGLJournalEntryAnnualSummaryRecord> parsedRecords = List
-                .of(AccountGLJournalEntryAnnualSummaryRecord.builder().postingDate("2024-12-31").product("TestProduct").glAcct("400001")
-                        .assetOwner(ExternalIdFactory.produce("OWNER1")).endingBalance(BigDecimal.valueOf(1200)).build());
+        List<AccountGLJournalEntryAnnualSummaryRecord> parsedRecords = List.of(AccountGLJournalEntryAnnualSummaryRecord.builder()
+                .postingDate("2024-12-31").product("TestProduct").glAcct("400001").assetOwner(ExternalIdFactory.produce("OWNER1"))
+                .endingBalance(BigDecimal.valueOf(1200)).originatorExternalIds("ALPHA-01").build());
 
         when(retainedEarningConfigurationService.getOfficeId()).thenReturn(1L);
         when(dataParser.parse(anyString())).thenReturn(parsedRecords);
@@ -168,6 +170,7 @@ class RetainedEarningDataServiceImplTest {
         assertEquals("TestProduct", data.getProductName());
         assertEquals(1L, data.getOfficeId());
         assertEquals(ExternalIdFactory.produce("OWNER1"), data.getOwnerExternalId());
+        assertEquals("ALPHA-01", data.getOriginatorExternalIds());
         assertEquals(new BigDecimal("1200").negate(), data.getOpeningBalanceAmount());
         assertEquals(new BigDecimal("1200"), data.getEndingBalanceAmount());
         assertEquals(LocalDate.of(2024, 12, 31), data.getYearEndDate());
