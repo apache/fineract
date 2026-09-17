@@ -696,9 +696,10 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         stateMachine.determineAndTransition(loan, transactionDate);
         transactionProcessor.recalculateOverpaidOnDate(loan, adjustmentTransaction);
+        transactionProcessor.recalculateSettlementDates(loan);
         transactionProcessor.triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
         // A discount-fee adjustment can pay down principal and close the loan, so accrue any pending charge income.
-        chargeAccrualService.accrueOnClosure(loan, transactionDate);
+        chargeAccrualService.accrueOnClosure(loan, transactionProcessor.closureIncomeDate(loan, transactionDate));
         changes.put("status", loan.getLoanStatus());
 
         loanRepository.saveAndFlush(loan);
@@ -960,12 +961,17 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                     : BigDecimal.ZERO;
             if (principalOutstanding.compareTo(BigDecimal.ZERO) == 0 && overpaymentAmount.compareTo(BigDecimal.ZERO) == 0) {
                 this.stateMachine.transition(WorkingCapitalLoanEvent.LOAN_CREDIT_BALANCE_REFUND_IN_FULL, loan, transactionDate);
+                // A refund is a real money movement, and until it happened the account was not closed - so the refund
+                // is what closes the loan and both dates carry its own date, with no correction from the payment
+                // history. This deliberately matches core: DefaultLoanLifecycleStateMachine stamps closedOnDate and
+                // actualMaturityDate with the refund's date on the same transition. The WC transition stamps only the
+                // closure, so the maturity is set here.
                 loan.setMaturedOnDate(transactionDate);
             }
         }
 
         // Closing an overpaid loan via a full credit balance refund must still recognize any pending charge accrual.
-        chargeAccrualService.accrueOnClosure(loan, transactionDate);
+        chargeAccrualService.accrueOnClosure(loan, transactionProcessor.closureIncomeDate(loan, transactionDate));
         changes.put("status", loan.getLoanStatus());
         handleNote(loan, command, changes);
 
@@ -1141,6 +1147,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         stateMachine.determineAndTransition(loan, DateUtils.getBusinessLocalDate());
         transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
+        transactionProcessor.recalculateSettlementDates(loan);
 
         changes.put("status", loan.getLoanStatus());
 

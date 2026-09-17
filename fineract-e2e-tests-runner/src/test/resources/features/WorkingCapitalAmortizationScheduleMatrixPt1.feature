@@ -74,7 +74,7 @@ Feature: WorkingCapitalAmortizationScheduleMatrixPt1
     When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
     # --- Repayment ---
-    When Admin sets the business date to "02 January 2026"
+    When Admin sets the business date to "03 January 2026"
     And Customer makes repayment on "02 January 2026" with 50 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     # --- Journal entries verification ---
@@ -82,7 +82,7 @@ Feature: WorkingCapitalAmortizationScheduleMatrixPt1
       | Type      | Account code | Account name              | Debit  | Credit |
       | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
       | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
-    And Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "01 January 2026" which has the following Journal entries:
+    And Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "02 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
       | LIABILITY | 240005       | Deferred Interest Revenue | 9.61  |        |
       | INCOME    | 404000       | Interest Income           |       | 9.61   |

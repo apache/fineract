@@ -1146,6 +1146,11 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 10000.0   | 9900.0             | 0.0            | 1000.0           | 0.0               |
+    # 100 of the 10000 is still owed, so nothing has settled: the loan carries no settlement dates at all
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null |
+      | timeline.closedOnDate       | null |
+      | timeline.actualMaturityDate | null |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -1166,6 +1171,14 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9500.0    | 9500.0             | 500.0          | 0.0              | 400.0             |
+    # The adjustment - not the 02 January repayment - is what met the obligations: until it posted the loan still owed
+    # 100, and a discount fee adjustment is effective from its own date. So 03 January is the day the loan matured, and
+    # the day its overpayment began. The repayment on 02 January is reallocated, but that restates how the money is
+    # apportioned, not when the obligation existed.
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | 2026-01-03 |
+      | timeline.closedOnDate       | null       |
+      | timeline.actualMaturityDate | 2026-01-03 |
     And Working Capital Loan has transactions:
       | transactionDate | type                                 | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement                         | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -1202,6 +1215,12 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 03 January 2026 | Discount Fee Adjustment              | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
       | 03 January 2026 | Discount Fee Amortization Adjustment | 499.84            |                  |                   |                       | false    |
       | 04 January 2026 | Credit Balance Refund                | 400.0             | 0.0              | 0.0               | 0.0                   | false    |
+    # A refund is a real money movement and the account was not closed until it happened, so it closes the loan on its
+    # own date - as core's state machine does, stamping both dates from the refund.
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null       |
+      | timeline.closedOnDate       | 2026-01-04 |
+      | timeline.actualMaturityDate | 2026-01-04 |
 
   @TestRailId:C94062
   Scenario: Working Capital loan raises Discount Fee Amortization Adjustment transaction business event when the amortization runs backwards
