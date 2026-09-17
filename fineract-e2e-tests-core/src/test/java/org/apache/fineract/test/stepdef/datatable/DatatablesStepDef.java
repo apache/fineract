@@ -46,6 +46,8 @@ import org.apache.fineract.client.models.PostColumnHeaderData;
 import org.apache.fineract.client.models.PostDataTablesAppTableIdResponse;
 import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PostDataTablesResponse;
+import org.apache.fineract.client.models.PostEntityDatatableChecksTemplateRequest;
+import org.apache.fineract.client.models.PostEntityDatatableChecksTemplateResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
@@ -67,6 +69,9 @@ public class DatatablesStepDef extends AbstractStepDef {
     public static final String DATATABLE_NAME = "DatatableId";
     public static final String DATATABLE_QUERY_RESPONSE = "DatatableQueryResponse";
     public static final String DATATABLE_ENTRY_ID = "DatatableEntryId";
+    public static final String ENTITY_DATATABLE_CHECK_ID = "EntityDatatableCheckId";
+    /** StatusEnum.CREATE — mandatory datatable entry required at entity creation. */
+    private static final long ENTITY_DATATABLE_CHECK_STATUS_CREATE = 100L;
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getShared();
 
     private final FineractFeignClient fineractClient;
@@ -229,6 +234,25 @@ public class DatatablesStepDef extends AbstractStepDef {
     public void whenDatatableDeregistered() {
         final String datatableName = currentDatatable();
         ok(() -> fineractClient.dataTables().deregisterDatatable(datatableName, Map.of()));
+    }
+
+    @When("An entity datatable check for CREATE is registered for the created datatable on {string}")
+    public void whenEntityDatatableCheckForCreateRegistered(final String entity) {
+        final String datatableName = currentDatatable();
+        final PostEntityDatatableChecksTemplateRequest request = new PostEntityDatatableChecksTemplateRequest().entity(entity)
+                .datatableName(datatableName).status(ENTITY_DATATABLE_CHECK_STATUS_CREATE);
+        final PostEntityDatatableChecksTemplateResponse response = ok(
+                () -> fineractClient.entityDataTable().createEntityDatatableCheck(request));
+        assertThat(response.getResourceId()).as("Entity datatable check id").isNotNull();
+        testContext().set(ENTITY_DATATABLE_CHECK_ID, response.getResourceId());
+    }
+
+    @When("The entity datatable check is deleted")
+    public void whenEntityDatatableCheckDeleted() {
+        final Long checkId = testContext().get(ENTITY_DATATABLE_CHECK_ID);
+        assertThat(checkId).as("Entity datatable check id in test context").isNotNull();
+        ok(() -> fineractClient.entityDataTable().deleteEntityDatatableCheck(checkId));
+        testContext().set(ENTITY_DATATABLE_CHECK_ID, null);
     }
 
     @When("The datatable is registered against apptable {string}")

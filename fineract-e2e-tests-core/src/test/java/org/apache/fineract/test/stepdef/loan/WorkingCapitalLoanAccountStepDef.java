@@ -80,6 +80,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsPaymentDetailRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsResponse;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansDataTable;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdDisbursementPaymentDetails;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdResponse;
@@ -116,6 +117,7 @@ import org.apache.fineract.test.helper.WorkingCapitalTenantDateHelper;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.stepdef.common.JournalEntriesStepDef;
+import org.apache.fineract.test.stepdef.datatable.DatatablesStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
@@ -205,6 +207,49 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     public void createWorkingCapitalLoan(final DataTable table) {
         final List<List<String>> data = table.asLists();
         createWorkingCapitalLoanAccount(data.get(1));
+    }
+
+    @When("Admin creates a working capital loan with datatable entry value {string} in column {string} and the following data:")
+    public void createWorkingCapitalLoanWithDatatableEntry(final String value, final String columnName, final DataTable table) {
+        final List<String> loanData = table.asLists().get(1);
+        final Long clientId = extractClientId();
+        final Long loanProductId = resolveLoanProductId(loanData.getFirst());
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequest(clientId, loanProductId, loanData);
+
+        final String datatableName = testContext().get(DatatablesStepDef.DATATABLE_NAME);
+        final Object parsedValue;
+        try {
+            parsedValue = Integer.parseInt(value);
+        } catch (final NumberFormatException ex) {
+            throw new IllegalArgumentException("Datatable entry value must be numeric for this step, got: " + value, ex);
+        }
+        loansRequest.datatables(List.of(new PostWorkingCapitalLoansDataTable().registeredTableName(datatableName)
+                .data(Map.of("locale", "en", columnName, parsedValue))));
+        testContext().set(TestContextKey.LOAN_CREATE_REQUEST, loansRequest);
+
+        final PostWorkingCapitalLoansResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_CREATE_RESPONSE, response);
+        trackLoanIdIfEnabled(response.getLoanId());
+        log.info("Working Capital Loan created with inline datatable entry, Loan ID: {}", response.getLoanId());
+    }
+
+    @Then("Creating a working capital loan without datatables is rejected because the CREATE datatable entry is required with the following data:")
+    public void createWorkingCapitalLoanWithoutDatatablesRejectedForMandatoryCheck(final DataTable table) {
+        final List<String> loanData = table.asLists().get(1);
+        final Long clientId = extractClientId();
+        final Long loanProductId = resolveLoanProductId(loanData.getFirst());
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequest(clientId, loanProductId, loanData);
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
+
+        final String datatableName = testContext().get(DatatablesStepDef.DATATABLE_NAME);
+        assertHttpStatus(exception, 403);
+        assertValidationError(exception, "error.msg.entry.required.in.datatable.[" + datatableName + "]");
+        log.info("Verified WC loan create rejected for missing mandatory CREATE datatable entry on {}", datatableName);
     }
 
     @When("Admin creates a working capital loan with fund and the following data:")

@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
@@ -570,6 +571,9 @@ public final class WorkingCapitalLoanApiResourceSwagger {
                 non-existing originators will be auto-created using the provided details (name, typeId, channelTypeId).""")
         public List<PostWorkingCapitalLoansOriginatorData> originators;
 
+        @Schema(example = "List of PostWorkingCapitalLoansDataTable")
+        public List<PostWorkingCapitalLoansDataTable> datatables;
+
         @Schema(example = "en_GB")
         public String locale;
         @Schema(example = "dd MMMM yyyy")
@@ -615,6 +619,17 @@ public final class WorkingCapitalLoanApiResourceSwagger {
 
             @Schema(description = "Code value ID for channel type (from LoanOriginationChannelType code)", example = "2")
             public Long channelTypeId;
+        }
+
+        @Schema(description = "PostWorkingCapitalLoansDataTable")
+        public static final class PostWorkingCapitalLoansDataTable {
+
+            private PostWorkingCapitalLoansDataTable() {}
+
+            @Schema(example = "dt_wc_loan_extra")
+            public String registeredTableName;
+            @Schema(example = "Datatable data")
+            public Map<String, Object> data;
         }
     }
 
