@@ -36,8 +36,6 @@ public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>,
 
     Long countByDelinquencyBucket(DelinquencyBucket delinquencyBucket);
 
-    List<LoanProduct> findByDelinquencyBucketNotNull();
-
     LoanProduct findByExternalId(ExternalId externalId);
 
     @Override
