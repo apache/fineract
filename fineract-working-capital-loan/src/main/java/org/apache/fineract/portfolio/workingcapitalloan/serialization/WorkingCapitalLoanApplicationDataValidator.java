@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.serialization;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -27,6 +29,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -90,9 +93,10 @@ public class WorkingCapitalLoanApplicationDataValidator {
             WorkingCapitalLoanConstants.clientIdParameterName, WorkingCapitalLoanConstants.productIdParameterName,
             WorkingCapitalLoanConstants.fundIdParameterName, WorkingCapitalLoanConstants.accountNoParameterName,
             WorkingCapitalLoanConstants.externalIdParameterName, WorkingCapitalLoanConstants.principalAmountParamName,
-            WorkingCapitalLoanConstants.originatorsParameterName, WorkingCapitalLoanProductConstants.periodPaymentRateParamName,
-            WorkingCapitalLoanConstants.totalPaymentVolumeParamName, WorkingCapitalLoanProductConstants.discountParamName,
-            WorkingCapitalLoanConstants.submittedOnDateParameterName, WorkingCapitalLoanConstants.expectedDisbursementDateParameterName,
+            WorkingCapitalLoanConstants.originatorsParameterName, WorkingCapitalLoanConstants.chargesParameterName,
+            WorkingCapitalLoanProductConstants.periodPaymentRateParamName, WorkingCapitalLoanConstants.totalPaymentVolumeParamName,
+            WorkingCapitalLoanProductConstants.discountParamName, WorkingCapitalLoanConstants.submittedOnDateParameterName,
+            WorkingCapitalLoanConstants.expectedDisbursementDateParameterName,
             WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, WorkingCapitalLoanProductConstants.repaymentEveryParamName,
             WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName, WorkingCapitalLoanConstants.submittedOnNoteParameterName,
             WorkingCapitalLoanProductConstants.breachIdParamName, WorkingCapitalLoanProductConstants.allowAttributeOverridesParamName,
@@ -304,7 +308,90 @@ public class WorkingCapitalLoanApplicationDataValidator {
         // Once the individual inputs are valid, ensure the derived Total Days / EIR is actually calculable.
         validateScheduleCalculable(dataValidationErrors, product, principal, periodPaymentRate, totalPaymentVolume, discount);
 
+        validateCharges(element, baseDataValidator, false);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    /**
+     * Shape of the optional {@code charges} array: one object per charge with {@code chargeId} (or {@code id} on
+     * update, to address a charge already on the loan), optional {@code amount}, {@code dueDate} and
+     * {@code externalId}. The rules that depend on the charge definition and the loan state (which time types are
+     * accepted, whether a due date is allowed) live in the charge assembler, not here.
+     */
+    private void validateCharges(final JsonElement element, final DataValidatorBuilder baseDataValidator, final boolean isUpdate) {
+        if (!element.isJsonObject() || !this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.chargesParameterName, element)) {
+            return;
+        }
+        final JsonObject topLevelJsonElement = element.getAsJsonObject();
+        final JsonElement chargesElement = topLevelJsonElement.get(WorkingCapitalLoanConstants.chargesParameterName);
+        if (chargesElement == null || chargesElement.isJsonNull()) {
+            return;
+        }
+        if (!chargesElement.isJsonArray()) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.chargesParameterName).failWithCode("must.be.an.array");
+            return;
+        }
+        final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
+        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Set<String> supportedParameters = new HashSet<>(
+                Set.of(WorkingCapitalLoanChargeConstants.chargeIdParamName, WorkingCapitalLoanChargeConstants.amountParamName,
+                        WorkingCapitalLoanChargeConstants.dueDateParamName, WorkingCapitalLoanChargeConstants.externalIdParamName));
+        if (isUpdate) {
+            supportedParameters.add(WorkingCapitalLoanConstants.idParameterName);
+        }
+
+        final JsonArray array = chargesElement.getAsJsonArray();
+        for (int i = 0; i < array.size(); i++) {
+            final int position = i + 1;
+            if (!array.get(i).isJsonObject()) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.chargesParameterName)
+                        .parameterAtIndexArray(WorkingCapitalLoanChargeConstants.chargeIdParamName, position).value(null).notNull();
+                continue;
+            }
+            final JsonObject chargeElement = array.get(i).getAsJsonObject();
+            this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, this.fromApiJsonHelper.toJson(chargeElement),
+                    supportedParameters);
+
+            final Long loanChargeId = this.fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanConstants.idParameterName, chargeElement);
+            final Long chargeId = this.fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanChargeConstants.chargeIdParamName,
+                    chargeElement);
+            if (loanChargeId == null) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.chargesParameterName)
+                        .parameterAtIndexArray(WorkingCapitalLoanChargeConstants.chargeIdParamName, position).value(chargeId).notNull()
+                        .longGreaterThanZero();
+            } else {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.chargesParameterName)
+                        .parameterAtIndexArray(WorkingCapitalLoanConstants.idParameterName, position).value(loanChargeId)
+                        .longGreaterThanZero();
+                if (chargeId != null) {
+                    baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.chargesParameterName)
+                            .parameterAtIndexArray(WorkingCapitalLoanChargeConstants.chargeIdParamName, position).value(chargeId)
+                            .longGreaterThanZero();
+                }
+            }
+            if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanChargeConstants.amountParamName, chargeElement)) {
+                final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanChargeConstants.amountParamName,
+                        chargeElement, locale);
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.chargesParameterName)
+                        .parameterAtIndexArray(WorkingCapitalLoanChargeConstants.amountParamName, position).value(amount).notNull()
+                        .positiveAmount();
+            }
+            if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanChargeConstants.dueDateParamName, chargeElement)) {
+                final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanChargeConstants.dueDateParamName,
+                        chargeElement, dateFormat, locale);
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.chargesParameterName)
+                        .parameterAtIndexArray(WorkingCapitalLoanChargeConstants.dueDateParamName, position).value(dueDate).notNull();
+            }
+            if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanChargeConstants.externalIdParamName, chargeElement)) {
+                final String externalId = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanChargeConstants.externalIdParamName,
+                        chargeElement);
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.chargesParameterName)
+                        .parameterAtIndexArray(WorkingCapitalLoanChargeConstants.externalIdParamName, position).value(externalId)
+                        .notExceedingLengthOf(100);
+            }
+        }
     }
 
     /**
@@ -604,6 +691,11 @@ public class WorkingCapitalLoanApplicationDataValidator {
                             .failWithCode("invalid.breach.start.type");
                 }
             }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.chargesParameterName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+            validateCharges(element, baseDataValidator, true);
         }
 
         if (!atLeastOneParameterPassedForUpdate) {

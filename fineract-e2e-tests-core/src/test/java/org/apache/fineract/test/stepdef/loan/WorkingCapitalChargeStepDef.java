@@ -42,6 +42,7 @@ import org.apache.fineract.client.models.EnumOptionData;
 import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.GetBalance;
 import org.apache.fineract.client.models.GetChargesResponse;
+import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
@@ -51,7 +52,9 @@ import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
+import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanChargeData;
+import org.apache.fineract.client.models.WorkingCapitalLoanProductChargeData;
 import org.apache.fineract.test.data.ChargeCalculationType;
 import org.apache.fineract.test.data.ChargePaymentMode;
 import org.apache.fineract.test.data.ChargeProductAppliesTo;
@@ -152,6 +155,36 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         log.info("Verified WCL charge ID {} has Regular payment mode", id);
     }
 
+    @When("Admin attaches the created working capital loan charge to the loan product")
+    public void attachCreatedChargeToLoanProduct() {
+        final Long loanId = getLoanId();
+        final Long chargeId = getChargeId();
+        Assertions.assertNotNull(chargeId);
+
+        final GetWorkingCapitalLoansLoanIdResponse loanResponse = ok(
+                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
+        // The loan detail carries the product as flat fields (loanProductId / loanProductName); the nested product
+        // object is only populated by the template endpoint.
+        final Long productId = loanResponse.getLoanProductId();
+        Assertions.assertNotNull(productId, "the loan detail must expose its product id");
+
+        // The account charge template only offers what the product catalogues, so the charge has to be attached to the
+        // product before the account can be asked for it. The update is partial: only the charges are sent.
+        final List<WorkingCapitalLoanProductChargeData> charges = new ArrayList<>(
+                retrieveProductChargeIds(productId).stream().map(id -> new WorkingCapitalLoanProductChargeData().id(id)).toList());
+        charges.add(new WorkingCapitalLoanProductChargeData().id(chargeId));
+
+        final PutWorkingCapitalLoanProductsProductIdRequest request = new PutWorkingCapitalLoanProductsProductIdRequest().charges(charges)
+                .locale(WorkingCapitalChargeRequestFactory.DEFAULT_LOCALE);
+        ok(() -> fineractClient.workingCapitalLoanProducts().updateWorkingCapitalLoanProduct(productId, request));
+    }
+
+    private List<Long> retrieveProductChargeIds(final Long productId) {
+        final GetWorkingCapitalLoanProductsProductIdResponse product = ok(
+                () -> fineractClient.workingCapitalLoanProducts().retrieveOneWorkingCapitalLoanProduct(productId));
+        return product.getCharges() == null ? List.of() : product.getCharges().stream().map(ChargeData::getId).toList();
+    }
+
     @Then("Admin retrieves working capital loan charge template by loan id")
     public void getWorkingCapitalLoanChargesTemplateByLoanId() {
         Long loanId = getLoanId();
@@ -183,6 +216,56 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
 
         addLoanChargeId(response.getResourceId());
 
+    }
+
+    @When("Admin adds {string} disbursement charge to working capital loan")
+    public void addWorkingCapitalDisbursementCharge(String chargeType) {
+        Long loanId = getLoanId();
+        Assertions.assertNotNull(loanId);
+
+        ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
+        Long chargeTypeId = chargeProductResolver.resolve(chargeProductType);
+
+        PostLoansLoanIdChargesRequest request = new PostLoansLoanIdChargesRequest() //
+                .chargeId(chargeTypeId)//
+                .locale("en");//
+        PostLoansLoanIdChargesResponse response = ok(() -> fineractClient.workingCapitalLoanCharges().createLoanCharge(loanId, request));
+        Assertions.assertNotNull(response);
+        Assertions.assertNotNull(response.getResourceId());
+
+        log.debug("Disbursement charge response: {}", response);
+
+        addLoanChargeId(response.getResourceId());
+        testContext().set(TestContextKey.ADD_DUE_DATE_CHARGE_WORKING_CAPITAL_RESPONSE, response);
+    }
+
+    @Then("Working Capital Loan net disbursal amount is {double}")
+    public void verifyNetDisbursalAmount(final Double expectedNetDisbursalAmount) {
+        final Long loanId = getLoanId();
+        Assertions.assertNotNull(loanId);
+
+        final GetWorkingCapitalLoansLoanIdResponse loanResponse = ok(
+                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
+        Assertions.assertNotNull(loanResponse.getNetDisbursalAmount(), "netDisbursalAmount should not be null after disbursement");
+
+        assertThat(loanResponse.getNetDisbursalAmount().doubleValue()).as("Working Capital Loan net disbursal amount")
+                .isEqualTo(expectedNetDisbursalAmount);
+    }
+
+    @Then("Working Capital Loan Repayment At Disbursement transaction exists with {double} amount")
+    public void verifyRepaymentAtDisbursementTransaction(final Double expectedAmount) {
+        final Long loanId = getLoanId();
+        Assertions.assertNotNull(loanId);
+
+        final GetWorkingCapitalLoanTransactionsResponse body = ok(
+                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTransactionsById(loanId));
+        Assertions.assertNotNull(body.getContent(), "No WC loan transactions found");
+
+        final boolean found = body.getContent().stream()
+                .anyMatch(t -> t.getType() != null && "loanTransactionType.repaymentAtDisbursement".equals(t.getType().getCode())
+                        && t.getTransactionAmount() != null && t.getTransactionAmount().doubleValue() == expectedAmount);
+
+        assertThat(found).as("Expected a Repayment At Disbursement transaction with amount %s on loan %s", expectedAmount, loanId).isTrue();
     }
 
     @When("Admin adds {string} specified due date charge to working capital loan with {string} due date and {double} transaction amount")

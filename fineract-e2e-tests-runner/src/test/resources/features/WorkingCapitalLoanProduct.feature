@@ -497,3 +497,38 @@ Feature: WorkingCapitalLoanProduct
   @TestRailId:C80966
   Scenario: Verify WC Loan Product create fails when payment allocation rules contain duplicates
     Then Admin failed to create a new Working Capital Loan Product with duplicate payment allocation rules
+
+#    #############################################
+#    --- Product-level charges ---
+#  ###############################################
+  @TestRailId:C106699
+  Scenario: Verify Working Capital Loan Product Charges - UC1: product offers the mapped charge
+    Then Working Capital Loan Product "WCLP_WITH_DISBURSEMENT_CHARGE" offers the "WORKING_CAPITAL_DISBURSEMENT_FEE" charge
+
+  @TestRailId:C106700
+  Scenario: Verify Working Capital Loan Product Charges - UC2: product's charges can be replaced via update
+    When Admin creates a new Working Capital Loan Product with the "WORKING_CAPITAL_DISBURSEMENT_FEE" charge attached
+    Then The created Working Capital Loan Product offers the "WORKING_CAPITAL_DISBURSEMENT_FEE" charge
+    When Admin updates the created Working Capital Loan Product replacing charges with the "WORKING_CAPITAL_DISBURSEMENT_PENALTY" charge
+    Then The created Working Capital Loan Product offers the "WORKING_CAPITAL_DISBURSEMENT_PENALTY" charge
+    Then Admin deletes a Working Capital Loan Product
+
+  @TestRailId:C106701
+  Scenario: Verify Working Capital Loan Product Charges - UC3: product's charges can be cleared via update
+    When Admin creates a new Working Capital Loan Product with the "WORKING_CAPITAL_DISBURSEMENT_FEE" charge attached
+    Then The created Working Capital Loan Product offers the "WORKING_CAPITAL_DISBURSEMENT_FEE" charge
+    When Admin updates the created Working Capital Loan Product removing all charges
+    Then The created Working Capital Loan Product has no charges
+    Then Admin deletes a Working Capital Loan Product
+
+  @TestRailId:C106702
+  Scenario: Verify Working Capital Loan Product Charges - UC4: attaching a charge not defined for Working Capital loans is rejected (Negative)
+    Then Admin fails to create a new Working Capital Loan Product with the "LOAN_DISBURSEMENT_CHARGE" charge attached, results an error with the following data:
+      | httpCode | errorMessage                                                                                          |
+      | 403      | is not defined for Working Capital loans and cannot be attached to a Working Capital loan product |
+
+  @TestRailId:C106703
+  Scenario: Verify Working Capital Loan Product Charges - UC5: attaching a charge of a different currency than the product is rejected (Negative)
+    Then Admin fails to create a new Working Capital Loan Product in "USD" currency with a different-currency Working Capital charge attached, results an error with the following data:
+      | httpCode | errorMessage                                                          |
+      | 403      | Charge and Working Capital Loan Product must have the same currency |

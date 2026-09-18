@@ -230,7 +230,11 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         scheduleRepositoryWrapper.readModel(loan.getId(), mc, currency).ifPresent(model -> {
             data.setNumberOfRepayments(model.effectiveTotalTerm());
             data.setPeriodPaymentAmount(model.expectedPaymentAmount() != null ? model.expectedPaymentAmount().getAmount() : null);
-            data.setNetDisbursalAmount(model.netDisbursementAmount() != null ? model.netDisbursementAmount().getAmount() : null);
+            // The schedule carries the *expected* net; once disbursed the loan records the cash actually handed over
+            // (disbursed amount minus the charges settled at disbursement), which wins.
+            if (data.getNetDisbursalAmount() == null) {
+                data.setNetDisbursalAmount(model.netDisbursementAmount() != null ? model.netDisbursementAmount().getAmount() : null);
+            }
             data.setCalculatedAnnualEir(model.calculatedAnnualEir());
         });
     }

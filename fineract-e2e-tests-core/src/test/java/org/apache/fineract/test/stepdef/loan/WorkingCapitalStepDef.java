@@ -41,6 +41,7 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.feign.services.WorkingCapitalLoanProductsApi;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DeleteWorkingCapitalLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetConfigurableAttributes;
@@ -51,6 +52,7 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsTemplateResponse;
 import org.apache.fineract.client.models.PaymentTypeToGLAccountMapper;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
+import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostPaymentAllocation;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest.AccountingRuleEnum;
@@ -61,9 +63,16 @@ import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdR
 import org.apache.fineract.client.models.StringEnumOptionData;
 import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanPaymentChannelToFundSourceMappings;
+import org.apache.fineract.client.models.WorkingCapitalLoanProductChargeData;
 import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalPostChargeOffReasonToExpenseAccountMappings;
 import org.apache.fineract.client.models.WorkingCapitalPostWriteOffReasonToExpenseAccountMappings;
+import org.apache.fineract.test.data.ChargeCalculationType;
+import org.apache.fineract.test.data.ChargePaymentMode;
+import org.apache.fineract.test.data.ChargeProductAppliesTo;
+import org.apache.fineract.test.data.ChargeProductResolver;
+import org.apache.fineract.test.data.ChargeProductType;
+import org.apache.fineract.test.data.ChargeTimeType;
 import org.apache.fineract.test.data.accounttype.AccountTypeResolver;
 import org.apache.fineract.test.data.accounttype.DefaultAccountType;
 import org.apache.fineract.test.data.codevalue.CodeNames;
@@ -74,6 +83,7 @@ import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
 import org.apache.fineract.test.data.workingcapitalproduct.DefaultWorkingCapitalLoanProduct;
 import org.apache.fineract.test.data.workingcapitalproduct.WCGLAccountMapping;
 import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalBreachFrequencyType;
+import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalLoanProductResolver;
 import org.apache.fineract.test.factory.LoanProductsRequestFactory;
 import org.apache.fineract.test.factory.WorkingCapitalRequestFactory;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
@@ -95,6 +105,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     private final AccountTypeResolver accountTypeResolver;
     private final PaymentTypeResolver paymentTypeResolver;
     private final CodeValueResolver codeValueResolver;
+    private final ChargeProductResolver chargeProductResolver;
+    private final WorkingCapitalLoanProductResolver workingCapitalLoanProductResolver;
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getShared();
     private static final String WC_ADVANCED_MAPPINGS_EXPECTED_CREATE = "wcAdvancedMappingsExpectedCreate";
     private static final String WC_ADVANCED_MAPPINGS_EXPECTED_UPDATE = "wcAdvancedMappingsExpectedUpdate";
@@ -199,6 +211,125 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         CallFailedRuntimeException exception = fail(() -> workingCapitalApi().createWorkingCapitalLoanProduct(request, Map.of()));
         assertThat(exception.getStatus()).as(ErrorMessageHelper.incorrectExpectedValueInResponse()).isEqualTo(statusCode);
         assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
+    @Then("Working Capital Loan Product {string} offers the {string} charge")
+    public void verifyWorkingCapitalLoanProductOffersCharge(final String productName, final String chargeType) {
+        final Long productId = workingCapitalLoanProductResolver.resolve(DefaultWorkingCapitalLoanProduct.valueOf(productName));
+        final Long chargeId = chargeProductResolver.resolve(ChargeProductType.valueOf(chargeType));
+
+        final GetWorkingCapitalLoanProductsProductIdResponse product = workingCapitalApi().retrieveOneWorkingCapitalLoanProduct(productId,
+                Map.of());
+        Assertions.assertNotNull(product.getCharges(), "Product charges should not be null");
+
+        final boolean found = product.getCharges().stream().anyMatch(c -> chargeId.equals(c.getId()));
+        assertThat(found).as("Expected Working Capital Loan Product %s to offer charge %s", productName, chargeType).isTrue();
+    }
+
+    @When("Admin creates a new Working Capital Loan Product with the {string} charge attached")
+    public void createWorkingCapitalLoanProductWithChargeAttached(final String chargeType) {
+        final Long chargeId = chargeProductResolver.resolve(ChargeProductType.valueOf(chargeType));
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+
+        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest()
+                .name(name).charges(List.of(new WorkingCapitalLoanProductChargeData().id(chargeId)));
+
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
+    @When("Admin updates the created Working Capital Loan Product replacing charges with the {string} charge")
+    public void updateWorkingCapitalLoanProductReplacingCharges(final String chargeType) {
+        final PostWorkingCapitalLoanProductsResponse createResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
+        final Long productId = createResponse.getResourceId();
+        final Long chargeId = chargeProductResolver.resolve(ChargeProductType.valueOf(chargeType));
+
+        final PutWorkingCapitalLoanProductsProductIdRequest request = new PutWorkingCapitalLoanProductsProductIdRequest()
+                .charges(List.of(new WorkingCapitalLoanProductChargeData().id(chargeId))).locale("en");
+
+        final PutWorkingCapitalLoanProductsProductIdResponse response = ok(
+                () -> workingCapitalApi().updateWorkingCapitalLoanProduct(productId, request, Map.of()));
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_UPDATE_RESPONSE, response);
+    }
+
+    @When("Admin updates the created Working Capital Loan Product removing all charges")
+    public void updateWorkingCapitalLoanProductRemovingCharges() {
+        final PostWorkingCapitalLoanProductsResponse createResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
+        final Long productId = createResponse.getResourceId();
+
+        final PutWorkingCapitalLoanProductsProductIdRequest request = new PutWorkingCapitalLoanProductsProductIdRequest().charges(List.of())
+                .locale("en");
+
+        final PutWorkingCapitalLoanProductsProductIdResponse response = ok(
+                () -> workingCapitalApi().updateWorkingCapitalLoanProduct(productId, request, Map.of()));
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_UPDATE_RESPONSE, response);
+    }
+
+    @Then("The created Working Capital Loan Product offers the {string} charge")
+    public void verifyCreatedWorkingCapitalLoanProductOffersCharge(final String chargeType) {
+        final PostWorkingCapitalLoanProductsResponse createResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
+        final Long productId = createResponse.getResourceId();
+        final Long chargeId = chargeProductResolver.resolve(ChargeProductType.valueOf(chargeType));
+
+        final GetWorkingCapitalLoanProductsProductIdResponse product = workingCapitalApi().retrieveOneWorkingCapitalLoanProduct(productId,
+                Map.of());
+        final boolean found = product.getCharges() != null && product.getCharges().stream().anyMatch(c -> chargeId.equals(c.getId()));
+        assertThat(found).as("Expected the created Working Capital Loan Product to offer charge %s", chargeType).isTrue();
+    }
+
+    @Then("The created Working Capital Loan Product has no charges")
+    public void verifyCreatedWorkingCapitalLoanProductHasNoCharges() {
+        final PostWorkingCapitalLoanProductsResponse createResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
+        final Long productId = createResponse.getResourceId();
+
+        final GetWorkingCapitalLoanProductsProductIdResponse product = workingCapitalApi().retrieveOneWorkingCapitalLoanProduct(productId,
+                Map.of());
+        assertThat(product.getCharges()).as("Working Capital Loan Product charges should be empty").isNullOrEmpty();
+    }
+
+    @Then("Admin fails to create a new Working Capital Loan Product with the {string} charge attached, results an error with the following data:")
+    public void createWorkingCapitalLoanProductWithChargeFails(final String chargeType, final DataTable table) {
+        final Long chargeId = chargeProductResolver.resolve(ChargeProductType.valueOf(chargeType));
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+
+        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest()
+                .name(name).charges(List.of(new WorkingCapitalLoanProductChargeData().id(chargeId)));
+
+        final Map<String, String> expectedData = table.asMaps().get(0);
+        final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
+        final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+        createWorkingCapitalLoanProductFailure(request, expectedHttpCode, expectedErrorMessage);
+    }
+
+    @Then("Admin fails to create a new Working Capital Loan Product in {string} currency with a different-currency Working Capital charge attached, results an error with the following data:")
+    public void createWorkingCapitalLoanProductWithCurrencyMismatchChargeFails(final String currencyCode, final DataTable table) {
+        final ChargeRequest chargeRequest = new ChargeRequest() //
+                .chargeAppliesTo(ChargeProductAppliesTo.WORKING_CAPITAL_LOAN.value) //
+                .name(Utils.randomStringGenerator("WCChargeCurrencyMismatch_", 8)) //
+                .currencyCode(currencyCode) //
+                .chargeTimeType(ChargeTimeType.DISBURSEMENT.value) //
+                .chargeCalculationType(ChargeCalculationType.FLAT.value) //
+                .amount(10.0) //
+                .active(true) //
+                .penalty(false) //
+                .chargePaymentMode(ChargePaymentMode.REGULAR.value) //
+                .locale("en");
+        final PostChargesResponse chargeResponse = ok(() -> fineractFeignClient.charges().createCharge(chargeRequest, Map.of()));
+
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest()
+                .name(name).charges(List.of(new WorkingCapitalLoanProductChargeData().id(chargeResponse.getResourceId())));
+
+        final Map<String, String> expectedData = table.asMaps().get(0);
+        final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
+        final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+        createWorkingCapitalLoanProductFailure(request, expectedHttpCode, expectedErrorMessage);
     }
 
     @When("Admin failed to create WCLP with breach {int} {string} frequency lower then near breach {int} {string} frequency")

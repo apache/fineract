@@ -164,6 +164,14 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     @Column(name = "approved_principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal approvedPrincipal;
 
+    /**
+     * Cash actually handed to the client at disbursement: the disbursed amount minus the charges settled at that
+     * moment. Null until disbursed and cleared again on undo disbursal.
+     */
+    @Setter
+    @Column(name = "net_disbursal_amount", scale = 6, precision = 19)
+    private BigDecimal netDisbursalAmount;
+
     @Setter
     @OneToOne(mappedBy = "wcLoan", cascade = CascadeType.ALL, orphanRemoval = true)
     private WorkingCapitalLoanBalance balance;

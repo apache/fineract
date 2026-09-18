@@ -120,6 +120,7 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "WorkingCapitalLoanRepaymentTransactionBusinessEvent", "WorkingCapitalLoanDiscountFeeTransactionBusinessEvent",
                 "WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent", "WorkingCapitalLoanChargeAdjustmentPreBusinessEvent",
                 "WorkingCapitalLoanChargeAdjustmentPostBusinessEvent", "WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent",
+                "WorkingCapitalLoanRepaymentAtDisbursementTransactionBusinessEvent",
                 "WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent", "WorkingCapitalLoanCreatedBusinessEvent",
                 "WorkingCapitalLoanApplicationModifiedBusinessEvent", "WorkingCapitalLoanApprovedBusinessEvent",
                 "WorkingCapitalLoanUndoApprovalBusinessEvent", "WorkingCapitalLoanRejectedBusinessEvent",
