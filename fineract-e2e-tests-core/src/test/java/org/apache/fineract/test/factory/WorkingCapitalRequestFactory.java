@@ -37,6 +37,7 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
 import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.DelinquencyRangeResponse;
+import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
@@ -321,6 +322,12 @@ public class WorkingCapitalRequestFactory {
 
     public PostWorkingCapitalLoanTransactionsRequest defaultWorkingCapitalLoanRepaymentRequest() {
         return new PostWorkingCapitalLoanTransactionsRequest() //
+                .dateFormat(DATE_FORMAT) //
+                .locale(LOCALE_EN);
+    }
+
+    public ExecuteWorkingCapitalLoanTransactionCommandRequest defaultWorkingCapitalLoanTransactionCommandRequest() {
+        return new ExecuteWorkingCapitalLoanTransactionCommandRequest() //
                 .dateFormat(DATE_FORMAT) //
                 .locale(LOCALE_EN);
     }

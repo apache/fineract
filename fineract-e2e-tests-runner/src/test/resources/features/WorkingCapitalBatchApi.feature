@@ -96,8 +96,12 @@ Feature: Working Capital Batch API
       | WCLP_DISCOUNT | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
+    When Batch API adds discount fee with "12" amount referencing the disbursement external-id in relatedResourceId on the working capital loan
+    Then Verify that WCL step 1 throws an error with error code 400 and message "relatedResourceId.not.a.number"
     When Batch API adds discount fee with "12" amount on the working capital loan
     Then Admin checks that all steps result 200OK
+    When Batch API adds discount fee adjustment with "5" amount referencing the discount fee external-id in relatedResourceId on the working capital loan
+    Then Verify that WCL step 1 throws an error with error code 400 and message "relatedResourceId.not.a.number"
     And Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |

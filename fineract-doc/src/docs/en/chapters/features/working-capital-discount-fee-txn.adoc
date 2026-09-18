@@ -35,7 +35,7 @@ The scope of this document includes:
 A `DISCOUNT_FEE` transaction can be created in two ways:
 
 * Automatically during disbursement when the resolved discount amount is greater than zero.
-* Explicitly after disbursement using `POST /transactions?command=discountFee`, if no Discount Fee was created for the related disbursement.
+* Explicitly after disbursement using `POST /transactions?command=discountFee`, or by naming the disbursement in the path (`/transactions/{transactionId}` or `/transactions/external-id/{transactionExternalId}`), if no Discount Fee was created for the related disbursement.
 
 Each Discount Fee transaction is linked to its disbursement transaction through `m_wc_loan_transaction_relation` with relation type `RELATED`.
 
@@ -63,7 +63,7 @@ A `DISCOUNT_FEE_ADJUSTMENT` transaction reduces the loan-level discount that was
 === Applicability
 
 * Loan must be ACTIVE.
-* `relatedResourceId` must reference an active, non-reversed `DISCOUNT_FEE` transaction.
+* The related Discount Fee transaction (`relatedResourceId`, or the transaction in the path) must be an active, non-reversed `DISCOUNT_FEE` transaction.
 * Multiple adjustments are allowed against the same Discount Fee transaction until the remaining adjustable amount reaches zero.
 
 === Transaction Behavior
@@ -101,7 +101,7 @@ On Discount Fee Adjustment:
 | Adjustment is allowed only for ACTIVE loans
 
 | Parent transaction
-| `relatedResourceId` must reference a non-reversed Discount Fee transaction
+| `relatedResourceId`, or the transaction in the path, must reference a non-reversed Discount Fee transaction
 |===
 
 === Allocation
@@ -134,6 +134,10 @@ When disbursement is reversed:
 ----
 POST /v1/working-capital-loans/{loanId}/transactions?command=discountFee
 POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions?command=discountFee
+POST /v1/working-capital-loans/{loanId}/transactions/{transactionId}?command=discountFee
+POST /v1/working-capital-loans/{loanId}/transactions/external-id/{transactionExternalId}?command=discountFee
+POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions/{transactionId}?command=discountFee
+POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions/external-id/{transactionExternalId}?command=discountFee
 ----
 
 [source,json]
@@ -157,7 +161,7 @@ POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions?command
 ----
 
 * `transactionAmount` is optional. If omitted, the service defaults to the loan's current discount.
-* `relatedResourceId` is mandatory and must be the related disbursement transaction ID.
+* On `/transactions?command=discountFee`, `relatedResourceId` is mandatory and must be the related disbursement transaction ID. On `/transactions/{transactionId}` and `/transactions/external-id/{transactionExternalId}` the path names the disbursement and `relatedResourceId` is not accepted. An unknown transaction external id, or one that belongs to another loan, returns 404.
 * `classificationId` is optional and must reference `working_capital_loan_discount_fee_classification` when provided.
 
 === Create Discount Fee Adjustment
@@ -166,6 +170,10 @@ POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions?command
 ----
 POST /v1/working-capital-loans/{loanId}/transactions?command=discountFeeAdjustment
 POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions?command=discountFeeAdjustment
+POST /v1/working-capital-loans/{loanId}/transactions/{transactionId}?command=discountFeeAdjustment
+POST /v1/working-capital-loans/{loanId}/transactions/external-id/{transactionExternalId}?command=discountFeeAdjustment
+POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions/{transactionId}?command=discountFeeAdjustment
+POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions/external-id/{transactionExternalId}?command=discountFeeAdjustment
 ----
 
 [source,json]
@@ -182,7 +190,7 @@ POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions?command
 }
 ----
 
-* `relatedResourceId` is mandatory and must be the Discount Fee transaction ID.
+* On `/transactions?command=discountFeeAdjustment`, `relatedResourceId` is mandatory and must be the Discount Fee transaction ID. On `/transactions/{transactionId}` and `/transactions/external-id/{transactionExternalId}` the path names the Discount Fee transaction and `relatedResourceId` is not accepted. An unknown transaction external id, or one that belongs to another loan, returns 404.
 * `transactionAmount` is mandatory and capped by the remaining adjustable discount.
 * `classificationId` is optional and must reference `working_capital_loan_discount_fee_classification` when provided.
 

@@ -2077,6 +2077,32 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_DISCOUNT_FEE_RESPONSE, response);
     }
 
+    @When("Admin adds Discount fee with {string} amount, a random externalId, {string} classification and {string} payment type by loan and disbursement external-ids on Working Capital loan account")
+    public void addDiscountFeeByLoanAndDisbursementExternalIds(final String discountAmount, final String classificationCodeValueName,
+            final String paymentTypeName) {
+        final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
+        Assertions.assertNotNull(lastDisbursementResponse);
+        final PostWorkingCapitalLoansLoanIdRequest lastDisbursementRequest = testContext().get(TestContextKey.LOAN_DISBURSE_REQUEST);
+        final String randomExternalId = Utils.randomStringGenerator("TestDiscountFeeExtId_", 10);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_DISCOUNT_FEE_EXTERNAL_ID_USER_GENERATED, randomExternalId);
+
+        final String loanExternalId = retrieveLoanExternalId(getCreatedLoanId());
+        final Long classificationId = getClassificationCodeValueId(CodeNames.WORKING_CAPITAL_DISCOUNT_FEE_CLASSIFICATION.getValue(),
+                classificationCodeValueName);
+        final long paymentTypeId = paymentTypeResolver.resolve(DefaultPaymentType.valueOf(paymentTypeName));
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanTransactionCommandRequest().transactionDate(lastDisbursementRequest.getActualDisbursementDate())
+                .transactionAmount(new BigDecimal(discountAmount)).note("Discount applied").externalId(randomExternalId)
+                .classificationId(classificationId)
+                .paymentDetails(new PostWorkingCapitalLoanTransactionsPaymentDetailRequest().paymentTypeId(paymentTypeId));
+
+        ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionCommandByLoanExternalIdTransactionExternalId(loanExternalId,
+                        lastDisbursementResponse.getResourceExternalId(), "discountFee", request));
+        rememberLastWorkingCapitalTransaction(TransactionType.DISCOUNT_FEE.getValue(), lastDisbursementRequest.getActualDisbursementDate(),
+                request.getTransactionAmount());
+    }
+
     @Then("Adding Discount fee with {string} amount reusing the previously shared externalId on Working Capital loan account for last disbursement results an error with the following data:")
     public void addDiscountFeeReusingSharedExternalIdResultsAnError(final String discountAmount, final DataTable table) {
         final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
@@ -2223,6 +2249,17 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .defaultWorkingCapitalLoanRepaymentRequest().relatedResourceId(lastDiscountResponse.getResourceId())
                 .transactionAmount(new BigDecimal(adjustmentAmount));
         executeDiscountFeeAdjustmentById(getCreatedLoanId(), request);
+    }
+
+    @When("Admin adds Discount fee adjustment with {string} amount by loan and discount fee external-ids on Working Capital loan account")
+    public void addDiscountFeeAdjustmentByLoanAndDiscountFeeExternalIds(final String adjustmentAmount) {
+        final String loanExternalId = retrieveLoanExternalId(getCreatedLoanId());
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanTransactionCommandRequest().transactionAmount(new BigDecimal(adjustmentAmount));
+
+        ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionCommandByLoanExternalIdTransactionExternalId(loanExternalId,
+                        latestActiveTransactionOfType(TransactionType.DISCOUNT_FEE).getExternalId(), "discountFeeAdjustment", request));
     }
 
     @And("Admin adds Discount fee adjustment with {string} amount on transaction date {string} on Working Capital loan account for last discount")

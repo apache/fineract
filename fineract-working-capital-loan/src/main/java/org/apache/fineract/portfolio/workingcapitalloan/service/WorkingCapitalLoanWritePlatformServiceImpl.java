@@ -517,11 +517,25 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     }
 
     @Override
-    public CommandProcessingResult makeDiscountFee(Long loanId, JsonCommand command) {
+    public CommandProcessingResult makeDiscountFee(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
-
+        validator.validateRelatedResourceId(command.parsedJson());
         final Long relatedDisbursementTransactionId = fromApiJsonHelper
                 .extractLongNamed(WorkingCapitalLoanConstants.relatedResourceIdParamName, command.parsedJson());
+        return makeDiscountFee(loan, relatedDisbursementTransactionId, command);
+    }
+
+    @Override
+    public CommandProcessingResult makeDiscountFee(final Long loanId, final Long relatedDisbursementTransactionId,
+            final JsonCommand command) {
+        final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        validator.validateNoRelatedResourceId(command.parsedJson());
+        return makeDiscountFee(loan, relatedDisbursementTransactionId, command);
+    }
+
+    private CommandProcessingResult makeDiscountFee(final WorkingCapitalLoan loan, final Long relatedDisbursementTransactionId,
+            final JsonCommand command) {
+        final Long loanId = loan.getId();
 
         BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
                 command.parsedJson(), new HashSet<>());
@@ -607,8 +621,23 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     @Override
     public CommandProcessingResult makeDiscountFeeAdjustment(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        validator.validateRelatedResourceId(command.parsedJson());
         final Long relatedDiscountTransactionId = fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanConstants.relatedResourceIdParamName,
                 command.parsedJson());
+        return makeDiscountFeeAdjustment(loan, relatedDiscountTransactionId, command);
+    }
+
+    @Override
+    public CommandProcessingResult makeDiscountFeeAdjustment(final Long loanId, final Long relatedDiscountTransactionId,
+            final JsonCommand command) {
+        final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        validator.validateNoRelatedResourceId(command.parsedJson());
+        return makeDiscountFeeAdjustment(loan, relatedDiscountTransactionId, command);
+    }
+
+    private CommandProcessingResult makeDiscountFeeAdjustment(final WorkingCapitalLoan loan, final Long relatedDiscountTransactionId,
+            final JsonCommand command) {
+        final Long loanId = loan.getId();
         if (relatedDiscountTransactionId == null) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.related.resource.id.required",
                     "Related discount transaction ID is required for discount fee adjustment",
