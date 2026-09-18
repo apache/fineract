@@ -59,8 +59,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <li>{@code breachStartDate} = fromDate of the earliest breached breach-schedule period. The breach schedule already
  * offsets its first period by {@code breachGraceDays}, so the grace is reflected in the fromDate.</li>
  * <li>{@code delinquencyStartDate} = fromDate of the earliest delinquent range-schedule period (minPaymentCriteriaMet =
- * false) plus {@code delinquencyGraceDays} (the range schedule does not apply the grace days when generating
- * periods).</li>
+ * false). The range schedule bakes {@code delinquencyGraceDays} into the toDate of its first period, so the fromDate is
+ * the raw anchor date.</li>
+ * <li>{@code delinquencyEffectiveStartDate} = {@code delinquencyStartDate} shifted by {@code delinquencyGraceDays}, set
+ * only when the earliest delinquent period is the first one and grace days are configured.</li>
  * </ul>
  */
 @Slf4j
@@ -80,6 +82,12 @@ public class WorkingCapitalLoanStartDatesTest {
     private static final int DELINQUENCY_GRACE_DAYS = 3;
 
     private static final LocalDate DISBURSEMENT_DATE = LocalDate.of(2026, 1, 1);
+    // First delinquency period is [D .. D+19+grace] = [2026-01-01 .. 2026-01-23]; the effective start is D + grace.
+    private static final LocalDate DELINQUENCY_EFFECTIVE_START_DATE = LocalDate.of(2026, 1, 4);
+    // Second delinquency period starts the day after the first one ends and carries no grace days.
+    private static final LocalDate SECOND_PERIOD_FROM_DATE = LocalDate.of(2026, 1, 24);
+    // 3% of the 10000 principal: the minimum payment that makes a delinquency period meet its criteria.
+    private static final BigDecimal MINIMUM_PAYMENT = new BigDecimal("300");
     // Submitted-on date intentionally earlier than the disbursement date so the two anchors can be told apart.
     private static final LocalDate SUBMITTED_ON_DATE = LocalDate.of(2025, 12, 20);
 
@@ -107,6 +115,11 @@ public class WorkingCapitalLoanStartDatesTest {
             // delinquencyStartDate = fromDate of the first delinquent period (= disbursement)
             assertEquals(DISBURSEMENT_DATE, response.getDelinquencyStartDate(),
                     "delinquencyStartDate should be the fromDate of the first delinquent period");
+
+            // delinquencyEffectiveStartDate = delinquencyStartDate + delinquencyGraceDays, since the delinquent
+            // period is the first one.
+            assertEquals(DELINQUENCY_EFFECTIVE_START_DATE, response.getDelinquencyEffectiveStartDate(),
+                    "delinquencyEffectiveStartDate should be the fromDate of the first delinquent period plus delinquencyGraceDays");
         });
     }
 
@@ -130,7 +143,7 @@ public class WorkingCapitalLoanStartDatesTest {
 
             // delinquencyStartDate must anchor on the loan submitted-on date (creation), not the disbursement date.
             assertEquals(SUBMITTED_ON_DATE, response.getDelinquencyStartDate(),
-                    "delinquencyStartDate should anchor on submittedOnDate + delinquencyGraceDays when delinquencyStartType = LOAN_CREATION");
+                    "delinquencyStartDate should anchor on submittedOnDate when delinquencyStartType = LOAN_CREATION");
         });
     }
 
@@ -199,6 +212,64 @@ public class WorkingCapitalLoanStartDatesTest {
 
             assertNull(response.getBreachStartDate(), "breachStartDate must be null when the loan is not in breach");
             assertNull(response.getDelinquencyStartDate(), "delinquencyStartDate must be null when the loan is not delinquent");
+            assertNull(response.getDelinquencyEffectiveStartDate(),
+                    "delinquencyEffectiveStartDate must be null when the loan is not delinquent");
+        });
+    }
+
+    @Test
+    public void testDelinquencyEffectiveStartDateIsNullWhenNoGraceDaysConfigured() {
+        AtomicLong loanIdRef = new AtomicLong();
+
+        // given - the same setup but with delinquencyGraceDays = 0, so there is no cool off period to expose
+        BusinessDateHelper.runAt("01 January 2026", () -> {
+            loanIdRef.set(createDisbursedLoan(null, null, 0));
+        });
+
+        BusinessDateHelper.runAt("26 January 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanId)));
+
+            final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
+            final GetWorkingCapitalLoansLoanIdResponse response = loanHelper.retrieveLoan(loanId);
+
+            assertEquals(DISBURSEMENT_DATE, response.getDelinquencyStartDate(),
+                    "delinquencyStartDate should be the fromDate of the first delinquent period");
+            assertNull(response.getDelinquencyEffectiveStartDate(),
+                    "delinquencyEffectiveStartDate must be null when no delinquency grace days are configured");
+        });
+    }
+
+    @Test
+    public void testDelinquencyEffectiveStartDateIsNullWhenTheDelinquentPeriodIsNotTheFirstOne() {
+        AtomicLong loanIdRef = new AtomicLong();
+
+        BusinessDateHelper.runAt("01 January 2026", () -> {
+            loanIdRef.set(createDisbursedLoan());
+        });
+
+        // Meet the minimum payment of the first period [2026-01-01 .. 2026-01-23] so it is never delinquent.
+        BusinessDateHelper.runAt("05 January 2026", () -> {
+            final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
+            loanHelper.makeRepaymentByLoanId(loanIdRef.get(), WorkingCapitalLoanDisbursementTestBuilder
+                    .buildRepaymentRequest(LocalDate.of(2026, 1, 5), MINIMUM_PAYMENT, null, "repayment", 1, null));
+        });
+
+        // The second period [2026-01-24 .. 2026-02-12] goes unpaid and is the earliest delinquent one.
+        BusinessDateHelper.runAt("13 February 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanId)));
+
+            final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
+            final GetWorkingCapitalLoansLoanIdResponse response = loanHelper.retrieveLoan(loanId);
+
+            assertEquals(SECOND_PERIOD_FROM_DATE, response.getDelinquencyStartDate(),
+                    "delinquencyStartDate should be the fromDate of the second period once the first one is met");
+            assertNull(response.getDelinquencyEffectiveStartDate(),
+                    "delinquencyEffectiveStartDate must be null when the delinquent period is not the first one, "
+                            + "which is the only one the grace days shift");
         });
     }
 
@@ -209,6 +280,10 @@ public class WorkingCapitalLoanStartDatesTest {
     }
 
     private Long createDisbursedLoan(final LocalDate submittedOnDate, final String delinquencyStartType) {
+        return createDisbursedLoan(submittedOnDate, delinquencyStartType, DELINQUENCY_GRACE_DAYS);
+    }
+
+    private Long createDisbursedLoan(final LocalDate submittedOnDate, final String delinquencyStartType, final int delinquencyGraceDays) {
         // Delinquency bucket with a percentage minimum payment and a 20-day frequency.
         final List<Long> rangeIds = createDelinquencyRanges();
         final PostDelinquencyBucketResponse bucketResponse = WorkingCapitalLoanDelinquencyRangeScheduleHelper
@@ -229,7 +304,7 @@ public class WorkingCapitalLoanStartDatesTest {
                 .withName(uniqueName) //
                 .withShortName(uniqueShortName) //
                 .withDelinquencyBucketId(bucketResponse.getResourceId()) //
-                .withDelinquencyGraceDays(DELINQUENCY_GRACE_DAYS) //
+                .withDelinquencyGraceDays(delinquencyGraceDays) //
                 .withDelinquencyStartType(delinquencyStartType) //
                 .withBreachId(breachId) //
                 .withBreachGraceDays(BREACH_GRACE_DAYS) //
