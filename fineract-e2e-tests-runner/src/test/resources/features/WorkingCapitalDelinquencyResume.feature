@@ -29,7 +29,7 @@ Feature: Working Capital Delinquency Resume
     And Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-02-09 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
-    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C85173
   Scenario: Verify working capital loan delinquency resume - UC2: resume on the day before planned pause end shortens schedule by one day
@@ -55,7 +55,7 @@ Feature: Working Capital Delinquency Resume
     And Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-02-14 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
-    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 January 2026"
 
   @TestRailId:C85174
   Scenario: Verify working capital loan delinquency resume - UC3: resume by external ID
@@ -75,7 +75,7 @@ Feature: Working Capital Delinquency Resume
       | action | startDate  | endDate    |
       | PAUSE  | 2026-01-01 | 2026-01-16 |
       | RESUME | 2026-01-10 |            |
-    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C85175
   Scenario: Verify working capital loan delinquency resume - UC4: resume without an active pause results an error (Negative)
@@ -92,7 +92,7 @@ Feature: Working Capital Delinquency Resume
     Then Initiating a Working Capital loan delinquency resume with startDate "10 January 2026" results an error with the following data:
       | httpCode | errorMessage                                                         |
       | 400      | Resume Delinquency Action can only be created during an active pause |
-    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C85176
   Scenario: Verify working capital loan delinquency resume - UC5: backdated resume results an error (Negative)
@@ -110,7 +110,7 @@ Feature: Working Capital Delinquency Resume
     Then Initiating a Working Capital loan delinquency resume with startDate "09 January 2026" results an error with the following data:
       | httpCode | errorMessage                                                                  |
       | 400      | Start date of the Resume Delinquency action must be the current business date |
-    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C85177
   Scenario: Verify working capital loan delinquency resume - UC6: resume on pause start date results an error (Negative)
@@ -126,7 +126,7 @@ Feature: Working Capital Delinquency Resume
     Then Initiating a Working Capital loan delinquency resume with startDate "01 January 2026" results an error with the following data:
       | httpCode | errorMessage                                          |
       | 400      | Resume date must be after the active pause start date |
-    Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
 
   @TestRailId:C85178
   Scenario: Verify working capital loan delinquency resume - UC7: multiple resumes on the same pause results an error (Negative)
@@ -145,7 +145,7 @@ Feature: Working Capital Delinquency Resume
     Then Initiating a Working Capital loan delinquency resume with startDate "10 January 2026" results an error with the following data:
       | httpCode | errorMessage                                                         |
       | 400      | Resume Delinquency Action can only be created during an active pause |
-    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C85179
   Scenario: Verify working capital loan delinquency resume - UC8: resume recalculates delinquency immediately
@@ -174,7 +174,7 @@ Feature: Working Capital Delinquency Resume
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 21             |
       | 2            | 2026-01-31 | 2026-03-07 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
-    Then Admin closes the Working Capital loan with a full repayment on "20 February 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "20 February 2026"
 
   @TestRailId:C85219
   Scenario: Verify resume keeps the PAUSE action dates unchanged and only shortens the delinquency period extension
@@ -197,7 +197,7 @@ Feature: Working Capital Delinquency Resume
     And Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-02-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
-    Then Admin closes the Working Capital loan with a full repayment on "29 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "29 January 2026"
 
   @TestRailId:C85220
   Scenario: Verify that COB-generated period after resume must honour the shortened (resumed) pause
@@ -219,7 +219,7 @@ Feature: Working Capital Delinquency Resume
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount |
       | 1            | 2026-01-01 | 2026-02-01 | 270.0          | 0.0        | 270.0             |
       | 2            | 2026-02-02 | 2026-03-03 | 270.0          | 0.0        | 270.0             |
-    Then Admin closes the Working Capital loan with a full repayment on "02 February 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 February 2026"
 
   @TestRailId:C85314
   Scenario: Verify new pause is allowed after resumed pause when outside effective pause window
@@ -253,7 +253,7 @@ Feature: Working Capital Delinquency Resume
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-02-01 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 4              |
       | 2            | 2026-02-02 | 2026-03-09 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
-    Then Admin closes the Working Capital loan with a full repayment on "05 February 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "05 February 2026"
 
   @TestRailId:C85330
   Scenario: Verify working capital loan delinquency pause - G1: a one-day pause (startDate == endDate) is accepted and extends the schedule by one day
@@ -273,7 +273,7 @@ Feature: Working Capital Delinquency Resume
     And Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-31 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
-    Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
 
   @TestRailId:C85328
   Scenario: Verify working capital loan delinquency pause - G2: an active pause suppresses delinquency on the first overdue day
@@ -298,7 +298,7 @@ Feature: Working Capital Delinquency Resume
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-02-11 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
-    Then Admin closes the Working Capital loan with a full repayment on "31 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
 
   @TestRailId:C85329
   Scenario: Verify working capital loan delinquency resume - G3: the resume date counts as paused and delinquency resumes only the next day
@@ -331,4 +331,4 @@ Feature: Working Capital Delinquency Resume
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-02-05 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
       | 2            | 2026-02-06 | 2026-03-07 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
-    Then Admin closes the Working Capital loan with a full repayment on "06 February 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "06 February 2026"

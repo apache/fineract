@@ -19,6 +19,8 @@
 package org.apache.fineract.test.initializer.global;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+import static org.apache.fineract.test.factory.WorkingCapitalRequestFactory.DEFAULT_WC_ANNUAL_EIR;
+import static org.apache.fineract.test.factory.WorkingCapitalRequestFactory.DEFAULT_WC_DISCOUNT;
 import static org.apache.fineract.test.factory.WorkingCapitalRequestFactory.DUE_FEE;
 import static org.apache.fineract.test.factory.WorkingCapitalRequestFactory.DUE_PENALTY;
 import static org.apache.fineract.test.factory.WorkingCapitalRequestFactory.DUE_PRINCIPAL;
@@ -199,7 +201,6 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                                         createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.REPAYMENT.getValue(),
                                                 List.of(DUE_FEE, DUE_PENALTY, DUE_PRINCIPAL, IN_ADVANCE_FEE, IN_ADVANCE_PENALTY,
                                                         IN_ADVANCE_PRINCIPAL))))
-                                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
                                 .paymentChannelToFundSourceMappings(
                                         List.of(new org.apache.fineract.client.models.WorkingCapitalLoanPaymentChannelToFundSourceMappings()
                                                 .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
@@ -297,7 +298,81 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                                 .paymentChannelToFundSourceMappings(
                                         List.of(new org.apache.fineract.client.models.WorkingCapitalLoanPaymentChannelToFundSourceMappings()
                                                 .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
-                                                .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES)))))));
+                                                .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES)))))),
+                () -> TestContext.INSTANCE.set(
+                        TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ANNUAL_EIR_ADVANCED_ACCOUNTING,
+                        createWorkingCapitalLoanProductIdempotent(workingCapitalRequestFactory
+                                .defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()
+                                .name(DefaultWorkingCapitalLoanProduct.WCLP_ANNUAL_EIR_ADVANCED_ACCOUNTING.getName())
+                                .allowAttributeOverrides(allowAttributeOverrides)
+                                .paymentAmountCalculationStrategy(
+                                        PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.ANNUAL_EIR) //
+                                .annualEir(DEFAULT_WC_ANNUAL_EIR) //
+                                .discount(DEFAULT_WC_DISCOUNT) //
+                                .periodPaymentRate(null) //
+                                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
+                                .paymentChannelToFundSourceMappings(
+                                        List.of(new org.apache.fineract.client.models.WorkingCapitalLoanPaymentChannelToFundSourceMappings()
+                                                .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
+                                                .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES))))
+                                .chargeOffReasonToExpenseAccountMappings(List.of(
+                                        new org.apache.fineract.client.models.WorkingCapitalPostChargeOffReasonToExpenseAccountMappings()
+                                                .chargeOffReasonCodeValueId(
+                                                        codeValueResolver.resolve(chargeOffReasonCodeId, DefaultCodeValue.valueOf("FRAUD")))
+                                                .expenseAccountId(
+                                                        accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT_FRAUD))))
+                                .writeOffReasonsToExpenseMappings(List
+                                        .of(new org.apache.fineract.client.models.WorkingCapitalPostWriteOffReasonToExpenseAccountMappings()
+                                                .writeOffReasonCodeValueId(codeValueResolver.resolve(writeOffReasonCodeId,
+                                                        DefaultCodeValue.valueOf("BAD_DEBT")))
+                                                .expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT)))))),
+                () -> TestContext.INSTANCE.set(
+                        TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ANNUAL_EIR_DUE_FEE_PENALTY_PRINCIPAL,
+                        createWorkingCapitalLoanProductIdempotent(workingCapitalRequestFactory
+                                .defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()
+                                .name(DefaultWorkingCapitalLoanProduct.WCLP_ANNUAL_EIR_DUE_FEE_PENALTY_PRINCIPAL.getName())
+                                .allowAttributeOverrides(allowAttributeOverrides)
+                                .paymentAmountCalculationStrategy(
+                                        PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.ANNUAL_EIR) //
+                                .annualEir(DEFAULT_WC_ANNUAL_EIR) //
+                                .discount(DEFAULT_WC_DISCOUNT) //
+                                .periodPaymentRate(null) //
+                                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
+                                .paymentAllocation(List.of(
+                                        createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(),
+                                                List.of(DUE_FEE, DUE_PENALTY, DUE_PRINCIPAL, IN_ADVANCE_FEE, IN_ADVANCE_PENALTY,
+                                                        IN_ADVANCE_PRINCIPAL)),
+                                        createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.REPAYMENT.getValue(),
+                                                List.of(DUE_FEE, DUE_PENALTY, DUE_PRINCIPAL, IN_ADVANCE_FEE, IN_ADVANCE_PENALTY,
+                                                        IN_ADVANCE_PRINCIPAL))))
+                                .paymentChannelToFundSourceMappings(
+                                        List.of(new org.apache.fineract.client.models.WorkingCapitalLoanPaymentChannelToFundSourceMappings()
+                                                .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
+                                                .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES)))))),
+                () -> TestContext.INSTANCE.set(
+                        TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ANNUAL_EIR_BREACH_NEAR_BREACH_ACC_DEF_REV_AM,
+                        createWorkingCapitalLoanProductIdempotent(workingCapitalRequestFactory
+                                .defaultWorkingCapitalLoanProductBreachNearBreachRequestWithAccrualAccounting()
+                                .name(DefaultWorkingCapitalLoanProduct.WCLP_ANNUAL_EIR_BREACH_NEAR_BREACH_ACC_DEF_REV_AM.getName())
+                                .allowAttributeOverrides(allowAttributeOverrides)
+                                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
+                                .paymentAmountCalculationStrategy(
+                                        PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.ANNUAL_EIR) //
+                                .annualEir(DEFAULT_WC_ANNUAL_EIR) //
+                                .discount(DEFAULT_WC_DISCOUNT) //
+                                .periodPaymentRate(null))),
+                () -> TestContext.INSTANCE.set(
+                        TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ANNUAL_EIR_OVERRIDES_DISALLOWED,
+                        createWorkingCapitalLoanProductIdempotent(workingCapitalRequestFactory
+                                .defaultWorkingCapitalLoanProductRequestWithAccrualAccounting().discount(new BigDecimal(1000))
+                                .name(DefaultWorkingCapitalLoanProduct.WCLP_ANNUAL_EIR_OVERRIDE_DISALLOWED.getName())
+                                .allowAttributeOverrides(allowAttributeOverridesDisabled)
+                                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
+                                .paymentAmountCalculationStrategy(
+                                        PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.ANNUAL_EIR) //
+                                .annualEir(DEFAULT_WC_ANNUAL_EIR) //
+                                .discount(DEFAULT_WC_DISCOUNT) //
+                                .periodPaymentRate(null))));
         ParallelExecutionHelper.runInParallel(items);
     }
 

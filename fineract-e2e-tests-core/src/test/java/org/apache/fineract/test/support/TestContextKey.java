@@ -350,6 +350,10 @@ public abstract class TestContextKey {
     public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_GOODWILL_CREDIT_ALLOCATION = "workingCapitalLoanProductCreateResponseWCLPGoodwillCreditAllocation";
     public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_REPAYMENT_DIFF_DEFAULT = "workingCapitalLoanProductCreateResponseWCLPRepaymentDiffDefault";
     public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_365 = "workingCapitalLoanProductCreateResponseWCLP365";
+    public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ANNUAL_EIR_ADVANCED_ACCOUNTING = "workingCapitalLoanProductCreateResponseWCLPAnnualEIR";
+    public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ANNUAL_EIR_DUE_FEE_PENALTY_PRINCIPAL = "workingCapitalLoanProductCreateResponseWCLPAnnualEIRDueFeePenaltyPrincipal";
+    public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ANNUAL_EIR_BREACH_NEAR_BREACH_ACC_DEF_REV_AM = "workingCapitalLoanProductCreateResponseWCLPAnnualEIRBreachNearBreach";
+    public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ANNUAL_EIR_OVERRIDES_DISALLOWED = "workingCapitalLoanProductCreateResponseWCLPAnnualEIROverrideDisallowed";
     public static final String WC_LOAN_IDS = "wcLoanIds";
     public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST_FOR_UPDATE_WCLP = "workingCapitalLoanProductCreateRequestForUpdateWCLP";
     public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_FOR_UPDATE_WCLP = "workingCapitalLoanProductCreateResponseForUpdateWCLP";

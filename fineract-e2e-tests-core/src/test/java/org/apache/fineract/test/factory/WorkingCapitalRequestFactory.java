@@ -89,6 +89,8 @@ public class WorkingCapitalRequestFactory {
     public static final Integer DEFAULT_WC_NEAR_BREACH_FREQUENCY = 12;
     public static final String DEFAULT_WC_NEAR_BREACH_FREQUENCY_TYPE = WorkingCapitalBreachFrequencyType.DAYS.getCode();
     public static final BigDecimal DEFAULT_WC_NEAR_BREACH_THRESHOLD = new BigDecimal("70.23");
+    public static final BigDecimal DEFAULT_WC_ANNUAL_EIR = new BigDecimal("43.7562");
+    public static final BigDecimal DEFAULT_WC_DISCOUNT = new BigDecimal("1000");
 
     public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductRequestWithAccrualAccounting() {
         return defaultWorkingCapitalLoanProductRequest()//
@@ -171,6 +173,19 @@ public class WorkingCapitalRequestFactory {
                 .allowAttributeOverrides(allowAttributeOverrides);
     }
 
+    /**
+     * Annual EIR strategy product: no period payment rate, required discount, and discount override enabled so loan
+     * applications may pass a discount (as in the reference EIR calculation scenarios).
+     */
+    public PostWorkingCapitalLoanProductsRequest defaultAnnualEirWorkingCapitalLoanProductRequest(final BigDecimal annualEir,
+            final BigDecimal discount) {
+        return defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                .paymentAmountCalculationStrategy(PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.ANNUAL_EIR) //
+                .annualEir(annualEir) //
+                .discount(discount) //
+                .periodPaymentRate(null);
+    }
+
     public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductBreachRequest() {
         String name = Utils.randomStringGenerator(WCLP_NAME_PREFIX, 10);
         String shortName = loanProductsRequestFactory.generateShortNameSafely();
@@ -187,7 +202,21 @@ public class WorkingCapitalRequestFactory {
 
         Long breachId = getWCBreachIdByName(DEFAULT_WC_BREACH_NAME);
         Long nearBreachId = getWCNearBreachIdByName(DEFAULT_WC_NEAR_BREACH_NAME);
-        return defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest().name(name)//
+        return defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest()//
+                .name(name)//
+                .shortName(shortName)//
+                .breachId(breachId) //
+                .nearBreachId(nearBreachId); //
+    }
+
+    public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductBreachNearBreachRequestWithAccrualAccounting() {
+        String name = Utils.randomStringGenerator(WCLP_NAME_PREFIX, 10);
+        String shortName = loanProductsRequestFactory.generateShortNameSafely();
+
+        Long breachId = getWCBreachIdByName(DEFAULT_WC_BREACH_NAME);
+        Long nearBreachId = getWCNearBreachIdByName(DEFAULT_WC_NEAR_BREACH_NAME);
+        return defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()//
+                .name(name)//
                 .shortName(shortName)//
                 .breachId(breachId) //
                 .nearBreachId(nearBreachId); //
