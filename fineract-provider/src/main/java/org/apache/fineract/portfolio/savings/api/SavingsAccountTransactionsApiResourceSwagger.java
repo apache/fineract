@@ -202,6 +202,9 @@ final class SavingsAccountTransactionsApiResourceSwagger {
 
         private PostSavingsAccountTransactionsRequest() {}
 
+        @Schema(description = "command=gsimDeposit: the child accounts of a GSIM parent to deposit into, and how much into each")
+        public List<SavingsAccountsApiResourceSwagger.PostSavingsAccountsGsimRequest.PostSavingsAccountsGsimSavings> savingsArray;
+
         @Schema(example = "27 March 2022")
         public String transactionDate;
         @Schema(example = "1000")
@@ -250,5 +253,15 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         public String externalId;
         @Schema(example = "true")
         public String isBulk;
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "01 March 2013")
+        public String transactionDate;
+        @Schema(example = "500")
+        public BigDecimal transactionAmount;
+        @Schema(example = "1")
+        public Long paymentTypeId;
     }
 }

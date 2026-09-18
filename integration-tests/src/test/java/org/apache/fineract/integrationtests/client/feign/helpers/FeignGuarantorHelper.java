@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.GuarantorData;
 import org.apache.fineract.client.models.GuarantorsRequest;
@@ -40,6 +42,10 @@ public class FeignGuarantorHelper {
 
     public Long createGuarantor(Long loanId, GuarantorsRequest request) {
         return ok(() -> fineractClient.guarantors().createGuarantor(loanId, request)).getResourceId();
+    }
+
+    public CallFailedRuntimeException createGuarantorExpectingError(Long loanId, GuarantorsRequest request) {
+        return fail(() -> fineractClient.guarantors().createGuarantor(loanId, request));
     }
 
     public List<GuarantorData> getAllGuarantors(Long loanId) {
