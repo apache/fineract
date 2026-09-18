@@ -628,6 +628,7 @@ Feature: Working Capital Loan Undo Transaction
     When Admin closes the Working Capital loan with a full repayment on "07 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
+  @TestRailId:C106716
   Scenario: Verify working capital loan undo transaction - user with UNDO_WORKINGCAPITALLOANTRANSACTION permission can undo a repayment
     Then Permission "UNDO_WORKINGCAPITALLOANTRANSACTION" is returned with grouping "transaction_loan", entity "WORKINGCAPITALLOANTRANSACTION" and action "UNDO"
     When Admin sets the business date to "01 January 2026"
@@ -650,6 +651,7 @@ Feature: Working Capital Loan Undo Transaction
     When Admin closes the Working Capital loan with a full repayment on "10 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
+  @TestRailId:C106717
   Scenario: Verify working capital loan undo transaction - user without UNDO_WORKINGCAPITALLOANTRANSACTION permission is rejected
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

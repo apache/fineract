@@ -320,6 +320,7 @@ Feature: WorkingCapitalLoanChargesFeature
       | 403      | Charge time type DISBURSEMENT is not supported on a Working Capital Loan. |
     When Admin deletes working capital loan charge
 
+  @TestRailId:C106718
   Scenario: Verify Working Capital Charge on loan account level - user with CREATE_WORKINGCAPITALLOANCHARGE permission can add a charge
     Then Permission "CREATE_WORKINGCAPITALLOANCHARGE" is returned with grouping "transaction_loan", entity "WORKINGCAPITALLOANCHARGE" and action "CREATE"
     Given Admin sets the business date to "01 January 2026"
