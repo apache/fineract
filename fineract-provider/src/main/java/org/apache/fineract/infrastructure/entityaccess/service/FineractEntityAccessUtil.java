@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.entityaccess.service;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
@@ -119,6 +121,26 @@ public class FineractEntityAccessUtil {
             }
         }
         return inClause;
+    }
+
+    /**
+     * The charges the current user's office may see, for callers that bind the ids instead of pasting them into an SQL
+     * IN clause. Typed sibling of {@link #getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled}, which
+     * stays in place for the callers that still build SQL.
+     *
+     * @return an empty optional when office specific products are disabled or the office is unrestricted, in which case
+     *         every charge is visible, otherwise the ids of the charges the office may see, which is empty when the
+     *         office is mapped to no charge at all.
+     */
+    public Optional<List<Long>> getChargeIdsForUserOffice_ifGlobalConfigEnabled() {
+
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository
+                .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED);
+
+        if (!property.isEnabled()) {
+            return Optional.empty();
+        }
+        return fineractEntityAccessReadService.getIdList_ForChargesForOffice(this.context.authenticatedUser().getOffice().getId(), false);
     }
 
 }

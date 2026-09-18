@@ -82,7 +82,7 @@ public class WorkingCapitalLoanApiResource {
     @GET
     @Path("template")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "retrieveWorkingCapitalLoanTemplate", summary = "Retrieve Working Capital Loan application template", description = "Returns loan details plus productOptions, fundOptions, delinquencyBucketOptions, periodFrequencyTypeOptions.")
+    @Operation(operationId = "retrieveWorkingCapitalLoanTemplate", summary = "Retrieve Working Capital Loan application template", description = "Returns loan details plus productOptions, fundOptions, delinquencyBucketOptions, periodFrequencyTypeOptions and, when productId is supplied, chargeOptions: every active Working Capital charge definition in the product currency, not only the ones the product catalogues.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanApiResourceSwagger.GetWorkingCapitalLoansTemplateResponse.class))) })
     public WorkingCapitalLoanTemplateData retrieveTemplate(

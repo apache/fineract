@@ -95,7 +95,7 @@ public class WorkingCapitalLoanProductData implements Serializable {
     private WorkingCapitalLoanProductConfigurableAttributesData allowAttributeOverrides;
 
     // Charges offered by the product
-    private Collection<ChargeData> charges;
+    private List<ChargeData> charges;
 
     // Accounting
     private StringEnumOptionData accountingRule;

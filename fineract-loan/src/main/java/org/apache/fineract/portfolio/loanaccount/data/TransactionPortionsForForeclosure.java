@@ -21,14 +21,13 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import java.math.BigDecimal;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
-public interface TransactionPortionsForForeclosure {
-
-    LoanTransactionType getTransactionType();
-
-    BigDecimal getInterestPortion();
-
-    BigDecimal getFeeChargesPortion();
-
-    BigDecimal getPenaltyChargesPortion();
-
+/**
+ * Transaction portions the foreclosure income calculation needs.
+ *
+ * A record built by a JPQL constructor expression rather than a Spring Data interface projection: the interface form
+ * required result variables ({@code AS} aliases) in the SELECT clause to bind the columns to the accessors, and
+ * EclipseLink rejects that select clause when parsing the query.
+ */
+public record TransactionPortionsForForeclosure(LoanTransactionType transactionType, BigDecimal interestPortion,
+        BigDecimal feeChargesPortion, BigDecimal penaltyChargesPortion) {
 }

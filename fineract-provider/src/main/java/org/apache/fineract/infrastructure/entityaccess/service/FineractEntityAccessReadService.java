@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.entityaccess.service;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
@@ -36,6 +38,15 @@ public interface FineractEntityAccessReadService {
     String getSQLQueryInClauseIDList_ForSavingsProductsForOffice(Long savingsProductId, boolean includeAllOffices);
 
     String getSQLQueryInClauseIDList_ForChargesForOffice(Long officeId, boolean includeAllOffices);
+
+    /**
+     * Typed sibling of {@link #getSQLQueryInClauseIDList_ForChargesForOffice(Long, boolean)} for callers that bind the
+     * ids instead of pasting them into an SQL IN clause.
+     *
+     * @return an empty optional when the office is not restricted and every charge is visible, otherwise the ids of the
+     *         charges the office may see, which may itself be empty when the office is mapped to no charge at all.
+     */
+    Optional<List<Long>> getIdList_ForChargesForOffice(Long officeId, boolean includeAllOffices);
 
     Collection<FineractEntityRelationData> retrieveAllSupportedMappingTypes();
 

@@ -227,6 +227,9 @@ public abstract class TestContextKey {
     public static final String CHARGE_FOR_LOAN_DISBURSEMENT_PERCENTAGE_AMOUNT_PLUS_INTEREST_CREATE_RESPONSE = "ChargeForLoanDisbursementPercentageAmountPlusInterestCreateResponse";
     public static final String CHARGE_FOR_WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE_CREATE_RESPONSE = "ChargeForWorkingCapitalSpecifiedDueDateFeeCreateResponse";
     public static final String CHARGE_FOR_WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY_CREATE_RESPONSE = "ChargeForWorkingCapitalSpecifiedDueDatePenaltyCreateResponse";
+    public static final String CHARGE_FOR_WORKING_CAPITAL_DISBURSEMENT_FEE_CREATE_RESPONSE = "ChargeForWorkingCapitalDisbursementFeeCreateResponse";
+    public static final String CHARGE_FOR_WORKING_CAPITAL_DISBURSEMENT_PENALTY_CREATE_RESPONSE = "ChargeForWorkingCapitalDisbursementPenaltyCreateResponse";
+    public static final String CHARGE_FOR_WORKING_CAPITAL_DISBURSEMENT_FEE_PERCENTAGE_CREATE_RESPONSE = "ChargeForWorkingCapitalDisbursementFeePercentageCreateResponse";
     public static final String LOAN_RESPONSE = "loanResponse";
     public static final String LOAN_REPAYMENT_UNDO_RESPONSE = "loanRepaymentUndoResponse";
     public static final String LOAN_CAPITALIZED_INCOME_ADJUSTMENT_UNDO_RESPONSE = "loanCapitalizedIncomeAdjustmentUndoResponse";
@@ -350,6 +353,7 @@ public abstract class TestContextKey {
     public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_GOODWILL_CREDIT_ALLOCATION = "workingCapitalLoanProductCreateResponseWCLPGoodwillCreditAllocation";
     public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_REPAYMENT_DIFF_DEFAULT = "workingCapitalLoanProductCreateResponseWCLPRepaymentDiffDefault";
     public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_365 = "workingCapitalLoanProductCreateResponseWCLP365";
+    public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_WITH_DISBURSEMENT_CHARGE = "workingCapitalLoanProductCreateResponseWCLPWithDisbursementCharge";
     public static final String WC_LOAN_IDS = "wcLoanIds";
     public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST_FOR_UPDATE_WCLP = "workingCapitalLoanProductCreateRequestForUpdateWCLP";
     public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_FOR_UPDATE_WCLP = "workingCapitalLoanProductCreateResponseForUpdateWCLP";

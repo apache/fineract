@@ -27,6 +27,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
@@ -54,6 +55,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public List<StringEnumOptionData> breachStartTypeOptions;
         public List<StringEnumOptionData> delinquencyMinimumPaymentTypeOptions;
         public List<WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse.GetWorkingCapitalLoanBreach> breachOptions;
+        @Schema(description = "Working Capital charge definitions in the selected product's currency; null when no productId is supplied.")
+        public List<ChargeData> chargeOptions;
     }
 
     @Schema(description = "GetWorkingCapitalLoansClient")

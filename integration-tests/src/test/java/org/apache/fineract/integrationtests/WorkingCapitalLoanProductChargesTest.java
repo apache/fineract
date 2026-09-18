@@ -58,6 +58,7 @@ public class WorkingCapitalLoanProductChargesTest {
     private static final String WCLP_CHARGE_INVALID_CURRENCY = "error.msg.charge.attach.to.working.capital.loan.product.invalid.currency";
 
     private static final Integer CHARGE_APPLIES_TO_LOAN = 1;
+    private static final Integer CHARGE_APPLIES_TO_SAVINGS = 2;
     private static final Integer CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE = 2;
     private static final Integer CHARGE_CALCULATION_TYPE_FLAT = 1;
     // Mandatory for chargeAppliesTo=LOAN; Working Capital charges default it to REGULAR instead.
@@ -260,6 +261,60 @@ public class WorkingCapitalLoanProductChargesTest {
         assertEquals(chargeId, charges.get(0).getId());
     }
 
+    @Test
+    public void accountTemplateOffersWorkingCapitalChargesTheProductDoesNotCatalogue() {
+        final Long catalogued = createWorkingCapitalFee();
+        final Long notCatalogued = createWorkingCapitalFee();
+        final Long productId = createProduct(new WorkingCapitalLoanProductTestBuilder().withChargeIds(List.of(catalogued)));
+
+        final GetWorkingCapitalLoansTemplateResponse template = loanHelper.retrieveTemplateRaw(Map.of("productId", productId));
+
+        assertNotNull(template.getChargeOptions(), "the account template must offer the Working Capital charge catalogue");
+        final List<Long> optionIds = template.getChargeOptions().stream().map(ChargeData::getId).toList();
+        assertTrue(optionIds.contains(catalogued), "chargeOptions must contain the charge the product catalogues");
+        assertTrue(optionIds.contains(notCatalogued),
+                "chargeOptions is the whole Working Capital catalogue for the currency, not only the product charges, got: " + optionIds);
+    }
+
+    @Test
+    public void accountTemplateChargeOptionsAreLimitedToTheProductCurrency() {
+        final Long usdChargeId = createWorkingCapitalFee();
+        final Long eurChargeId = createWorkingCapitalFeeInCurrency("EUR");
+        final Long productId = createProduct(new WorkingCapitalLoanProductTestBuilder().withCurrencyCode("USD"));
+
+        final GetWorkingCapitalLoansTemplateResponse template = loanHelper.retrieveTemplateRaw(Map.of("productId", productId));
+
+        assertNotNull(template.getChargeOptions());
+        final List<Long> optionIds = template.getChargeOptions().stream().map(ChargeData::getId).toList();
+        assertTrue(optionIds.contains(usdChargeId), "chargeOptions must contain the charge in the product currency");
+        assertFalse(optionIds.contains(eurChargeId), "chargeOptions must not offer a charge in another currency, got: " + optionIds);
+    }
+
+    @Test
+    public void accountTemplateChargeOptionsExcludeChargesOfOtherEntities() {
+        final Long termLoanChargeId = createTermLoanFee();
+        final Long savingsChargeId = createSavingsFee();
+        final Long productId = createProduct(new WorkingCapitalLoanProductTestBuilder());
+
+        final GetWorkingCapitalLoansTemplateResponse template = loanHelper.retrieveTemplateRaw(Map.of("productId", productId));
+
+        assertNotNull(template.getChargeOptions());
+        final List<Long> optionIds = template.getChargeOptions().stream().map(ChargeData::getId).toList();
+        assertFalse(optionIds.contains(termLoanChargeId), "chargeOptions must not leak term loan charges, got: " + optionIds);
+        assertFalse(optionIds.contains(savingsChargeId), "chargeOptions must not leak savings charges, got: " + optionIds);
+    }
+
+    @Test
+    public void accountTemplateWithoutProductIdLeavesChargeOptionsEmpty() {
+        createWorkingCapitalFee();
+
+        final GetWorkingCapitalLoansTemplateResponse template = loanHelper.retrieveTemplateRaw(Map.of());
+
+        assertNotNull(template, "the template must be served even without a productId");
+        assertTrue(template.getChargeOptions() == null || template.getChargeOptions().isEmpty(),
+                "without a product there is no currency to filter by, so no charges are offered");
+    }
+
     private Long createProduct(final WorkingCapitalLoanProductTestBuilder builder) {
         final PostWorkingCapitalLoanProductsRequest request = builder.withName(uniqueName()).withShortName(uniqueShortName()).build();
         return createProduct(request);
@@ -291,6 +346,14 @@ public class WorkingCapitalLoanProductChargesTest {
                 .chargeTimeType(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE).chargeCalculationType(CHARGE_CALCULATION_TYPE_FLAT)
                 .name(Utils.uniqueRandomStringGenerator("TERM_LOAN_CHARGE_", 8)).amount(15.0).active(true).currencyCode("USD")
                 .chargePaymentMode(CHARGE_PAYMENT_MODE_REGULAR).penalty(false).locale("en");
+        return trackCharge(chargesHelper.createCharge(request).getResourceId());
+    }
+
+    private Long createSavingsFee() {
+        final ChargeRequest request = new ChargeRequest().chargeAppliesTo(CHARGE_APPLIES_TO_SAVINGS)
+                .chargeTimeType(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE).chargeCalculationType(CHARGE_CALCULATION_TYPE_FLAT)
+                .name(Utils.uniqueRandomStringGenerator("SAVINGS_CHARGE_", 8)).amount(15.0).active(true).currencyCode("USD").penalty(false)
+                .locale("en");
         return trackCharge(chargesHelper.createCharge(request).getResourceId());
     }
 

@@ -1108,10 +1108,10 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 .findTransactionDataForForeclosureIncome(loan, tillDate);
 
         for (TransactionPortionsForForeclosure transactionPortion : transactionPortions) {
-            LoanTransactionType transactionType = transactionPortion.getTransactionType();
-            BigDecimal interestPortion = transactionPortion.getInterestPortion();
-            BigDecimal feePortion = transactionPortion.getFeeChargesPortion();
-            BigDecimal penaltyPortion = transactionPortion.getPenaltyChargesPortion();
+            LoanTransactionType transactionType = transactionPortion.transactionType();
+            BigDecimal interestPortion = transactionPortion.interestPortion();
+            BigDecimal feePortion = transactionPortion.feeChargesPortion();
+            BigDecimal penaltyPortion = transactionPortion.penaltyChargesPortion();
 
             if (transactionType.isAccrual()) {
                 receivableInterest = receivableInterest.plus(Money.of(currency, interestPortion));

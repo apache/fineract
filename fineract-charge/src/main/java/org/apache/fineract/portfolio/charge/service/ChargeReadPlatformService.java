@@ -106,6 +106,17 @@ public interface ChargeReadPlatformService {
     List<ChargeData> retrieveWorkingCapitalLoanApplicablePenalties();
 
     /**
+     * Returns the fees (excluding penalties) that can be applied to a Working Capital loan in the given currency. This
+     * is the catalogue of every active Working Capital charge definition, deliberately not restricted to the charges a
+     * product happens to offer: the product catalogue is a default, not a contract, and the write path accepts any
+     * Working Capital charge whose currency matches the loan.
+     *
+     * @param currencyCode
+     *            the currency the charges must be denominated in
+     */
+    List<ChargeData> retrieveWorkingCapitalLoanApplicableFeesForCurrency(String currencyCode);
+
+    /**
      * Returns all charges associated with a given Working Capital loan product
      *
      * @param workingCapitalLoanProductId

@@ -38,6 +38,9 @@ import org.apache.fineract.client.models.PostAllowAttributeOverrides;
 import org.apache.fineract.client.models.PostPaymentAllocation;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
+import org.apache.fineract.client.models.WorkingCapitalLoanProductChargeData;
+import org.apache.fineract.test.data.ChargeProductResolver;
+import org.apache.fineract.test.data.ChargeProductType;
 import org.apache.fineract.test.data.accounttype.AccountTypeResolver;
 import org.apache.fineract.test.data.accounttype.DefaultAccountType;
 import org.apache.fineract.test.data.codevalue.CodeValueResolver;
@@ -63,6 +66,7 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
     private final AccountTypeResolver accountTypeResolver;
     private final CodeValueResolver codeValueResolver;
     private final CodeHelper codeHelper;
+    private final ChargeProductResolver chargeProductResolver;
 
     @Override
     public void initialize() throws Exception {
@@ -185,6 +189,13 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                         createWorkingCapitalLoanProductIdempotent(
                                 workingCapitalRequestFactory.defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest()
                                         .npvDayCount(365).name(DefaultWorkingCapitalLoanProduct.WCLP_365.getName()))),
+                () -> TestContext.INSTANCE
+                        .set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_WITH_DISBURSEMENT_CHARGE,
+                                createWorkingCapitalLoanProductIdempotent(workingCapitalRequestFactory
+                                        .defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest()
+                                        .name(DefaultWorkingCapitalLoanProduct.WCLP_WITH_DISBURSEMENT_CHARGE.getName())
+                                        .charges(List.of(new WorkingCapitalLoanProductChargeData()
+                                                .id(chargeProductResolver.resolve(ChargeProductType.WORKING_CAPITAL_DISBURSEMENT_FEE)))))),
                 () -> TestContext.INSTANCE.set(
                         TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_DUE_FEE_PENALTY_PRINCIPAL,
                         createWorkingCapitalLoanProductIdempotent(workingCapitalRequestFactory
