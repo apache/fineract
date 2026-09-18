@@ -1919,3 +1919,10 @@ Feature: WorkingCapitalLoanAccount
     And Working capital loan account has the correct data:
       | status | principal | totalDiscountFee | unrealizedIncome |
       | Active | 10000.0   | 1000.0           | 990.39           |
+
+  Scenario: Create Working Capital Loan account rejects non-WORKING_CAPITAL delinquency bucket
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    Then Creating a working capital loan with the following data will result an error "The parameter `delinquencyBucketId` must reference a WORKING_CAPITAL delinquency bucket.":
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId      |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      | BASIC_DELINQUENCY_BUCKET |

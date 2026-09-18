@@ -101,6 +101,7 @@ import org.apache.fineract.test.data.codevalue.CodeNames;
 import org.apache.fineract.test.data.codevalue.CodeValue;
 import org.apache.fineract.test.data.codevalue.CodeValueResolver;
 import org.apache.fineract.test.data.codevalue.DefaultCodeValue;
+import org.apache.fineract.test.data.delinquency.DelinquencyBucketResolver;
 import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
 import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
 import org.apache.fineract.test.data.workingcapitalproduct.DefaultWorkingCapitalLoanProduct;
@@ -158,6 +159,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     private final ClientRequestFactory clientRequestFactory;
     private final CodeValueResolver codeValueResolver;
     private final FineractClientConfiguration fineractClientConfiguration;
+    private final DelinquencyBucketResolver delinquencyBucketResolver;
 
     @Given("Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:")
     public void createClientAndDisburseWorkingCapitalLoanWithData(final DataTable table) {
@@ -682,6 +684,31 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertValidationError(exception, "validation.msg.WORKINGCAPITALLOAN.discount.override.not.allowed.by.product");
 
         log.info("Verified working capital loan creation failed with expected validation errors for LP overridables disabled");
+    }
+
+    @Then("Creating a working capital loan with the following data will result an error {string}:")
+    public void creatingWorkingCapitalLoanWithDataWillResultAnError(final String errorMessage, final DataTable table) {
+        final Map<String, String> rawData = table.asMaps().getFirst();
+        final Long clientId = extractClientId();
+        final Long loanProductId = resolveLoanProductId(rawData.get("LoanProduct"));
+
+        final PostWorkingCapitalLoansRequest loansRequest = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansRequest(clientId)
+                .productId(loanProductId).submittedOnDate(rawData.get("submittedOnDate"))
+                .expectedDisbursementDate(rawData.get("expectedDisbursementDate"))
+                .principalAmount(new BigDecimal(rawData.get("principalAmount")))
+                .totalPaymentVolume(new BigDecimal(rawData.get("totalPaymentVolume")))
+                .periodPaymentRate(new BigDecimal(rawData.get("periodPaymentRate")))
+                .discount(rawData.get("discount") != null && !rawData.get("discount").isEmpty() ? new BigDecimal(rawData.get("discount"))
+                        : null);
+        if (rawData.get("delinquencyBucketId") != null && !rawData.get("delinquencyBucketId").isEmpty()) {
+            loansRequest.delinquencyBucketId(delinquencyBucketResolver.resolveBucketId(rawData.get("delinquencyBucketId")));
+        }
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
+        assertHttpStatus(exception, 400);
+        assertValidationError(exception, errorMessage);
     }
 
     @Then("Creating a working capital loan with principal amount greater than Working Capital Loan Product max will result an error:")

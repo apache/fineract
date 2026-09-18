@@ -517,3 +517,25 @@ Feature: WorkingCapitalLoanProduct
       | PAYOUT_REFUND     |
       | GOODWILL_CREDIT   |
       | CHARGE_ADJUSTMENT |
+
+  Scenario: Verify WC Loan Product template delinquencyBucketOptions are WORKING_CAPITAL only
+    When Admin retrieves the Working Capital Loan Product template
+    Then Working Capital Loan Product template delinquencyBucketOptions all have bucketType "WORKING_CAPITAL"
+    And Working Capital Loan Product template delinquencyBucketOptions do not contain:
+      | BASIC_DELINQUENCY_BUCKET |
+
+  Scenario Outline: Verify WC Loan Product create rejects non-WORKING_CAPITAL delinquency bucket
+    Then Admin failed to create a new Working Capital Loan Product with field "<wcp_field_name>" invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+
+    Examples:
+      | wcp_field_name      | wcp_invalid_field_value    | wcp_error_message                                                                           |
+      | delinquencyBucketId | "BASIC_DELINQUENCY_BUCKET" | "The parameter `delinquencyBucketId` must reference a WORKING_CAPITAL delinquency bucket." |
+
+  Scenario Outline: Verify WC Loan Product update rejects non-WORKING_CAPITAL delinquency bucket
+    When Admin creates a new Working Capital Loan Product
+    Then Admin failed to update a new Working Capital Loan Product field "<wcp_field_name>" with invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+    Then Admin deletes a Working Capital Loan Product
+
+    Examples:
+      | wcp_field_name      | wcp_invalid_field_value    | wcp_error_message                                                                          |
+      | delinquencyBucketId | "BASIC_DELINQUENCY_BUCKET" | "The parameter `delinquencyBucketId` must reference a WORKING_CAPITAL delinquency bucket." |

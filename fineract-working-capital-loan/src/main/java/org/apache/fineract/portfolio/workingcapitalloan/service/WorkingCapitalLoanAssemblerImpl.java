@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
@@ -42,8 +41,6 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepository;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.fund.domain.FundRepository;
 import org.apache.fineract.portfolio.fund.exception.FundNotFoundException;
@@ -82,7 +79,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
     private final WorkingCapitalLoanProductRepository loanProductRepository;
     private final ClientRepository clientRepository;
     private final FundRepository fundRepository;
-    private final DelinquencyBucketRepository delinquencyBucketRepository;
+    private final WorkingCapitalDelinquencyBucketResolver workingCapitalDelinquencyBucketResolver;
     private final ExternalIdFactory externalIdFactory;
     private final WorkingCapitalAdvancedPaymentAllocationsJsonParser paymentAllocationParser;
     private final AccountNumberFormatLookup accountNumberFormatLookup;
@@ -244,7 +241,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
         if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, element)) {
             final Long bucketId = fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName,
                     element);
-            detail.setDelinquencyBucket(bucketId != null ? delinquencyBucketRepository.findById(bucketId).orElse(null) : null);
+            detail.setDelinquencyBucket(workingCapitalDelinquencyBucketResolver.findWorkingCapitalBucketByIdIfProvided(bucketId));
         } else {
             detail.setDelinquencyBucket(product.getDelinquencyBucket());
         }
@@ -434,15 +431,13 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                 detail.setNearBreach(nearBreachId != null ? findNearBreachById(nearBreachId) : null);
                 changes.put(WorkingCapitalLoanProductConstants.nearBreachIdParamName, nearBreachId);
             }
-            if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, element)) {
+            final Long existingBucketId = detail.getDelinquencyBucket() != null ? detail.getDelinquencyBucket().getId() : null;
+            if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, element) && command
+                    .isChangeInLongParameterNamed(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, existingBucketId)) {
                 final Long bucketId = fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName,
                         element);
-                final DelinquencyBucket bucket = bucketId != null ? delinquencyBucketRepository.findById(bucketId).orElse(null) : null;
-                final Long existingBucketId = detail.getDelinquencyBucket() != null ? detail.getDelinquencyBucket().getId() : null;
-                if (!Objects.equals(bucketId, existingBucketId)) {
-                    detail.setDelinquencyBucket(bucket);
-                    changes.put(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, bucketId);
-                }
+                detail.setDelinquencyBucket(workingCapitalDelinquencyBucketResolver.findWorkingCapitalBucketByIdIfProvided(bucketId));
+                changes.put(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, bucketId);
             }
             if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, element)) {
                 final Integer delinquencyGraceDays = fromApiJsonHelper

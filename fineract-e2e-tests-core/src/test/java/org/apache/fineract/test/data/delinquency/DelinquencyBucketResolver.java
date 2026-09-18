@@ -49,4 +49,15 @@ public class DelinquencyBucketResolver {
 
         return foundAtr.getId();
     }
+
+    public Long resolveBucketId(final String value) {
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
+        try {
+            return Long.valueOf(value);
+        } catch (NumberFormatException ex) {
+            return resolve(DelinquencyBucket.valueOf(value));
+        }
+    }
 }
