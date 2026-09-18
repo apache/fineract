@@ -771,6 +771,26 @@ Feature: Working Capital Charge-Off Accounting Entries
       | Type | Account code | Account name | Debit | Credit |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
+  @TestRailId:C106706
+  Scenario: Verify Working Capital charge-off on a product without accounting posts the final discount fee amortization with no journal entries
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin charges off the Working Capital loan on "02 January 2026"
+    Then Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Charge-off                | 10000.0           | 10000.0          | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 1000.0            |                  |                   |                       | false    |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "02 January 2026" which has the following Journal entries:
+      | Type | Account code | Account name | Debit | Credit |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
+
   @TestRailId:C94033
   Scenario: Verify Working Capital charge-off accounting - UC24: backdated repayment before charge-off keeps regular JE and restates charge-off
     Given Admin sets the business date to "01 January 2026"
