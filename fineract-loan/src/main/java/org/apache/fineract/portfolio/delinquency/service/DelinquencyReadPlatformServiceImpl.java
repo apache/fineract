@@ -111,6 +111,14 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
     }
 
     @Override
+    public List<DelinquencyBucketData> retrieveDelinquencyBucketsByType(final DelinquencyBucketType bucketType) {
+        final List<DelinquencyBucket> delinquencyBuckets = repositoryBucket.findByBucketType(bucketType);
+        final List<DelinquencyBucketData> result = mapperBucket.map(delinquencyBuckets);
+        result.forEach(this::enrichWorkingCapitalConfiguration);
+        return result;
+    }
+
+    @Override
     public DelinquencyBucketData retrieveDelinquencyBucket(Long delinquencyBucketId) {
         if (!repositoryBucket.existsById(delinquencyBucketId)) {
             throw DelinquencyBucketNotFoundException.notFound(delinquencyBucketId);

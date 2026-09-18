@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import jakarta.persistence.criteria.Predicate;
 import java.math.MathContext;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -40,9 +39,7 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepos
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.accountdetails.data.WorkingCapitalLoanAccountSummaryData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
-import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
-import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCollectionData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
@@ -80,7 +77,6 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
     private final WorkingCapitalLoanMapper mapper;
     private final WorkingCapitalLoanProductReadPlatformService productReadPlatformService;
     private final ClientReadPlatformService clientReadPlatformService;
-    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final WorkingCapitalLoanSummaryMapper workingCapitalLoanSummaryMapper;
     private final WorkingCapitalBreachReadPlatformService breachReadPlatformService;
     private final WorkingCapitalLoanDelinquencyReadPlatformService workingCapitalLoanDelinquencyReadPlatformService;
@@ -98,8 +94,6 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
     public WorkingCapitalLoanTemplateData retrieveTemplate(final Long productId, final Long clientId) {
         final List<WorkingCapitalLoanProductData> productOptions = this.productReadPlatformService.retrieveAllWorkingCapitalLoanProducts();
         final WorkingCapitalLoanProductData productTemplate = this.productReadPlatformService.retrieveNewWorkingCapitalLoanProductDetails();
-        final Collection<DelinquencyBucketData> delinquencyBucketOptions = this.delinquencyReadPlatformService
-                .retrieveAllDelinquencyBuckets();
         final List<StringEnumOptionData> periodFrequencyTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(WorkingCapitalLoanPeriodFrequencyType.class);
         final List<WorkingCapitalBreachData> breachOptions = breachReadPlatformService.retrieveAll();
@@ -137,7 +131,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
                 .loanData(loanData)//
                 .productOptions(productOptions)//
                 .fundOptions(productTemplate.getFundOptions())//
-                .delinquencyBucketOptions(delinquencyBucketOptions)//
+                .delinquencyBucketOptions(productTemplate.getDelinquencyBucketOptions())//
                 .periodFrequencyTypeOptions(periodFrequencyTypeOptions)//
                 .breachOptions(breachOptions)//
                 .nearBreachOptions(nearBreachOptions)//

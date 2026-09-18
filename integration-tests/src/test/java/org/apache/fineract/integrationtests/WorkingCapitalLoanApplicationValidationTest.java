@@ -52,7 +52,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
 
     @BeforeAll
     static void initDelinquency() {
-        delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        delinquencyBucketId = DelinquencyBucketsHelper.createDefaultWorkingCapitalBucket();
     }
 
     @Test
