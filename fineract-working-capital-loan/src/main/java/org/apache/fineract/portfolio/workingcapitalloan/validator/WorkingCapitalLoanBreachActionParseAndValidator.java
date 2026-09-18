@@ -463,15 +463,19 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
     /**
      * Rejects a frequency change whose resulting period end date falls before the business date. The candidate end date
-     * is derived exactly as the re-date derives it: from the current open period fromDate, extended by the pauses.
+     * is derived exactly as the re-date derives it: from the current open period fromDate, carrying the breach grace
+     * days when that period is the first one, and extended by the pauses.
      */
     private void validateFrequencyDoesNotEndBeforeBusinessDate(final WorkingCapitalLoanBreachAction action,
             final WorkingCapitalLoan workingCapitalLoan, final List<WorkingCapitalLoanBreachAction> existing,
             final DataValidatorBuilder dataValidator) {
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
+        final Integer breachGraceDays = details == null ? null : details.getBreachGraceDays();
         final Optional<LocalDate> candidateToDate = breachScheduleRepository.findCurrentOpenPeriod(workingCapitalLoan.getId(), businessDate)
                 .map(currentPeriod -> WorkingCapitalLoanBreachScheduleEvaluationUtils.calculateRescheduledToDate(
-                        currentPeriod.getFromDate(), action.getFrequency(), action.getFrequencyType(), existing));
+                        currentPeriod.getFromDate(), currentPeriod.getPeriodNumber(), action.getFrequency(), action.getFrequencyType(),
+                        breachGraceDays, existing));
         if (candidateToDate.filter(toDate -> toDate.isBefore(businessDate)).isPresent()) {
             failGeneralValidation(dataValidator, "reschedule.frequency.results.endDate.before.businessDate",
                     "Frequency change results a breach period endDate before current businessDate is not allowed");

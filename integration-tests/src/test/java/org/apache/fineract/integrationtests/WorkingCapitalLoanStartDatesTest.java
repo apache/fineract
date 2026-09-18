@@ -45,6 +45,7 @@ import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCap
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachActionHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.Test;
@@ -56,11 +57,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * /workingcapitalloans/{loanId}} response.
  *
  * <ul>
- * <li>{@code breachStartDate} = fromDate of the earliest breached breach-schedule period. The breach schedule already
- * offsets its first period by {@code breachGraceDays}, so the grace is reflected in the fromDate.</li>
+ * <li>{@code breachStartDate} = fromDate of the earliest breached breach-schedule period. The breach schedule bakes
+ * {@code breachGraceDays} into the toDate of its first period, so the fromDate is the raw anchor date.</li>
+ * <li>{@code breachEffectiveStartDate} = {@code breachStartDate} shifted by {@code breachGraceDays}, set only when the
+ * earliest breached period is the first one, grace days are configured, and the resulting date still falls inside that
+ * period (an operation that cuts the period short, such as a reset, leaves no cool off period to report).</li>
  * <li>{@code delinquencyStartDate} = fromDate of the earliest delinquent range-schedule period (minPaymentCriteriaMet =
- * false) plus {@code delinquencyGraceDays} (the range schedule does not apply the grace days when generating
- * periods).</li>
+ * false). The range schedule bakes {@code delinquencyGraceDays} into the toDate of its first period, so the fromDate is
+ * the raw anchor date.</li>
  * </ul>
  */
 @Slf4j
@@ -72,7 +76,7 @@ public class WorkingCapitalLoanStartDatesTest {
     private static final BigDecimal BREACH_AMOUNT = new BigDecimal("500");
     private static final BigDecimal DELINQUENCY_MIN_PAYMENT_PERCENT = new BigDecimal("3");
 
-    // Breach: 15-day frequency with a 5-day grace -> first period [D+5 .. D+19].
+    // Breach: 15-day frequency with a 5-day grace baked into the end of the first period -> [D .. D+14+grace].
     private static final int BREACH_FREQUENCY_DAYS = 15;
     private static final int BREACH_GRACE_DAYS = 5;
     // Delinquency: 20-day frequency (no grace baked into the schedule) -> first period [D .. D+19].
@@ -80,8 +84,24 @@ public class WorkingCapitalLoanStartDatesTest {
     private static final int DELINQUENCY_GRACE_DAYS = 3;
 
     private static final LocalDate DISBURSEMENT_DATE = LocalDate.of(2026, 1, 1);
+    // First breach period is [D .. D+14+grace] = [2026-01-01 .. 2026-01-20]; the effective start is D + grace.
+    private static final LocalDate BREACH_EFFECTIVE_START_DATE = LocalDate.of(2026, 1, 6);
+    // Second breach period starts the day after the first one ends and carries no grace days.
+    private static final LocalDate SECOND_BREACH_PERIOD_FROM_DATE = LocalDate.of(2026, 1, 21);
     // Submitted-on date intentionally earlier than the disbursement date so the two anchors can be told apart.
     private static final LocalDate SUBMITTED_ON_DATE = LocalDate.of(2025, 12, 20);
+    // Same shift applied to the submitted-on anchor: 2025-12-20 + 5 breach grace days.
+    private static final LocalDate BREACH_EFFECTIVE_START_DATE_FROM_CREATION = LocalDate.of(2025, 12, 25);
+    // Reset date deliberately inside the grace window [2026-01-01 .. 2026-01-06).
+    private static final String RESET_DATE = "2026-01-03";
+    // The reset cuts the first period the day before it: [2026-01-01 .. 2026-01-02].
+    private static final LocalDate RESET_FIRST_PERIOD_TO_DATE = LocalDate.of(2026, 1, 2);
+    // Natural end of the first period, restored when the reset is undone.
+    private static final LocalDate NATURAL_FIRST_PERIOD_TO_DATE = LocalDate.of(2026, 1, 20);
+    // Frequency the reschedule scenario shortens the first period to, deliberately shorter than the grace days.
+    private static final int RESCHEDULED_FREQUENCY_DAYS = 2;
+    // First period re-dated by that reschedule: [D .. D+1+grace] = [2026-01-01 .. 2026-01-07].
+    private static final LocalDate RESCHEDULED_FIRST_PERIOD_TO_DATE = LocalDate.of(2026, 1, 7);
 
     @Test
     public void testStartDatesArePopulatedWhenLoanBreachesAndBecomesDelinquent() {
@@ -103,6 +123,10 @@ public class WorkingCapitalLoanStartDatesTest {
             // breachStartDate = fromDate of the first breached period = disbursement
             assertEquals(DISBURSEMENT_DATE, response.getBreachStartDate(),
                     "breachStartDate should be the fromDate of the first breached period (disbursement)");
+
+            // breachEffectiveStartDate = breachStartDate + breachGraceDays, since the breached period is the first one.
+            assertEquals(BREACH_EFFECTIVE_START_DATE, response.getBreachEffectiveStartDate(),
+                    "breachEffectiveStartDate should be the fromDate of the first breached period plus breachGraceDays");
 
             // delinquencyStartDate = fromDate of the first delinquent period (= disbursement)
             assertEquals(DISBURSEMENT_DATE, response.getDelinquencyStartDate(),
@@ -156,6 +180,8 @@ public class WorkingCapitalLoanStartDatesTest {
             // breachStartDate must anchor on the loan submitted-on (creation) date, not the disbursement date.
             assertEquals(SUBMITTED_ON_DATE, response.getBreachStartDate(),
                     "breachStartDate should anchor on submittedOnDate when breachStartType = LOAN_CREATION");
+            assertEquals(BREACH_EFFECTIVE_START_DATE_FROM_CREATION, response.getBreachEffectiveStartDate(),
+                    "breachEffectiveStartDate should shift the submitted-on anchor by breachGraceDays");
         });
     }
 
@@ -180,6 +206,8 @@ public class WorkingCapitalLoanStartDatesTest {
 
             assertEquals(DISBURSEMENT_DATE, response.getBreachStartDate(),
                     "breachStartDate should anchor on disbursementDate when breachStartType = DISBURSEMENT");
+            assertEquals(BREACH_EFFECTIVE_START_DATE, response.getBreachEffectiveStartDate(),
+                    "breachEffectiveStartDate should shift the disbursement anchor by breachGraceDays");
         });
     }
 
@@ -198,8 +226,171 @@ public class WorkingCapitalLoanStartDatesTest {
             final GetWorkingCapitalLoansLoanIdResponse response = loanHelper.retrieveLoan(loanId);
 
             assertNull(response.getBreachStartDate(), "breachStartDate must be null when the loan is not in breach");
+            assertNull(response.getBreachEffectiveStartDate(), "breachEffectiveStartDate must be null when the loan is not in breach");
             assertNull(response.getDelinquencyStartDate(), "delinquencyStartDate must be null when the loan is not delinquent");
         });
+    }
+
+    @Test
+    public void testBreachEffectiveStartDateIsNullWhenNoGraceDaysConfigured() {
+        AtomicLong loanIdRef = new AtomicLong();
+
+        // given - the same setup but with breachGraceDays = 0, so there is no cool off period to expose
+        BusinessDateHelper.runAt("01 January 2026", () -> {
+            loanIdRef.set(createDisbursedLoanWithBreachStartType(null, "DISBURSEMENT", 0));
+        });
+
+        BusinessDateHelper.runAt("21 January 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanId)));
+
+            final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
+            final GetWorkingCapitalLoansLoanIdResponse response = loanHelper.retrieveLoan(loanId);
+
+            assertEquals(DISBURSEMENT_DATE, response.getBreachStartDate(),
+                    "breachStartDate should be the fromDate of the first breached period");
+            assertNull(response.getBreachEffectiveStartDate(),
+                    "breachEffectiveStartDate must be null when no breach grace days are configured");
+        });
+    }
+
+    @Test
+    public void testBreachEffectiveStartDateIsNullWhenTheBreachedPeriodIsNotTheFirstOne() {
+        AtomicLong loanIdRef = new AtomicLong();
+
+        BusinessDateHelper.runAt("01 January 2026", () -> {
+            loanIdRef.set(createDisbursedLoan());
+        });
+
+        // Cover the minimum payment of the first breach period [2026-01-01 .. 2026-01-20] so it never breaches.
+        BusinessDateHelper.runAt("05 January 2026", () -> {
+            final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
+            loanHelper.makeRepaymentByLoanId(loanIdRef.get(), WorkingCapitalLoanDisbursementTestBuilder
+                    .buildRepaymentRequest(LocalDate.of(2026, 1, 5), BREACH_AMOUNT, null, "repayment", 1, null));
+        });
+
+        // The second period [2026-01-21 .. 2026-02-04] goes unpaid and is the earliest breached one.
+        BusinessDateHelper.runAt("05 February 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanId)));
+
+            final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
+            final GetWorkingCapitalLoansLoanIdResponse response = loanHelper.retrieveLoan(loanId);
+
+            assertEquals(SECOND_BREACH_PERIOD_FROM_DATE, response.getBreachStartDate(),
+                    "breachStartDate should be the fromDate of the second period once the first one is covered");
+            assertNull(response.getBreachEffectiveStartDate(),
+                    "breachEffectiveStartDate must be null when the breached period is not the first one, "
+                            + "which is the only one the grace days shift");
+        });
+    }
+
+    /**
+     * A reset that restarts the schedule cuts the first period short at the reset date, and the cut can land before the
+     * grace days are over. The effective start date then describes a cool off period that never took place, so there is
+     * none to report.
+     */
+    @Test
+    public void testBreachEffectiveStartDateIsNullWhenAResetCutsTheFirstPeriodInsideTheGraceWindow() {
+        AtomicLong loanIdRef = new AtomicLong();
+
+        BusinessDateHelper.runAt("01 January 2026", () -> {
+            loanIdRef.set(createDisbursedLoan());
+        });
+
+        // The reset lands inside the grace window, so the first period ends before the cool off period would.
+        BusinessDateHelper.runAt("03 January 2026", () -> {
+            new WorkingCapitalLoanBreachActionHelper().resetRestartingFromResetDate(loanIdRef.get(), RESET_DATE);
+        });
+
+        BusinessDateHelper.runAt("04 January 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanId)));
+
+            final WorkingCapitalLoanBreachActionHelper actionHelper = new WorkingCapitalLoanBreachActionHelper();
+            assertEquals(RESET_FIRST_PERIOD_TO_DATE, firstBreachPeriodToDate(actionHelper, loanId),
+                    "the reset should have cut the first period the day before the reset date");
+
+            final GetWorkingCapitalLoansLoanIdResponse response = new WorkingCapitalLoanHelper().retrieveLoan(loanId);
+            assertEquals(DISBURSEMENT_DATE, response.getBreachStartDate(),
+                    "breachStartDate should still be the fromDate of the cut first period");
+            assertNull(response.getBreachEffectiveStartDate(),
+                    "breachEffectiveStartDate must be null when the grace days outlast the period they belong to");
+        });
+    }
+
+    @Test
+    public void testBreachEffectiveStartDateComesBackWhenTheResetIsUndone() {
+        AtomicLong loanIdRef = new AtomicLong();
+
+        BusinessDateHelper.runAt("01 January 2026", () -> {
+            loanIdRef.set(createDisbursedLoan());
+        });
+
+        BusinessDateHelper.runAt("03 January 2026", () -> {
+            final WorkingCapitalLoanBreachActionHelper actionHelper = new WorkingCapitalLoanBreachActionHelper();
+            actionHelper.resetRestartingFromResetDate(loanIdRef.get(), RESET_DATE);
+            // The undo rebuilds the first period from its natural length, which carries the grace days again.
+            actionHelper.undoReset(loanIdRef.get(), RESET_DATE);
+        });
+
+        // The day after the restored period ends, it is breached again and the cool off period is reportable.
+        BusinessDateHelper.runAt("21 January 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanId)));
+
+            final WorkingCapitalLoanBreachActionHelper actionHelper = new WorkingCapitalLoanBreachActionHelper();
+            assertEquals(NATURAL_FIRST_PERIOD_TO_DATE, firstBreachPeriodToDate(actionHelper, loanId),
+                    "the undo should have restored the natural end date of the first period");
+
+            final GetWorkingCapitalLoansLoanIdResponse response = new WorkingCapitalLoanHelper().retrieveLoan(loanId);
+            assertEquals(DISBURSEMENT_DATE, response.getBreachStartDate(), "breachStartDate should be the fromDate of the first period");
+            assertEquals(BREACH_EFFECTIVE_START_DATE, response.getBreachEffectiveStartDate(),
+                    "breachEffectiveStartDate should be reportable again once the period carries its grace days");
+        });
+    }
+
+    /**
+     * A reschedule re-dates the first period from its own fromDate, and the grace days belong to that period rather
+     * than to the frequency it was created with, so they survive the new frequency.
+     */
+    @Test
+    public void testFirstPeriodKeepsItsGraceDaysAfterAFrequencyReschedule() {
+        AtomicLong loanIdRef = new AtomicLong();
+
+        BusinessDateHelper.runAt("01 January 2026", () -> {
+            loanIdRef.set(createDisbursedLoan());
+        });
+
+        BusinessDateHelper.runAt("02 January 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            final WorkingCapitalLoanBreachActionHelper actionHelper = new WorkingCapitalLoanBreachActionHelper();
+            actionHelper.rescheduleFrequency(loanId, "2026-01-02", RESCHEDULED_FREQUENCY_DAYS, "DAYS");
+
+            assertEquals(RESCHEDULED_FIRST_PERIOD_TO_DATE, firstBreachPeriodToDate(actionHelper, loanId),
+                    "the rescheduled first period must still carry the breach grace days");
+        });
+
+        BusinessDateHelper.runAt("08 January 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanId)));
+
+            final GetWorkingCapitalLoansLoanIdResponse response = new WorkingCapitalLoanHelper().retrieveLoan(loanId);
+            assertEquals(DISBURSEMENT_DATE, response.getBreachStartDate(),
+                    "breachStartDate should still be the fromDate of the rescheduled first period");
+            assertEquals(BREACH_EFFECTIVE_START_DATE, response.getBreachEffectiveStartDate(),
+                    "breachEffectiveStartDate should be unchanged by the reschedule and fall inside the period");
+        });
+    }
+
+    private LocalDate firstBreachPeriodToDate(final WorkingCapitalLoanBreachActionHelper actionHelper, final Long loanId) {
+        return actionHelper.retrieveBreachSchedule(loanId).stream().filter(period -> Integer.valueOf(1).equals(period.getPeriodNumber()))
+                .findFirst().orElseThrow().getToDate();
     }
 
     private Long createDisbursedLoan() {
@@ -261,6 +452,11 @@ public class WorkingCapitalLoanStartDatesTest {
      * start-date-type anchor.
      */
     private Long createDisbursedLoanWithBreachStartType(final LocalDate submittedOnDate, final String breachStartType) {
+        return createDisbursedLoanWithBreachStartType(submittedOnDate, breachStartType, BREACH_GRACE_DAYS);
+    }
+
+    private Long createDisbursedLoanWithBreachStartType(final LocalDate submittedOnDate, final String breachStartType,
+            final int breachGraceDays) {
         final List<Long> rangeIds = createDelinquencyRanges();
         final PostDelinquencyBucketResponse bucketResponse = WorkingCapitalLoanDelinquencyRangeScheduleHelper
                 .createWorkingCapitalLoanDelinquencyBucket(rangeIds, DELINQUENCY_FREQUENCY_DAYS, 0, DELINQUENCY_MIN_PAYMENT_PERCENT, 1);
@@ -280,7 +476,7 @@ public class WorkingCapitalLoanStartDatesTest {
                 .withDelinquencyBucketId(bucketResponse.getResourceId()) //
                 .withDelinquencyGraceDays(DELINQUENCY_GRACE_DAYS) //
                 .withBreachId(breachId) //
-                .withBreachGraceDays(BREACH_GRACE_DAYS) //
+                .withBreachGraceDays(breachGraceDays) //
                 .withBreachStartType(breachStartType) //
                 .build()).getResourceId();
         assertNotNull(productId);

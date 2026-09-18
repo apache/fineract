@@ -80,6 +80,7 @@ public interface WorkingCapitalLoanMapper {
     @Mapping(target = "breachGraceDays", source = "loanProductRelatedDetails.breachGraceDays")
     @Mapping(target = "breachStartType", source = "loanProductRelatedDetails", qualifiedByName = "breachStartTypeData")
     @Mapping(target = "breachStartDate", ignore = true)
+    @Mapping(target = "breachEffectiveStartDate", ignore = true)
     @Mapping(target = "delinquencyStartDate", ignore = true)
     @Mapping(target = "delinquent", ignore = true)
     @Mapping(target = "numberOfRepayments", ignore = true)
