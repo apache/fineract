@@ -68,10 +68,6 @@ public class FloatingRateDTO {
         return this.interestRateDiff;
     }
 
-    public Collection<FloatingRatePeriodData> getBaseLendingRatePeriods() {
-        return this.baseLendingRatePeriods;
-    }
-
     public void resetInterestRateDiff() {
         this.interestRateDiff = this.actualInterestRateDiff;
     }
