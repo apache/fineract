@@ -1307,18 +1307,19 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final List<WorkingCapitalLoanTransaction> accrualsToReverse = transactions.stream()
                 .filter(t -> t.getTypeOf() == LoanTransactionType.ACCRUAL && !t.isReversed()).toList();
 
-        transactions.forEach(this::markReversed);
-
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postReversalJournalEntries(loan, txn);
-        }
+        transactions.stream().filter(t -> !t.isReversed()) // reverse only unreversed transaction
+                .peek(this::markReversed) // mark them reversed
+                .forEach(t -> { // post journal entries if accounting is enabled
+                    if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+                        accountingProcessor.postReversalJournalEntries(loan, t);
+                    }
+                });
 
         this.transactionRepository.saveAll(transactions);
         this.transactionRepository.flush();
 
         // Reverse the journal entries of any charge accrual so the recognized income/receivable is backed out with the
         // disbursement; marking the transaction reversed alone would leave the GL postings in place.
-        accrualsToReverse.forEach(accrual -> accountingProcessor.postReversalJournalEntries(loan, accrual));
         accrualsToReverse.forEach(accrual -> businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent(accrual, loan.getId())));
 
