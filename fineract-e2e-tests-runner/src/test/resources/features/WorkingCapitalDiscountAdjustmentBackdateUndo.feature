@@ -178,7 +178,8 @@ Feature: Working Capital Discount Adjustment Backdated and Undo
       | LIABILITY | 240005       | Deferred Interest Revenue | 28.7  |        |
       | INCOME    | 404000       | Interest Income           |       | 28.7   |
 
-  Scenario: Full discount adjustment on a product without accounting posts an amortization adjustment with no journal entries; undo reverses both even when accounting is closed for the office
+  @TestRailId:C106704
+  Scenario: Verify full discount adjustment on a product without accounting posts an amortization adjustment with no journal entries; undo reverses both even when accounting is closed for the office
     When Admin sets the business date to "01 January 2026"
     And Admin creates a new office
     And Admin creates a client with random data in the last created office
@@ -510,3 +511,53 @@ Feature: Working Capital Discount Adjustment Backdated and Undo
     Then Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
     Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
     Then Undo discount fee adjustment with a non-existent transaction id on Working Capital loan account failed as not found with status code 400
+
+  @TestRailId:C106709
+  Scenario: Verify undo of a repayment on a product without accounting succeeds when accounting is closed for the office
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Admin successfully add discount with "1000" amount on Working Capital loan account
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 50 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "02 January 2026" which has the following Journal entries:
+      | Type | Account code | Account name | Debit | Credit |
+    When Admin closes accounting for the last created office on "02 January 2026"
+    When Customer undo "1"th working capital transaction made on "02 January 2026"
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 50.0              | 50.0             | 0.0               | 0.0                   | true     |
+    Then Working Capital Loan Transactions tab has a reversed "REPAYMENT" transaction with date "02 January 2026" which has the following Journal entries:
+      | Type | Account code | Account name | Debit | Credit |
+    Then Admin closes the Working Capital loan with a full repayment on "02 January 2026"
+
+  @TestRailId:C106709
+  Scenario: Verify undo disbursal on a product without accounting succeeds when accounting is closed for the office
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Admin successfully add discount with "1000" amount on Working Capital loan account
+    When Admin closes accounting for the last created office on "01 January 2026"
+    When Admin successfully undo Working Capital disbursal
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | true     |
+    Then Working Capital Loan Transactions tab has a reversed "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type | Account code | Account name | Debit | Credit |
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type | Account code | Account name | Debit | Credit |
