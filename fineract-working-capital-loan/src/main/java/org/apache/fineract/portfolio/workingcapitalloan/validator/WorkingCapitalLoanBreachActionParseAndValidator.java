@@ -35,6 +35,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -130,6 +131,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
         validateStartBeforeEnd(dataValidator, startDate, endDate);
         validateNotBeforeScheduleStart(dataValidator, startDate, workingCapitalLoan);
+        validateNotBeforeBreachReset(dataValidator, startDate, existing);
         validateNoOverlap(dataValidator, startDate, endDate, existing);
 
         throwExceptionIfValidationWarningsExist(dataValidator);
@@ -399,6 +401,26 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     private int getBreachGraceDays(final WorkingCapitalLoan workingCapitalLoan) {
         final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
         return (details == null || details.getBreachGraceDays() == null) ? 0 : details.getBreachGraceDays();
+    }
+
+    /**
+     * A reset closes the breach period it lands on and restarts the evaluation from its own date. A pause that starts
+     * before that date would re-date periods the reset already settled, so backdating a pause behind the latest active
+     * reset is rejected. Resets that were undone are not considered: their split is restored by the undo, so there is
+     * nothing left to protect.
+     */
+    private void validateNotBeforeBreachReset(final DataValidatorBuilder dataValidator, final LocalDate startDate,
+            final List<WorkingCapitalLoanBreachAction> existing) {
+        if (startDate == null) {
+            return;
+        }
+        activeBreachResetResolver.activeResets(existing).stream() //
+                .map(WorkingCapitalLoanBreachAction::getStartDate) //
+                .filter(Objects::nonNull) //
+                .max(LocalDate::compareTo) //
+                .filter(startDate::isBefore) //
+                .ifPresent(latestResetDate -> failParameterValidation(dataValidator, START_DATE, "must.not.be.before.breach.reset.date",
+                        "Breach pause cannot start before the latest breach reset date: " + latestResetDate));
     }
 
     private void validateNoOverlap(final DataValidatorBuilder dataValidator, final LocalDate startDate, final LocalDate endDate,
