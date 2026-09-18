@@ -357,25 +357,75 @@ public final class ProjectedAmortizationScheduleModel {
                 .map(p -> p.actualAmortizationAmount().getAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal totalActualAmortizationWithDiscount(final BigDecimal asOfDiscount) {
-        if (asOfDiscount == null || discountFeeAmount == null || asOfDiscount.compareTo(discountFeeAmount.getAmount()) == 0) {
-            return totalActualAmortization();
+    /**
+     * The amortization earned by the payments dated on or before {@code asOfDate}, measured against
+     * {@code asOfDiscount}.
+     */
+    public BigDecimal totalActualAmortizationAsOf(final BigDecimal asOfDiscount, final LocalDate asOfDate) {
+        Objects.requireNonNull(asOfDate, "asOfDate");
+        Objects.requireNonNull(discountFeeAmount, "discountFeeAmount");
+        // The ordinary case, and the cheap one: the discount that was in force on asOfDate is the one the live schedule
+        // was built with, so its rows already carry the right figures. A row's actual amortization is a function of the
+        // payments up to its own day, so the as-of answer is simply the rows up to that day - no rebuild needed. This
+        // is the path every COB day takes.
+        if (asOfDiscount == null || asOfDiscount.compareTo(discountFeeAmount.getAmount()) == 0) {
+            return totalActualAmortizationUpTo(asOfDate);
         }
-        return withDiscount(asOfDiscount).totalActualAmortization();
+        // The discounts differ, which means an adjustment landed after asOfDate. The model keeps only one discount, the
+        // latest, and restates the whole schedule whenever it changes - so every row now reports what it would have
+        // earned under the new discount, including the rows dated before the adjustment. Those rows are answering the
+        // wrong question, and filtering cannot fix it: it drops rows, it never restates the ones it keeps. The schedule
+        // has to be rebuilt at the discount that was actually in force on the day.
+        return asOfModel(asOfDiscount, asOfDate).totalActualAmortization();
     }
 
-    private ProjectedAmortizationScheduleModel withDiscount(final BigDecimal asOfDiscount) {
+    /**
+     * Sum of {@code actualAmortizationAmount} across the applied payment periods dated on or before {@code asOfDate}.
+     */
+    private BigDecimal totalActualAmortizationUpTo(final LocalDate asOfDate) {
+        materializeDerivedPayments();
+        if (projectedPayments == null) {
+            return BigDecimal.ZERO;
+        }
+        return projectedPayments.stream()
+                .filter(p -> p.paymentNo() > 0 && p.actualAmortizationAmount() != null && !p.date().isAfter(asOfDate))
+                .map(p -> p.actualAmortizationAmount().getAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * The model as it stood at the end of {@code asOfDate}: the discount in force then, and only the payments, rate
+     * changes and principal adjustments dated on or before it. {@code calculatedTillDate} is pinned to that day too, so
+     * the days after it are not billed as elapsed.
+     */
+    private ProjectedAmortizationScheduleModel asOfModel(final BigDecimal asOfDiscount, final LocalDate asOfDate) {
+        final LocalDate reachedDate = calculatedTillDate != null && calculatedTillDate.isBefore(asOfDate) ? calculatedTillDate : asOfDate;
         final ProjectedAmortizationScheduleModel asOfModel = generate(amortizationType(), asOfDiscount, netDisbursementAmount.getAmount(),
-                totalPaymentVolume.getAmount(), periodPaymentRate, npvDayCount, expectedDisbursementDate, mc, currency,
-                calculatedTillDate != null ? calculatedTillDate : expectedDisbursementDate);
-        asOfModel.copyPrincipalAdjustmentsFrom(this);
+                totalPaymentVolume.getAmount(), periodPaymentRate, npvDayCount, expectedDisbursementDate, mc, currency, reachedDate);
+        // Rate changes first: a payment is walked at the rate in force on its day, so the rates have to be in place
+        // before any payment is applied. periodPaymentRate is the rate the schedule was generated at and nothing moves
+        // it - the changes live only in this list - so a copy that skipped them would amortize a re-rated loan at its
+        // original rate.
+        if (rateChanges != null) {
+            for (final RateChange rateChange : rateChanges) {
+                if (!rateChange.effectiveDate().isAfter(reachedDate)) {
+                    asOfModel.rateChanges.add(rateChange);
+                }
+            }
+        }
+        if (principalAdjustments != null) {
+            for (final PrincipalAdjustment adjustment : principalAdjustments) {
+                if (!adjustment.date().isAfter(reachedDate)) {
+                    asOfModel.principalAdjustments.add(adjustment);
+                }
+            }
+        }
         for (final ActualPayment payment : actualPayments) {
-            asOfModel.applyPayment(payment.date(), payment.amount().getAmount());
+            if (!payment.date().isAfter(reachedDate)) {
+                asOfModel.applyPayment(payment.date(), payment.amount().getAmount());
+            }
         }
-        if (calculatedTillDate != null) {
-            asOfModel.updateCalculatedTillDate(calculatedTillDate);
-            asOfModel.rebuildPayments();
-        }
+        asOfModel.updateCalculatedTillDate(reachedDate);
+        asOfModel.rebuildPayments();
         return asOfModel;
     }
 

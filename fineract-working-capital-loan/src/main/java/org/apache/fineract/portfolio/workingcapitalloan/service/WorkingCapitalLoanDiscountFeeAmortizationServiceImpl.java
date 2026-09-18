@@ -356,7 +356,7 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
     private BigDecimal calculateScheduleAmortization(final WorkingCapitalLoan loan, final LocalDate cobDate) {
         final MathContext mc = MoneyHelper.getMathContext();
         return scheduleRepositoryWrapper.readModel(loan.getId(), mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan))
-                .map(model -> model.totalActualAmortizationWithDiscount(discountInForceOn(loan, model, cobDate))).orElse(BigDecimal.ZERO);
+                .map(model -> model.totalActualAmortizationAsOf(discountInForceOn(loan, model, cobDate), cobDate)).orElse(BigDecimal.ZERO);
     }
 
     /**

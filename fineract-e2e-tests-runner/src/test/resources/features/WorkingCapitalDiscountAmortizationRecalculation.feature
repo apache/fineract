@@ -338,6 +338,30 @@ Feature: Working Capital Discount Fee Amortization Recalculation
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9500.0    | 50.0               | 5.14           | 494.86           | 0.0               |
+    # The same rule for a backdated repayment, not only for a discount fee adjustment. COB last closed 04 January; the
+    # business date jumps to 08 January and a repayment is booked for 06 January, so the catch-up replays 05, 06 and 07
+    # January in turn. The amortization the repayment earns belongs on 06 January - the day the money came in - and must
+    # not be booked on 05 January, the earliest day the catch-up happens to replay.
+    When Admin sets the business date to "08 January 2026"
+    And Customer makes repayment on "06 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin runs inline COB job for Working Capital Loan
+    And Working Capital Loan has transactions:
+      | transactionDate | type                                 | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement                         | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee                         | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                            | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization            | 9.61              |                  |                   |                       | false    |
+      | 04 January 2026 | Discount Fee Adjustment              | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
+      | 04 January 2026 | Discount Fee Amortization Adjustment | 4.47              |                  |                   |                       | false    |
+      | 06 January 2026 | Repayment                            | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 06 January 2026 | Discount Fee Amortization            | 5.12              |                  |                   |                       | false    |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "06 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 5.12  |        |
+      | INCOME    | 404000       | Interest Income           |       | 5.12   |
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9500.0    | 100.0              | 10.26          | 489.74           | 0.0               |
 
   @TestRailId:C85367
   Scenario: Verify discount fee amortization transaction on working capital loan after repayment overpays loan - UC7
