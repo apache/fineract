@@ -37,7 +37,11 @@ public interface WorkingCapitalLoanWritePlatformService {
 
     CommandProcessingResult makeDiscountFee(Long resourceId, JsonCommand command);
 
+    CommandProcessingResult makeDiscountFee(Long loanId, Long relatedDisbursementTransactionId, JsonCommand command);
+
     CommandProcessingResult makeDiscountFeeAdjustment(Long loanId, JsonCommand command);
+
+    CommandProcessingResult makeDiscountFeeAdjustment(Long loanId, Long relatedDiscountTransactionId, JsonCommand command);
 
     CommandProcessingResult undoTransaction(Long loanId, Long transactionId, JsonCommand command);
 

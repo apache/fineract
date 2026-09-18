@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
@@ -151,6 +152,23 @@ public class WorkingCapitalLoanDataValidator {
     private static final int PAYMENT_DETAIL_STRING_MAX_LENGTH = 50;
     private static final Set<LoanStatus> REPAYMENT_LIKE_TXN_ALLOWED_LOAN_STATUSES = Set.of(LoanStatus.ACTIVE,
             LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID);
+
+    public void validateRelatedResourceId(final JsonElement element) {
+        final String relatedResourceId = fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.relatedResourceIdParamName,
+                element);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.relatedResourceIdParamName).value(relatedResourceId).ignoreIfNull()
+                .longGreaterThanZero();
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateNoRelatedResourceId(final JsonElement element) {
+        if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.relatedResourceIdParamName, element)) {
+            throw new UnsupportedParameterException(List.of(WorkingCapitalLoanConstants.relatedResourceIdParamName));
+        }
+    }
 
     public void validateDiscountTransaction(final WorkingCapitalLoan loan, final String json, BigDecimal discountAmount,
             final String note) {

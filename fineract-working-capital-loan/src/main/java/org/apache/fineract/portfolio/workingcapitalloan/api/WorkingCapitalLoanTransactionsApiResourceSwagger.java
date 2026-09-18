@@ -201,7 +201,7 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "28 June 2024", description = "Transaction date")
         public String transactionDate;
-        @Schema(example = "42", description = "Disbursement transaction id for discountFee; discount fee transaction id for discountFeeAdjustment")
+        @Schema(example = "42", description = "Disbursement transaction id for discountFee; discount fee transaction id for discountFeeAdjustment. Not accepted on transactions/{transactionId} and transactions/external-id/{transactionExternalId}, where the path names the related transaction")
         public Long relatedResourceId;
         @Schema(example = "100.0", description = "Transaction amount. For command=recoveryPayment it may not exceed the loan's writtenOffOutstanding")
         public BigDecimal transactionAmount;
@@ -243,8 +243,24 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
 
         private ExecuteWorkingCapitalLoanTransactionCommandRequest() {}
 
-        @Schema(example = "loan-ext-001")
+        @Schema(example = "loan-ext-001", description = "Optional external id for the reversal (command=undo)")
         public String reversalExternalId;
+        @Schema(example = "en_GB")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "28 June 2024", description = "Transaction date (command=discountFeeAdjustment); command=discountFee uses the date of the related disbursement")
+        public String transactionDate;
+        @Schema(example = "100.0", description = "Transaction amount (command=discountFee, discountFeeAdjustment)")
+        public BigDecimal transactionAmount;
+        @Schema(example = "12", description = "Optional code value id for transaction classification (command=discountFee, discountFeeAdjustment)")
+        public Long classificationId;
+        @Schema(example = "Discount applied")
+        public String note;
+        @Schema(example = "discount-fee-ext-001", description = "Optional external id for the created transaction (command=discountFee, discountFeeAdjustment)")
+        public String externalId;
+        @Schema(description = "Payment details (command=discountFee, discountFeeAdjustment)")
+        public PostWorkingCapitalLoanTransactionsPaymentDetailRequest paymentDetails;
     }
 
     @Schema(description = "Response for working capital loan transaction command execution")
