@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
@@ -65,7 +66,8 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     @Override
     public TaxGroupData retrieveTaxGroupData(final Long id) {
-        return taxGroupMapper.map(taxGroupRepositoryWrapper.findOneWithNotFoundDetection(id));
+        final TaxGroupData taxGroupData = taxGroupMapper.map(taxGroupRepositoryWrapper.findOneWithNotFoundDetection(id));
+        return TaxGroupData.withBusinessDate(taxGroupData, DateUtils.getBusinessLocalDate());
     }
 
     @Override
