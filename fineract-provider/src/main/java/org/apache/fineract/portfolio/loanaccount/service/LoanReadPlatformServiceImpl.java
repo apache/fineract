@@ -41,6 +41,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.commands.data.PendingMakerCheckerData;
+import org.apache.fineract.commands.service.MakerCheckerReadService;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -200,6 +202,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final InterestRefundServiceDelegate interestRefundServiceDelegate;
     private final LoanMaximumAmountCalculator loanMaximumAmountCalculator;
     private final LoanRepaymentScheduleService loanRepaymentScheduleService;
+    private final MakerCheckerReadService makerCheckerReadService;
 
     @Override
     public LoanAccountData retrieveOne(final Long loanId) {
@@ -217,7 +220,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             sqlBuilder.append(" left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
             sqlBuilder.append(" where l.id=? and ( o.hierarchy like ? or transferToOffice.hierarchy like ?)");
 
-            return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), rm, loanId, hierarchySearchString, hierarchySearchString);
+            final LoanAccountData loanAccountData = this.jdbcTemplate.queryForObject(sqlBuilder.toString(), rm, loanId,
+                    hierarchySearchString, hierarchySearchString);
+
+            if (loanAccountData != null) {
+                final List<PendingMakerCheckerData> pending = makerCheckerReadService.retrievePendingByLoanId(loanId);
+                loanAccountData.setPendingMakerCheckerApprovals(pending.isEmpty() ? null : pending);
+            }
+
+            return loanAccountData;
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(loanId, e);
         }

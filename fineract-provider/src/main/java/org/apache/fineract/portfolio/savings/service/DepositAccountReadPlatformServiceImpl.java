@@ -29,9 +29,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.commands.data.PendingMakerCheckerData;
+import org.apache.fineract.commands.service.MakerCheckerReadService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
@@ -128,6 +131,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final PaymentTypeReadService paymentTypeReadPlatformService;
+    private final MakerCheckerReadService makerCheckerReadService;
 
     @Override
     public Collection<DepositAccountData> retrieveAll(final DepositAccountType depositAccountType,
@@ -213,7 +217,15 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append(depositAccountMapper.schema());
             sqlBuilder.append(" where sa.id = ? and sa.deposit_type_enum = ? ");
 
-            return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), depositAccountMapper, accountId, depositAccountType.getValue());
+            final DepositAccountData account = this.jdbcTemplate.queryForObject(sqlBuilder.toString(), depositAccountMapper, accountId,
+                    depositAccountType.getValue());
+
+            if (account != null) {
+                final List<PendingMakerCheckerData> pending = makerCheckerReadService.retrievePendingBySavingsId(accountId);
+                account.setPendingMakerCheckerApprovals(pending.isEmpty() ? null : pending);
+            }
+
+            return account;
 
         } catch (final EmptyResultDataAccessException e) {
             throw new DepositAccountNotFoundException(depositAccountType, accountId, e);
