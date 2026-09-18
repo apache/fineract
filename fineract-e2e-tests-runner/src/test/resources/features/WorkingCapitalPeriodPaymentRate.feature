@@ -24,19 +24,19 @@ Feature: Working Capital Period Payment Rate
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 100.0     | 100.0             | 100.0              | 1.0               | null     |
 #--- update period payment rate ---#
-    When Admin sets the business date to "15 January 2026"
+    When Admin sets the business date to "03 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin update Working Capital period payment rate with "12.5" value
     Then Working Capital Loan Period Payment Rate changes history contains the following data:
       | Effective Date  | Previous Rate | New Rate | Reversed |
-      | 15 January 2026 | 1.0           | 12.5     | false    |
-    When Admin sets the business date to "15 March 2026"
+      | 03 January 2026 | 1.0           | 12.5     | false    |
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 100.0     | 100.0             | 100.0              | 1.0               | null     |
     And Working Capital Loan period payment rate in effect is "12.5"
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with a full repayment on "04 January 2026"
 
   @TestRailId:C78818
   Scenario: Verify Working Capital period payment rate added on first day of disbursement successfully on loan account - UC2
@@ -61,13 +61,13 @@ Feature: Working Capital Period Payment Rate
     Then Working Capital Loan Period Payment Rate changes history contains the following data:
       | Effective Date  | Previous Rate | New Rate | Reversed |
       | 01 January 2026 | 1.0           | 12.5     | false    |
-    When Admin sets the business date to "15 March 2026"
+    When Admin sets the business date to "02 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 100.0     | 100.0             | 100.0              | 1.0               | null     |
     And Working Capital Loan period payment rate in effect is "12.5"
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with a full repayment on "02 January 2026"
 
   @TestRailId:C78819
   Scenario: Verify Working Capital period payment rate added successfully a few times a day on loan account - UC3
@@ -100,13 +100,13 @@ Feature: Working Capital Period Payment Rate
       | Effective Date  | Previous Rate | New Rate | Reversed |
       | 01 January 2026 | 1.0           | 12.5     | true     |
       | 01 January 2026 | 1.0           | 19.38    | false    |
-    When Admin sets the business date to "15 March 2026"
+    When Admin sets the business date to "02 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 100.0     | 100.0             | 100.0              | 1.0               | null     |
     And Working Capital Loan period payment rate in effect is "19.38"
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with a full repayment on "02 January 2026"
 
   @TestRailId:C78820
   Scenario: Verify Working Capital period payment rate added successfully a few times on different dates on loan account - UC4
@@ -132,7 +132,7 @@ Feature: Working Capital Period Payment Rate
       | Effective Date  | Previous Rate | New Rate | Reversed |
       | 01 January 2026 | 1.0           | 12.5     | false    |
 #--- update period payment rate ---#
-    When Admin sets the business date to "15 January 2026"
+    When Admin sets the business date to "02 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin update Working Capital period payment rate with "19.38" value
 # Changes on distinct dates each keep their own segment of the schedule: only a change sharing an effective date is
@@ -140,23 +140,23 @@ Feature: Working Capital Period Payment Rate
     Then Working Capital Loan Period Payment Rate changes history contains the following data:
       | Effective Date  | Previous Rate | New Rate | Reversed |
       | 01 January 2026 | 1.0           | 12.5     | false    |
-      | 15 January 2026 | 12.5          | 19.38    | false    |
+      | 02 January 2026 | 12.5          | 19.38    | false    |
 #--- update period payment rate ---#
-    When Admin sets the business date to "25 February 2026"
+    When Admin sets the business date to "03 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin update Working Capital period payment rate with "18.09" value
     Then Working Capital Loan Period Payment Rate changes history contains the following data:
-      | Effective Date   | Previous Rate | New Rate | Reversed |
-      | 01 January 2026  | 1.0           | 12.5     | false    |
-      | 15 January 2026  | 12.5          | 19.38    | false    |
-      | 25 February 2026 | 19.38         | 18.09    | false    |
-    When Admin sets the business date to "15 March 2026"
+      | Effective Date  | Previous Rate | New Rate | Reversed |
+      | 01 January 2026 | 1.0           | 12.5     | false    |
+      | 02 January 2026 | 12.5          | 19.38    | false    |
+      | 03 January 2026 | 19.38         | 18.09    | false    |
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 100.0     | 100.0             | 100.0              | 1.0               | null     |
     And Working Capital Loan period payment rate in effect is "18.09"
-    Then Admin closes the Working Capital loan with a full repayment on "25 February 2026"
+    Then Admin closes the Working Capital loan with a full repayment on "03 January 2026"
 
   @TestRailId:C78821
   Scenario: Verify Working Capital period payment rate added successfully on different date on loan account - UC5
@@ -177,19 +177,19 @@ Feature: Working Capital Period Payment Rate
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 100.0     | 100.0             | 100.0              | 12.5              | null     |
 #--- update period payment rate ---#
-    When Admin sets the business date to "25 April 2026"
+    When Admin sets the business date to "03 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin update Working Capital period payment rate with "15" value
     Then Working Capital Loan Period Payment Rate changes history contains the following data:
-      | Effective Date | Previous Rate | New Rate | Reversed |
-      | 25 April 2026  | 12.5          | 15.0     | false    |
-    When Admin sets the business date to "28 April 2026"
+      | Effective Date  | Previous Rate | New Rate | Reversed |
+      | 03 January 2026 | 12.5          | 15.0     | false    |
+    When Admin sets the business date to "06 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 100.0     | 100.0             | 100.0              | 12.5              | null     |
     And Working Capital Loan period payment rate in effect is "15.0"
-    Then Admin closes the Working Capital loan with a full repayment on "28 April 2026"
+    Then Admin closes the Working Capital loan with a full repayment on "06 January 2026"
 
   @TestRailId:C89816
   Scenario: Verify a rate change followed by backdated-repayment reprocessing preserves the pre-rate-change schedule segment
@@ -204,20 +204,20 @@ Feature: Working Capital Period Payment Rate
       | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
-    When Admin sets the business date to "10 January 2026"
+    When Admin sets the business date to "06 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin update Working Capital period payment rate with "11" value
-#--- Snapshot taken here, once those nine days have gone by: elapsing is itself what settles a period, so the earlier
+#--- Snapshot taken here, once those five days have gone by: elapsing is itself what settles a period, so the earlier
 #--- rows legitimately move as the calendar advances. What must not move them is the reprocessing below.
     And Admin retrieves the projected amortization schedule
-    And Admin remembers the retrieved amortization schedule payments before "2026-01-10"
-    When Admin sets the business date to "25 January 2026"
-    And Customer makes repayment on "25 January 2026" with 500 transaction amount on Working Capital loan
-    When Admin sets the business date to "30 January 2026"
-    And Customer makes repayment on "15 January 2026" with 200 transaction amount on Working Capital loan
+    And Admin remembers the retrieved amortization schedule payments before "2026-01-06"
+    When Admin sets the business date to "08 January 2026"
+    And Customer makes repayment on "08 January 2026" with 500 transaction amount on Working Capital loan
+    When Admin sets the business date to "09 January 2026"
+    And Customer makes repayment on "07 January 2026" with 200 transaction amount on Working Capital loan
     And Admin retrieves the projected amortization schedule
-    Then The retrieved amortization schedule payments before "2026-01-10" match the previously remembered ones
-    Then Admin closes the Working Capital loan with a full repayment on "30 January 2026"
+    Then The retrieved amortization schedule payments before "2026-01-06" match the previously remembered ones
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
 
   @TestRailId:C78822
   Scenario Outline: Verify update Working Capital period payment rate failed with outranged rate change value within loan product level defined range - UC6
@@ -320,19 +320,19 @@ Feature: Working Capital Period Payment Rate
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 100.0     | 100.0             | 100.0              | 1.0               | null     |
 #--- update period payment rate by externalId ---#
-    When Admin sets the business date to "15 January 2026"
+    When Admin sets the business date to "03 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin update Working Capital period payment rate with "12.5" value by externalId
     Then Working Capital Loan Period Payment Rate changes history by externalId contains the following data:
       | Effective Date  | Previous Rate | New Rate | Reversed |
-      | 15 January 2026 | 1.0           | 12.5     | false    |
-    When Admin sets the business date to "15 March 2026"
+      | 03 January 2026 | 1.0           | 12.5     | false    |
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 100.0     | 100.0             | 100.0              | 1.0               | null     |
     And Working Capital Loan period payment rate in effect is "12.5"
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with a full repayment on "04 January 2026"
 
   @TestRailId:C93984
   Scenario: Verify a backdated period payment rate change takes effect on its own date and keeps later changes - UC10
@@ -414,7 +414,7 @@ Feature: Working Capital Period Payment Rate
     When Admin sets the business date to "05 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Customer makes repayment on "05 January 2026" with 500 transaction amount on Working Capital loan
-    When Admin sets the business date to "20 January 2026"
+    When Admin sets the business date to "11 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
 #--- what the periods before the change look like with those days gone by, and before the change is made ---#
     And Admin retrieves the projected amortization schedule
@@ -438,7 +438,7 @@ Feature: Working Capital Period Payment Rate
       | 9         | 2026-01-10 | 30.56                 | 8569.22         | 5.62                       | 900.22                     |
       | 10        | 2026-01-11 | 30.56                 | 8544.26         | 5.60                       | 894.62                     |
     Then a Working Capital Loan Period Payment Rate Changed business event is raised
-    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+    Then Admin closes the Working Capital loan with a full repayment on "11 January 2026"
 
   @TestRailId:C93986
   Scenario: Verify a future-dated period payment rate change leaves the current rate untouched until its date - UC12
@@ -455,44 +455,45 @@ Feature: Working Capital Period Payment Rate
     And Admin retrieves the projected amortization schedule
     And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance |
-      | 30        | 2026-01-31 | 50.00                 | 7769.36         | 8.34                       | 730.64                     |
-      | 31        | 2026-02-01 | 50.00                 | 7727.66         | 8.30                       | 722.34                     |
-      | 32        | 2026-02-02 | 50.00                 | 7685.91         | 8.25                       | 714.09                     |
+      | 13        | 2026-01-14 | 50.00                 | 8471.56         | 9.09                       | 878.44                     |
+      | 14        | 2026-01-15 | 50.00                 | 8430.60         | 9.04                       | 869.40                     |
+      | 15        | 2026-01-16 | 50.00                 | 8389.61         | 9.01                       | 860.39                     |
     When Admin sets the business date to "10 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
 #--- Snapshot taken once those days have gone by: elapsing is itself what settles a period, so the earlier
 #--- rows legitimately restate as the calendar advances. What must not move them is the change below.
     And Admin retrieves the projected amortization schedule
-    And Admin remembers the retrieved amortization schedule payments before "2026-02-01"
-    And Admin update Working Capital period payment rate with "11" value effective from "01 February 2026"
+    And Admin remembers the retrieved amortization schedule payments before "2026-01-15"
+    And Admin update Working Capital period payment rate with "11" value effective from "15 January 2026"
     Then Working Capital Loan Period Payment Rate changes history contains the following data:
-      | Effective Date   | Previous Rate | New Rate | Reversed |
-      | 01 February 2026 | 18.0          | 11.0     | false    |
-#--- Recorded but not yet in force: the change is effective 01 February, so 18 is still the rate being billed.
+      | Effective Date  | Previous Rate | New Rate | Reversed |
+      | 15 January 2026 | 18.0          | 11.0     | false    |
+#--- Recorded but not yet in force: the change is effective 15 January, so 18 is still the rate being billed.
     And Working Capital Loan period payment rate in effect is "18"
     And Admin retrieves the projected amortization schedule
 #--- everything up to the effective date is untouched, everything from it is repriced ---#
-    Then The retrieved amortization schedule payments before "2026-02-01" match the previously remembered ones
-# From 01 February the daily payment drops from 50.00 to 30.56 and the amortization drops with it, stretching the term
-# from 200 periods to 309 while the balance and deferred discount fee still close at 0.00.
+    Then The retrieved amortization schedule payments before "2026-01-15" match the previously remembered ones
+# From 15 January the daily payment drops from 50.00 to 30.56 and the amortization drops with it, stretching the term
+# to 334 periods while the balance and deferred discount fee still close at 0.00 on the final tail remainder.
+    And The retrieved amortization schedule has exactly 334 payment rows
     And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance |
-      | 29        | 2026-01-30 | 50.00                 | 8142.70         | 8.74                       | 807.30                     |
-      | 30        | 2026-01-31 | 50.00                 | 8101.39         | 8.69                       | 798.61                     |
-      | 31        | 2026-02-01 | 30.56                 | 8076.13         | 5.30                       | 793.31                     |
-      | 32        | 2026-02-02 | 30.56                 | 8050.85         | 5.28                       | 788.03                     |
-      | 308       | 2026-11-05 | 30.56                 | 402.45          | 0.29                       | 1.87                       |
-      | 309       | 2026-11-06 | 30.56                 | 372.15          | 0.26                       | 1.61                       |
+      | 12        | 2026-01-13 | 50.00                 | 8838.18         | 9.48                       | 961.82                     |
+      | 13        | 2026-01-14 | 50.00                 | 8797.62         | 9.44                       | 952.38                     |
+      | 14        | 2026-01-15 | 30.56                 | 8772.81         | 5.75                       | 946.63                     |
+      | 15        | 2026-01-16 | 30.56                 | 8747.99         | 5.74                       | 940.89                     |
+      | 332       | 2026-11-29 | 30.56                 | 1.36            | 0.02                       | 0.00                       |
+      | 333       | 2026-11-30 | 1.36                  | 0.00            | 0.00                       | 0.00                       |
     And Working capital loan account has the correct period payment rate history data:
-      | effectiveDate    | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
-      | 01 February 2026 | 18.0         | 11.0    | 26.535954           | 30.56              | 292         | false    |
+      | effectiveDate   | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
+      | 15 January 2026 | 18.0         | 11.0    | 26.530276           | 30.56              | 320         | false    |
     Then a Working Capital Loan Period Payment Rate Changed business event is raised
 #--- the effective date arrives and the change is in force at once. The assertion sits before the COB run
 #--- deliberately: the rate in force is derived from the change history, so no job has to bring it up to date.
-    When Admin sets the business date to "01 February 2026"
+    When Admin sets the business date to "15 January 2026"
     Then Working Capital Loan period payment rate in effect is "11"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "01 February 2026"
+    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
   @TestRailId:C93987
   Scenario: Verify a same-date period payment rate change overwrites the earlier one for that date only - UC13
@@ -809,17 +810,17 @@ Feature: Working Capital Period Payment Rate
     And Admin remembers the retrieved amortization schedule payments before "2026-01-10"
     When Admin sets the business date to "20 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    And Admin update Working Capital period payment rate with "11" value effective from "01 February 2026"
+    And Admin update Working Capital period payment rate with "11" value effective from "22 January 2026"
     Then Working Capital Loan Period Payment Rate changes history contains the following data:
-      | Effective Date   | Previous Rate | New Rate | Reversed |
-      | 01 February 2026 | 18.0          | 11.0     | false    |
+      | Effective Date  | Previous Rate | New Rate | Reversed |
+      | 22 January 2026 | 18.0          | 11.0     | false    |
 # --- add  backdated repayment on current biz date --- #
     And Customer makes repayment on "15 January 2026" with 100 transaction amount on Working Capital loan
     And Admin update Working Capital period payment rate with "21" value effective from "10 January 2026"
     Then Working Capital Loan Period Payment Rate changes history contains the following data:
-      | Effective Date   | Previous Rate | New Rate | Reversed |
-      | 10 January 2026  | 18.0          | 21.0     | false    |
-      | 01 February 2026 | 21.0          | 11.0     | false    |
+      | Effective Date  | Previous Rate | New Rate | Reversed |
+      | 10 January 2026 | 18.0          | 21.0     | false    |
+      | 22 January 2026 | 21.0          | 11.0     | false    |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -835,10 +836,10 @@ Feature: Working Capital Period Payment Rate
       | 18        | 2026-01-19 | 58.33                 | 8871.94         | 11.11                      | 969.73                     | 0.00                | 8919.16       | 0.00                     | 980.84                   |
       | 19        | 2026-01-20 | 58.33                 | 8871.94         | 11.11                      | 969.73                     |                     |               |                          |                          |
 # - undo repayment trn --- #
-    When Admin sets the business date to "02 February 2026"
+    When Admin sets the business date to "23 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Customer undo "1"th "REPAYMENT" transaction made on "15 January 2026" on Working Capital loan
-#--- On 02 February the 01 February change is the newest in force, so the backdated 10 January one sits behind it.
+#--- On 23 January the 22 January change is the newest in force, so the backdated 10 January one sits behind it.
     And Working Capital Loan period payment rate in effect is "11"
     And Working Capital Loan has transactions:
       | transactionDate  | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
@@ -857,10 +858,10 @@ Feature: Working Capital Period Payment Rate
       | 19        | 2026-01-20 | 58.33                 | 8952.87         | 11.20                      | 988.80                     | 0.00                | 9000.00       | 0.00                     | 1000.00                  |
 #--- the effective date arrives and the change is in force at once. The assertion sits before the COB run
 #--- deliberately: the rate in force is derived from the change history, so no job has to bring it up to date.
-    When Admin sets the business date to "03 February 2026"
+    When Admin sets the business date to "24 January 2026"
     Then Working Capital Loan period payment rate in effect is "11"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "03 February 2026"
+    Then Admin closes the Working Capital loan with a full repayment on "24 January 2026"
 
   @TestRailId:C93993
   Scenario: Verify Working Capital amortization schedule with period payment rate change after repayment with amount less then expected - UC19
@@ -1778,10 +1779,10 @@ Feature: Working Capital Period Payment Rate
       | 01 January 2026 | Discount Fee              | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
       | 04 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
 # --- update period payment rate --- #
-    When Admin sets the business date to "20 January 2026"
+    When Admin sets the business date to "10 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    And Admin update Working Capital period payment rate with "20" value effective from "20 January 2026"
-    Then Working Capital loan amortization schedule has 38 periods, with the following data for periods:
+    And Admin update Working Capital period payment rate with "20" value effective from "10 January 2026"
+    Then Working Capital loan amortization schedule has 28 periods, with the following data for periods:
       | paymentNo | paymentDate      | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance   | actualAmortizationAmount | actualDiscountFeeBalance |
       | 0         | 01 January 2026  | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00         |                          | 100.00                   |
       | 1         | 02 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
@@ -1792,40 +1793,29 @@ Feature: Working Capital Period Payment Rate
       | 6         | 07 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
       | 7         | 08 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
       | 8         | 09 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 9         | 10 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 10        | 11 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 11        | 12 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 12        | 13 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 13        | 14 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 14        | 15 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 15        | 16 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 16        | 17 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 17        | 18 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 18        | 19 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 19        | 20 January 2026  | 55.56                 | 911.84          | 8.95                       | 82.60                      |                     |                 |                          |                          |
-      | 20        | 21 January 2026  | 55.56                 | 864.79          | 8.51                       | 74.09                      |                     |                 |                          |                          |
-      | 21        | 22 January 2026  | 55.56                 | 817.31          | 8.08                       | 66.01                      |                     |                 |                          |                          |
-      | 22        | 23 January 2026  | 55.56                 | 769.38          | 7.63                       | 58.38                      |                     |                 |                          |                          |
-      | 23        | 24 January 2026  | 55.56                 | 721.01          | 7.19                       | 51.19                      |                     |                 |                          |                          |
-      | 24        | 25 January 2026  | 55.56                 | 672.18          | 6.73                       | 44.46                      |                     |                 |                          |                          |
-      | 25        | 26 January 2026  | 55.56                 | 622.90          | 6.28                       | 38.18                      |                     |                 |                          |                          |
-      | 26        | 27 January 2026  | 55.56                 | 573.16          | 5.82                       | 32.36                      |                     |                 |                          |                          |
-      | 27        | 28 January 2026  | 55.56                 | 522.95          | 5.35                       | 27.01                      |                     |                 |                          |                          |
-      | 28        | 29 January 2026  | 55.56                 | 472.28          | 4.89                       | 22.12                      |                     |                 |                          |                          |
-      | 29        | 30 January 2026  | 55.56                 | 421.13          | 4.41                       | 17.71                      |                     |                 |                          |                          |
-      | 30        | 31 January 2026  | 55.56                 | 369.50          | 3.93                       | 13.78                      |                     |                 |                          |                          |
-      | 31        | 01 February 2026 | 55.56                 | 317.39          | 3.45                       | 10.33                      |                     |                 |                          |                          |
-      | 32        | 02 February 2026 | 55.56                 | 264.80          | 2.97                       | 7.36                       |                     |                 |                          |                          |
-      | 33        | 03 February 2026 | 55.56                 | 211.71          | 2.47                       | 4.89                       |                     |                 |                          |                          |
-      | 34        | 04 February 2026 | 55.56                 | 158.13          | 1.98                       | 2.91                       |                     |                 |                          |                          |
-      | 35        | 05 February 2026 | 55.56                 | 104.04          | 1.47                       | 1.44                       |                     |                 |                          |                          |
-      | 36        | 06 February 2026 | 55.56                 | 49.46           | 0.98                       | 0.46                       |                     |                 |                          |                          |
-      | 37        | 07 February 2026 | 49.92                 | 0.00            | 0.46                       | 0.00                       |                     |                 |                          |                          |
-# ---- make repayment after updated period payment rate --- #
-    When Admin sets the business date to "21 January 2026"
+      | 9         | 10 January 2026  | 55.56                 | 911.84          | 8.95                       | 82.60                      |                     |                 |                          |                          |
+      | 10        | 11 January 2026  | 55.56                 | 864.79          | 8.51                       | 74.09                      |                     |                 |                          |                          |
+      | 11        | 12 January 2026  | 55.56                 | 817.31          | 8.08                       | 66.01                      |                     |                 |                          |                          |
+      | 12        | 13 January 2026  | 55.56                 | 769.38          | 7.63                       | 58.38                      |                     |                 |                          |                          |
+      | 13        | 14 January 2026  | 55.56                 | 721.01          | 7.19                       | 51.19                      |                     |                 |                          |                          |
+      | 14        | 15 January 2026  | 55.56                 | 672.18          | 6.73                       | 44.46                      |                     |                 |                          |                          |
+      | 15        | 16 January 2026  | 55.56                 | 622.90          | 6.28                       | 38.18                      |                     |                 |                          |                          |
+      | 16        | 17 January 2026  | 55.56                 | 573.16          | 5.82                       | 32.36                      |                     |                 |                          |                          |
+      | 17        | 18 January 2026  | 55.56                 | 522.95          | 5.35                       | 27.01                      |                     |                 |                          |                          |
+      | 18        | 19 January 2026  | 55.56                 | 472.28          | 4.89                       | 22.12                      |                     |                 |                          |                          |
+      | 19        | 20 January 2026  | 55.56                 | 421.13          | 4.41                       | 17.71                      |                     |                 |                          |                          |
+      | 20        | 21 January 2026  | 55.56                 | 369.50          | 3.93                       | 13.78                      |                     |                 |                          |                          |
+      | 21        | 22 January 2026  | 55.56                 | 317.39          | 3.45                       | 10.33                      |                     |                 |                          |                          |
+      | 22        | 23 January 2026  | 55.56                 | 264.80          | 2.97                       | 7.36                       |                     |                 |                          |                          |
+      | 23        | 24 January 2026  | 55.56                 | 211.71          | 2.47                       | 4.89                       |                     |                 |                          |                          |
+      | 24        | 25 January 2026  | 55.56                 | 158.13          | 1.98                       | 2.91                       |                     |                 |                          |                          |
+      | 25        | 26 January 2026  | 55.56                 | 104.04          | 1.47                       | 1.44                       |                     |                 |                          |                          |
+      | 26        | 27 January 2026  | 55.56                 | 49.46           | 0.98                       | 0.46                       |                     |                 |                          |                          |
+      | 27        | 28 January 2026  | 49.92                 | 0.00            | 0.46                       | 0.00                       |                     |                 |                          |                          |
+    When Admin sets the business date to "11 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    And Customer makes repayment by loan external ID on "21 January 2026" with 55.56 transaction amount on Working Capital loan
-    Then Working Capital loan amortization schedule has 39 periods, with the following data for periods:
+    And Customer makes repayment by loan external ID on "11 January 2026" with 55.56 transaction amount on Working Capital loan
+    Then Working Capital loan amortization schedule has 29 periods, with the following data for periods:
       | paymentNo | paymentDate      | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance   | actualAmortizationAmount | actualDiscountFeeBalance |
       | 0         | 01 January 2026  | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00         |                          | 100.00                   |
       | 1         | 02 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
@@ -1836,47 +1826,37 @@ Feature: Working Capital Period Payment Rate
       | 6         | 07 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
       | 7         | 08 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
       | 8         | 09 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 9         | 10 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 10        | 11 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 11        | 12 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 12        | 13 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 13        | 14 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 14        | 15 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 15        | 16 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 16        | 17 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 17        | 18 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 18        | 19 January 2026  | 50.00                 | 916.54          | 8.09                       | 83.46                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 19        | 20 January 2026  | 55.56                 | 911.84          | 8.95                       | 82.60                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 20        | 21 January 2026  | 55.56                 | 911.84          | 8.95                       | 82.60                      | 55.56               | 911.84          | 8.95                     | 82.60                    |
-      | 21        | 22 January 2026  | 55.56                 | 864.79          | 8.51                       | 74.09                      |                     |                 |                          |                          |
-      | 22        | 23 January 2026  | 55.56                 | 817.31          | 8.08                       | 66.01                      |                     |                 |                          |                          |
-      | 23        | 24 January 2026  | 55.56                 | 769.39          | 7.64                       | 58.37                      |                     |                 |                          |                          |
-      | 24        | 25 January 2026  | 55.56                 | 721.01          | 7.18                       | 51.19                      |                     |                 |                          |                          |
-      | 25        | 26 January 2026  | 55.56                 | 672.19          | 6.74                       | 44.45                      |                     |                 |                          |                          |
-      | 26        | 27 January 2026  | 55.56                 | 622.90          | 6.27                       | 38.18                      |                     |                 |                          |                          |
-      | 27        | 28 January 2026  | 55.56                 | 573.16          | 5.82                       | 32.36                      |                     |                 |                          |                          |
-      | 28        | 29 January 2026  | 55.56                 | 522.95          | 5.35                       | 27.01                      |                     |                 |                          |                          |
-      | 29        | 30 January 2026  | 55.56                 | 472.28          | 4.89                       | 22.12                      |                     |                 |                          |                          |
-      | 30        | 31 January 2026  | 55.56                 | 421.13          | 4.41                       | 17.71                      |                     |                 |                          |                          |
-      | 31        | 01 February 2026 | 55.56                 | 369.50          | 3.93                       | 13.78                      |                     |                 |                          |                          |
-      | 32        | 02 February 2026 | 55.56                 | 317.39          | 3.45                       | 10.33                      |                     |                 |                          |                          |
-      | 33        | 03 February 2026 | 55.56                 | 264.80          | 2.97                       | 7.36                       |                     |                 |                          |                          |
-      | 34        | 04 February 2026 | 55.56                 | 211.71          | 2.47                       | 4.89                       |                     |                 |                          |                          |
-      | 35        | 05 February 2026 | 55.56                 | 158.13          | 1.98                       | 2.91                       |                     |                 |                          |                          |
-      | 36        | 06 February 2026 | 55.56                 | 104.05          | 1.48                       | 1.43                       |                     |                 |                          |                          |
-      | 37        | 07 February 2026 | 55.56                 | 49.46           | 0.97                       | 0.46                       |                     |                 |                          |                          |
-      | 38        | 08 February 2026 | 49.92                 | 0.00            | 0.46                       | 0.00                       |                     |                 |                          |                          |
+      | 9         | 10 January 2026  | 55.56                 | 911.84          | 8.95                       | 82.60                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
+      | 10        | 11 January 2026  | 55.56                 | 911.84          | 8.95                       | 82.60                      | 55.56               | 911.84          | 8.95                     | 82.60                    |
+      | 11        | 12 January 2026  | 55.56                 | 864.79          | 8.51                       | 74.09                      |                     |                 |                          |                          |
+      | 12        | 13 January 2026  | 55.56                 | 817.31          | 8.08                       | 66.01                      |                     |                 |                          |                          |
+      | 13        | 14 January 2026  | 55.56                 | 769.39          | 7.64                       | 58.37                      |                     |                 |                          |                          |
+      | 14        | 15 January 2026  | 55.56                 | 721.01          | 7.18                       | 51.19                      |                     |                 |                          |                          |
+      | 15        | 16 January 2026  | 55.56                 | 672.19          | 6.74                       | 44.45                      |                     |                 |                          |                          |
+      | 16        | 17 January 2026  | 55.56                 | 622.90          | 6.27                       | 38.18                      |                     |                 |                          |                          |
+      | 17        | 18 January 2026  | 55.56                 | 573.16          | 5.82                       | 32.36                      |                     |                 |                          |                          |
+      | 18        | 19 January 2026  | 55.56                 | 522.95          | 5.35                       | 27.01                      |                     |                 |                          |                          |
+      | 19        | 20 January 2026  | 55.56                 | 472.28          | 4.89                       | 22.12                      |                     |                 |                          |                          |
+      | 20        | 21 January 2026  | 55.56                 | 421.13          | 4.41                       | 17.71                      |                     |                 |                          |                          |
+      | 21        | 22 January 2026  | 55.56                 | 369.50          | 3.93                       | 13.78                      |                     |                 |                          |                          |
+      | 22        | 23 January 2026  | 55.56                 | 317.39          | 3.45                       | 10.33                      |                     |                 |                          |                          |
+      | 23        | 24 January 2026  | 55.56                 | 264.80          | 2.97                       | 7.36                       |                     |                 |                          |                          |
+      | 24        | 25 January 2026  | 55.56                 | 211.71          | 2.47                       | 4.89                       |                     |                 |                          |                          |
+      | 25        | 26 January 2026  | 55.56                 | 158.13          | 1.98                       | 2.91                       |                     |                 |                          |                          |
+      | 26        | 27 January 2026  | 55.56                 | 104.05          | 1.48                       | 1.43                       |                     |                 |                          |                          |
+      | 27        | 28 January 2026  | 55.56                 | 49.46           | 0.97                       | 0.46                       |                     |                 |                          |                          |
+      | 28        | 29 January 2026  | 49.92                 | 0.00            | 0.46                       | 0.00                       |                     |                 |                          |                          |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee              | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
       | 04 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
       | 04 January 2026 | Discount Fee Amortization | 8.45              |                  |                   |                       | false    |
-      | 21 January 2026 | Repayment                 | 55.56             | 55.56            | 0.0               | 0.0                   | false    |
+      | 11 January 2026 | Repayment                 | 55.56             | 55.56            | 0.0               | 0.0                   | false    |
     And Working capital loan account has the correct period payment rate history data:
       | effectiveDate   | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
-      | 20 January 2026 | 18.0         | 20.0    | 2740.680185         | 55.56              | 19          | false    |
-    Then Admin closes the Working Capital loan with a full repayment on "21 January 2026"
+      | 10 January 2026 | 18.0         | 20.0    | 2740.680185         | 55.56              | 19          | false    |
+    Then Admin closes the Working Capital loan with a full repayment on "11 January 2026"
 
   @TestRailId:C94031
   Scenario: Verify Working Capital amortization schedule with period payment rate change with repayment afterwards with WC COB run - UC22
