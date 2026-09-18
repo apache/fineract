@@ -905,6 +905,9 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
         if (boolean.class.equals(parameterType)) {
             return false;
         }
+        if (BigDecimal.class.equals(parameterType)) {
+            return BigDecimal.TEN;
+        }
         throw new IllegalArgumentException("Unsupported entry point parameter type " + parameterType.getName());
     }
 }

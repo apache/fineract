@@ -212,6 +212,17 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.ADD_DUE_DATE_CHARGE_WORKING_CAPITAL_RESPONSE, response);
     }
 
+    @Then("Created user without CREATE_WORKINGCAPITALLOANCHARGE permission fails to add {string} specified due date charge to working capital loan with {string} due date and {double} transaction amount")
+    public void addWorkingCapitalChargeWithCreatedUserWithoutPermissionResultsAnError(final String chargeType, final String dueDate,
+            final Double amount) {
+        final Long loanId = getLoanId();
+        final PostLoansLoanIdChargesRequest request = buildSpecifiedDueDateChargeRequest(chargeType, dueDate, amount);
+        final FineractFeignClient userClient = userClient();
+        final CallFailedRuntimeException exception = fail(() -> userClient.workingCapitalLoanCharges().createLoanCharge(loanId, request));
+        assertHttpStatus(exception, 403);
+        assertThat(exception.getDeveloperMessage()).contains("User has no authority to: CREATE_WORKINGCAPITALLOANCHARGE");
+    }
+
     private PostLoansLoanIdChargesRequest buildSpecifiedDueDateChargeRequest(final String chargeType, final String dueDate,
             final Double amount) {
         final Long chargeTypeId = chargeProductResolver.resolve(ChargeProductType.valueOf(chargeType));
