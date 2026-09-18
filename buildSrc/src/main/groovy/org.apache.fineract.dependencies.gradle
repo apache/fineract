@@ -22,7 +22,7 @@ apply plugin: 'io.spring.dependency-management'
 // https://github.com/spring-gradle-plugins/dependency-management-plugin
 dependencyManagement {
     imports {
-        mavenBom 'com.squareup.okhttp3:okhttp-bom:4.12.0'
+        mavenBom 'com.squareup.okhttp3:okhttp-bom:5.5.0'
         mavenBom 'org.slf4j:slf4j-bom:2.0.17'
         mavenBom 'io.micrometer:micrometer-bom:1.16.5'
         mavenBom 'org.springframework.boot:spring-boot-dependencies:4.1.0'
