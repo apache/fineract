@@ -65,6 +65,7 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(source = "breach.breachAmount", target = "breach.breachAmount")
     @Mapping(source = "breachGraceDays", target = "breach.breachGraceDays")
     @Mapping(source = "breachStartDate", target = "breach.breachStartDate")
+    @Mapping(source = "breachEffectiveStartDate", target = "breach.breachEffectiveStartDate")
     @Mapping(source = "nearBreach", target = "breach.nearBreach")
     @Mapping(target = "breach.breachSchedule", ignore = true)
     @Mapping(target = "breach.breachPastDueAmount", ignore = true)

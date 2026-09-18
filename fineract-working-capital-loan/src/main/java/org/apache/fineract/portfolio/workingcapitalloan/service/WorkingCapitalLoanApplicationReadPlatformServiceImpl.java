@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import jakarta.persistence.criteria.Predicate;
 import java.math.MathContext;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +49,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanC
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTemplateData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanMapper;
@@ -236,11 +238,12 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
     }
 
     private void enrichWithStartDates(final WorkingCapitalLoan loan, final WorkingCapitalLoanData data) {
-        // breachStartDate: fromDate of the earliest breached period. The breach schedule already offsets its first
-        // period
-        // by breachGraceDays, so the grace period is implicitly reflected in the fromDate.
-        breachScheduleRepository.findTopByLoanIdAndBreachTrueOrderByFromDateAsc(loan.getId())
-                .ifPresent(period -> data.setBreachStartDate(period.getFromDate()));
+        // breachStartDate: fromDate of the earliest breached period. The breach schedule bakes the breach grace days
+        // into the toDate of its first period, so the fromDate is the raw anchor date.
+        breachScheduleRepository.findTopByLoanIdAndBreachTrueOrderByFromDateAsc(loan.getId()).ifPresent(period -> {
+            data.setBreachStartDate(period.getFromDate());
+            data.setBreachEffectiveStartDate(resolveBreachEffectiveStartDate(period, data.getBreachGraceDays()));
+        });
 
         // delinquencyStartDate: fromDate of the earliest delinquent period. The delinquency range
         delinquencyRangeScheduleRepository.findTopByLoanIdAndMinPaymentCriteriaMetFalseOrderByFromDateAsc(loan.getId())
@@ -248,6 +251,22 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
                     data.setDelinquencyStartDate(period.getFromDate());
                     Optional.ofNullable(data.getSummary()).ifPresent(summary -> summary.setOverdueSinceDate(period.getToDate()));
                 });
+    }
+
+    /**
+     * Resolves the "effective" start of the breach, i.e. the date the breach clock starts ticking once the configured
+     * cool off period is taken into account.
+     *
+     * Only the first breach schedule period carries the breach grace days: the schedule generator extends that period's
+     * toDate by the grace days and every subsequent period is chained from it, so the grace is equivalent to shifting
+     * the first period forward. The effective start date makes that shift explicit for API consumers. It is
+     * {@code null} for any later period and when no grace days are configured.
+     */
+    private LocalDate resolveBreachEffectiveStartDate(final WorkingCapitalLoanBreachSchedule period, final Integer breachGraceDays) {
+        if (!Integer.valueOf(1).equals(period.getPeriodNumber()) || breachGraceDays == null || breachGraceDays <= 0) {
+            return null;
+        }
+        return period.getFromDate().plusDays(breachGraceDays);
     }
 
     private void enrichWithOriginators(final Long loanId, final WorkingCapitalLoanData data) {
