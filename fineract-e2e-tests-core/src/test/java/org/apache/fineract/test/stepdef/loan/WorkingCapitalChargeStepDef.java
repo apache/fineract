@@ -218,6 +218,56 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
 
     }
 
+    @When("Admin adds {string} disbursement charge to working capital loan")
+    public void addWorkingCapitalDisbursementCharge(String chargeType) {
+        Long loanId = getLoanId();
+        Assertions.assertNotNull(loanId);
+
+        ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
+        Long chargeTypeId = chargeProductResolver.resolve(chargeProductType);
+
+        PostLoansLoanIdChargesRequest request = new PostLoansLoanIdChargesRequest() //
+                .chargeId(chargeTypeId)//
+                .locale("en");//
+        PostLoansLoanIdChargesResponse response = ok(() -> fineractClient.workingCapitalLoanCharges().createLoanCharge(loanId, request));
+        Assertions.assertNotNull(response);
+        Assertions.assertNotNull(response.getResourceId());
+
+        log.debug("Disbursement charge response: {}", response);
+
+        addLoanChargeId(response.getResourceId());
+        testContext().set(TestContextKey.ADD_DUE_DATE_CHARGE_WORKING_CAPITAL_RESPONSE, response);
+    }
+
+    @Then("Working Capital Loan net disbursal amount is {double}")
+    public void verifyNetDisbursalAmount(final Double expectedNetDisbursalAmount) {
+        final Long loanId = getLoanId();
+        Assertions.assertNotNull(loanId);
+
+        final GetWorkingCapitalLoansLoanIdResponse loanResponse = ok(
+                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
+        Assertions.assertNotNull(loanResponse.getNetDisbursalAmount(), "netDisbursalAmount should not be null after disbursement");
+
+        assertThat(loanResponse.getNetDisbursalAmount().doubleValue()).as("Working Capital Loan net disbursal amount")
+                .isEqualTo(expectedNetDisbursalAmount);
+    }
+
+    @Then("Working Capital Loan Repayment At Disbursement transaction exists with {double} amount")
+    public void verifyRepaymentAtDisbursementTransaction(final Double expectedAmount) {
+        final Long loanId = getLoanId();
+        Assertions.assertNotNull(loanId);
+
+        final GetWorkingCapitalLoanTransactionsResponse body = ok(
+                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTransactionsById(loanId));
+        Assertions.assertNotNull(body.getContent(), "No WC loan transactions found");
+
+        final boolean found = body.getContent().stream()
+                .anyMatch(t -> t.getType() != null && "loanTransactionType.repaymentAtDisbursement".equals(t.getType().getCode())
+                        && t.getTransactionAmount() != null && t.getTransactionAmount().doubleValue() == expectedAmount);
+
+        assertThat(found).as("Expected a Repayment At Disbursement transaction with amount %s on loan %s", expectedAmount, loanId).isTrue();
+    }
+
     @When("Admin adds {string} specified due date charge to working capital loan with {string} due date and {double} transaction amount")
     public void addWorkingCapitalCharge(String chargeType, String dueDate, Double amount) {
         Long loanId = getLoanId();

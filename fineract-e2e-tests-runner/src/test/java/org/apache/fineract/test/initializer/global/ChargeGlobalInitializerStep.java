@@ -165,7 +165,19 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
                 () -> TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY_CREATE_RESPONSE,
                         createChargeIfNotExists(charges, ChargeProductAppliesTo.WORKING_CAPITAL_LOAN,
                                 ChargeProductType.WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY.getName(), CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE,
-                                CHARGE_CALCULATION_TYPE_FLAT, 20.0, true, true)));
+                                CHARGE_CALCULATION_TYPE_FLAT, 20.0, true, true)),
+                () -> TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_WORKING_CAPITAL_DISBURSEMENT_FEE_CREATE_RESPONSE,
+                        createChargeIfNotExists(charges, ChargeProductAppliesTo.WORKING_CAPITAL_LOAN,
+                                ChargeProductType.WORKING_CAPITAL_DISBURSEMENT_FEE.getName(), CHARGE_TIME_TYPE_DISBURSEMENT,
+                                CHARGE_CALCULATION_TYPE_FLAT, 25.0, true, false)),
+                () -> TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_WORKING_CAPITAL_DISBURSEMENT_PENALTY_CREATE_RESPONSE,
+                        createChargeIfNotExists(charges, ChargeProductAppliesTo.WORKING_CAPITAL_LOAN,
+                                ChargeProductType.WORKING_CAPITAL_DISBURSEMENT_PENALTY.getName(), CHARGE_TIME_TYPE_DISBURSEMENT,
+                                CHARGE_CALCULATION_TYPE_FLAT, 30.0, true, true)),
+                () -> TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_WORKING_CAPITAL_DISBURSEMENT_FEE_PERCENTAGE_CREATE_RESPONSE,
+                        createChargeIfNotExists(charges, ChargeProductAppliesTo.WORKING_CAPITAL_LOAN,
+                                ChargeProductType.WORKING_CAPITAL_DISBURSEMENT_FEE_PERCENTAGE.getName(), CHARGE_TIME_TYPE_DISBURSEMENT,
+                                CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, CHARGE_AMOUNT_DISBURSEMENT_PERCENTAGE, true, false)));
 
         ParallelExecutionHelper.runInParallel(items);
     }

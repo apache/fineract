@@ -307,6 +307,10 @@ Feature: WorkingCapitalLoanChargesFeature
     When Admin rejects the working capital loan on "01 January 2026"
     Then Working capital loan rejection was successful
 
+#    #############################################
+#    --- Disbursement charge settlement ---
+#  ###############################################
+
   @TestRailId:C102440
   Scenario: Verify Working Capital Charge on loan account level - UC14: Disbursement charge cannot be added once the loan is disbursed (Negative)
     When Admin creates working capital loan charge with "DISBURSEMENT" charge time type and "FLAT" calculation type
@@ -320,3 +324,137 @@ Feature: WorkingCapitalLoanChargesFeature
       | httpCode | errorMessage                                                                          |
       | 403      | A disbursement charge can only be added before the Working Capital Loan is disbursed. |
     When Admin deletes working capital loan charge
+
+  @TestRailId:C106692
+  Scenario: Verify Working Capital Disbursement Charge settlement - UC1: flat disbursement fee is settled out of the disbursed amount
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct                   | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_WITH_DISBURSEMENT_CHARGE | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                 | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    # --- Disbursement fee ---
+    When Admin adds "WORKING_CAPITAL_DISBURSEMENT_FEE" disbursement charge to working capital loan
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital Loan net disbursal amount is 8975.0
+    And Working Capital Loan Repayment At Disbursement transaction exists with 25.0 amount
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 25.0       | 0.0             | 25.0     | 0.0             | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
+
+  @TestRailId:C106693
+  Scenario: Verify Working Capital Disbursement Charge settlement - UC2: percentage disbursement fee is resolved against the disbursed amount
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct                   | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_WITH_DISBURSEMENT_CHARGE | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                 | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    # --- Disbursement fee (percentage) ---
+    When Admin adds "WORKING_CAPITAL_DISBURSEMENT_FEE_PERCENTAGE" disbursement charge to working capital loan
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital Loan net disbursal amount is 8865.0
+    And Working Capital Loan Repayment At Disbursement transaction exists with 135.0 amount
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 135.0      | 0.0             | 135.0    | 0.0             | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
+
+  @TestRailId:C106694
+  Scenario: Verify Working Capital Disbursement Charge settlement - UC3: disbursement penalty is settled the same way as a fee
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct                   | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_WITH_DISBURSEMENT_CHARGE | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                 | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    # --- Disbursement penalty ---
+    When Admin adds "WORKING_CAPITAL_DISBURSEMENT_PENALTY" disbursement charge to working capital loan
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital Loan net disbursal amount is 8970.0
+    And Working Capital Loan Repayment At Disbursement transaction exists with 30.0 amount
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 0.0        | 0.0             | 0.0      | 30.0            | 0.0                 | 30.0         |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
+
+  @TestRailId:C106695
+  Scenario: Verify Working Capital Disbursement Charge settlement - UC4: multiple disbursement charges are settled in a single transaction
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct                   | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_WITH_DISBURSEMENT_CHARGE | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                 | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    # --- Disbursement fee and penalty ---
+    When Admin adds "WORKING_CAPITAL_DISBURSEMENT_FEE" disbursement charge to working capital loan
+    And Admin adds "WORKING_CAPITAL_DISBURSEMENT_PENALTY" disbursement charge to working capital loan
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital Loan net disbursal amount is 8945.0
+    And Working Capital Loan Repayment At Disbursement transaction exists with 55.0 amount
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 25.0       | 0.0             | 25.0     | 30.0            | 0.0                 | 30.0         |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
+
+  @TestRailId:C106696
+  Scenario: Verify Working Capital Disbursement Charge settlement - UC5: charges consuming the whole disbursed amount are rejected (Negative)
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct                   | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_WITH_DISBURSEMENT_CHARGE | 01 January 2026 | 01 January 2026          | 20               | 100000       | 18                 | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "20" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    When Admin adds "WORKING_CAPITAL_DISBURSEMENT_FEE" disbursement charge to working capital loan
+    Then Disbursing the Working Capital loan on "01 January 2026" with "20" EUR transaction amount results an error with the following data:
+      | httpCode | errorMessage                              |
+      | 403      | must be lower than the disbursed amount |
+
+  @TestRailId:C106697
+  Scenario: Verify Working Capital Disbursement Charge settlement - UC6: disbursement fee added before approval settles correctly at disbursement
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct                   | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_WITH_DISBURSEMENT_CHARGE | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                 | 0        |
+    Then Working Capital loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
+    # --- Charge added before approval ---
+    When Admin adds "WORKING_CAPITAL_DISBURSEMENT_FEE" disbursement charge to working capital loan
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital Loan net disbursal amount is 8975.0
+    And Working Capital Loan Repayment At Disbursement transaction exists with 25.0 amount
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 25.0       | 0.0             | 25.0     | 0.0             | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
+
+  @TestRailId:C106698
+  Scenario: Verify Working Capital Disbursement Charge settlement - UC7: undo disbursal reverses the settlement, re-disbursing settles again without duplicating
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct                   | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_WITH_DISBURSEMENT_CHARGE | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                 | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    When Admin adds "WORKING_CAPITAL_DISBURSEMENT_FEE" disbursement charge to working capital loan
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital Loan net disbursal amount is 8975.0
+    And Working Capital Loan Repayment At Disbursement transaction exists with 25.0 amount
+    # --- Undo disbursal ---
+    When Admin successfully undo Working Capital disbursal
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital Loan net disbursal amount is 8975.0
+    And Working Capital Loan Repayment At Disbursement transaction exists with 25.0 amount
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 25.0       | 0.0             | 25.0     | 0.0             | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
