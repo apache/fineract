@@ -199,7 +199,6 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                                         createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.REPAYMENT.getValue(),
                                                 List.of(DUE_FEE, DUE_PENALTY, DUE_PRINCIPAL, IN_ADVANCE_FEE, IN_ADVANCE_PENALTY,
                                                         IN_ADVANCE_PRINCIPAL))))
-                                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
                                 .paymentChannelToFundSourceMappings(
                                         List.of(new org.apache.fineract.client.models.WorkingCapitalLoanPaymentChannelToFundSourceMappings()
                                                 .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))

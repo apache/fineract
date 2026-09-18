@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.math.BigDecimal;
@@ -187,6 +188,88 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
         checkWorkingCapitalLoanProductCreate();
+    }
+
+    @Given("Admin ensures Annual EIR working capital loan products exist")
+    public void ensureAnnualEirWorkingCapitalLoanProductsExist() {
+        final PostAllowAttributeOverrides allowAttributeOverrides = new PostAllowAttributeOverrides().delinquencyBucketClassification(true)
+                .breach(true).discountDefault(true).periodPaymentFrequencyType(true).periodPaymentFrequency(true);
+        final PostAllowAttributeOverrides allowAttributeOverridesDisabled = new PostAllowAttributeOverrides()
+                .delinquencyBucketClassification(false).discountDefault(false).periodPaymentFrequencyType(false)
+                .periodPaymentFrequency(false).breach(false);
+
+        ensureWorkingCapitalLoanProductExists(workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()
+                .name(DefaultWorkingCapitalLoanProduct.WCLP_ANNUAL_EIR_ADVANCED_ACCOUNTING.getName())
+                .allowAttributeOverrides(allowAttributeOverrides)
+                .paymentAmountCalculationStrategy(PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.ANNUAL_EIR)
+                .annualEir(WorkingCapitalRequestFactory.DEFAULT_WC_ANNUAL_EIR).discount(WorkingCapitalRequestFactory.DEFAULT_WC_DISCOUNT)
+                .periodPaymentRate(null)
+                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
+                .paymentChannelToFundSourceMappings(List.of(new WorkingCapitalLoanPaymentChannelToFundSourceMappings()
+                        .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
+                        .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES))))
+                .chargeOffReasonToExpenseAccountMappings(List.of(new WorkingCapitalPostChargeOffReasonToExpenseAccountMappings()
+                        .chargeOffReasonCodeValueId(
+                                codeValueResolver.resolve(CodeNames.CHARGE_OFF.getValue(), DefaultCodeValue.FRAUD.getName()))
+                        .expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT_FRAUD))))
+                .writeOffReasonsToExpenseMappings(List.of(new WorkingCapitalPostWriteOffReasonToExpenseAccountMappings()
+                        .writeOffReasonCodeValueId(
+                                codeValueResolver.resolve(CodeNames.WRITE_OFF_REASON.getValue(), DefaultCodeValue.BAD_DEBT.getName()))
+                        .expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT)))));
+
+        ensureWorkingCapitalLoanProductExists(workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()
+                .name(DefaultWorkingCapitalLoanProduct.WCLP_ANNUAL_EIR_DUE_FEE_PENALTY_PRINCIPAL.getName())
+                .allowAttributeOverrides(allowAttributeOverrides)
+                .paymentAmountCalculationStrategy(PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.ANNUAL_EIR)
+                .annualEir(WorkingCapitalRequestFactory.DEFAULT_WC_ANNUAL_EIR).discount(WorkingCapitalRequestFactory.DEFAULT_WC_DISCOUNT)
+                .periodPaymentRate(null)
+                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
+                .paymentAllocation(List.of(WorkingCapitalRequestFactory.createPaymentAllocation(
+                        PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(),
+                        List.of(WorkingCapitalRequestFactory.DUE_FEE, WorkingCapitalRequestFactory.DUE_PENALTY,
+                                WorkingCapitalRequestFactory.DUE_PRINCIPAL, WorkingCapitalRequestFactory.IN_ADVANCE_FEE,
+                                WorkingCapitalRequestFactory.IN_ADVANCE_PENALTY, WorkingCapitalRequestFactory.IN_ADVANCE_PRINCIPAL)),
+                        WorkingCapitalRequestFactory.createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.REPAYMENT.getValue(),
+                                List.of(WorkingCapitalRequestFactory.DUE_FEE, WorkingCapitalRequestFactory.DUE_PENALTY,
+                                        WorkingCapitalRequestFactory.DUE_PRINCIPAL, WorkingCapitalRequestFactory.IN_ADVANCE_FEE,
+                                        WorkingCapitalRequestFactory.IN_ADVANCE_PENALTY,
+                                        WorkingCapitalRequestFactory.IN_ADVANCE_PRINCIPAL))))
+                .paymentChannelToFundSourceMappings(List.of(new WorkingCapitalLoanPaymentChannelToFundSourceMappings()
+                        .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
+                        .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES)))));
+
+        ensureWorkingCapitalLoanProductExists(workingCapitalRequestFactory
+                .defaultWorkingCapitalLoanProductBreachNearBreachRequestWithAccrualAccounting()
+                .name(DefaultWorkingCapitalLoanProduct.WCLP_ANNUAL_EIR_BREACH_NEAR_BREACH_ACC_DEF_REV_AM.getName())
+                .allowAttributeOverrides(allowAttributeOverrides)
+                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
+                .paymentAmountCalculationStrategy(PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.ANNUAL_EIR)
+                .annualEir(WorkingCapitalRequestFactory.DEFAULT_WC_ANNUAL_EIR).discount(WorkingCapitalRequestFactory.DEFAULT_WC_DISCOUNT)
+                .periodPaymentRate(null));
+
+        ensureWorkingCapitalLoanProductExists(workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()
+                .name(DefaultWorkingCapitalLoanProduct.WCLP_ANNUAL_EIR_OVERRIDE_DISALLOWED.getName())
+                .allowAttributeOverrides(allowAttributeOverridesDisabled)
+                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
+                .paymentAmountCalculationStrategy(PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.ANNUAL_EIR)
+                .annualEir(WorkingCapitalRequestFactory.DEFAULT_WC_ANNUAL_EIR).discount(WorkingCapitalRequestFactory.DEFAULT_WC_DISCOUNT)
+                .periodPaymentRate(null));
+    }
+
+    private void ensureWorkingCapitalLoanProductExists(final PostWorkingCapitalLoanProductsRequest request) {
+        final String productName = request.getName();
+        try {
+            final List<GetWorkingCapitalLoanProductsResponse> existing = ok(
+                    () -> workingCapitalApi().retrieveAllWorkingCapitalLoanProducts(Map.of()));
+            final boolean alreadyExists = existing.stream().anyMatch(p -> productName.equals(p.getName()));
+            if (alreadyExists) {
+                log.debug("Working capital product '{}' already exists", productName);
+                return;
+            }
+        } catch (Exception e) {
+            log.warn("Error checking if working capital product '{}' exists", productName, e);
+        }
+        createWorkingCapitalLoanProduct(request);
     }
 
     @Then("Admin creates a Working Capital Loan Product with the following payment strategy data expecting error:")
@@ -564,8 +647,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         checkWorkingCapitalLoanProductWithExternalIdCreate();
     }
 
-    @When("Admin creates a new Working Capital Loan Product with discount value {string} that is forbidden to be overriden")
-    public void createWorkingCapitalLoanProductNonOverridenDiscount(String discount) {
+    @When("Admin creates a new Working Capital Loan Product with discount value {string} that is forbidden to be overridden")
+    public void createWorkingCapitalLoanProductNonOverriddenDiscount(String discount) {
         final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
         PostAllowAttributeOverrides allowAttributeOverrides = new PostAllowAttributeOverrides().delinquencyBucketClassification(true)
                 .breach(true).discountDefault(false).periodPaymentFrequencyType(true).periodPaymentFrequency(true);

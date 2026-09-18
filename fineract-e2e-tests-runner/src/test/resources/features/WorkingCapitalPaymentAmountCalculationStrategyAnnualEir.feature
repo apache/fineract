@@ -4,8 +4,10 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
 
   Background:
     Given Global configuration "enable-business-date" is enabled
+    And Admin ensures Annual EIR working capital loan products exist
 
-  Scenario: Verify daily payment is calculated from annual EIR using the reference example
+  @TestRailId:C106644
+  Scenario: Verify daily payment is calculated from annual EIR using the reference example - UC1
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with Annual EIR strategy, annualEir "43.7562" and discount "1000"
@@ -34,7 +36,8 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
     And The retrieved amortization schedule expected amortization sums to the discount fee and both expected balances close to zero
     Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
 
-  Scenario: Verify Discount Fee Amortization when repayment is made on the disbursement date with Annual EIR
+  @TestRailId:C106645
+  Scenario: Verify Discount Fee Amortization when repayment is made on the disbursement date with Annual EIR - UC2
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with Annual EIR strategy, annualEir "46.8451" and discount "1000"
@@ -260,8 +263,15 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
       | 198       | 2026-07-17 | 50.00                 | 99.84           |               | 0.16                       |                     |                          | 0.16                       |                          |
       | 199       | 2026-07-18 | 50.00                 | 49.95           |               | 0.11                       |                     |                          | 0.05                       |                          |
       | 200       | 2026-07-19 | 50.00                 | 0.00            |               | 0.05                       |                     |                          | 0.00                       |                          |
+    And Working Capital Loan has transactions:
+      | transactionDate | type          | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement  | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee  | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Repayment     | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
 
-  Scenario: Verify annual EIR is rejected on a TPV strategy loan product
+  @TestRailId:C106646
+  Scenario: Verify annual EIR is rejected on a TPV strategy loan product - UC3
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product
@@ -269,7 +279,8 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | annualEir | discount | httpCode | errorMessage                                                |
       | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 43.7562   | 1000     | 400      | Failed data validation due to: not.allowed.for.tpv.strategy |
 
-  Scenario Outline: Verify Annual EIR Working Capital Loan Product validations
+  @TestRailId:C106647
+  Scenario Outline: Verify Annual EIR Working Capital Loan Product validations - UC4
     When Admin sets the business date to "01 January 2026"
     Then Admin creates a Working Capital Loan Product with the following payment strategy data expecting error:
       | paymentAmountCalculationStrategy | annualEir   | discount   | periodPaymentRate   | minPeriodPaymentRate   | maxPeriodPaymentRate   | minAnnualEir   | maxAnnualEir   | httpCode   | errorMessage   |
@@ -288,7 +299,8 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
       | TPV        |           |          |                   |                      |                      | 20           |              | 400      | Failed data validation due to: not.allowed.for.tpv.strategy                      |
       | TPV        |           |          |                   |                      |                      |              | 50           | 400      | Failed data validation due to: not.allowed.for.tpv.strategy                      |
 
-  Scenario Outline: Verify Annual EIR loan validations on an Annual EIR product
+  @TestRailId:C106648
+  Scenario Outline: Verify Annual EIR loan validations on an Annual EIR product - UC5
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with Annual EIR strategy, annualEir "43.7562" and discount "1000"
@@ -303,7 +315,8 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
       | 43.7562   | 0        |                    |                   | 400      | Failed data validation due to: must.be.greater.than.zero.for.annual.eir.strategy |
       | 0.01      | 1000     |                    |                   | 400      | Please check the input values - unable to calculate a valid EIR.                 |
 
-  Scenario Outline: Verify Annual EIR loan respects product min/max annual EIR
+  @TestRailId:C106649
+  Scenario Outline: Verify Annual EIR loan respects product min/max annual EIR - UC6
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with Annual EIR strategy, annualEir "43.7562", discount "1000", minAnnualEir "40" and maxAnnualEir "50"
@@ -316,7 +329,8 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
       | 30        | 400      | Failed data validation due to: must.be.greater.than.or.equal.to.min |
       | 60        | 400      | Failed data validation due to: must.be.less.than.or.equal.to.max    |
 
-  Scenario: Verify loan inherits annual EIR from product when omitted on application
+  @TestRailId:C106650
+  Scenario: Verify loan inherits annual EIR from product when omitted on application - UC7
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with Annual EIR strategy, annualEir "43.7562" and discount "1000"
@@ -340,8 +354,10 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
       | 210       | 2026-07-30 | 47.22                 | 83.68           | 0.13                       | 0.12                       |
       | 211       | 2026-07-31 | 47.22                 | 36.54           | 0.08                       | 0.04                       |
       | 212       | 2026-08-01 | 36.58                 | 0.00            | 0.04                       | 0.00                       |
+    Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
 
-  Scenario: Verify period payment rate change is rejected on an Annual EIR strategy loan
+  @TestRailId:C106651
+  Scenario: Verify period payment rate change is rejected on an Annual EIR strategy loan - UC8
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with Annual EIR strategy, annualEir "43.7562" and discount "1000"
@@ -355,8 +371,10 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
     Then Admin update Working Capital period payment rate with "20" value expecting error:
       | httpCode | errorMessage                                                                   |
       | 400      | Failed data validation due to: rate.change.not.allowed.for.annual.eir.strategy |
+    Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
 
-  Scenario: Verify FLAT amortization with Annual EIR payment strategy sizes like TPV-equivalent EIR and earns fee via flat ratio
+  @TestRailId:C106676
+  Scenario: Verify FLAT amortization with Annual EIR payment strategy sizes like TPV-equivalent EIR and earns fee via flat ratio - UC9
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with Annual EIR strategy, FLAT amortization, annualEir "46.8451" and discount "1000"
@@ -381,3 +399,508 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
       | 200       | 2026-07-20 | 50.00                 | 0.00            | 5.00                       | 0.00                       |
     And The retrieved amortization schedule expected amortization sums to the discount fee and both expected balances close to zero
     Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
+
+  @TestRailId:C106677
+  Scenario: Verify breach reschedule while changes frequency only with Annual EIR payment strategy - UC10
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                                       | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_BREACH_NEAR_BREACH_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            |           | 1000     |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin sets the business date to "15 May 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    When Admin creates WC breach reschedule action with the following parameters:
+      | frequency | frequencyType |
+      | 30        | DAYS          |
+    When Admin sets the business date to "15 August 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-28 | 59           | 123.0            | 123.0             | null       | true   |
+      | 2            | 2026-03-01 | 2026-04-30 | 61           | 123.0            | 123.0             | null       | true   |
+      | 3            | 2026-05-01 | 2026-05-30 | 30           | 123.0            | 123.0             | null       | true   |
+      | 4            | 2026-05-31 | 2026-06-29 | 30           | 123.0            | 123.0             | false      | true   |
+      | 5            | 2026-06-30 | 2026-07-29 | 30           | 123.0            | 123.0             | false      | true   |
+      | 6            | 2026-07-30 | 2026-08-28 | 30           | 123.0            | 123.0             | null       | null   |
+    Then Admin closes the Working Capital loan with a full repayment on "15 August 2026"
+
+  @TestRailId:C106678
+  Scenario: Verify working capital loan delinquency range schedule on disbursement date with Annual EIR payment strategy - UC11
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                         | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 43.7562   | 1000     |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+    When Admin sets the business date to "02 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 0.0        | 300.0             | false                 | 300              | 3              |
+      | 2            | 2026-01-31 | 2026-03-01 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with a full repayment on "02 February 2026"
+
+  @TestRailId:C106678
+  Scenario: Verify WC new delinquency pause is allowed after resumed pause when outside effective pause window with Annual EIR payment strategy - UC12
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                         | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 43.7562   | 1000     |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin sets the business date to "28 January 2026"
+    And Admin initiate a Working Capital loan delinquency pause with startDate "28 January 2026" and endDate "20 February 2026"
+    And Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-23 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+    When Admin sets the business date to "29 January 2026"
+    And Admin initiate a Working Capital loan delinquency resume with startDate "29 January 2026"
+    And Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-01 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+    When Admin sets the business date to "05 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin initiate a Working Capital loan delinquency pause with startDate "05 February 2026" and endDate "10 February 2026"
+    Then Working Capital loan delinquency action has the following data:
+      | action | startDate  | endDate    |
+      | PAUSE  | 2026-01-28 | 2026-02-20 |
+      | RESUME | 2026-01-29 |            |
+      | PAUSE  | 2026-02-05 | 2026-02-10 |
+    And Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-01 | 300.0          | 0.0        | 300.0             | false                 | 300.0            | 4              |
+      | 2            | 2026-02-02 | 2026-03-09 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "05 February 2026"
+
+  @TestRailId:C106680
+  Scenario: Discount fee adjustment after COB creates discount fee amortization adjustment on next COB for each trn with Annual EIR payment strategy - UC13
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                         | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            |           | 1000     |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "02 January 2026" with 50.0 transaction amount on Working Capital loan
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 50.0               | 0.0            | 1000.0         | 0.0               |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+    When Admin sets the business date to "03 January 2026"
+    When Admin runs inline COB job for Working Capital Loan
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 50.0               | 9.61           | 990.39           | 0.0               |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 9.61              |                  |                   |                       | false    |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "02 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | INCOME    | 404000       | Interest Income              |        | 9.61   |
+      | LIABILITY | 240005       | Deferred Interest Revenue    | 9.61   |        |
+    And Admin adds Discount fee adjustment with "200" amount on transaction date "03 January 2026" on Working Capital loan account for last discount added on disbursement
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9800.0    | 50.0               | 9.61           | 790.39           | 0.0               |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 9.61              |                  |                   |                       | false    |
+      | 03 January 2026 | Discount Fee Adjustment   | 200.0             | 200.0            | 0.0               | 0.0                   | false    |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_ADJUSTMENT" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 200.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |       | 200.0  |
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds Discount fee adjustment with "300" amount on transaction date "04 January 2026" on Working Capital loan account for last discount added on disbursement
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9500.0    | 50.0               | 7.89           | 492.11           | 0.0               |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                                 | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement                         | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee                         | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                            | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization            | 9.61              |                  |                   |                       | false    |
+      | 03 January 2026 | Discount Fee Adjustment              | 200.0             | 200.0            | 0.0               | 0.0                   | false    |
+      | 03 January 2026 | Discount Fee Amortization Adjustment | 1.72              |                  |                   |                       | false    |
+      | 04 January 2026 | Discount Fee Adjustment              | 300.0             | 300.0            | 0.0               | 0.0                   | false    |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | INCOME    | 404000       | Interest Income              | 1.72   |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue    |        | 1.72   |
+    When Admin sets the business date to "05 January 2026"
+    When Admin runs inline COB job for Working Capital Loan
+    And Working Capital Loan has transactions:
+      | transactionDate | type                                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement                          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee                          | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                             | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization             | 9.61              |                  |                   |                       | false    |
+      | 03 January 2026 | Discount Fee Adjustment               | 200.0             | 200.0            | 0.0               | 0.0                   | false    |
+      | 03 January 2026 | Discount Fee Amortization Adjustment  | 1.72              |                  |                   |                       | false    |
+      | 04 January 2026 | Discount Fee Adjustment               | 300.0             | 300.0            | 0.0               | 0.0                   | false    |
+      | 04 January 2026 | Discount Fee Amortization Adjustment  | 2.77              |                  |                   |                       | false    |
+
+  @TestRailId:C106681
+  Scenario: Verify Working Capital Goodwill Credit trn with fee and penalty added with DUE_FEE_PENALTY_PRINCIPAL allocation with Annual EIR payment strategy - UC14
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                               | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_DUE_FEE_PENALTY_PRINCIPAL | 01 January 2026 | 01 January 2026          | 9000            |           | 1000     |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "12 January 2026" due date and 15.0 transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "12 January 2026" due date and 25.0 transaction amount
+    Then Working Capital Loan has charges with the following data:
+      | Charge Name                  | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
+      | Working Capital Loan Fee     | 12 January 2026 | 15.0   | EUR      | false     | Specified due date | Flat                    | Regular             |
+      | Working Capital Loan Penalty | 12 January 2026 | 25.0   | EUR      | true      | Specified due date | Flat                    | Regular             |
+    When Admin sets the business date to "12 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes "GOODWILL_CREDIT" transaction on "12 January 2026" with 270.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "GOODWILL_CREDIT" transaction with date "12 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name             | Debit  | Credit  |
+      | EXPENSE | 744003       | Goodwill Expense Account | 230.0  |         |
+      | INCOME  | 404008       | Fee Charge Off           | 15.0    |        |
+      | INCOME  | 404008       | Fee Charge Off           | 25.0    |        |
+      | ASSET   | 112601       | Loans Receivable         |         | 230.0  |
+      | ASSET   | 112603       | Interest/Fee Receivable  |         | 15.0   |
+      | ASSET   | 112603       | Interest/Fee Receivable  |         | 25.0   |
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | annualEir | calculatedAnnualEir | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 230.0              | 43.75620  | 43.756245           | 0.0            | 1000.0           | 0.0               |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 15.0       | 0.0             | 15.0     | 25.0           | 0.0                 | 25.0         |
+    And Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee    | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Goodwill Credit | 270.0             | 230.0            | 15.0              | 25.0                  | false    |
+    When Admin sets the business date to "15 March 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 March 2026"
+
+  @TestRailId:C106682
+  Scenario: Verify Working Capital fee charge adjustment accounting entries has correct journal entries with Annual EIR payment strategy - UC15
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                               | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_DUE_FEE_PENALTY_PRINCIPAL | 01 January 2026 | 01 January 2026          | 9000            |           | 1000     |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "10 January 2026" due date and 100.0 transaction amount
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+    And Working Capital Loan has charges with the following data:
+      | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
+      | Working Capital Loan Fee | 10 January 2026 | 100.0  | EUR      | false     | Specified due date | Flat                    | Regular             |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
+    When Admin makes a charge adjustment for the last added charge with 100.0 amount on working capital loan
+    Then Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee    | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Charge Adjustment | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+    And Working Capital Loan has charges with the following data:
+      | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
+      | Working Capital Loan Fee | 10 January 2026 | 100.0  | EUR      | false     | Specified due date | Flat                    | Regular             |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+    Then Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | INCOME | 404007       | Fee Income              | 100.0 |        |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 100.0  |
+    When Customer undo "1"th "CHARGE_ADJUSTMENT" transaction made on "10 January 2026" on Working Capital loan
+    Then Working Capital Loan Transactions tab has a reversed "CHARGE_ADJUSTMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | INCOME | 404007       | Fee Income              | 100.0 |        |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 100.0  |
+      | INCOME | 404007       | Fee Income              |       | 100.0  |
+      | ASSET  | 112603       | Interest/Fee Receivable | 100.0 |        |
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee      | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Charge Adjustment | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
+    And Working Capital Loan has charges with the following data:
+      | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
+      | Working Capital Loan Fee | 10 January 2026 | 100.0  | EUR      | false     | Specified due date | Flat                    | Regular             |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
+
+  @TestRailId:C106683
+  Scenario: Verify Working Capital charge-off accounting with backdated payout refund before charge-off keeps regular JE and restates charge-off with Annual EIR payment strategy - UC16
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                         | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            |           | 1000     |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit   | Credit  |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 10000.0 |         |
+      | ASSET   | 112601       | Loans Receivable     |         | 10000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off                | 10000.0           | 10000.0          | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Discount Fee Amortization | 1000.0            |                  |                   |                       | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Backdated payout refund before charge-off ---
+    And Customer makes "PAYOUT_REFUND" transaction on "10 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "PAYOUT_REFUND" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Payout Refund             | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off                | 7000.0            | 7000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Discount Fee Amortization | 1000.0            |                  |                   |                       | false    |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit   | Credit  |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 10000.0 |         |
+      | ASSET   | 112601       | Loans Receivable     |         | 10000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |         | 10000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 10000.0 |         |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 7000.0  |         |
+      | ASSET   | 112601       | Loans Receivable     |         | 7000.0  |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "20 January 2026"
+
+  @TestRailId:C106684
+  Scenario: Verify CBR GL entries: refund with payment details with Annual EIR payment strategy - UC17
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                                       | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_BREACH_NEAR_BREACH_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            |           | 1000     |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 10100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 10100.0           | 10000.0          | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 1000.0            |                  |                   |                       | false    |
+    When Admin sets the business date to "03 January 2026"
+    And Customer makes credit balance refund on "03 January 2026" with 25.0 transaction amount on Working Capital loan with the following payment details:
+      | paymentType   | accountNumber | checkNumber | routingCode | receiptNumber | bankNumber |
+      | CHECK_PAYMENT | 12345         | 321         | 456         | 789           | 654        |
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital Loan Transactions tab has a "CREDIT_BALANCE_REFUND" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 245000       | Other Credit Liability    | 25.0  |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 25.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 10100.0           | 10000.0          | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 1000.0            |                  |                   |                       | false    |
+      | 03 January 2026 | Credit Balance Refund     | 25.0              | 0.0             | 0.0               | 0.0                   | false    |
+    And Customer makes credit balance refund on "03 January 2026" with 75.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:C106714
+  Scenario: Verify WC discount override disallowed from loan product level with Annual EIR payment strategy - UC18
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                         | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_OVERRIDE_DISALLOWED | 01 January 2026 | 01 January 2026          | 9000            |           |          |
+    Then Approving the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026" with "200" discount amount results an error with the following data:
+      | HTTP response code | Error message                   |
+      | 400                | override.not.allowed.by.product |
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    Then Disbursing the working capital loan on "01 January 2026" with "9000" amount and "150" discount amount results an error with the following data:
+      | HTTP response code | Error message                   |
+      | 400                | override.not.allowed.by.product |
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    Then Verify Working Capital loan disbursement was successful
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee      | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
+
+  @TestRailId:C106715
+  Scenario: Verify WC delinquency bucket, breach and near breach override disallowed from WCLP level with Annual EIR payment strategy - UC19
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket With Values:
+      | frequency | frequencyType | minimumPaymentType | minimumPayment |
+      | 2         | WEEKS         | FLAT               | 248            |
+# -- disallow delinquency override fails modify loan account --- #
+    And Admin failed to create a working capital loan due to disallow delinquency bucket override with annual EIR and the following data:
+      | LoanProduct                         | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_OVERRIDE_DISALLOWED | 01 January 2026 | 01 January 2026          | 9000            |           |          |
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                         | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_OVERRIDE_DISALLOWED | 01 January 2026 | 01 January 2026          | 9000            |           |          |
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    Then Verify Working Capital loan disbursement was successful
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee      | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+    Then Admin successfully undo Working Capital disbursal
+    Then Working Capital loan status will be "APPROVED"
+    When Admin makes undo approval on the working capital loan
+    Then Working capital loan undo approval was successful
+    Then Working Capital loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
+# -- disallow breach and near breach override fails modify loan account --- #
+    Then Admin failed to modify working capital loan while breach override disallowed with breach and near breach override
+    Then Admin successfully approves the working capital loan on "02 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "02 January 2026"
+    Then Working capital loan approval was successful
+    Then Admin successfully disburse the Working Capital loan on "02 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+      | 01 January 2026 | Discount Fee      | 1000.0            | 1000.0           | 0.0               | 0.0                   | true     |
+      | 02 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee      | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
+    When Admin deletes WC Breach override
+    When Admin deletes WC Near Breach override
+
+  @TestRailId:C106719
+  Scenario: Verify WC Originator persists across the working capital loan lifecycle with Annual EIR payment strategy - UC20
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new loan originator with external ID and name "WC Merchant Alpha"
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                                       | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_BREACH_NEAR_BREACH_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            |           | 1000     |
+    Then Working capital loan creation was successful
+    When Admin attaches the originator to the working capital loan
+    Then Working capital loan details has the originator attached
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan details has the originator attached
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working capital loan details has the originator attached
+
+  @TestRailId:С106720
+  Scenario: Verify Working Capital Write-off with undo reopens the loan and restores the balance with Annual EIR payment strategy - UC21
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with annual EIR and the following data:
+      | LoanProduct                                       | submittedOnDate | expectedDisbursementDate | principalAmount | annualEir | discount |
+      | WCLP_ANNUAL_EIR_BREACH_NEAR_BREACH_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            |           | 1000     |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+# --- write-off the working capital loan account--- #
+    And Admin sets the business date to "15 January 2026"
+    And Admin writes off the Working Capital loan on "15 January 2026"
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Close (as written-off)    | 10000.0           | 10000.0          | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Discount Fee Amortization | 1000.0            |                  |                   |                       | false    |
+    Then Working Capital loan status will be "CLOSED_WRITTEN_OFF"
+    And Working Capital loan balance principalOutstanding is "0.0"
+# --- undo write-off the working capital loan account--- #
+    When Admin undoes the write-off on the Working Capital loan
+    Then a Working Capital Loan Undo Write Off transaction business event is raised with "10000.0" EUR amount
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Close (as written-off)    | 10000.0           | 10000.0          | 0.0               | 0.0                   | true     |
+      | 15 January 2026 | Discount Fee Amortization | 1000.0            |                  |                   |                       | true     |
+    Then Working Capital loan status will be "ACTIVE"
+    And Working Capital loan balance principalOutstanding is "10000.0"
+    Then Working Capital Loan Transactions tab has a reversed "WRITE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name               | Debit   | Credit  |
+      | ASSET   | 112601       | Loans Receivable           |         | 10000.0 |
+      | EXPENSE | e4           | Written off                | 10000.0 |         |
+      | ASSET   | 112601       | Loans Receivable           | 10000.0 |         |
+      | EXPENSE | e4           | Written off                |         | 10000.0 |
+    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
