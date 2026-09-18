@@ -69,6 +69,15 @@
         },
         {
             "default": null,
+            "name": "breachEffectiveStartDate",
+            "doc": "breachStartDate shifted by the breach grace days; only set for the first breach period.",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
             "name": "nearBreach",
             "type": [
                 "null",
