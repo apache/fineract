@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -118,6 +119,9 @@ public class WorkingCapitalLoanDataValidator {
                     WorkingCapitalLoanConstants.transactionAmountParamName, WorkingCapitalLoanConstants.classificationIdParamName,
                     WorkingCapitalLoanConstants.relatedResourceIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
                     WorkingCapitalLoanConstants.externalIdParameterName, WorkingCapitalLoanConstants.transactionDateParamName));
+    private static final Set<String> DISCOUNT_TRANSACTION_IN_PATH_SUPPORTED_PARAMETERS = DISCOUNT_TRANSACTION_SUPPORTED_PARAMETERS.stream()
+            .filter(parameter -> !WorkingCapitalLoanConstants.relatedResourceIdParamName.equals(parameter))
+            .collect(Collectors.toUnmodifiableSet());
     private static final Set<String> CREDIT_BALANCE_REFUND_SUPPORTED_PARAMETERS = new HashSet<>(REPAYMENT_SUPPORTED_PARAMETERS);
     // Incoming write-off parameters follow the progressive-loan shape.
     private static final Set<String> WRITE_OFF_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
@@ -152,6 +156,29 @@ public class WorkingCapitalLoanDataValidator {
     private static final int PAYMENT_DETAIL_STRING_MAX_LENGTH = 50;
     private static final Set<LoanStatus> REPAYMENT_LIKE_TXN_ALLOWED_LOAN_STATUSES = Set.of(LoanStatus.ACTIVE,
             LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID);
+
+    public void validateRelatedResourceIdIsPositiveNumber(final JsonElement element) {
+        requireJsonBody(element);
+        final String relatedResourceId = fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.relatedResourceIdParamName,
+                element);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.relatedResourceIdParamName).value(relatedResourceId).ignoreIfNull()
+                .longGreaterThanZero();
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateRelatedResourceIdIsNotInBody(final JsonElement element) {
+        requireJsonBody(element);
+        fromApiJsonHelper.checkForUnsupportedParameters(element.getAsJsonObject(), DISCOUNT_TRANSACTION_IN_PATH_SUPPORTED_PARAMETERS);
+    }
+
+    private void requireJsonBody(final JsonElement element) {
+        if (element == null || !element.isJsonObject()) {
+            throw new InvalidJsonException();
+        }
+    }
 
     public void validateDiscountTransaction(final WorkingCapitalLoan loan, final String json, BigDecimal discountAmount,
             final String note) {

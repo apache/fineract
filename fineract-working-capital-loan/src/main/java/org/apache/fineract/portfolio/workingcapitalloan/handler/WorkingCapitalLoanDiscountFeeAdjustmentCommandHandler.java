@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.handler;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
@@ -34,7 +35,9 @@ public class WorkingCapitalLoanDiscountFeeAdjustmentCommandHandler implements Ne
     private final WorkingCapitalLoanWritePlatformService writePlatformService;
 
     @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return writePlatformService.makeDiscountFeeAdjustment(command.getResourceId(), command);
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return Optional.ofNullable(command.getLoanId())
+                .map(loanId -> writePlatformService.makeDiscountFeeAdjustmentForDiscountFee(loanId, command.entityId(), command))
+                .orElseGet(() -> writePlatformService.makeDiscountFeeAdjustment(command.entityId(), command));
     }
 }

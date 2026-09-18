@@ -444,8 +444,10 @@ public class EventCheckHelper {
     private void workingCapitalLoanTransactionEventCheck(final Class<? extends AbstractWorkingCapitalLoanTransactionEvent> eventClazz,
             final Long loanId, final GetWorkingCapitalLoanTransactionIdResponse transaction, final BigDecimal expectedAmount,
             final boolean expectedReversed) {
+        final String loanExternalId = fetchWorkingCapitalLoan(loanId).getExternalId();
         eventAssertion.assertEvent(eventClazz, transaction.getId())//
                 .extractingData(WorkingCapitalLoanTransactionDataV1::getWcLoanId).isEqualTo(loanId)//
+                .extractingData(WorkingCapitalLoanTransactionDataV1::getExternalLoanId).isEqualTo(loanExternalId)//
                 .extractingBigDecimal(WorkingCapitalLoanTransactionDataV1::getTransactionAmount)
                 .isEqualTo(expectedAmount == null ? transaction.getTransactionAmount() : expectedAmount)//
                 .extractingData(data -> data.getType().getCode()).isEqualTo(transaction.getType().getCode())//
@@ -1217,8 +1219,10 @@ public class EventCheckHelper {
         waitForTransactionCommit();
         final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, transactionType, true,
                 "Reversed " + transactionType + " transaction not found");
+        final String loanExternalId = fetchWorkingCapitalLoan(loanId).getExternalId();
         eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transaction.getId())//
                 .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
+                .extractingData(data -> data.getTransactionToAdjust().getExternalLoanId()).isEqualTo(loanExternalId)//
                 .extractingBigDecimal(data -> data.getTransactionToAdjust().getTransactionAmount())
                 .isEqualTo(transaction.getTransactionAmount())//
                 .extractingData(data -> data.getTransactionToAdjust().getType().getCode()).isEqualTo(transaction.getType().getCode())//
@@ -1231,8 +1235,11 @@ public class EventCheckHelper {
             final BigDecimal previousFeeChargesPortion, final BigDecimal newFeeChargesPortion) {
         final GetWorkingCapitalLoanTransactionIdResponse transaction = workingCapitalLoanTransactionDetails(loanId, transactionType,
                 transactionDate);
+        final String loanExternalId = fetchWorkingCapitalLoan(loanId).getExternalId();
         eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transaction.getId())//
                 .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
+                .extractingData(data -> data.getTransactionToAdjust().getExternalLoanId()).isEqualTo(loanExternalId)//
+                .extractingData(data -> data.getNewTransactionDetail().getExternalLoanId()).isEqualTo(loanExternalId)//
                 .extractingBigDecimal(data -> data.getTransactionToAdjust().getPrincipalPortion()).isEqualTo(previousPrincipalPortion)//
                 .extractingBigDecimal(data -> data.getTransactionToAdjust().getFeeChargesPortion()).isEqualTo(previousFeeChargesPortion)//
                 .extractingBigDecimal(data -> data.getNewTransactionDetail().getPrincipalPortion()).isEqualTo(newPrincipalPortion)//

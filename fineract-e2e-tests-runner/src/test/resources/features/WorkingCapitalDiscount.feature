@@ -1385,6 +1385,53 @@ Feature: Working Capital Discount
     Then In Working Capital Loan Transactions all transactions have non-blank external-id
     Then Active Discount Fee transactions contain the user-generated externalId from DISCOUNTFEE
 
+  Scenario: Discount fee and its adjustment added by loan and transaction external ids, the discount fee externalId, classification and payment type are persisted as sent
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 |          |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
+    Then Working Capital loan status will be "ACTIVE"
+    Then Verify Working Capital loan disbursement was successful
+    Then Admin adds Discount fee with "12" amount, a random externalId, "working_capital_loan_discount_fee_classification_value" classification and "AUTOPAY" payment type by loan and disbursement external-ids on Working Capital loan account
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
+    Then Active Discount Fee transactions contain the user-generated externalId from DISCOUNTFEE
+    And Working Capital Loan has a "DISCOUNT_FEE" transaction with date "01 January 2026" which has classification code value "working_capital_loan_discount_fee_classification_value"
+    And Working Capital loan transaction with type "DISCOUNT_FEE" has payment type "AUTOPAY"
+    And WorkingCapitalLoanDiscountFeeTransactionBusinessEvent is raised with amount "12" on "01 January 2026" date
+    When Admin adds Discount fee adjustment with "5" amount by loan and discount fee external-ids on Working Capital loan account
+    Then Working Capital Loan has transactions:
+      | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement            | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee            | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee Adjustment | 5.0               | 5.0              | 0.0               | 0.0                   | false    |
+    And WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent is raised with amount "5" on "01 January 2026" date
+    And In Working Capital Loan Transactions all transactions carry the loan external-id
+    When Admin adds Discount fee adjustment with "1" amount by loan and discount fee ids on Working Capital loan account
+    And Admin adds Discount fee adjustment with "2" amount by loan id and discount fee external-id on Working Capital loan account
+    And Admin adds Discount fee adjustment with "3" amount by loan external-id and discount fee id on Working Capital loan account
+    Then Working Capital Loan has transactions:
+      | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement            | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee            | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee Adjustment | 5.0               | 5.0              | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee Adjustment | 1.0               | 1.0              | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee Adjustment | 2.0               | 2.0              | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee Adjustment | 3.0               | 3.0              | 0.0               | 0.0                   | false    |
+    Then Adding Discount fee adjustment by an unknown transaction external-id on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                           |
+      | 404                | error.msg.wc.loan.transaction.not.found |
+    Then Adding Discount fee adjustment by a non-existent transaction id on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                                         |
+      | 400                | validation.msg.wc.loan.discount.transaction.not.found |
+
   @TestRailId:C83041
   Scenario: Discount provided during disbursement without externalId gets an auto-generated externalId
     When Admin sets the business date to "01 January 2026"
