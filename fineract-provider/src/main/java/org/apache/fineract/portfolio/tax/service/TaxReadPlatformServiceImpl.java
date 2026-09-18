@@ -18,12 +18,16 @@
  */
 package org.apache.fineract.portfolio.tax.service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
+import org.apache.fineract.portfolio.tax.data.TaxGroupMappingsData;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepository;
@@ -41,6 +45,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
     private final TaxGroupRepository taxGroupRepository;
     private final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper;
     private final TaxGroupMapper taxGroupMapper;
+    private final ChargeRepository chargeRepository;
 
     @Override
     public List<TaxComponentData> retrieveAllTaxComponents() {
@@ -71,7 +76,30 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
     @Override
     public TaxGroupData retrieveTaxGroupWithTemplate(final Long id) {
         TaxGroupData taxGroupData = retrieveTaxGroupData(id);
-        taxGroupData = TaxGroupData.template(taxGroupData, retrieveTaxComponentsForLookUp());
+
+        final boolean isLinked = chargeRepository.existsByTaxGroupId(id);
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+
+        // A linked group is only editable if at least one of its components has not taken effect yet.
+        Boolean groupEditable = !isLinked;
+        if (isLinked && taxGroupData.getTaxAssociations() != null) {
+            for (TaxGroupMappingsData mapping : taxGroupData.getTaxAssociations()) {
+                if (mapping.getStartDate() != null && mapping.getStartDate().isAfter(today)) {
+                    groupEditable = true;
+                    break;
+                }
+            }
+        }
+
+        if (taxGroupData.getTaxAssociations() != null) {
+            for (TaxGroupMappingsData mapping : taxGroupData.getTaxAssociations()) {
+                final boolean componentEditable = Boolean.TRUE.equals(groupEditable) && mapping.getStartDate() != null
+                        && mapping.getStartDate().isAfter(today);
+                mapping.setComponentEditable(componentEditable);
+            }
+        }
+
+        taxGroupData = TaxGroupData.template(taxGroupData, retrieveTaxComponentsForLookUp(), groupEditable);
         return taxGroupData;
     }
 
