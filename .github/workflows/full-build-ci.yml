@@ -34,7 +34,7 @@ jobs:
         github.event_name != 'workflow_dispatch' &&
         vars.ENABLE_PRIVATE_REPOSITORY_CI != 'true'
       }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
       - name: Private repository CI disabled
@@ -51,7 +51,7 @@ jobs:
         github.event_name == 'workflow_dispatch' ||
         vars.ENABLE_PRIVATE_REPOSITORY_CI == 'true'
       }}
-    uses: ./.github/workflows/build-core.yml
+    uses: $/.github/workflows/build-core.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -59,7 +59,7 @@ jobs:
 
   build-embeddable-progressive-loan-jar:
     needs: build-core
-    uses: ./.github/workflows/build-progressive-loan.yml
+    uses: $/.github/workflows/build-progressive-loan.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -67,7 +67,7 @@ jobs:
 
   build-docker-image:
     needs: build-core
-    uses: ./.github/workflows/build-docker.yml
+    uses: $/.github/workflows/build-docker.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -75,13 +75,13 @@ jobs:
 
   build-documentation:
     needs: build-core
-    uses: ./.github/workflows/build-documentation.yml
+    uses: $/.github/workflows/build-documentation.yml
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
   run-quality-checks:
     needs: build-core
-    uses: ./.github/workflows/build-quality-checks.yml
+    uses: $/.github/workflows/build-quality-checks.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -89,7 +89,7 @@ jobs:
 
   run-cucumber-tests:
     needs: build-core
-    uses: ./.github/workflows/build-cucumber.yml
+    uses: $/.github/workflows/build-cucumber.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -97,7 +97,7 @@ jobs:
 
   run-integrations-tests-on-postgresql:
     needs: build-core
-    uses: ./.github/workflows/build-postgresql.yml
+    uses: $/.github/workflows/build-postgresql.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -105,7 +105,7 @@ jobs:
 
   run-integrations-tests-on-mysql:
     needs: build-core
-    uses: ./.github/workflows/build-mysql.yml
+    uses: $/.github/workflows/build-mysql.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -113,7 +113,7 @@ jobs:
 
   run-integrations-tests-on-mariadb:
     needs: build-core
-    uses: ./.github/workflows/build-mariadb.yml
+    uses: $/.github/workflows/build-mariadb.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -121,7 +121,7 @@ jobs:
 
   run-e2e-tests:
     needs: build-core
-    uses: ./.github/workflows/build-e2e-tests.yml
+    uses: $/.github/workflows/build-e2e-tests.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -129,7 +129,7 @@ jobs:
 
   run-war-smoke-test:
     needs: build-core
-    uses: ./.github/workflows/build-war-smoke.yml
+    uses: $/.github/workflows/build-war-smoke.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -137,13 +137,13 @@ jobs:
 
   run-liquibase-only-on-postgresql:
     needs: build-core
-    uses: ./.github/workflows/liquibase-only-postgresql.yml
+    uses: $/.github/workflows/liquibase-only-postgresql.yml
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
   run-messaging-smoke-tests:
     needs: build-core
-    uses: ./.github/workflows/smoke-messaging.yml
+    uses: $/.github/workflows/smoke-messaging.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -151,7 +151,7 @@ jobs:
 
   run-api-backward-compatibility:
     needs: build-core
-    uses: ./.github/workflows/verify-api-backward-compatibility.yml
+    uses: $/.github/workflows/verify-api-backward-compatibility.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -159,7 +159,7 @@ jobs:
 
   run-generated-client-api-method-compatibility:
     needs: build-core
-    uses: ./.github/workflows/verify-generated-client-api-method-compatibility.yml
+    uses: $/.github/workflows/verify-generated-client-api-method-compatibility.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -167,13 +167,13 @@ jobs:
 
   run-liquibase-backward-compatibility:
     needs: build-core
-    uses: ./.github/workflows/verify-liquibase-backward-compatibility.yml
+    uses: $/.github/workflows/verify-liquibase-backward-compatibility.yml
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
   run-liquibase-ddl-safety:
     needs: build-core
-    uses: ./.github/workflows/verify-liquibase-ddl-safety.yml
+    uses: $/.github/workflows/verify-liquibase-ddl-safety.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -181,7 +181,7 @@ jobs:
 
   run-regression-safety-db-changes:
     needs: build-core
-    uses: ./.github/workflows/regression-safety-db-changes.yml
+    uses: $/.github/workflows/regression-safety-db-changes.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -189,7 +189,7 @@ jobs:
 
   run-sonarqube:
     needs: build-core
-    uses: ./.github/workflows/sonarqube.yml
+    uses: $/.github/workflows/sonarqube.yml
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
@@ -199,7 +199,7 @@ jobs:
 
   run-integration-tests-sequentially-on-postgresql:
     needs: build-core
-    uses: ./.github/workflows/run-integration-test-sequentially-postgresql.yml
+    uses: $/.github/workflows/run-integration-test-sequentially-postgresql.yml
     with:
       upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
     secrets:
@@ -207,7 +207,7 @@ jobs:
 
   publish-dockerhub:
     needs: build-core
-    uses: ./.github/workflows/publish-dockerhub.yml
+    uses: $/.github/workflows/publish-dockerhub.yml
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}

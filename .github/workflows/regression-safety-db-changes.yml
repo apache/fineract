@@ -17,14 +17,14 @@ permissions:
 
 jobs:
   detect-db-changes:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     outputs:
       has_liquibase_changes: ${{ steps.check.outputs.has_changes }}
     steps:
       - name: Download workspace
         id: download-workspace
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         continue-on-error: true
         with:
           name: fineract-workspace-${{ github.run_id }}
@@ -44,7 +44,7 @@ jobs:
 
       - name: Build workspace fallback
         if: steps.download-workspace.outcome != 'success'
-        uses: ./.github/actions/setup-and-build-fineract
+        uses: $/.github/actions/setup-and-build-fineract
         with:
           cache-read-only: false
 
@@ -76,7 +76,7 @@ jobs:
   regression-safety:
     needs: detect-db-changes
     if: needs.detect-db-changes.outputs.has_liquibase_changes == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
 
     services:
@@ -135,14 +135,14 @@ jobs:
           path: baseline
 
       - name: Set up JDK 25
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: 'zulu'
           java-version: '25'
 
       - name: Download workspace
         id: download-workspace
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         continue-on-error: true
         with:
           name: fineract-workspace-${{ github.run_id }}
@@ -162,7 +162,7 @@ jobs:
 
       - name: Build workspace fallback
         if: steps.download-workspace.outcome != 'success'
-        uses: ./.github/actions/setup-and-build-fineract
+        uses: $/.github/actions/setup-and-build-fineract
         with:
           cache-read-only: false
 
@@ -174,7 +174,7 @@ jobs:
       # ample; every gradlew call here also uses --no-daemon so idle build JVMs cannot
       # accumulate across the three instances (org.gradle.daemon.idletimeout is 3h).
       - name: Apply Gradle memory budget
-        uses: ./.github/actions/gradle-memory-budget
+        uses: $/.github/actions/gradle-memory-budget
         with:
           max-heap: '2g'
           workers-max: '2'
