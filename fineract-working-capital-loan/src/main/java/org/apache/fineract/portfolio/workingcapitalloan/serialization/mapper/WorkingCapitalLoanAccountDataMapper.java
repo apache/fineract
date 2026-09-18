@@ -57,6 +57,7 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(source = "numberOfRepayments", target = "actualNoTerm")
     @Mapping(source = "delinquencyStartType", target = "delinquency.delinquencyStartType")
     @Mapping(source = "delinquencyStartDate", target = "delinquency.delinquencyStartDate")
+    @Mapping(source = "delinquencyEffectiveStartDate", target = "delinquency.delinquencyEffectiveStartDate")
     @Mapping(source = "breach.id", target = "breach.id")
     @Mapping(source = "breach.name", target = "breach.name")
     @Mapping(source = "breach.breachFrequency", target = "breach.breachFrequency")

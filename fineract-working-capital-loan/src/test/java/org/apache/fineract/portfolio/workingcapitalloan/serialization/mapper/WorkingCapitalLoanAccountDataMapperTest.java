@@ -233,6 +233,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertNotNull(delinquency);
         assertStringEnum(source.getDelinquencyStartType(), delinquency.getDelinquencyStartType());
         assertEquals("2024-01-05", delinquency.getDelinquencyStartDate());
+        assertEquals("2024-01-12", delinquency.getDelinquencyEffectiveStartDate());
     }
 
     @Test
@@ -567,12 +568,12 @@ class WorkingCapitalLoanAccountDataMapperTest {
                 .periodPaymentAmount(new BigDecimal("120.00")).calculatedAnnualEir(new BigDecimal("18.25"))
                 .totalPaymentVolume(new BigDecimal("5000.00")).breachGraceDays(3).delinquencyGraceDays(7)
                 .delinquencyStartType(stringEnum("1", "delinquencyStart.disbursement", "Disbursement"))
-                .delinquencyStartDate(LocalDate.of(2024, 1, 5)).breachStartDate(LocalDate.of(2024, 1, 6))
-                .lastClosedBusinessDate(LocalDate.of(2024, 2, 1)).overpaidOnDate(LocalDate.of(2024, 2, 14)).chargedOff(Boolean.TRUE)
-                .enableInstallmentLevelDelinquency(Boolean.TRUE).currency(currency()).timeline(fullTimeline()).summary(fullSummary())
-                .delinquent(fullCollection()).breach(fullBreach()).nearBreach(fullNearBreach()).charges(List.of(fullCharge()))
-                .disbursementDetails(List.of(fullDisbursement())).originators(List.of(fullOriginator()))
-                .periodPaymentRateHistory(List.of(fullRateChange())).build();
+                .delinquencyStartDate(LocalDate.of(2024, 1, 5)).delinquencyEffectiveStartDate(LocalDate.of(2024, 1, 12))
+                .breachStartDate(LocalDate.of(2024, 1, 6)).lastClosedBusinessDate(LocalDate.of(2024, 2, 1))
+                .overpaidOnDate(LocalDate.of(2024, 2, 14)).chargedOff(Boolean.TRUE).enableInstallmentLevelDelinquency(Boolean.TRUE)
+                .currency(currency()).timeline(fullTimeline()).summary(fullSummary()).delinquent(fullCollection()).breach(fullBreach())
+                .nearBreach(fullNearBreach()).charges(List.of(fullCharge())).disbursementDetails(List.of(fullDisbursement()))
+                .originators(List.of(fullOriginator())).periodPaymentRateHistory(List.of(fullRateChange())).build();
     }
 
     private static LoanStatusEnumData fullStatus() {

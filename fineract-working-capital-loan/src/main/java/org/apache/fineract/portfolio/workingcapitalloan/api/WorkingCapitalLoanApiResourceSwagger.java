@@ -281,8 +281,13 @@ public final class WorkingCapitalLoanApiResourceSwagger {
                 + "breach schedule period (the breach grace days are already reflected in this date). Null when the loan is not in breach")
         public LocalDate breachStartDate;
         @Schema(example = "[2024, 1, 14]", description = "Start date of the loan's delinquency, i.e. the fromDate of the earliest "
-                + "delinquent range schedule period shifted by delinquencyGraceDays. Null when the loan is not delinquent")
+                + "delinquent range schedule period. Null when the loan is not delinquent")
         public LocalDate delinquencyStartDate;
+        @Schema(example = "[2024, 1, 17]", description = "Effective start date of the loan's delinquency, i.e. delinquencyStartDate "
+                + "shifted forward by delinquencyGraceDays (the cool off period). Only the first delinquency period carries the grace "
+                + "days, so this is null when the earliest delinquent period is not the first one, when no delinquency grace days are "
+                + "configured, and when the loan is not delinquent")
+        public LocalDate delinquencyEffectiveStartDate;
         @Schema(example = "[2024, 1, 14]", description = "Last closed business date (COB)")
         public LocalDate lastClosedBusinessDate;
         public List<GetPaymentAllocation> paymentAllocation;
