@@ -204,6 +204,19 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
     @Override
     public Collection<FineractEntityToEntityMappingData> retrieveEntityToEntityMappings(Long mapId, Long fromId, Long toId) {
 
+        if (fromId == 0) {
+            final String fromEntityTypeSql = "SELECT er.from_entity_type FROM m_entity_relation er WHERE er.id = ?";
+            Integer fromEntityType = jdbcTemplate.queryForObject(fromEntityTypeSql, Integer.class, mapId);
+            if (fromEntityType != null && fromEntityType == 1) {
+                final AppUser currentUser = this.context.authenticatedUser();
+                final Long userOfficeId = currentUser.getOffice().getId();
+
+                EntityToEntityMapper entityToEntityMapper = new EntityToEntityMapper();
+                String officeScopedSql = entityToEntityMapper.schemaWithOfficeScopedFromId();
+                return this.jdbcTemplate.query(officeScopedSql, entityToEntityMapper, new Object[] { userOfficeId, mapId, toId, toId });
+            }
+        }
+
         EntityToEntityMapper entityToEntityMapper = new EntityToEntityMapper();
         String sql = entityToEntityMapper.schema();
         final Collection<FineractEntityToEntityMappingData> mapTypes = this.jdbcTemplate.query(sql, entityToEntityMapper,
@@ -302,6 +315,46 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
             return ENTITY_TO_ENTITY_SCHEMA;
         }
 
+        public String schemaWithOfficeScopedFromId() {
+            StringBuilder str = new StringBuilder("WITH RECURSIVE office_descendants AS ( ");
+            str.append("SELECT id FROM m_office WHERE id = ? ");
+            str.append("UNION ALL ");
+            str.append("SELECT o.id FROM m_office o JOIN office_descendants d ON o.parent_id = d.id ");
+            str.append(") ");
+            str.append("select eem.id as mapId, ");
+            str.append("eem.rel_id as relId, ");
+            str.append("eem.from_id as from_id, ");
+            str.append("eem.to_id as to_id, ");
+            str.append("eem.start_date as startDate, ");
+            str.append("eem.end_date as endDate, ");
+            str.append("case er.code_name ");
+            str.append("when 'office_access_to_loan_products' then o.name ");
+            str.append("when 'office_access_to_savings_products' then o.name ");
+            str.append("when 'office_access_to_fees/charges' then o.name ");
+            str.append("when 'role_access_to_loan_products' then r.name ");
+            str.append("when 'role_access_to_savings_products' then r.name ");
+            str.append("end as from_name, ");
+            str.append("case er.code_name ");
+            str.append("when 'office_access_to_loan_products' then lp.name ");
+            str.append("when 'office_access_to_savings_products' then sp.name ");
+            str.append("when 'office_access_to_fees/charges' then charge.name ");
+            str.append("when 'role_access_to_loan_products' then lp.name ");
+            str.append("when 'role_access_to_savings_products' then sp.name ");
+            str.append("end as to_name, ");
+            str.append("er.code_name ");
+            str.append("from m_entity_to_entity_mapping eem ");
+            str.append("join m_entity_relation er on eem.rel_id = er.id ");
+            str.append("left join m_office o on er.from_entity_type = 1 and eem.from_id = o.id ");
+            str.append("left join m_role r on er.from_entity_type = 5 and eem.from_id = r.id ");
+            str.append("left join m_product_loan lp on er.to_entity_type = 2 and eem.to_id = lp.id ");
+            str.append("left join m_savings_product sp on er.to_entity_type = 3 and eem.to_id = sp.id ");
+            str.append("left join m_charge charge on er.to_entity_type = 4 and eem.to_id = charge.id ");
+            str.append("where er.id = ? ");
+            str.append("and eem.from_id IN (SELECT id FROM office_descendants) ");
+            str.append("and ( ? = 0 or to_id = ? ) ");
+            return str.toString();
+        }
+
         @Override
         public FineractEntityToEntityMappingData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
                 throws SQLException {
@@ -318,6 +371,51 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
             return FineractEntityToEntityMappingData.getRelatedEntities(mapId, relId, fromId, toId, startLocalDate, endLocalDate,
                     fromEntity, toEntity);
         }
+    }
+
+    @Override
+    public String getSQLQueryInClauseIDList_ForLoanProductsVisibleToOffice(final Long officeId) {
+        FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
+                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.getStr());
+        final Long relId = fineractEntityRelation.getId();
+        return "WITH RECURSIVE descendants AS ( " + "  SELECT id, parent_id FROM m_office WHERE id = " + officeId + " " + "  UNION ALL "
+                + "  SELECT o.id, o.parent_id FROM m_office o JOIN descendants d ON o.parent_id = d.id " + ") " + "select lp.id "
+                + "from m_product_loan lp " + "where lp.id not in ( " + "    select eem.to_id " + "    from m_entity_to_entity_mapping eem "
+                + "    where eem.rel_id = " + relId + " " + "    and eem.to_id <> 0 " + ") " + "or lp.id in ( " + "    select eem.to_id "
+                + "    from m_entity_to_entity_mapping eem " + "    where eem.rel_id = " + relId + " "
+                + "    and (eem.from_id in (select id from descendants) or eem.to_id = 0) " + ")";
+    }
+
+    @Override
+    public boolean isLoanProductVisibleToOffice(final Long productId, final Long officeId) {
+        FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
+                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.getStr());
+        final Long relId = fineractEntityRelation.getId();
+
+        final String isRestrictedSql = "SELECT COUNT(*) FROM m_entity_to_entity_mapping eem " + "WHERE eem.rel_id = ? AND eem.to_id = ?";
+        final Integer restrictedCount = jdbcTemplate.queryForObject(isRestrictedSql, Integer.class, relId, productId);
+        if (restrictedCount == null || restrictedCount == 0) {
+            return true;
+        }
+        final String visibleSql = "WITH RECURSIVE descendants AS ( " + "  SELECT id FROM m_office WHERE id = ? " + "  UNION ALL "
+                + "  SELECT o.id FROM m_office o JOIN descendants d ON o.parent_id = d.id " + ") "
+                + "SELECT COUNT(*) FROM m_entity_to_entity_mapping eem " + "WHERE eem.rel_id = ? AND eem.to_id = ? "
+                + "AND (eem.from_id IN (SELECT id FROM descendants) OR eem.from_id = 0)";
+        final Integer visibleCount = jdbcTemplate.queryForObject(visibleSql, Integer.class, officeId, relId, productId);
+        return visibleCount != null && visibleCount > 0;
+    }
+
+    @Override
+    public String getSQLQueryInClauseIDList_ForChargesVisibleToOffice(final Long officeId) {
+        FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
+                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES.getStr());
+        final Long relId = fineractEntityRelation.getId();
+        return "WITH RECURSIVE descendants AS ( " + "  SELECT id, parent_id FROM m_office WHERE id = " + officeId + " " + "  UNION ALL "
+                + "  SELECT o.id, o.parent_id FROM m_office o JOIN descendants d ON o.parent_id = d.id " + ") " + "select c.id "
+                + "from m_charge c " + "where c.id not in ( " + "    select eem.to_id " + "    from m_entity_to_entity_mapping eem "
+                + "    where eem.rel_id = " + relId + " " + "    and eem.to_id <> 0 " + ") " + "or c.id in ( " + "    select eem.to_id "
+                + "    from m_entity_to_entity_mapping eem " + "    where eem.rel_id = " + relId + " "
+                + "    and (eem.from_id in (select id from descendants) or eem.to_id = 0) " + ")";
     }
 
 }
