@@ -49,7 +49,7 @@ public enum EntityTables {
     SAVINGS_TRANSACTION("m_savings_account_transaction", "Savings Account Transaction", "savings_transaction_id", "id"), //
     SHARE_PRODUCT("m_share_product", "Share Product", "share_product_id", "id"), //
     WC_LOAN_PRODUCT("m_wc_loan_product", "Working Capital Loan Product", "wc_product_loan_id", "id"), //
-    WC_LOAN("m_wc_loan", "Working Capital Loan", "wc_loan_id", "id"), //
+    WC_LOAN("m_wc_loan", "Working Capital Loan", "wc_loan_id", "id", CREATE), //
     ;
 
     static final EntityTables[] ENTITY_VALUES = values();

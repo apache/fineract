@@ -130,4 +130,7 @@ public final class WorkingCapitalLoanConstants {
 
     // Loan origination parameters
     public static final String originatorsParameterName = "originators";
+
+    // Datatable entries attached at loan application create
+    public static final String datatablesParameterName = "datatables";
 }
