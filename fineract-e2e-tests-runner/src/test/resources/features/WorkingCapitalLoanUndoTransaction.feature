@@ -627,3 +627,44 @@ Feature: Working Capital Loan Undo Transaction
     # --- Close loan ---
     When Admin closes the Working Capital loan with a full repayment on "07 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:C106716
+  Scenario: Verify working capital loan undo transaction - user with UNDO_WORKINGCAPITALLOANTRANSACTION permission can undo a repayment
+    Then Permission "UNDO_WORKINGCAPITALLOANTRANSACTION" is returned with grouping "transaction_loan", entity "WORKINGCAPITALLOANTRANSACTION" and action "UNDO"
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin creates new user with "WC_UNDO_TXN_USER" username, "WC_UNDO_TXN_ROLE" role name and given permissions:
+      | REPAYMENT_WORKINGCAPITALLOAN       |
+      | UNDO_WORKINGCAPITALLOANTRANSACTION |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Created user makes repayment on "10 January 2026" with 270.0 transaction amount on Working Capital loan
+    And Created user undoes "1"th "REPAYMENT" transaction made on "10 January 2026" on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value   |
+      | principalOutstanding | 9000.00 |
+    When Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:C106717
+  Scenario: Verify working capital loan undo transaction - user without UNDO_WORKINGCAPITALLOANTRANSACTION permission is rejected
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin creates new user with "WC_NO_UNDO_TXN_USER" username, "WC_NO_UNDO_TXN_ROLE" role name and given permissions:
+      | REPAYMENT_WORKINGCAPITALLOAN |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Created user makes repayment on "10 January 2026" with 270.0 transaction amount on Working Capital loan
+    Then Created user without UNDO_WORKINGCAPITALLOANTRANSACTION permission fails to undo "1"th "REPAYMENT" transaction made on "10 January 2026" on Working Capital loan
+    When Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
