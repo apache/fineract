@@ -65,6 +65,16 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         plannedPostings(loan, txn, allocation, isChargedOff).forEach(accountPostHelper::post);
     }
 
+    @Override
+    public void postJournalEntriesForChargeWaiver(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final BigDecimal recognizedFeePortion, final BigDecimal recognizedPenaltyPortion, final boolean isChargedOff) {
+        final Office office = loan.getClient().getOffice();
+        helper.checkForBranchClosures(helper.getLatestClosureByBranch(office.getId()), txn.getTransactionDate());
+
+        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
+        chargeWaiverPostings(recognizedFeePortion, recognizedPenaltyPortion, isChargedOff).forEach(accountPostHelper::post);
+    }
+
     /**
      * One entry a transaction's split books: which account, which side, how much.
      *
@@ -246,6 +256,24 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 LedgerPosting.credit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
                 LedgerPosting.credit(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion),
                 LedgerPosting.credit(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion));
+    }
+
+    /**
+     * Books only the recognized part of the waiver, passed in separately because the allocation carries the whole
+     * relief: a charge whose income was never accrued books nothing - crediting a receivable that does not exist would
+     * drive it negative. A waiver addresses exactly one charge, so one credit leg is always zero, and it carries no
+     * write-off reason to map the debit onto. On a charged-off loan the receivables are already off the books, so the
+     * credits go to the charged-off income accounts, as in {@link #writeOffPostings}.
+     */
+    private List<LedgerPosting> chargeWaiverPostings(final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
+            final boolean isChargedOff) {
+        final CashAccountsForLoan feesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES
+                : CashAccountsForLoan.FEES_RECEIVABLE;
+        final CashAccountsForLoan penaltiesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY
+                : CashAccountsForLoan.PENALTIES_RECEIVABLE;
+
+        return List.of(LedgerPosting.debit(CashAccountsForLoan.LOSSES_WRITTEN_OFF, MathUtil.add(feesPortion, penaltiesPortion)),
+                LedgerPosting.credit(feesAccount, feesPortion), LedgerPosting.credit(penaltiesAccount, penaltiesPortion));
     }
 
     /**

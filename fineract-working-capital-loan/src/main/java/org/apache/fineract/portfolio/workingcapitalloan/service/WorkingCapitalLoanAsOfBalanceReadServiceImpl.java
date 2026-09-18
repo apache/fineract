@@ -91,8 +91,10 @@ public class WorkingCapitalLoanAsOfBalanceReadServiceImpl implements WorkingCapi
 
         final BigDecimal principalOutstanding = bucketOutstanding(MathUtil.add(principalCharged, balance.getPrincipalAdjustment()),
                 balance.getPrincipalPaid(), balance.getPrincipalWrittenOff());
-        final BigDecimal feeOutstanding = bucketOutstanding(feeCharged, balance.getFeePaid(), balance.getFeeWrittenOff());
-        final BigDecimal penaltyOutstanding = bucketOutstanding(penaltyCharged, balance.getPenaltyPaid(), balance.getPenaltyWrittenOff());
+        final BigDecimal feeOutstanding = bucketOutstanding(feeCharged, balance.getFeePaid(), balance.getFeeWrittenOff(),
+                balance.getFeeWaived());
+        final BigDecimal penaltyOutstanding = bucketOutstanding(penaltyCharged, balance.getPenaltyPaid(), balance.getPenaltyWrittenOff(),
+                balance.getPenaltyWaived());
 
         return Optional.of(new WorkingCapitalLoanAsOfBalanceData(asOfDate, principalOutstanding, feeOutstanding, penaltyOutstanding,
                 MathUtil.add(principalOutstanding, feeOutstanding, penaltyOutstanding), balance.getOverpaymentAmount(),
