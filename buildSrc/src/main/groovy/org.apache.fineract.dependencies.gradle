@@ -149,7 +149,6 @@ dependencyManagement {
         // fineract client dependencies
         dependency "com.squareup.retrofit2:retrofit:2.12.0"
         dependency "com.squareup.retrofit2:retrofit-mock:2.12.0"
-        dependency "com.squareup.retrofit2:adapter-java8:2.12.0"
         dependency "com.squareup.retrofit2:adapter-rxjava2:2.12.0"
         dependency "com.squareup.retrofit2:adapter-rxjava3:2.12.0"
         dependency "com.squareup.retrofit2:adapter-guava:2.12.0"
@@ -157,7 +156,6 @@ dependencyManagement {
         dependency "com.squareup.retrofit2:converter-jackson:2.12.0"
         dependency "com.squareup.retrofit2:converter-simplexml:2.12.0"
         dependency "com.squareup.retrofit2:converter-jaxb:2.12.0"
-        dependency "com.squareup.retrofit2:converter-java8:2.12.0"
         dependency "com.squareup.retrofit2:converter-scalars:2.12.0"
         dependency "com.squareup.retrofit2:converter-gson:2.12.0"
         dependency "com.squareup.retrofit2:converter-protobuf:2.12.0"
