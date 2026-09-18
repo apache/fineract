@@ -29,7 +29,7 @@ public record EmiAdjustment(//
 ) {
 
     public boolean shouldBeAdjusted() {
-        double lowerHalfOfRelatedPeriods = Math.floor(numberOfRelatedPeriods() / 2.0);
+        double lowerHalfOfRelatedPeriods = Math.floor((numberOfRelatedPeriods() - uncountablePeriods) / 2.0);
         return lowerHalfOfRelatedPeriods > 0.0 && !emiDifference.isZero() && emiDifference.abs() //
                 .multipliedBy(100) //
                 .isGreaterThan(originalEmi.copy(lowerHalfOfRelatedPeriods)); //
