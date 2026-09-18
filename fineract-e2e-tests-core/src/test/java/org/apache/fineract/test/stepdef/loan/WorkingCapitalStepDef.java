@@ -564,8 +564,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         checkWorkingCapitalLoanProductWithExternalIdCreate();
     }
 
-    @When("Admin creates a new Working Capital Loan Product with discount value {string} that is forbidden to be overriden")
-    public void createWorkingCapitalLoanProductNonOverridenDiscount(String discount) {
+    @When("Admin creates a new Working Capital Loan Product with discount value {string} that is forbidden to be overridden")
+    public void createWorkingCapitalLoanProductNonOverriddenDiscount(String discount) {
         final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
         PostAllowAttributeOverrides allowAttributeOverrides = new PostAllowAttributeOverrides().delinquencyBucketClassification(true)
                 .breach(true).discountDefault(false).periodPaymentFrequencyType(true).periodPaymentFrequency(true);

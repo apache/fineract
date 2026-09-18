@@ -1104,6 +1104,10 @@ public final class ErrorMessageHelper {
         return "Failed data validation due to: override.not.allowed.by.product.";
     }
 
+    public static String overrideDisallowedByProductFailure(String disallowedOverrideSettingName) {
+        return String.format("validation.msg.WORKINGCAPITALLOAN.%s.override.not.allowed.by.product", disallowedOverrideSettingName);
+    }
+
     public static String discountAlreadySetBeforeDisburseFailure() {
         return "Discount was already set before disbursement and cannot be added again";
     }

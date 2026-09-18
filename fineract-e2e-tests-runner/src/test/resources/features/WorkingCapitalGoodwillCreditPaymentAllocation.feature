@@ -38,7 +38,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 12 January 2026 | Goodwill Credit | 270.0             | 230.0            | 15.0              | 25.0                  | false    |
     When Admin sets the business date to "15 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 March 2026"
 
   @TestRailId:C85512
   Scenario: Verify Working Capital Goodwill Credit transaction with fee and penalty added with DUE_PENALTY_FEE_PRINCIPAL allocation - UC2
@@ -69,7 +69,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 12 January 2026 | Goodwill Credit | 30.0              | 0.0              | 5.0               | 25.0                  | false    |
     When Admin sets the business date to "15 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 March 2026"
 
   @TestRailId:C85513
   Scenario: Verify Working Capital Goodwill Credit transaction with fee and penalty added with DUE_PRINCIPAL_FEE_PENALTY allocation - UC3
@@ -100,7 +100,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 12 January 2026 | Goodwill Credit | 270.0             | 270.0            | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "15 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 March 2026"
 
   @TestRailId:C85514
   Scenario: Verify Working Capital Goodwill Credit transaction with fee and penalty added with DUE_FEE_PRINCIPAL_PENALTY allocation - UC4
@@ -131,7 +131,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 12 January 2026 | Goodwill Credit | 270.0             | 255.0            | 15.0              | 0.0                   | false    |
     When Admin sets the business date to "15 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 March 2026"
 
   @TestRailId:C85515
   Scenario: Verify Working Capital Goodwill Credit transaction with fee and penalty added with IN_ADVANCE_PENALTY_FEE_PRINCIPAL allocation - UC5
@@ -160,7 +160,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 10 January 2026 | Goodwill Credit | 270.0             | 230.0            | 15.0              | 25.0                  | false    |
     When Admin sets the business date to "15 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 March 2026"
 
   @TestRailId:C85516
   Scenario: Verify Working Capital Goodwill Credit transaction that closes loan with fee and penalty added with DUE_PRINCIPAL_FEE_PENALTY allocation - UC6
@@ -276,7 +276,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
     When Admin sets the business date to "25 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "25 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "25 January 2026"
 
   @TestRailId:C85519
   Scenario: Verify Working Capital Goodwill Credit and fee charge adjustment transaction allocation is processed successfully - UC9
@@ -308,7 +308,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
     When Admin sets the business date to "20 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "20 February 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "20 February 2026"
 
   @TestRailId:C85520
   Scenario: Verify Working Capital Goodwill Credit transaction with charge within amortization schedule with DUE_PENALTY_FEE_PRINCIPAL allocation - UC10
@@ -525,7 +525,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 185       | 05 July 2026     | 15.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
     When Admin sets the business date to "15 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 March 2026"
 
   @TestRailId:C85521
   Scenario: Verify Working Capital Goodwill Credit with fee and penalty charges within amortization schedule with DUE_FEE_PENALTY_PRINCIPAL allocation - UC11
@@ -749,7 +749,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 188       | 08 July 2026     | 8.00                  |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
     When Admin sets the business date to "15 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 March 2026"
 
   @TestRailId:C85522
   Scenario: Verify Working Capital Goodwill Credit uses GOODWILL_CREDIT specific payment allocation rule (DUE_PRINCIPAL_FEE_PENALTY) - UC12
@@ -780,7 +780,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 12 January 2026 | Goodwill Credit | 270.0             | 270.0            | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "15 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 March 2026"
 
   @TestRailId:C85523
   Scenario: Verify Working Capital Goodwill Credit (DUE_PRINCIPAL_FEE_PENALTY) and Repayment (DUE_FEE_PENALTY_PRINCIPAL) apply different payment allocation rules on the same loan - UC13
@@ -814,7 +814,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 15.0       | 0.0             | 15.0     | 25.0           | 0.0                 | 25.0         |
     When Admin sets the business date to "20 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "20 February 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "20 February 2026"
 
   @TestRailId:C85524
   Scenario: Verify Working Capital Goodwill Credit paid in full follows the GOODWILL_CREDIT specific payment allocation rule - UC14
@@ -919,7 +919,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 13 January 2026 | Repayment       | 40.0              | 0.0              | 15.0              | 25.0                  | false    |
     When Admin sets the business date to "15 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 January 2026"
 
   @TestRailId:C85527
   Scenario: Verify backdated Working Capital Goodwill Credit reprocessing replays each transaction with its own payment allocation rule - UC17
@@ -955,7 +955,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
     When Admin sets the business date to "25 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "25 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "25 January 2026"
 
   @TestRailId:C85528
   Scenario: Verify undo of Working Capital Goodwill Credit re-allocates the remaining transactions with their own payment allocation rules - UC18
@@ -995,7 +995,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 15.0       | 0.0             | 15.0     | 25.0           | 0.0                 | 25.0         |
-    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 January 2026"
 
   @TestRailId:C85529
   Scenario: Verify Working Capital Goodwill Credit allocates to in advance fee and penalty buckets of the GOODWILL_CREDIT specific rule - UC19
