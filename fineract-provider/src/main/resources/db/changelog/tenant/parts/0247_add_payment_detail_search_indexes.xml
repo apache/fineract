@@ -22,13 +22,63 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="fineract" id="1">
+    <changeSet author="fineract" id="1" runInTransaction="false" context="postgresql">
+        <validCheckSum>9:7278f63f0c4dce719d1408997000509f</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_payment_detail" columnNames="check_number"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_payment_detail_check_number on m_payment_detail(check_number);
+        </sql>
+    </changeSet>
+    <changeSet author="fineract" id="2" runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_payment_detail" columnNames="routing_code"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_payment_detail_routing_code on m_payment_detail(routing_code);
+        </sql>
+    </changeSet>
+    <changeSet author="fineract" id="3" runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_payment_detail" columnNames="receipt_number"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_payment_detail_receipt_number on m_payment_detail(receipt_number);
+        </sql>
+    </changeSet>
+    <changeSet author="fineract" id="4-mysql" runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_payment_detail" columnNames="check_number"/>
+            </not>
+        </preConditions>
         <createIndex indexName="idx_m_payment_detail_check_number" tableName="m_payment_detail">
             <column name="check_number"/>
         </createIndex>
+    </changeSet>
+    <changeSet author="fineract" id="5-mysql" runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_payment_detail" columnNames="routing_code"/>
+            </not>
+        </preConditions>
         <createIndex indexName="idx_m_payment_detail_routing_code" tableName="m_payment_detail">
             <column name="routing_code"/>
         </createIndex>
+    </changeSet>
+    <changeSet author="fineract" id="6-mysql" runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_payment_detail" columnNames="receipt_number"/>
+            </not>
+        </preConditions>
         <createIndex indexName="idx_m_payment_detail_receipt_number" tableName="m_payment_detail">
             <column name="receipt_number"/>
         </createIndex>

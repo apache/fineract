@@ -21,8 +21,8 @@
 # check-liquibase-ddl-safety.sh
 #
 # Scans Liquibase XML changesets introduced in a PR for dangerous DDL
-# operations on critical tables and invalid DATETIME precision. Designed for
-# CI but also runs locally.
+# operations on critical tables, invalid DATETIME precision, and index creation
+# that would lock a table on PostgreSQL. Designed for CI but also runs locally.
 #
 # Uses only bash builtins + grep/sed (no xmllint dependency).
 #
@@ -115,6 +115,7 @@ done < "$DANGEROUS_OPS_FILE"
 
 # ---- Find changed XML files ----
 CHANGED_FILES=()
+MERGE_BASE=""
 if [[ -n "$FILES_OVERRIDE" ]]; then
     IFS=',' read -ra CHANGED_FILES <<< "$FILES_OVERRIDE"
 else
@@ -290,6 +291,175 @@ find_invalid_datetime_precision_in_sql_blocks() {
     ' "$local_file"
 }
 
+# Line numbers this PR added to a file, one per line. Empty output means "no
+# diff available" (--files mode), and callers then scan the whole file.
+added_lines_of() {
+    local file="$1"
+    [[ -z "$MERGE_BASE" ]] && return 0
+    git -C "$REPO_ROOT" diff -U0 "$MERGE_BASE".."$HEAD_REF" -- "$file" 2>/dev/null \
+        | awk '
+        /^@@/ {
+            # @@ -old,count +new,count @@ — $3 is the "+new,count" field.
+            split($3, hunk, ",")
+            start = substr(hunk[1], 2) + 0
+            count = (hunk[2] == "" ? 1 : hunk[2] + 0)
+            for (i = 0; i < count; i++) print start + i
+        }' || true
+}
+
+# Index creation that would take an ACCESS EXCLUSIVE lock on PostgreSQL.
+#
+# CREATE INDEX blocks every reader and writer of the table until the index is
+# built. On a large table in a live deployment that is an outage. PostgreSQL's
+# CREATE INDEX CONCURRENTLY builds without the lock, but it cannot run inside a
+# transaction block, so its changeSet must carry runInTransaction="false".
+# Liquibase's <createIndex> element has no way to emit CONCURRENTLY, which makes
+# it unusable for PostgreSQL; the MySQL form belongs in its own context="mysql"
+# changeSet.
+#
+# Emits: <line>|<kind>|<table>|<detail>
+# Kinds: createIndex | raw-sql | concurrent-in-transaction
+find_unsafe_index_creation() {
+    local local_file="$1"
+    local added_file="$2"
+    awk -v added_file="$added_file" '
+    function lc_strip(s) { s = tolower(s); gsub(/[ \t\r\n]/, "", s); return s }
+
+    # Value of attribute `name` within the already-collected tag text `t`.
+    function attr(t, name,    v, p) {
+        if (match(t, "[ \t]" name "[ \t]*=[ \t]*\"")) {
+            v = substr(t, RSTART + RLENGTH)
+            p = index(v, "\"")
+            if (p > 0) return substr(v, 1, p - 1)
+        }
+        return ""
+    }
+
+    # Text of the <tagname ...> opening on line `start`, joined across line
+    # breaks so attributes spread over several lines are still visible.
+    function collect_tag(start, tagname,    i, s, p, t) {
+        t = ""
+        for (i = start; i <= n; i++) {
+            s = lines[i]
+            if (i == start) {
+                p = index(s, "<" tagname)
+                if (p == 0) return ""
+                s = substr(s, p)
+            }
+            t = t " " s
+            if (index(s, ">") > 0) break
+        }
+        p = index(t, ">")
+        if (p > 0) t = substr(t, 1, p)
+        return t
+    }
+
+    # Can a changeSet carrying these context/dbms attributes reach PostgreSQL?
+    function targets_postgres(ctx, dbms,    c, d, i, count, toks, tok) {
+        d = lc_strip(dbms)
+        if (d != "") {
+            if (substr(d, 1, 1) == "!") {
+                if (index(d, "postgres") > 0) return 0
+            } else {
+                return (index(d, "postgres") > 0) ? 1 : 0
+            }
+        }
+        c = lc_strip(ctx)
+        if (c == "") return 1
+        if (index(c, "postgres") > 0) return 1
+        # Rule the changeSet out only when every token names another database.
+        # Functional contexts (tenant_db, initial_switch, ...) do reach PostgreSQL.
+        gsub(/[()]/, "", c)
+        count = split(c, toks, /,|and|or/)
+        for (i = 1; i <= count; i++) {
+            tok = toks[i]
+            if (tok == "") continue
+            if (tok != "mysql" && tok != "mariadb" && tok != "!postgresql") return 1
+        }
+        return 0
+    }
+
+    # Table named by the ON clause of a CREATE INDEX statement. `rest` is the
+    # upper-cased tail used for matching, `raw` the same tail in original case.
+    function sql_table(rest, raw,    t) {
+        if (!match(rest, /[ \t]ON[ \t]+/)) return "unknown"
+        t = substr(raw, RSTART + RLENGTH)
+        sub(/[ \t(;].*$/, "", t)
+        gsub(/["`]/, "", t)
+        return (t == "") ? "unknown" : tolower(t)
+    }
+
+    # Report only on what this PR touched: either the offending line itself or
+    # the opening tag of its changeSet, so flipping an existing changeSet to a
+    # PostgreSQL context is caught too. Pre-existing changesets stay silent.
+    function touched(line_no) {
+        if (!have_diff) return 1
+        return ((line_no in added) || (cs_line in added))
+    }
+
+    BEGIN {
+        have_diff = 0
+        if (added_file != "") {
+            while ((getline a < added_file) > 0) { added[a + 0] = 1; have_diff = 1 }
+            close(added_file)
+        }
+    }
+
+    { lines[NR] = $0 }
+
+    END {
+        n = NR
+        in_cs = 0
+        for (i = 1; i <= n; i++) {
+            line = lines[i]
+
+            if (!in_cs) {
+                if (index(line, "<changeSet") > 0) {
+                    tag = collect_tag(i, "changeSet")
+                    cs_line = i
+                    cs_id = attr(tag, "id")
+                    cs_ctx = attr(tag, "context")
+                    if (cs_ctx == "") cs_ctx = attr(tag, "contextFilter")
+                    cs_pg = targets_postgres(cs_ctx, attr(tag, "dbms"))
+                    cs_tx = lc_strip(attr(tag, "runInTransaction"))
+                    in_cs = 1
+                }
+                continue
+            }
+
+            if (index(line, "</changeSet>") > 0) { in_cs = 0; continue }
+            if (!cs_pg || !touched(i)) continue
+
+            if (index(line, "<createIndex") > 0) {
+                itag = collect_tag(i, "createIndex")
+                tbl = attr(itag, "tableName")
+                if (tbl == "") tbl = "unknown"
+                print i "|createIndex|" tolower(tbl) "|changeSet id=" cs_id
+            }
+
+            # Raw SQL CREATE [UNIQUE] INDEX, possibly more than one per line.
+            u = toupper(line)
+            off = 0
+            while (1) {
+                seg = substr(u, off + 1)
+                if (!match(seg, /CREATE[ \t]+(UNIQUE[ \t]+)?INDEX[ \t]/)) break
+                start = RSTART; len = RLENGTH
+                rest = substr(seg, start + len)
+                raw = substr(line, off + start + len)
+                tbl = sql_table(rest, raw)
+                if (match(rest, /^CONCURRENTLY([ \t]|$)/)) {
+                    if (cs_tx != "false")
+                        print i "|concurrent-in-transaction|" tbl "|changeSet id=" cs_id
+                } else {
+                    print i "|raw-sql|" tbl "|changeSet id=" cs_id
+                }
+                off = off + start + len - 1
+            }
+        }
+    }
+    ' "$local_file"
+}
+
 # ---- Scan each changed file ----
 for file in "${CHANGED_FILES[@]}"; do
     local_file="$REPO_ROOT/$file"
@@ -382,6 +552,41 @@ for file in "${CHANGED_FILES[@]}"; do
             fi
         fi
     done < <(echo "$FLAT_CONTENT" | grep -oP '<addColumn[^>]*tableName="\K[^"]+' 2>/dev/null | sort -u || true)
+
+    # ---- Check index creation concurrency (PostgreSQL) ----
+    # A plain CREATE INDEX locks the table against all reads and writes for as
+    # long as the build takes. Only lines this PR touched are reported, so the
+    # many pre-existing <createIndex> changesets stay quiet unless edited.
+    ADDED_LINES_FILE=""
+    if [[ -z "$FILES_OVERRIDE" ]]; then
+        ADDED_LINES_FILE="$(mktemp)"
+        added_lines_of "$file" > "$ADDED_LINES_FILE"
+    fi
+
+    while IFS='|' read -r idx_line idx_kind idx_table idx_detail; do
+        [[ -z "$idx_line" ]] && continue
+        case "$idx_kind" in
+            createIndex)
+                add_violation "BLOCKING" "$file" "createIndex-not-concurrent" "$idx_table" \
+                    "<createIndex> cannot emit CONCURRENTLY; on PostgreSQL it locks the table against reads and writes while the index builds" \
+                    "line: $idx_line, $idx_detail"
+                ;;
+            raw-sql)
+                add_violation "BLOCKING" "$file" "raw-SQL-index-not-concurrent" "$idx_table" \
+                    "CREATE INDEX without CONCURRENTLY locks the table against reads and writes while the index builds" \
+                    "line: $idx_line, $idx_detail"
+                ;;
+            concurrent-in-transaction)
+                add_violation "BLOCKING" "$file" "index-concurrent-in-transaction" "n/a" \
+                    "CREATE INDEX CONCURRENTLY cannot run inside a transaction block; the changeSet needs runInTransaction=\"false\"" \
+                    "line: $idx_line, table: $idx_table, $idx_detail"
+                ;;
+        esac
+    done < <(find_unsafe_index_creation "$local_file" "$ADDED_LINES_FILE")
+
+    if [[ -n "$ADDED_LINES_FILE" ]]; then
+        rm -f "$ADDED_LINES_FILE"
+    fi
 
     # ---- Check raw SQL blocks for dangerous DDL ----
     # Extract text between <sql> and </sql> tags
@@ -480,6 +685,7 @@ if [[ $BLOCKING_COUNT -gt 0 ]]; then
     MD_REPORT+="- **Instead of RENAME COLUMN**: Add new column, backfill, update code, drop old column in a later release"$'\n'
     MD_REPORT+="- **Instead of ADD NOT NULL**: Add as nullable first, backfill defaults, add constraint in a later release"$'\n'
     MD_REPORT+="- **Instead of DATETIME**: Use \`DATETIME(6)\` to preserve MySQL microsecond precision"$'\n'
+    MD_REPORT+="- **Instead of \`<createIndex>\` / plain \`CREATE INDEX\`**: split the index into two changesets — \`context=\"postgresql\"\` with \`runInTransaction=\"false\"\` running \`CREATE INDEX CONCURRENTLY\` as raw \`<sql>\`, and \`context=\"mysql\"\` with the MySQL form"$'\n'
 fi
 
 # Print to console
