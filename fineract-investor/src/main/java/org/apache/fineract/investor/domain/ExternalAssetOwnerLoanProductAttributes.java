@@ -39,7 +39,7 @@ public class ExternalAssetOwnerLoanProductAttributes extends AbstractAuditableWi
     @Column(name = "attribute_key", nullable = false)
     private String attributeKey;
 
-    @Column(name = "attribute_value", nullable = false)
+    @Column(name = "attribute_value", nullable = false, length = 2000)
     private String attributeValue;
 
 }
