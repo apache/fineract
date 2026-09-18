@@ -504,13 +504,14 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
 
     /**
      * Only the first period carries the breach grace days; every path that re-dates a period must agree on this or the
-     * undo restore drifts by the grace days.
+     * undo restore drifts by the grace days, which is why the rule itself lives in
+     * {@link WorkingCapitalLoanBreachScheduleEvaluationUtils#calculateNaturalToDate} and is shared with the reschedule
+     * validator.
      */
     private LocalDate naturalToDate(final WorkingCapitalLoan loan, final int periodNumber, final LocalDate fromDate,
             final EffectiveBreachRescheduleParams params) {
-        final int graceDays = periodNumber == 1 ? getBreachGraceDays(loan) : 0;
-        return WorkingCapitalLoanBreachScheduleEvaluationUtils.calculateToDate(fromDate, params.frequency(), params.frequencyType())
-                .plusDays(graceDays);
+        return WorkingCapitalLoanBreachScheduleEvaluationUtils.calculateNaturalToDate(fromDate, periodNumber, params.frequency(),
+                params.frequencyType(), getBreachGraceDays(loan));
     }
 
     /**
