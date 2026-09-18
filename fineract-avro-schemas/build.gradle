@@ -131,3 +131,11 @@ tasks.named('sourcesJar') {
     dependsOn tasks.named('buildJavaSdk')
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
+
+// The generated Avro SDK targets Java 8; JUnit 6 (managed by the Boot 4 BOM) requires JVM 17+,
+// so keep this module's test stack on the JUnit 5 line
+dependencyManagement {
+    imports {
+        mavenBom 'org.junit:junit-bom:5.14.4'
+    }
+}
