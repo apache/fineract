@@ -265,7 +265,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId", summary = "Execute Working Capital Loan transaction command by loan id and transaction id", description = "Supported command query parameter: undo")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId", summary = "Execute Working Capital Loan transaction command by loan id and transaction id", description = "Supported command query parameter: undo, adjust")
     @Path("{loanId}/transactions/{transactionId}")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.ExecuteWorkingCapitalLoanTransactionCommandRequest.class)))
     @ApiResponses({
@@ -281,7 +281,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionExternalId", summary = "Execute Working Capital Loan transaction command by loan id and transaction external id", description = "Supported command query parameter: undo")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionExternalId", summary = "Execute Working Capital Loan transaction command by loan id and transaction external id", description = "Supported command query parameter: undo, adjust")
     @Path("{loanId}/transactions/external-id/{transactionExternalId}")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.ExecuteWorkingCapitalLoanTransactionCommandRequest.class)))
     @ApiResponses({
@@ -347,7 +347,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanExternalIdTransactionId", summary = "Execute Working Capital Loan transaction command by loan external id and transaction id", description = "Supported command query parameter: undo")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanExternalIdTransactionId", summary = "Execute Working Capital Loan transaction command by loan external id and transaction id", description = "Supported command query parameter: undo, adjust")
     @Path("external-id/{loanExternalId}/transactions/{transactionId}")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.ExecuteWorkingCapitalLoanTransactionCommandRequest.class)))
     @ApiResponses({
@@ -363,7 +363,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanExternalIdTransactionExternalId", summary = "Execute Working Capital Loan transaction command by loan external id and transaction external id", description = "Supported command query parameter: undo")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanExternalIdTransactionExternalId", summary = "Execute Working Capital Loan transaction command by loan external id and transaction external id", description = "Supported command query parameter: undo, adjust")
     @Path("external-id/{loanExternalId}/transactions/external-id/{transactionExternalId}")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.ExecuteWorkingCapitalLoanTransactionCommandRequest.class)))
     @ApiResponses({
@@ -386,6 +386,8 @@ public class WorkingCapitalLoanTransactionsApiResource {
         final CommandWrapper commandRequest;
         if (CommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.UNDO_COMMAND)) {
             commandRequest = builder.undoWorkingCapitalLoanTransaction(resolvedLoanId, resolvedTransactionId).build();
+        } else if (CommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.ADJUST_COMMAND)) {
+            commandRequest = builder.adjustWorkingCapitalLoanTransaction(resolvedLoanId, resolvedTransactionId).build();
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }

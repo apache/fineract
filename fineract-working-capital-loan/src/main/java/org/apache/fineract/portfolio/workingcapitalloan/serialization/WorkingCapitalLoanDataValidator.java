@@ -95,6 +95,10 @@ public class WorkingCapitalLoanDataValidator {
 
     private static final Set<String> UNDO_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
             WorkingCapitalLoanConstants.reversalExternalIdParamName, WorkingCapitalLoanConstants.noteParamName));
+    private static final Set<String> ADJUST_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(
+            Arrays.asList("locale", "dateFormat", WorkingCapitalLoanConstants.transactionDateParamName,
+                    WorkingCapitalLoanConstants.transactionAmountParamName, WorkingCapitalLoanConstants.reversalExternalIdParamName,
+                    WorkingCapitalLoanConstants.noteParamName, WorkingCapitalLoanConstants.paymentDetailsParamName));
 
     private static final Set<String> PAYMENT_DETAILS_SUPPORTED_PARAMETERS = new HashSet<>(
             Arrays.asList(WorkingCapitalLoanConstants.paymentTypeIdParamName, WorkingCapitalLoanConstants.accountNumberParamName,
@@ -1185,6 +1189,75 @@ public class WorkingCapitalLoanDataValidator {
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateAdjustTransaction(final JsonCommand command, final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transaction) {
+        final String json = command.getJsonCommand();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ADJUST_TRANSACTION_SUPPORTED_PARAMETERS);
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        validatePaymentDetailsParameters(typeOfMap, element);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+
+        if (transaction.isReversed()) {
+            baseDataValidator.reset().parameter("transaction").failWithCode("transaction.already.undone", transaction.getId());
+        }
+
+        final LoanStatus loanStatus = loan.getLoanStatus();
+        final boolean adjustAllowedForStatus = LoanStatus.ACTIVE.equals(loanStatus) || LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loanStatus)
+                || LoanStatus.OVERPAID.equals(loanStatus);
+        if (!adjustAllowedForStatus) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
+                    .failWithCode("adjust.transaction.not.allowed.for.loan.status");
+        }
+
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.transactionDateParamName,
+                element);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate).notNull();
+        if (transactionDate != null) {
+            if (DateUtils.isDateInTheFuture(transactionDate)) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
+                        .failWithCode("cannot.be.a.future.date");
+            }
+            if (loan.getFirstActualDisbursementDate() != null
+                    && DateUtils.isBefore(transactionDate, loan.getFirstActualDisbursementDate())) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
+                        .failWithCode("cannot.be.before.disbursal.date");
+            }
+        }
+
+        final BigDecimal transactionAmount = this.fromApiJsonHelper
+                .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, element, new HashSet<>());
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName).value(transactionAmount).notNull()
+                .zeroOrPositiveAmount();
+
+        if (MathUtil.isGreaterThanZero(transactionAmount) && !isEditableForPartialAdjustment(transaction.getTypeOf())) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionTypeParamName)
+                    .failWithCode("adjust.with.amount.not.allowed.for.transaction.type");
+        }
+
+        validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.reversalExternalIdParamName);
+        final String note = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.noteParamName, element);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.noteParamName).value(note).ignoreIfNull()
+                .notExceedingLengthOf(NOTE_MAX_LENGTH);
+
+        validatePaymentDetails(baseDataValidator, element);
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private boolean isEditableForPartialAdjustment(final LoanTransactionType transactionType) {
+        // Same spirit as LoanTransaction.isEditable(): refund-like credits are reverse-only (amount zero)
+        return !(LoanTransactionType.GOODWILL_CREDIT.equals(transactionType) || LoanTransactionType.PAYOUT_REFUND.equals(transactionType)
+                || LoanTransactionType.CHARGE_ADJUSTMENT.equals(transactionType));
     }
 
     public void validateChargeOff(final JsonCommand command, final WorkingCapitalLoan loan) {

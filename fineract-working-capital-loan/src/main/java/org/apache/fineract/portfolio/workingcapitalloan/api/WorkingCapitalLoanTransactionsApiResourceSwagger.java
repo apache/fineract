@@ -238,13 +238,25 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String resourceExternalId;
     }
 
-    @Schema(description = "Request for working capital loan transaction command execution")
+    @Schema(description = "Request for working capital loan transaction command execution (undo / adjust)")
     public static final class ExecuteWorkingCapitalLoanTransactionCommandRequest {
 
         private ExecuteWorkingCapitalLoanTransactionCommandRequest() {}
 
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "10 January 2026", description = "Transaction date for the replacement transaction when adjusting with a non-zero amount")
+        public String transactionDate;
+        @Schema(example = "0", description = "Zero reverses the existing transaction (same as undo). A positive amount reverses it and creates a replacement")
+        public BigDecimal transactionAmount;
+        @Schema(example = "random text")
+        public String note;
         @Schema(example = "loan-ext-001")
         public String reversalExternalId;
+        @Schema(description = "Optional payment details for the replacement transaction when adjusting with a non-zero amount")
+        public PostWorkingCapitalLoanTransactionsPaymentDetailRequest paymentDetails;
     }
 
     @Schema(description = "Response for working capital loan transaction command execution")

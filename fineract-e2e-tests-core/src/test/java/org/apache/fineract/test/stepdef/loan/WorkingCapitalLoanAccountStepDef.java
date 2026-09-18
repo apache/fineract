@@ -4351,6 +4351,61 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         Assertions.assertNotNull(undo);
     }
 
+    @When("Customer adjust {string}th {string} transaction made on {string} on Working Capital loan with amount {string}")
+    public void adjustNthWorkingCapitalLoanTransaction(final String nthItemStr, final String transactionType, final String transactionDate,
+            final String amount) {
+        adjustNthWorkingCapitalLoanTransaction(nthItemStr, transactionType, transactionDate, amount, null);
+    }
+
+    @When("Customer adjust {string}th {string} transaction made on {string} on Working Capital loan with amount {string} and payment details:")
+    public void adjustNthWorkingCapitalLoanTransactionWithPaymentDetails(final String nthItemStr, final String transactionType,
+            final String transactionDate, final String amount, final DataTable table) {
+        adjustNthWorkingCapitalLoanTransaction(nthItemStr, transactionType, transactionDate, amount, buildPaymentDetailsFromTable(table));
+    }
+
+    private void adjustNthWorkingCapitalLoanTransaction(final String nthItemStr, final String transactionType, final String transactionDate,
+            final String amount, final PostWorkingCapitalLoanTransactionsPaymentDetailRequest paymentDetails) {
+        final Long loanId = getCreatedLoanId();
+        final GetWorkingCapitalLoanTransactionsResponse response = retrieveLoanTransactions(loanId);
+        final TransactionType resolvedType = resolveTransactionType(transactionType);
+        final String expectedCode = "loanTransactionType." + resolvedType.getValue();
+        final int nthItem = Integer.parseInt(nthItemStr) - 1;
+
+        assert response.getContent() != null;
+        final GetWorkingCapitalLoanTransactionIdResponse target = response.getContent().stream().filter(t -> {
+            if (t.getType() == null || !expectedCode.equals(t.getType().getCode())) {
+                return false;
+            }
+            assert t.getTransactionDate() != null;
+            return transactionDate.equals(FORMATTER.format(t.getTransactionDate())) && !Boolean.TRUE.equals(t.getReversed());
+        }).toList().get(nthItem);
+
+        final BigDecimal amountValue = new BigDecimal(amount);
+        final String reversalExternalId = Utils.randomStringGenerator("wcl-adjust-reversal-ext-id", 8);
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest()
+                .locale(WorkingCapitalLoanRequestFactory.DEFAULT_LOCALE).dateFormat(DATE_FORMAT).transactionDate(transactionDate)
+                .transactionAmount(amountValue).note("working capital transaction adjustment").reversalExternalId(reversalExternalId);
+        if (paymentDetails != null) {
+            request.paymentDetails(paymentDetails);
+        }
+
+        final ExecuteWorkingCapitalLoanTransactionCommandResponse adjustResponse = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, target.getId(), "adjust", request));
+        Assertions.assertNotNull(adjustResponse);
+        testContext().set(TestContextKey.LOAN_REPAYMENT_UNDO_RESPONSE, adjustResponse);
+        if (amountValue.compareTo(BigDecimal.ZERO) > 0) {
+            rememberLastWorkingCapitalTransaction(resolvedType.getValue(), transactionDate, amountValue);
+        }
+    }
+
+    @Then("a Working Capital Loan Adjust Transaction business event is raised for the adjusted repayment with new amount {string}")
+    public void aWorkingCapitalLoanAdjustTransactionBusinessEventIsRaisedForPartialAdjust(final String newAmount) {
+        final ExecuteWorkingCapitalLoanTransactionCommandResponse adjustResponse = testContext()
+                .get(TestContextKey.LOAN_REPAYMENT_UNDO_RESPONSE);
+        eventCheckHelper.workingCapitalLoanAdjustTransactionPartialEventCheck(getCreatedLoanId(), new BigDecimal(newAmount),
+                adjustResponse.getResourceId());
+    }
+
     private void verifyTransactionsJournalEntries(final String transactionType, final String transactionDate, final boolean reversed,
             final Integer expectedCount, final DataTable table) {
         final Long loanId = getCreatedLoanId();

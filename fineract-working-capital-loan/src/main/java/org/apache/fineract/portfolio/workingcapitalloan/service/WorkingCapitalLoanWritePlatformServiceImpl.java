@@ -737,6 +737,21 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         };
     }
 
+    @Override
+    public CommandProcessingResult adjustTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
+        final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        final WorkingCapitalLoanTransaction transaction = transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
+                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
+                        "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
+
+        return switch (transaction.getTypeOf()) {
+            case REPAYMENT, GOODWILL_CREDIT, CHARGE_ADJUSTMENT, PAYOUT_REFUND -> adjustRepaymentLikeTransaction(loan, transaction, command);
+            default -> throw new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.adjust.not.supported",
+                    "Adjust is not supported for transaction type " + transaction.getTypeOf(),
+                    WorkingCapitalLoanConstants.transactionTypeParamName);
+        };
+    }
+
     private CommandProcessingResult undoDiscountFeeAdjustment(final WorkingCapitalLoan loan,
             final WorkingCapitalLoanTransaction adjustmentTransaction, final JsonCommand command) {
         validator.validateUndoDiscountAdjustmentTransaction(loan, adjustmentTransaction);
@@ -1085,10 +1100,28 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
     public CommandProcessingResult undoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
             JsonCommand command) {
-
         validator.validateUndoTransaction(command, loan, transaction);
+        return reverseRepaymentLikeTransaction(loan, transaction, command);
+    }
+
+    private CommandProcessingResult reverseRepaymentLikeTransaction(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transaction, final JsonCommand command) {
 
         final LoanStatus oldStatus = loan.getLoanStatus();
+        final Map<String, Object> changes = reverseRepaymentLikeTransactionCore(loan, transaction, command);
+
+        handleNote(loan, command, changes);
+        this.loanRepository.saveAndFlush(loan);
+        adjustTransactionEventPublisher.publishReversal(loan.getId(), transaction);
+        notifyBalanceChanged(loan);
+        notifyStatusChanged(loan, oldStatus);
+
+        return new CommandProcessingResultBuilder().withLoanId(loan.getId()).withLoanExternalId(loan.getExternalId())
+                .withEntityId(transaction.getId()).withEntityExternalId(transaction.getExternalId()).with(changes).build();
+    }
+
+    private Map<String, Object> reverseRepaymentLikeTransactionCore(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transaction, final JsonCommand command) {
         Map<String, Object> changes = new HashMap<>();
         changes.put("reversed", true);
         transaction.setReversed(true);
@@ -1139,16 +1172,54 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
 
         changes.put("status", loan.getLoanStatus());
+        return changes;
+    }
 
+    private CommandProcessingResult adjustRepaymentLikeTransaction(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transactionToAdjust, final JsonCommand command) {
+        validator.validateAdjustTransaction(command, loan, transactionToAdjust);
+
+        final BigDecimal newAmount = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanConstants.transactionAmountParamName);
+        if (!MathUtil.isGreaterThanZero(newAmount)) {
+            // Zero amount reuses the undo reverse path (same behaviour as ?command=undo).
+            return reverseRepaymentLikeTransaction(loan, transactionToAdjust, command);
+        }
+
+        final LoanStatus oldStatus = loan.getLoanStatus();
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed(WorkingCapitalLoanConstants.transactionDateParamName);
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put(WorkingCapitalLoanConstants.transactionDateParamName, transactionDate);
+        changes.put(WorkingCapitalLoanConstants.transactionAmountParamName, newAmount);
+
+        // Lift the external id off the reversed transaction onto its replacement (reverse-replay semantics).
+        final ExternalId liftedExternalId = transactionToAdjust.getExternalId() != null && !transactionToAdjust.getExternalId().isEmpty()
+                ? transactionToAdjust.getExternalId()
+                : this.externalIdFactory.create();
+        transactionToAdjust.setExternalId(ExternalId.empty());
+
+        changes.putAll(reverseRepaymentLikeTransactionCore(loan, transactionToAdjust, command));
+        this.transactionRepository.saveAndFlush(transactionToAdjust);
+
+        final PaymentDetail paymentDetail = createAndPersistPaymentDetailFromCommand(command, changes);
+        final WorkingCapitalLoanTransaction newTransaction = resolveNewTransaction(transactionToAdjust.getTypeOf(), loan, newAmount,
+                paymentDetail, transactionDate, transactionToAdjust.getClassification(), liftedExternalId);
+
+        saveNewTransactionRelation(newTransaction, transactionToAdjust, LoanTransactionRelationTypeEnum.REPLAYED);
+
+        transactionProcessor.processRepaymentLikeTransaction(loan, newTransaction, transactionDate, newAmount);
+
+        changes.put("status", loan.getLoanStatus());
         handleNote(loan, command, changes);
 
         this.loanRepository.saveAndFlush(loan);
-        adjustTransactionEventPublisher.publishReversal(loan.getId(), transaction);
+        adjustTransactionEventPublisher.publishAdjustment(loan.getId(), transactionToAdjust, newTransaction);
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, oldStatus);
 
-        return new CommandProcessingResultBuilder().withLoanId(loan.getId()).withLoanExternalId(loan.getExternalId())
-                .withEntityId(transaction.getId()).withEntityExternalId(transaction.getExternalId()).with(changes).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withLoanId(loan.getId())
+                .withLoanExternalId(loan.getExternalId()).withEntityId(newTransaction.getId())
+                .withEntityExternalId(newTransaction.getExternalId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
+                .with(changes).build();
     }
 
     private boolean isChargesInvolved(WorkingCapitalLoan loan) {
