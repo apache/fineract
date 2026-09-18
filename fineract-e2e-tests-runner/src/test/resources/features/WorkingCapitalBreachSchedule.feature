@@ -468,7 +468,8 @@ Feature: Working Capital Breach Schedule
   Scenario: Verify that breachStartDate and delinquencyStartDate are populated once the loan is in breach and delinquent
     # Validates breachStartDate / delinquencyStartDate on the GET loan by response
     # breachStartDate       = fromDate of the earliest breached breach-schedule period
-    # delinquencyStartDate  = fromDate of the earliest delinquent range-schedule period + delinquencyGraceDays
+    # delinquencyStartDate  = fromDate of the earliest delinquent range-schedule period (the range schedule bakes
+    #                         delinquencyGraceDays into the toDate of its first period, so the fromDate is the raw anchor)
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
