@@ -2674,11 +2674,11 @@ public final class LoanProductDataValidator {
             }
         }
 
-        if (mandatoryGuarantee.compareTo(minimumGuaranteeFromOwnFunds.add(minimumGuaranteeFromGuarantor)) < 0) {
-            baseDataValidator.parameter(LoanProductConstants.mandatoryGuaranteeParamName)
-                    .failWithCode("must.be.greater.than.sum.of.min.funds");
+        if (mandatoryGuarantee.compareTo(minimumGuaranteeFromOwnFunds.add(minimumGuaranteeFromGuarantor)) != 0) {
+            baseDataValidator.reset().parameter(LoanProductConstants.mandatoryGuaranteeParamName).failWithCode(
+                    "must.be.equal.to.sum.of.own.and.guarantor.funds",
+                    "Mandatory Guarantee should be equal to sum of own fund and guarantor fund OR any one of them");
         }
-
     }
 
     private void validatePartialPeriodSupport(final Integer interestCalculationPeriodType, final DataValidatorBuilder baseDataValidator,
