@@ -39,6 +39,7 @@ public class AccountTransferRequest implements Serializable {
     private String fromClientId;
     private String locale;
     private String transferDate;
+    private String transferTime;
     private String fromAccountType;
     private String toClientId;
     private String fromAccountId;
