@@ -90,20 +90,20 @@ public final class SavingsAccountSummary {
         //
     }
 
-    public void updateSummary(final MonetaryCurrency currency, final SavingsAccountTransactionSummaryWrapper wrapper,
-            final List<SavingsAccountTransaction> transactions) {
+    public void updateSummary(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
 
-        this.totalDeposits = wrapper.calculateTotalDeposits(currency, transactions);
-        this.totalWithdrawals = wrapper.calculateTotalWithdrawals(currency, transactions);
-        this.totalInterestPosted = wrapper.calculateTotalInterestPosted(currency, transactions);
-        this.totalWithdrawalFees = wrapper.calculateTotalWithdrawalFees(currency, transactions);
-        this.totalAnnualFees = wrapper.calculateTotalAnnualFees(currency, transactions);
-        this.totalFeeCharge = wrapper.calculateTotalFeesCharge(currency, transactions);
-        this.totalPenaltyCharge = wrapper.calculateTotalPenaltyCharge(currency, transactions);
-        this.totalFeeChargesWaived = wrapper.calculateTotalFeesChargeWaived(currency, transactions);
-        this.totalPenaltyChargesWaived = wrapper.calculateTotalPenaltyChargeWaived(currency, transactions);
-        this.totalOverdraftInterestDerived = wrapper.calculateTotalOverdraftInterest(currency, transactions);
-        this.totalWithholdTax = wrapper.calculateTotalWithholdTaxWithdrawal(currency, transactions);
+        this.totalDeposits = SavingsAccountTransactionSummaryWrapper.calculateTotalDeposits(currency, transactions);
+        this.totalWithdrawals = SavingsAccountTransactionSummaryWrapper.calculateTotalWithdrawals(currency, transactions);
+        this.totalInterestPosted = SavingsAccountTransactionSummaryWrapper.calculateTotalInterestPosted(currency, transactions);
+        this.totalWithdrawalFees = SavingsAccountTransactionSummaryWrapper.calculateTotalWithdrawalFees(currency, transactions);
+        this.totalAnnualFees = SavingsAccountTransactionSummaryWrapper.calculateTotalAnnualFees(currency, transactions);
+        this.totalFeeCharge = SavingsAccountTransactionSummaryWrapper.calculateTotalFeesCharge(currency, transactions);
+        this.totalPenaltyCharge = SavingsAccountTransactionSummaryWrapper.calculateTotalPenaltyCharge(currency, transactions);
+        this.totalFeeChargesWaived = SavingsAccountTransactionSummaryWrapper.calculateTotalFeesChargeWaived(currency, transactions);
+        this.totalPenaltyChargesWaived = SavingsAccountTransactionSummaryWrapper.calculateTotalPenaltyChargeWaived(currency, transactions);
+        this.totalOverdraftInterestDerived = SavingsAccountTransactionSummaryWrapper.calculateTotalOverdraftInterest(currency,
+                transactions);
+        this.totalWithholdTax = SavingsAccountTransactionSummaryWrapper.calculateTotalWithholdTaxWithdrawal(currency, transactions);
 
         updateRunningBalanceAndPivotDate(false, transactions, null, null, null, currency);
 
@@ -112,8 +112,8 @@ public final class SavingsAccountSummary {
                 .minus(totalOverdraftInterestDerived).minus(totalWithholdTax).getAmount();
     }
 
-    public void updateSummaryWithPivotConfig(final MonetaryCurrency currency, final SavingsAccountTransactionSummaryWrapper wrapper,
-            final SavingsAccountTransaction transaction, final List<SavingsAccountTransaction> savingsAccountTransactions) {
+    public void updateSummaryWithPivotConfig(final MonetaryCurrency currency, final SavingsAccountTransaction transaction,
+            final List<SavingsAccountTransaction> savingsAccountTransactions) {
 
         if (transaction != null) {
             if (transaction.isReversalTransaction()) {
@@ -187,8 +187,8 @@ public final class SavingsAccountSummary {
             Money interestTotal = Money.zero(currency);
             Money withHoldTaxTotal = Money.zero(currency);
             Money overdraftInterestTotal = Money.zero(currency);
-            this.totalDeposits = wrapper.calculateTotalDeposits(currency, savingsAccountTransactions);
-            this.totalWithdrawals = wrapper.calculateTotalWithdrawals(currency, savingsAccountTransactions);
+            this.totalDeposits = SavingsAccountTransactionSummaryWrapper.calculateTotalDeposits(currency, savingsAccountTransactions);
+            this.totalWithdrawals = SavingsAccountTransactionSummaryWrapper.calculateTotalWithdrawals(currency, savingsAccountTransactions);
 
             final HashMap<String, Money> map = updateRunningBalanceAndPivotDate(true, savingsAccountTransactions, interestTotal,
                     overdraftInterestTotal, withHoldTaxTotal, currency);
