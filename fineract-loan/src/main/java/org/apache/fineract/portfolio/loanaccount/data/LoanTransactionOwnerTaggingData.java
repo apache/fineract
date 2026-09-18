@@ -16,28 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.data.attribute;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
-public interface ExternalAssetOwnerLoanProductAttribute {
+/**
+ * Everything needed to decide whether a loan transaction's journal entries may be attributed to an external asset
+ * owner, resolved in a single query.
+ */
+@AllArgsConstructor
+@Getter
+public class LoanTransactionOwnerTaggingData {
 
-    String getAttributeKey();
-
-    String getAttributeValue();
-
-    List<String> getAttributeValues();
-
-    boolean validate(String attributeValue);
-
-    boolean isMultiValue();
-
-    /**
-     * Converts an already validated attribute value into its canonical, storable form. Implementations that accept
-     * loosely formatted input (different casing, padding around separators) return the normalised value here, so that
-     * the persisted value is always canonical.
-     */
-    default String normalize(String attributeValue) {
-        return attributeValue;
-    }
+    private final Long loanId;
+    private final Long loanProductId;
+    private final LoanTransactionType transactionType;
 }

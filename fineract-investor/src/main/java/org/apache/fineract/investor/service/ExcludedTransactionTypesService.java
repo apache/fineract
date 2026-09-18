@@ -16,28 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.data.attribute;
+package org.apache.fineract.investor.service;
 
-import java.util.List;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
-public interface ExternalAssetOwnerLoanProductAttribute {
+/**
+ * Tells whether a loan transaction type must be kept out of external asset owner accounting and reporting for a given
+ * loan product, based on the {@code EXCLUDED_TRANSACTION_TYPES} loan product attribute.
+ */
+public interface ExcludedTransactionTypesService {
 
-    String getAttributeKey();
-
-    String getAttributeValue();
-
-    List<String> getAttributeValues();
-
-    boolean validate(String attributeValue);
-
-    boolean isMultiValue();
-
-    /**
-     * Converts an already validated attribute value into its canonical, storable form. Implementations that accept
-     * loosely formatted input (different casing, padding around separators) return the normalised value here, so that
-     * the persisted value is always canonical.
-     */
-    default String normalize(String attributeValue) {
-        return attributeValue;
-    }
+    boolean isExcluded(Long loanProductId, LoanTransactionType transactionType);
 }
