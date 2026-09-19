@@ -378,6 +378,7 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_HOOK")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/hooks/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_HOOK")
+
                     // template
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/templates/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_TEMPLATE")
@@ -402,6 +403,10 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_FLOATINGRATE")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/floatingrates/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_FLOATINGRATE")
+
+                    // client address
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/client/*/addresses"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_ADDRESS")
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
