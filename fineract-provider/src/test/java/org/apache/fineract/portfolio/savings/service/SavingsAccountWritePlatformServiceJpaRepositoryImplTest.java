@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,6 +89,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -480,5 +483,55 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
 
         // Then
         assertThat(result.getTransactionId()).isEqualTo(expectedTransactionId.toString());
+    }
+
+    @Test
+    void applyChargeDueShouldRunInAnIndependentTransaction() throws NoSuchMethodException {
+        Method method = SavingsAccountWritePlatformServiceJpaRepositoryImpl.class.getMethod("applyChargeDue", Long.class, Long.class);
+
+        Transactional transactional = method.getAnnotation(Transactional.class);
+
+        assertThat(transactional).isNotNull();
+        assertThat(transactional.propagation()).isEqualTo(Propagation.REQUIRES_NEW);
+        assertThat(method.getReturnType()).isEqualTo(LocalDate.class);
+    }
+
+    @Test
+    void applyChargeDueShouldCollectOneRecurringInstallmentAndReturnTheNextDueDate() {
+        Long savingsAccountId = 1L;
+        Long chargeId = 2L;
+        LocalDate businessDate = LocalDate.of(2026, 9, 17);
+        LocalDate firstDueDate = LocalDate.of(2026, 9, 1);
+        LocalDate nextDueDate = LocalDate.of(2026, 9, 8);
+        setupTenantContext(businessDate);
+
+        SavingsAccount account = mock(SavingsAccount.class);
+        SavingsAccountCharge charge = mock(SavingsAccountCharge.class);
+        SavingsAccountTransaction transaction = mock(SavingsAccountTransaction.class);
+        MonetaryCurrency currency = new MonetaryCurrency("USD", 2, 0);
+
+        when(savingsAccountChargeRepository.findOneWithNotFoundDetection(chargeId, savingsAccountId)).thenReturn(charge);
+        when(charge.savingsAccount()).thenReturn(account);
+        when(charge.isNotFullyPaid()).thenReturn(true);
+        when(charge.getDueDate()).thenReturn(firstDueDate, nextDueDate);
+        when(charge.amoutOutstanding()).thenReturn(BigDecimal.valueOf(100));
+        when(account.getId()).thenReturn(savingsAccountId);
+        when(account.getCurrency()).thenReturn(currency);
+        when(account.getOnHoldFunds()).thenReturn(BigDecimal.ZERO);
+        when(account.findExistingTransactionIds()).thenReturn(Collections.emptySet());
+        when(account.findExistingReversedTransactionIds()).thenReturn(Collections.emptySet());
+        when(account.isBeforeLastPostingPeriod(any(LocalDate.class), anyBoolean())).thenReturn(false);
+        when(account.payCharge(any(), any(), any(), any(), anyBoolean(), any())).thenReturn(transaction);
+        when(account.deriveAccountingBridgeData(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyMap());
+        when(savingsAccountTransactionRepository.findBySavingsAccountIdAndLessThanDateOfAndReversedIsFalse(anyLong(), any(), any()))
+                .thenReturn(Collections.emptyList());
+        when(configurationDomainService.isSavingsInterestPostingAtCurrentPeriodEnd()).thenReturn(false);
+        when(configurationDomainService.retrieveFinancialYearBeginningMonth()).thenReturn(1);
+
+        LocalDate result = service.applyChargeDue(chargeId, savingsAccountId);
+
+        assertThat(result).isEqualTo(nextDueDate);
+        verify(account, times(1)).payCharge(any(), any(), any(), any(), anyBoolean(), any());
+        verify(savingAccountRepositoryWrapper).saveAndFlush(account);
     }
 }
