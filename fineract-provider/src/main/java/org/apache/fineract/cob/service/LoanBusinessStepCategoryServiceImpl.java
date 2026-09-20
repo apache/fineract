@@ -18,22 +18,26 @@
  */
 package org.apache.fineract.cob.service;
 
-import java.util.Locale;
-import java.util.Map;
 import org.apache.fineract.cob.COBBusinessStep;
 import org.apache.fineract.cob.loan.LoanCOBBusinessStep;
+import org.apache.fineract.cob.loan.LoanCOBConstant;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoanBusinessStepCategoryServiceImpl implements BusinessStepCategoryService {
 
-    private static final Map<BusinessStepCategory, Class<? extends COBBusinessStep>> businessSteps = Map.of(BusinessStepCategory.LOAN,
-            LoanCOBBusinessStep.class);
+    @Override
+    public BusinessStepCategory getCategory() {
+        return BusinessStepCategory.LOAN;
+    }
 
     @Override
-    public Class<? extends COBBusinessStep> getBusinessStepByCategory(String category) {
-        Map.Entry<BusinessStepCategory, Class<? extends COBBusinessStep>> businessStepCategoryClassEntry = businessSteps.entrySet().stream()
-                .filter(businessStep -> businessStep.getKey().name().equals(category.toUpperCase(Locale.ROOT))).findFirst().orElse(null);
-        return businessStepCategoryClassEntry != null ? businessStepCategoryClassEntry.getValue() : null;
+    public String getCobJobName() {
+        return LoanCOBConstant.LOAN_COB_JOB_NAME;
+    }
+
+    @Override
+    public Class<? extends COBBusinessStep<?>> getBusinessStepClass() {
+        return LoanCOBBusinessStep.class;
     }
 }

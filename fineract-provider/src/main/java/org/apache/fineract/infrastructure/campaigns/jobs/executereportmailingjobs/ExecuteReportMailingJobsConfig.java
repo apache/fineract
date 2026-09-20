@@ -26,11 +26,10 @@ import org.apache.fineract.infrastructure.reportmailingjob.domain.ReportMailingJ
 import org.apache.fineract.infrastructure.reportmailingjob.domain.ReportMailingJobRunHistoryRepository;
 import org.apache.fineract.infrastructure.reportmailingjob.service.ReportMailingJobEmailService;
 import org.apache.fineract.infrastructure.reportmailingjob.validation.ReportMailingJobValidator;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -67,8 +66,7 @@ public class ExecuteReportMailingJobsConfig {
 
     @Bean
     public Job executeReportMailingJobsJob() {
-        return new JobBuilder(JobName.EXECUTE_REPORT_MAILING_JOBS.name(), jobRepository).start(executeReportMailingJobsStep())
-                .incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.EXECUTE_REPORT_MAILING_JOBS.name(), jobRepository).start(executeReportMailingJobsStep()).build();
     }
 
     @Bean

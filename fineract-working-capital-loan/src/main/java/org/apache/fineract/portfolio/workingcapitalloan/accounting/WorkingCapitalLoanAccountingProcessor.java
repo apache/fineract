@@ -48,6 +48,13 @@ public interface WorkingCapitalLoanAccountingProcessor {
      */
     void restateJournalEntriesForDiscountFeeAmortization(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn, boolean isChargedOff);
 
+    /**
+     * {@link #restateJournalEntriesForDiscountFeeAmortization}'s counterpart for a discount-fee-amortization-adjustment
+     * transaction.
+     */
+    void restateJournalEntriesForDiscountFeeAmortizationAdjustment(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn,
+            boolean isChargedOff);
+
     void postJournalEntriesForDiscountFeeAmortizationAdjustment(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn,
             boolean isChargedOff);
 

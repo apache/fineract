@@ -20,12 +20,13 @@ package org.apache.fineract.cob.workingcapitalloan;
 
 import lombok.NoArgsConstructor;
 import org.apache.fineract.cob.COBConstant;
+import org.apache.fineract.infrastructure.jobs.service.JobName;
 
 @NoArgsConstructor
 public final class WorkingCapitalLoanCOBConstant extends COBConstant {
 
     // Job Related Constants
-    public static final String WORKING_CAPITAL_JOB_NAME = "WC_LOAN_COB";
+    public static final String WORKING_CAPITAL_JOB_NAME = JobName.WORKING_CAPITAL_LOAN_COB_JOB.name();
     public static final String WORKING_CAPITAL_JOB_HUMAN_READABLE_NAME = "Working Capital Loan COB";
     public static final String WORKING_CAPITAL_LOAN_COB_JOB_NAME = "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS";
 

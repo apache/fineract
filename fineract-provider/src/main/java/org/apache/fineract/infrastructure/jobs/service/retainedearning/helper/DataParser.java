@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.infrastructure.jobs.service.retainedearning.helper;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +25,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.model.AccountGLJournalEntryAnnualSummaryRecord;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class DataParser {
@@ -52,7 +53,7 @@ public class DataParser {
         // Get column names in order
         final List<String> columns = new ArrayList<>();
         columns.addAll(StreamSupport.stream(root.path("columnHeaders").spliterator(), false)
-                .map(header -> header.path("columnName").asText()).collect(Collectors.toList()));
+                .map(header -> header.path("columnName").asString()).collect(Collectors.toList()));
 
         final List<AccountGLJournalEntryAnnualSummaryRecord> records = StreamSupport.stream(root.path("data").spliterator(), false)
                 .map(data -> {
@@ -60,13 +61,14 @@ public class DataParser {
 
                     // Create row dataMap Map<columnName, value>
                     Map<String, String> rowData = IntStream.range(0, Math.min(columns.size(), row.size())).boxed()
-                            .collect(Collectors.toMap(i -> columns.get(i), i -> row.get(i).asText()));
+                            .collect(Collectors.toMap(i -> columns.get(i), i -> row.get(i).asString()));
 
                     // Build record
                     return AccountGLJournalEntryAnnualSummaryRecord.builder().postingDate(rowData.get("postingdate"))
                             .product(rowData.get("product")).glAcct(rowData.get("glacct"))
                             .assetOwner(ExternalIdFactory.produce(rowData.get("assetowner")))
-                            .endingBalance(new BigDecimal(rowData.getOrDefault("endingbalance", "0"))).build();
+                            .endingBalance(new BigDecimal(rowData.getOrDefault("endingbalance", "0")))
+                            .originatorExternalIds(StringUtils.defaultIfBlank(rowData.get("originator_external_ids"), null)).build();
                 }).collect(Collectors.toList());
 
         return records;

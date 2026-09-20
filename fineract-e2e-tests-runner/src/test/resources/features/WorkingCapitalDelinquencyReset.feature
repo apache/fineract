@@ -693,3 +693,193 @@ Feature: Working Capital Delinquency Reset Action
       | 3            | 07 January 2026 | 11 January 2026 |                |            |                   |                       |
       | 4            | 12 January 2026 | 12 January 2026 |                |            |                   |                       |
       | 5            | 13 January 2026 | 15 January 2026 | 200            | 0          | 200               |                       |
+
+  @TestRailId:C106672
+  Scenario: Verify Working Capital delinquency reset - UC13: backdated delinquency pause before an active reset is rejected, pause on the reset date is accepted
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 25 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 800             | 10000              | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
+    When Admin sets the business date to "12 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 03 January 2026 | 200            | 0          | 200               | false                 |
+      | 2            | 04 January 2026 | 06 January 2026 | 200            | 0          | 200               | false                 |
+      | 3            | 07 January 2026 | 09 January 2026 | 200            | 0          | 200               | false                 |
+      | 4            | 10 January 2026 | 12 January 2026 | 200            | 0          | 200               |                       |
+#   --- Delinquency reset on 12 January 2026 ---
+    When Admin creates a Working Capital delinquency reset
+    Then WC loan delinquency actions have the following data:
+      | action | startDate       | endDate | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | RESET  | 12 January 2026 |         |                |                    |           |               |
+    And WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 03 January 2026 |                |            |                   |                       |
+      | 2            | 04 January 2026 | 06 January 2026 |                |            |                   |                       |
+      | 3            | 07 January 2026 | 09 January 2026 |                |            |                   |                       |
+      | 4            | 10 January 2026 | 12 January 2026 | 200            | 0          | 200               |                       |
+#   --- Backdated pause starting before the reset date is rejected ---
+    Then Initiating a Working Capital loan delinquency pause with startDate "10 January 2026" and endDate "11 January 2026" results an error with the following data:
+      | httpCode | errorMessage                                                                        |
+      | 400      | Delinquency pause cannot start before the latest delinquency reset date: 2026-01-12 |
+    And WC loan delinquency actions have the following data:
+      | action | startDate       | endDate | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | RESET  | 12 January 2026 |         |                |                    |           |               |
+    And WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 03 January 2026 |                |            |                   |                       |
+      | 2            | 04 January 2026 | 06 January 2026 |                |            |                   |                       |
+      | 3            | 07 January 2026 | 09 January 2026 |                |            |                   |                       |
+      | 4            | 10 January 2026 | 12 January 2026 | 200            | 0          | 200               |                       |
+#   --- Pause starting on the reset date is accepted and extends the current period ---
+    When Admin initiate a Working Capital loan delinquency pause with startDate "12 January 2026" and endDate "13 January 2026"
+    Then WC loan delinquency actions have the following data:
+      | action | startDate       | endDate         | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | RESET  | 12 January 2026 |                 |                |                    |           |               |
+      | PAUSE  | 12 January 2026 | 13 January 2026 |                |                    |           |               |
+    And WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 03 January 2026 |                |            |                   |                       |
+      | 2            | 04 January 2026 | 06 January 2026 |                |            |                   |                       |
+      | 3            | 07 January 2026 | 09 January 2026 |                |            |                   |                       |
+      | 4            | 10 January 2026 | 14 January 2026 | 200            | 0          | 200               |                       |
+#   --- Close loan ---
+    Then Admin closes the Working Capital loan with a full repayment on "12 January 2026"
+    And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:C106673
+  Scenario: Verify Working Capital delinquency reset - UC14: backdated delinquency pause before an UNDONE reset is accepted
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 25 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 800             | 10000              | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
+    When Admin sets the business date to "12 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+#   --- Delinquency reset on 12 January 2026, undone on 13 January 2026 ---
+    And Admin creates a Working Capital delinquency reset
+    When Admin sets the business date to "13 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 03 January 2026 |                |            |                   |                       |
+      | 2            | 04 January 2026 | 06 January 2026 |                |            |                   |                       |
+      | 3            | 07 January 2026 | 09 January 2026 |                |            |                   |                       |
+      | 4            | 10 January 2026 | 12 January 2026 | 200            | 0          | 200               | false                 |
+      | 5            | 13 January 2026 | 15 January 2026 | 200            | 0          | 200               |                       |
+    When Admin creates Working Capital delinquency reset undo
+    Then WC loan delinquency actions have the following data:
+      | action     | startDate       | endDate         | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | RESET      | 12 January 2026 | 13 January 2026 |                |                    |           |               |
+      | UNDO_RESET | 13 January 2026 |                 |                |                    |           |               |
+    And WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 03 January 2026 | 200            | 0          | 200               | false                 |
+      | 2            | 04 January 2026 | 06 January 2026 | 200            | 0          | 200               | false                 |
+      | 3            | 07 January 2026 | 09 January 2026 | 200            | 0          | 200               | false                 |
+      | 4            | 10 January 2026 | 12 January 2026 | 200            | 0          | 200               | false                 |
+      | 5            | 13 January 2026 | 15 January 2026 | 200            | 0          | 200               |                       |
+#   --- Backdated pause before the (undone) reset date must be accepted: no active reset exists any more ---
+    When Admin initiate a Working Capital loan delinquency pause with startDate "10 January 2026" and endDate "11 January 2026"
+    Then WC loan delinquency actions have the following data:
+      | action     | startDate       | endDate         | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | RESET      | 12 January 2026 | 13 January 2026 |                |                    |           |               |
+      | UNDO_RESET | 13 January 2026 |                 |                |                    |           |               |
+      | PAUSE      | 10 January 2026 | 11 January 2026 |                |                    |           |               |
+#   NOTE: table below is the expected post-fix shape (periods from 10 Jan shifted by the 2-day pause);
+    And WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 03 January 2026 | 200            | 0          | 200               | false                 |
+      | 2            | 04 January 2026 | 06 January 2026 | 200            | 0          | 200               | false                 |
+      | 3            | 07 January 2026 | 09 January 2026 | 200            | 0          | 200               | false                 |
+      | 4            | 10 January 2026 | 14 January 2026 | 200            | 0          | 200               |                       |
+      | 5            | 15 January 2026 | 17 January 2026 | 200            | 0          | 200               |                       |
+#   --- Close loan ---
+    Then Admin closes the Working Capital loan with a full repayment on "13 January 2026"
+    And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:C106674
+  Scenario: Verify Working Capital delinquency reset - UC15: multiple resets - backdated pause is validated against the latest active reset only
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 25 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 800             | 10000              | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
+#   --- First reset on 12 January 2026 ---
+    When Admin sets the business date to "12 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin creates a Working Capital delinquency reset
+#   --- Second reset on 15 January 2026 ---
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin creates a Working Capital delinquency reset
+    Then WC loan delinquency actions have the following data:
+      | action | startDate       | endDate | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | RESET  | 12 January 2026 |         |                |                    |           |               |
+      | RESET  | 15 January 2026 |         |                |                    |           |               |
+#   --- Pause between the two resets is rejected against the latest active reset (15 January) ---
+    Then Initiating a Working Capital loan delinquency pause with startDate "13 January 2026" and endDate "14 January 2026" results an error with the following data:
+      | httpCode | errorMessage                                                                        |
+      | 400      | Delinquency pause cannot start before the latest delinquency reset date: 2026-01-15 |
+#   --- Undo the 15 January reset; the 12 January reset stays active ---
+    When Admin sets the business date to "16 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin creates Working Capital delinquency reset undo
+    Then WC loan delinquency actions have the following data:
+      | action     | startDate       | endDate         | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | RESET      | 12 January 2026 |                 |                |                    |           |               |
+      | RESET      | 15 January 2026 | 16 January 2026 |                |                    |           |               |
+      | UNDO_RESET | 16 January 2026 |                 |                |                    |           |               |
+#   --- Same pause is now accepted (only the undone reset was after it) ---
+    When Admin initiate a Working Capital loan delinquency pause with startDate "13 January 2026" and endDate "14 January 2026"
+    Then WC loan delinquency actions have the following data:
+      | action     | startDate       | endDate         | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | RESET      | 12 January 2026 |                 |                |                    |           |               |
+      | RESET      | 15 January 2026 | 16 January 2026 |                |                    |           |               |
+      | UNDO_RESET | 16 January 2026 |                 |                |                    |           |               |
+      | PAUSE      | 13 January 2026 | 14 January 2026 |                |                    |           |               |
+#   --- Pause before the still-active 12 January reset is rejected ---
+    Then Initiating a Working Capital loan delinquency pause with startDate "10 January 2026" and endDate "11 January 2026" results an error with the following data:
+      | httpCode | errorMessage                                                                        |
+      | 400      | Delinquency pause cannot start before the latest delinquency reset date: 2026-01-12 |
+#   --- Close loan ---
+    Then Admin closes the Working Capital loan with a full repayment on "16 January 2026"
+    And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:C106675
+  Scenario: Verify Working Capital delinquency reset - UC16: delinquency pause without startDate on a loan with a reset returns validation error
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 25 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 800             | 10000              | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
+    When Admin sets the business date to "12 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin creates a Working Capital delinquency reset
+    Then Initiating a Working Capital loan delinquency pause without startDate and endDate "11 January 2026" results an error with the following data:
+      | httpCode | errorMessage                                                               |
+      | 400      | validation.msg.workingCapitalLoanDelinquencyAction.startDate.cannot.be.blank |
+    And WC loan delinquency actions have the following data:
+      | action | startDate       | endDate | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | RESET  | 12 January 2026 |         |                |                    |           |               |
+#   --- Close loan ---
+    Then Admin closes the Working Capital loan with a full repayment on "12 January 2026"
+    And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"

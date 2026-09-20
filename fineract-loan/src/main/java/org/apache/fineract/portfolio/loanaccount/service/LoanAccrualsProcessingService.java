@@ -23,7 +23,7 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public interface LoanAccrualsProcessingService {
 

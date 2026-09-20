@@ -16,27 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.jersey;
+package org.apache.fineract.cob.service;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpOutputMessage;
+import org.apache.fineract.cob.COBBusinessStep;
+import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBConstant;
+import org.apache.fineract.cob.workingcapitalloan.businessstep.WorkingCapitalLoanCOBBusinessStep;
+import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
-public final class SimpleHttpOutputMessage implements HttpOutputMessage {
-
-    private final OutputStream outputStream;
-    private final HttpHeaders headers;
+@Service
+public class WorkingCapitalLoanBusinessStepCategoryServiceImpl implements BusinessStepCategoryService {
 
     @Override
-    public OutputStream getBody() throws IOException {
-        return outputStream;
+    public BusinessStepCategory getCategory() {
+        return BusinessStepCategory.WORKING_CAPITAL_LOAN;
     }
 
     @Override
-    public HttpHeaders getHeaders() {
-        return headers;
+    public String getCobJobName() {
+        return WorkingCapitalLoanCOBConstant.WORKING_CAPITAL_LOAN_COB_JOB_NAME;
+    }
+
+    @Override
+    public Class<? extends COBBusinessStep<?>> getBusinessStepClass() {
+        return WorkingCapitalLoanCOBBusinessStep.class;
     }
 }

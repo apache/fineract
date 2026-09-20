@@ -31,6 +31,9 @@ public final class WorkingCapitalLoanConstants {
      * Shared by the create/modify validation error and the schedule-generation exception so both emit the same message.
      */
     public static final String EIR_NOT_CALCULABLE_USER_MESSAGE = "Please check the input values - unable to calculate a valid EIR.";
+    /** The FLAT counterpart: a FLAT schedule solves no EIR, so its structural failures must not be reported as one. */
+    public static final String SCHEDULE_NOT_CALCULABLE_USER_MESSAGE = "Please check the input values - "
+            + "unable to calculate a valid amortization schedule.";
 
     // Common request parameters (locale, dateFormat, id)
     public static final String localeParameterName = "locale";
@@ -53,6 +56,7 @@ public final class WorkingCapitalLoanConstants {
     public static final String APPROVE_LOAN_COMMAND = "approve";
     public static final String DISBURSE_LOAN_COMMAND = "disburse";
     public static final String REPAYMENT_LOAN_COMMAND = "repayment";
+    public static final String PREPAY_LOAN_COMMAND = "prepayLoan";
     public static final String GOODWILL_CREDIT_LOAN_COMMAND = "goodwillCredit";
     public static final String CREDIT_BALANCE_REFUND_COMMAND = "creditBalanceRefund";
     public static final String PAYOUT_REFUND_COMMAND = "payoutRefund";

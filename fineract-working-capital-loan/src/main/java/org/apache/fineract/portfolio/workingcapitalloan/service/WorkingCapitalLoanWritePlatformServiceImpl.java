@@ -65,7 +65,6 @@ import org.apache.fineract.infrastructure.event.business.domain.workingcapitallo
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
@@ -399,6 +398,10 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnDisbursement(loan, transactionAmount, actualDisbursementDate);
         generateInitialDelinquencyAndBreachPeriods(loan);
 
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            accountingProcessor.postJournalEntries(loan, disbursementTransaction, allocation, false);
+        }
+
         this.loanRepository.saveAndFlush(loan);
         changes.put("status", loan.getLoanStatus());
         handleNote(loan, command, changes);
@@ -545,12 +548,19 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
 
         final WorkingCapitalLoanTransaction relatedDisbursementTransaction = transactionRepository
-                .findById(relatedDisbursementTransactionId)
+                .findByIdAndWcLoan_Id(relatedDisbursementTransactionId, loanId)
                 .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.disbursement.transaction.not.found",
-                        "Disbursement transaction not found", "disbursementTransaction"));
+                        "Disbursement transaction not found", WorkingCapitalLoanConstants.relatedResourceIdParamName));
+        if (!relatedDisbursementTransaction.getTypeOf().isDisbursement() || relatedDisbursementTransaction.isReversed()) {
+            throw new PlatformApiDataValidationException("validation.msg.wc.loan.disbursement.transaction.invalid",
+                    "Related transaction must be an active disbursement transaction of the same loan",
+                    WorkingCapitalLoanConstants.relatedResourceIdParamName);
+        }
 
-        boolean alreadyHasDiscount = relationRepository.findByToTransactionAndFromTransactionReversedAndFromTransactionTransactionType(
-                relatedDisbursementTransaction, false, LoanTransactionType.DISCOUNT_FEE).isPresent();
+        // Loan-scoped, not disbursement-scoped: the discount, the amortization schedule and the unrealized income are
+        // all held on the loan, so a second discount fee against any disbursement would desynchronize them for good.
+        final boolean alreadyHasDiscount = !transactionRepository.findActiveByTypeOrderByIdDesc(loanId, LoanTransactionType.DISCOUNT_FEE)
+                .isEmpty();
         if (alreadyHasDiscount) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.discount.already.set.before.disbursement",
                     "Discount was already set before disbursement and cannot be added again",
@@ -1073,9 +1083,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                     rateChange.getId(), rateChange.getEffectiveDate());
             return;
         }
-        rateChange.applyCalculatedValues(
-                ProjectedAmortizationScheduleModel.annualEirPercentage(solve.eir(), model.npvDayCount(), MoneyHelper.getMathContext()),
-                solve.dailyPayment().getAmount(), solve.term());
+        rateChange.applyCalculatedValues(solve.calculatedAnnualEir(), solve.dailyPayment().getAmount(), solve.term());
         this.rateChangeRepository.save(rateChange);
     }
 
@@ -1300,6 +1308,11 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 .filter(t -> t.getTypeOf() == LoanTransactionType.ACCRUAL && !t.isReversed()).toList();
 
         transactions.forEach(this::markReversed);
+
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            accountingProcessor.postReversalJournalEntries(loan, txn);
+        }
+
         this.transactionRepository.saveAll(transactions);
         this.transactionRepository.flush();
 

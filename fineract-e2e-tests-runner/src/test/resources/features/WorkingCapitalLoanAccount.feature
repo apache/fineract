@@ -1353,7 +1353,7 @@ Feature: WorkingCapitalLoanAccount
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
     And Working capital loan account has the correct data:
       | product.name             | submittedOnDate | expectedDisbursementDate | status | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 9000.0            | 9000.0            | 100000.0           | 18.0              | 1000.0    |
+      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 9000.0            | 9000.0            | 100000.0           | 18.0              | 1000.0   |
     Then Admin update Working Capital period payment rate failed with "0.01" value cause unable to calculate EIR
     And Working capital loan account has the correct data:
       | product.name             | submittedOnDate | expectedDisbursementDate | status | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
@@ -1378,3 +1378,167 @@ Feature: WorkingCapitalLoanAccount
     Then Working capital loan account has the correct data:
       | product.name  | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
       | WCLP_DISCOUNT | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 9000.0            | 0.0               | 100000.0           | 18.0              | 0.0              |
+
+  @TestRailId:C106685
+  Scenario: Verify journal entries are not created for Disbursement & undo when accounting is disabled
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin stores the last Working Capital loan disbursement transaction id for later reference
+    And Working capital loan account has the correct data:
+      | status | principal | totalDiscountFee | unrealizedIncome |
+      | Active | 9000.0    | 0.0              | 0.0              |
+
+    Then Working Capital Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+
+    And Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+
+    And Admin successfully undo Working Capital disbursal
+
+    Then Working Capital Loan Transactions tab has a reversed "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+
+  @TestRailId:C106686
+  Scenario: Verify journal entries created for Disbursement & undo when accounting is enabled
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+    And Working capital loan account has the correct data:
+      | status | principal | discount | totalDiscountFee | unrealizedIncome |
+      | Active | 10000.0   | 1000.0   | 1000.0           | 1000.0           |
+
+    Then Working Capital Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
+
+    And Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    And Admin successfully undo Working Capital disbursal
+
+    Then Working Capital Loan Transactions tab has a reversed "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
+      | ASSET     | 112601       | Loans Receivable          |        | 9000.0 |
+      | LIABILITY | 145023       | Suspense/Clearing account | 9000.0 |        |
+
+  @TestRailId:C106687
+  Scenario: Verify Working Capital loan disbursement GL entries - UC1: ACC_DEF_REV_AM, loan portfolio and fund source net to zero after full repayment
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "02 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 50.0  |        |
+      | ASSET     | 112601       | Loans Receivable          |       | 50.0   |
+    When Admin sets the business date to "03 January 2026"
+    And Customer makes repayment on "03 January 2026" with 8950.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+#   9000 Dr - 50 Cr - 8950 Cr = 0.00 on 112601; 9000 Cr - 50 Dr - 8950 Dr = 0.00 on 145023
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8950.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 8950.0 |
+
+  @TestRailId:C106688
+  Scenario: Verify Working Capital loan disbursement GL entries - UC2: Advanced Accounting, payment channel fund source mapping, undo disbursal on a later date
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "MONEY_TRANSFER" payment type
+    Then Working Capital Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type  | Account code | Account name     | Debit  | Credit |
+      | ASSET | 112601       | Loans Receivable | 9000.0 |        |
+      | ASSET | 987654       | Fund Receivables |        | 9000.0 |
+    When Admin sets the business date to "05 January 2026"
+    And Admin successfully undo Working Capital disbursal
+    Then Working Capital Loan Transactions tab has a reversed "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type  | Account code | Account name     | Debit  | Credit |
+      | ASSET | 112601       | Loans Receivable | 9000.0 |        |
+      | ASSET | 987654       | Fund Receivables |        | 9000.0 |
+      | ASSET | 112601       | Loans Receivable |        | 9000.0 |
+      | ASSET | 987654       | Fund Receivables | 9000.0 |        |
+
+  @TestRailId:C106689
+  Scenario: Verify Working Capital loan disbursement GL entries - UC3: Advanced Accounting, unmapped payment type falls back to the default fund source
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "AUTOPAY" payment type
+    Then Working Capital Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
+
+  @TestRailId:C106690
+  Scenario: Verify Working Capital loan disbursement GL entries - UC4: disbursement with discount fee in the same call posts both sets
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
+    And Working Capital Loan Transactions tab has a "DISCOUNT_FEE" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
+
+  @TestRailId:C106691
+  Scenario: Verify Working Capital loan disbursement GL entries - UC5: partial disbursement, undo, re-disbursement with a different amount
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "8000" EUR transaction amount
+    Then Working Capital Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 8000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 8000.0 |
+    When Admin successfully undo Working Capital disbursal
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital Loan Transactions tab has a reversed "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 8000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 8000.0 |
+      | ASSET     | 112601       | Loans Receivable          |        | 8000.0 |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8000.0 |        |
+    And Working Capital Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
