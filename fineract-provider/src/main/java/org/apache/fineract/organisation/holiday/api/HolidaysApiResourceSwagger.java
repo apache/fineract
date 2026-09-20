@@ -43,6 +43,8 @@ final class HolidaysApiResourceSwagger {
         public Long id;
         @Schema(example = "Good Friday")
         public String name;
+        @Schema(example = "Holiday for Independence day celebration")
+        public String description;
         @Schema(example = "[2013, 10, 26]")
         public LocalDate fromDate;
         @Schema(example = "[2013, 10, 26]")

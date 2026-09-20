@@ -57,8 +57,12 @@ final class TellerApiResourceSwagger {
         public Long creditAccountId;
         @Schema(example = "Teller3")
         public String name;
+        @Schema(example = "teller cash handling")
+        public String description;
         @Schema(example = "[2015,2,1]")
         public LocalDate startDate;
+        @Schema(example = "[2015,2,28]")
+        public LocalDate endDate;
         @Schema(example = "ACTIVE")
         public TellerStatus status;
         @Schema(example = "Head Office")
@@ -86,6 +90,8 @@ final class TellerApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "01 February 2015")
         public LocalDate startDate;
+        @Schema(example = "28 February 2015")
+        public LocalDate endDate;
 
     }
 
