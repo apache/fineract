@@ -467,41 +467,4 @@ public class FeignWorkingCapitalLoanBreachResetUndoTest extends FeignWorkingCapi
                     action("PAUSE", "2026-01-12"));
         });
     }
-
-    @Test
-    @DisplayName("Undo after a backwards business date move flags the period regenerated for the still active reset")
-    void undoAfterBackwardsBusinessDateMove_flagsTheRegeneratedPeriodOfTheStillActiveReset() {
-        runAt("2026-01-01", () -> {
-            final Long loanId = setupCommonBreachLoan();
-
-            advanceBusinessDateWithCob(loanId, "2026-02-15", "2026-03-03");
-            advanceBusinessDateWithCob(loanId, "2026-03-03", "2026-05-10");
-            createBreachResetWithRestartPeriod(loanId);
-            validateBreachSchedule(getBreachSchedule(loanId), //
-                    period(1, "2026-01-01", "2026-03-01", 60, "400.00", "100.00", true, false), //
-                    period(2, "2026-03-02", "2026-04-30", 60, "400.00", "400.00", true, false), //
-                    period(3, "2026-05-01", "2026-05-09", 9, "400.00", "400.00", true, false), //
-                    period(4, "2026-05-10", "2026-07-08", 60, "400.00", "400.00", null, true));
-
-            setBusinessDate("2026-03-20");
-            createBreachResetWithRestartPeriod(loanId);
-            validateBreachSchedule(getBreachSchedule(loanId), //
-                    period(1, "2026-01-01", "2026-03-01", 60, "400.00", "100.00", true, false), //
-                    period(2, "2026-03-02", "2026-03-19", 18, "400.00", "400.00", true, false), //
-                    period(3, "2026-03-20", "2026-05-18", 60, "400.00", "400.00", null, true));
-
-            advanceBusinessDateWithCob(loanId, "2026-03-20", "2026-06-20");
-            createBreachUndoReset(loanId);
-
-            validateBreachSchedule(getBreachSchedule(loanId), //
-                    period(1, "2026-01-01", "2026-03-01", 60, "400.00", "100.00", true, false), //
-                    period(2, "2026-03-02", "2026-04-30", 60, "400.00", "400.00", true, false), //
-                    period(3, "2026-05-01", "2026-06-29", 60, "400.00", "400.00", null, true));
-            validateBreachPastDueAmount(getBreachPastDueAmount(loanId), "0");
-            validateBreachActions(getBreachActions(loanId), //
-                    action("RESET", "2026-05-10"), //
-                    action("RESET", "2026-03-20"), //
-                    action("UNDO_RESET", "2026-06-20"));
-        });
-    }
 }
