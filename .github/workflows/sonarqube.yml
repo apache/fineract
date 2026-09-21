@@ -26,7 +26,7 @@ jobs:
           startsWith(github.ref_name, '1.')
         )
       }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     env:
         TZ: Asia/Kolkata
@@ -39,13 +39,13 @@ jobs:
         JAVA_BINARIES: .
     steps:
       - name: Set up JDK 25
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '25'
           distribution: 'zulu'
       - name: Download workspace
         id: download-workspace
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         continue-on-error: true
         with:
           name: fineract-workspace-${{ github.run_id }}
@@ -65,7 +65,7 @@ jobs:
 
       - name: Build workspace fallback
         if: steps.download-workspace.outcome != 'success'
-        uses: ./.github/actions/setup-and-build-fineract
+        uses: $/.github/actions/setup-and-build-fineract
         with:
           cache-read-only: false
       - name: Setup Gradle and Validate Wrapper
@@ -76,7 +76,7 @@ jobs:
       # The sonar task resolves every subproject's compileClasspath inside one build JVM, so
       # it needs more headroom than the other jobs. It runs alone, with nothing to share with.
       - name: Apply Gradle memory budget
-        uses: ./.github/actions/gradle-memory-budget
+        uses: $/.github/actions/gradle-memory-budget
         with:
           max-heap: '6g'
           workers-max: '2'
