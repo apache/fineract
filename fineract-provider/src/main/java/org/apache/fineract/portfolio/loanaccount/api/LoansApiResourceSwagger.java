@@ -1898,6 +1898,8 @@ final class LoansApiResourceSwagger {
         public String note;
         @Schema(example = "28 June 2022")
         public String actualDisbursementDate;
+        @Schema(example = "31 March 2024")
+        public String transactionDate;
         @Schema(example = "3")
         public Integer paymentTypeId;
         @Schema(example = "28 June 2022")
