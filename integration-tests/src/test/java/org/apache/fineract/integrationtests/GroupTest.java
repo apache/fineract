@@ -25,9 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
-import org.apache.fineract.client.models.PostGroupsRequest;
-import org.apache.fineract.client.models.PostGroupsResponse;
+import org.apache.fineract.client.models.GroupCreateRequest;
+import org.apache.fineract.client.models.GroupCreateResponse;
+import org.apache.fineract.client.models.GroupGeneralData;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
@@ -86,10 +86,10 @@ public class GroupTest extends FeignLoanTestBase {
         final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
         try {
-            final PostGroupsRequest request = groupRequest(null);
-            final PostGroupsResponse response = Calls.ok(FineractClientHelper.getFineractClient().groups.createGroup(request));
+            final GroupCreateRequest request = groupRequest(null);
+            final GroupCreateResponse response = Calls.ok(FineractClientHelper.getFineractClient().groups.createGroup(request));
 
-            final GetGroupsGroupIdResponse group = Calls
+            final GroupGeneralData group = Calls
                     .ok(FineractClientHelper.getFineractClient().groups.retrieveOneGroup(response.getGroupId(), false, null));
             assertThat(group.getExternalId()).isNotBlank();
             assertNotEquals("null", group.getExternalId());
@@ -101,16 +101,16 @@ public class GroupTest extends FeignLoanTestBase {
     @Test
     public void testGroupCreationWithExternalIdIsPersisted() {
         final String externalId = UUID.randomUUID().toString();
-        final PostGroupsRequest request = groupRequest(externalId);
-        final PostGroupsResponse response = Calls.ok(FineractClientHelper.getFineractClient().groups.createGroup(request));
+        final GroupCreateRequest request = groupRequest(externalId);
+        final GroupCreateResponse response = Calls.ok(FineractClientHelper.getFineractClient().groups.createGroup(request));
 
-        final GetGroupsGroupIdResponse group = Calls
+        final GroupGeneralData group = Calls
                 .ok(FineractClientHelper.getFineractClient().groups.retrieveOneGroup(response.getGroupId(), false, null));
         assertThat(group.getExternalId()).isEqualTo(externalId);
     }
 
-    private static PostGroupsRequest groupRequest(final String externalId) {
-        final PostGroupsRequest request = new PostGroupsRequest();
+    private static GroupCreateRequest groupRequest(final String externalId) {
+        final GroupCreateRequest request = new GroupCreateRequest();
         request.officeId(1L);
         request.name(GroupHelper.randomNameGenerator("Group_Name_", 5));
         request.externalId(externalId);
@@ -141,7 +141,8 @@ public class GroupTest extends FeignLoanTestBase {
         assertNotNull(staffId2);
 
         // assign staff "staffId1" to the group
-        assertEquals(staffId1, groupHelper.assignStaff(groupId, staffId1).getStaffId(), "Verify assigned staff id is the same as id sent");
+        assertEquals(staffId1, ((Number) groupHelper.assignStaff(groupId, staffId1).get("staffId")).longValue(),
+                "Verify assigned staff id is the same as id sent");
 
         // assign staff "staffId2" to the client
         assertEquals(staffId2, clientHelper.assignStaffToClient(clientId, staffId2).getStaffId(),
@@ -156,7 +157,8 @@ public class GroupTest extends FeignLoanTestBase {
         disburseLoanWithNetDisbursalAmount(loanId, LOAN_DATE, getLoanDetails(loanId).getNetDisbursalAmount().toPlainString());
 
         // assign staff "staffId1" to the group and cascade it to member client accounts
-        final Long inheritedStaffId = groupHelper.assignStaffInheritStaffForClientAccounts(groupId, staffId1).getStaffId();
+        final Long inheritedStaffId = ((Number) groupHelper.assignStaffInheritStaffForClientAccounts(groupId, staffId1).get("staffId"))
+                .longValue();
 
         // the client's staff officer changed away from staffId2 and now matches the inherited staff
         assertNotEquals(staffId2, inheritedStaffId, "Verify if client staff has changed");

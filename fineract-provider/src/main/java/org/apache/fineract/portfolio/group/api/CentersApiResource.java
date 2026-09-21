@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.group.api;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,6 +27,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -47,24 +51,21 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
-import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.DateParam;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.DateFormat;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
-import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -74,7 +75,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectionData;
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
@@ -83,9 +83,30 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
+import org.apache.fineract.portfolio.group.command.CenterActivateCommand;
+import org.apache.fineract.portfolio.group.command.CenterAssociateGroupsCommand;
+import org.apache.fineract.portfolio.group.command.CenterCloseCommand;
+import org.apache.fineract.portfolio.group.command.CenterCreateCommand;
+import org.apache.fineract.portfolio.group.command.CenterDeleteCommand;
+import org.apache.fineract.portfolio.group.command.CenterDisassociateGroupsCommand;
+import org.apache.fineract.portfolio.group.command.CenterSaveCollectionSheetCommand;
+import org.apache.fineract.portfolio.group.command.CenterUpdateCommand;
+import org.apache.fineract.portfolio.group.command.CenterUploadCommand;
+import org.apache.fineract.portfolio.group.data.CenterCommandRequest;
+import org.apache.fineract.portfolio.group.data.CenterCommandResponse;
+import org.apache.fineract.portfolio.group.data.CenterCreateRequest;
+import org.apache.fineract.portfolio.group.data.CenterCreateResponse;
 import org.apache.fineract.portfolio.group.data.CenterData;
+import org.apache.fineract.portfolio.group.data.CenterDeleteRequest;
+import org.apache.fineract.portfolio.group.data.CenterDeleteResponse;
+import org.apache.fineract.portfolio.group.data.CenterUpdateRequest;
+import org.apache.fineract.portfolio.group.data.CenterUpdateResponse;
+import org.apache.fineract.portfolio.group.data.CenterUploadRequest;
+import org.apache.fineract.portfolio.group.data.CenterUploadResponse;
+import org.apache.fineract.portfolio.group.data.CentersPageResponse;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.data.StaffCenterData;
+import org.apache.fineract.portfolio.group.mapping.CenterCommandRequestMapper;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.apache.fineract.portfolio.meeting.service.MeetingReadService;
@@ -94,27 +115,28 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/centers")
+@Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Tag(name = "Centers", description = "Centers along with Groups are used to provided a distinctive banking distribution channel used in microfinance. Its common in areas such as Southern Asia to use Centers and Group as administrative units in grameen style lending. Typically groups will contain one to five people and centers themselves will be made of anywhere between 2-10 groups.")
 @RequiredArgsConstructor
 public class CentersApiResource {
 
-    private final PlatformSecurityContext context;
     private final CenterReadPlatformService centerReadPlatformService;
     private final ToApiJsonSerializer<CenterData> centerApiJsonSerializer;
     private final ToApiJsonSerializer<Object> toApiJsonSerializer;
     private final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
     private final FromJsonHelper fromJsonHelper;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final MeetingReadService meetingReadPlatformService;
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
-    private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
     private final SqlValidator sqlValidator;
+    private final CommandDispatcher dispatcher;
+    private final Validator validator;
+    private final CenterCommandRequestMapper mapper;
 
     @GET
     @Path("template")
@@ -133,13 +155,11 @@ public class CentersApiResource {
             centers/template?officeId=2""")
     @AlternativeOperationId("retrieveTemplate_6")
 
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.GetCentersTemplateResponse.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CenterData.class)))
     public String retrieveTemplate(@Context final UriInfo uriInfo,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
-
-        this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
 
         if (is(commandParam, "close")) {
             final CenterData centerClosureTemplate = this.centerReadPlatformService.retrieveCenterWithClosureReasons();
@@ -181,7 +201,7 @@ public class CentersApiResource {
             centers?orderBy=name&sortOrder=DESC""")
     @AlternativeOperationId("retrieveAll_23")
 
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.GetCentersResponse.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersPageResponse.class)))
     public String retrieveAll(@Context final UriInfo uriInfo,
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("staffId") @Parameter(description = "staffId") final Long staffId,
@@ -197,7 +217,6 @@ public class CentersApiResource {
             @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String dateFormat,
             @QueryParam("locale") @Parameter(description = "locale") final String locale) {
 
-        this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (meetingDateParam != null && officeId != null) {
             LocalDate meetingDate = meetingDateParam.getDate("meetingDate", new DateFormat(dateFormat), locale);
@@ -240,12 +259,11 @@ public class CentersApiResource {
             centers/1?associations=groupMembers""")
     @AlternativeOperationId("retrieveOne_14")
 
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.GetCentersCenterIdResponse.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CenterData.class)))
     public String retrieveOne(@Context final UriInfo uriInfo,
             @PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
-        this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         CalendarData collectionMeetingCalendar = null;
         Collection<GroupGeneralData> groups = null;
@@ -290,7 +308,6 @@ public class CentersApiResource {
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a Center", operationId = "createCenter", description = """
             Creates a Center
 
@@ -298,59 +315,32 @@ public class CentersApiResource {
 
             Optional Fields: externalId, staffId, groupMembers""")
     @AlternativeOperationId("create_7")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PostCentersRequest.class)))
-
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PostCentersResponse.class)))
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createCenter() //
-                .withJson(apiRequestBodyAsJson) //
-                .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
-
+    public CenterCreateResponse create(@RequestBody(required = true) final CenterCreateRequest request) {
+        return dispatch(new CenterCreateCommand(), validate(request));
     }
 
     @PUT
     @Path("{centerId}")
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Center", operationId = "updateCenter", description = "Updates a Center")
     @AlternativeOperationId("update_12")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PutCentersCenterIdRequest.class)))
-
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PutCentersCenterIdResponse.class)))
-    public String update(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateCenter(centerId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+    public CenterUpdateResponse update(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
+            @RequestBody(required = true) final CenterUpdateRequest request) {
+        request.setId(centerId);
+        return dispatch(new CenterUpdateCommand(), validate(request));
     }
 
     @DELETE
     @Path("{centerId}")
-    @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Center", operationId = "deleteCenter", description = "A Center can be deleted if it is in pending state and has no association - groups, loans or savings")
     @AlternativeOperationId("delete_10")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.DeleteCentersCenterIdResponse.class)))
-    public String delete(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .deleteCenter(centerId) //
-                .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+    public CenterDeleteResponse delete(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId) {
+        return dispatch(new CenterDeleteCommand(), CenterDeleteRequest.builder().id(centerId).build());
     }
 
     @POST
     @Path("{centerId}")
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Activate a Center | Generate Collection Sheet | Save Collection Sheet | Close a Center | Associate Groups | Disassociate Groups", operationId = "handleCommandsCenter", description = """
             Activate a Center:
 
@@ -378,52 +368,31 @@ public class CentersApiResource {
 
             Showing Request/Response for Close a Center""")
     @AlternativeOperationId("activate_2")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PostCentersCenterIdRequest.class)))
-
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PostCentersCenterIdResponse.class)))
-    public String activate(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
-            @QueryParam("command") @Parameter(description = "command") final String commandParam,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
-
-        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
-
-        CommandProcessingResult result = null;
-        if (is(commandParam, "activate")) {
-            final CommandWrapper commandRequest = builder.activateCenter(centerId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "generateCollectionSheet")) {
-            final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
-            final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
-            final JLGCollectionSheetData collectionSheet = this.collectionSheetReadPlatformService.generateCenterCollectionSheet(centerId,
-                    query);
-            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, collectionSheet, GroupingTypesApiConstants.COLLECTIONSHEET_DATA_PARAMETERS);
-        } else if (is(commandParam, "saveCollectionSheet")) {
-            final CommandWrapper commandRequest = builder.saveCenterCollectionSheet(centerId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "close")) {
-            final CommandWrapper commandRequest = builder.closeCenter(centerId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "associateGroups")) {
-            final CommandWrapper commandRequest = builder.associateGroupsToCenter(centerId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "disassociateGroups")) {
-            final CommandWrapper commandRequest = builder.disassociateGroupsFromCenter(centerId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
-        } else {
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet",
-                    "saveCollectionSheet", "close", "associateGroups", "disassociateGroups" });
-        }
-
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CenterCommandRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CenterCommandResponse.class)))
+    public Object activate(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam, final CenterCommandRequest request,
+            @Context final UriInfo uriInfo) {
+        final CenterCommandRequest body = request == null ? new CenterCommandRequest() : request;
+        return switch (CenterCommand.from(commandParam)) {
+            case ACTIVATE -> dispatch(new CenterActivateCommand(), validate(mapper.toActivate(body, centerId)));
+            case GENERATE_COLLECTION_SHEET -> generateCollectionSheet(centerId, body, uriInfo);
+            case SAVE_COLLECTION_SHEET ->
+                dispatch(new CenterSaveCollectionSheetCommand(), validate(mapper.toSaveCollectionSheet(body, centerId)));
+            case CLOSE -> dispatch(new CenterCloseCommand(), validate(mapper.toClose(body, centerId)));
+            case ASSOCIATE_GROUPS -> dispatch(new CenterAssociateGroupsCommand(), validate(mapper.toAssociateGroups(body, centerId)));
+            case DISASSOCIATE_GROUPS ->
+                dispatch(new CenterDisassociateGroupsCommand(), validate(mapper.toDisassociateGroups(body, centerId)));
+        };
     }
 
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    private String generateCollectionSheet(final Long centerId, final CenterCommandRequest body, final UriInfo uriInfo) {
+        final String json = new Gson().toJson(body);
+        final JsonElement parsed = fromJsonHelper.parse(json);
+        final JLGCollectionSheetData collectionSheet = this.collectionSheetReadPlatformService.generateCenterCollectionSheet(centerId,
+                JsonQuery.from(json, parsed, fromJsonHelper));
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, collectionSheet, GroupingTypesApiConstants.COLLECTIONSHEET_DATA_PARAMETERS);
     }
 
     @GET
@@ -442,11 +411,9 @@ public class CentersApiResource {
 
             centers/9/accounts""")
     @AlternativeOperationId("retrieveGroupAccount")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.GetCentersCenterIdAccountsResponse.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountSummaryCollectionData.class)))
     public String retrieveGroupAccount(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
             @Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
 
         final AccountSummaryCollectionData groupAccount = this.accountDetailsReadPlatformService.retrieveGroupAccountDetails(centerId);
 
@@ -470,15 +437,35 @@ public class CentersApiResource {
     @POST
     @Path("uploadtemplate")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces({ MediaType.WILDCARD })
     @Operation(summary = "Upload Centers Bulk Template", operationId = "postBulkTemplateCenter")
     @AlternativeOperationId("postCentersTemplate")
     @RequestBody(description = "Upload centers template", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public String postCentersTemplate(@FormDataParam("file") InputStream uploadedInputStream,
+    public Long postCentersTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {
-        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.CENTERS.toString(),
-                uploadedInputStream, fileDetail, locale, dateFormat);
-        return this.toApiJsonSerializer.serialize(importDocumentId);
+        final CenterUploadRequest request = CenterUploadRequest.builder().uploadedInputStream(uploadedInputStream).fileDetail(fileDetail)
+                .locale(locale).dateFormat(dateFormat).build();
+        final CenterUploadResponse response = dispatch(new CenterUploadCommand(), request);
+        return response.getResourceId();
+    }
+
+    private boolean is(final String commandParam, final String commandValue) {
+        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    }
+
+    private <T> T validate(final T request) {
+        final Set<ConstraintViolation<T>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        return request;
+    }
+
+    private <RequestT, ResponseT> ResponseT dispatch(final Command<RequestT> command, final RequestT payload) {
+        command.setPayload(payload);
+        final Supplier<ResponseT> response = dispatcher.dispatch(command);
+        return response.get();
     }
 }

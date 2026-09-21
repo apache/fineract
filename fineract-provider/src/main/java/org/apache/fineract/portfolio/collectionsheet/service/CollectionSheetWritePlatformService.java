@@ -20,10 +20,18 @@ package org.apache.fineract.portfolio.collectionsheet.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.group.data.CenterCommandResponse;
+import org.apache.fineract.portfolio.group.data.CenterSaveCollectionSheetRequest;
+import org.apache.fineract.portfolio.group.data.GroupCommandResponse;
+import org.apache.fineract.portfolio.group.data.GroupSaveCollectionSheetRequest;
 
 public interface CollectionSheetWritePlatformService {
 
     CommandProcessingResult updateCollectionSheet(JsonCommand command);
 
     CommandProcessingResult saveIndividualCollectionSheet(JsonCommand command);
+
+    GroupCommandResponse saveGroupCollectionSheet(GroupSaveCollectionSheetRequest request);
+
+    CenterCommandResponse saveCenterCollectionSheet(CenterSaveCollectionSheetRequest request);
 }

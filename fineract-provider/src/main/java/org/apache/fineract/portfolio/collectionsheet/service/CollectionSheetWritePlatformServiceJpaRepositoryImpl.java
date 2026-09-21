@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.service;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,12 +32,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.TransactionBoundApplicationEventPublisher;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetTransactionDataValidator;
 import org.apache.fineract.portfolio.collectionsheet.serialization.CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.collectionsheet.serialization.CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer;
+import org.apache.fineract.portfolio.group.data.CenterCommandResponse;
+import org.apache.fineract.portfolio.group.data.CenterSaveCollectionSheetRequest;
+import org.apache.fineract.portfolio.group.data.GroupCommandResponse;
+import org.apache.fineract.portfolio.group.data.GroupSaveCollectionSheetRequest;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
@@ -59,6 +67,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
     private final DepositAccountWritePlatformService accountWritePlatformService;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final TransactionBoundApplicationEventPublisher eventPublisher;
+    private final FromJsonHelper fromApiJsonHelper;
 
     @Override
     public CommandProcessingResult updateCollectionSheet(final JsonCommand command) {
@@ -156,5 +165,29 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
         }
         changes.put("SavingsTransactions", depositTransactionIds);
         return changes;
+    }
+
+    @Override
+    public GroupCommandResponse saveGroupCollectionSheet(final GroupSaveCollectionSheetRequest request) {
+        final CommandProcessingResult result = updateCollectionSheet(toLegacyCommand(request, request.getId()));
+        return GroupCommandResponse.builder().groupId(request.getId()).resourceId(request.getId()).changes(result.getChanges()).build();
+    }
+
+    @Override
+    public CenterCommandResponse saveCenterCollectionSheet(final CenterSaveCollectionSheetRequest request) {
+        final CommandProcessingResult result = updateCollectionSheet(toLegacyCommand(request, request.getId()));
+        return CenterCommandResponse.builder().groupId(request.getId()).resourceId(request.getId()).changes(result.getChanges()).build();
+    }
+
+    private JsonCommand toLegacyCommand(final Object request, final Long groupId) {
+        final JsonElement parsed = toLegacyJson(request, fromApiJsonHelper);
+        return JsonCommand.from(parsed.toString(), parsed, fromApiJsonHelper, "GROUP", groupId, null, groupId, null, null, null, null,
+                "/groups/" + groupId, null, null, null, null, null);
+    }
+
+    static JsonElement toLegacyJson(final Object request, final FromJsonHelper fromApiJsonHelper) {
+        final JsonObject json = new GsonBuilder().create().toJsonTree(request).getAsJsonObject();
+        json.remove("id");
+        return fromApiJsonHelper.parse(json.toString());
     }
 }

@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.group;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.GsonBuilder;
-import java.lang.reflect.Type;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.IdempotencyKeyGenerator;
@@ -35,14 +35,16 @@ import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateI
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
-import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.ClientIdSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.EnumOptionDataValueSerializer;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.group.command.GroupCreateCommand;
+import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
+import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -61,12 +63,14 @@ public class GroupImportHandler implements ImportHandler {
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final IdempotencyKeyGenerator idempotencyKeyGenerator;
+    private final CommandDispatcher dispatcher;
 
     @Autowired
     public GroupImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            IdempotencyKeyGenerator idempotencyKeyGenerator) {
+            IdempotencyKeyGenerator idempotencyKeyGenerator, final CommandDispatcher dispatcher) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.idempotencyKeyGenerator = idempotencyKeyGenerator;
+        this.dispatcher = dispatcher;
     }
 
     @Override
@@ -178,7 +182,7 @@ public class GroupImportHandler implements ImportHandler {
             Row row = groupSheet.getRow(groups.get(i).getRowIndex());
             Cell errorReportCell = row.createCell(GroupConstants.FAILURE_COL);
             Cell statusCell = row.createCell(GroupConstants.STATUS_COL);
-            CommandProcessingResult result = null;
+            GroupCreateResponse result = null;
             try {
                 String status = statuses.get(i);
                 progressLevel = getProgressLevel(status);
@@ -237,7 +241,7 @@ public class GroupImportHandler implements ImportHandler {
                 TemplatePopulateImportConstants.FAILURE_COL_REPORT_HEADER);
     }
 
-    private Integer importGroupMeeting(final List<CalendarData> meetings, CommandProcessingResult result, int rowIndex, String dateFormat) {
+    private Integer importGroupMeeting(final List<CalendarData> meetings, GroupCreateResponse result, int rowIndex, String dateFormat) {
         CalendarData calendarData = meetings.get(rowIndex);
         calendarData.setTitle("group_" + result.getGroupId().toString() + "_CollectionMeeting");
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
@@ -259,9 +263,8 @@ public class GroupImportHandler implements ImportHandler {
         }
         payload = gsonBuilder.create().toJson(modifiedCalendarData);
 
-        CommandWrapper commandWrapper = new CommandWrapper(result.getOfficeId(), result.getGroupId(), result.getClientId(),
-                result.getLoanId(), result.getSavingsId(), null, null, null, null, null, payload, result.getTransactionId(),
-                result.getProductId(), null, null, null, null, idempotencyKeyGenerator.create(), null, null);
+        CommandWrapper commandWrapper = new CommandWrapper(result.getOfficeId(), result.getGroupId(), null, null, null, null, null, null,
+                null, null, payload, null, null, null, null, null, null, idempotencyKeyGenerator.create(), null, null);
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createCalendar(commandWrapper, TemplatePopulateImportConstants.CENTER_ENTITY_TYPE, result.getGroupId()) //
                 .withJson(payload) //
@@ -270,19 +273,20 @@ public class GroupImportHandler implements ImportHandler {
         return 2;
     }
 
-    private CommandProcessingResult importGroup(final List<GroupGeneralData> groups, final int rowIndex, final String dateFormat) {
-        GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, groups.get(rowIndex).getLocale()));
-        Type clientCollectionType = new TypeToken<Collection<ClientData>>() {
-
-        }.getType();
-        gsonBuilder.registerTypeAdapter(clientCollectionType, new ClientIdSerializer());
-        String payload = gsonBuilder.create().toJson(groups.get(rowIndex));
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createGroup() //
-                .withJson(payload) //
-                .build(); //
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    private GroupCreateResponse importGroup(final List<GroupGeneralData> groups, final int rowIndex, final String dateFormat) {
+        final GroupGeneralData row = groups.get(rowIndex);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat, JsonParserHelper.localeFromString(row.getLocale()));
+        final List<Long> clientIds = row.getClientMembers() == null ? null
+                : row.getClientMembers().stream().map(ClientData::getId).toList();
+        final GroupCreateRequest request = GroupCreateRequest.builder().name(row.getName()).officeId(row.getOfficeId())
+                .staffId(row.getStaffId()).centerId(row.getCenterId()).externalId(row.getExternalId()).active(row.getActive())
+                .activationDate(row.getActivationDate() == null ? null : formatter.format(row.getActivationDate()))
+                .submittedOnDate(row.getSubmittedOnDate() == null ? null : formatter.format(row.getSubmittedOnDate()))
+                .clientMembers(clientIds).dateFormat(dateFormat).locale(row.getLocale()).build();
+        final GroupCreateCommand command = new GroupCreateCommand();
+        command.setPayload(request);
+        final Supplier<GroupCreateResponse> response = dispatcher.dispatch(command);
+        return response.get();
     }
 
     private int getProgressLevel(String status) {

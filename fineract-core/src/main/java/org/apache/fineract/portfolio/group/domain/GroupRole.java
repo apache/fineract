@@ -23,14 +23,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
 
+@Getter
 @Entity
 @Table(name = "m_group_roles")
 public class GroupRole extends AbstractPersistableCustom<Long> {
@@ -59,23 +57,6 @@ public class GroupRole extends AbstractPersistableCustom<Long> {
         this.group = group;
         this.client = client;
         this.role = role;
-    }
-
-    public Map<String, Object> update(final JsonCommand command) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(2);
-
-        if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.clientIdParamName, this.client.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.clientIdParamName);
-            actualChanges.put(GroupingTypesApiConstants.clientIdParamName, newValue);
-        }
-
-        if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.roleParamName, this.role.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.roleParamName);
-            actualChanges.put(GroupingTypesApiConstants.roleParamName, newValue);
-        }
-
-        return actualChanges;
     }
 
     public void updateRole(final CodeValue role) {

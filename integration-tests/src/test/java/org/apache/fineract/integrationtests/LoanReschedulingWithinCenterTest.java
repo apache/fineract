@@ -34,9 +34,9 @@ import java.util.Locale;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.FeignCalls;
+import org.apache.fineract.client.models.CenterData;
 import org.apache.fineract.client.models.ClientCollateralCreateRequest;
 import org.apache.fineract.client.models.CollateralProductCreateRequest;
-import org.apache.fineract.client.models.GetCentersCenterIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
@@ -97,7 +97,7 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         final String centerActivationDate = "01 July 2007";
         Long centerId = centerHelper.createCenter(name, officeId, externalId, Long.valueOf(staffId), List.of(groupId), centerActivationDate)
                 .getResourceId();
-        GetCentersCenterIdResponse center = centerHelper.retrieveCenter(centerId);
+        CenterData center = centerHelper.retrieveCenter(centerId);
         assertNotNull(center);
         assertEquals(staffId, center.getStaffId().intValue());
         assertTrue(center.getActive());
@@ -167,7 +167,7 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         final String centerActivationDate = "01 July 2007";
         Long centerId = centerHelper.createCenter(name, officeId, externalId, Long.valueOf(staffId), List.of(groupId), centerActivationDate)
                 .getResourceId();
-        GetCentersCenterIdResponse center = centerHelper.retrieveCenter(centerId);
+        CenterData center = centerHelper.retrieveCenter(centerId);
         assertNotNull(center);
         assertEquals(staffId, center.getStaffId().intValue());
         assertTrue(center.getActive());

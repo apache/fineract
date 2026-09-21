@@ -49,6 +49,9 @@ import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.domain.ClientTransferDetails;
 import org.apache.fineract.portfolio.client.domain.ClientTransferDetailsRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientHasBeenClosedException;
+import org.apache.fineract.portfolio.group.data.GroupCommandResponse;
+import org.apache.fineract.portfolio.group.data.GroupTransferClientItem;
+import org.apache.fineract.portfolio.group.data.GroupTransferClientsRequest;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
@@ -518,5 +521,40 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
      * (!group.isTransferInProgressOrOnHold()) { throw new ClientNotAwaitingTransferApprovalException(group.getId()); }
      * }
      **/
+
+    @Transactional
+    @Override
+    public GroupCommandResponse transferClientsBetweenGroups(final GroupTransferClientsRequest request) {
+        final Long sourceGroupId = request.getId();
+        final Group sourceGroup = groupRepository.findOneWithNotFoundDetection(sourceGroupId);
+        final Long destinationGroupId = request.getDestinationGroupId();
+        final Group destinationGroup = groupRepository.findOneWithNotFoundDetection(destinationGroupId);
+        final Office sourceOffice = sourceGroup.getOffice();
+        Staff staff = null;
+        if (request.getStaffId() != null) {
+            staff = staffRepositoryWrapper.findByOfficeHierarchyWithNotFoundDetection(request.getStaffId(), sourceOffice.getHierarchy());
+        }
+        final List<Client> clients = new ArrayList<>();
+        final List<GroupTransferClientItem> requestedClients = request.getClients();
+        if (requestedClients != null) {
+            for (final GroupTransferClientItem item : requestedClients) {
+                if (item.getId() != null) {
+                    clients.add(clientRepositoryWrapper.findOneWithNotFoundDetection(item.getId()));
+                }
+            }
+        }
+        if (sourceGroupId.equals(destinationGroupId)) {
+            throw new TransferNotSupportedException(TransferNotSupportedReason.SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, sourceGroupId,
+                    destinationGroupId);
+        }
+        if (!sourceOffice.getId().equals(destinationGroup.getOffice().getId())) {
+            throw new TransferNotSupportedException(TransferNotSupportedReason.BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, sourceGroupId,
+                    destinationGroupId);
+        }
+        for (final Client client : clients) {
+            transferClientBetweenGroups(sourceGroup, client, destinationGroup, request.getInheritDestinationGroupLoanOfficer(), staff);
+        }
+        return GroupCommandResponse.builder().groupId(sourceGroupId).resourceId(sourceGroupId).build();
+    }
 
 }

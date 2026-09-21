@@ -22,19 +22,16 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.DeleteGroupsGroupIdResponse;
-import org.apache.fineract.client.models.GetGroupsGroupIdClientMembers;
-import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
-import org.apache.fineract.client.models.GetGroupsPageItems;
-import org.apache.fineract.client.models.PostGroupsGroupIdChanges;
-import org.apache.fineract.client.models.PostGroupsGroupIdRequest;
-import org.apache.fineract.client.models.PostGroupsRequest;
-import org.apache.fineract.client.models.PostGroupsResponse;
-import org.apache.fineract.client.models.PutGroupsGroupIdRequest;
-import org.apache.fineract.client.models.PutGroupsGroupIdResponse;
+import org.apache.fineract.client.models.ClientData;
+import org.apache.fineract.client.models.GroupCommandRequest;
+import org.apache.fineract.client.models.GroupCreateRequest;
+import org.apache.fineract.client.models.GroupCreateResponse;
+import org.apache.fineract.client.models.GroupDeleteResponse;
+import org.apache.fineract.client.models.GroupGeneralData;
+import org.apache.fineract.client.models.GroupUpdateRequest;
+import org.apache.fineract.client.models.GroupUpdateResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
 
@@ -60,13 +57,13 @@ public class FeignGroupHelper {
     }
 
     /** Creates a group in {@code pending} status (active=false) in the default office. */
-    public PostGroupsResponse createGroup() {
+    public GroupCreateResponse createGroup() {
         return createGroup(DEFAULT_OFFICE_ID);
     }
 
     /** Creates a group in {@code pending} status (active=false). */
-    public PostGroupsResponse createGroup(Long officeId) {
-        PostGroupsRequest request = new PostGroupsRequest()//
+    public GroupCreateResponse createGroup(Long officeId) {
+        GroupCreateRequest request = new GroupCreateRequest()//
                 .officeId(officeId)//
                 .name(Utils.uniqueRandomStringGenerator("Group_Name_", 5))//
                 .externalId(UUID.randomUUID().toString())//
@@ -78,12 +75,12 @@ public class FeignGroupHelper {
     }
 
     /** Creates an {@code active} group in the default office. */
-    public PostGroupsResponse createActiveGroup() {
+    public GroupCreateResponse createActiveGroup() {
         return createActiveGroup(DEFAULT_OFFICE_ID, DEFAULT_ACTIVATION_DATE);
     }
 
-    public PostGroupsResponse createActiveGroup(Long officeId, String activationDate) {
-        PostGroupsRequest request = new PostGroupsRequest()//
+    public GroupCreateResponse createActiveGroup(Long officeId, String activationDate) {
+        GroupCreateRequest request = new GroupCreateRequest()//
                 .officeId(officeId)//
                 .name(Utils.uniqueRandomStringGenerator("Group_Name_", 5))//
                 .externalId(UUID.randomUUID().toString())//
@@ -94,27 +91,27 @@ public class FeignGroupHelper {
         return createGroup(request);
     }
 
-    public PostGroupsResponse createGroup(PostGroupsRequest request) {
+    public GroupCreateResponse createGroup(GroupCreateRequest request) {
         return ok(() -> fineractClient.groups().createGroup(request));
     }
 
-    public GetGroupsGroupIdResponse retrieveGroup(Long groupId) {
+    public GroupGeneralData retrieveGroup(Long groupId) {
         Map<String, Object> params = Map.of();
         return ok(() -> fineractClient.groups().retrieveOneGroup(groupId, params));
     }
 
     /** Retrieves a group with the given {@code associations} (e.g. {@code clientMembers}, {@code all}). */
-    public GetGroupsGroupIdResponse retrieveGroupWithAssociations(Long groupId, String associations) {
+    public GroupGeneralData retrieveGroupWithAssociations(Long groupId, String associations) {
         Map<String, Object> params = Map.of("associations", associations);
         return ok(() -> fineractClient.groups().retrieveOneGroup(groupId, params));
     }
 
-    public PutGroupsGroupIdResponse updateGroup(Long groupId, String name) {
-        PutGroupsGroupIdRequest request = new PutGroupsGroupIdRequest().name(name);
+    public GroupUpdateResponse updateGroup(Long groupId, String name) {
+        GroupUpdateRequest request = new GroupUpdateRequest().name(name);
         return ok(() -> fineractClient.groups().updateGroup(groupId, request));
     }
 
-    public DeleteGroupsGroupIdResponse deleteGroup(Long groupId) {
+    public GroupDeleteResponse deleteGroup(Long groupId) {
         return ok(() -> fineractClient.groups().deleteGroup(groupId));
     }
 
@@ -123,7 +120,7 @@ public class FeignGroupHelper {
     }
 
     public void activateGroup(Long groupId, String activationDate) {
-        PostGroupsGroupIdRequest request = new PostGroupsGroupIdRequest()//
+        GroupCommandRequest request = new GroupCommandRequest()//
                 .activationDate(activationDate)//
                 .dateFormat(LoanTestData.DATETIME_PATTERN)//
                 .locale(LoanTestData.LOCALE);
@@ -131,25 +128,23 @@ public class FeignGroupHelper {
     }
 
     public void associateClient(Long groupId, Long clientId) {
-        postGroupCommand(groupId, ASSOCIATE_CLIENTS_COMMAND, new PostGroupsGroupIdRequest().clientMembers(List.of(clientId)));
+        postGroupCommand(groupId, ASSOCIATE_CLIENTS_COMMAND, new GroupCommandRequest().clientMembers(List.of(clientId)));
     }
 
     public void disAssociateClient(Long groupId, Long clientId) {
-        postGroupCommand(groupId, DISASSOCIATE_CLIENTS_COMMAND, new PostGroupsGroupIdRequest().clientMembers(List.of(clientId)));
+        postGroupCommand(groupId, DISASSOCIATE_CLIENTS_COMMAND, new GroupCommandRequest().clientMembers(List.of(clientId)));
     }
 
-    /** Assigns a staff member to the group; returns the {@code changes} object (contains {@code staffId}). */
-    public PostGroupsGroupIdChanges assignStaff(Long groupId, Long staffId) {
-        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, new PostGroupsGroupIdRequest().staffId(staffId));
+    public Map<String, Object> assignStaff(Long groupId, Long staffId) {
+        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, new GroupCommandRequest().staffId(staffId));
     }
 
-    /** Assigns staff to the group and cascades it to member client accounts; returns the {@code changes} object. */
-    public PostGroupsGroupIdChanges assignStaffInheritStaffForClientAccounts(Long groupId, Long staffId) {
-        PostGroupsGroupIdRequest request = new PostGroupsGroupIdRequest().staffId(staffId).inheritStaffForClientAccounts(true);
+    public Map<String, Object> assignStaffInheritStaffForClientAccounts(Long groupId, Long staffId) {
+        GroupCommandRequest request = new GroupCommandRequest().staffId(staffId).inheritStaffForClientAccounts(true);
         return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, request);
     }
 
-    private PostGroupsGroupIdChanges postGroupCommand(Long groupId, String command, PostGroupsGroupIdRequest request) {
+    private Map<String, Object> postGroupCommand(Long groupId, String command, GroupCommandRequest request) {
         return ok(() -> fineractClient.groups().handleCommandsGroup(groupId, request, Map.of("command", command))).getChanges();
     }
 
@@ -157,7 +152,7 @@ public class FeignGroupHelper {
      * The office's groups that have no center as parent. Must stay on the non-paged listing, see
      * {@link NonPagedListingApi}.
      */
-    public List<GetGroupsPageItems> retrieveOrphanGroups(Long officeId) {
+    public List<GroupGeneralData> retrieveOrphanGroups(Long officeId) {
         return ok(() -> nonPagedListingApi.listOrphanGroups(officeId));
     }
 
@@ -168,7 +163,7 @@ public class FeignGroupHelper {
 
     /** The client-member ids associated with the group (empty if none). */
     public List<Long> retrieveGroupMemberIds(Long groupId) {
-        Set<GetGroupsGroupIdClientMembers> members = retrieveGroupWithAssociations(groupId, CLIENT_MEMBERS_ASSOCIATION).getClientMembers();
-        return members == null ? List.of() : members.stream().map(GetGroupsGroupIdClientMembers::getId).toList();
+        List<ClientData> members = retrieveGroupWithAssociations(groupId, CLIENT_MEMBERS_ASSOCIATION).getClientMembers();
+        return members == null ? List.of() : members.stream().map(ClientData::getId).toList();
     }
 }
