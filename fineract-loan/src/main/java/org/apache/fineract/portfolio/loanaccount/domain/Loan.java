@@ -1826,6 +1826,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return chargeOffTransaction != null && chargeOffTransaction.getDateOf().compareTo(onDate) <= 0;
     }
 
+    public boolean isContractTerminatedOnDate(final LocalDate onDate) {
+        final LoanTransaction contractTerminationTransaction = isContractTermination() ? findContractTerminationTransaction() : null;
+        return contractTerminationTransaction != null && contractTerminationTransaction.getDateOf().compareTo(onDate) <= 0;
+    }
+
     public boolean hasMonetaryActivityAfter(final LocalDate transactionDate) {
         for (LoanTransaction transaction : this.getLoanTransactions()) {
             if (transaction.getTransactionDate().isAfter(transactionDate) && transaction.isNotReversed()
