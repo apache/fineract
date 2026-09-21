@@ -2615,17 +2615,64 @@ Feature: Working Capital Charge-Off Accounting Entries
       | Type      | Account code | Account name              | Debit  | Credit |
       | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt      |        | 1000.0 |
-      | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
-      | EXPENSE   | 744007       | Credit Loss/Bad Debt      |        | 1000.0 |
       | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt      | 1000.0 |        |
       | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
-      | EXPENSE   | 744007       | Credit Loss/Bad Debt      |         | 1000.0 |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt      |        | 1000.0 |
     Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_ADJUSTMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit  | Credit |
       | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
       | ASSET     | 112601       | Loans Receivable          |        | 1000.0 |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "08 January 2026"
+
+  @TestRailId:C106827
+  Scenario: Verify Working Capital charge-off accounting: re-applying a backdated discount fee adjustment after its undo revives the amortization adjustment and books it once
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    When Admin sets the business date to "05 January 2026"
+    And Admin charges off the Working Capital loan on "05 January 2026"
+    When Admin sets the business date to "06 January 2026"
+    And Admin adds Discount fee adjustment with "1000" amount on transaction date "04 January 2026" on Working Capital loan account for last discount
+    When Admin undo the last Discount fee adjustment on Working Capital loan account
+    And Admin adds Discount fee adjustment with "1000" amount on transaction date "04 January 2026" on Working Capital loan account for last discount
+    Then Working Capital Loan has transactions:
+      | transactionDate | type                                 | transactionAmount | reversed |
+      | 01 January 2026 | Disbursement                         | 9000.0            | false    |
+      | 01 January 2026 | Discount Fee                         | 1000.0            | false    |
+      | 02 January 2026 | Repayment                            | 50.0              | false    |
+      | 02 January 2026 | Discount Fee Amortization            | 9.61              | false    |
+      | 04 January 2026 | Discount Fee Adjustment              | 1000.0            | true     |
+      | 04 January 2026 | Discount Fee Adjustment              | 1000.0            | false    |
+      | 05 January 2026 | Charge-off                           | 8950.0            | false    |
+      | 05 January 2026 | Discount Fee Amortization            | 990.39            | true     |
+      | 05 January 2026 | Discount Fee Amortization Adjustment | 9.61              | false    |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt      | 9.61  |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 9.61   |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt      |       | 9.61   |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 9.61  |        |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt      | 9.61  |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 9.61   |
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_AMORTIZATION" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 990.39 |        |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt      |        | 990.39 |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 990.39 |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt      | 990.39 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 990.39 |        |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt      |        | 990.39 |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 990.39 |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt      | 990.39 |        |
 
   @TestRailId:C106652
   Scenario: Verify Working Capital charge-off accounting: same-day discount fee adjustment below realized income posts amortization adjustment - UC54
