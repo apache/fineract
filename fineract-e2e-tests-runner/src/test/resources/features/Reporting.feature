@@ -1015,3 +1015,119 @@ Feature: Reporting
       | 2026-01-03      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC | Payout Refund                   | AUTOPAY          |            | 1        | Unallocated Credit (UNC) |                      | 0.0                |
     When Loan Pay-off is made on "05 January 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C106736
+  Scenario: Verify Transaction Summary Reports - UC04: Buy Down Fee Amortization Adjustment netted from AM and AM_ADJ mapping rows of two different Buy Down Fees is reported with the correct sign
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | 01 January 2026 | 100 | 7 | DECLINING_BALANCE | DAILY | EQUAL_INSTALLMENTS | 3 | MONTHS | 1 | MONTHS | 3 | 0 | 0 | 0 | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the loan on "01 January 2026" with "100" EUR transaction amount
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2026" with "50" EUR transaction amount
+    And Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Loan
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "02 January 2026" with "30" EUR transaction amount
+    And Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Loan
+    And Admin sets the business date to "16 January 2026"
+#   --- two backdated adjustments on the same day against two different Buy Down Fees: 45 of 50 claws back already amortized income of fee #1 (AM_ADJ 2.78), fee #2 keeps amortizing (AM 0.08) ---
+    And Admin adds buy down fee adjustment of buy down fee transaction made on "01 January 2026" with "AUTOPAY" payment type to the loan on "05 January 2026" with "45" EUR transaction amount
+    And Admin adds buy down fee adjustment of buy down fee transaction made on "02 January 2026" with "AUTOPAY" payment type to the loan on "05 January 2026" with "2" EUR transaction amount
+    And Admin runs inline COB job for Loan
+#   --- the COB (COB date 15 January) nets both mapping rows into one Buy Down Fee Amortization Adjustment of 2.70 dated 15 January: reported as -2.70, not -(2.78 + 0.08) ---
+    Then Transaction Summary Report for date "15 January 2026" has the following data:
+      | TransactionDate | Product | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type | Chargeoff_ReasonCode | Transaction_Amount |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Apply Charges | | | 0 | Interest | | |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Amortization Adjustment |  | | 0 | Fees | | -2.70 |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Amortization Adjustment |  | | 0 | Interest | | 0.0 |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Amortization Adjustment |  | | 0 | Penalty | | 0.0 |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Amortization Adjustment |  | | 0 | Principal | | 0.0 |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Amortization Adjustment |  | | 0 | Unallocated Credit (UNC) | | 0.0 |
+    And Transaction Summary Report for date "16 January 2026" has the following data:
+      | TransactionDate | Product | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type | Chargeoff_ReasonCode | Transaction_Amount |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Adjustment | AUTOPAY | | 0 | Fees | | -47.0 |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Adjustment | AUTOPAY | | 0 | Interest | | 0.0 |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Adjustment | AUTOPAY | | 0 | Penalty | | 0.0 |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Adjustment | AUTOPAY | | 0 | Principal | | 0.0 |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Adjustment | AUTOPAY | | 0 | Unallocated Credit (UNC) | | 0.0 |
+    And Transaction Summary Report with Asset Owner for date "15 January 2026" has the following data:
+      | TransactionDate | Product | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Apply Charges | | | 0 | Interest | | |                |                     |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Amortization Adjustment |  | | 0 | Fees | | -2.70 |                |                     |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Amortization Adjustment |  | | 0 | Interest | | 0.0 |                |                     |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Amortization Adjustment |  | | 0 | Penalty | | 0.0 |                |                     |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Amortization Adjustment |  | | 0 | Principal | | 0.0 |                |                     |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Amortization Adjustment |  | | 0 | Unallocated Credit (UNC) | | 0.0 |                |                     |
+    And Transaction Summary Report with Asset Owner for date "16 January 2026" has the following data:
+      | TransactionDate | Product | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Adjustment | AUTOPAY | | 0 | Fees | | -47.0 |                |                     |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Adjustment | AUTOPAY | | 0 | Interest | | 0.0 |                |                     |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Adjustment | AUTOPAY | | 0 | Penalty | | 0.0 |                |                     |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Adjustment | AUTOPAY | | 0 | Principal | | 0.0 |                |                     |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | Buy Down Fee Adjustment | AUTOPAY | | 0 | Unallocated Credit (UNC) | | 0.0 |                |                     |
+
+  @TestRailId:C106737
+  Scenario: Verify Transaction Summary Reports - UC06: a live Loan re-age and its later undo are excluded from both reports on their own days
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME | 01 January 2026 | 100 | 7 | DECLINING_BALANCE | DAILY | EQUAL_INSTALLMENTS | 3 | MONTHS | 1 | MONTHS | 3 | 0 | 0 | 0 | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the loan on "01 January 2026" with "100" EUR transaction amount
+    And Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Loan
+    And Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 01 February 2026 | 6                    |
+    Then Transaction Summary Report for date "10 January 2026" has the following data:
+      | TransactionDate | Product | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type | Chargeoff_ReasonCode | Transaction_Amount |
+    And Transaction Summary Report with Asset Owner for date "10 January 2026" has the following data:
+      | TransactionDate | Product | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id |
+    When Admin sets the business date to "11 January 2026"
+    And Admin successfully undo Loan re-aging transaction
+    Then Transaction Summary Report for date "11 January 2026" has the following data:
+      | TransactionDate | Product | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type | Chargeoff_ReasonCode | Transaction_Amount |
+    And Transaction Summary Report with Asset Owner for date "11 January 2026" has the following data:
+      | TransactionDate | Product | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id |
+
+  @TestRailId:C106738
+  Scenario: Verify Transaction Summary Report with Asset Owner - UC05: Capitalized Income Amortization Adjustment netted from AM and AM_ADJ mapping rows of two different Capitalized Incomes is reported with the correct sign
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_CAPITALIZED_INCOME | 01 January 2026 | 100 | 0 | DECLINING_BALANCE | DAILY | EQUAL_INSTALLMENTS | 100 | DAYS | 25 | DAYS | 4 | 0 | 0 | 0 | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the loan on "01 January 2026" with "25" EUR transaction amount
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 January 2026" with "50" EUR transaction amount
+    And Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Loan
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "02 January 2026" with "25" EUR transaction amount
+    And Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Loan
+    And Admin sets the business date to "16 January 2026"
+#   --- same shape as UC04 for capitalized income: 45 of 50 claws back income of #1 (AM_ADJ 2.00), #2 keeps amortizing (AM 0.03) ---
+    And Admin adds capitalized income adjustment of capitalized income transaction made on "01 January 2026" with "AUTOPAY" payment type to the loan on "05 January 2026" with "45" EUR transaction amount
+    And Admin adds capitalized income adjustment of capitalized income transaction made on "02 January 2026" with "AUTOPAY" payment type to the loan on "05 January 2026" with "2" EUR transaction amount
+    And Admin runs inline COB job for Loan
+#   --- one Capitalized Income Amortization Adjustment of 1.97 dated 15 January: must be reported as -1.97, not -(2.00 + 0.03) ---
+    Then Transaction Summary Report with Asset Owner for date "15 January 2026" has the following data:
+      | TransactionDate | Product | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_CAPITALIZED_INCOME | Capitalized Income Amortization Adjustment |  | | 0 | Fees | | 0.0 |                |                     |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_CAPITALIZED_INCOME | Capitalized Income Amortization Adjustment |  | | 0 | Interest | | -1.97 |                |                     |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_CAPITALIZED_INCOME | Capitalized Income Amortization Adjustment |  | | 0 | Penalty | | 0.0 |                |                     |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_CAPITALIZED_INCOME | Capitalized Income Amortization Adjustment |  | | 0 | Principal | | 0.0 |                |                     |
+      | 2026-01-15      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_CAPITALIZED_INCOME | Capitalized Income Amortization Adjustment |  | | 0 | Unallocated Credit (UNC) | | 0.0 |                |                     |
+    And Transaction Summary Report with Asset Owner for date "16 January 2026" has the following data:
+      | TransactionDate | Product | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_CAPITALIZED_INCOME | Capitalized Income Adjustment | AUTOPAY | | 0 | Fees | | 0.0 |                |                     |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_CAPITALIZED_INCOME | Capitalized Income Adjustment | AUTOPAY | | 0 | Interest | | 0.0 |                |                     |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_CAPITALIZED_INCOME | Capitalized Income Adjustment | AUTOPAY | | 0 | Penalty | | 0.0 |                |                     |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_CAPITALIZED_INCOME | Capitalized Income Adjustment | AUTOPAY | | 0 | Principal | | -47.0 |                |                     |
+      | 2026-01-16      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_CAPITALIZED_INCOME | Capitalized Income Adjustment | AUTOPAY | | 0 | Unallocated Credit (UNC) | | 0.0 |                |                     |
