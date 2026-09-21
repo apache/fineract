@@ -261,12 +261,14 @@ Feature: LoanProduct
     And Admin successfully disburse the loan on "2 January 2024" with "300" EUR transaction amount
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "02 January 2024" with "200" EUR transaction amount
 
+  @TestRailId:C106739
   Scenario: Verify Loan Product template delinquencyBucketOptions are REGULAR only
     When Admin retrieves the Loan Product template
     Then Loan Product template delinquencyBucketOptions all have bucketType "REGULAR"
     And Loan Product template delinquencyBucketOptions do not contain:
       | WC_DELINQUENCY_BUCKET |
 
+  @TestRailId:C106740
   Scenario Outline: Verify Loan Product create rejects non-REGULAR delinquency bucket
     Then Admin failed to create a new Loan Product with field "<lp_field_name>" invalid data <lp_invalid_field_value> and got an error <lp_error_message>
 
@@ -274,6 +276,7 @@ Feature: LoanProduct
       | lp_field_name       | lp_invalid_field_value   | lp_error_message                                                                   |
       | delinquencyBucketId | "WC_DELINQUENCY_BUCKET"  | "The parameter `delinquencyBucketId` must reference a REGULAR delinquency bucket." |
 
+  @TestRailId:C106741
   Scenario Outline: Verify Loan Product update rejects non-REGULAR delinquency bucket
     When Admin creates a new Loan Product
     Then Admin failed to update a new Loan Product field "<lp_field_name>" with invalid data <lp_invalid_field_value> and got an error <lp_error_message>

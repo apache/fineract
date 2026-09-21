@@ -642,8 +642,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         return value == null ? "null" : value.toString();
     }
 
-    @Then("Creating a working capital loan with LP overridables disabled and with the following data will result an error:")
-    public void creatingWorkingCapitalLoanWithLpOverridablesDisabledWillResultAnError(final DataTable table) {
+    @Then("Creating a working capital loan with LP overridable disabled and with the following data will result an error:")
+    public void creatingWorkingCapitalLoanWithLpOverridableDisabledWillResultAnError(final DataTable table) {
         final List<List<String>> data = table.asLists();
         final List<String> loanData = data.get(1);
 
@@ -666,8 +666,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .principalAmount(new BigDecimal(principal)).totalPaymentVolume(new BigDecimal(totalPaymentVolume))
                 .periodPaymentRate(new BigDecimal(periodPaymentRate))
                 .discount(discount != null && !discount.isEmpty() ? new BigDecimal(discount) : null)
-                .delinquencyBucketId(
-                        delinquencyBucketId != null && !delinquencyBucketId.isEmpty() ? Long.valueOf(delinquencyBucketId) : null)
+                .delinquencyBucketId(delinquencyBucketResolver.resolveBucketId(delinquencyBucketId))
                 .repaymentEvery(repaymentEvery != null && !repaymentEvery.isEmpty() ? Integer.valueOf(repaymentEvery) : null)
                 .repaymentFrequencyType(repaymentFrequencyType != null && !repaymentFrequencyType.isEmpty()
                         ? PostWorkingCapitalLoansRequest.RepaymentFrequencyTypeEnum.valueOf(repaymentFrequencyType)
@@ -1126,6 +1125,32 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
         testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, response);
         log.info("Working Capital Loan modified with delinquency bucket with ID: {}", response.getResourceId());
+    }
+
+    @Then("Admin failed to modify working capital loan with delinquencyBucketId {string} and got an error {string}")
+    public void adminFailedToModifyWorkingCapitalLoanWithDelinquencyBucketId(final String delinquencyBucketId, final String expectedError) {
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .delinquencyBucketId(delinquencyBucketResolver.resolveBucketId(delinquencyBucketId));
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, exception);
+        assertHttpStatus(exception, 400);
+        assertValidationError(exception, expectedError);
+    }
+
+    @When("Admin modifies the working capital loan resenting its current delinquencyBucketId")
+    public void adminModifiesWorkingCapitalLoanResentingCurrentDelinquencyBucketId() {
+        final GetWorkingCapitalLoansLoanIdResponse loanDetails = retrieveLoanDetails(getCreatedLoanId());
+        assertThat(loanDetails.getDelinquencyBucket()).as("Loan must have a delinquency bucket to resent").isNotNull();
+        assertThat(loanDetails.getDelinquencyBucket().getId()).as("Loan delinquency bucket id").isNotNull();
+        final Long currentBucketId = loanDetails.getDelinquencyBucket().getId();
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .delinquencyBucketId(currentBucketId);
+        final PutWorkingCapitalLoansLoanIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, response);
+        log.info("Working Capital Loan modified resenting delinquencyBucketId {}, resource ID: {}", currentBucketId,
+                response.getResourceId());
     }
 
     @When("Admin modifies the working capital loan with {int} {string} breach override data")

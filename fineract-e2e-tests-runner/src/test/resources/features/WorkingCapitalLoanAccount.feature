@@ -39,32 +39,32 @@ Feature: WorkingCapitalLoanAccount
       | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 500.0             | 0.0               | 1000.0             | 2.0               | 5.0              |
 
   @TestRailId:C70253
-  Scenario: Create Working Capital Loan account - UC4: With LP overridables disabled/disallowed, loan creation will result an error when trying override values (Negative)
+  Scenario: Create Working Capital Loan account - UC4: With LP overridable disabled/disallowed, loan creation will result an error when trying override values (Negative)
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
-    Then Creating a working capital loan with LP overridables disabled and with the following data will result an error:
-      | LoanProduct                       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId | repaymentEvery | repaymentFrequencyType |
-      | WCLP_DISALLOW_ATTRIBUTES_OVERRIDE | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      | 1                   | 30             | DAYS                   |
+    Then Creating a working capital loan with LP overridable disabled and with the following data will result an error:
+      | LoanProduct                       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId   | repaymentEvery | repaymentFrequencyType |
+      | WCLP_DISALLOW_ATTRIBUTES_OVERRIDE | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      | WC_DELINQUENCY_BUCKET | 30             | DAYS                   |
 
   @TestRailId:C74453
-  Scenario: Create Working Capital Loan account - UC4.1: With LP overridables enabled/allowed, loan creation will override discount value
+  Scenario: Create Working Capital Loan account - UC4.1: With LP overridable enabled/allowed, loan creation will override discount value
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
-      | LoanProduct   | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId | repaymentEvery | repaymentFrequencyType |
-      | WCLP_DISCOUNT | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 2.0               | 60.0     | 1                   | 1              | MONTHS                 |
+      | LoanProduct   | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId   | repaymentEvery | repaymentFrequencyType |
+      | WCLP_DISCOUNT | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 2.0               | 60.0     | WC_DELINQUENCY_BUCKET | 1              | MONTHS                 |
     Then Working capital loan creation was successful
     And Working capital loan account has the correct data:
       | product.name  | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
       | WCLP_DISCOUNT | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 100.0             | 0.0               | 100.0              | 2.0               | 60.0             |
 
   @TestRailId:C74479
-  Scenario: Create Working Capital Loan account - UC4.2: With LP overridables disabled/disallowed, loan created with discount amount from loan product level
+  Scenario: Create Working Capital Loan account - UC4.2: With LP overridable disabled/disallowed, loan created with discount amount from loan product level
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
-      | LoanProduct                                | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId | repaymentEvery | repaymentFrequencyType |
-      | WCLP_DISCOUNT_DISALLOW_ATTRIBUTES_OVERRIDE | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               |          | 1                   | 30             | DAYS                   |
+      | LoanProduct                                | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId   | repaymentEvery | repaymentFrequencyType |
+      | WCLP_DISCOUNT_DISALLOW_ATTRIBUTES_OVERRIDE | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               |          | WC_DELINQUENCY_BUCKET | 30             | DAYS                   |
     Then Working capital loan creation was successful
     And Working capital loan account has the correct data:
       | product.name                               | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
@@ -1920,9 +1920,30 @@ Feature: WorkingCapitalLoanAccount
       | status | principal | totalDiscountFee | unrealizedIncome |
       | Active | 10000.0   | 1000.0           | 990.39           |
 
+  @TestRailId:C106745
   Scenario: Create Working Capital Loan account rejects non-WORKING_CAPITAL delinquency bucket
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     Then Creating a working capital loan with the following data will result an error "The parameter `delinquencyBucketId` must reference a WORKING_CAPITAL delinquency bucket.":
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId      |
       | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      | BASIC_DELINQUENCY_BUCKET |
+
+  @TestRailId:C106803
+  Scenario: Modify Working Capital Loan account rejects non-WORKING_CAPITAL delinquency bucket
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      |
+    Then Working capital loan creation was successful
+    Then Admin failed to modify working capital loan with delinquencyBucketId "BASIC_DELINQUENCY_BUCKET" and got an error "The parameter `delinquencyBucketId` must reference a WORKING_CAPITAL delinquency bucket."
+
+  @TestRailId:C106804
+  Scenario: Modify Working Capital Loan account with the same WORKING_CAPITAL delinquencyBucketId succeeds
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      |
+    Then Working capital loan creation was successful
+    When Admin modifies the working capital loan resenting its current delinquencyBucketId
