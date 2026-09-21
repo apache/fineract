@@ -5751,9 +5751,9 @@ class ProgressiveEMICalculatorTest {
      *
      * <p>
      * N=8, 30% p.a., graceOnPrincipalPayment=3, disburse 100 on 1 January 2024, re-amortize on 15 February 2024, then
-     * change the rate on 1 April 2024 (effective 31 March). The next recalculation must not stamp
-     * principalPaymentGrace back on from the product grace setting. Periods still open after the re-amortization date
-     * keep principal, and installments due after the rate change stay equal.
+     * change the rate on 1 April 2024 (effective 31 March). The next recalculation must not stamp principalPaymentGrace
+     * back on from the product grace setting. Periods still open after the re-amortization date keep principal, and
+     * installments due after the rate change stay equal.
      */
     @Test
     public void test_principalGrace_reAmortizationThenRateChange_keepsGraceLifted() {
@@ -5873,6 +5873,95 @@ class ProgressiveEMICalculatorTest {
                     .append(toDouble(period.getDuePrincipal()));
         }
         return schedule.toString();
+    }
+
+    /**
+     * Overpaid installments must not make evening-out easier. Six of eight installments are overpaid, and the last two
+     * differ by 0.02. Half of all eight is 4, and 0.02 is too small to clear that bar. Half of the two that were not
+     * overpaid is 1, which the current gate uses, so this fails until overpayments stop lowering the bar.
+     */
+    @Test
+    public void test_shouldBeAdjusted_overpaidPeriodsDoNotLowerTheGate() {
+        final List<RepaymentPeriod> periods = generateEightPeriodSchedule(0).repaymentPeriods();
+        setLastTwoEmis(periods, 10.00, 10.02);
+        overpay(periods, 6);
+
+        final EmiAdjustment adjustment = emiCalculator.getEmiAdjustment(periods);
+        Assertions.assertEquals(6, adjustment.uncountablePeriods(), "Overpaid installments stay out of the split");
+        Assertions.assertFalse(adjustment.shouldBeAdjusted(),
+                "A 0.02 gap across eight installments must not be evened out just because six were overpaid");
+    }
+
+    /**
+     * Overpaid installments must not switch evening-out off. Seven of eight are overpaid, so the current gate sees one
+     * payment left and refuses to even out. The last two still differ by 1.00, which is enough when all eight count.
+     */
+    @Test
+    public void test_shouldBeAdjusted_manyOverpaymentsDoNotCloseTheGate() {
+        final List<RepaymentPeriod> periods = generateEightPeriodSchedule(0).repaymentPeriods();
+        setLastTwoEmis(periods, 10.00, 11.00);
+        overpay(periods, 7);
+
+        final EmiAdjustment adjustment = emiCalculator.getEmiAdjustment(periods);
+        Assertions.assertEquals(7, adjustment.uncountablePeriods(), "Overpaid installments stay out of the split");
+        Assertions.assertTrue(adjustment.shouldBeAdjusted(),
+                "Evening-out must still be considered when overpayments leave fewer than two payments");
+    }
+
+    /**
+     * Grace installments still lower the bar. Six of eight are grace, and the last two differ by 0.02. That gap is
+     * large enough across the two real payments and too small across all eight.
+     */
+    @Test
+    public void test_shouldBeAdjusted_gracePeriodsStillLowerTheGate() {
+        final List<RepaymentPeriod> periods = generateEightPeriodSchedule(6).repaymentPeriods();
+        setLastTwoEmis(periods, 10.00, 10.02);
+
+        final EmiAdjustment adjustment = emiCalculator.getEmiAdjustment(periods);
+        Assertions.assertEquals(6, adjustment.uncountablePeriods(), "Grace installments stay out of the split");
+        Assertions.assertTrue(adjustment.shouldBeAdjusted(),
+                "A 0.02 gap must still be evened out across the two payments that are not grace");
+    }
+
+    private ProgressiveLoanInterestScheduleModel generateEightPeriodSchedule(final int graceOnPrincipalPayment) {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1)));
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(BigDecimal.valueOf(30.0));
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getNumberOfRepayments()).thenReturn(8);
+        Mockito.when(loanProductRelatedDetail.getGraceOnPrincipalPayment()).thenReturn(graceOnPrincipalPayment);
+        Mockito.when(loanProductRelatedDetail.getGraceOnInterestPayment()).thenReturn(0);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator
+                .generatePeriodInterestScheduleModel(expectedRepaymentPeriods, loanProductRelatedDetail, null, mc);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), toMoney(100.0));
+        return interestSchedule;
+    }
+
+    private static void setLastTwoEmis(final List<RepaymentPeriod> periods, final double penultimateEmi, final double lastEmi) {
+        final RepaymentPeriod penultimate = periods.get(periods.size() - 2);
+        final RepaymentPeriod last = periods.get(periods.size() - 1);
+        penultimate.setEmi(toMoney(penultimateEmi));
+        penultimate.setOriginalEmi(toMoney(penultimateEmi));
+        last.setEmi(toMoney(lastEmi));
+        last.setOriginalEmi(toMoney(lastEmi));
+    }
+
+    private static void overpay(final List<RepaymentPeriod> periods, final int count) {
+        for (int idx = 0; idx < count; idx++) {
+            periods.get(idx).addPaidPrincipalAmount(toMoney(20.0));
+        }
     }
 
     @Test

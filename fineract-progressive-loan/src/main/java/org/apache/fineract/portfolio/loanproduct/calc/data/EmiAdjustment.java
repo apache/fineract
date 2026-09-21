@@ -29,7 +29,9 @@ public record EmiAdjustment(//
 ) {
 
     public boolean shouldBeAdjusted() {
-        double lowerHalfOfRelatedPeriods = Math.floor((numberOfRelatedPeriods() - uncountablePeriods) / 2.0);
+        // Overpaid installments stay in uncountablePeriods for adjustment(). They must not move this gate.
+        long gracePeriods = relatedRepaymentPeriods.stream().filter(RepaymentPeriod::isPrincipalPaymentGrace).count();
+        double lowerHalfOfRelatedPeriods = Math.floor((numberOfRelatedPeriods() - gracePeriods) / 2.0);
         return lowerHalfOfRelatedPeriods > 0.0 && !emiDifference.isZero() && emiDifference.abs() //
                 .multipliedBy(100) //
                 .isGreaterThan(originalEmi.copy(lowerHalfOfRelatedPeriods)); //
