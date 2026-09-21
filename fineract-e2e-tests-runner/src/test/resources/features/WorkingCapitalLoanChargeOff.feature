@@ -450,7 +450,7 @@ Feature: Working Capital Loan Charge-off
       | 15 January 2026 | Charge-off   | 60.0              | 60.0             | 0.0               | 0.0                   | true     |
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
-  @TestRailId:TODO_ADD_01
+  @TestRailId:C106729
   Scenario: Verify Working Capital Charge-off transactions - Backdated discount fee adjustment on a re-charged-off loan should correct realized income
 # Step 1: WC loan 9000 / total payment volume 100000 / rate 18, approve and disburse on 01 January 2026 with discount 1000.
     When Admin sets the business date to "01 January 2026"
@@ -462,12 +462,12 @@ Feature: Working Capital Loan Charge-off
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
     And Admin loads discount fee transaction from Working Capital loan for adjustment
 
-# Step 2: 02 January 2026 -> repayment 50; run COB (amortization 9.61).
+# Step 2: 02 January 2026 -> run COB for 01 January (no amortization); repayment 50.
     And Admin sets the business date to "02 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Customer makes "REPAYMENT" transaction on "02 January 2026" with 50.0 transaction amount on Working Capital loan
 
-# Step 3: 04 January 2026 -> charge off (9950, final amortization 990.39 to charge-off expense).
+# Step 3: 04 January 2026 -> run COB (amortization 9.61); charge off (9950, final amortization 990.39 to charge-off expense).
     And Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Admin charges off the Working Capital loan on "04 January 2026"
@@ -478,7 +478,7 @@ Feature: Working Capital Loan Charge-off
     When Customer makes "REPAYMENT" transaction on "03 January 2026" with 9950.0 transaction amount on Working Capital loan
 
 # Step 5: Undo that repayment (loan ACTIVE, outstanding 9950, not charged off, realized still 1000.00).
-    When Customer undo "1"th working capital transaction made on "03 January 2026"
+    When Customer undo "1"th "Repayment" transaction made on "03 January 2026" on Working Capital loan
 
 # Step 6: Charge off again on 05 January 2026 (no final amortization, deferred income already 0).
     When Admin charges off the Working Capital loan on "05 January 2026"
@@ -507,6 +507,6 @@ Feature: Working Capital Loan Charge-off
     And Working Capital loan balance payload contains the following fields:
       | field                      | value  |
       | totalDiscountFee           | 1000.0 |
-      | totalDiscountFeeAdjustment | 000.0  |
+      | totalDiscountFeeAdjustment | 0.0    |
       | realizedIncome             | 1000.0 |
       | unrealizedIncome           | 0.0    |
