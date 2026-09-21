@@ -5746,6 +5746,51 @@ class ProgressiveEMICalculatorTest {
         Assertions.assertEquals(100.0, totalPrincipal, 0.01, "All principal must still be scheduled");
     }
 
+    /**
+     * Re-amortization keeps precedence over principal grace through a later recalculation.
+     *
+     * <p>
+     * N=8, 30% p.a., graceOnPrincipalPayment=3, disburse 100 on 1 January 2024, re-amortize on 15 February 2024, then
+     * change the rate on 1 April 2024 (effective 31 March). The next recalculation must not stamp
+     * principalPaymentGrace back on from the product grace setting. Periods still open after the re-amortization date
+     * keep principal, and installments due after the rate change stay equal.
+     */
+    @Test
+    public void test_principalGrace_reAmortizationThenRateChange_keepsGraceLifted() {
+        final ProgressiveLoanInterestScheduleModel interestSchedule = generatePrincipalGraceScheduleForReAmortProbe();
+        final LocalDate reAmortizationDate = LocalDate.of(2024, 2, 15);
+
+        emiCalculator.updateModelRepaymentPeriodsDuringReAmortization(interestSchedule, reAmortizationDate);
+        assertPrincipalGraceLiftedAndFutureEmisEqualized(interestSchedule);
+
+        emiCalculator.changeInterestRate(interestSchedule, LocalDate.of(2024, 4, 1), BigDecimal.valueOf(24));
+
+        final List<RepaymentPeriod> repaymentPeriods = interestSchedule.repaymentPeriods();
+        final String schedule = formatPrincipalGraceProbe(repaymentPeriods);
+
+        Assertions.assertTrue(repaymentPeriods.stream().noneMatch(RepaymentPeriod::isPrincipalPaymentGrace),
+                "A later rate change must not restore principalPaymentGrace after re-amortization\n" + schedule);
+        for (final RepaymentPeriod period : repaymentPeriods) {
+            if (!period.getDueDate().isAfter(reAmortizationDate)) {
+                continue;
+            }
+            Assertions.assertTrue(toDouble(period.getDuePrincipal()) > 0.0,
+                    "Period due " + period.getDueDate() + " was re-amortized and must keep principal\n" + schedule);
+        }
+
+        final List<RepaymentPeriod> periodsAfterRateChange = repaymentPeriods.stream()
+                .filter(period -> period.getDueDate().isAfter(LocalDate.of(2024, 3, 31))).toList();
+        Assertions.assertFalse(periodsAfterRateChange.isEmpty(), schedule);
+        final double emiAfterRateChange = toDouble(periodsAfterRateChange.getFirst().getEmi());
+        for (final RepaymentPeriod period : periodsAfterRateChange) {
+            Assertions.assertEquals(emiAfterRateChange, toDouble(period.getEmi()), 0.05,
+                    "Installments due after the rate change should stay equal once grace stays lifted\n" + schedule);
+        }
+
+        final double totalPrincipal = repaymentPeriods.stream().mapToDouble(period -> toDouble(period.getDuePrincipal())).sum();
+        Assertions.assertEquals(100.0, totalPrincipal, 0.01, "All principal must still be scheduled\n" + schedule);
+    }
+
     private ProgressiveLoanInterestScheduleModel generatePrincipalGraceBulletSchedule() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
         expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
@@ -5814,6 +5859,20 @@ class ProgressiveEMICalculatorTest {
         }
         final double totalPrincipal = repaymentPeriods.stream().mapToDouble(rp -> toDouble(rp.getDuePrincipal())).sum();
         Assertions.assertEquals(100.0, totalPrincipal, 0.01, "All principal must still be scheduled");
+    }
+
+    private static String formatPrincipalGraceProbe(final List<RepaymentPeriod> repaymentPeriods) {
+        final StringBuilder schedule = new StringBuilder();
+        for (int idx = 0; idx < repaymentPeriods.size(); idx++) {
+            final RepaymentPeriod period = repaymentPeriods.get(idx);
+            if (idx > 0) {
+                schedule.append('\n');
+            }
+            schedule.append("p").append(idx + 1).append(" due=").append(period.getDueDate()).append(" grace=")
+                    .append(period.isPrincipalPaymentGrace()).append(" emi=").append(toDouble(period.getEmi())).append(" principal=")
+                    .append(toDouble(period.getDuePrincipal()));
+        }
+        return schedule.toString();
     }
 
     @Test
