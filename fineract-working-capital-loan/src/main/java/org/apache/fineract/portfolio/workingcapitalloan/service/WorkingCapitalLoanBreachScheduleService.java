@@ -50,9 +50,11 @@ public interface WorkingCapitalLoanBreachScheduleService {
      * carries a frequency group, the current open period is also re-dated: its toDate is recalculated from its fromDate
      * and the new frequency, extended by the recorded pauses that overlap the period.
      */
-    void rescheduleMinimumPayment(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction action);
-
-    void recalculatePeriodsForPauses(WorkingCapitalLoan loan);
+    /**
+     * Replays the recorded breach actions over the schedule after {@code action} was recorded, re-dating the periods it
+     * reaches and rewriting their demand.
+     */
+    void replayForBreachAction(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction action);
 
     void splitPeriodAtReset(WorkingCapitalLoan loan, LocalDate resetDate);
 

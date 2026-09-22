@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +58,11 @@ class WorkingCapitalLoanActiveBreachResetResolverTest {
         action.setId(id);
         action.setAction(type);
         action.setStartDate(startDate);
+        return action;
+    }
+
+    private WorkingCapitalLoanBreachAction createdAt(final WorkingCapitalLoanBreachAction action, final int hour) {
+        action.setCreatedDate(OffsetDateTime.of(2026, 4, 15, hour, 0, 0, 0, ZoneOffset.UTC));
         return action;
     }
 
@@ -111,14 +118,35 @@ class WorkingCapitalLoanActiveBreachResetResolverTest {
         assertTrue(actual.isEmpty());
     }
 
+    /** Reset 1 was recorded first but is dated last, so the undo of 04-10 meets only reset 2 and reset 1 survives. */
     @Test
-    void activeResets_pairsByRecordingOrderNotByDate() {
+    void activeResets_anUndoCancelsTheResetThatPrecedesItOnTheTimeline() {
         final Deque<WorkingCapitalLoanBreachAction> actual = underTest
                 .activeResets(List.of(action(1L, WorkingCapitalLoanBreachActionType.RESET, LocalDate.of(2026, 5, 20)),
                         action(2L, WorkingCapitalLoanBreachActionType.RESET, LocalDate.of(2026, 4, 5)),
                         action(3L, WorkingCapitalLoanBreachActionType.UNDO_RESET, LocalDate.of(2026, 4, 10))));
 
         assertEquals(List.of(1L), ids(actual));
+    }
+
+    /** Two actions on the same start date are ordered by the instant they were created. */
+    @Test
+    void activeResets_theCreationInstantOrdersTheActionsSharingAStartDate() {
+        final LocalDate sameDay = LocalDate.of(2026, 4, 15);
+        final WorkingCapitalLoanBreachAction undo = createdAt(action(1L, WorkingCapitalLoanBreachActionType.UNDO_RESET, sameDay), 12);
+        final WorkingCapitalLoanBreachAction reset = createdAt(action(2L, WorkingCapitalLoanBreachActionType.RESET, sameDay), 9);
+
+        assertEquals(List.of(), ids(underTest.activeResets(List.of(undo, reset))), "the reset was created first, so the undo cancels it");
+    }
+
+    @Test
+    void activeResets_theIdentifierBreaksATieOnTheCreationInstantToo() {
+        final LocalDate sameDay = LocalDate.of(2026, 4, 15);
+        final Deque<WorkingCapitalLoanBreachAction> actual = underTest
+                .activeResets(List.of(action(2L, WorkingCapitalLoanBreachActionType.UNDO_RESET, sameDay),
+                        action(1L, WorkingCapitalLoanBreachActionType.RESET, sameDay)));
+
+        assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -133,7 +161,7 @@ class WorkingCapitalLoanActiveBreachResetResolverTest {
     }
 
     @Test
-    void findLatestActiveReset_replaysTheLoanActionsInRecordingOrder() {
+    void findLatestActiveReset_replaysTheLoanActionsOnTheirTimeline() {
         when(breachActionRepository.findByWorkingCapitalLoanIdOrderById(LOAN_ID))
                 .thenReturn(List.of(action(1L, WorkingCapitalLoanBreachActionType.RESET, LocalDate.of(2026, 4, 15)),
                         action(2L, WorkingCapitalLoanBreachActionType.RESET, LocalDate.of(2026, 5, 20)),

@@ -35,7 +35,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -408,16 +407,18 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
      * before that date would re-date periods the reset already settled, so backdating a pause behind the latest active
      * reset is rejected. Resets that were undone are not considered: their split is restored by the undo, so there is
      * nothing left to protect.
+     *
+     * The boundary is the reset on top of the resolver stack, which replays the actions on their own timeline. Scanning
+     * the active resets here for the highest date would be a second definition of "latest" to keep in step with the
+     * resolver, for an answer the resolver already holds.
      */
     private void validateNotBeforeBreachReset(final DataValidatorBuilder dataValidator, final LocalDate startDate,
             final List<WorkingCapitalLoanBreachAction> existing) {
         if (startDate == null) {
             return;
         }
-        activeBreachResetResolver.activeResets(existing).stream() //
+        Optional.ofNullable(activeBreachResetResolver.activeResets(existing).peek()) //
                 .map(WorkingCapitalLoanBreachAction::getStartDate) //
-                .filter(Objects::nonNull) //
-                .max(LocalDate::compareTo) //
                 .filter(startDate::isBefore) //
                 .ifPresent(latestResetDate -> failParameterValidation(dataValidator, START_DATE, "must.not.be.before.breach.reset.date",
                         "Breach pause cannot start before the latest breach reset date: " + latestResetDate));

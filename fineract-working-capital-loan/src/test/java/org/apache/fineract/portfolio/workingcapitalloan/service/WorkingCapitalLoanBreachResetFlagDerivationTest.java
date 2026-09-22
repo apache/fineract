@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -222,9 +221,10 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
         period(1, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 3, 1), false);
         period(2, LocalDate.of(2026, 3, 2), LocalDate.of(2026, 4, 14), false);
         period(3, resetDate, LocalDate.of(2026, 6, 13), true);
-        givenActions(restartReset(1L, resetDate), pause(2L, LocalDate.of(2026, 4, 20), LocalDate.of(2026, 4, 29)));
+        final WorkingCapitalLoanBreachAction pause = pause(2L, LocalDate.of(2026, 4, 20), LocalDate.of(2026, 4, 29));
+        givenActions(restartReset(1L, resetDate), pause);
 
-        scheduleService.recalculatePeriodsForPauses(loan);
+        scheduleService.replayForBreachAction(loan, pause);
 
         final String state = dump();
         final WorkingCapitalLoanBreachSchedule holdingReset = periodContaining(resetDate);
@@ -241,31 +241,34 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
     }
 
     /**
-     * Reset A on 06-10, business date back to 05-05, reset B, forward to 06-15, undo B: A lies beyond the restored
-     * period.
+     * The rebuild from the start, taken when an action sits behind later ones on the timeline. A pause recorded inside
+     * the period before the restart reset re-extends that period on every such replay, so the cut has to be applied
+     * after the pauses. Cutting first lets the earlier pause re-open it: period 2 ends on 01-15 and swallows the reset
+     * date instead of stopping on 01-11.
      */
     @Test
-    void undoAfterBackwardsBusinessDateMove_flagsThePeriodHoldingTheStillActiveReset() {
-        givenBreachConfig(30);
-        final WorkingCapitalLoanBreachAction resetA = restartReset(1L, LocalDate.of(2026, 6, 10));
-        final WorkingCapitalLoanBreachAction resetB = restartReset(2L, LocalDate.of(2026, 5, 5));
-        final WorkingCapitalLoanBreachAction undoB = action(3L, WorkingCapitalLoanBreachActionType.UNDO_RESET, LocalDate.of(2026, 6, 15));
-        period(1, LocalDate.of(2026, 4, 1), LocalDate.of(2026, 4, 30), false);
-        period(2, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 4), false);
-        period(3, LocalDate.of(2026, 5, 5), LocalDate.of(2026, 6, 3), true);
-        givenActions(resetA, resetB, undoB);
-        businessDate(LocalDate.of(2026, 6, 15));
+    void pauseBehindLaterActions_rebuildsFromTheStartWithoutReopeningTheCut() {
+        givenBreachConfig(6);
+        businessDate(LocalDate.of(2026, 1, 14));
+        final LocalDate resetDate = LocalDate.of(2026, 1, 12);
+        period(1, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 6), false);
+        period(2, LocalDate.of(2026, 1, 7), LocalDate.of(2026, 1, 11), false);
+        period(3, resetDate, LocalDate.of(2026, 1, 17), true);
+        final WorkingCapitalLoanBreachAction earlierPause = pause(1L, LocalDate.of(2026, 1, 9), LocalDate.of(2026, 1, 10));
+        givenActions(earlierPause, restartReset(2L, resetDate), pause(3L, resetDate, LocalDate.of(2026, 1, 13)));
 
-        resetService.undoResetBreach(loan, undoB, List.of(resetA, resetB));
+        scheduleService.replayForBreachAction(loan, earlierPause);
 
         final String state = dump();
-        final WorkingCapitalLoanBreachSchedule holdingA = periodContaining(resetA.getStartDate());
+        final WorkingCapitalLoanBreachSchedule holdingReset = periodContaining(resetDate);
         assertAll(state, //
-                () -> assertTrue(holdingA.isReset(), "period holding reset A (06-10) is flagged"),
-                () -> assertFalse(periodContaining(LocalDate.of(2026, 5, 15)).isReset(), "restored P2 is not flagged"),
-                () -> assertEquals(1, sorted().stream().filter(WorkingCapitalLoanBreachSchedule::isReset).count(), "one flag"),
-                () -> assertEquals(0, BigDecimal.ZERO.compareTo(balance.getBreachPastDueAmount()),
-                        "past due anchored on the open period holding A, so zero"));
+                () -> assertEquals(LocalDate.of(2026, 1, 11), sorted().get(1).getToDate(),
+                        "the pause recorded before the reset must not re-open the cut"),
+                () -> assertEquals(LocalDate.of(2026, 1, 19), sorted().get(2).getToDate(),
+                        "only the restarted period absorbs the 2 days of the pause recorded on the reset date"),
+                () -> assertEquals(3, holdingReset.getPeriodNumber(), "the restarted period 3 still holds the reset date"),
+                () -> assertTrue(holdingReset.isReset(), "period holding the reset date is flagged"),
+                () -> assertEquals(1, sorted().stream().filter(WorkingCapitalLoanBreachSchedule::isReset).count(), "one flag"));
     }
 
     @Test
@@ -391,9 +394,8 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
         when(breachActionRepository.findByWorkingCapitalLoanIdAndActionOrderByIdDesc(LOAN_ID,
                 WorkingCapitalLoanBreachActionType.RESCHEDULE)).thenReturn(List.of(reschedule));
         when(repository.findCurrentOpenPeriod(LOAN_ID, LocalDate.of(2026, 5, 5))).thenReturn(Optional.of(current));
-        when(repository.findFuturePeriodsOrderByPeriodNumberAsc(LOAN_ID, LocalDate.of(2026, 5, 5))).thenReturn(List.of(future));
 
-        scheduleService.rescheduleMinimumPayment(loan, reschedule);
+        scheduleService.replayForBreachAction(loan, reschedule);
 
         assertAll(dump(), //
                 () -> assertEquals(LocalDate.of(2026, 5, 10), current.getToDate()),
@@ -451,6 +453,82 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
                 () -> assertEquals(0, BigDecimal.valueOf(100).compareTo(balance.getBreachPastDueAmount())));
     }
 
+    /**
+     * A reschedule is replayed like any other action. The periods that closed under the earlier frequency keep it, the
+     * period the reschedule lands on and the ones after it take the new one, and the pauses they meet still move their
+     * due dates out. Resolving the whole schedule against the latest frequency instead would stretch period 1, which
+     * expired weeks before the reschedule was even requested.
+     */
+    @Test
+    void reschedule_keepsTheClosedPeriodsAndThePausesOfTheOnesItReaches() {
+        givenBreachConfig(30);
+        businessDate(LocalDate.of(2026, 5, 5));
+        period(1, LocalDate.of(2026, 4, 1), LocalDate.of(2026, 4, 30), false);
+        period(2, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 30), false);
+        // period 3 already carries the 5 days of the pause, as the replay of the pause left it
+        period(3, LocalDate.of(2026, 5, 31), LocalDate.of(2026, 7, 4), false);
+        final WorkingCapitalLoanBreachAction pause = pause(1L, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 6, 14));
+        final WorkingCapitalLoanBreachAction reschedule = action(2L, WorkingCapitalLoanBreachActionType.RESCHEDULE,
+                LocalDate.of(2026, 5, 5));
+        reschedule.setFrequency(40);
+        reschedule.setFrequencyType(WorkingCapitalLoanPeriodFrequencyType.DAYS);
+        givenActions(pause, reschedule);
+        when(breachActionRepository.findByWorkingCapitalLoanIdAndActionOrderByIdDesc(LOAN_ID,
+                WorkingCapitalLoanBreachActionType.RESCHEDULE)).thenReturn(List.of(reschedule));
+
+        scheduleService.replayForBreachAction(loan, reschedule);
+
+        assertBounds(periodNumber(1), LocalDate.of(2026, 4, 1), LocalDate.of(2026, 4, 30), 30);
+        assertBounds(periodNumber(2), LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 9), 40);
+        assertBounds(periodNumber(3), LocalDate.of(2026, 6, 10), LocalDate.of(2026, 7, 24), 45);
+
+        final String afterTheReschedule = dump();
+        scheduleService.replayForBreachAction(loan, pause);
+        assertEquals(afterTheReschedule, dump(), "replaying again must land on the same schedule");
+    }
+
+    /**
+     * Nothing on the timeline comes after this pause, so the periods before the one it lands on cannot have moved and
+     * are left exactly as the earlier actions settled them - period 2 keeps the 3 days a reset gave it instead of being
+     * stretched back to the frequency.
+     */
+    @Test
+    void lastActionOnTheTimeline_replaysOnlyFromThePeriodItLandsOn() {
+        givenBreachConfig(6);
+        businessDate(LocalDate.of(2026, 1, 20));
+        period(1, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 6), false);
+        period(2, LocalDate.of(2026, 1, 7), LocalDate.of(2026, 1, 9), false);
+        period(3, LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 15), false);
+        final WorkingCapitalLoanBreachAction pause = pause(1L, LocalDate.of(2026, 1, 11), LocalDate.of(2026, 1, 12));
+        givenActions(pause);
+
+        scheduleService.replayForBreachAction(loan, pause);
+
+        assertBounds(periodNumber(2), LocalDate.of(2026, 1, 7), LocalDate.of(2026, 1, 9), 3);
+        assertBounds(periodNumber(3), LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 17), 8);
+    }
+
+    /**
+     * The same pause, now behind a later one on the timeline: the actions after it have to be re-derived over the
+     * geometry it changes, so the schedule is rebuilt from the start and period 2 takes its natural length back.
+     */
+    @Test
+    void actionBehindALaterOne_rebuildsTheScheduleFromTheStart() {
+        givenBreachConfig(6);
+        businessDate(LocalDate.of(2026, 1, 20));
+        period(1, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 6), false);
+        period(2, LocalDate.of(2026, 1, 7), LocalDate.of(2026, 1, 9), false);
+        period(3, LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 15), false);
+        final WorkingCapitalLoanBreachAction pause = pause(1L, LocalDate.of(2026, 1, 11), LocalDate.of(2026, 1, 12));
+        givenActions(pause, pause(2L, LocalDate.of(2026, 1, 20), LocalDate.of(2026, 1, 21)));
+
+        scheduleService.replayForBreachAction(loan, pause);
+
+        assertBounds(periodNumber(1), LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 6), 6);
+        assertBounds(periodNumber(2), LocalDate.of(2026, 1, 7), LocalDate.of(2026, 1, 14), 8);
+        assertBounds(periodNumber(3), LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 22), 8);
+    }
+
     private WorkingCapitalLoanBreachSchedule periodNumber(final int number) {
         return sorted().stream().filter(p -> p.getPeriodNumber() == number).findFirst().orElseThrow();
     }
@@ -470,7 +548,7 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
         final WorkingCapitalLoanBreachAction pause = pause(1L, LocalDate.of(2026, 2, 10), LocalDate.of(2026, 2, 14));
         givenActions(pause);
         businessDate(LocalDate.of(2026, 2, 15));
-        scheduleService.recalculatePeriodsForPauses(loan);
+        scheduleService.replayForBreachAction(loan, pause);
         assertBounds(periodNumber(1), LocalDate.of(2026, 1, 1), LocalDate.of(2026, 3, 9), 68);
 
         final WorkingCapitalLoanBreachAction reset = restartReset(2L, LocalDate.of(2026, 2, 20));
@@ -498,7 +576,7 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
         final WorkingCapitalLoanBreachAction pause = pause(1L, LocalDate.of(2026, 2, 10), LocalDate.of(2026, 2, 14));
         givenActions(pause);
         businessDate(LocalDate.of(2026, 2, 15));
-        scheduleService.recalculatePeriodsForPauses(loan);
+        scheduleService.replayForBreachAction(loan, pause);
         scheduleService.generateNextPeriodIfNeeded(loan, LocalDate.of(2026, 3, 10));
         final WorkingCapitalLoanBreachSchedule first = periodNumber(1);
         final WorkingCapitalLoanBreachSchedule second = periodNumber(2);
