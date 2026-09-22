@@ -19,7 +19,11 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Set;
+import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 
 /**
  * Created by Chirag Gupta on 12/30/17.
@@ -196,6 +200,27 @@ final class SavingsAccountChargesApiResourceSwagger {
         public Float amountOrPercentage;
         @Schema(example = "false")
         public Boolean penalty;
+        public Collection<GetSavingsChargeTransactionResponse> transactions;
+    }
+
+    @Schema(description = "Recorded transaction allocation for the selected savings account charge")
+    public static final class GetSavingsChargeTransactionResponse {
+
+        private GetSavingsChargeTransactionResponse() {}
+
+        @Schema(example = "42")
+        public Long transactionId;
+        @Schema(example = "7")
+        public Long allocationId;
+        public LocalDate date;
+        public SavingsAccountTransactionEnumData transactionType;
+        @Schema(example = "100.00")
+        public Double amount;
+        @Schema(example = "25.00")
+        public Double amountAllocated;
+        @Schema(example = "false")
+        public Boolean reversed;
+        public PaymentDetailData paymentDetailData;
     }
 
     @Schema(description = "PostSavingsAccountsSavingsAccountIdChargesRequest")
