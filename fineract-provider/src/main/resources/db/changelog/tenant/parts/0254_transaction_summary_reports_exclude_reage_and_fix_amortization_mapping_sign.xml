@@ -22,6 +22,9 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet author="fineract" id="0254-0" context="mysql">
+        <modifyDataType tableName="stretchy_report" columnName="report_sql" newDataType="MEDIUMTEXT"/>
+    </changeSet>
     <changeSet author="fineract" id="0254-1" context="postgresql">
         <update tableName="stretchy_report">
             <column name="report_sql"><![CDATA[
@@ -56,7 +59,7 @@ WITH slt_except_charge_adj_and_accrual AS (SELECT '${endDate}' AS transactiondat
      e.settlement_date < '${endDate}' AND
      e.effective_date_to >= '${endDate}'
    WHERE t.submitted_on_date = '${endDate}'
-     AND t.transaction_type_enum not in (10, 26, 29, 32, 34, 36, 39, 42, 43)
+     AND t.transaction_type_enum not in (10, 26, 29, 30, 32, 34, 36, 39, 42, 43)
      AND (t.office_id = ${officeId})),
      slt_charge_adj AS (SELECT '${endDate}' AS transactiondate,
            t.id,
@@ -117,7 +120,7 @@ WITH slt_except_charge_adj_and_accrual AS (SELECT '${endDate}' AS transactiondat
      e.settlement_date < '${endDate}' AND
      e.effective_date_to >= '${endDate}'
    WHERE t.reversed_on_date = '${endDate}'
-     AND t.transaction_type_enum not in (10, 26, 29, 32, 34, 36, 39, 42, 43)
+     AND t.transaction_type_enum not in (10, 26, 29, 30, 32, 34, 36, 39, 42, 43)
      AND (t.office_id = ${officeId})),
      rlt_charge_adj AS (SELECT '${endDate}' AS transactiondate,
            t.id,
@@ -158,36 +161,36 @@ WITH slt_except_charge_adj_and_accrual AS (SELECT '${endDate}' AS transactiondat
         ELSE NULL END AS classification_name,
     CASE
         WHEN t.overpayment_portion_derived IS NOT NULL
-            THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-             WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+            THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+             WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
              ELSE map.amount END)
         ELSE NULL END AS overpayment_portion_derived,
     CASE
         WHEN t.principal_portion_derived IS NOT NULL
-            THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-             WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+            THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+             WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
              ELSE map.amount END)
         ELSE NULL END AS principal_portion_derived,
     CASE
         WHEN t.interest_portion_derived IS NOT NULL
-            THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-             WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+            THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+             WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
              ELSE map.amount END)
         ELSE NULL END AS interest_portion_derived,
     CASE
         WHEN t.fee_charges_portion_derived IS NOT NULL
-            THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-             WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+            THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+             WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
              ELSE map.amount END)
         ELSE NULL END AS fee_charges_portion_derived,
     CASE
         WHEN t.penalty_charges_portion_derived IS NOT NULL
-            THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-             WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+            THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+             WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
              ELSE map.amount END)
         ELSE NULL END AS penalty_charges_portion_derived,
-    (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-     WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+    (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+     WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
      ELSE map.amount END),
     e.status,
     e.settlement_date,
@@ -223,36 +226,36 @@ WITH slt_except_charge_adj_and_accrual AS (SELECT '${endDate}' AS transactiondat
         ELSE NULL END AS classification_name,
     CASE
         WHEN t.overpayment_portion_derived IS NOT NULL
-            THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-             WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+            THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+             WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
              ELSE map.amount END)
         ELSE NULL END AS overpayment_portion_derived,
     CASE
         WHEN t.principal_portion_derived IS NOT NULL
-            THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-             WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+            THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+             WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
              ELSE map.amount END)
         ELSE NULL END AS principal_portion_derived,
     CASE
         WHEN t.interest_portion_derived IS NOT NULL
-            THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-             WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+            THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+             WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
              ELSE map.amount END)
         ELSE NULL END AS interest_portion_derived,
     CASE
         WHEN t.fee_charges_portion_derived IS NOT NULL
-            THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-             WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+            THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+             WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
              ELSE map.amount END)
         ELSE NULL END AS fee_charges_portion_derived,
     CASE
         WHEN t.penalty_charges_portion_derived IS NOT NULL
-            THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-             WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+            THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+             WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
              ELSE map.amount END)
         ELSE NULL END AS penalty_charges_portion_derived,
-    (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-     WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+    (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+     WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
      ELSE map.amount END),
     e.status,
     e.settlement_date,
@@ -1404,7 +1407,7 @@ WITH slt_except_charge_adj_and_accrual AS (SELECT '${endDate}' AS transactiondat
         e.settlement_date < '${endDate}' AND
         e.effective_date_to >= '${endDate}'
      WHERE t.submitted_on_date = '${endDate}'
-       AND t.transaction_type_enum not in (10, 26, 29, 32, 34, 36, 39, 42, 43)
+       AND t.transaction_type_enum not in (10, 26, 29, 30, 32, 34, 36, 39, 42, 43)
        AND (t.office_id = ${officeId})),
      slt_charge_adj AS (SELECT '${endDate}' AS transactiondate,
             t.id,
@@ -1465,7 +1468,7 @@ WITH slt_except_charge_adj_and_accrual AS (SELECT '${endDate}' AS transactiondat
         e.settlement_date < '${endDate}' AND
         e.effective_date_to >= '${endDate}'
      WHERE t.reversed_on_date = '${endDate}'
-       AND t.transaction_type_enum not in (10, 26, 29, 32, 34, 36, 39, 42, 43)
+       AND t.transaction_type_enum not in (10, 26, 29, 30, 32, 34, 36, 39, 42, 43)
        AND (t.office_id = ${officeId})),
      rlt_charge_adj AS (SELECT '${endDate}' AS transactiondate,
             t.id,
@@ -1506,36 +1509,36 @@ WITH slt_except_charge_adj_and_accrual AS (SELECT '${endDate}' AS transactiondat
           ELSE NULL END AS classification_name,
       CASE
           WHEN t.overpayment_portion_derived IS NOT NULL
-              THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-               WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+              THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+               WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
                ELSE map.amount END)
           ELSE NULL END AS overpayment_portion_derived,
       CASE
           WHEN t.principal_portion_derived IS NOT NULL
-              THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-               WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+              THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+               WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
                ELSE map.amount END)
           ELSE NULL END AS principal_portion_derived,
       CASE
           WHEN t.interest_portion_derived IS NOT NULL
-              THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-               WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+              THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+               WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
                ELSE map.amount END)
           ELSE NULL END AS interest_portion_derived,
       CASE
           WHEN t.fee_charges_portion_derived IS NOT NULL
-              THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-               WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+              THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+               WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
                ELSE map.amount END)
           ELSE NULL END AS fee_charges_portion_derived,
       CASE
           WHEN t.penalty_charges_portion_derived IS NOT NULL
-              THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-               WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+              THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+               WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
                ELSE map.amount END)
           ELSE NULL END AS penalty_charges_portion_derived,
-      (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-       WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+      (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+       WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
        ELSE map.amount END),
       e.status,
       e.settlement_date,
@@ -1571,36 +1574,36 @@ WITH slt_except_charge_adj_and_accrual AS (SELECT '${endDate}' AS transactiondat
           ELSE NULL END AS classification_name,
       CASE
           WHEN t.overpayment_portion_derived IS NOT NULL
-              THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-               WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+              THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+               WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
                ELSE map.amount END)
           ELSE NULL END AS overpayment_portion_derived,
       CASE
           WHEN t.principal_portion_derived IS NOT NULL
-              THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-               WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+              THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+               WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
                ELSE map.amount END)
           ELSE NULL END AS principal_portion_derived,
       CASE
           WHEN t.interest_portion_derived IS NOT NULL
-              THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-               WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+              THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+               WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
                ELSE map.amount END)
           ELSE NULL END AS interest_portion_derived,
       CASE
           WHEN t.fee_charges_portion_derived IS NOT NULL
-              THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-               WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+              THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+               WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
                ELSE map.amount END)
           ELSE NULL END AS fee_charges_portion_derived,
       CASE
           WHEN t.penalty_charges_portion_derived IS NOT NULL
-              THEN (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-               WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+              THEN (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+               WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
                ELSE map.amount END)
           ELSE NULL END AS penalty_charges_portion_derived,
-      (CASE WHEN t.transaction_type_enum = 42 AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
-       WHEN t.transaction_type_enum = 43 AND map.amortization_type = 'AM'     THEN map.amount * -1
+      (CASE WHEN t.transaction_type_enum IN (36, 42) AND map.amortization_type = 'AM_ADJ' THEN map.amount * -1
+       WHEN t.transaction_type_enum IN (39, 43) AND map.amortization_type = 'AM'     THEN map.amount * -1
        ELSE map.amount END),
       e.status,
       e.settlement_date,
@@ -2772,7 +2775,7 @@ ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
                 left join m_payment_detail d on d.id = t.payment_detail_id
               WHERE
                 t.submitted_on_date = '${endDate}'
-                and t.transaction_type_enum not in (10, 26, 29)
+                and t.transaction_type_enum not in (10, 26, 29, 30)
                 and (t.office_id = ${officeId})
               UNION ALL
               SELECT
@@ -2792,7 +2795,7 @@ ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
                 left join m_payment_detail d on d.id = t.payment_detail_id
               WHERE
                 t.submitted_on_date = '${endDate}'
-                and t.transaction_type_enum not in (10, 26, 29)
+                and t.transaction_type_enum not in (10, 26, 29, 30)
                 and (t.office_id = ${officeId})
               UNION ALL
               SELECT
@@ -2812,7 +2815,7 @@ ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
                 left join m_payment_detail d on d.id = t.payment_detail_id
               WHERE
                 t.submitted_on_date = '${endDate}'
-                and t.transaction_type_enum not in (10, 26, 29)
+                and t.transaction_type_enum not in (10, 26, 29, 30)
                 and (t.office_id = ${officeId})
               UNION ALL
               SELECT
@@ -2832,7 +2835,7 @@ ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
                 left join m_payment_detail d on d.id = t.payment_detail_id
               WHERE
                 t.submitted_on_date = '${endDate}'
-                and t.transaction_type_enum not in (10, 26, 29)
+                and t.transaction_type_enum not in (10, 26, 29, 30)
                 and (t.office_id = ${officeId})
               UNION ALL
               SELECT
@@ -2852,7 +2855,7 @@ ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
                 left join m_payment_detail d on d.id = t.payment_detail_id
               WHERE
                 t.submitted_on_date = '${endDate}'
-                and t.transaction_type_enum not in (10, 26, 29)
+                and t.transaction_type_enum not in (10, 26, 29, 30)
                 and (t.office_id = ${officeId})
               UNION ALL
               SELECT
@@ -3052,7 +3055,7 @@ ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
                 left join m_payment_detail d on d.id = t.payment_detail_id
               WHERE
                 t.reversed_on_date = '${endDate}'
-                and t.transaction_type_enum not in (10, 26, 29)
+                and t.transaction_type_enum not in (10, 26, 29, 30)
                 and (t.office_id = ${officeId})
               UNION ALL
               SELECT
@@ -3072,7 +3075,7 @@ ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
                 left join m_payment_detail d on d.id = t.payment_detail_id
               WHERE
                 t.reversed_on_date = '${endDate}'
-                and t.transaction_type_enum not in (10, 26, 29)
+                and t.transaction_type_enum not in (10, 26, 29, 30)
                 and (t.office_id = ${officeId})
               UNION ALL
               SELECT
@@ -3092,7 +3095,7 @@ ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
                 left join m_payment_detail d on d.id = t.payment_detail_id
               WHERE
                 t.reversed_on_date = '${endDate}'
-                and t.transaction_type_enum not in (10, 26, 29)
+                and t.transaction_type_enum not in (10, 26, 29, 30)
                 and (t.office_id = ${officeId})
               UNION ALL
               SELECT
@@ -3112,7 +3115,7 @@ ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
                 left join m_payment_detail d on d.id = t.payment_detail_id
               WHERE
                 t.reversed_on_date = '${endDate}'
-                and t.transaction_type_enum not in (10, 26, 29)
+                and t.transaction_type_enum not in (10, 26, 29, 30)
                 and (t.office_id = ${officeId})
               UNION ALL
               SELECT
@@ -3132,7 +3135,7 @@ ORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
                 left join m_payment_detail d on d.id = t.payment_detail_id
               WHERE
                 t.reversed_on_date = '${endDate}'
-                and t.transaction_type_enum not in (10, 26, 29)
+                and t.transaction_type_enum not in (10, 26, 29, 30)
                 and (t.office_id = ${officeId})
               UNION ALL
               SELECT
