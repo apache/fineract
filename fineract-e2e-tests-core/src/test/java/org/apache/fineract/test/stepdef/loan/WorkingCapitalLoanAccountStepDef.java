@@ -442,6 +442,68 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         return value == null || value.isBlank() ? null : value.trim();
     }
 
+    @When("Admin creates a working capital loan with payment amount using created product with the following data:")
+    public void createWorkingCapitalLoanWithPaymentAmountUsingCreatedProduct(final DataTable table) {
+        final Map<String, String> rawData = table.asMaps().getFirst();
+        final PostWorkingCapitalLoansRequest loansRequest = paymentAmountLoanRequest(rawData);
+        testContext().set(TestContextKey.LOAN_CREATE_REQUEST, loansRequest);
+
+        final PostWorkingCapitalLoansResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_CREATE_RESPONSE, response);
+        trackLoanIdIfEnabled(response.getLoanId());
+        log.info("Working Capital Loan with payment amount created, Loan ID: {}", response.getLoanId());
+    }
+
+    @Then("Admin creates a working capital loan with payment amount using created product with the following data expecting error:")
+    public void createWorkingCapitalLoanWithPaymentAmountUsingCreatedProductExpectingError(final DataTable table) {
+        final Map<String, String> rawData = table.asMaps().getFirst();
+        // Callers that need TPV / annual EIR fields for a mixed-strategy negative case pass them explicitly in the
+        // table.
+        final PostWorkingCapitalLoansRequest loansRequest = paymentAmountLoanRequest(rawData);
+        if (blankToNull(rawData.get("annualEir")) != null) {
+            loansRequest.annualEir(new BigDecimal(rawData.get("annualEir").trim()));
+        }
+        if (blankToNull(rawData.get("totalPaymentVolume")) != null) {
+            loansRequest.totalPaymentVolume(new BigDecimal(rawData.get("totalPaymentVolume").trim()));
+        }
+        if (blankToNull(rawData.get("periodPaymentRate")) != null) {
+            loansRequest.periodPaymentRate(new BigDecimal(rawData.get("periodPaymentRate").trim()));
+        }
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
+
+        final int expectedHttpCode = Integer.parseInt(rawData.get("httpCode"));
+        final String expectedErrorMessage = rawData.get("errorMessage").trim();
+        assertHttpStatus(exception, expectedHttpCode);
+        assertValidationError(exception, expectedErrorMessage);
+        log.info("Verified Working Capital Loan create with payment amount failed with status {} and message: {}", expectedHttpCode,
+                expectedErrorMessage);
+    }
+
+    /**
+     * Payment Amount application shell (no TPV / annual EIR fields) for the product created earlier in the scenario,
+     * filled from the table's dates, principal and optional discount / paymentAmount.
+     */
+    private PostWorkingCapitalLoansRequest paymentAmountLoanRequest(final Map<String, String> rawData) {
+        final PostWorkingCapitalLoanProductsResponse productResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
+        final PostWorkingCapitalLoansRequest loansRequest = workingCapitalLoanRequestFactory
+                .defaultPaymentAmountWorkingCapitalLoansRequest(extractClientId())//
+                .productId(productResponse.getResourceId())//
+                .submittedOnDate(rawData.get("submittedOnDate"))//
+                .expectedDisbursementDate(rawData.get("expectedDisbursementDate"))//
+                .principalAmount(new BigDecimal(rawData.get("principalAmount")))//
+                .discount(blankToNull(rawData.get("discount")) != null ? new BigDecimal(rawData.get("discount").trim()) : null);
+        if (blankToNull(rawData.get("paymentAmount")) != null) {
+            loansRequest.paymentAmount(new BigDecimal(rawData.get("paymentAmount").trim()));
+        }
+        return loansRequest;
+    }
+
     @When("Admin creates a working capital loan using created product with breachGraceDays {int} and the following data:")
     public void createWorkingCapitalLoanUsingCreatedProductWithBreachGraceDays(final int breachGraceDays, final DataTable table) {
         submitLoanUsingCreatedProduct(table, breachGraceDays, null);

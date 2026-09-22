@@ -26,6 +26,7 @@ import static org.apache.fineract.integrationtests.client.feign.modules.WorkingC
 import static org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalAmortizationScheduleValidators.validatePayment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
@@ -162,20 +164,29 @@ public class FeignWorkingCapitalPaymentAmountStrategyTest extends FeignWorkingCa
     }
 
     @Test
-    @DisplayName("paymentAmount precision follows the currency: 2 dp rejects 47.225 and accepts 47.2, JPY (0 dp) rejects 47.22")
+    @DisplayName("paymentAmount precision follows the currency: 2 dp rejects 47.225 and accepts 47.2, JPY (0 dp) rejects 47.22 and accepts 47")
     void paymentAmountPrecisionIsDrivenByTheCurrency() {
         assertProductRejected(paymentAmountProductRequest("PaScale", new BigDecimal("47.225"), DISCOUNT_FEE, NPV_DAY_COUNT),
                 List.of(WCLP + "paymentAmount.scale.is.greater.than.2"),
                 "the payment amount precision comes from the currency, enforced here on a 2-dp product");
 
         final Long productId = createProduct(paymentAmountProductRequest("PaScaleOk", new BigDecimal("47.2"), DISCOUNT_FEE, NPV_DAY_COUNT));
-        assertEqualBigDecimal(new BigDecimal("47.2"), productHelper.retrieveWorkingCapitalLoanProductById(productId).getPaymentAmount(),
+        final GetWorkingCapitalLoanProductsProductIdResponse product = productHelper.retrieveWorkingCapitalLoanProductById(productId);
+        assertEqualBigDecimal(new BigDecimal("47.2"), product.getPaymentAmount(),
                 "a paymentAmount below the currency scale must be accepted and stored as given");
+        assertEquals("PAYMENT_AMOUNT", product.getPaymentAmountCalculationStrategy().getId(),
+                "the product discloses the strategy its paymentAmount belongs to");
+        assertNull(product.getAnnualEir(), "a PAYMENT_AMOUNT product carries no annual EIR");
 
         final PostWorkingCapitalLoanProductsRequest jpyRequest = paymentAmountProductRequest("PaJpy", PAYMENT_AMOUNT, DISCOUNT_FEE,
                 NPV_DAY_COUNT).currencyCode("JPY").digitsAfterDecimal(0);
         assertProductRejected(jpyRequest, List.of(WCLP + "paymentAmount.scale.is.greater.than.0"),
                 "the payment amount precision comes from the currency, so on a 0-dp currency 47.22 is too fine");
+
+        final Long jpyProductId = createProduct(paymentAmountProductRequest("PaJpyOk", new BigDecimal("47"), DISCOUNT_FEE, NPV_DAY_COUNT)
+                .currencyCode("JPY").digitsAfterDecimal(0).minPaymentAmount(new BigDecimal("10")).maxPaymentAmount(new BigDecimal("100")));
+        assertEqualBigDecimal(new BigDecimal("47"), productHelper.retrieveWorkingCapitalLoanProductById(jpyProductId).getPaymentAmount(),
+                "a whole paymentAmount and whole bounds must be accepted on a 0-dp currency");
     }
 
     @Test

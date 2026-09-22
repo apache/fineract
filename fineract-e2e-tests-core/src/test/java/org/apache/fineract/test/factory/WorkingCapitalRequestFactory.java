@@ -186,6 +186,19 @@ public class WorkingCapitalRequestFactory {
                 .periodPaymentRate(null);
     }
 
+    /**
+     * Payment Amount strategy product: no period payment rate / annual EIR, required discount, and discount override
+     * enabled so loan applications may pass a discount (as in the reference Payment Amount calculation scenarios).
+     */
+    public PostWorkingCapitalLoanProductsRequest defaultPaymentAmountWorkingCapitalLoanProductRequest(final BigDecimal paymentAmount,
+            final BigDecimal discount) {
+        return defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                .paymentAmountCalculationStrategy(PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.PAYMENT_AMOUNT) //
+                .paymentAmount(paymentAmount) //
+                .discount(discount) //
+                .periodPaymentRate(null);
+    }
+
     public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductBreachRequest() {
         String name = Utils.randomStringGenerator(WCLP_NAME_PREFIX, 10);
         String shortName = loanProductsRequestFactory.generateShortNameSafely();

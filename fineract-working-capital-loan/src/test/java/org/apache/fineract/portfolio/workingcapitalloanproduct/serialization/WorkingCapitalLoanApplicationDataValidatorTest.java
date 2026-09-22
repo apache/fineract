@@ -52,6 +52,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.ExpectedDisbursementDateValidator;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanApplicationDataValidator;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
@@ -59,6 +60,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductMinMaxConstraints;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.repository.WorkingCapitalLoanProductRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -302,6 +304,26 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
         assertUpdateCodes(json, WCL + "paymentAmount.not.allowed.for.tpv.strategy");
     }
 
+    /** The engine runs a loan on the strategy it copied at creation, so modify must judge it by that one too. */
+    @Test
+    void tpvLoanOnAProductSwitchedToPaymentAmount_UpdatingPaymentAmount_ShouldReportTheLoansStrategyRejection() {
+        stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, BigDecimal.valueOf(47.22), null, null);
+        final JsonObject json = updateJsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountParamName, 47.22);
+        final WorkingCapitalLoan loan = submittedLoanWithStrategy(WorkingCapitalPaymentAmountCalculationStrategy.TPV);
+        assertCodes(() -> validator.validateForUpdate(jsonCommand(json.toString()), loan), json,
+                WCL + "paymentAmount.not.allowed.for.tpv.strategy");
+    }
+
+    @Test
+    void paymentAmountLoanOnAProductSwitchedToTpv_UpdatingPaymentAmount_ShouldNotThrow() {
+        stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.TPV, null, null, null);
+        final JsonObject json = updateJsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountParamName, 47.22);
+        final WorkingCapitalLoan loan = submittedLoanWithStrategy(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT);
+        assertDoesNotThrow(() -> validator.validateForUpdate(jsonCommand(json.toString()), loan));
+    }
+
     @Test
     void paymentAmountLoanUpdate_WithZeroPaymentAmount_ShouldReportNotGreaterThanZero() {
         stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, BigDecimal.valueOf(47.22), null, null);
@@ -364,6 +386,17 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
             json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountParamName, paymentAmount);
         }
         return json;
+    }
+
+    private WorkingCapitalLoan submittedLoanWithStrategy(final WorkingCapitalPaymentAmountCalculationStrategy strategy) {
+        final WorkingCapitalLoanProductRelatedDetails details = org.mockito.Mockito.mock(WorkingCapitalLoanProductRelatedDetails.class);
+        lenient().when(details.getPaymentAmountCalculationStrategy()).thenReturn(strategy);
+        final WorkingCapitalLoan loan = org.mockito.Mockito.mock(WorkingCapitalLoan.class);
+        lenient().when(loan.isNotSubmittedAndPendingApproval()).thenReturn(false);
+        lenient().when(loan.getDisbursementDetails()).thenReturn(List.of());
+        lenient().when(loan.productId()).thenReturn(PRODUCT_ID);
+        lenient().when(loan.getLoanProductRelatedDetails()).thenReturn(details);
+        return loan;
     }
 
     private JsonObject updateJsonObject() {

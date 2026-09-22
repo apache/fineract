@@ -468,6 +468,27 @@ class WorkingCapitalLoanProductDataValidatorTest {
     }
 
     @Test
+    public void storedPaymentAmountProduct_LoweringCurrencyDigitsBelowTheStoredBounds_ShouldReportScaleErrors() {
+        final WorkingCapitalLoanProduct product = storedProduct(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, 2);
+        lenient().when(product.getMinMaxConstraints()).thenReturn(new WorkingCapitalLoanProductMinMaxConstraints(null, null, null, null,
+                null, null, new BigDecimal("10.55"), new BigDecimal("90.25")));
+        final JsonObject json = new JsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.digitsAfterDecimalParamName, 0);
+        assertUpdateCodes(json, product, WCLP + "minPaymentAmount.scale.is.greater.than.0",
+                WCLP + "maxPaymentAmount.scale.is.greater.than.0");
+    }
+
+    @Test
+    public void storedPaymentAmountProduct_LoweringCurrencyDigitsWithWholeStoredValues_ShouldNotThrow() {
+        final WorkingCapitalLoanProduct product = storedProduct(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, 2);
+        lenient().when(product.getMinMaxConstraints()).thenReturn(new WorkingCapitalLoanProductMinMaxConstraints(null, null, null, null,
+                null, null, new BigDecimal("10.000000"), new BigDecimal("90.000000")));
+        final JsonObject json = new JsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.digitsAfterDecimalParamName, 0);
+        assertDoesNotThrow(() -> validator.validateForUpdate(json.toString(), product));
+    }
+
+    @Test
     void storedPaymentAmountProduct_RaisingMinAboveTheStoredValue_ShouldReportTheValueBelowMin() {
         final JsonObject json = new JsonObject();
         json.addProperty(WorkingCapitalLoanProductConstants.minPaymentAmountParamName, BigDecimal.valueOf(100));
@@ -483,6 +504,24 @@ class WorkingCapitalLoanProductDataValidatorTest {
         final JsonObject json = new JsonObject();
         json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountParamName, BigDecimal.valueOf(500));
         assertUpdateCodes(json, product, WCLP + "paymentAmount.must.be.less.than.or.equal.to.max");
+    }
+
+    @Test
+    void storedAnnualEirProduct_RaisingMinAboveTheStoredValue_ShouldReportTheValueBelowMin() {
+        final JsonObject json = new JsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.minAnnualEirParamName, BigDecimal.valueOf(50));
+        assertUpdateCodes(json, WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, 2,
+                WCLP + "annualEir.must.be.greater.than.or.equal.to.min");
+    }
+
+    @Test
+    void storedAnnualEirProduct_RaisingTheValueAboveTheStoredMax_ShouldReportTheValueAboveMax() {
+        final WorkingCapitalLoanProduct product = storedProduct(WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, 2);
+        lenient().when(product.getMinMaxConstraints()).thenReturn(
+                new WorkingCapitalLoanProductMinMaxConstraints(null, null, null, null, null, BigDecimal.valueOf(60), null, null));
+        final JsonObject json = new JsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.annualEirParamName, BigDecimal.valueOf(70));
+        assertUpdateCodes(json, product, WCLP + "annualEir.must.be.less.than.or.equal.to.max");
     }
 
     @Test

@@ -177,7 +177,7 @@ class ProjectedAmortizationScheduleModelParserServiceGsonImplTest {
         assertEquals(0, new BigDecimal("36.58").compareTo(restored.projectedPayments().getLast().expectedPaymentAmount().getAmount()));
     }
 
-    /** Models persisted before the strategy was stored only record it through which input they carry. */
+    /** JSON without the strategy records it only through which input it carries. */
     @Test
     void readsAPaymentAmountModelPersistedWithoutTheStrategy() {
         final String legacyJson = parser.toJson(paymentAmountModel()).replace("\"paymentAmountCalculationStrategy\":\"PAYMENT_AMOUNT\",",
@@ -191,6 +191,24 @@ class ProjectedAmortizationScheduleModelParserServiceGsonImplTest {
                 DISBURSEMENT, DISBURSEMENT);
         assertEquals(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, regenerated.paymentAmountCalculationStrategy());
         assertEquals(0, new BigDecimal("47.22").compareTo(regenerated.expectedPaymentAmount().getAmount()));
+    }
+
+    /** Models persisted before the strategy was stored record Annual EIR only through carrying an annual EIR. */
+    @Test
+    public void readsAnAnnualEirModelPersistedWithoutTheStrategy() {
+        final ProjectedAmortizationScheduleModel annualEirModel = ProjectedAmortizationScheduleModel.generateFromAnnualEir(
+                WorkingCapitalAmortizationType.EIR, new BigDecimal("1000"), new BigDecimal("9000"), new BigDecimal("46.8451"), 360,
+                DISBURSEMENT, MC, CURRENCY, DISBURSEMENT);
+        final String legacyJson = parser.toJson(annualEirModel).replace("\"paymentAmountCalculationStrategy\":\"ANNUAL_EIR\",", "");
+        assertFalse(legacyJson.contains("paymentAmountCalculationStrategy"), "the legacy fixture must not carry the field");
+
+        final ProjectedAmortizationScheduleModel restored = parser.fromJson(legacyJson, MC, CURRENCY);
+        assertNotNull(restored);
+        assertNull(restored.paymentAmountCalculationStrategy());
+        final ProjectedAmortizationScheduleModel regenerated = restored.regenerate(new BigDecimal("1000"), new BigDecimal("9000"),
+                DISBURSEMENT, DISBURSEMENT);
+        assertEquals(WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, regenerated.paymentAmountCalculationStrategy());
+        assertEquals(0, annualEirModel.expectedPaymentAmount().getAmount().compareTo(regenerated.expectedPaymentAmount().getAmount()));
     }
 
     private ProjectedAmortizationScheduleModel paymentAmountModel() {

@@ -68,6 +68,12 @@ class WorkingCapitalAmountScaleValidatorTest {
     }
 
     @Test
+    public void zeroDecimalCurrency_AcceptsWholeValues() {
+        assertEquals(List.of(), validate(new BigDecimal("100"), 0));
+        assertEquals(List.of(), validate(new BigDecimal("100.000000"), 0));
+    }
+
+    @Test
     void unknownCurrencyDigits_SkipsTheCheck() {
         assertEquals(List.of(), validate(new BigDecimal("47.225"), null));
     }
