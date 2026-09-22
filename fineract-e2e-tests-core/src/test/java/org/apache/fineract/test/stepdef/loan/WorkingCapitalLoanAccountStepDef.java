@@ -126,6 +126,9 @@ import org.junit.jupiter.api.Assertions;
 @RequiredArgsConstructor
 public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
+    private static final String PREPARED_DATATABLE_ENTRIES = "PreparedWorkingCapitalDatatableEntries";
+    private static final String MANDATORY_DATATABLE_ENTRY_ERROR = "error.msg.entry.required.in.datatable.[%s]";
+
     private static final String DATE_FORMAT = "dd MMMM yyyy";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
@@ -237,19 +240,95 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     @Then("Creating a working capital loan without datatables is rejected because the CREATE datatable entry is required with the following data:")
     public void createWorkingCapitalLoanWithoutDatatablesRejectedForMandatoryCheck(final DataTable table) {
+        submitLoanExpectingMandatoryDatatableEntryError(buildCreateLoanRequest(table));
+    }
+
+    @Given("The following datatable entries are prepared for the working capital loan creation request:")
+    public void prepareDatatableEntriesForLoanCreation(final DataTable table) {
+        final String datatableName = testContext().get(DatatablesStepDef.DATATABLE_NAME);
+        final List<Map<String, Object>> rows = table.asMaps().stream().map(WorkingCapitalLoanAccountStepDef::datatableEntryData).toList();
+        testContext().set(PREPARED_DATATABLE_ENTRIES, new PreparedDatatableEntries(datatableName, rows));
+    }
+
+    @Given("The prepared datatable entries are addressed to datatable {string}")
+    public void prepareDatatableEntriesTargetTable(final String registeredTableName) {
+        testContext().set(PREPARED_DATATABLE_ENTRIES, preparedDatatableEntries().addressedTo(registeredTableName));
+    }
+
+    @When("Admin creates a working capital loan with the prepared datatable entries and the following data:")
+    public void createWorkingCapitalLoanWithPreparedDatatableEntries(final DataTable table) {
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequestWithPreparedDatatables(table);
+        final PostWorkingCapitalLoansResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_CREATE_RESPONSE, response);
+        trackLoanIdIfEnabled(response.getLoanId());
+        log.info("Working Capital Loan created with {} prepared datatable entries, Loan ID: {}", loansRequest.getDatatables().size(),
+                response.getLoanId());
+    }
+
+    @Then("Creating a working capital loan with the prepared datatable entries is rejected with HTTP {int} and error {string} with the following data:")
+    public void createWorkingCapitalLoanWithPreparedDatatableEntriesRejected(final int expectedStatus, final String expectedError,
+            final DataTable table) {
+        submitLoanExpectingFailure(buildCreateLoanRequestWithPreparedDatatables(table), expectedStatus, expectedError);
+    }
+
+    @Then("Creating a working capital loan with the prepared datatable entries is rejected because the CREATE datatable entry is required with the following data:")
+    public void createWorkingCapitalLoanWithPreparedDatatableEntriesRejectedForMandatoryCheck(final DataTable table) {
+        submitLoanExpectingMandatoryDatatableEntryError(buildCreateLoanRequestWithPreparedDatatables(table));
+    }
+
+    /** Datatable entries collected from a Gherkin table; one row per entry, header = datatable column names. */
+    private record PreparedDatatableEntries(String registeredTableName, List<Map<String, Object>> rows) {
+
+        PreparedDatatableEntries addressedTo(final String otherRegisteredTableName) {
+            return new PreparedDatatableEntries(otherRegisteredTableName, rows);
+        }
+    }
+
+    private static Map<String, Object> datatableEntryData(final Map<String, String> cells) {
+        final Map<String, Object> data = new HashMap<>(cells);
+        data.put("locale", WorkingCapitalLoanRequestFactory.DEFAULT_LOCALE);
+        data.put("dateFormat", DATE_FORMAT);
+        return data;
+    }
+
+    private PreparedDatatableEntries preparedDatatableEntries() {
+        final PreparedDatatableEntries prepared = testContext().get(PREPARED_DATATABLE_ENTRIES);
+        assertThat(prepared).as("Prepared datatable entries in test context").isNotNull();
+        return prepared;
+    }
+
+    private PostWorkingCapitalLoansRequest buildCreateLoanRequest(final DataTable table) {
         final List<String> loanData = table.asLists().get(1);
         final Long clientId = extractClientId();
         final Long loanProductId = resolveLoanProductId(loanData.getFirst());
-        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequest(clientId, loanProductId, loanData);
+        return buildCreateLoanRequest(clientId, loanProductId, loanData);
+    }
 
+    private PostWorkingCapitalLoansRequest buildCreateLoanRequestWithPreparedDatatables(final DataTable table) {
+        final PreparedDatatableEntries prepared = preparedDatatableEntries();
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequest(table);
+        loansRequest.datatables(prepared.rows().stream()
+                .map(data -> new PostWorkingCapitalLoansDataTable().registeredTableName(prepared.registeredTableName()).data(data))
+                .toList());
+        testContext().set(TestContextKey.LOAN_CREATE_REQUEST, loansRequest);
+        return loansRequest;
+    }
+
+    private void submitLoanExpectingMandatoryDatatableEntryError(final PostWorkingCapitalLoansRequest loansRequest) {
+        final String requiredDatatable = testContext().get(DatatablesStepDef.ENTITY_DATATABLE_CHECK_DATATABLE_NAME);
+        assertThat(requiredDatatable).as("Datatable name of the registered entity datatable check").isNotNull();
+        submitLoanExpectingFailure(loansRequest, 403, MANDATORY_DATATABLE_ENTRY_ERROR.formatted(requiredDatatable));
+    }
+
+    private void submitLoanExpectingFailure(final PostWorkingCapitalLoansRequest loansRequest, final int expectedStatus,
+            final String expectedError) {
         final CallFailedRuntimeException exception = fail(
                 () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
         testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
-
-        final String datatableName = testContext().get(DatatablesStepDef.DATATABLE_NAME);
-        assertHttpStatus(exception, 403);
-        assertValidationError(exception, "error.msg.entry.required.in.datatable.[" + datatableName + "]");
-        log.info("Verified WC loan create rejected for missing mandatory CREATE datatable entry on {}", datatableName);
+        assertHttpStatus(exception, expectedStatus);
+        assertValidationError(exception, expectedError);
     }
 
     @When("Admin creates a working capital loan with fund and the following data:")

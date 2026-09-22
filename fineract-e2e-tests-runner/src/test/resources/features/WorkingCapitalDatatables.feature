@@ -294,6 +294,7 @@ Feature: WorkingCapitalDatatables
     And A multirow datatable entry is created for "WC_Loan_Product" with null in column "amount"
     Then Fetching multirow datatable entries for "WC_Loan_Product" returns null in column "amount"
 
+  @TestRailId:C106763
   Scenario: Datatable entries can be set on Working Capital loan creation request
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -308,6 +309,7 @@ Feature: WorkingCapitalDatatables
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
 
+  @TestRailId:C106764 @EntityDatatableCheckCleanup
   Scenario: Creating Working Capital loan without mandatory CREATE datatable entry is rejected
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -325,4 +327,106 @@ Feature: WorkingCapitalDatatables
     When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
+    And The entity datatable check is deleted
+
+  @TestRailId:C106765
+  Scenario: Several entries of a multi-row datatable can be set in one Working Capital loan creation request
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And A multirow datatable for "WC_Loan" is created with the following extra columns:
+      | Name    | Type   | Length | Unique | Indexed |
+      | test_nr | number | 10     | false  | false   |
+    And The following datatable entries are prepared for the working capital loan creation request:
+      | test_nr |
+      | 1       |
+      | 2       |
+    When Admin creates a working capital loan with the prepared datatable entries and the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    Then Fetching multirow datatable entries for "WC_Loan" returns 2 rows
+    And Fetching multirow datatable entries for "WC_Loan" returns value "1" in column "test_nr"
+    And Fetching multirow datatable entries for "WC_Loan" returns value "2" in column "test_nr"
+
+  @TestRailId:C106766
+  Scenario: Datatable entry with number, string and date columns can be set on Working Capital loan creation request
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And A datatable for "WC_Loan" is created with the following extra columns:
+      | Name    | Type   | Length | Unique | Indexed |
+      | test_nr | number | 10     | false  | false   |
+      | note    | string | 50     | false  | false   |
+      | on_date | date   | 10     | false  | false   |
+    And The following datatable entries are prepared for the working capital loan creation request:
+      | test_nr | note  | on_date         |
+      | 42      | hello | 02 January 2026 |
+    When Admin creates a working capital loan with the prepared datatable entries and the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    Then Fetching the datatable entry for "WC_Loan" returns value "42" in column "test_nr"
+    And Fetching the datatable entry for "WC_Loan" returns value "hello" in column "note"
+
+  @TestRailId:C106767
+  Scenario: Working Capital loan creation is rejected when the datatable entry value does not match the column type
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And A datatable for "WC_Loan" is created with the following extra columns:
+      | Name    | Type   | Length | Unique | Indexed |
+      | test_nr | number | 10     | false  | false   |
+    And The following datatable entries are prepared for the working capital loan creation request:
+      | test_nr |
+      | abc     |
+    Then Creating a working capital loan with the prepared datatable entries is rejected with HTTP 400 and error "validation.msg.invalid.integer.format" with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+
+  @TestRailId:C106768
+  Scenario: Working Capital loan creation is rejected when the datatable entry targets an unregistered datatable
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And A datatable for "WC_Loan" is created with the following extra columns:
+      | Name    | Type   | Length | Unique | Indexed |
+      | test_nr | number | 10     | false  | false   |
+    And The following datatable entries are prepared for the working capital loan creation request:
+      | test_nr |
+      | 1       |
+    And The prepared datatable entries are addressed to datatable "dt_wc_loan_does_not_exist"
+    Then Creating a working capital loan with the prepared datatable entries is rejected with HTTP 404 and error "error.msg.datatable.not.found" with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+
+  @TestRailId:C106769 @EntityDatatableCheckCleanup
+  Scenario: Mandatory CREATE datatable check is not satisfied by an entry in a different datatable and stops blocking once deleted
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And A datatable for "WC_Loan" is created with the following extra columns:
+      | Name    | Type   | Length | Unique | Indexed |
+      | test_nr | number | 10     | false  | false   |
+    And An entity datatable check for CREATE is registered for the created datatable on "m_wc_loan"
+    And A datatable for "WC_Loan" is created with the following extra columns:
+      | Name     | Type   | Length | Unique | Indexed |
+      | other_nr | number | 10     | false  | false   |
+    And The following datatable entries are prepared for the working capital loan creation request:
+      | other_nr |
+      | 1        |
+    Then Creating a working capital loan with the prepared datatable entries is rejected because the CREATE datatable entry is required with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    When The entity datatable check is deleted
+    And Admin creates a working capital loan with the prepared datatable entries and the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    Then Fetching the datatable entry for "WC_Loan" returns value "1" in column "other_nr"
+
+  @TestRailId:C106770 @EntityDatatableCheckCleanup
+  Scenario: Mandatory CREATE datatable check registered for term loans does not block Working Capital loan creation
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And A datatable for "Loan" is created with the following extra columns:
+      | Name    | Type   | Length | Unique | Indexed |
+      | test_nr | number | 10     | false  | false   |
+    And An entity datatable check for CREATE is registered for the created datatable on "m_loan"
+    When Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And The entity datatable check is deleted

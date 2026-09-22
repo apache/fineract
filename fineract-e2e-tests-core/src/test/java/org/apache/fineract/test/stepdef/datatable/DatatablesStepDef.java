@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.math.BigDecimal;
@@ -36,6 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.fineract.client.feign.FeignException;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -62,6 +64,7 @@ import org.apache.fineract.test.data.datatable.DatatableNameGenerator;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 
+@Slf4j
 @RequiredArgsConstructor
 public class DatatablesStepDef extends AbstractStepDef {
 
@@ -70,6 +73,7 @@ public class DatatablesStepDef extends AbstractStepDef {
     public static final String DATATABLE_QUERY_RESPONSE = "DatatableQueryResponse";
     public static final String DATATABLE_ENTRY_ID = "DatatableEntryId";
     public static final String ENTITY_DATATABLE_CHECK_ID = "EntityDatatableCheckId";
+    public static final String ENTITY_DATATABLE_CHECK_DATATABLE_NAME = "EntityDatatableCheckDatatableName";
     /** StatusEnum.CREATE — mandatory datatable entry required at entity creation. */
     private static final long ENTITY_DATATABLE_CHECK_STATUS_CREATE = 100L;
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getShared();
@@ -245,6 +249,7 @@ public class DatatablesStepDef extends AbstractStepDef {
                 () -> fineractClient.entityDataTable().createEntityDatatableCheck(request));
         assertThat(response.getResourceId()).as("Entity datatable check id").isNotNull();
         testContext().set(ENTITY_DATATABLE_CHECK_ID, response.getResourceId());
+        testContext().set(ENTITY_DATATABLE_CHECK_DATATABLE_NAME, datatableName);
     }
 
     @When("The entity datatable check is deleted")
@@ -253,6 +258,27 @@ public class DatatablesStepDef extends AbstractStepDef {
         assertThat(checkId).as("Entity datatable check id in test context").isNotNull();
         ok(() -> fineractClient.entityDataTable().deleteEntityDatatableCheck(checkId));
         testContext().set(ENTITY_DATATABLE_CHECK_ID, null);
+    }
+
+    /**
+     * Entity datatable checks are tenant-global (a CREATE check on m_wc_loan blocks every WC loan creation in the run
+     * and cannot be product-scoped). If a scenario fails before its explicit delete step the check would poison every
+     * following scenario, so tagged scenarios always drop the check here.
+     */
+    @After(value = "@EntityDatatableCheckCleanup", order = 10001)
+    public void cleanupEntityDatatableCheck() {
+        final Long checkId = testContext().get(ENTITY_DATATABLE_CHECK_ID);
+        if (checkId == null) {
+            return;
+        }
+        try {
+            ok(() -> fineractClient.entityDataTable().deleteEntityDatatableCheck(checkId));
+            log.info("Deleted leftover entity datatable check {}", checkId);
+        } catch (final CallFailedRuntimeException e) {
+            log.warn("Could not delete leftover entity datatable check {}: {}", checkId, e.getMessage());
+        } finally {
+            testContext().set(ENTITY_DATATABLE_CHECK_ID, null);
+        }
     }
 
     @When("The datatable is registered against apptable {string}")
@@ -415,6 +441,13 @@ public class DatatablesStepDef extends AbstractStepDef {
         assertThat(rows).withFailMessage("No datatable rows found for entity %s", entityType).isNotEmpty();
         final Object expected = parseValue(expectedValue);
         assertThat(rows).anyMatch(row -> valuesMatch(row.get(columnName), expected));
+    }
+
+    @Then("Fetching multirow datatable entries for {string} returns {int} rows")
+    public void thenMultirowEntryCount(final String entityTypeStr, final int expectedRows) {
+        final DatatableEntityType entityType = DatatableEntityType.fromString(entityTypeStr);
+        final List<Map<?, ?>> rows = fetchEntryRows(entityType);
+        assertThat(rows).as("Multirow datatable entries for %s", entityType).hasSize(expectedRows);
     }
 
     @Then("Fetching multirow datatable entries for {string} returns null in column {string}")
