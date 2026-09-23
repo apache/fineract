@@ -88,6 +88,7 @@ public class WorkingCapitalLoanProductDataValidator {
                     WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, //
                     WorkingCapitalLoanProductConstants.npvDayCountParamName, //
                     WorkingCapitalLoanProductConstants.paymentAllocationParamName, //
+                    WorkingCapitalLoanProductConstants.chargesParamName, //
                     WorkingCapitalLoanProductConstants.minPrincipalParamName, //
                     WorkingCapitalLoanProductConstants.principalParamName, //
                     WorkingCapitalLoanProductConstants.maxPrincipalParamName, //

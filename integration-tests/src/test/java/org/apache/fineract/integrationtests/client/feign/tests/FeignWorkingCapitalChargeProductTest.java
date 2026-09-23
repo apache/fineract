@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.client.feign.tests;
 
 import static org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper.errorCodesOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -89,7 +90,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
     private static final String TIME_TYPE_ERROR_CODE_ON_UPDATE = "validation.msg.charges.chargeTimeType.is.not.one.of.expected.enumerations";
     private static final String PAYMENT_MODE_ERROR_CODE = "validation.msg.charge.chargePaymentMode.is.not.one.of.expected.enumerations";
     private static final String PAYMENT_MODE_ERROR_CODE_ON_UPDATE = "validation.msg.charges.chargePaymentMode.is.not.one.of.expected.enumerations";
-    private static final String WC_LOAN_CHARGE_TIME_TYPE_UNSUPPORTED = "error.msg.wc.loan.charge.time.type.not.supported";
+    private static final String WC_LOAN_DISBURSEMENT_CHARGE_ALREADY_DISBURSED = "error.msg.wc.loan.disbursement.charge.loan.already.disbursed";
 
     private static final String BUSINESS_DATE = "2026-01-01";
     private static final String LOAN_DATE = "01 January 2026";
@@ -345,7 +346,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
 
     @Test
     @Order(17)
-    void addWorkingCapitalDisbursementChargeToLoanAccount_isRejected() {
+    void addWorkingCapitalDisbursementChargeToDisbursedLoanAccount_isRejected() {
         businessDateHelper.runAt(BUSINESS_DATE, () -> {
             final Long chargeId = createExpectingSuccess(WorkingCapitalLoanRequestBuilders.disbursementCharge(false, 20.0),
                     "the WC Disbursement charge product must exist before the account guard can be exercised");
@@ -355,8 +356,8 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
                     WorkingCapitalLoanRequestBuilders.addChargeWithoutDueDate(chargeId, 20.0));
 
             assertEquals(403, failure.getStatus(), "a domain-rule rejection is reported as 403");
-            assertEquals(List.of(WC_LOAN_CHARGE_TIME_TYPE_UNSUPPORTED), errorCodesOf(failure),
-                    "the account path must reject an unsupported WC charge time type");
+            assertEquals(List.of(WC_LOAN_DISBURSEMENT_CHARGE_ALREADY_DISBURSED), errorCodesOf(failure),
+                    "a disbursement charge is settled at disbursement, so it cannot be added once the loan is disbursed");
             assertTrue(wcLoanHelper.getCharges(loanId).isEmpty(), "no charge may be persisted on the account");
         });
     }
@@ -489,14 +490,15 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
             final Long specifiedDueDateChargeId = createExpectingSuccess(
                     WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(false, 20.0),
                     "the WC Specified-due-date charge product is the positive control");
-            final Long loanId = createActiveWorkingCapitalLoan();
+            final Long loanId = createActiveWorkingCapitalLoan(List.of(disbursementChargeId, specifiedDueDateChargeId));
 
             final List<ChargeData> chargeOptions = wcLoanHelper.getChargeTemplateOptions(loanId);
 
             final List<Long> ownOptionIds = chargeOptions.stream().map(ChargeData::getId)
                     .filter(id -> disbursementChargeId.equals(id) || specifiedDueDateChargeId.equals(id)).toList();
             assertEquals(List.of(specifiedDueDateChargeId), ownOptionIds,
-                    "the account charge template must offer the Specified-due-date product (id " + specifiedDueDateChargeId
+                    "both products are catalogued by the loan product, so the time type is what decides: the account charge template"
+                            + " must offer the Specified-due-date product (id " + specifiedDueDateChargeId
                             + ") and must not offer the Disbursement product (id " + disbursementChargeId
                             + "), which POST /working-capital-loans/{loanId}/charges rejects with 403");
 
@@ -571,6 +573,38 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         assertId(CALCULATION_PERCENT_OF_AMOUNT, charge.getChargeCalculationType().getId(), "the calculation type is untouched");
     }
 
+    @Test
+    @Order(30)
+    void workingCapitalLoanAccountChargeTemplate_offersOnlyTheChargesTheProductCatalogues() {
+        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+            final Long catalogued = createExpectingSuccess(WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(false, 20.0),
+                    "the charge the product offers");
+            final Long notCatalogued = createExpectingSuccess(WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(false, 30.0),
+                    "an equally valid WC charge product that this loan product simply does not offer");
+            final Long loanId = createActiveWorkingCapitalLoan(List.of(catalogued));
+
+            final List<Long> optionIds = wcLoanHelper.getChargeTemplateOptions(loanId).stream().map(ChargeData::getId).toList();
+
+            assertTrue(optionIds.contains(catalogued),
+                    "the account charge template must offer the charge the loan product catalogues (id " + catalogued + ")");
+            assertFalse(optionIds.contains(notCatalogued), "the account charge template must not offer a charge the loan product does not"
+                    + " catalogue (id " + notCatalogued + "), even though it is a valid Specified-due-date WC charge");
+        });
+    }
+
+    @Test
+    @Order(31)
+    void workingCapitalLoanAccountChargeTemplate_isEmptyWhenTheProductCataloguesNothing() {
+        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+            createExpectingSuccess(WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(false, 20.0),
+                    "a valid WC charge product must exist, so that an empty template proves the catalogue filter and not an empty system");
+            final Long loanId = createActiveWorkingCapitalLoan();
+
+            assertTrue(wcLoanHelper.getChargeTemplateOptions(loanId).isEmpty(),
+                    "a product with an empty charge catalogue must offer no charge at all on its accounts");
+        });
+    }
+
     private Long createExpectingSuccess(final ChargeRequest request, final String expectation) {
         final PostChargesResponse response;
         try {
@@ -585,10 +619,19 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
     }
 
     private Long createActiveWorkingCapitalLoan() {
+        return createActiveWorkingCapitalLoan(null);
+    }
+
+    /**
+     * @param productChargeIds
+     *            charges the loan's product offers, or null for a product with an empty charge catalogue
+     */
+    private Long createActiveWorkingCapitalLoan(final List<Long> productChargeIds) {
         final Long clientId = clientHelper.createClient(LOAN_DATE);
-        final Long productId = productHelper.createWorkingCapitalLoanProduct(
-                new WorkingCapitalLoanProductTestBuilder().withName("WCL Charge " + Utils.uniqueRandomStringGenerator("", 8))
-                        .withShortName(Utils.uniqueRandomStringGenerator("", 4)).build())
+        final Long productId = productHelper
+                .createWorkingCapitalLoanProduct(
+                        new WorkingCapitalLoanProductTestBuilder().withName("WCL Charge " + Utils.uniqueRandomStringGenerator("", 8))
+                                .withShortName(Utils.uniqueRandomStringGenerator("", 4)).withChargeIds(productChargeIds).build())
                 .getResourceId();
         final BigDecimal principal = BigDecimal.valueOf(9000);
         final Long loanId = wcLoanHelper.submitApplication(WorkingCapitalLoanRequestBuilders.submitApplication(clientId, productId,

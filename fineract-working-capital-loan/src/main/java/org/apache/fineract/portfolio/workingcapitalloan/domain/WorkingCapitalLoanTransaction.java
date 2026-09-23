@@ -135,6 +135,17 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         return txn;
     }
 
+    /**
+     * Settles the charges due at disbursement out of the disbursed money: one transaction for their total, one
+     * {@code WorkingCapitalLoanChargePaidBy} line per charge. Mirrors Term Loan's repayment-at-disbursement.
+     */
+    public static WorkingCapitalLoanTransaction repaymentAtDisbursement(final WorkingCapitalLoan loan, final BigDecimal amount,
+            final PaymentDetail paymentDetail, final LocalDate disbursementDate, final ExternalId externalId) {
+        final WorkingCapitalLoanTransaction txn = new WorkingCapitalLoanTransaction();
+        txn.initialize(loan, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT, disbursementDate, amount, paymentDetail, null, externalId);
+        return txn;
+    }
+
     public static WorkingCapitalLoanTransaction repayment(final WorkingCapitalLoan loan, final BigDecimal amount,
             final PaymentDetail paymentDetail, final LocalDate transactionDate, final CodeValue classification,
             final ExternalId externalId) {

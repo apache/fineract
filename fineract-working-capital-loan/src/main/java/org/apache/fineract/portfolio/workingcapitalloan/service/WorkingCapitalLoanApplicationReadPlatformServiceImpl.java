@@ -39,6 +39,8 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.accountdetails.data.WorkingCapitalLoanAccountSummaryData;
+import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
@@ -90,6 +92,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository delinquencyRangeScheduleRepository;
     private final Optional<WorkingCapitalLoanOriginatorReadPlatformService> originatorReadService;
     private final WorkingCapitalLoanChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadPlatformService chargeDefinitionReadPlatformService;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final AppUserRepository appUserRepository;
     private final WorkingCapitalLoanPeriodPaymentRateChangeReadService rateChangeReadService;
@@ -111,6 +114,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         final List<StringEnumOptionData> delinquencyMinimumPaymentTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(DelinquencyMinimumPaymentType.class);
         final WorkingCapitalLoanData.WorkingCapitalLoanDataBuilder builder = WorkingCapitalLoanData.builder();
+        List<ChargeData> chargeOptions = null;
         if (productId != null) {
             final WorkingCapitalLoanProductData product = this.productReadPlatformService.retrieveWorkingCapitalLoanProduct(productId);
             if (product != null) {
@@ -126,6 +130,13 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
                         .breach(product.getBreach()) //
                         .nearBreach(product.getNearBreach()) //
                         .breachGraceDays(product.getBreachGraceDays()); //
+                // The whole Working Capital catalogue for the product currency, not only the charges the product
+                // catalogues: the product catalogue is a default, not a contract, and submit accepts any Working
+                // Capital charge whose currency matches the loan.
+                if (product.getCurrency() != null && product.getCurrency().getCode() != null) {
+                    chargeOptions = this.chargeDefinitionReadPlatformService
+                            .retrieveWorkingCapitalLoanApplicableFeesForCurrency(product.getCurrency().getCode());
+                }
             }
         }
         if (clientId != null) {
@@ -143,7 +154,8 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
                 .nearBreachOptions(nearBreachOptions)//
                 .delinquencyStartTypeOptions(delinquencyStartTypeOptions)//
                 .breachStartTypeOptions(breachStartTypeOptions)//
-                .delinquencyMinimumPaymentTypeOptions(delinquencyMinimumPaymentTypeOptions).build();
+                .delinquencyMinimumPaymentTypeOptions(delinquencyMinimumPaymentTypeOptions)//
+                .chargeOptions(chargeOptions).build();
     }
 
     @Override
@@ -230,7 +242,11 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         scheduleRepositoryWrapper.readModel(loan.getId(), mc, currency).ifPresent(model -> {
             data.setNumberOfRepayments(model.effectiveTotalTerm());
             data.setPeriodPaymentAmount(model.expectedPaymentAmount() != null ? model.expectedPaymentAmount().getAmount() : null);
-            data.setNetDisbursalAmount(model.netDisbursementAmount() != null ? model.netDisbursementAmount().getAmount() : null);
+            // The schedule carries the *expected* net; once disbursed the loan records the cash actually handed over
+            // (disbursed amount minus the charges settled at disbursement), which wins.
+            if (data.getNetDisbursalAmount() == null) {
+                data.setNetDisbursalAmount(model.netDisbursementAmount() != null ? model.netDisbursementAmount().getAmount() : null);
+            }
             data.setCalculatedAnnualEir(model.calculatedAnnualEir());
         });
     }

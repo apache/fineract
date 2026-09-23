@@ -93,7 +93,7 @@ public interface WorkingCapitalLoanMapper {
     @Mapping(target = "npvDayCount", source = "loanProductRelatedDetails.npvDayCount")
     @Mapping(target = "loanProductCounter", source = "loanProductCounter")
     @Mapping(target = "enableInstallmentLevelDelinquency", source = "loanProductRelatedDetails", qualifiedByName = "installmentLevelDelinquencyEnabled")
-    @Mapping(target = "netDisbursalAmount", ignore = true)
+    @Mapping(target = "netDisbursalAmount", source = "netDisbursalAmount")
     @Mapping(target = "charges", ignore = true)
     @Mapping(target = "originators", ignore = true)
     @Mapping(target = "fraud", source = "fraud")

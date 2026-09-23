@@ -1557,6 +1557,16 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         executeDisburseAndExpectError(disburseRequest, table);
     }
 
+    @Then("Disbursing the Working Capital loan on {string} with {string} EUR transaction amount results an error with the following data:")
+    public void disburseWorkingCapitalLoanResultsAnError(final String actualDisbursementDate, final String transactionAmount,
+            final DataTable table) {
+        final PostWorkingCapitalLoansLoanIdRequest disburseRequest = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoanDisburseRequest() //
+                .actualDisbursementDate(actualDisbursementDate) //
+                .transactionAmount(new BigDecimal(transactionAmount));
+        executeDisburseAndExpectError(disburseRequest, table);
+    }
+
     private void executeDisburseAndExpectError(final PostWorkingCapitalLoansLoanIdRequest disburseRequest, final DataTable table) {
         final Long loanId = getCreatedLoanId();
         final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoans()

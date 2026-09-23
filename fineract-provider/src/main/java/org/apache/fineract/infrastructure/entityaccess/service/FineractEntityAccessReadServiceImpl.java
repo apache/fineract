@@ -23,7 +23,10 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
@@ -175,6 +178,42 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         Long relId = fineractEntityRelation.getId();
 
         return getSQLQueryInClause_WithListOfIDsForEntityAccess(firstEntityType, relId, officeId, includeAllOffices);
+    }
+
+    @Override
+    public Optional<List<Long>> getIdList_ForChargesForOffice(final Long officeId, final boolean includeAllOffices) {
+
+        FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
+                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES.getStr());
+
+        return getIdList_ForEntityAccess(FineractEntityType.OFFICE, fineractEntityRelation.getId(), officeId, includeAllOffices);
+    }
+
+    /**
+     * Typed sibling of {@link #getSQLQueryInClause_WithListOfIDsForEntityAccess}, returning the same access decision as
+     * ids rather than as the body of an SQL IN clause. The two sentinels the string form encodes are made explicit
+     * here: a mapping to entity 0 means the office is not restricted, which is an empty optional, and no mapping at all
+     * means the office may see nothing, which is an empty list.
+     */
+    private Optional<List<Long>> getIdList_ForEntityAccess(final FineractEntityType firstEntityType, final Long relId,
+            final Long fromEntityId, final boolean includeAllOffices) {
+        final Collection<FineractEntityToEntityMappingData> accessList = retrieveEntityAccessFor(firstEntityType, relId, fromEntityId,
+                includeAllOffices);
+        if (accessList == null || accessList.isEmpty()) {
+            return Optional.of(List.of());
+        }
+        final List<Long> ids = new ArrayList<>(accessList.size());
+        for (FineractEntityToEntityMappingData accessData : accessList) {
+            if (accessData == null) {
+                throw new FineractEntityMappingConfigurationException();
+            }
+            if (accessData.getToId() == 0) {
+                return Optional.empty();
+            }
+            ids.add(accessData.getToId());
+        }
+        LOG.debug("List of IDs applicable: {}", ids);
+        return Optional.of(ids);
     }
 
     @Override

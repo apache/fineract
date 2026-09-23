@@ -26,6 +26,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -38,7 +42,9 @@ import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAcc
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
+import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
@@ -70,6 +76,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     private final TaxReadPlatformService taxReadPlatformService;
     private final ConfigurationDomainServiceJpa configurationDomainServiceJpa;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final ChargeRepository chargeRepository;
 
     @Override
     @Cacheable(value = "charges", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('ch')")
@@ -197,6 +204,69 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId, chargeTime.getValue() }); // NOSONAR
+    }
+
+    @Override
+    public List<ChargeData> retrieveWorkingCapitalLoanApplicableFees() {
+        return retrieveWorkingCapitalLoanApplicableCharges(false);
+    }
+
+    @Override
+    public List<ChargeData> retrieveWorkingCapitalLoanApplicablePenalties() {
+        return retrieveWorkingCapitalLoanApplicableCharges(true);
+    }
+
+    @Override
+    public List<ChargeData> retrieveWorkingCapitalLoanApplicableFeesForCurrency(final String currencyCode) {
+        final Integer chargeAppliesTo = ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue();
+        return queryVisibleToUserOffice(
+                () -> chargeRepository.findWorkingCapitalLoanApplicableChargesForCurrency(false, chargeAppliesTo, currencyCode),
+                chargeIds -> chargeRepository.findWorkingCapitalLoanApplicableChargesForCurrencyAndOffice(false, chargeAppliesTo,
+                        currencyCode, chargeIds));
+    }
+
+    @Override
+    public List<ChargeData> retrieveWorkingCapitalLoanProductCharges(final Long workingCapitalLoanProductId) {
+        return queryVisibleToUserOffice(() -> chargeRepository.findWorkingCapitalLoanProductCharges(workingCapitalLoanProductId),
+                chargeIds -> chargeRepository.findWorkingCapitalLoanProductChargesForOffice(workingCapitalLoanProductId, chargeIds));
+    }
+
+    private List<ChargeData> retrieveWorkingCapitalLoanApplicableCharges(final boolean penalty) {
+        final Integer chargeAppliesTo = ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue();
+        return queryVisibleToUserOffice(() -> chargeRepository.findWorkingCapitalLoanApplicableCharges(penalty, chargeAppliesTo),
+                chargeIds -> chargeRepository.findWorkingCapitalLoanApplicableChargesForOffice(penalty, chargeAppliesTo, chargeIds));
+    }
+
+    /**
+     * Runs whichever of the two queries the current user's office is entitled to: the plain one when office specific
+     * products are disabled or the office is not restricted, the id bound one otherwise. An office mapped to no charge
+     * at all sees nothing, which is answered without querying.
+     */
+    private List<ChargeData> queryVisibleToUserOffice(final Supplier<List<Charge>> unrestricted,
+            final Function<List<Long>, List<Charge>> restrictedToChargeIds) {
+        final Optional<List<Long>> officeChargeIds = fineractEntityAccessUtil.getChargeIdsForUserOffice_ifGlobalConfigEnabled();
+        if (officeChargeIds.isEmpty()) {
+            return toChargeDataList(unrestricted.get());
+        }
+        final List<Long> chargeIds = officeChargeIds.get();
+        return chargeIds.isEmpty() ? List.of() : toChargeDataList(restrictedToChargeIds.apply(chargeIds));
+    }
+
+    /**
+     * {@link Charge#toData()} only carries the currency code, while the SQL these queries replaced joined
+     * m_organisation_currency to return the full currency. The join was an inner one, so a charge in a currency the
+     * organisation has not enabled was never part of the result and is dropped here as well.
+     */
+    private List<ChargeData> toChargeDataList(final List<Charge> charges) {
+        if (charges.isEmpty()) {
+            return List.of();
+        }
+        final Map<String, CurrencyData> organisationCurrencies = currencyReadPlatformService.retrieveAllowedCurrencies().stream()
+                .collect(Collectors.toMap(CurrencyData::getCode, Function.identity(), (first, second) -> first));
+        return charges.stream() //
+                .filter(charge -> organisationCurrencies.containsKey(charge.getCurrencyCode())) //
+                .map(charge -> charge.toData().toBuilder().currency(organisationCurrencies.get(charge.getCurrencyCode())).build()) //
+                .toList();
     }
 
     @Override
@@ -452,19 +522,21 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         return this.jdbcTemplate.query(sql, rm, new Object[] { shareProductId }); // NOSONAR
     }
 
+    /**
+     * Only the charges catalogued by the loan's own product are offered, so the template cannot suggest a charge the
+     * product does not sell. This is deliberately stricter than the loan application template
+     * (retrieveWorkingCapitalLoanApplicableFeesForCurrency), which offers the whole Working Capital catalogue for the
+     * product currency, and stricter than the write path, which accepts any Working Capital charge in the loan
+     * currency. Relaxing it changes an already released screen and is tracked separately from WEB-657.
+     */
     @Override
     public List<ChargeData> retrieveWorkingCapitalLoanAccountApplicableCharges(Long loanId) {
-        final ChargeMapper rm = new ChargeMapper();
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("loanId", loanId);
-        paramMap.put("chargeAppliesTo", ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue());
-        paramMap.put("chargeTimeTypes", ChargeTimeType.validWorkingCapitalLoanAccountValues());
-        String sql = "select " + rm.chargeSchema() + " join m_wc_loan la on la.currency_code = c.currency_code" + " where la.id=:loanId"
-                + " and c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=:chargeAppliesTo"
-                + " and c.charge_time_enum in (:chargeTimeTypes) ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-        sql += " order by c.name ";
-        return this.namedParameterJdbcTemplate.query(sql, paramMap, rm);
+        final Integer chargeAppliesTo = ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue();
+        final List<Integer> chargeTimeTypes = ChargeTimeType.validWorkingCapitalLoanAccountValues();
+        return queryVisibleToUserOffice(
+                () -> chargeRepository.findWorkingCapitalLoanAccountApplicableCharges(loanId, chargeAppliesTo, chargeTimeTypes),
+                chargeIds -> chargeRepository.findWorkingCapitalLoanAccountApplicableChargesForOffice(loanId, chargeAppliesTo,
+                        chargeTimeTypes, chargeIds));
     }
 
     @Override

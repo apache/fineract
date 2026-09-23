@@ -87,6 +87,10 @@ public class FeignWorkingCapitalLoanHelper {
         return response.getResourceId();
     }
 
+    public CallFailedRuntimeException submitApplicationExpectingFailure(PostWorkingCapitalLoansRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(request));
+    }
+
     public Long approve(Long loanId, PostWorkingCapitalLoansLoanIdRequest request) {
         PostWorkingCapitalLoansLoanIdResponse result = ok(
                 () -> fineractClient.workingCapitalLoans().stateTransitionWorkingCapitalLoanById(loanId, "approve", request));
@@ -97,6 +101,10 @@ public class FeignWorkingCapitalLoanHelper {
         PostWorkingCapitalLoansLoanIdResponse result = ok(
                 () -> fineractClient.workingCapitalLoans().stateTransitionWorkingCapitalLoanById(loanId, "disburse", request));
         return result.getResourceId();
+    }
+
+    public CallFailedRuntimeException disburseExpectingFailure(Long loanId, PostWorkingCapitalLoansLoanIdRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoans().stateTransitionWorkingCapitalLoanById(loanId, "disburse", request));
     }
 
     public Long undoDisbursal(Long loanId, PostWorkingCapitalLoansLoanIdRequest request) {

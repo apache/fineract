@@ -30,6 +30,8 @@ import org.apache.fineract.client.models.PostPaymentAllocation;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest.AccountingRuleEnum;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanProductChargeData;
+import org.apache.fineract.client.models.WorkingCapitalLoanProductChargeToGLAccountMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 
@@ -59,6 +61,8 @@ public class WorkingCapitalLoanProductTestBuilder {
     private Long fundId;
     private String externalId;
     private String currencyCode = DEFAULT_CURRENCY_CODE;
+    private List<Long> chargeIds;
+    private Map<Long, Long> feeToIncomeAccountIdsByChargeId;
     private Integer decimalPlace = DEFAULT_DECIMAL_PLACE;
     private Integer currencyInMultiplesOf = DEFAULT_CURRENCY_IN_MULTIPLES_OF;
     private String amortizationType = DEFAULT_AMORTIZATION;
@@ -338,11 +342,35 @@ public class WorkingCapitalLoanProductTestBuilder {
         return this;
     }
 
+    /**
+     * Charges the product offers. A null list (the default) omits the {@code charges} parameter entirely, an empty list
+     * sends it empty, which detaches every charge on update.
+     */
+    public WorkingCapitalLoanProductTestBuilder withChargeIds(final List<Long> chargeIds) {
+        this.chargeIds = chargeIds;
+        return this;
+    }
+
+    /** Charge-specific income accounts (advanced accounting mapping), keyed by charge id. Null omits the parameter. */
+    public WorkingCapitalLoanProductTestBuilder withFeeToIncomeAccountIds(final Map<Long, Long> feeToIncomeAccountIdsByChargeId) {
+        this.feeToIncomeAccountIdsByChargeId = feeToIncomeAccountIdsByChargeId;
+        return this;
+    }
+
     public PostWorkingCapitalLoanProductsRequest build() {
         final PostWorkingCapitalLoanProductsRequest request = new PostWorkingCapitalLoanProductsRequest();
         populateCommonFields(request);
         setPaymentAllocation(request);
         setAllowAttributeOverrides(request);
+        if (this.chargeIds != null) {
+            request.setCharges(buildCharges());
+        }
+        if (this.feeToIncomeAccountIdsByChargeId != null) {
+            request.setFeeToIncomeAccountMappings(this.feeToIncomeAccountIdsByChargeId.entrySet().stream()
+                    .map(entry -> new WorkingCapitalLoanProductChargeToGLAccountMapper().chargeId(entry.getKey())
+                            .incomeAccountId(entry.getValue()))
+                    .toList());
+        }
         return request;
     }
 
@@ -351,7 +379,14 @@ public class WorkingCapitalLoanProductTestBuilder {
         populateCommonFields(request);
         setPaymentAllocation(request);
         setAllowAttributeOverrides(request);
+        if (this.chargeIds != null) {
+            request.setCharges(buildCharges());
+        }
         return request;
+    }
+
+    private List<WorkingCapitalLoanProductChargeData> buildCharges() {
+        return this.chargeIds.stream().map(chargeId -> new WorkingCapitalLoanProductChargeData().id(chargeId)).toList();
     }
 
     private void populateCommonFields(final PostWorkingCapitalLoanProductsRequest request) {

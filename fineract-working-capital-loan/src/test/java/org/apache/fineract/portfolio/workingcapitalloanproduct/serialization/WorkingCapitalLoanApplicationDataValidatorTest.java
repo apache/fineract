@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -240,6 +241,84 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
         final Throwable cause = new RuntimeException("wc_loan_externalid_UNIQUE");
         assertThrows(org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException.class,
                 () -> validator.handleDataIntegrityIssues(command, cause, new RuntimeException()));
+    }
+
+    // ---- charges array on the application ------------------------------------------------------------------------
+
+    @Test
+    void testValidateForCreate_WithValidCharges_ShouldNotThrowException() {
+        final JsonObject json = createBaseJsonObject();
+        final JsonArray charges = new JsonArray();
+        final JsonObject flat = new JsonObject();
+        flat.addProperty("chargeId", 12);
+        flat.addProperty("amount", 100);
+        charges.add(flat);
+        final JsonObject withoutAmount = new JsonObject();
+        withoutAmount.addProperty("chargeId", 15);
+        charges.add(withoutAmount);
+        json.add(WorkingCapitalLoanConstants.chargesParameterName, charges);
+
+        assertDoesNotThrow(() -> validator.validateForCreate(jsonCommand(json.toString())));
+    }
+
+    @Test
+    void testValidateForCreate_WithChargesNotAnArray_ShouldThrowException() {
+        final JsonObject json = createBaseJsonObject();
+        json.addProperty(WorkingCapitalLoanConstants.chargesParameterName, "12");
+
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(jsonCommand(json.toString())));
+    }
+
+    @Test
+    void testValidateForCreate_WithUnsupportedChargeParameter_ShouldThrowException() {
+        final JsonObject json = createBaseJsonObject();
+        final JsonArray charges = new JsonArray();
+        final JsonObject charge = new JsonObject();
+        charge.addProperty("chargeId", 12);
+        charge.addProperty("chargeTimeType", 1);
+        charges.add(charge);
+        json.add(WorkingCapitalLoanConstants.chargesParameterName, charges);
+
+        assertThrows(UnsupportedParameterException.class, () -> validator.validateForCreate(jsonCommand(json.toString())));
+    }
+
+    @Test
+    void testValidateForCreate_WithChargeIdOnCreate_ShouldThrowException() {
+        // `id` addresses an existing loan charge and only makes sense on modify
+        final JsonObject json = createBaseJsonObject();
+        final JsonArray charges = new JsonArray();
+        final JsonObject charge = new JsonObject();
+        charge.addProperty("id", 301);
+        charge.addProperty("chargeId", 12);
+        charges.add(charge);
+        json.add(WorkingCapitalLoanConstants.chargesParameterName, charges);
+
+        assertThrows(UnsupportedParameterException.class, () -> validator.validateForCreate(jsonCommand(json.toString())));
+    }
+
+    @Test
+    void testValidateForCreate_WithChargeMissingChargeId_ShouldThrowException() {
+        final JsonObject json = createBaseJsonObject();
+        final JsonArray charges = new JsonArray();
+        final JsonObject charge = new JsonObject();
+        charge.addProperty("amount", 100);
+        charges.add(charge);
+        json.add(WorkingCapitalLoanConstants.chargesParameterName, charges);
+
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(jsonCommand(json.toString())));
+    }
+
+    @Test
+    void testValidateForCreate_WithNonPositiveChargeAmount_ShouldThrowException() {
+        final JsonObject json = createBaseJsonObject();
+        final JsonArray charges = new JsonArray();
+        final JsonObject charge = new JsonObject();
+        charge.addProperty("chargeId", 12);
+        charge.addProperty("amount", 0);
+        charges.add(charge);
+        json.add(WorkingCapitalLoanConstants.chargesParameterName, charges);
+
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(jsonCommand(json.toString())));
     }
 
     private JsonCommand jsonCommand(final String json) {

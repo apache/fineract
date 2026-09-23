@@ -75,6 +75,7 @@ public interface WorkingCapitalLoanProductMapper {
     @Mapping(target = "breachGraceDays", source = "relatedDetail.breachGraceDays")
     @Mapping(target = "breachStartType", source = "relatedDetail.breachStartType", qualifiedByName = "breachStartTypeToStringEnumOptionData")
     @Mapping(target = "accountingRule", source = "accountingRule", qualifiedByName = "accountingRuleToStringEnumOptionData")
+    @Mapping(target = "charges", ignore = true)
     @Mapping(target = "accountingMappings", ignore = true)
     @Mapping(target = "paymentChannelToFundSourceMappings", ignore = true)
     @Mapping(target = "feeToIncomeAccountMappings", ignore = true)

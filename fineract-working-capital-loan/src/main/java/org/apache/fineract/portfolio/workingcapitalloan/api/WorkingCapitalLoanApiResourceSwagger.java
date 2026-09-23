@@ -27,6 +27,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
@@ -54,6 +55,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public List<StringEnumOptionData> breachStartTypeOptions;
         public List<StringEnumOptionData> delinquencyMinimumPaymentTypeOptions;
         public List<WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse.GetWorkingCapitalLoanBreach> breachOptions;
+        @Schema(description = "Working Capital charge definitions in the selected product's currency; null when no productId is supplied.")
+        public List<ChargeData> chargeOptions;
     }
 
     @Schema(description = "GetWorkingCapitalLoansClient")
@@ -569,6 +572,12 @@ public final class WorkingCapitalLoanApiResourceSwagger {
                 If the global config 'enable_originator_creation_during_loan_application' is enabled, \
                 non-existing originators will be auto-created using the provided details (name, typeId, channelTypeId).""")
         public List<PostWorkingCapitalLoansOriginatorData> originators;
+        @Schema(description = """
+                Optional array of charges to attach to the application. Each entry references a charge product by 'chargeId'. \
+                The same rules as POST /working-capital-loans/{loanId}/charges apply for a loan in its current state: while the \
+                loan is not disbursed only disbursement charges are accepted, without 'dueDate' and with an optional 'amount' \
+                (the rate for percentage charges).""")
+        public List<PostWorkingCapitalLoansChargeData> charges;
 
         @Schema(example = "en_GB")
         public String locale;
@@ -594,6 +603,23 @@ public final class WorkingCapitalLoanApiResourceSwagger {
             public String paymentAllocationRule;
             @Schema(example = "1")
             public Integer order;
+        }
+
+        @Schema(description = "Charge data for loan application request")
+        public static final class PostWorkingCapitalLoansChargeData {
+
+            private PostWorkingCapitalLoansChargeData() {}
+
+            @Schema(description = "Id of a charge already on the loan (PUT only): updates its amount instead of adding a new one", example = "301")
+            public Long id;
+            @Schema(description = "Charge product id", example = "12")
+            public Long chargeId;
+            @Schema(description = "Amount, or rate for percentage charges. Optional for disbursement charges", example = "100.00")
+            public BigDecimal amount;
+            @Schema(description = "Not allowed for disbursement charges", example = "01 January 2026")
+            public String dueDate;
+            @Schema(example = "ext-charge-001")
+            public String externalId;
         }
 
         @Schema(description = "Originator data for loan creation request")
@@ -701,6 +727,11 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(example = "DISBURSEMENT", description = "Breach start type: LOAN_CREATION or DISBURSEMENT")
         public String breachStartType;
         public List<PostWorkingCapitalLoansRequest.PostPaymentAllocationRule> paymentAllocation;
+        @Schema(description = """
+                Optional. Replaces the loan's active charges: omitted keeps them, an empty array removes them all, an entry with \
+                'id' updates the amount of that charge, an entry without 'id' adds a new one, and active charges not listed are \
+                removed. A removed charge is not brought back from the product catalogue at disbursement.""")
+        public List<PostWorkingCapitalLoansRequest.PostWorkingCapitalLoansChargeData> charges;
 
         @Schema(example = "en_GB")
         public String locale;
