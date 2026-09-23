@@ -41,6 +41,7 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttribut
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttributesRepository;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeAlreadyExistsException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeInvalidSettlementAttributeException;
+import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeInvalidValueException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeNotFoundException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributesException;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
@@ -326,7 +327,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
     @Test
     public void testCreateExcludedTransactionTypesAttributeNormalizesTheStoredValue() {
         TestContext testContext = new TestContext(ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY,
-                "buy_down_fee, BUY_DOWN_FEE_ADJUSTMENT");
+                "BUY_DOWN_FEE , BUY_DOWN_FEE_ADJUSTMENT");
         ArgumentCaptor<ExternalAssetOwnerLoanProductAttributes> loanProductAttributeArgumentCaptor = ArgumentCaptor
                 .forClass(ExternalAssetOwnerLoanProductAttributes.class);
 
@@ -376,10 +377,27 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "BUY_DOWN_FEE,NOT_A_TYPE", ",", "BUY_DOWN_FEE,", "BUY_DOWN_FEE,BUY_DOWN_FEE" })
+    @ValueSource(strings = { "BUY_DOWN_FEE,NOT_A_TYPE", ",", "BUY_DOWN_FEE,", "BUY_DOWN_FEE,BUY_DOWN_FEE", "buy_down_fee" })
     public void testCreateExcludedTransactionTypesAttributeWithInvalidValuePersistsNothing(String attributeValue) {
         TestContext testContext = new TestContext(ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY,
                 attributeValue);
+
+        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
+
+        ExternalAssetOwnerLoanProductAttributeInvalidValueException thrownException = assertThrows(
+                ExternalAssetOwnerLoanProductAttributeInvalidValueException.class,
+                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService
+                        .createExternalAssetOwnerLoanProductAttribute(command));
+
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0)).saveAndFlush(any());
+        verify(testContext.loanProductRepository, times(0)).existsById(testContext.loanProductId);
+        Assertions.assertEquals("error.msg.externalAssetOwnerLoanProductAttribute.invalidAttributeValue",
+                thrownException.getGlobalisationMessageCode());
+    }
+
+    @Test
+    public void testCreateSettlementModelAttributeWithLowerCaseValueIsRejected() {
+        TestContext testContext = new TestContext("SETTLEMENT_MODEL", "delayed_settlement");
 
         final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
 
@@ -388,7 +406,6 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
                         .createExternalAssetOwnerLoanProductAttribute(command));
 
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0)).saveAndFlush(any());
-        verify(testContext.loanProductRepository, times(0)).existsById(testContext.loanProductId);
     }
 
     @Test

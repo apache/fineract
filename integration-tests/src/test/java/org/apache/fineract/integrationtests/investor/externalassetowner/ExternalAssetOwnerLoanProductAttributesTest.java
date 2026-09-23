@@ -59,10 +59,10 @@ public class ExternalAssetOwnerLoanProductAttributesTest extends FeignLoanTestBa
         assertEquals(EXCLUDED_TRANSACTION_TYPES, created.getAttributeKey());
         assertEquals(BUY_DOWN_FEE_TYPES, created.getAttributeValue());
 
-        // update, with loose casing and padding that must be normalised
+        // update, with padding around the separator that must be normalised
         final Long attributeId = created.getAttributeId();
         externalAssetOwnerHelper.updateLoanProductAttribute(loanProductId, attributeId, EXCLUDED_TRANSACTION_TYPES,
-                "buy_down_fee, BUY_DOWN_FEE_AMORTIZATION");
+                "BUY_DOWN_FEE , BUY_DOWN_FEE_AMORTIZATION");
 
         final ExternalTransferLoanProductAttributesData updated = retrieveSingleAttribute(loanProductId, EXCLUDED_TRANSACTION_TYPES);
         assertEquals(attributeId, updated.getAttributeId());
@@ -107,7 +107,7 @@ public class ExternalAssetOwnerLoanProductAttributesTest extends FeignLoanTestBa
 
         final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> externalAssetOwnerHelper
                 .createLoanProductAttribute(loanProductId, EXCLUDED_TRANSACTION_TYPES, "BUY_DOWN_FEE,NOT_A_TYPE"));
-        assertTrue(exception.getMessage().contains("error.msg.externalAssetOwnerLoanProductAttribute.invalidSettlementAttribute"));
+        assertTrue(exception.getMessage().contains("error.msg.externalAssetOwnerLoanProductAttribute.invalidAttributeValue"));
 
         final PageExternalTransferLoanProductAttributesData attributes = externalAssetOwnerHelper
                 .retrieveLoanProductAttributes(loanProductId, EXCLUDED_TRANSACTION_TYPES);

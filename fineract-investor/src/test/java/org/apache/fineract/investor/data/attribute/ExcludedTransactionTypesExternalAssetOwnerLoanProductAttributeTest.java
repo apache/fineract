@@ -70,7 +70,8 @@ public class ExcludedTransactionTypesExternalAssetOwnerLoanProductAttributeTest 
                 Arguments.of("the buy down fee family", //
                         "BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT,BUY_DOWN_FEE_AMORTIZATION,BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT", //
                         "BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT,BUY_DOWN_FEE_AMORTIZATION,BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT"), //
-                Arguments.of("mixed case and padding", "buy_down_fee, BUY_DOWN_FEE_ADJUSTMENT", "BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT"), //
+                Arguments.of("padding around the separator", "BUY_DOWN_FEE , BUY_DOWN_FEE_ADJUSTMENT",
+                        "BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT"), //
                 Arguments.of("surrounding whitespace", "  BUY_DOWN_FEE  ", "BUY_DOWN_FEE"), //
                 Arguments.of("order is preserved", "REPAYMENT,ACCRUAL", "REPAYMENT,ACCRUAL"));
     }
@@ -78,7 +79,8 @@ public class ExcludedTransactionTypesExternalAssetOwnerLoanProductAttributeTest 
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = { " ", ",", "BUY_DOWN_FEE,", ",BUY_DOWN_FEE", "BUY_DOWN_FEE,,ACCRUAL", "BUY_DOWN_FEE,BUY_DOWN_FEE",
-            "buy_down_fee,BUY_DOWN_FEE", "BUY_DOWN_FEE,NOT_A_TYPE", "NOT_A_TYPE", "INVALID", "BUY_DOWN_FEE;ACCRUAL" })
+            "buy_down_fee", "Buy_Down_Fee", "BUY_DOWN_FEE,buy_down_fee_adjustment", "BUY_DOWN_FEE,NOT_A_TYPE", "NOT_A_TYPE", "INVALID",
+            "BUY_DOWN_FEE;ACCRUAL" })
     public void testInvalidValuesAreRejected(String attributeValue) {
         assertFalse(underTest.validate(attributeValue));
     }

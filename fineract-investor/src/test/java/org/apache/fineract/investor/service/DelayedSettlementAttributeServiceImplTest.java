@@ -45,7 +45,11 @@ public class DelayedSettlementAttributeServiceImplTest {
         ExternalTransferLoanProductAttributesData disabledAttributesData = new ExternalTransferLoanProductAttributesData();
         disabledAttributesData.setAttributeValue(DEFAULT_SETTLEMENT.getAttributeValue());
 
+        ExternalTransferLoanProductAttributesData lowerCaseEnabledAttributesData = new ExternalTransferLoanProductAttributesData();
+        lowerCaseEnabledAttributesData.setAttributeValue("delayed_settlement");
+
         return Stream.of(Arguments.of(new Page(List.of(enabledAttributesData), 1), true),
+                Arguments.of(new Page(List.of(lowerCaseEnabledAttributesData), 1), true),
                 Arguments.of(new Page(List.of(disabledAttributesData), 1), false), Arguments.of(new Page(List.of(), 0), false));
     }
 
