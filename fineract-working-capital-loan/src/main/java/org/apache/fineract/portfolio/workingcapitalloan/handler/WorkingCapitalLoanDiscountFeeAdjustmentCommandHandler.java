@@ -36,8 +36,9 @@ public class WorkingCapitalLoanDiscountFeeAdjustmentCommandHandler implements Ne
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return Optional.ofNullable(command.getLoanId())
-                .map(loanId -> writePlatformService.makeDiscountFeeAdjustmentForDiscountFee(loanId, command.entityId(), command))
-                .orElseGet(() -> writePlatformService.makeDiscountFeeAdjustment(command.entityId(), command));
+        final Long loanId = command.entityId();
+        return Optional.ofNullable(command.subentityId())
+                .map(transactionId -> writePlatformService.makeDiscountFeeAdjustmentForDiscountFee(loanId, transactionId, command))
+                .orElseGet(() -> writePlatformService.makeDiscountFeeAdjustment(loanId, command));
     }
 }

@@ -102,10 +102,13 @@ Feature: Working Capital Batch API
     Then Admin checks that all steps result 200OK
     When Batch API adds discount fee adjustment with "5" amount referencing the discount fee external-id in relatedResourceId on the working capital loan
     Then Verify that WCL step 1 throws an error with error code 400 and message "relatedResourceId.not.a.number"
+    When Batch API adds discount fee adjustment with "5" amount referencing the discount fee external-id in relatedExternalResourceId on the working capital loan
+    Then Admin checks that all steps result 200OK
     And Working Capital Loan has transactions:
-      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
+      | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement            | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee            | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee Adjustment | 5.0               | 5.0              | 0.0               | 0.0                   | false    |
 
   @TestRailId:C102522
   Scenario: Verify Batch API - discount fee on a charged-off Working Capital loan is rejected

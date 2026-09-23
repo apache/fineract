@@ -867,7 +867,8 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder discountFeeWorkingCapitalLoanTransaction(final Long loanId, final Long transactionId) {
         this.actionName = ACTION_DISCOUNTFEE;
         this.entityName = ENTITY_WORKINGCAPITALLOAN;
-        this.entityId = transactionId;
+        this.entityId = loanId;
+        this.subentityId = transactionId;
         this.loanId = loanId;
         this.href = "/working-capital-loans/" + loanId + "/transactions/" + transactionId + "?command=discountFee";
         return this;
@@ -876,7 +877,8 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder discountFeeAdjustmentWorkingCapitalLoanTransaction(final Long loanId, final Long transactionId) {
         this.actionName = ACTION_DISCOUNTFEEADJUSTMENT;
         this.entityName = ENTITY_WORKINGCAPITALLOAN;
-        this.entityId = transactionId;
+        this.entityId = loanId;
+        this.subentityId = transactionId;
         this.loanId = loanId;
         this.href = "/working-capital-loans/" + loanId + "/transactions/" + transactionId + "?command=discountFeeAdjustment";
         return this;

@@ -143,6 +143,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     private static final String WC_LAST_TRANSACTION_DATE = "wcLastTransactionDate";
     private static final String WC_LAST_TRANSACTION_AMOUNT = "wcLastTransactionAmount";
     private static final String WC_STORED_DISBURSEMENT_TRANSACTION_ID = "wcStoredDisbursementTransactionId";
+    private static final String WC_STORED_DISBURSEMENT_TRANSACTION_EXTERNAL_ID = "wcStoredDisbursementTransactionExternalId";
     private static final long NON_EXISTENT_TRANSACTION_ID = 999_999_999L;
     private static final String NON_EXISTENT_TRANSACTION_EXTERNAL_ID = "NonExistentTransactionExtId";
 
@@ -2371,6 +2372,113 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 request.getTransactionAmount());
     }
 
+    @When("Admin adds Discount fee with {string} amount by loan external-id and the disbursement external resource id on Working Capital loan account")
+    public void addDiscountFeeByLoanExternalIdAndDisbursementExternalResourceId(final String discountAmount) {
+        final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
+        Assertions.assertNotNull(lastDisbursementResponse);
+        final String loanExternalId = retrieveLoanExternalId(getCreatedLoanId());
+
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().relatedExternalResourceId(lastDisbursementResponse.getResourceExternalId())
+                .transactionAmount(new BigDecimal(discountAmount));
+
+        final PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionByExternalId(loanExternalId, "discountFee", request));
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_DISCOUNT_FEE_RESPONSE, response);
+    }
+
+    @When("Admin adds Discount fee adjustment with {string} amount by loan external-id and the discount fee external resource id on Working Capital loan account")
+    public void addDiscountFeeAdjustmentByLoanExternalIdAndDiscountFeeExternalResourceId(final String adjustmentAmount) {
+        final String loanExternalId = retrieveLoanExternalId(getCreatedLoanId());
+        final String discountFeeExternalId = latestActiveTransactionOfType(TransactionType.DISCOUNT_FEE).getExternalId();
+
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().relatedExternalResourceId(discountFeeExternalId)
+                .transactionAmount(new BigDecimal(adjustmentAmount));
+
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionByExternalId(loanExternalId,
+                "discountFeeAdjustment", request));
+    }
+
+    @Then("Adding Discount fee with {string} amount by both the disbursement id and its external resource id on Working Capital loan account results an error with the following data:")
+    public void addingDiscountFeeByBothRelatedResourceReferencesResultsAnError(final String discountAmount, final DataTable table) {
+        final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
+        Assertions.assertNotNull(lastDisbursementResponse);
+
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().relatedResourceId(lastDisbursementResponse.getResourceId())
+                .relatedExternalResourceId(lastDisbursementResponse.getResourceExternalId())
+                .transactionAmount(new BigDecimal(discountAmount));
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFee", request));
+        verifyErrorResponse(exception, table);
+    }
+
+    @Then("Adding Discount fee with {string} amount by an unknown external resource id on Working Capital loan account results an error with the following data:")
+    public void addingDiscountFeeByUnknownExternalResourceIdResultsAnError(final String discountAmount, final DataTable table) {
+        addingDiscountFeeByExternalResourceIdResultsAnError(discountAmount, NON_EXISTENT_TRANSACTION_EXTERNAL_ID, table);
+    }
+
+    @Then("Adding Discount fee with {string} amount by the stored disbursement external resource id on Working Capital loan account results an error with the following data:")
+    public void addingDiscountFeeByStoredDisbursementExternalResourceIdResultsAnError(final String discountAmount, final DataTable table) {
+        final String storedDisbursementExternalId = testContext().get(WC_STORED_DISBURSEMENT_TRANSACTION_EXTERNAL_ID);
+        Assertions.assertNotNull(storedDisbursementExternalId, "A disbursement transaction external-id must be stored by a prior step");
+        addingDiscountFeeByExternalResourceIdResultsAnError(discountAmount, storedDisbursementExternalId, table);
+    }
+
+    private void addingDiscountFeeByExternalResourceIdResultsAnError(final String discountAmount, final String relatedExternalResourceId,
+            final DataTable table) {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().relatedExternalResourceId(relatedExternalResourceId)
+                .transactionAmount(new BigDecimal(discountAmount));
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFee", request));
+        verifyErrorResponse(exception, table);
+    }
+
+    @Then("Adding Discount fee with {string} amount by the last repayment external resource id on Working Capital loan account results an error with the following data:")
+    public void addingDiscountFeeByLastRepaymentExternalResourceIdResultsAnError(final String discountAmount, final DataTable table) {
+        final String repaymentExternalId = latestActiveTransactionOfType(TransactionType.REPAYMENT).getExternalId();
+        addingDiscountFeeByExternalResourceIdResultsAnError(discountAmount, repaymentExternalId, table);
+    }
+
+    @Then("Adding Discount fee adjustment with {string} amount by the disbursement external resource id on Working Capital loan account results an error with the following data:")
+    public void addingDiscountFeeAdjustmentByDisbursementExternalResourceIdResultsAnError(final String adjustmentAmount,
+            final DataTable table) {
+        final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
+        Assertions.assertNotNull(lastDisbursementResponse);
+
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().relatedExternalResourceId(lastDisbursementResponse.getResourceExternalId())
+                .transactionAmount(new BigDecimal(adjustmentAmount));
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFeeAdjustment", request));
+        verifyErrorResponse(exception, table);
+    }
+
+    @Then("Adding Discount fee with {string} amount without a related resource on Working Capital loan account results an error with the following data:")
+    public void addingDiscountFeeWithoutRelatedResourceResultsAnError(final String discountAmount, final DataTable table) {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionAmount(new BigDecimal(discountAmount));
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFee", request));
+        verifyErrorResponse(exception, table);
+    }
+
+    @Then("Adding Discount fee adjustment with {string} amount without a related resource on Working Capital loan account results an error with the following data:")
+    public void addingDiscountFeeAdjustmentWithoutRelatedResourceResultsAnError(final String adjustmentAmount, final DataTable table) {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionAmount(new BigDecimal(adjustmentAmount));
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFeeAdjustment", request));
+        verifyErrorResponse(exception, table);
+    }
+
     @Then("Adding Discount fee with {string} amount reusing the previously shared externalId on Working Capital loan account for last disbursement results an error with the following data:")
     public void addDiscountFeeReusingSharedExternalIdResultsAnError(final String discountAmount, final DataTable table) {
         final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
@@ -2459,6 +2567,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
         Assertions.assertNotNull(lastDisbursementResponse, "A disbursement must precede storing its transaction id");
         testContext().set(WC_STORED_DISBURSEMENT_TRANSACTION_ID, lastDisbursementResponse.getResourceId());
+        testContext().set(WC_STORED_DISBURSEMENT_TRANSACTION_EXTERNAL_ID, lastDisbursementResponse.getResourceExternalId());
     }
 
     @Then("Adding Discount fee with {string} amount referencing the stored disbursement transaction id on Working Capital loan account results an error with the following data:")
@@ -2579,8 +2688,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         verifyErrorResponse(exception, table);
     }
 
-    private static final String WC_STORED_DISBURSEMENT_TRANSACTION_EXTERNAL_ID = "wcStoredDisbursementTransactionExternalId";
-
     @When("Admin adds Discount fee with {string} amount by loan id and disbursement id on Working Capital loan account")
     public void addDiscountFeeByLoanIdAndDisbursementId(final String discountAmount) {
         final Long loanId = getCreatedLoanId();
@@ -2611,14 +2718,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                         .executeWorkingCapitalLoanTransactionCommandByLoanExternalIdTransactionId(loanExternalId,
                                 lastDisbursementResponse.getResourceId(), "discountFee", discountFeeRequest(discountAmount))),
                 discountAmount);
-    }
-
-    @When("Admin stores the disbursement transaction id and external-id of the Working Capital loan")
-    public void storeDisbursementTransactionIdAndExternalId() {
-        final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
-        Assertions.assertNotNull(lastDisbursementResponse);
-        testContext().set(WC_STORED_DISBURSEMENT_TRANSACTION_ID, lastDisbursementResponse.getResourceId());
-        testContext().set(WC_STORED_DISBURSEMENT_TRANSACTION_EXTERNAL_ID, lastDisbursementResponse.getResourceExternalId());
     }
 
     @Then("Adding Discount fee with {string} amount naming the last repayment transaction in the path on Working Capital loan account results an error with the following data:")
@@ -2852,12 +2951,12 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("Undo discount fee adjustment with a non-existent transaction id on Working Capital loan account failed as not found with status code {int}")
     public void undoDiscountFeeAdjustmentNotFoundFailure(final int expectedStatus) {
         final Long loanId = getCreatedLoanId();
-        ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest();
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest();
 
-        final String errorMessage = ErrorMessageHelper.discountAdjustmentUndoTransactionNotFoundFailure();
+        final String errorMessage = ErrorMessageHelper.workingCapitalLoanTransactionNotFoundFailure(NON_EXISTENT_TRANSACTION_ID, loanId);
 
         final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
-                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, 999999999L, "undo", request));
+                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, NON_EXISTENT_TRANSACTION_ID, "undo", request));
 
         assertThat(exception.getStatus()).as(errorMessage).isEqualTo(expectedStatus);
 

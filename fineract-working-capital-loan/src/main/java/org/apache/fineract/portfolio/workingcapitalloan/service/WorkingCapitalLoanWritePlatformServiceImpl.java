@@ -523,21 +523,37 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     public CommandProcessingResult makeDiscountFee(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
         validator.validateRelatedResourceIdIsPositiveNumber(command.parsedJson());
-        final Long relatedDisbursementTransactionId = fromApiJsonHelper
-                .extractLongNamed(WorkingCapitalLoanConstants.relatedResourceIdParamName, command.parsedJson());
-        return processDiscountFee(loan, relatedDisbursementTransactionId, command, WorkingCapitalLoanConstants.relatedResourceIdParamName);
+        validator.validateRelatedExternalResourceId(command.parsedJson());
+        return processDiscountFee(loan, relatedTransactionFromBody(command), command);
     }
 
     @Override
     public CommandProcessingResult makeDiscountFeeForDisbursement(final Long loanId, final Long disbursementTransactionId,
             final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
-        validator.validateRelatedResourceIdIsNotInBody(command.parsedJson());
-        return processDiscountFee(loan, disbursementTransactionId, command, WorkingCapitalLoanConstants.transactionIdParamName);
+        validator.validateRelatedResourceIsNotInBody(command.parsedJson());
+        return processDiscountFee(loan,
+                new TransactionReference(disbursementTransactionId, ExternalId.empty(), WorkingCapitalLoanConstants.transactionIdParamName),
+                command);
     }
 
-    private CommandProcessingResult processDiscountFee(final WorkingCapitalLoan loan, final Long relatedDisbursementTransactionId,
-            final JsonCommand command, final String relatedTransactionParamName) {
+    private TransactionReference relatedTransactionFromBody(final JsonCommand command) {
+        final ExternalId externalId = ExternalIdFactory.produce(
+                fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.relatedExternalResourceIdParamName, command.parsedJson()));
+        final Long transactionId = fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanConstants.relatedResourceIdParamName,
+                command.parsedJson());
+        final String paramName = externalId.isEmpty() ? WorkingCapitalLoanConstants.relatedResourceIdParamName
+                : WorkingCapitalLoanConstants.relatedExternalResourceIdParamName;
+        return new TransactionReference(transactionId, externalId, paramName);
+    }
+
+    private Optional<WorkingCapitalLoanTransaction> findRelatedTransaction(final TransactionReference reference, final Long loanId) {
+        return reference.externalId().isEmpty() ? transactionRepository.findByIdAndWcLoan_Id(reference.transactionId(), loanId)
+                : transactionRepository.findByWcLoan_IdAndExternalId(loanId, reference.externalId());
+    }
+
+    private CommandProcessingResult processDiscountFee(final WorkingCapitalLoan loan, final TransactionReference reference,
+            final JsonCommand command) {
         final Long loanId = loan.getId();
 
         BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
@@ -559,18 +575,17 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                     "Add discount is allowed only for disbursed (active) loans", "loanStatus");
         }
 
-        if (relatedDisbursementTransactionId == null) {
+        if (reference.isMissing()) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.related.resource.id.required",
-                    "Related disbursement transaction ID is required for discount fee transaction", relatedTransactionParamName);
+                    "Related disbursement transaction ID or external ID is required for discount fee transaction", reference.paramName());
         }
 
-        final WorkingCapitalLoanTransaction relatedDisbursementTransaction = transactionRepository
-                .findByIdAndWcLoan_Id(relatedDisbursementTransactionId, loanId)
+        final WorkingCapitalLoanTransaction relatedDisbursementTransaction = findRelatedTransaction(reference, loanId)
                 .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.disbursement.transaction.not.found",
-                        "Disbursement transaction not found", relatedTransactionParamName));
+                        "Disbursement transaction not found", reference.paramName()));
         if (!relatedDisbursementTransaction.getTypeOf().isDisbursement() || relatedDisbursementTransaction.isReversed()) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.disbursement.transaction.invalid",
-                    "Related transaction must be an active disbursement transaction of the same loan", relatedTransactionParamName);
+                    "Related transaction must be an active disbursement transaction of the same loan", reference.paramName());
         }
 
         // Loan-scoped, not disbursement-scoped: the discount, the amortization schedule and the unrealized income are
@@ -599,7 +614,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         handleNote(loan, command, changes);
 
         changes.put(WorkingCapitalLoanConstants.transactionAmountParamName, amount);
-        changes.put(WorkingCapitalLoanConstants.relatedResourceIdParamName, relatedDisbursementTransactionId);
+        changes.put(WorkingCapitalLoanConstants.relatedResourceIdParamName, relatedDisbursementTransaction.getId());
         changes.put(WorkingCapitalLoanConstants.transactionDateParamName, relatedDisbursementTransaction.getTransactionDate());
         changes.put(WorkingCapitalLoanConstants.transactionTypeParamName, LoanTransactionType.DISCOUNT_FEE);
         changes.put(WorkingCapitalLoanConstants.externalIdParameterName, txnExternalId);
@@ -624,34 +639,33 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     public CommandProcessingResult makeDiscountFeeAdjustment(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
         validator.validateRelatedResourceIdIsPositiveNumber(command.parsedJson());
-        final Long relatedDiscountTransactionId = fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanConstants.relatedResourceIdParamName,
-                command.parsedJson());
-        return processDiscountFeeAdjustment(loan, relatedDiscountTransactionId, command,
-                WorkingCapitalLoanConstants.relatedResourceIdParamName);
+        validator.validateRelatedExternalResourceId(command.parsedJson());
+        return processDiscountFeeAdjustment(loan, relatedTransactionFromBody(command), command);
     }
 
     @Override
     public CommandProcessingResult makeDiscountFeeAdjustmentForDiscountFee(final Long loanId, final Long discountFeeTransactionId,
             final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
-        validator.validateRelatedResourceIdIsNotInBody(command.parsedJson());
-        return processDiscountFeeAdjustment(loan, discountFeeTransactionId, command, WorkingCapitalLoanConstants.transactionIdParamName);
+        validator.validateRelatedResourceIsNotInBody(command.parsedJson());
+        return processDiscountFeeAdjustment(loan,
+                new TransactionReference(discountFeeTransactionId, ExternalId.empty(), WorkingCapitalLoanConstants.transactionIdParamName),
+                command);
     }
 
-    private CommandProcessingResult processDiscountFeeAdjustment(final WorkingCapitalLoan loan, final Long relatedDiscountTransactionId,
-            final JsonCommand command, final String relatedTransactionParamName) {
+    private CommandProcessingResult processDiscountFeeAdjustment(final WorkingCapitalLoan loan, final TransactionReference reference,
+            final JsonCommand command) {
         final Long loanId = loan.getId();
-        if (relatedDiscountTransactionId == null) {
+        if (reference.isMissing()) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.related.resource.id.required",
-                    "Related discount transaction ID is required for discount fee adjustment", relatedTransactionParamName);
+                    "Related discount transaction ID or external ID is required for discount fee adjustment", reference.paramName());
         }
-        final WorkingCapitalLoanTransaction relatedDiscountTransaction = transactionRepository
-                .findByIdAndWcLoan_Id(relatedDiscountTransactionId, loanId)
+        final WorkingCapitalLoanTransaction relatedDiscountTransaction = findRelatedTransaction(reference, loanId)
                 .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.discount.transaction.not.found",
-                        "Discount transaction not found", relatedTransactionParamName));
+                        "Discount transaction not found", reference.paramName()));
         if (!relatedDiscountTransaction.getTypeOf().isDiscountFee() || relatedDiscountTransaction.isReversed()) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.discount.transaction.invalid",
-                    "Related transaction must be an active discount fee transaction", relatedTransactionParamName);
+                    "Related transaction must be an active discount fee transaction", reference.paramName());
         }
         final BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
                 command.parsedJson(), new HashSet<>());
@@ -736,7 +750,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
         createNote(noteText, loan);
         changes.put(WorkingCapitalLoanConstants.transactionAmountParamName, amount);
-        changes.put(WorkingCapitalLoanConstants.relatedResourceIdParamName, relatedDiscountTransactionId);
+        changes.put(WorkingCapitalLoanConstants.relatedResourceIdParamName, relatedDiscountTransaction.getId());
         changes.put(WorkingCapitalLoanConstants.transactionDateParamName, transactionDate);
         changes.put(WorkingCapitalLoanConstants.transactionTypeParamName, LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT);
         changes.put(WorkingCapitalLoanConstants.classificationIdParamName, classificationId);

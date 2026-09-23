@@ -65,7 +65,7 @@ A `DISCOUNT_FEE_ADJUSTMENT` transaction reduces the loan-level discount that was
 === Applicability
 
 * Loan must be ACTIVE.
-* The related Discount Fee transaction (`relatedResourceId`, or the transaction in the path) must be an active, non-reversed `DISCOUNT_FEE` transaction.
+* The related Discount Fee transaction (`relatedResourceId`, `relatedExternalResourceId`, or the transaction in the path) must be an active, non-reversed `DISCOUNT_FEE` transaction.
 * Multiple adjustments are allowed against the same Discount Fee transaction until the remaining adjustable amount reaches zero.
 
 === Transaction Behavior
@@ -103,7 +103,7 @@ On Discount Fee Adjustment:
 | Adjustment is allowed only for ACTIVE loans
 
 | Parent transaction
-| `relatedResourceId`, or the transaction in the path, must reference a non-reversed Discount Fee transaction
+| `relatedResourceId`, `relatedExternalResourceId`, or the transaction in the path, must reference a non-reversed Discount Fee transaction
 |===
 
 === Allocation
@@ -179,11 +179,12 @@ On the forms that name the disbursement in the path, the same body is sent witho
 * `transactionAmount` is optional. If omitted, the service defaults to the loan's current discount.
 * `classificationId` is optional and must reference `working_capital_loan_discount_fee_classification` when provided.
 * The related disbursement is named differently per endpoint form:
-** On `/transactions?command=discountFee`, `relatedResourceId` is mandatory and must be the disbursement transaction ID.
-** `relatedResourceId` carries a transaction ID only. A transaction external id, or any other value that is not a positive whole number, is rejected with 400 (`validation.msg.WORKINGCAPITALLOAN.relatedResourceId.not.a.number`).
-** On `/transactions/{transactionId}` and `/transactions/external-id/{transactionExternalId}` the path names the disbursement, and `relatedResourceId` is not accepted in the body.
-** An unknown `transactionExternalId`, or one that belongs to another loan, returns 404; a `transactionId` that belongs to another loan returns 400.
-* Only `/transactions?command=discountFee` is routed by the Batch API. The forms that name the transaction in the path are available over the regular API only.
+** On `/transactions?command=discountFee`, the disbursement is named in the body: `relatedResourceId` with the transaction ID, or `relatedExternalResourceId` with the transaction external id. Exactly one of the two is mandatory; sending both is rejected with 400 (`validation.msg.WORKINGCAPITALLOAN.relatedExternalResourceId.cannot.also.be.provided.when.relatedResourceId.is.populated`).
+** `relatedResourceId` is always read as the internal transaction ID, never as an external id. A value that is not a whole number (for example a UUID) is rejected with 400 (`validation.msg.WORKINGCAPITALLOAN.relatedResourceId.not.a.number`), zero or a negative number with 400 (`validation.msg.WORKINGCAPITALLOAN.relatedResourceId.not.greater.than.zero`).
+** `relatedExternalResourceId` is resolved within the loan and behaves exactly like `relatedResourceId` from there on: an external id that is unknown, or that belongs to another loan, is rejected with 400 (`validation.msg.wc.loan.disbursement.transaction.not.found`), and one that names a transaction that is not an active disbursement with 400 (`validation.msg.wc.loan.disbursement.transaction.invalid`).
+** On `/transactions/{transactionId}` and `/transactions/external-id/{transactionExternalId}` the path names the disbursement, and neither `relatedResourceId` nor `relatedExternalResourceId` is accepted in the body.
+** A `transactionId` or `transactionExternalId` that names no transaction of the loan, including one that belongs to another loan, returns 404 (`error.msg.wc.loan.transaction.not.found`).
+* Only `/transactions?command=discountFee` is routed by the Batch API, so over Batch the disbursement is named with `relatedResourceId` or `relatedExternalResourceId`. The forms that name the transaction in the path are available over the regular API only.
 
 === Create Discount Fee Adjustment
 
@@ -229,11 +230,12 @@ On the forms that name the Discount Fee transaction in the path, the same body i
 * `transactionAmount` is mandatory and capped by the remaining adjustable discount.
 * `classificationId` is optional and must reference `working_capital_loan_discount_fee_classification` when provided.
 * The related Discount Fee transaction is named differently per endpoint form:
-** On `/transactions?command=discountFeeAdjustment`, `relatedResourceId` is mandatory and must be the Discount Fee transaction ID.
-** `relatedResourceId` carries a transaction ID only. A transaction external id, or any other value that is not a positive whole number, is rejected with 400 (`validation.msg.WORKINGCAPITALLOAN.relatedResourceId.not.a.number`).
-** On `/transactions/{transactionId}` and `/transactions/external-id/{transactionExternalId}` the path names the Discount Fee transaction, and `relatedResourceId` is not accepted in the body.
-** An unknown `transactionExternalId`, or one that belongs to another loan, returns 404; a `transactionId` that belongs to another loan returns 400.
-* Only `/transactions?command=discountFeeAdjustment` is routed by the Batch API. The forms that name the transaction in the path are available over the regular API only.
+** On `/transactions?command=discountFeeAdjustment`, the Discount Fee transaction is named in the body: `relatedResourceId` with the transaction ID, or `relatedExternalResourceId` with the transaction external id. Exactly one of the two is mandatory; sending both is rejected with 400 (`validation.msg.WORKINGCAPITALLOAN.relatedExternalResourceId.cannot.also.be.provided.when.relatedResourceId.is.populated`).
+** `relatedResourceId` is always read as the internal transaction ID, never as an external id. A value that is not a whole number (for example a UUID) is rejected with 400 (`validation.msg.WORKINGCAPITALLOAN.relatedResourceId.not.a.number`), zero or a negative number with 400 (`validation.msg.WORKINGCAPITALLOAN.relatedResourceId.not.greater.than.zero`).
+** `relatedExternalResourceId` is resolved within the loan and behaves exactly like `relatedResourceId` from there on: an external id that is unknown, or that belongs to another loan, is rejected with 400 (`validation.msg.wc.loan.discount.transaction.not.found`), and one that names a transaction that is not an active Discount Fee with 400 (`validation.msg.wc.loan.discount.transaction.invalid`).
+** On `/transactions/{transactionId}` and `/transactions/external-id/{transactionExternalId}` the path names the Discount Fee transaction, and neither `relatedResourceId` nor `relatedExternalResourceId` is accepted in the body.
+** A `transactionId` or `transactionExternalId` that names no transaction of the loan, including one that belongs to another loan, returns 404 (`error.msg.wc.loan.transaction.not.found`).
+* Only `/transactions?command=discountFeeAdjustment` is routed by the Batch API, so over Batch the Discount Fee transaction is named with `relatedResourceId` or `relatedExternalResourceId`. The forms that name the transaction in the path are available over the regular API only.
 
 == Summary
 

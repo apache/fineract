@@ -396,11 +396,12 @@ public class WorkingCapitalLoanTransactionsApiResource {
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
-    private Long resolveTransactionId(Long loanId, Long transactionId, String transactionExternalId) {
+    private Long resolveTransactionId(final Long loanId, final Long transactionId, final String transactionExternalId) {
         if (transactionId != null) {
-            return transactionId;
+            return transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId).map(WorkingCapitalLoanTransaction::getId)
+                    .orElseThrow(() -> new WorkingCapitalLoanTransactionNotFoundException(transactionId, loanId));
         }
-        ExternalId externalId = ExternalIdFactory.produce(transactionExternalId);
+        final ExternalId externalId = ExternalIdFactory.produce(transactionExternalId);
         return transactionRepository.findByWcLoan_IdAndExternalId(loanId, externalId).map(WorkingCapitalLoanTransaction::getId)
                 .orElseThrow(() -> new WorkingCapitalLoanTransactionNotFoundException(externalId));
     }

@@ -1430,8 +1430,8 @@ Feature: Working Capital Discount
       | HTTP response code | Error message                           |
       | 404                | error.msg.wc.loan.transaction.not.found |
     Then Adding Discount fee adjustment by a non-existent transaction id on Working Capital loan account results an error with the following data:
-      | HTTP response code | Error message                                         |
-      | 400                | validation.msg.wc.loan.discount.transaction.not.found |
+      | HTTP response code | Error message                           |
+      | 404                | error.msg.wc.loan.transaction.not.found |
 
   @TestRailId:C106760
   Scenario: Discount fee added by the disbursement named in the path on every remaining endpoint form is recorded and adjustable like a body-referenced discount fee
@@ -1488,7 +1488,7 @@ Feature: Working Capital Discount
       | 01 January 2026 | Discount Fee | 7.0               | 7.0              | 0.0               | 0.0                   | false    |
     # a second discount fee on the same loan is refused on the path form exactly as on the body form
     Then Adding Discount fee with "1" amount naming the disbursement in the path again on Working Capital loan account results an error with the following data:
-      | HTTP response code | Error message                                             |
+      | HTTP response code | Error message                                                   |
       | 400                | validation.msg.wc.loan.discount.already.set.before.disbursement |
 
   @TestRailId:C106761
@@ -1500,7 +1500,7 @@ Feature: Working Capital Discount
       | WCLP        | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 |          |
     Then Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
     Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
-    And Admin stores the disbursement transaction id and external-id of the Working Capital loan
+    And Admin stores the last Working Capital loan disbursement transaction id for later reference
     # second loan, the stored transaction ids belong to the first one
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -1510,21 +1510,61 @@ Feature: Working Capital Discount
     Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
     And Customer makes repayment on "01 January 2026" with 10 transaction amount on Working Capital loan
     Then Adding Discount fee with "1" amount naming the last repayment transaction in the path on Working Capital loan account results an error with the following data:
-      | HTTP response code | Error message                                       |
+      | HTTP response code | Error message                                           |
       | 400                | validation.msg.wc.loan.disbursement.transaction.invalid |
     Then Adding Discount fee adjustment with "1" amount naming the disbursement transaction in the path on Working Capital loan account results an error with the following data:
-      | HTTP response code | Error message                                   |
+      | HTTP response code | Error message                                       |
       | 400                | validation.msg.wc.loan.discount.transaction.invalid |
     Then Adding Discount fee with "1" amount naming the stored disbursement transaction external-id of another loan in the path on Working Capital loan account results an error with the following data:
       | HTTP response code | Error message                           |
       | 404                | error.msg.wc.loan.transaction.not.found |
     Then Adding Discount fee with "1" amount naming the stored disbursement transaction id of another loan in the path on Working Capital loan account results an error with the following data:
-      | HTTP response code | Error message                                             |
-      | 400                | validation.msg.wc.loan.disbursement.transaction.not.found |
+      | HTTP response code | Error message                           |
+      | 404                | error.msg.wc.loan.transaction.not.found |
     And Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment    | 10.0              | 10.0             | 0.0               | 0.0                   | false    |
+
+  @TestRailId:C106838
+  Scenario: Discount fee and its adjustment added on the loan external-id endpoint with the related transaction named by relatedExternalResourceId in the body
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 |          |
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
+    Then Adding Discount fee with "12" amount by an unknown external resource id on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                                             |
+      | 400                | validation.msg.wc.loan.disbursement.transaction.not.found |
+    Then Adding Discount fee with "12" amount by both the disbursement id and its external resource id on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                                                                         |
+      | 400                | relatedExternalResourceId.cannot.also.be.provided.when.relatedResourceId.is.populated |
+    Then Adding Discount fee with "12" amount without a related resource on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                                                                               |
+      | 400                | Related disbursement transaction ID or external ID is required for discount fee transaction |
+    When Admin adds Discount fee with "12" amount by loan external-id and the disbursement external resource id on Working Capital loan account
+    Then WorkingCapitalLoanDiscountFeeTransactionBusinessEvent is raised with amount "12" on "01 January 2026" date
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
+    Then Adding Discount fee adjustment with "5" amount without a related resource on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                                                                          |
+      | 400                | Related discount transaction ID or external ID is required for discount fee adjustment |
+    Then Adding Discount fee adjustment with "5" amount by the disbursement external resource id on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                                       |
+      | 400                | validation.msg.wc.loan.discount.transaction.invalid |
+    When Admin adds Discount fee adjustment with "5" amount by loan external-id and the discount fee external resource id on Working Capital loan account
+    Then WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent is raised with amount "5" on "01 January 2026" date
+    And Working Capital Loan has transactions:
+      | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement            | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee            | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee Adjustment | 5.0               | 5.0              | 0.0               | 0.0                   | false    |
+    And In Working Capital Loan Transactions all transactions have non-blank external-id
+    And In Working Capital Loan Transactions all transactions carry the loan external-id
 
   @TestRailId:C83041
   Scenario: Discount provided during disbursement without externalId gets an auto-generated externalId
@@ -1670,6 +1710,9 @@ Feature: Working Capital Discount
     Then Adding Discount fee with "1000" amount referencing the last repayment transaction on Working Capital loan account results an error with the following data:
       | HTTP response code | Error message                                           |
       | 400                | validation.msg.wc.loan.disbursement.transaction.invalid |
+    Then Adding Discount fee with "1000" amount by the last repayment external resource id on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                                           |
+      | 400                | validation.msg.wc.loan.disbursement.transaction.invalid |
     And Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -1691,6 +1734,9 @@ Feature: Working Capital Discount
     Then Adding Discount fee with "1000" amount referencing the stored disbursement transaction id on Working Capital loan account results an error with the following data:
       | HTTP response code | Error message                                             |
       | 400                | validation.msg.wc.loan.disbursement.transaction.not.found |
+    Then Adding Discount fee with "1000" amount by the stored disbursement external resource id on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                                             |
+      | 400                | validation.msg.wc.loan.disbursement.transaction.not.found |
     And Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -1708,6 +1754,9 @@ Feature: Working Capital Discount
     And Admin successfully undo Working Capital disbursal
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Adding Discount fee with "1000" amount referencing the stored disbursement transaction id on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                                           |
+      | 400                | validation.msg.wc.loan.disbursement.transaction.invalid |
+    Then Adding Discount fee with "1000" amount by the stored disbursement external resource id on Working Capital loan account results an error with the following data:
       | HTTP response code | Error message                                           |
       | 400                | validation.msg.wc.loan.disbursement.transaction.invalid |
     And Working Capital Loan has transactions:

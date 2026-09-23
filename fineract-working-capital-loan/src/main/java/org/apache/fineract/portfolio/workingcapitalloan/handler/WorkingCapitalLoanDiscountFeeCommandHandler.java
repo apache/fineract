@@ -37,8 +37,9 @@ public class WorkingCapitalLoanDiscountFeeCommandHandler implements NewCommandSo
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return Optional.ofNullable(command.getLoanId())
-                .map(loanId -> writePlatformService.makeDiscountFeeForDisbursement(loanId, command.entityId(), command))
-                .orElseGet(() -> writePlatformService.makeDiscountFee(command.entityId(), command));
+        final Long loanId = command.entityId();
+        return Optional.ofNullable(command.subentityId())
+                .map(transactionId -> writePlatformService.makeDiscountFeeForDisbursement(loanId, transactionId, command))
+                .orElseGet(() -> writePlatformService.makeDiscountFee(loanId, command));
     }
 }

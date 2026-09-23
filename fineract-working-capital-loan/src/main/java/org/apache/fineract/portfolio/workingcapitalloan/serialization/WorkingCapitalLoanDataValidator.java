@@ -109,19 +109,20 @@ public class WorkingCapitalLoanDataValidator {
             WorkingCapitalLoanConstants.transactionDateParamName, WorkingCapitalLoanConstants.transactionAmountParamName,
             WorkingCapitalLoanConstants.classificationIdParamName, WorkingCapitalLoanConstants.noteParamName,
             WorkingCapitalLoanConstants.paymentDetailsParamName, WorkingCapitalLoanConstants.externalIdParameterName));
-    private static final Set<String> DISCOUNT_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(
-            Arrays.asList("locale", "dateFormat", WorkingCapitalLoanConstants.noteParamName,
-                    WorkingCapitalLoanConstants.transactionAmountParamName, WorkingCapitalLoanConstants.classificationIdParamName,
-                    WorkingCapitalLoanConstants.relatedResourceIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
-                    WorkingCapitalLoanConstants.transactionDateParamName, WorkingCapitalLoanConstants.externalIdParameterName));
-    private static final Set<String> DISCOUNT_ADJUSTMENT_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(
-            Arrays.asList("locale", "dateFormat", WorkingCapitalLoanConstants.noteParamName,
-                    WorkingCapitalLoanConstants.transactionAmountParamName, WorkingCapitalLoanConstants.classificationIdParamName,
-                    WorkingCapitalLoanConstants.relatedResourceIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
-                    WorkingCapitalLoanConstants.externalIdParameterName, WorkingCapitalLoanConstants.transactionDateParamName));
+    private static final Set<String> RELATED_RESOURCE_PARAMETERS = Set.of(WorkingCapitalLoanConstants.relatedResourceIdParamName,
+            WorkingCapitalLoanConstants.relatedExternalResourceIdParamName);
+    private static final Set<String> DISCOUNT_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
+            WorkingCapitalLoanConstants.noteParamName, WorkingCapitalLoanConstants.transactionAmountParamName,
+            WorkingCapitalLoanConstants.classificationIdParamName, WorkingCapitalLoanConstants.relatedResourceIdParamName,
+            WorkingCapitalLoanConstants.relatedExternalResourceIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
+            WorkingCapitalLoanConstants.transactionDateParamName, WorkingCapitalLoanConstants.externalIdParameterName));
+    private static final Set<String> DISCOUNT_ADJUSTMENT_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale",
+            "dateFormat", WorkingCapitalLoanConstants.noteParamName, WorkingCapitalLoanConstants.transactionAmountParamName,
+            WorkingCapitalLoanConstants.classificationIdParamName, WorkingCapitalLoanConstants.relatedResourceIdParamName,
+            WorkingCapitalLoanConstants.relatedExternalResourceIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
+            WorkingCapitalLoanConstants.externalIdParameterName, WorkingCapitalLoanConstants.transactionDateParamName));
     private static final Set<String> DISCOUNT_TRANSACTION_IN_PATH_SUPPORTED_PARAMETERS = DISCOUNT_TRANSACTION_SUPPORTED_PARAMETERS.stream()
-            .filter(parameter -> !WorkingCapitalLoanConstants.relatedResourceIdParamName.equals(parameter))
-            .collect(Collectors.toUnmodifiableSet());
+            .filter(parameter -> !RELATED_RESOURCE_PARAMETERS.contains(parameter)).collect(Collectors.toUnmodifiableSet());
     private static final Set<String> CREDIT_BALANCE_REFUND_SUPPORTED_PARAMETERS = new HashSet<>(REPAYMENT_SUPPORTED_PARAMETERS);
     // Incoming write-off parameters follow the progressive-loan shape.
     private static final Set<String> WRITE_OFF_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
@@ -169,7 +170,25 @@ public class WorkingCapitalLoanDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateRelatedResourceIdIsNotInBody(final JsonElement element) {
+    public void validateRelatedExternalResourceId(final JsonElement element) {
+        requireJsonBody(element);
+        final String relatedExternalResourceId = fromApiJsonHelper
+                .extractStringNamed(WorkingCapitalLoanConstants.relatedExternalResourceIdParamName, element);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.relatedExternalResourceIdParamName).value(relatedExternalResourceId)
+                .ignoreIfNull().notExceedingLengthOf(EXTERNAL_ID_MAX_LENGTH);
+        final String relatedResourceId = fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.relatedResourceIdParamName,
+                element);
+        if (relatedExternalResourceId != null && relatedResourceId != null) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.relatedExternalResourceIdParamName)
+                    .value(relatedExternalResourceId).failWithCode("cannot.also.be.provided.when.relatedResourceId.is.populated");
+        }
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateRelatedResourceIsNotInBody(final JsonElement element) {
         requireJsonBody(element);
         fromApiJsonHelper.checkForUnsupportedParameters(element.getAsJsonObject(), DISCOUNT_TRANSACTION_IN_PATH_SUPPORTED_PARAMETERS);
     }
