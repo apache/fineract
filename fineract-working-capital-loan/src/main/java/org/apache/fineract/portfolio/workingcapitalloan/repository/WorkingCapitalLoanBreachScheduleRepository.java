@@ -56,12 +56,4 @@ public interface WorkingCapitalLoanBreachScheduleRepository extends JpaRepositor
               AND s.toDate >= :businessDate""")
     Optional<WorkingCapitalLoanBreachSchedule> findCurrentOpenPeriod(@Param("loanId") Long loanId,
             @Param("businessDate") LocalDate businessDate);
-
-    @Query("""
-            SELECT s FROM WorkingCapitalLoanBreachSchedule s
-            WHERE s.loan.id = :loanId
-              AND s.fromDate > :businessDate
-            ORDER BY s.periodNumber ASC""")
-    List<WorkingCapitalLoanBreachSchedule> findFuturePeriodsOrderByPeriodNumberAsc(@Param("loanId") Long loanId,
-            @Param("businessDate") LocalDate businessDate);
 }
