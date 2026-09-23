@@ -39,6 +39,8 @@ public class SavingsAccountRecalculateBalanceTest extends FeignSavingsTestBase {
 
     private static final BigDecimal TRANSACTION_AMOUNT = new BigDecimal("100");
     private static final BigDecimal HOLD_AMOUNT = new BigDecimal("50");
+    private static final BigDecimal SECOND_HOLD_AMOUNT = new BigDecimal("20");
+    private static final BigDecimal WITHDRAWAL_AMOUNT = new BigDecimal("30");
     private static final BigDecimal OVERDRAFT_LIMIT = new BigDecimal("500.0");
     private static final String HOLD_REASON = "unUsualActivity";
     private static final Double NO_INTEREST = 0.0;
@@ -91,28 +93,83 @@ public class SavingsAccountRecalculateBalanceTest extends FeignSavingsTestBase {
         final Long holdTransactionId = holdAmount(savingsId);
         balance = balance.subtract(HOLD_AMOUNT);
         verifyAvailableBalance(savingsId, balance, "Verifying Balance after hold amount");
+        verifyRunningBalance(savingsId, holdTransactionId, BigDecimal.ZERO, "Verifying Running Balance after hold amount");
 
         final Long releaseTransactionId = savingsTransactionHelper.releaseAmount(savingsId, holdTransactionId).getResourceId();
         assertNotNull(releaseTransactionId);
         balance = balance.add(HOLD_AMOUNT);
         verifyAvailableBalance(savingsId, balance, "Verifying Balance after release amount");
+        verifyRunningBalance(savingsId, releaseTransactionId, BigDecimal.ZERO, "Verifying Running Balance after release amount");
 
         depositTransactionId = deposit(savingsId, TRANSACTION_AMOUNT.toPlainString(), TRANSACTION_DATE).getResourceId();
         assertNotNull(depositTransactionId);
         balance = balance.add(TRANSACTION_AMOUNT);
         verifyAvailableBalance(savingsId, balance, "Verifying Balance after hold-release-deposit");
         // this is a backdated transaction and so listed before the release transaction
-        verifyRunningBalance(savingsId, depositTransactionId, balance.subtract(HOLD_AMOUNT),
-                "Verifying Running Balance of deposit negative balance");
+        verifyRunningBalance(savingsId, depositTransactionId, balance, "Verifying Running Balance of deposit negative balance");
 
         final SavingsAccountTransactionData releaseTransaction = savingsTransactionHelper.getTransaction(savingsId, releaseTransactionId);
         assertFalse(releaseTransaction.getReversed(), "Verifying release transaction with overdraft is not reversed");
         SavingsTestValidators.verifyAmount(balance, releaseTransaction.getRunningBalance(), "Verifying Running Balance");
     }
 
+    @Test
+    public void testHoldDoesNotChangeRunningBalanceBeforeWithdrawal() {
+        final Long savingsId = createActiveOverdraftSavingsAccount(NO_INTEREST);
+
+        final Long depositTransactionId = deposit(savingsId, TRANSACTION_AMOUNT.toPlainString(), TRANSACTION_DATE).getResourceId();
+        assertNotNull(depositTransactionId);
+        final Long holdTransactionId = holdAmount(savingsId, HOLD_AMOUNT);
+
+        verifyAvailableBalance(savingsId, TRANSACTION_AMOUNT.subtract(HOLD_AMOUNT), "Verifying Balance after hold amount");
+        verifyRunningBalance(savingsId, depositTransactionId, TRANSACTION_AMOUNT, "Verifying Running Balance after deposit");
+        verifyRunningBalance(savingsId, holdTransactionId, TRANSACTION_AMOUNT, "Verifying Running Balance after hold amount");
+
+        final Long withdrawalTransactionId = withdraw(savingsId, WITHDRAWAL_AMOUNT.toPlainString(), TRANSACTION_DATE).getResourceId();
+        assertNotNull(withdrawalTransactionId);
+        verifyAvailableBalance(savingsId, TRANSACTION_AMOUNT.subtract(HOLD_AMOUNT).subtract(WITHDRAWAL_AMOUNT),
+                "Verifying Balance after withdrawal");
+        verifyRunningBalance(savingsId, withdrawalTransactionId, TRANSACTION_AMOUNT.subtract(WITHDRAWAL_AMOUNT),
+                "Verifying Running Balance after withdrawal");
+    }
+
+    @Test
+    public void testHoldDoesNotChangeRunningBalanceBeforeDeposit() {
+        final Long savingsId = createActiveOverdraftSavingsAccount(NO_INTEREST);
+
+        deposit(savingsId, TRANSACTION_AMOUNT.toPlainString(), TRANSACTION_DATE);
+        final Long holdTransactionId = holdAmount(savingsId, HOLD_AMOUNT);
+        final Long secondDepositTransactionId = deposit(savingsId, TRANSACTION_AMOUNT.toPlainString(), TRANSACTION_DATE).getResourceId();
+        assertNotNull(secondDepositTransactionId);
+
+        verifyAvailableBalance(savingsId, TRANSACTION_AMOUNT.add(TRANSACTION_AMOUNT).subtract(HOLD_AMOUNT),
+                "Verifying Balance after hold and deposit");
+        verifyRunningBalance(savingsId, holdTransactionId, TRANSACTION_AMOUNT, "Verifying Running Balance after hold amount");
+        verifyRunningBalance(savingsId, secondDepositTransactionId, TRANSACTION_AMOUNT.add(TRANSACTION_AMOUNT),
+                "Verifying Running Balance after second deposit");
+    }
+
+    @Test
+    public void testMultipleHoldsDoNotChangeRunningBalance() {
+        final Long savingsId = createActiveOverdraftSavingsAccount(NO_INTEREST);
+
+        deposit(savingsId, TRANSACTION_AMOUNT.toPlainString(), TRANSACTION_DATE);
+        final Long firstHoldTransactionId = holdAmount(savingsId, HOLD_AMOUNT);
+        final Long secondHoldTransactionId = holdAmount(savingsId, SECOND_HOLD_AMOUNT);
+
+        verifyAvailableBalance(savingsId, TRANSACTION_AMOUNT.subtract(HOLD_AMOUNT).subtract(SECOND_HOLD_AMOUNT),
+                "Verifying Balance after multiple holds");
+        verifyRunningBalance(savingsId, firstHoldTransactionId, TRANSACTION_AMOUNT, "Verifying Running Balance after first hold");
+        verifyRunningBalance(savingsId, secondHoldTransactionId, TRANSACTION_AMOUNT, "Verifying Running Balance after second hold");
+    }
+
     private Long holdAmount(final Long savingsId) {
-        final Long holdTransactionId = savingsTransactionHelper
-                .holdAmount(savingsId, HOLD_AMOUNT.toPlainString(), TRANSACTION_DATE, HOLD_REASON).getResourceId();
+        return holdAmount(savingsId, HOLD_AMOUNT);
+    }
+
+    private Long holdAmount(final Long savingsId, final BigDecimal amount) {
+        final Long holdTransactionId = savingsTransactionHelper.holdAmount(savingsId, amount.toPlainString(), TRANSACTION_DATE, HOLD_REASON)
+                .getResourceId();
         assertNotNull(holdTransactionId);
         return holdTransactionId;
     }
