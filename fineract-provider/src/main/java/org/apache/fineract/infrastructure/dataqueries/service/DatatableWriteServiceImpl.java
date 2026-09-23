@@ -490,6 +490,11 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                         throw new PlatformServiceUnavailableException("error.msg.datatable.column.update.not.allowed",
                                 "One of the data table columns contains null values", e);
                     }
+                    // Never swallow a failed DDL: on PostgreSQL the transaction is already aborted at this point, so
+                    // continuing only moves the failure to whatever statement (or the commit) runs next, where it
+                    // surfaces as an unrelated 500 instead of a data-integrity error. Map it here, deterministically.
+                    throw ErrorHandler.getMappable(e, "error.msg.datatable.column.update.failed",
+                            "Datatable column update failed: " + e.getMessage(), API_PARAM_CHANGECOLUMNS);
                 }
             }
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
