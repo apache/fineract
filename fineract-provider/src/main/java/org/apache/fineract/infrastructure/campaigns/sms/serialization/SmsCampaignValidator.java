@@ -162,7 +162,7 @@ public class SmsCampaignValidator {
         if (this.fromApiJsonHelper.parameterExists(SmsCampaignValidator.isNotificationParamName, element)) {
             final Boolean isNotification = this.fromApiJsonHelper.extractBooleanNamed(SmsCampaignValidator.isNotificationParamName,
                     element);
-            baseDataValidator.reset().parameter(SmsCampaignValidator.submittedOnDateParamName).trueOrFalseRequired(isNotification);
+            baseDataValidator.reset().parameter(SmsCampaignValidator.isNotificationParamName).trueOrFalseRequired(isNotification);
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
@@ -224,7 +224,7 @@ public class SmsCampaignValidator {
         if (this.fromApiJsonHelper.parameterExists(SmsCampaignValidator.isNotificationParamName, element)) {
             final Boolean isNotification = this.fromApiJsonHelper.extractBooleanNamed(SmsCampaignValidator.isNotificationParamName,
                     element);
-            baseDataValidator.reset().parameter(SmsCampaignValidator.submittedOnDateParamName).trueOrFalseRequired(isNotification);
+            baseDataValidator.reset().parameter(SmsCampaignValidator.isNotificationParamName).trueOrFalseRequired(isNotification);
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
