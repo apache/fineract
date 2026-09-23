@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
-import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -91,7 +91,7 @@ public class LoanOriginatorHelper {
 
     private boolean isOriginatorCreationDuringLoanApplicationEnabled() {
         try {
-            final GlobalConfigurationProperty config = globalConfigurationRepository
+            final GlobalConfigurationPropertyData config = globalConfigurationRepository
                     .findOneByNameWithNotFoundDetection(ENABLE_ORIGINATOR_CREATION_DURING_LOAN_APPLICATION);
             return config.isEnabled();
         } catch (final GlobalConfigurationPropertyNotFoundException e) {

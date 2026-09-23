@@ -320,8 +320,8 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
-    public void removeGlobalConfigurationPropertyDataFromCache(final String propertyName) {
-        globalConfigurationRepository.removeFromCache(propertyName);
+    public void removeGlobalConfigurationPropertyDataFromCache() {
+        globalConfigurationRepository.removeFromCache();
     }
 
     @Override
@@ -389,7 +389,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     @NotNull
     private GlobalConfigurationPropertyData getGlobalConfigurationPropertyData(final String propertyName) {
-        return globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName).toData();
+        return globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
     }
 
     @Override
