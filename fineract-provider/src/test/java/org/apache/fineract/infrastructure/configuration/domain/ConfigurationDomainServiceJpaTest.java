@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import org.apache.fineract.infrastructure.cache.domain.PlatformCacheRepository;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyValueNotAllowedException;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
@@ -121,6 +122,6 @@ class ConfigurationDomainServiceJpaTest {
 
     private void stored(final String name, final String stringValue, final boolean enabled) {
         when(repository.findOneByNameWithNotFoundDetection(name))
-                .thenReturn(new GlobalConfigurationProperty().setName(name).setStringValue(stringValue).setEnabled(enabled));
+                .thenReturn(new GlobalConfigurationPropertyData().setName(name).setStringValue(stringValue).setEnabled(enabled));
     }
 }

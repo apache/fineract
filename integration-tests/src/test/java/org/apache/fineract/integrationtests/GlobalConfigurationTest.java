@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -25,14 +26,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.CacheSwitchRequest;
 import org.apache.fineract.client.models.GetGlobalConfigurationsResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
+import org.apache.fineract.client.models.PostColumnHeaderData;
+import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,11 +49,16 @@ import org.junit.jupiter.api.Test;
 
 public class GlobalConfigurationTest {
 
+    private static final int NO_CACHE = 1;
+    private static final int SINGLE_NODE_CACHE = 2;
+
+    private FineractFeignClient fineractClient;
     private FeignGlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
-        globalConfigurationHelper = new FeignGlobalConfigurationHelper(FineractFeignClientHelper.getFineractFeignClient());
+        fineractClient = FineractFeignClientHelper.getFineractFeignClient();
+        globalConfigurationHelper = new FeignGlobalConfigurationHelper(fineractClient);
     }
 
     @AfterEach
@@ -253,5 +265,58 @@ public class GlobalConfigurationTest {
             globalConfigurationHelper.updateGlobalConfiguration(configName,
                     new PutGlobalConfigurationsRequest().enabled(config.getEnabled()));
         }
+    }
+
+    @Test
+    public void testGlobalConfigurationIsServedAndRefreshedWithTheSingleNodeCache() {
+        String configName = GlobalConfigurationConstants.PENALTY_WAIT_PERIOD;
+        switchCache(SINGLE_NODE_CACHE);
+        try {
+            GlobalConfigurationPropertyData config = globalConfigurationHelper.retrieveConfigurationByName(configName);
+            Assertions.assertNotNull(config.getValue());
+            // Served from the single-node cache from now on: a second transaction must see the same value
+            assertEquals(config.getValue(), globalConfigurationHelper.retrieveConfigurationByName(configName).getValue());
+
+            Long newValue = config.getValue() + 1;
+            globalConfigurationHelper.updateGlobalConfiguration(configName,
+                    new PutGlobalConfigurationsRequest().value(newValue).enabled(config.getEnabled()));
+
+            // The update evicts the cached configuration, so the next read must not return the stale value
+            assertEquals(newValue, globalConfigurationHelper.retrieveConfigurationByName(configName).getValue());
+        } finally {
+            // Always restore the default so the single-node cache cannot leak into other tests
+            switchCache(NO_CACHE);
+        }
+    }
+
+    @Test
+    public void testPpiDatatableRegistrationIsVisibleAsAConfigurationWithTheSingleNodeCache() {
+        final String appTable = "m_client";
+        final String datatableName = ok(() -> fineractClient.dataTables()
+                .createDatatable(new PostDataTablesRequest().datatableName(Utils.uniqueRandomStringGenerator("dt_ppi_", 5).toLowerCase())
+                        .apptableName(appTable).entitySubType("PERSON").multiRow(false)
+                        .addColumnsItem(new PostColumnHeaderData().name("score").type("Number").mandatory(false))))
+                .getResourceIdentifier();
+
+        switchCache(SINGLE_NODE_CACHE);
+        try {
+            // Any lookup caches the snapshot of all configurations, which does not contain the datatable yet
+            globalConfigurationHelper.retrieveConfigurationByName(GlobalConfigurationConstants.PENALTY_WAIT_PERIOD);
+
+            // A PPI datatable is also a configuration: registering it must be visible through the cached snapshot
+            ok(() -> fineractClient.dataTables().deregisterDatatable(datatableName));
+            ok(() -> fineractClient.dataTables().registerDatatable(datatableName, appTable, Map.of("category", 200, "locale", "en")));
+            assertEquals(datatableName, globalConfigurationHelper.retrieveConfigurationByName(datatableName).getName());
+
+            // And deleting the datatable must not leave the configuration behind in the cache
+            ok(() -> fineractClient.dataTables().deleteDatatable(datatableName));
+            assertEquals(404, globalConfigurationHelper.retrieveConfigurationByNameExpectingError(datatableName).getStatus());
+        } finally {
+            switchCache(NO_CACHE);
+        }
+    }
+
+    private void switchCache(final int cacheType) {
+        ok(() -> fineractClient.cache().switchCache(new CacheSwitchRequest().cacheType(cacheType)));
     }
 }

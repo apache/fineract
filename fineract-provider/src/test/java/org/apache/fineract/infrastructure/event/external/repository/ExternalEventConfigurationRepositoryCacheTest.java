@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.event.external.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Method;
-import org.apache.fineract.infrastructure.core.config.cache.TransactionBoundCacheManager;
+import org.apache.fineract.infrastructure.cache.service.TransactionBoundCacheManager;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

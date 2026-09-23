@@ -35,11 +35,11 @@ import org.apache.fineract.integrationtests.client.feign.FeignDepositTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignRoleHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.DepositRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.DepositTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.DepositTestValidators;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Test;
@@ -92,9 +92,10 @@ public class FixedDepositOfficeHierarchyAccessIntegrationTest extends FeignDepos
     }
 
     private Long createClientInOffice(Long officeId) {
-        return clientHelper.createClient(new PostClientsRequest().officeId(officeId).legalFormId(1L)
-                .firstname(Utils.randomFirstNameGenerator()).lastname(Utils.randomLastNameGenerator()).active(true)
-                .activationDate(ClientHelper.DEFAULT_DATE).dateFormat(SavingsTestData.DATETIME_PATTERN).locale(SavingsTestData.LOCALE))
+        return clientHelper
+                .createClient(new PostClientsRequest().officeId(officeId).legalFormId(1L).firstname(Utils.randomFirstNameGenerator())
+                        .lastname(Utils.randomLastNameGenerator()).active(true).activationDate(ClientTestData.DEFAULT_ACTIVATION_DATE)
+                        .dateFormat(SavingsTestData.DATETIME_PATTERN).locale(SavingsTestData.LOCALE))
                 .getClientId();
     }
 

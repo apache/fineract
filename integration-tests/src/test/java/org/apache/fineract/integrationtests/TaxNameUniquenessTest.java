@@ -33,20 +33,22 @@ import org.apache.fineract.client.models.PostTaxesGroupRequest;
 import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
 import org.apache.fineract.client.models.PutTaxesComponentsTaxComponentIdRequest;
 import org.apache.fineract.client.models.PutTaxesGroupTaxGroupIdRequest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class TaxNameUniquenessTest {
 
     private FineractFeignClient fineractClient;
+    private FeignAccountHelper accountHelper;
 
     @BeforeEach
     public void setup() {
         fineractClient = FineractFeignClientHelper.getFineractFeignClient();
+        accountHelper = new FeignAccountHelper(fineractClient);
     }
 
     @Test
@@ -106,7 +108,7 @@ public class TaxNameUniquenessTest {
     }
 
     private PostTaxesComponentsRequest taxComponentRequest(final String name) {
-        final Account glAccount = AccountHelper.createLiabilityGlAccount("taxComponent");
+        final Account glAccount = accountHelper.createLiabilityAccount("taxComponent");
         return new PostTaxesComponentsRequest().name(name).percentage(5.0f).startDate("01 January 2023")
                 .creditAccountType(Integer.valueOf(glAccount.getAccountType().toString()))
                 .creditAccountId(glAccount.getAccountID().longValue()).dateFormat(Utils.DATE_FORMAT).locale(Utils.LOCALE);
