@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.serialization;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -90,9 +91,10 @@ public class WorkingCapitalLoanApplicationDataValidator {
             WorkingCapitalLoanConstants.clientIdParameterName, WorkingCapitalLoanConstants.productIdParameterName,
             WorkingCapitalLoanConstants.fundIdParameterName, WorkingCapitalLoanConstants.accountNoParameterName,
             WorkingCapitalLoanConstants.externalIdParameterName, WorkingCapitalLoanConstants.principalAmountParamName,
-            WorkingCapitalLoanConstants.originatorsParameterName, WorkingCapitalLoanProductConstants.periodPaymentRateParamName,
-            WorkingCapitalLoanConstants.totalPaymentVolumeParamName, WorkingCapitalLoanProductConstants.discountParamName,
-            WorkingCapitalLoanConstants.submittedOnDateParameterName, WorkingCapitalLoanConstants.expectedDisbursementDateParameterName,
+            WorkingCapitalLoanConstants.originatorsParameterName, WorkingCapitalLoanConstants.datatablesParameterName,
+            WorkingCapitalLoanProductConstants.periodPaymentRateParamName, WorkingCapitalLoanConstants.totalPaymentVolumeParamName,
+            WorkingCapitalLoanProductConstants.discountParamName, WorkingCapitalLoanConstants.submittedOnDateParameterName,
+            WorkingCapitalLoanConstants.expectedDisbursementDateParameterName,
             WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, WorkingCapitalLoanProductConstants.repaymentEveryParamName,
             WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName, WorkingCapitalLoanConstants.submittedOnNoteParameterName,
             WorkingCapitalLoanProductConstants.breachIdParamName, WorkingCapitalLoanProductConstants.allowAttributeOverridesParamName,
@@ -290,6 +292,13 @@ public class WorkingCapitalLoanApplicationDataValidator {
             final Long fundId = this.fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanConstants.fundIdParameterName, element);
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.fundIdParameterName).value(fundId).ignoreIfNull()
                     .integerGreaterThanZero();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.datatablesParameterName, element)) {
+            final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(WorkingCapitalLoanConstants.datatablesParameterName,
+                    element);
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.datatablesParameterName).value(datatables).notNull()
+                    .jsonArrayNotEmpty();
         }
 
         // Min/max checks against product (correct value checks)
