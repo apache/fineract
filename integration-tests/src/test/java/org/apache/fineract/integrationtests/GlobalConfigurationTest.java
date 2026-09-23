@@ -26,13 +26,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.client.models.CacheSwitchRequest;
 import org.apache.fineract.client.models.GetGlobalConfigurationsResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
+import org.apache.fineract.client.models.PostColumnHeaderData;
+import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.client.services.DataTablesApi;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +49,9 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings({ "unchecked" })
 
 public class GlobalConfigurationTest {
+
+    private static final int NO_CACHE = 1;
+    private static final int SINGLE_NODE_CACHE = 2;
 
     private GlobalConfigurationHelper globalConfigurationHelper;
 
@@ -254,5 +265,60 @@ public class GlobalConfigurationTest {
             globalConfigurationHelper.updateGlobalConfiguration(configName,
                     new PutGlobalConfigurationsRequest().enabled(config.getEnabled()));
         }
+    }
+
+    @Test
+    public void testGlobalConfigurationIsServedAndRefreshedWithTheSingleNodeCache() {
+        String configName = GlobalConfigurationConstants.PENALTY_WAIT_PERIOD;
+        switchCache(SINGLE_NODE_CACHE);
+        try {
+            GlobalConfigurationPropertyData config = globalConfigurationHelper.getGlobalConfigurationByName(configName);
+            Assertions.assertNotNull(config.getValue());
+            // Served from the single-node cache from now on: a second transaction must see the same value
+            assertEquals(config.getValue(), globalConfigurationHelper.getGlobalConfigurationByName(configName).getValue());
+
+            Long newValue = config.getValue() + 1;
+            globalConfigurationHelper.updateGlobalConfiguration(configName,
+                    new PutGlobalConfigurationsRequest().value(newValue).enabled(config.getEnabled()));
+
+            // The update evicts the cached configuration, so the next read must not return the stale value
+            assertEquals(newValue, globalConfigurationHelper.getGlobalConfigurationByName(configName).getValue());
+        } finally {
+            // Always restore the default so the single-node cache cannot leak into other tests
+            switchCache(NO_CACHE);
+        }
+    }
+
+    @Test
+    public void testPpiDatatableRegistrationIsVisibleAsAConfigurationWithTheSingleNodeCache() {
+        final DataTablesApi dataTables = FineractClientHelper.getFineractClient().dataTables;
+        final String appTable = "m_client";
+        final String datatableName = Calls
+                .ok(dataTables.createDatatable(
+                        new PostDataTablesRequest().datatableName(Utils.uniqueRandomStringGenerator("dt_ppi_", 5).toLowerCase())
+                                .apptableName(appTable).entitySubType("PERSON").multiRow(false)
+                                .addColumnsItem(new PostColumnHeaderData().name("score").type("Number").mandatory(false))))
+                .getResourceIdentifier();
+
+        switchCache(SINGLE_NODE_CACHE);
+        try {
+            // Any lookup caches the snapshot of all configurations, which does not contain the datatable yet
+            globalConfigurationHelper.getGlobalConfigurationByName(GlobalConfigurationConstants.PENALTY_WAIT_PERIOD);
+
+            // A PPI datatable is also a configuration: registering it must be visible through the cached snapshot
+            Calls.ok(dataTables.deregisterDatatable(datatableName));
+            Calls.ok(dataTables.registerDatatable(datatableName, appTable, Map.of("category", 200, "locale", "en")));
+            assertEquals(datatableName, globalConfigurationHelper.getGlobalConfigurationByName(datatableName).getName());
+
+            // And deleting the datatable must not leave the configuration behind in the cache
+            Calls.ok(dataTables.deleteDatatable(datatableName));
+            assertThrows(CallFailedRuntimeException.class, () -> globalConfigurationHelper.getGlobalConfigurationByName(datatableName));
+        } finally {
+            switchCache(NO_CACHE);
+        }
+    }
+
+    private static void switchCache(final int cacheType) {
+        Calls.ok(FineractClientHelper.getFineractClient().caches.switchCache(new CacheSwitchRequest().cacheType(cacheType)));
     }
 }

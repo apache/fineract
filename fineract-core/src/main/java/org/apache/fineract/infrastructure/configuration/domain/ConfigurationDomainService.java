@@ -95,7 +95,7 @@ public interface ConfigurationDomainService {
 
     Long getDailyTPTLimit();
 
-    void removeGlobalConfigurationPropertyDataFromCache(String propertyName);
+    void removeGlobalConfigurationPropertyDataFromCache();
 
     boolean isSMSOTPDeliveryEnabled();
 

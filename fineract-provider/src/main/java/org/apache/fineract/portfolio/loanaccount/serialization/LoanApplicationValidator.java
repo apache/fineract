@@ -38,8 +38,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
@@ -1852,7 +1852,7 @@ public final class LoanApplicationValidator {
     }
 
     private void officeSpecificLoanProductValidation(final Long productId, final Long officeId) {
-        final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
+        final GlobalConfigurationPropertyData restrictToUserOfficeProperty = this.globalConfigurationRepository
                 .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED);
         if (restrictToUserOfficeProperty.isEnabled()) {
             if (!fineractEntityAccessReadService
