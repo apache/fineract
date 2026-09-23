@@ -765,6 +765,77 @@ public class SchedulerJobsTestResults extends IntegrationTest {
     }
 
     @Test
+    public void testExecuteStandingInstructionsJobTransfersAvailableBalanceWhenPartialTransferIsAllowed() throws InterruptedException {
+        savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        StandingInstructionsHelper standingInstructionsHelper = new StandingInstructionsHelper(requestSpec, responseSpec);
+
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+        final DateTimeFormatter monthDayFormat = DateTimeFormatter.ofPattern("dd MMMM", Locale.US);
+
+        final LocalDate localDate = LocalDate.now(this.systemTimeZone.toZoneId());
+        ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.systemTimeZone.toZoneId());
+        final String MONTH_DAY = monthDayFormat.format(currentDate.toLocalDate());
+        currentDate = currentDate.minus(Duration.ofDays(7));
+        final String VALID_FROM = dateFormat.format(currentDate);
+        currentDate = currentDate.plus(1, ChronoUnit.YEARS);
+        final String VALID_TO = dateFormat.format(currentDate);
+
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
+                ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer fromSavingsId = createActiveSavingsAccount(clientID, savingsProductID);
+        final Integer toSavingsId = createActiveSavingsAccount(clientID, savingsProductID);
+
+        HashMap fromSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(fromSavingsId);
+        Float fromSavingsBalanceBefore = (Float) fromSavingsSummaryBefore.get("accountBalance");
+        HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsId);
+        Float toSavingsBalanceBefore = (Float) toSavingsSummaryBefore.get("accountBalance");
+
+        // ask for more than the account holds, so the transfer can only be covered in part
+        final String amountBeyondTheBalance = String.valueOf(fromSavingsBalanceBefore.intValue() * 2);
+        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
+                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY,
+                amountBeyondTheBalance, true);
+        Assertions.assertNotNull(standingInstructionId);
+
+        SchedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");
+
+        HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsId);
+        Float fromSavingsBalanceAfter = (Float) fromSavingsSummaryAfter.get("accountBalance");
+        HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(toSavingsId);
+        Float toSavingsBalanceAfter = (Float) toSavingsSummaryAfter.get("accountBalance");
+
+        Assertions.assertEquals(0.0f, fromSavingsBalanceAfter, "Verifying the whole available balance was transferred");
+        Assertions.assertEquals(toSavingsBalanceBefore + fromSavingsBalanceBefore, toSavingsBalanceAfter,
+                "Verifying the receiving account was credited with the available balance");
+
+        Set<GetStandingInstructionHistoryPageItemsResponse> standingInstructionHistoryData = standingInstructionsHelper
+                .getStandingInstructionHistory(fromSavingsId, PortfolioAccountType.SAVINGS.getValue(), clientID,
+                        AccountTransferType.ACCOUNT_TRANSFER.getValue());
+        Assertions.assertEquals(1, standingInstructionHistoryData.size(),
+                "Verifying the no of standing instruction transactions logged for the client");
+        GetStandingInstructionHistoryPageItemsResponse loggedTransaction = standingInstructionHistoryData.iterator().next();
+        Assertions.assertEquals("partial", loggedTransaction.getStatus(),
+                "Verifying a partly covered transfer is distinguishable from a fully covered one");
+        Assertions.assertEquals(fromSavingsBalanceBefore, loggedTransaction.getAmount(),
+                "Verifying the logged amount is what was actually transferred, not what was due");
+    }
+
+    private Integer createActiveSavingsAccount(final Integer clientID, final Integer savingsProductID) {
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
+                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId));
+        SavingsStatusChecker.verifySavingsIsApproved(this.savingsAccountHelper.approveSavings(savingsId));
+        SavingsStatusChecker.verifySavingsIsActive(this.savingsAccountHelper.activateSavings(savingsId));
+        return savingsId;
+    }
+
+    @Test
     public void testApplyPenaltyForOverdueLoansJobOutcome() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);

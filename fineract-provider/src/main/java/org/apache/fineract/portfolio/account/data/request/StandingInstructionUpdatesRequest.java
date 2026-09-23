@@ -44,4 +44,5 @@ public class StandingInstructionUpdatesRequest implements Serializable {
     private String name;
     private String monthDayFormat;
     private String status;
+    private Boolean allowPartialTransfer;
 }
