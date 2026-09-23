@@ -23,15 +23,21 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.DelinquencyRangeRequest;
+import org.apache.fineract.client.models.GetWorkingCapitalLoanDelinquencyRangeScheduleTagHistoryResponse;
+import org.apache.fineract.client.models.WorkingCapitalCollection;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyRangeScheduleHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
@@ -52,6 +58,7 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
     protected static FeignBusinessDateHelper businessDateHelper;
     protected static WorkingCapitalLoanProductHelper productHelper;
     protected static WorkingCapitalBreachHelper breachHelper;
+    protected static FeignGlobalConfigurationHelper globalConfigurationHelper;
 
     private final List<Long> createdWcLoanIds = new ArrayList<>();
 
@@ -63,6 +70,7 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
         businessDateHelper = new FeignBusinessDateHelper(feignClient);
         productHelper = new WorkingCapitalLoanProductHelper();
         breachHelper = new WorkingCapitalBreachHelper();
+        globalConfigurationHelper = new FeignGlobalConfigurationHelper(feignClient);
     }
 
     @AfterAll
@@ -93,6 +101,14 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
         }
     }
 
+    protected boolean isConfigurationEnabled(String configName) {
+        return Boolean.TRUE.equals(globalConfigurationHelper.getGlobalConfigurationByName(configName).getEnabled());
+    }
+
+    protected void setConfigurationEnabled(String configName, boolean enabled) {
+        globalConfigurationHelper.updateConfigurationByName(configName, enabled);
+    }
+
     protected Long createClient(String activationDate) {
         return clientHelper.createClient(activationDate);
     }
@@ -104,6 +120,21 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
         return productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder()
                 .withName("WCL Breach " + Utils.uniqueRandomStringGenerator("", 8)).withShortName(Utils.uniqueRandomStringGenerator("", 4))
                 .withBreachId(breachId).withBreachGraceDays(breachGraceDays).build()).getResourceId();
+    }
+
+    protected Long createDelinquencyRange(String classification, int minimumAgeDays, Integer maximumAgeDays) {
+        return DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest().classification(classification)
+                .minimumAgeDays(minimumAgeDays).maximumAgeDays(maximumAgeDays).locale("en")).getResourceId();
+    }
+
+    protected Long createWcProductWithDelinquencyBucket(int frequencyDays, BigDecimal minimumPaymentPercent, List<Long> rangeIds) {
+        final Long bucketId = WorkingCapitalLoanDelinquencyRangeScheduleHelper
+                .createWorkingCapitalLoanDelinquencyBucket(rangeIds, frequencyDays, 0, minimumPaymentPercent, 1).getResourceId();
+        return productHelper
+                .createWorkingCapitalLoanProduct(
+                        new WorkingCapitalLoanProductTestBuilder().withName("WCL Delinquency " + Utils.uniqueRandomStringGenerator("", 8))
+                                .withShortName(Utils.uniqueRandomStringGenerator("", 4)).withDelinquencyBucketId(bucketId).build())
+                .getResourceId();
     }
 
     protected Long createApproveAndDisburseWcLoan(Long clientId, Long productId, BigDecimal principal, String date) {
@@ -121,6 +152,14 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
 
     protected void runInlineWcCob(Long loanId) {
         wcLoanHelper.executeInlineWCCOB(loanId);
+    }
+
+    protected List<GetWorkingCapitalLoanDelinquencyRangeScheduleTagHistoryResponse> getDelinquencyTagHistory(Long loanId) {
+        return wcLoanHelper.getDelinquencyTagHistory(loanId);
+    }
+
+    protected WorkingCapitalCollection getDelinquentData(Long loanId) {
+        return wcLoanHelper.getLoanDetails(loanId).getDelinquent();
     }
 
     protected Long createBreachReset(Long loanId) {

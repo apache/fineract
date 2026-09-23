@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -142,6 +144,16 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
         assertThat(pastPeriod.getMinPaymentCriteriaMet()).isTrue();
         assertThat(pastPeriod.getDelinquentAmount()).isEqualByComparingTo(new BigDecimal("100"));
         assertThat(pastPeriod.getDelinquentDays()).isEqualTo(5L);
+    }
+
+    @Test
+    void valueDatedRepaymentClassifiesDelinquencyAsOfBusinessDate() {
+        final LocalDate valueDate = today.minusDays(27);
+
+        rangeScheduleService.applyRepayment(loan, valueDate, new BigDecimal("100"));
+
+        verify(classificationService).instantClassifyDelinquency(loan, today);
+        verify(classificationService, never()).instantClassifyDelinquency(loan, valueDate);
     }
 
     @Test

@@ -236,9 +236,9 @@ Feature: Working Capital Delinquency
       | 3            | 2026-04-01  |              | D00            | 1              | 30             |
       | 2            | 2026-04-01  |              | D30            | 31             | 60             |
       | 1            | 2026-04-01  |              | D60            | 61             | 90             |
-      | 2            | 2026-03-02  |              | D00            | 1              | 30             |
-      | 1            | 2026-03-02  |              | D30            | 31             | 60             |
-      | 1            | 2026-01-31  |              | D00            | 1              | 30             |
+      | 2            | 2026-03-02  | 2026-04-01   | D00            | 1              | 30             |
+      | 1            | 2026-03-02  | 2026-04-01   | D30            | 31             | 60             |
+      | 1            | 2026-01-31  | 2026-03-02   | D00            | 1              | 30             |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 April 2026"
 
   @TestRailId:C74526

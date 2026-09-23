@@ -135,7 +135,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
     public void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal amount) {
         allocateRepayment(loan, transactionDate, amount);
         applyRemainingBalanceCap(loan);
-        delinquencyClassificationService.instantClassifyDelinquency(loan, transactionDate);
+        delinquencyClassificationService.instantClassifyDelinquency(loan, DateUtils.getBusinessLocalDate());
     }
 
     @Override
