@@ -39,6 +39,7 @@ import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandResponse;
+import org.apache.fineract.client.models.GetWorkingCapitalLoanDelinquencyRangeScheduleTagHistoryResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
@@ -372,6 +373,10 @@ public class FeignWorkingCapitalLoanHelper {
 
     public List<WorkingCapitalLoanDelinquencyRangeScheduleData> getDelinquencyRangeSchedule(Long loanId) {
         return ok(() -> fineractClient.workingCapitalLoanDelinquencyRangeSchedule().retrieveDelinquencyRangeSchedule(loanId));
+    }
+
+    public List<GetWorkingCapitalLoanDelinquencyRangeScheduleTagHistoryResponse> getDelinquencyTagHistory(Long loanId) {
+        return ok(() -> fineractClient.workingCapitalLoans().getDelinquencyRangeScheduleTagHistoryById(loanId));
     }
 
     /**

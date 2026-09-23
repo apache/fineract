@@ -167,8 +167,12 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
     }
 
     /**
-     * Applies a delinquency tag for a specific range to the given loan. This method either adds a new tag for the
-     * current delinquency range or lifts all existing tags if the current range is null.
+     * Keeps at most one active delinquency tag on the range schedule period: every active tag of another range is
+     * lifted on the business date, and a tag for the current range is added on the same date unless one is already
+     * active. The active tag carries the period's delinquent amount.
+     * <p>
+     * Contract: an escalation lifts the previous tag on the same date the new tag is added. The read side derives a
+     * period's delinquency start by walking this chain of lifted tags, so it relies on that date equality.
      *
      * @param loan
      *            the loan for which the delinquency range tag should be applied
@@ -178,41 +182,45 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
      *            the current delinquency range to be applied; can be null to lift all previous tags
      * @param businessDate
      *            the date on which the tagging operation is performed
-     * @return true if the tag history was changed (a tag added or lifted), false if nothing changed
+     * @return true if the tag history was changed (a tag added or lifted), false if nothing changed or only the amount
+     *         of the active tag was refreshed
      */
     @Override
     public boolean applyDelinquencyTagForRange(final WorkingCapitalLoan loan, final WorkingCapitalLoanDelinquencyRangeSchedule range,
             final DelinquencyRange currentRange, final LocalDate businessDate) {
-        List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> updatedList = new ArrayList<>();
-        List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> rangeScheduleTagHistoryList = delinquencyRangeScheduleTagHistoryRepository
+        final List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> activeTags = delinquencyRangeScheduleTagHistoryRepository
                 .findByRangeScheduleAndLiftedOnDateOrderByAddedOnDateAsc(range, null);
+        final Optional<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> activeTagOfCurrentRange = activeTags.stream()
+                .filter(tag -> currentRange != null && Objects.equals(tag.getDelinquencyRange().getId(), currentRange.getId())).findFirst();
 
-        WorkingCapitalLoanDelinquencyRangeScheduleTagHistory last = rangeScheduleTagHistoryList.isEmpty() ? null
-                : rangeScheduleTagHistoryList.getLast();
+        final List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> updatedList = new ArrayList<>(activeTags);
+        activeTagOfCurrentRange.ifPresent(updatedList::remove);
+        updatedList.forEach(tag -> tag.setLiftedOnDate(businessDate));
+        final boolean liftedAnyTag = !updatedList.isEmpty();
+        final boolean addedNewTag = currentRange != null && activeTagOfCurrentRange.isEmpty();
 
-        // do nothing if currentRange is in rangeScheduleTagHistoryList or last and currentRange are null
-        if ((last == null && currentRange == null) || (last != null && currentRange != null && rangeScheduleTagHistoryList.stream()
-                .anyMatch(tag -> Objects.equals(tag.getDelinquencyRange().getId(), currentRange.getId())))) {
-            return false;
+        if (currentRange != null) {
+            final WorkingCapitalLoanDelinquencyRangeScheduleTagHistory tag = activeTagOfCurrentRange
+                    .orElseGet(() -> newTag(loan, range, currentRange, businessDate));
+            tag.setOutstandingAmount(range.getDelinquentAmount());
+            updatedList.add(tag);
         }
 
-        if (currentRange == null) {
-            // lift all previous tags
-            rangeScheduleTagHistoryList.forEach(tag -> tag.setLiftedOnDate(businessDate));
-            updatedList.addAll(rangeScheduleTagHistoryList);
-        } else {
-            // add current range
-            WorkingCapitalLoanDelinquencyRangeScheduleTagHistory newTag = new WorkingCapitalLoanDelinquencyRangeScheduleTagHistory();
-            newTag.setLoan(loan);
-            newTag.setDelinquencyRange(currentRange);
-            newTag.setRangeSchedule(range);
-            newTag.setAddedOnDate(businessDate);
-            newTag.setLiftedOnDate(null);
-            updatedList.add(newTag);
+        if (!updatedList.isEmpty()) {
+            delinquencyRangeScheduleTagHistoryRepository.saveAll(updatedList);
         }
+        return liftedAnyTag || addedNewTag;
+    }
 
-        delinquencyRangeScheduleTagHistoryRepository.saveAll(updatedList);
-        return !updatedList.isEmpty();
+    private WorkingCapitalLoanDelinquencyRangeScheduleTagHistory newTag(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanDelinquencyRangeSchedule range, final DelinquencyRange currentRange, final LocalDate businessDate) {
+        final WorkingCapitalLoanDelinquencyRangeScheduleTagHistory tag = new WorkingCapitalLoanDelinquencyRangeScheduleTagHistory();
+        tag.setLoan(loan);
+        tag.setDelinquencyRange(currentRange);
+        tag.setRangeSchedule(range);
+        tag.setAddedOnDate(businessDate);
+        tag.setLiftedOnDate(null);
+        return tag;
     }
 
 }

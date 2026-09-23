@@ -231,9 +231,9 @@ Feature: Working Capital Delinquency
       | 3            | 2026-04-01  |              | D00            | 1              | 30             |
       | 2            | 2026-04-01  |              | D30            | 31             | 60             |
       | 1            | 2026-04-01  |              | D60            | 61             | 90             |
-      | 2            | 2026-03-02  |              | D00            | 1              | 30             |
-      | 1            | 2026-03-02  |              | D30            | 31             | 60             |
-      | 1            | 2026-01-31  |              | D00            | 1              | 30             |
+      | 2            | 2026-03-02  | 2026-04-01   | D00            | 1              | 30             |
+      | 1            | 2026-03-02  | 2026-04-01   | D30            | 31             | 60             |
+      | 1            | 2026-01-31  | 2026-03-02   | D00            | 1              | 30             |
 
   @TestRailId:C74526
   Scenario: Verify working capital loan delinquency tag history - UC2: multiple ranges with (internal) payment
