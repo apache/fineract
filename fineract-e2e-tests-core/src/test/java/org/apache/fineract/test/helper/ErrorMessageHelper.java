@@ -1112,10 +1112,6 @@ public final class ErrorMessageHelper {
         return "Discount was already set before disbursement and cannot be added again";
     }
 
-    public static String discountDiffDateFromDisburseFailure() {
-        return "Failed data validation due to: transaction.date.must.be.equal.disbursement.date.";
-    }
-
     public static String discountAdjustmentExceedFailure() {
         return "Failed data validation due to: cannot.be.more.than.discount.fee.";
     }

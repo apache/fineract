@@ -188,13 +188,6 @@ public class WorkingCapitalLoanDataValidator {
                     .failWithCode("loan.not.disbursed");
         }
 
-        final LocalDate actualDisbursementDate = loan.getFirstActualDisbursementDate();
-        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        if (actualDisbursementDate != null && !actualDisbursementDate.equals(businessDate)) {
-            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.actualDisbursementDateParamName).value(businessDate)
-                    .failWithCode("transaction.date.must.be.equal.disbursement.date");
-        }
-
         final Integer classificationId = this.fromApiJsonHelper
                 .extractIntegerSansLocaleNamed(WorkingCapitalLoanConstants.classificationIdParamName, element);
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.classificationIdParamName).value(classificationId).ignoreIfNull()

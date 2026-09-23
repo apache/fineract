@@ -39,7 +39,7 @@ Feature: Working Capital Discount
     And WorkingCapitalLoanDiscountFeeTransactionBusinessEvent is raised with amount "12" on "01 January 2026" date
 
   @TestRailId:C72394
-  Scenario: Discount update on WCL account on diff from disbursement date outcomes with an error - UC2
+  Scenario: Discount fee added after disbursement on a later business date is backdated to the disbursement date - UC2
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -63,17 +63,52 @@ Feature: Working Capital Discount
     And Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
-# --- add discount after disbursement on diff from same disbursement date should outcome with an error --- #
-    When Admin sets the business date to "08 January 2026"
-    Then Adding Discount fee with "10" amount on Working Capital loan account results an error with the following data:
+    Then Adding Discount fee with "10" amount on transaction date "31 December 2025" on Working Capital loan account for last disbursement results an error with the following data:
       | HTTP response code | Error message                                    |
       | 400                | transaction.date.must.be.equal.disbursement.date |
-    And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed | discountApproved | discount |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 100.0     | 100.0             | 100.0              | 1.0               | null             | null             | null     |
+    Then Adding Discount fee with "10" amount on transaction date "31 December 2025" on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                      |
+      | 400                | disbursement.transaction.not.found |
     And Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+    When Admin sets the business date to "08 January 2026"
+    Then Adding Discount fee with "10" amount on transaction date "08 January 2026" on Working Capital loan account for last disbursement results an error with the following data:
+      | HTTP response code | Error message                                    |
+      | 400                | transaction.date.must.be.equal.disbursement.date |
+    Then Adding Discount fee with "10" amount on transaction date "08 January 2026" on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                      |
+      | 400                | disbursement.transaction.not.found |
+    When Admin adds Discount fee with "10" amount on transaction date "01 January 2026" on Working Capital loan account
+    Then Working capital loan account has the correct data:
+      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed | discountApproved | discount |
+      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 110.0     | 100.0             | 100.0              | 1.0               | null             | null             | 10.0     |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 10.0              | 10.0             | 0.0               | 0.0                   | false    |
+    And WorkingCapitalLoanDiscountFeeTransactionBusinessEvent is raised with amount "10" on "01 January 2026" date
+
+  Scenario: Discount fee backdated to a disbursement on the branch's latest accounting closure date is rejected
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "08 January 2026"
+    And Admin closes accounting for the last created office on "01 January 2026"
+    Then Adding Discount fee with "1000" amount on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                                      |
+      | 403                | error.msg.glJournalEntry.invalid.accounting.closed |
+    And Working capital loan account has the correct data:
+      | principal | discount |
+      | 9000.0    | null     |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
 
   @TestRailId:C72395
   Scenario: Discount update on WCL account on the same as disburse date failed as already added discount before while create loan - UC3
@@ -504,7 +539,7 @@ Feature: Working Capital Discount
       | 01 January 2026 | Discount Fee | 10.0              | 10.0             | 0.0               | 0.0                   | false    |
 
   @TestRailId:C78839
-  Scenario: Working Capital Loan Transaction - Discount added after disbursement on disbursement undo - UC14
+  Scenario: Working Capital Loan Transaction - Discount added after disbursement on disbursement undo, and a discount fee added by date after a backdated re-disbursement belongs to the active disbursement - UC14
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -542,6 +577,20 @@ Feature: Working Capital Discount
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | true     |
       | 01 January 2026 | Discount Fee | 10.0              | 10.0             | 0.0               | 0.0                   | true     |
+    When Admin sets the business date to "08 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin adds Discount fee with "12" amount on transaction date "01 January 2026" on Working Capital loan account
+    Then Working capital loan account has the correct data:
+      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed | discountApproved | discount |
+      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 112.0     | 100.0             | 100.0              | 1.0               | 0.0              | null             | 12.0     |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | true     |
+      | 01 January 2026 | Discount Fee | 10.0              | 10.0             | 0.0               | 0.0                   | true     |
+      | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
+    And WorkingCapitalLoanDiscountFeeTransactionBusinessEvent is raised with amount "12" on "01 January 2026" date
 
   @TestRailId:C78840
   Scenario: Working Capital Loan Transaction - Discount added on disbursement on disbursement undo - UC15
