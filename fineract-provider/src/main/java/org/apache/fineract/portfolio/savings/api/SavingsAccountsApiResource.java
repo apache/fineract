@@ -55,6 +55,7 @@ import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -70,6 +71,7 @@ import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
@@ -122,7 +124,9 @@ public class SavingsAccountsApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List savings applications/accounts", operationId = "retrieveAllSavingsAccounts", description = "Lists savings applications/accounts\n\n"
-            + "Example Requests:\n" + "\n" + "savingsaccounts\n" + "\n" + "\n" + "savingsaccounts?fields=name")
+            + "The optional status filter accepts a numeric savings status ID. Omit it to list all visible statuses.\n\n"
+            + "Example Requests:\n savingsaccounts\n savingsaccounts?status=300\n"
+            + " savingsaccounts?status=100&offset=0&limit=20\n savingsaccounts?status=300&externalId=example")
     @AlternativeOperationId("retrieveAll_33")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsResponse.class)))
     public String retrieveAll(@Context final UriInfo uriInfo,
@@ -131,20 +135,44 @@ public class SavingsAccountsApiResource {
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+            @QueryParam("status") @Parameter(description = "Numeric savings status ID: 100 pending approval, 200 approved, 300 active, "
+                    + "303 transfer in progress, 304 transfer on hold, 400 withdrawn, 500 rejected, 600 closed, "
+                    + "700 prematurely closed, 800 matured. Omit for all visible statuses.", schema = @Schema(type = "integer", allowableValues = {
+                            "100", "200", "300", "303", "304", "400", "500", "600", "700", "800" })) final String status) {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
+        validateStatus(status);
         sqlValidator.validate(orderBy);
         sqlValidator.validate(sortOrder);
         sqlValidator.validate(externalId);
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).externalId(externalId).offset(offset)
-                .orderBy(orderBy).sortOrder(sortOrder).build();
+                .orderBy(orderBy).sortOrder(sortOrder).status(status).build();
 
         final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return toApiJsonSerializer.serialize(settings, products, SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+    }
+
+    private void validateStatus(final String status) {
+        if (status == null) {
+            return;
+        }
+        final DataValidatorBuilder validator = new DataValidatorBuilder().resource("savingsaccount").parameter("status").value(status);
+        final int statusId;
+        try {
+            statusId = Integer.parseInt(status);
+        } catch (NumberFormatException e) {
+            validator.failWithCode("must.be.an.integer");
+            validator.throwValidationErrors();
+            return;
+        }
+        if (SavingsAccountStatusType.fromInt(statusId) == SavingsAccountStatusType.INVALID) {
+            validator.failWithCode("must.be.a.valid.savings.account.status.id");
+            validator.throwValidationErrors();
+        }
     }
 
     @POST
