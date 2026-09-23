@@ -96,14 +96,14 @@ class LoanItemReaderTest {
         List<Long> accountLocks = Stream.of(1L, 2L, 3L, 4L, 5L).toList();
         when(loanLockingService.findLockIdsByLoanIdInAndLockOwner(List.of(1L, 2L, 3L, 4L, 5L), LockOwner.LOAN_COB_CHUNK_PROCESSING))
                 .thenReturn(accountLocks);
-        when(loanRepository.findById(anyLong())).thenReturn(Optional.of(loan));
+        when(loanRepository.findByIdWithRepaymentSchedule(anyLong())).thenReturn(Optional.of(loan));
 
         // when + then
         loanItemReader.beforeStep(stepExecution);
         for (long i = 1; i <= 5; i++) {
             Loan myLoan = loanItemReader.read();
             Assertions.assertEquals(loan, myLoan);
-            verify(loanRepository, times(1)).findById(i);
+            verify(loanRepository, times(1)).findByIdWithRepaymentSchedule(i);
         }
 
         Mockito.verifyNoMoreInteractions(loanRepository);
@@ -148,7 +148,7 @@ class LoanItemReaderTest {
         List<Long> accountLocks = IntStream.rangeClosed(1, 100).boxed().map(Long::valueOf).toList();
         when(loanLockingService.findLockIdsByLoanIdInAndLockOwner(IntStream.rangeClosed(1, 100).boxed().map(Long::valueOf).toList(),
                 LockOwner.LOAN_COB_CHUNK_PROCESSING)).thenReturn(accountLocks);
-        when(loanRepository.findById(anyLong())).thenReturn(Optional.of(loan));
+        when(loanRepository.findByIdWithRepaymentSchedule(anyLong())).thenReturn(Optional.of(loan));
 
         // when + then
         loanItemReader.beforeStep(stepExecution);
@@ -169,7 +169,7 @@ class LoanItemReaderTest {
 
         // verify that this was called 100times, and for each loan it was called exactly once
         for (long i = 1; i <= 100; i++) {
-            verify(loanRepository, times(1)).findById(i);
+            verify(loanRepository, times(1)).findByIdWithRepaymentSchedule(i);
         }
 
         Mockito.verifyNoMoreInteractions(loanRepository);

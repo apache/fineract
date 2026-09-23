@@ -109,8 +109,8 @@ public class LoanItemReaderStepDefinitions implements En {
 
             loanItemReader.beforeStep(stepExecution);
 
-            lenient().when(this.loanRepository.findById(1L)).thenReturn(Optional.of(loan));
-            lenient().when(this.loanRepository.findById(-1L)).thenThrow(new RuntimeException("fail"));
+            lenient().when(this.loanRepository.findByIdWithRepaymentSchedule(1L)).thenReturn(Optional.of(loan));
+            lenient().when(this.loanRepository.findByIdWithRepaymentSchedule(-1L)).thenThrow(new RuntimeException("fail"));
         });
 
         When("LoanItemReader.read method executed", () -> {
