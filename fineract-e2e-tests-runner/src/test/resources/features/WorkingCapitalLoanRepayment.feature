@@ -4340,12 +4340,12 @@ Feature: Working Capital Loan Repayment
       | 3            | 2026-05-01  |              | D30            | 31             | 60             |
       | 2            | 2026-05-01  |              | D60            | 61             | 90             |
       | 1            | 2026-05-01  |              | D90            | 91             | 120            |
-      | 3            | 2026-04-01  |              | D00            | 1              | 30             |
-      | 2            | 2026-04-01  |              | D30            | 31             | 60             |
-      | 1            | 2026-04-01  |              | D60            | 61             | 90             |
-      | 2            | 2026-03-02  |              | D00            | 1              | 30             |
-      | 1            | 2026-03-02  |              | D30            | 31             | 60             |
-      | 1            | 2026-01-31  |              | D00            | 1              | 30             |
+      | 3            | 2026-04-01  | 2026-05-01   | D00            | 1              | 30             |
+      | 2            | 2026-04-01  | 2026-05-01   | D30            | 31             | 60             |
+      | 1            | 2026-04-01  | 2026-05-01   | D60            | 61             | 90             |
+      | 2            | 2026-03-02  | 2026-04-01   | D00            | 1              | 30             |
+      | 1            | 2026-03-02  | 2026-04-01   | D30            | 31             | 60             |
+      | 1            | 2026-01-31  | 2026-03-02   | D00            | 1              | 30             |
     #   --- expectedAmount overpaid ---
     When Admin sets the business date to "10 May 2026"
     And Customer makes repayment on "10 May 2026" with 1500.0 transaction amount on Working Capital loan
@@ -4363,12 +4363,12 @@ Feature: Working Capital Loan Repayment
       | 3            | 2026-05-01  | 2026-05-10   | D30            | 31             | 60             |
       | 2            | 2026-05-01  | 2026-05-10   | D60            | 61             | 90             |
       | 1            | 2026-05-01  | 2026-05-10   | D90            | 91             | 120            |
-      | 3            | 2026-04-01  | 2026-05-10   | D00            | 1              | 30             |
-      | 2            | 2026-04-01  | 2026-05-10   | D30            | 31             | 60             |
-      | 1            | 2026-04-01  | 2026-05-10   | D60            | 61             | 90             |
-      | 2            | 2026-03-02  | 2026-05-10   | D00            | 1              | 30             |
-      | 1            | 2026-03-02  | 2026-05-10   | D30            | 31             | 60             |
-      | 1            | 2026-01-31  | 2026-05-10   | D00            | 1              | 30             |
+      | 3            | 2026-04-01  | 2026-05-01   | D00            | 1              | 30             |
+      | 2            | 2026-04-01  | 2026-05-01   | D30            | 31             | 60             |
+      | 1            | 2026-04-01  | 2026-05-01   | D60            | 61             | 90             |
+      | 2            | 2026-03-02  | 2026-04-01   | D00            | 1              | 30             |
+      | 1            | 2026-03-02  | 2026-04-01   | D30            | 31             | 60             |
+      | 1            | 2026-01-31  | 2026-03-02   | D00            | 1              | 30             |
     Then Working Capital loan amortization schedule has 280 periods, with the following data for periods:
       | paymentNo | paymentDate       | expectedPaymentAmount | actualPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
       | 0         | 01 January 2026   | -9000.00              |                     | 9000.00         | 9000.00       |                            |                          | 0.00                       |
