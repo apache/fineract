@@ -225,7 +225,10 @@ public class GenericDataServiceImpl implements GenericDataService {
         // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7046875 - prevent
         // Invalid Column Name bug in sun's CachedRowSetImpl where it doesn't
         // pick up on label names, only column names
-        return "select x.* from (" + sql + ") x";
+
+        // FINERACT-2622: a derived table's ORDER BY is not guaranteed to be honored by the outer query above, so
+        // lift a top-level trailing ORDER BY (and any trailing LIMIT/OFFSET) onto the outer wrapper when present.
+        return ReportSqlOrderByLifter.wrap(sql);
     }
 
     @Override
