@@ -109,6 +109,8 @@ final class ClientTransactionsApiResourceSwagger {
         public GetClientsClientIdTransactionsResponse.GetClientsPageItems.GetClientTransactionsCurrency currency;
         @Schema(example = "60.000000")
         public BigDecimal amount;
+        @Schema(example = "42")
+        public Long clientChargeId;
         @Schema(example = "[2015, 8, 17]")
         public LocalDate submittedOnDate;
         @Schema(example = "true")
