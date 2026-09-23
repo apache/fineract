@@ -22,6 +22,10 @@ apply plugin: 'java'
 apply plugin: 'com.google.cloud.tools.jib'
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
+tasks.withType(com.google.cloud.tools.jib.gradle.JibTask).configureEach {
+    notCompatibleWithConfigurationCache('jib 3.5.x keeps a Project reference in its tasks')
+}
+
 jib {
     from {
         image = 'azul/zulu-openjdk-alpine:25'

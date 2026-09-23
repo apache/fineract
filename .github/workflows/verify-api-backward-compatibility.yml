@@ -71,11 +71,11 @@ jobs:
 
       - name: Generate baseline spec
         working-directory: baseline
-        run: ./gradlew :fineract-provider:resolve --no-daemon
+        run: ./gradlew :fineract-provider:resolve --no-daemon --no-configuration-cache
 
       - name: Generate merged PR spec
         working-directory: current
-        run: ./gradlew :fineract-provider:resolve --no-daemon
+        run: ./gradlew :fineract-provider:resolve --no-daemon --no-configuration-cache
 
       - name: Sanitize specs
         run: |
@@ -109,7 +109,7 @@ jobs:
         working-directory: current
         run: |
           set -o pipefail
-          ./gradlew --no-daemon :fineract-provider:checkBreakingChanges \
+          ./gradlew --no-daemon --no-configuration-cache :fineract-provider:checkBreakingChanges \
             -PapiBaseline="${GITHUB_WORKSPACE}/baseline/fineract-provider/build/resources/main/static/fineract.json" \
             -PapiNew="${GITHUB_WORKSPACE}/current/fineract-provider/build/resources/main/static/fineract.json" \
             -x buildJavaSdk \
