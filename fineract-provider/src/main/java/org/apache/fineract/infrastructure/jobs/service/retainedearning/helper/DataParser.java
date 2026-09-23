@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.model.AccountGLJournalEntryAnnualSummaryRecord;
 import org.springframework.stereotype.Component;
@@ -66,7 +67,8 @@ public class DataParser {
                     return AccountGLJournalEntryAnnualSummaryRecord.builder().postingDate(rowData.get("postingdate"))
                             .product(rowData.get("product")).glAcct(rowData.get("glacct"))
                             .assetOwner(ExternalIdFactory.produce(rowData.get("assetowner")))
-                            .endingBalance(new BigDecimal(rowData.getOrDefault("endingbalance", "0"))).build();
+                            .endingBalance(new BigDecimal(rowData.getOrDefault("endingbalance", "0")))
+                            .originatorExternalIds(StringUtils.defaultIfBlank(rowData.get("originator_external_ids"), null)).build();
                 }).collect(Collectors.toList());
 
         return records;

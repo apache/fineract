@@ -42,6 +42,9 @@ public class CustomAuditingHandler extends AuditingHandler {
      */
     public CustomAuditingHandler(PersistentEntities entities) {
         super(entities);
+        // Installed once, for the lifetime of this (singleton) handler. The per-entity choice between local and UTC
+        // timestamps travels in a thread local instead of being written onto this instance before every call.
+        setDateTimeProvider(ThreadLocalDateTimeProvider.INSTANCE);
     }
 
     /**
@@ -77,8 +80,12 @@ public class CustomAuditingHandler extends AuditingHandler {
     @Override
     public <T> T markCreated(@NonNull T source) {
         Assert.notNull(source, "Source entity must not be null");
-        setDateTimeProvider(fetchDateTimeProvider(source));
-        return super.markCreated(source);
+        final DateTimeProvider previous = ThreadLocalDateTimeProvider.setAndReturnPreviousValue(fetchDateTimeProvider(source));
+        try {
+            return super.markCreated(source);
+        } finally {
+            ThreadLocalDateTimeProvider.restore(previous);
+        }
     }
 
     /**
@@ -90,7 +97,11 @@ public class CustomAuditingHandler extends AuditingHandler {
     @Override
     public <T> T markModified(@NonNull T source) {
         Assert.notNull(source, "Source entity must not be null");
-        setDateTimeProvider(fetchDateTimeProvider(source));
-        return super.markModified(source);
+        final DateTimeProvider previous = ThreadLocalDateTimeProvider.setAndReturnPreviousValue(fetchDateTimeProvider(source));
+        try {
+            return super.markModified(source);
+        } finally {
+            ThreadLocalDateTimeProvider.restore(previous);
+        }
     }
 }

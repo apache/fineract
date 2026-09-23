@@ -45,6 +45,7 @@ Feature: Buy Down Fees
     And Customer makes "AUTOPAY" repayment on "01 March 2024" with 33.72 EUR transaction amount
     When Admin sets the business date to "1 April 2024"
     When Admin runs inline COB job for Loan
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     And Customer makes "AUTOPAY" repayment on "01 April 2024" with 33.73 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     And Loan Transactions tab has the following data:
@@ -60,7 +61,6 @@ Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 50.0             | 0.0                      | 0.0             | 0.0                |
-    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
 
   @TestRailId:C3827
   Scenario: Verify loan with Buy Down fees and full payment and daily amortization - UC1.2
@@ -118,6 +118,7 @@ Feature: Buy Down Fees
     And Customer makes "AUTOPAY" repayment on "01 March 2024" with 33.72 EUR transaction amount
     When Admin sets the business date to "1 April 2024"
     When Admin runs inline COB job for Loan
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     And Customer makes "AUTOPAY" repayment on "01 April 2024" with 33.73 EUR transaction amount
     When Admin runs inline COB job for Loan
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -305,7 +306,6 @@ Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 50.0             | 0.0                      | 0.0             | 0.0                |
-    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
 
   @TestRailId:C3771
   Scenario: Verify loan with Buy Down fees and early payoff - UC2.1
@@ -1417,6 +1417,7 @@ Feature: Buy Down Fees
 # --- 2nd repayment on April,1 ---#
     When Admin sets the business date to "1 April 2024"
     When Admin runs inline COB job for Loan
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     And Customer makes "AUTOPAY" repayment on "01 April 2024" with 33.73 EUR transaction amount
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
@@ -1430,7 +1431,6 @@ Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 40.0             | 0.0                      | 10.0            | 0.0                |
-    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     When Loan Pay-off is made on "1 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Transactions tab has the following data:
@@ -1533,6 +1533,7 @@ Feature: Buy Down Fees
 # --- 2nd repayment on April,1 ---#
     When Admin sets the business date to "1 April 2024"
     When Admin runs inline COB job for Loan
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     And Customer makes "AUTOPAY" repayment on "01 April 2024" with 33.73 EUR transaction amount
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
@@ -1547,7 +1548,6 @@ Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 35.0             | 0.0                      | 15.0            | 0.0                |
-    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     When Loan Pay-off is made on "1 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Transactions tab has the following data:
@@ -2716,6 +2716,7 @@ Feature: Buy Down Fees
     And Customer makes "AUTOPAY" repayment on "01 March 2024" with 33.72 EUR transaction amount
     When Admin sets the business date to "1 April 2024"
     When Admin runs inline COB job for Loan
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     And Customer makes "AUTOPAY" repayment on "01 April 2024" with 33.73 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     And Loan Transactions tab has the following data:
@@ -2735,7 +2736,6 @@ Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 50.0             | 0.0                      | 0.0             | 0.0                |
-    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
 
   @TestRailId:C3982
   Scenario: Verify Buy Down Fee reversal on same business date for non-merchant - UC2
@@ -3167,6 +3167,7 @@ Feature: Buy Down Fees
 # --- 2nd repayment on April,1 ---#
     When Admin sets the business date to "1 April 2024"
     When Admin runs inline COB job for Loan
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     And Customer makes "AUTOPAY" repayment on "01 April 2024" with 33.73 EUR transaction amount
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
@@ -3180,7 +3181,6 @@ Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 40.0             | 0.0                      | 10.0            | 0.0                |
-    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     When Loan Pay-off is made on "1 April 2024"
     Then Loan's all installments have obligations met
     Then Loan Transactions tab has the following data:
@@ -4302,6 +4302,7 @@ Feature: Buy Down Fees
     And Customer makes "AUTOPAY" repayment on "01 March 2024" with 33.72 EUR transaction amount
     When Admin sets the business date to "1 April 2024"
     When Admin runs inline COB job for Loan
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     And Customer makes "AUTOPAY" repayment on "01 April 2024" with 33.73 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     And Loan Transactions tab has the following data:
@@ -4317,7 +4318,6 @@ Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 50.0             | 0.0                      | 0.0             | 0.0                |
-    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
 
   @TestRailId:C85359
   Scenario: Verify loan with Buy Down Fee adjustment as FEE income type and repayment transactions
@@ -4395,6 +4395,7 @@ Feature: Buy Down Fees
     And LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent is created on "01 March 2024"
     When Admin sets the business date to "1 April 2024"
     When Admin runs inline COB job for Loan
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     And Customer makes "AUTOPAY" repayment on "01 April 2024" with 33.73 EUR transaction amount
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
@@ -4408,7 +4409,6 @@ Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 40.0             | 0.0                      | 10.0            | 0.0                |
-    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     When Loan Pay-off is made on "1 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Transactions tab has the following data:

@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   build-core:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
 
     env:
@@ -33,7 +33,7 @@ jobs:
           fetch-tags: true
 
       - name: Build Fineract
-        uses: ./.github/actions/setup-and-build-fineract
+        uses: $/.github/actions/setup-and-build-fineract
         with:
           cache-read-only: false
 

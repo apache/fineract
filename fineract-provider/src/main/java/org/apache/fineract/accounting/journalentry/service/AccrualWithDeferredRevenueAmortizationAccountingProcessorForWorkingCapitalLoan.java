@@ -118,6 +118,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         final BigDecimal overpaymentPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getOverpaymentPortion());
 
         return switch (txn.getTypeOf()) {
+            case LoanTransactionType.DISBURSEMENT -> disbursementPostings(txn, principalPortion);
             case LoanTransactionType.REPAYMENT ->
                 repaymentPostings(txn, principalPortion, feesPortion, penaltiesPortion, overpaymentPortion, isChargedOff);
             case LoanTransactionType.GOODWILL_CREDIT ->
@@ -161,6 +162,11 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 LedgerPosting.creditWithoutPaymentDetail(penaltiesAccount, penaltiesPortion),
                 LedgerPosting.creditWithoutPaymentDetail(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion),
                 LedgerPosting.debit(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount()));
+    }
+
+    private List<LedgerPosting> disbursementPostings(final WorkingCapitalLoanTransaction txn, final BigDecimal principalPortion) {
+        return List.of(LedgerPosting.debit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
+                LedgerPosting.credit(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount()));
     }
 
     private List<LedgerPosting> chargeAdjustmentPostings(final WorkingCapitalLoanTransaction txn, final BigDecimal principalPortion,

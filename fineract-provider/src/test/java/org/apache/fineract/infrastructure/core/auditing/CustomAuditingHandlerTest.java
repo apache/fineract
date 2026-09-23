@@ -25,8 +25,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
@@ -37,6 +41,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mapping.context.PersistentEntities;
 
@@ -116,5 +121,57 @@ public class CustomAuditingHandlerTest {
         assertEquals(now.getDayOfMonth(), targetObject.getCreatedDate().get().getDayOfMonth());
         assertEquals(now.getHour(), targetObject.getCreatedDate().get().getHour());
         assertEquals(now.getMinute(), targetObject.getCreatedDate().get().getMinute());
+    }
+
+    /**
+     * The handler is a singleton shared by every request thread, so the same instance has to keep serving both entity
+     * flavours without one choice of clock bleeding into the other.
+     */
+    @Test
+    public void alternatingEntityKindsOnASharedHandler() {
+        CustomAuditingHandler testInstance = newHandler();
+
+        for (int i = 0; i < 20; i++) {
+            AbstractAuditableWithUTCDateTimeCustom<Long> utc = Mockito.spy(AbstractAuditableWithUTCDateTimeCustom.class);
+            testInstance.markCreated(utc);
+            assertEquals(ZoneOffset.UTC, utc.getCreatedDate().orElseThrow().getOffset());
+            assertEquals(DateUtils.getAuditOffsetDateTime().getHour(), utc.getCreatedDate().orElseThrow().getHour());
+
+            AbstractAuditableCustom local = Mockito.spy(AbstractAuditableCustom.class);
+            testInstance.markModified(local);
+            assertEquals(DateUtils.getLocalDateTimeOfSystem().getHour(), local.getLastModifiedDate().orElseThrow().getHour());
+        }
+    }
+
+    /**
+     * Auditing is not re-entrant on the paths this handler is wired into, but nothing in the type system says so. If a
+     * mark ever nests inside another one -- here from the auditor lookup, which runs before the outer mark resolves its
+     * timestamp -- the outer entity must keep the clock it selected.
+     */
+    @Test
+    public void reentrantMarkOfAnotherEntityKindLeavesTheOuterEntityAlone() {
+        final AtomicReference<CustomAuditingHandler> handlerRef = new AtomicReference<>();
+        final AtomicBoolean reentered = new AtomicBoolean();
+        final AuditorAware<Long> reentrantAuditor = () -> {
+            if (reentered.compareAndSet(false, true)) {
+                handlerRef.get().markCreated(Mockito.spy(AbstractAuditableCustom.class));
+            }
+            return Optional.of(1L);
+        };
+        CustomAuditingHandler testInstance = newHandler();
+        testInstance.setAuditorAware(reentrantAuditor);
+        handlerRef.set(testInstance);
+
+        AbstractAuditableWithUTCDateTimeCustom<Long> targetObject = Mockito.spy(AbstractAuditableWithUTCDateTimeCustom.class);
+        testInstance.markCreated(targetObject);
+
+        assertTrue(reentered.get(), "the nested mark never ran");
+        assertEquals(ZoneOffset.UTC, targetObject.getCreatedDate().orElseThrow().getOffset());
+        assertEquals(DateUtils.getAuditOffsetDateTime().getHour(), targetObject.getCreatedDate().orElseThrow().getHour());
+    }
+
+    private CustomAuditingHandler newHandler() {
+        MappingContext mappingContext = Mockito.mock(MappingContext.class);
+        return new CustomAuditingHandler(PersistentEntities.of(mappingContext));
     }
 }
