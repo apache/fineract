@@ -45,6 +45,7 @@ import org.apache.fineract.client.feign.services.WorkingCapitalLoanProductsApi;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DeleteWorkingCapitalLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.EnumOptionData;
 import org.apache.fineract.client.models.GetConfigurableAttributes;
 import org.apache.fineract.client.models.GetPaymentAllocation;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanDelinquencyRangeScheduleTagHistoryResponse;
@@ -2180,6 +2181,19 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         assertions.assertAll();
     }
 
+    @Then("Working Capital Loan Product template advancedPaymentAllocation Transaction Types contains:")
+    public void verifyTemplateAdvancedPaymentAllocationTransactionTypes(final DataTable table) {
+        final GetWorkingCapitalLoanProductsTemplateResponse template = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_TEMPLATE_RESPONSE);
+        assertThat(template.getAdvancedPaymentAllocationTransactionTypes()).isNotNull().isNotEmpty();
+
+        final List<String> actualCodeToValue = template.getAdvancedPaymentAllocationTransactionTypes().stream().map(EnumOptionData::getCode)
+                .collect(Collectors.toList());
+
+        assertThat(actualCodeToValue).hasSize(table.asLists().size());
+        assertThat(actualCodeToValue).containsAll(table.values());
+    }
+
     @When("Admin creates a new Working Capital Loan Product with payment allocation order:")
     public void createWorkingCapitalLoanProductWithPaymentAllocationOrder(final DataTable table) {
         final List<String> rules = table.asList();
@@ -2253,6 +2267,34 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                         .createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(), duplicateRules)));
         final String errorMessage = ErrorMessageHelper.paymentAllocationRulesDuplicateFailure();
         checkCreateWorkingCapitalLoanProductWithInvalidDataFailure(request, 400, errorMessage);
+    }
+
+    @Then("Admin failed to create a new Working Capital Loan Product with duplicate transaction type per payment allocation rules")
+    public void createWorkingCapitalLoanProductWithDuplicateTrnPerPaymentAllocationRulesFailed() {
+        final String workingCapitalProductDefaultName = DefaultWorkingCapitalLoanProduct.WCLP.getName()
+                + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+        final PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductCreateRequest = workingCapitalRequestFactory
+                .defaultWorkingCapitalLoanProductRequest() //
+                .name(workingCapitalProductDefaultName) //
+                .paymentAllocation(
+                        workingCapitalRequestFactory.invalidPaymentAllocationRulesWithTrnTypeForWorkingCapitalLoanProductRequest());
+
+        String errorMessage = ErrorMessageHelper.invalidTrnTypeDuplicatedForPaymentAllocationFailure();
+        checkCreateWorkingCapitalLoanProductWithInvalidDataFailure(defaultWorkingCapitalLoanProductCreateRequest, 400, errorMessage);
+    }
+
+    @Then("Admin failed to update a new Working Capital Loan Product with duplicate transaction type per payment allocation rules")
+    public void updateWorkingCapitalLoanProductWithDuplicateTrnPerPaymentAllocationRulesFailed() {
+        final PutWorkingCapitalLoanProductsProductIdRequest defaultWorkingCapitalLoanProductUpdateRequest = new PutWorkingCapitalLoanProductsProductIdRequest()
+                .paymentAllocation(
+                        workingCapitalRequestFactory.invalidPaymentAllocationRulesWithTrnTypeForWorkingCapitalLoanProductRequest());
+        PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
+        Long resourceId = workingCapitalLoanProductsResponse.getResourceId();
+
+        String errorMessage = ErrorMessageHelper.invalidTrnTypeDuplicatedForPaymentAllocationFailure();
+        checkUpdateWorkingCapitalLoanProductWithInvalidDataFailure(resourceId, defaultWorkingCapitalLoanProductUpdateRequest, 400,
+                errorMessage);
     }
 
     @Then("Working Capital Loan Product has advanced accounting mappings")

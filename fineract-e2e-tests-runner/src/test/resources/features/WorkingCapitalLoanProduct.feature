@@ -497,3 +497,23 @@ Feature: WorkingCapitalLoanProduct
   @TestRailId:C80966
   Scenario: Verify WC Loan Product create fails when payment allocation rules contain duplicates
     Then Admin failed to create a new Working Capital Loan Product with duplicate payment allocation rules
+
+  @TestRailId:C106771
+  Scenario: Verify WC Loan Product create fails when payment allocation rules contain transaction type duplicates
+    Then Admin failed to create a new Working Capital Loan Product with duplicate transaction type per payment allocation rules
+
+  @TestRailId:C106772
+  Scenario: Verify WC Loan Product update fails when payment allocation rules contain transaction type duplicates
+    When Admin creates a new Working Capital Loan Product
+    Then Admin failed to update a new Working Capital Loan Product with duplicate transaction type per payment allocation rules
+    Then Admin deletes a Working Capital Loan Product
+
+  @TestRailId:C106773
+  Scenario: Verify WC Loan Product template exposes advanced payment allocation defined transaction types
+    When Admin retrieves the Working Capital Loan Product template
+    Then Working Capital Loan Product template advancedPaymentAllocation Transaction Types contains:
+      | DEFAULT           |
+      | REPAYMENT         |
+      | PAYOUT_REFUND     |
+      | GOODWILL_CREDIT   |
+      | CHARGE_ADJUSTMENT |

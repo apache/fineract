@@ -68,6 +68,15 @@ class WorkingCapitalAdvancedPaymentAllocationsJsonParserTest {
     }
 
     @Test
+    void rejectsRulesWithoutDefault() {
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> parser.assembleWCPaymentAllocationRules(command(
+                        "{\"paymentAllocation\":[{\"transactionType\":\"REPAYMENT\"},{\"transactionType\":\"GOODWILL_CREDIT\"}]}")));
+        assertThat(exception.getErrors()).singleElement()
+                .satisfies(error -> assertThat(error.getUserMessageGlobalisationCode()).isEqualTo("wc-payment-allocation-without-default"));
+    }
+
+    @Test
     void mapsAllSupportedTransactionTypes() {
         JsonArray allocations = new JsonArray();
         for (WorkingCapitalPaymentAllocationTransactionType type : WorkingCapitalPaymentAllocationTransactionType.values()) {
