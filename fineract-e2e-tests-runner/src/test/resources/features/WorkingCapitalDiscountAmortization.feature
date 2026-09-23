@@ -104,7 +104,7 @@ Feature: WorkingCapitalDiscountFeeAmortization
       | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
 
   @TestRailId:C80970
-  Scenario: Verify NO Discount Fee Amortization transaction on Working Capital Loan account triggers on COB if NO discount added - UC3
+  Scenario: Verify NO Discount Fee Amortization transaction on Working Capital Loan account triggers on COB if NO discount added, and a discount fee added later backdated to the disbursement date catches up on the next COB - UC3
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -145,6 +145,29 @@ Feature: WorkingCapitalDiscountFeeAmortization
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Repayment    | 150.0             | 150.0            | 0.0               | 0.0                   | false    |
+    When Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 150.0              | 100000.0           | 0.0            | 1000.0           | 0.0               |
+    When Admin sets the business date to "09 January 2026"
+    When Admin runs inline COB job for Working Capital Loan
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 150.0              | 100000.0           | 28.7           | 971.3            | 0.0               |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment                 | 150.0             | 150.0            | 0.0               | 0.0                   | false    |
+      | 08 January 2026 | Discount Fee Amortization | 28.7              |                  |                   |                       | false    |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "08 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           |       | 28.7   |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 28.7  |        |
 
   @TestRailId:C80971
   Scenario: Verify NO duplicated Discount Fee Amortization transaction on Working Capital Loan account triggers on COB run again without new repayments - UC4

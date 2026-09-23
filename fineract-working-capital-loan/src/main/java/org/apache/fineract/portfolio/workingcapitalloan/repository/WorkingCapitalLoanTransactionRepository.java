@@ -51,6 +51,14 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
     List<WorkingCapitalLoanTransaction> findActiveByTypeOrderByIdDesc(@Param("wcLoanId") Long wcLoanId,
             @Param("transactionType") LoanTransactionType transactionType);
 
+    @Query("""
+            select t from WorkingCapitalLoanTransaction t
+            where t.wcLoan.id = :wcLoanId and t.transactionType = :transactionType and t.reversed = false
+              and t.transactionDate = :transactionDate
+            """)
+    Optional<WorkingCapitalLoanTransaction> findActiveByTypeAndTransactionDate(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionType") LoanTransactionType transactionType, @Param("transactionDate") LocalDate transactionDate);
+
     /** Net amortized discount fee income from non-reversed transactions: sum(amortization) - sum(adjustment). */
     // 'else 0' is required by EclipseLink's CASE grammar; EclipseLink also rejects unary negation in JPQL CASE, so the
     // adjustment branch subtracts via (0 - amount) rather than -amount.
