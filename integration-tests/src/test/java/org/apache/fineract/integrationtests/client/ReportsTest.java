@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import feign.Response;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +121,34 @@ public class ReportsTest extends FeignIntegrationTest {
                 assertThat(new String(csvBody.readAllBytes(), StandardCharsets.UTF_8))
                         .as("Client Listing CSV output should contain client %s", clientName).contains(clientName);
             }
+        }
+    }
+
+    /**
+     * FINERACT-2622: the report SQL is no longer wrapped in a derived table, so its own ORDER BY is honored (MariaDB
+     * drops it inside a derived table), and two aliased columns that come from the same source column keep their own
+     * values (read by position, not by underlying column name).
+     */
+    @Test
+    void reportOrderByIsHonoredAndAliasedColumnsKeepTheirOwnValues() {
+        final String reportName = "OrderByAliasIntegrationTest";
+        final String reportSql = "SELECT a.id AS first_id, b.id AS second_id "
+                + "FROM (SELECT 1 AS id UNION ALL SELECT 2 UNION ALL SELECT 3) a "
+                + "JOIN (SELECT 1 AS id UNION ALL SELECT 2 UNION ALL SELECT 3) b ON b.id <> a.id " + "ORDER BY a.id DESC, b.id DESC";
+        PostRepostRequest request = new PostRepostRequest().reportName(reportName).reportType("Table").reportSubType("")
+                .reportCategory("Test").description("FINERACT-2622 ORDER BY and alias integration test fixture").reportSql(reportSql);
+        final Long reportId = ok(() -> fineractClient().reports().createReport(request)).getResourceId();
+        try {
+            RunReportsResponse result = ok(() -> fineractClient().runReports().runReportGetData(reportName, Map.of()));
+            assertEquals(List.of("first_id", "second_id"), result.getColumnHeaders().stream().map(h -> h.getColumnName()).toList());
+            List<Long> firstIds = result.getData().stream().map(r -> new BigDecimal(String.valueOf(r.getRow().get(0))).longValue())
+                    .toList();
+            List<Long> secondIds = result.getData().stream().map(r -> new BigDecimal(String.valueOf(r.getRow().get(1))).longValue())
+                    .toList();
+            assertEquals(List.of(3L, 3L, 2L, 2L, 1L, 1L), firstIds);
+            assertEquals(List.of(2L, 1L, 3L, 1L, 3L, 2L), secondIds);
+        } finally {
+            ok(() -> fineractClient().reports().deleteReport(reportId));
         }
     }
 
