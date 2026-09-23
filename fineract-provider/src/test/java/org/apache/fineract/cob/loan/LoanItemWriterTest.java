@@ -78,8 +78,8 @@ class LoanItemWriterTest {
         Loan fresh2 = mock(Loan.class);
         Loan processed1 = loanWithId(1L);
         Loan processed2 = loanWithId(2L);
-        when(loanRepository.findById(1L)).thenReturn(Optional.of(fresh1));
-        when(loanRepository.findById(2L)).thenReturn(Optional.of(fresh2));
+        when(loanRepository.findByIdWithRepaymentSchedule(1L)).thenReturn(Optional.of(fresh1));
+        when(loanRepository.findByIdWithRepaymentSchedule(2L)).thenReturn(Optional.of(fresh2));
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, fresh1)).thenReturn(processed1);
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, fresh2)).thenReturn(processed2);
 
@@ -99,8 +99,8 @@ class LoanItemWriterTest {
         LoanItemWriter writer = stepScopedWriter();
         Loan loan1 = loanWithId(1L);
         Loan loan2 = loanWithId(2L);
-        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan1));
-        when(loanRepository.findById(2L)).thenReturn(Optional.of(loan2));
+        when(loanRepository.findByIdWithRepaymentSchedule(1L)).thenReturn(Optional.of(loan1));
+        when(loanRepository.findByIdWithRepaymentSchedule(2L)).thenReturn(Optional.of(loan2));
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, loan1)).thenReturn(loan1);
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, loan2)).thenThrow(new BusinessStepException("step failed"));
 
@@ -114,7 +114,7 @@ class LoanItemWriterTest {
     @Test
     void aLoanThatNoLongerExistsFailsTheWrite() {
         LoanItemWriter writer = stepScopedWriter();
-        when(loanRepository.findById(1L)).thenReturn(Optional.empty());
+        when(loanRepository.findByIdWithRepaymentSchedule(1L)).thenReturn(Optional.empty());
 
         assertThrows(BusinessStepException.class, () -> writer.write(new Chunk<>(1L)));
 
@@ -126,7 +126,7 @@ class LoanItemWriterTest {
         LoanItemWriter writer = stepScopedWriter();
         Loan loan = loanWithId(1L);
         when(loan.isProgressiveSchedule()).thenReturn(true);
-        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+        when(loanRepository.findByIdWithRepaymentSchedule(1L)).thenReturn(Optional.of(loan));
         when(modelProcessingService.hasValidModel(1L, ProgressiveLoanInterestScheduleModel.getModelVersion())).thenReturn(false);
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, loan)).thenReturn(loan);
 
@@ -160,7 +160,7 @@ class LoanItemWriterTest {
         stepExecution.getJobExecution().getExecutionContext().put(COBConstant.BUSINESS_STEPS, businessSteps());
         writer.beforeStep(stepExecution);
         Loan loan = loanWithId(1L);
-        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+        when(loanRepository.findByIdWithRepaymentSchedule(1L)).thenReturn(Optional.of(loan));
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, loan)).thenReturn(loan);
 
         writer.write(new Chunk<>(1L));

@@ -121,7 +121,11 @@ public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<
         setLastRun(processed);
     }
 
-    private I load(Long accountId) {
+    /**
+     * Loads an account for its business steps. A subclass can load associations the business steps use together with
+     * the account, as long as it keeps the not-found failure.
+     */
+    protected I load(Long accountId) {
         return repository.findById(accountId)
                 .orElseThrow(() -> new BusinessStepException("COB account (id: " + accountId + ") does not exist"));
     }

@@ -20,6 +20,7 @@ package org.apache.fineract.cob.loan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.domain.LockingService;
+import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.cob.writer.AbstractCOBItemWriter;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -29,12 +30,20 @@ import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanIntere
 public abstract class AbstractLoanItemWriter extends AbstractCOBItemWriter<Loan> {
 
     private final ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService;
+    private final LoanRepository loanRepository;
 
     protected AbstractLoanItemWriter(COBBusinessStepService cobBusinessStepService,
             ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService, LockingService loanLockingService,
             LoanRepository loanRepository) {
         super(cobBusinessStepService, loanLockingService, loanRepository);
         this.progressiveLoanModelProcessingService = progressiveLoanModelProcessingService;
+        this.loanRepository = loanRepository;
+    }
+
+    @Override
+    protected Loan load(Long loanId) {
+        return loanRepository.findByIdWithRepaymentSchedule(loanId)
+                .orElseThrow(() -> new BusinessStepException("COB account (id: " + loanId + ") does not exist"));
     }
 
     @Override
