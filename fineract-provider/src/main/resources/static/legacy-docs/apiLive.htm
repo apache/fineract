@@ -29010,10 +29010,19 @@ Request Body:
     <div class="method-section">
         <div class="method-description">
             <h2>List savings applications/accounts</h2>
+            <p>Optional <code>status</code> accepts a numeric savings status ID: 100 (pending approval),
+            200 (approved), 300 (active), 303 (transfer in progress), 304 (transfer on hold),
+            400 (withdrawn), 500 (rejected), 600 (closed), 700 (prematurely closed), or 800 (matured).
+            Malformed or unsupported values return a validation error. Omit status to retain the existing listing behavior.
+            Office-hierarchy visibility still applies. Status combines with externalId and pagination;
+            totalFilteredRecords counts matching accounts before pagination.</p>
             <p>Example Requests:</p>
             <div class=apiClick>savingsaccounts</div>
             <br><br>
             <div class=apiClick>savingsaccounts?fields=name</div>
+            <div class=apiClick>savingsaccounts?status=300</div>
+            <div class=apiClick>savingsaccounts?status=100&amp;offset=0&amp;limit=20</div>
+            <div class=apiClick>savingsaccounts?status=300&amp;externalId=example</div>
         </div>
         <div class="method-example">
             <code class="method-declaration">GET https://Domain Name/api/v1/savingsaccounts</code>
