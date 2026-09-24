@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,11 +34,15 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAdvancedPaymentAllocationsJsonParser;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.repository.WorkingCapitalLoanProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -154,12 +159,38 @@ class WorkingCapitalLoanProductDataValidatorTest {
     }
 
     @Test
+    void testValidateForCreate_WithMinGreaterThanMaxAnnualEir_ShouldThrowException() {
+        final JsonObject jsonObject = createBaseJsonObject();
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, "ANNUAL_EIR");
+        jsonObject.remove(WorkingCapitalLoanProductConstants.periodPaymentRateParamName);
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.annualEirParamName, BigDecimal.valueOf(43.7562));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.discountParamName, BigDecimal.valueOf(1000));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.minAnnualEirParamName, BigDecimal.valueOf(50));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.maxAnnualEirParamName, BigDecimal.valueOf(40));
+
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(toJsonAndSetupMocks(jsonObject)));
+    }
+
+    @Test
+    void testValidateForCreate_WithAnnualEirOutsideMinMax_ShouldThrowException() {
+        final JsonObject jsonObject = createBaseJsonObject();
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, "ANNUAL_EIR");
+        jsonObject.remove(WorkingCapitalLoanProductConstants.periodPaymentRateParamName);
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.annualEirParamName, BigDecimal.valueOf(10));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.discountParamName, BigDecimal.valueOf(1000));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.minAnnualEirParamName, BigDecimal.valueOf(20));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.maxAnnualEirParamName, BigDecimal.valueOf(50));
+
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(toJsonAndSetupMocks(jsonObject)));
+    }
+
+    @Test
     void testValidateForUpdate_WithValidData_ShouldNotThrowException() {
         // Given
         final String json = createValidJson();
 
         // When & Then
-        assertDoesNotThrow(() -> validator.validateForUpdate(json));
+        assertDoesNotThrow(() -> validator.validateForUpdate(json, null));
     }
 
     @Test
@@ -168,7 +199,7 @@ class WorkingCapitalLoanProductDataValidatorTest {
         final String json = "";
 
         // When & Then
-        assertThrows(InvalidJsonException.class, () -> validator.validateForUpdate(json));
+        assertThrows(InvalidJsonException.class, () -> validator.validateForUpdate(json, null));
     }
 
     @Test
@@ -179,7 +210,7 @@ class WorkingCapitalLoanProductDataValidatorTest {
         final String json = createJsonWithDates(startDate, closeDate);
 
         // When & Then
-        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForUpdate(json));
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForUpdate(json, null));
     }
 
     @Test
@@ -250,6 +281,89 @@ class WorkingCapitalLoanProductDataValidatorTest {
         final JsonObject jsonObject = createBaseJsonObject();
         jsonObject.addProperty(WorkingCapitalLoanProductConstants.breachIdParamName, 0);
         assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(jsonObject.toString()));
+    }
+
+    @Test
+    void testValidateForUpdate_EchoingAnnualEirStrategyWithoutPairedFields_ShouldNotThrow() {
+        // Partial PUT that only re-sends the unchanged strategy must not demand discount / annualEir again
+        // when persisted values already satisfy ANNUAL_EIR invariants.
+        final WorkingCapitalLoanProduct product = mockAnnualEirProduct(BigDecimal.valueOf(43.7562), BigDecimal.valueOf(1000));
+
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, "ANNUAL_EIR");
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.nameParamName, "Updated Name");
+
+        assertDoesNotThrow(() -> validator.validateForUpdate(toJsonAndSetupMocks(jsonObject), product));
+    }
+
+    @Test
+    void testValidateForUpdate_PartialUpdateOmittingStrategyWithValidPersistedAnnualEirFields_ShouldNotThrow() {
+        final WorkingCapitalLoanProduct product = mockAnnualEirProduct(BigDecimal.valueOf(43.7562), BigDecimal.valueOf(1000));
+
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.nameParamName, "Updated Name");
+
+        assertDoesNotThrow(() -> validator.validateForUpdate(toJsonAndSetupMocks(jsonObject), product));
+    }
+
+    @Test
+    void testValidateForUpdate_PartialUpdateSettingDiscountZeroOnAnnualEirProduct_ShouldThrow() {
+        final WorkingCapitalLoanProduct product = mockAnnualEirProduct(BigDecimal.valueOf(43.7562), BigDecimal.valueOf(1000));
+
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.discountParamName, BigDecimal.ZERO);
+        jsonObject.addProperty("locale", "en");
+
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForUpdate(toJsonAndSetupMocks(jsonObject), product));
+    }
+
+    @Test
+    void testValidateForUpdate_PartialUpdateNullingAnnualEirOnAnnualEirProduct_ShouldThrow() {
+        final WorkingCapitalLoanProduct product = mockAnnualEirProduct(BigDecimal.valueOf(43.7562), BigDecimal.valueOf(1000));
+
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.add(WorkingCapitalLoanProductConstants.annualEirParamName, JsonNull.INSTANCE);
+        jsonObject.addProperty("locale", "en");
+
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForUpdate(toJsonAndSetupMocks(jsonObject), product));
+    }
+
+    @Test
+    void testValidateForUpdate_PartialUpdateSettingPositiveDiscountOnAnnualEirProduct_ShouldNotThrow() {
+        final WorkingCapitalLoanProduct product = mockAnnualEirProduct(BigDecimal.valueOf(43.7562), BigDecimal.valueOf(1000));
+
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.discountParamName, BigDecimal.valueOf(500));
+        jsonObject.addProperty("locale", "en");
+
+        assertDoesNotThrow(() -> validator.validateForUpdate(toJsonAndSetupMocks(jsonObject), product));
+    }
+
+    @Test
+    void testValidateForUpdate_SwitchingToAnnualEirWithoutDiscount_ShouldThrow() {
+        final WorkingCapitalLoanProductRelatedDetail relatedDetail = Mockito.mock(WorkingCapitalLoanProductRelatedDetail.class);
+        Mockito.when(relatedDetail.getPaymentAmountCalculationStrategy()).thenReturn(WorkingCapitalPaymentAmountCalculationStrategy.TPV);
+        Mockito.when(relatedDetail.getPeriodPaymentRate()).thenReturn(BigDecimal.ONE);
+        final WorkingCapitalLoanProduct product = Mockito.mock(WorkingCapitalLoanProduct.class);
+        Mockito.when(product.getRelatedDetail()).thenReturn(relatedDetail);
+
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, "ANNUAL_EIR");
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.annualEirParamName, BigDecimal.valueOf(43.7562));
+        // discount omitted — required when strategy actually changes to ANNUAL_EIR
+
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForUpdate(toJsonAndSetupMocks(jsonObject), product));
+    }
+
+    private WorkingCapitalLoanProduct mockAnnualEirProduct(final BigDecimal annualEir, final BigDecimal discount) {
+        final WorkingCapitalLoanProductRelatedDetail relatedDetail = Mockito.mock(WorkingCapitalLoanProductRelatedDetail.class);
+        Mockito.when(relatedDetail.getPaymentAmountCalculationStrategy())
+                .thenReturn(WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR);
+        Mockito.when(relatedDetail.getAnnualEir()).thenReturn(annualEir);
+        Mockito.when(relatedDetail.getDiscount()).thenReturn(discount);
+        final WorkingCapitalLoanProduct product = Mockito.mock(WorkingCapitalLoanProduct.class);
+        Mockito.when(product.getRelatedDetail()).thenReturn(relatedDetail);
+        return product;
     }
 
     // Helper methods

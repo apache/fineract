@@ -83,9 +83,13 @@ public class WorkingCapitalLoanProductData implements Serializable {
     private BigDecimal minPeriodPaymentRate;
     private BigDecimal periodPaymentRate;
     private BigDecimal maxPeriodPaymentRate;
+    private BigDecimal minAnnualEir;
+    private BigDecimal maxAnnualEir;
     private BigDecimal discount;
     private Integer repaymentEvery;
     private StringEnumOptionData repaymentFrequencyType;
+    private StringEnumOptionData paymentAmountCalculationStrategy;
+    private BigDecimal annualEir;
     private Integer delinquencyGraceDays;
     private StringEnumOptionData delinquencyStartType;
     private Integer breachGraceDays;
@@ -110,6 +114,7 @@ public class WorkingCapitalLoanProductData implements Serializable {
     private Collection<ChargeData> penaltyOptions;
     private Collection<CurrencyData> currencyOptions;
     private List<StringEnumOptionData> amortizationTypeOptions;
+    private List<StringEnumOptionData> paymentAmountCalculationStrategyOptions;
     private List<StringEnumOptionData> periodFrequencyTypeOptions;
     private List<StringEnumOptionData> advancedPaymentAllocationTypes;
     private List<StringEnumOptionData> delinquencyStartTypeOptions;
@@ -128,6 +133,7 @@ public class WorkingCapitalLoanProductData implements Serializable {
         setFundOptions(productTemplate.getFundOptions());
         setCurrencyOptions(productTemplate.getCurrencyOptions());
         setAmortizationTypeOptions(productTemplate.getAmortizationTypeOptions());
+        setPaymentAmountCalculationStrategyOptions(productTemplate.getPaymentAmountCalculationStrategyOptions());
         setPeriodFrequencyTypeOptions(productTemplate.getPeriodFrequencyTypeOptions());
         setAdvancedPaymentAllocationTransactionTypes(productTemplate.getAdvancedPaymentAllocationTransactionTypes());
         setAdvancedPaymentAllocationTypes(productTemplate.getAdvancedPaymentAllocationTypes());

@@ -353,6 +353,93 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         submitLoanUsingCreatedProduct(table, null, null);
     }
 
+    @When("Admin creates a working capital loan with annual EIR and the following data:")
+    public void createWorkingCapitalLoanWithAnnualEir(final DataTable table) {
+        final List<List<String>> data = table.asLists();
+        createWorkingCapitalLoanAccountAnnualEIR(data.get(1));
+    }
+
+    @When("Admin failed to create a working capital loan due to disallow delinquency bucket override with annual EIR and the following data:")
+    public void createWorkingCapitalLoanWithAnnualEirFailsDueToDisallowOverride(final DataTable table) {
+        final List<List<String>> data = table.asLists();
+        final PostWorkingCapitalLoansRequest loansRequest = createWorkingCapitalLoanAccountAnnualEIRRequest(data.get(1));
+        final Long overrideDelinquencyBucketId = testContext().get(TestContextKey.DELINQUENCY_BUCKET_ID);
+        loansRequest.delinquencyBucketId(overrideDelinquencyBucketId);
+
+        String message = ErrorMessageHelper.overrideDisallowedByProductFailure("delinquencyBucketId");
+        verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, message);
+    }
+
+    @When("Admin creates a working capital loan with annual EIR using created product with the following data:")
+    public void createWorkingCapitalLoanWithAnnualEirUsingCreatedProduct(final DataTable table) {
+        final Map<String, String> rawData = table.asMaps().getFirst();
+        final Long clientId = extractClientId();
+        final PostWorkingCapitalLoanProductsResponse productResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
+        final Long loanProductId = productResponse.getResourceId();
+
+        final PostWorkingCapitalLoansRequest loansRequest = workingCapitalLoanRequestFactory
+                .defaultAnnualEirWorkingCapitalLoansRequest(clientId)//
+                .productId(loanProductId)//
+                .submittedOnDate(rawData.get("submittedOnDate"))//
+                .expectedDisbursementDate(rawData.get("expectedDisbursementDate"))//
+                .principalAmount(new BigDecimal(rawData.get("principalAmount")))//
+                .discount(blankToNull(rawData.get("discount")) != null ? new BigDecimal(rawData.get("discount").trim()) : null);
+        if (blankToNull(rawData.get("annualEir")) != null) {
+            loansRequest.annualEir(new BigDecimal(rawData.get("annualEir").trim()));
+        }
+        testContext().set(TestContextKey.LOAN_CREATE_REQUEST, loansRequest);
+
+        final PostWorkingCapitalLoansResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_CREATE_RESPONSE, response);
+        trackLoanIdIfEnabled(response.getLoanId());
+        log.info("Working Capital Loan with annual EIR created, Loan ID: {}", response.getLoanId());
+    }
+
+    @Then("Admin creates a working capital loan with annual EIR using created product with the following data expecting error:")
+    public void createWorkingCapitalLoanWithAnnualEirUsingCreatedProductExpectingError(final DataTable table) {
+        final Map<String, String> rawData = table.asMaps().getFirst();
+        final Long clientId = extractClientId();
+        final PostWorkingCapitalLoanProductsResponse productResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
+        final Long loanProductId = productResponse.getResourceId();
+
+        // Start from the Annual EIR application shell (no TPV fields). Callers that need TPV fields for a
+        // mixed-strategy
+        // negative case pass them explicitly in the table.
+        final PostWorkingCapitalLoansRequest loansRequest = workingCapitalLoanRequestFactory
+                .defaultAnnualEirWorkingCapitalLoansRequest(clientId).productId(loanProductId)
+                .submittedOnDate(rawData.get("submittedOnDate")).expectedDisbursementDate(rawData.get("expectedDisbursementDate"))
+                .principalAmount(new BigDecimal(rawData.get("principalAmount")))
+                .discount(blankToNull(rawData.get("discount")) != null ? new BigDecimal(rawData.get("discount").trim()) : null);
+        if (blankToNull(rawData.get("annualEir")) != null) {
+            loansRequest.annualEir(new BigDecimal(rawData.get("annualEir").trim()));
+        }
+        if (blankToNull(rawData.get("totalPaymentVolume")) != null) {
+            loansRequest.totalPaymentVolume(new BigDecimal(rawData.get("totalPaymentVolume").trim()));
+        }
+        if (blankToNull(rawData.get("periodPaymentRate")) != null) {
+            loansRequest.periodPaymentRate(new BigDecimal(rawData.get("periodPaymentRate").trim()));
+        }
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
+
+        final int expectedHttpCode = Integer.parseInt(rawData.get("httpCode"));
+        final String expectedErrorMessage = rawData.get("errorMessage").trim();
+        assertHttpStatus(exception, expectedHttpCode);
+        assertValidationError(exception, expectedErrorMessage);
+        log.info("Verified Working Capital Loan create with annual EIR failed with status {} and message: {}", expectedHttpCode,
+                expectedErrorMessage);
+    }
+
+    private static String blankToNull(final String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
     @When("Admin creates a working capital loan using created product with breachGraceDays {int} and the following data:")
     public void createWorkingCapitalLoanUsingCreatedProductWithBreachGraceDays(final int breachGraceDays, final DataTable table) {
         submitLoanUsingCreatedProduct(table, breachGraceDays, null);
@@ -938,6 +1025,21 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, message);
     }
 
+    @Then("Admin failed to create working capital loan while delinquency override disallowed with delinquency bucket override and default following data:")
+    public void createLoanWithDelinquencyOverrideDisallowedWithDelinquencyDefaultFailure(final DataTable table) {
+        final List<List<String>> data = table.asLists();
+        final List<String> loanData = data.get(1);
+        final String loanProduct = loanData.getFirst();
+        final String submittedOnDate = loanData.get(1);
+        final Long overrideDelinquencyBucketId = testContext().get(TestContextKey.DELINQUENCY_BUCKET_ID);
+
+        final PostWorkingCapitalLoansRequest loansRequest = createWorkingCapitalLoanAccountDefaultRequest(loanProduct, submittedOnDate)
+                .delinquencyBucketId(overrideDelinquencyBucketId);
+
+        String message = ErrorMessageHelper.overrideDisallowedByProductFailure("delinquencyBucketId");
+        verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, message);
+    }
+
     @Then("Admin failed to create WC loan account on {string} with breach {int} {string} frequency lower then near breach {int} {string} frequency")
     public void createLoanWithBreachLowerThenNearBreachFailure(String submittedOnDate, int breachFrequency, String breachFrequencyType,
             int nearBreachFrequency, String nearBreachFrequencyType) {
@@ -985,6 +1087,18 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     public void modifyWorkingCapitalLoan(final DataTable table) {
         final List<List<String>> data = table.asLists();
         modifyWorkingCapitalLoanAccount(data.get(1));
+    }
+
+    @When("Admin modifies the working capital loan with delinquency override data")
+    public void modifyWorkingCapitalLoanWithDelinquencyData() {
+        final Long delinquencyBucketId = testContext().get(TestContextKey.DELINQUENCY_BUCKET_ID);
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .delinquencyBucketId(delinquencyBucketId);
+
+        final PutWorkingCapitalLoansLoanIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, response);
+        log.info("Working Capital Loan modified with delinquency bucket with ID: {}", response.getResourceId());
     }
 
     @When("Admin modifies the working capital loan with {int} {string} breach override data")
@@ -1081,6 +1195,17 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .nearBreachId(overrideNearBreachId);//
 
         String message = ErrorMessageHelper.overrideDisallowedByProductFailure();
+        verifyModifyWorkingCapitalLoanAccountFailure(modifyRequest, 400, message);
+    }
+
+    @Then("Admin failed to modify working capital loan while delinquency override disallowed with delinquency override")
+    public void modifyLoanWithDelinquencyOverrideDisallowedWithDelinquencyDefaultFailure() {
+        final Long overrideDelinquencyBuckethId = testContext().get(TestContextKey.DELINQUENCY_BUCKET_ID);
+
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest() //
+                .delinquencyBucketId(overrideDelinquencyBuckethId);//
+
+        String message = ErrorMessageHelper.overrideDisallowedByProductFailure("delinquencyBucketId");
         verifyModifyWorkingCapitalLoanAccountFailure(modifyRequest, 400, message);
     }
 
@@ -2360,6 +2485,16 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         executeDiscountFeeAdjustmentById(getCreatedLoanId(), request);
     }
 
+    @And("Admin adds Discount fee adjustment with {string} amount on transaction date {string} on Working Capital loan account for last discount added on disbursement")
+    public void addDiscountFeeAdjustmentWCLoanDisbWithTransactionDate(final String adjustmentAmount, final String transactionDate) {
+        PostWorkingCapitalLoansLoanIdResponse lastDiscountOnDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
+        Assertions.assertNotNull(lastDiscountOnDisbursementResponse);
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().relatedResourceId(lastDiscountOnDisbursementResponse.getSubResourceId())
+                .transactionAmount(new BigDecimal(adjustmentAmount)).transactionDate(transactionDate);
+        executeDiscountFeeAdjustmentById(getCreatedLoanId(), request);
+    }
+
     @And("Admin adds Discount fee adjustment with {string} amount on transaction date {string} on Working Capital loan account for last discount and {string} classification")
     public void addDiscountFeeAdjustmentWCLoanWithTransactionDate(final String adjustmentAmount, final String transactionDate,
             String classificationCodeValueName) {
@@ -2769,6 +2904,25 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         updatePeriodPaymentRateFailed(periodPaymentRate, errorMessage);
     }
 
+    @Then("Admin update Working Capital period payment rate with {string} value expecting error:")
+    public void adminUpdateWorkingCapitalPeriodPaymentRateExpectingError(final String periodPaymentRate, final DataTable table) {
+        final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.getLoanId();
+        final Map<String, String> expectedData = table.asMaps().getFirst();
+        final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
+        final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+
+        final PutWorkingCapitalLoansLoanIdRateRequest rateChangeRequest = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoanUpdateRateRequest().periodPaymentRate(new BigDecimal(periodPaymentRate));
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().updateWorkingCapitalLoanRateById(loanId, rateChangeRequest));
+
+        assertHttpStatus(exception, expectedHttpCode);
+        assertValidationError(exception, expectedErrorMessage);
+        log.info("Verified period payment rate update on loan {} failed with status {} and message: {}", loanId, expectedHttpCode,
+                expectedErrorMessage);
+    }
+
     @When("Admin update Working Capital period payment rate failed with {string} value cause unable to calculate EIR")
     public void adminAddWorkingCapitalPeriodPaymentRateCauseUnableCalculateEIrFailure(final String periodPaymentRate) {
         String errorMessage = ErrorMessageHelper.workingCapitalInputValuesCauseUnableCalculateEIrFailure();
@@ -2854,6 +3008,26 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_CREATE_RESPONSE, response);
         trackLoanIdIfEnabled(response.getLoanId());
         log.info("Working Capital Loan created with ID: {}", response.getLoanId());
+    }
+
+    private void createWorkingCapitalLoanAccountAnnualEIR(final List<String> loanData) {
+        final PostWorkingCapitalLoansRequest loansRequest = createWorkingCapitalLoanAccountAnnualEIRRequest(loanData);
+
+        final PostWorkingCapitalLoansResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_CREATE_RESPONSE, response);
+        trackLoanIdIfEnabled(response.getLoanId());
+        log.info("Working Capital Loan created with ID: {}", response.getLoanId());
+    }
+
+    private PostWorkingCapitalLoansRequest createWorkingCapitalLoanAccountAnnualEIRRequest(final List<String> loanData) {
+        final String loanProduct = loanData.getFirst();
+        final Long clientId = extractClientId();
+        final Long loanProductId = resolveLoanProductId(loanProduct);
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequestAnnualEir(clientId, loanProductId, loanData);
+        testContext().set(TestContextKey.LOAN_CREATE_REQUEST, loansRequest);
+        return loansRequest;
     }
 
     @SuppressWarnings("unchecked")
@@ -3069,6 +3243,10 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                     actualValues.add(response.getChargedOffOnDate() == null ? "null" : response.getChargedOffOnDate().toString());
                 case "chargeOffReason.name" ->
                     actualValues.add(response.getChargeOffReason() == null ? "null" : response.getChargeOffReason().getName());
+                case "annualEir" -> actualValues.add(response.getAnnualEir() == null ? "null"
+                        : new Utils.DoubleFormatterCustomPrecision(response.getAnnualEir().doubleValue(), "%.6f").format());
+                case "calculatedAnnualEir" -> actualValues.add(response.getCalculatedAnnualEir() == null ? "null"
+                        : new Utils.DoubleFormatterCustomPrecision(response.getCalculatedAnnualEir().doubleValue(), "%.6f").format());
                 default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
             }
         }
@@ -3109,6 +3287,23 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .principalAmount(new BigDecimal(principal))//
                 .totalPaymentVolume(new BigDecimal(totalPaymentVolume))//
                 .periodPaymentRate(new BigDecimal(periodPaymentRate));//
+    }
+
+    private PostWorkingCapitalLoansRequest buildCreateLoanRequestAnnualEir(final Long clientId, final Long productId,
+            final List<String> loanData) {
+        final String submittedOnDate = loanData.get(1);
+        final String expectedDisbursementDate = loanData.get(2);
+        final String principal = loanData.get(3);
+        final String annualEir = loanData.get(4);
+        final String discount = loanData.get(5);
+
+        return workingCapitalLoanRequestFactory.defaultAnnualEirWorkingCapitalLoansRequest(clientId)//
+                .productId(productId)//
+                .submittedOnDate(submittedOnDate)//
+                .expectedDisbursementDate(expectedDisbursementDate)//
+                .principalAmount(new BigDecimal(principal))//
+                .annualEir(annualEir != null && !annualEir.isEmpty() ? new BigDecimal(annualEir) : null)//
+                .discount(discount != null && !discount.isEmpty() ? new BigDecimal(discount) : null);//
     }
 
     private PutWorkingCapitalLoansLoanIdRequest buildModifyLoanRequest(final List<String> loanData) {

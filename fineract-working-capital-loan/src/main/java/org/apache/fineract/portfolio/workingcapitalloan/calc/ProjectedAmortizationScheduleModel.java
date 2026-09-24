@@ -84,7 +84,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 @Slf4j
 public final class ProjectedAmortizationScheduleModel {
 
-    private static final String MODEL_VERSION = "8";
+    private static final String MODEL_VERSION = "9";
 
     /**
      * Cap on Total Days: beyond this the schedule materialises an unreasonable number of rows and the EIR is
@@ -97,6 +97,7 @@ public final class ProjectedAmortizationScheduleModel {
     private final Money netDisbursementAmount;
     private final Money totalPaymentVolume;
     private final BigDecimal periodPaymentRate;
+    private final BigDecimal annualEir;
     private final int npvDayCount;
     private final LocalDate expectedDisbursementDate;
 
@@ -201,7 +202,7 @@ public final class ProjectedAmortizationScheduleModel {
     private LocalDate calculatedTillDate;
 
     private ProjectedAmortizationScheduleModel(final Money discountFeeAmount, final Money netDisbursementAmount,
-            final Money totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount,
+            final Money totalPaymentVolume, final BigDecimal periodPaymentRate, final BigDecimal annualEir, final int npvDayCount,
             final LocalDate expectedDisbursementDate, final Money expectedPaymentAmount, final Money finalPaymentAmount,
             final int originalPaymentNumber, final BigDecimal effectiveInterestRate, final BigDecimal calculatedAnnualEir,
             final WorkingCapitalAmortizationType amortizationType, final MathContext mc, final CurrencyData currency,
@@ -211,6 +212,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.netDisbursementAmount = netDisbursementAmount;
         this.totalPaymentVolume = totalPaymentVolume;
         this.periodPaymentRate = periodPaymentRate;
+        this.annualEir = annualEir;
         this.npvDayCount = npvDayCount;
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.expectedPaymentAmount = expectedPaymentAmount;
@@ -243,6 +245,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.netDisbursementAmount = null;
         this.totalPaymentVolume = null;
         this.periodPaymentRate = null;
+        this.annualEir = null;
         this.npvDayCount = 0;
         this.expectedDisbursementDate = null;
         this.expectedPaymentAmount = null;
@@ -365,9 +368,12 @@ public final class ProjectedAmortizationScheduleModel {
     }
 
     private ProjectedAmortizationScheduleModel withDiscount(final BigDecimal asOfDiscount) {
-        final ProjectedAmortizationScheduleModel asOfModel = generate(amortizationType(), asOfDiscount, netDisbursementAmount.getAmount(),
-                totalPaymentVolume.getAmount(), periodPaymentRate, npvDayCount, expectedDisbursementDate, mc, currency,
-                calculatedTillDate != null ? calculatedTillDate : expectedDisbursementDate);
+        final LocalDate asOfDate = calculatedTillDate != null ? calculatedTillDate : expectedDisbursementDate;
+        final ProjectedAmortizationScheduleModel asOfModel = annualEir != null
+                ? generateFromAnnualEir(amortizationType(), asOfDiscount, netDisbursementAmount.getAmount(), annualEir, npvDayCount,
+                        expectedDisbursementDate, mc, currency, asOfDate)
+                : generate(amortizationType(), asOfDiscount, netDisbursementAmount.getAmount(), totalPaymentVolume.getAmount(),
+                        periodPaymentRate, npvDayCount, expectedDisbursementDate, mc, currency, asOfDate);
         asOfModel.copyPrincipalAdjustmentsFrom(this);
         for (final ActualPayment payment : actualPayments) {
             asOfModel.applyPayment(payment.date(), payment.amount().getAmount());
@@ -508,9 +514,72 @@ public final class ProjectedAmortizationScheduleModel {
         final AmortizationParams.Solved solved = AmortizationParams.solve(type, net.getAmount(), fee.getAmount(), volume.getAmount(),
                 periodPaymentRate, npvDayCount, currency.getDecimalPlaces(), mc);
 
-        return new ProjectedAmortizationScheduleModel(fee, net, volume, periodPaymentRate, npvDayCount, expectedDisbursementDate,
+        return new ProjectedAmortizationScheduleModel(fee, net, volume, periodPaymentRate, null, npvDayCount, expectedDisbursementDate,
                 Money.of(currency, solved.dailyPayment(), mc), Money.of(currency, solved.closingPayment(), mc), solved.term(), solved.eir(),
                 solved.calculatedAnnualEir(), type, mc, currency, currentDate);
+    }
+
+    /**
+     * Creates a schedule from net disbursement, discount fee, annual EIR (percentage) and NPV day count. The daily
+     * payment is found by binary search so that the discounted cash-flow NPV equals the net disbursement; term, closing
+     * and IRR then follow the same path as TPV for that daily payment, so the walk matches an equivalent
+     * period-payment-rate schedule.
+     */
+    public static ProjectedAmortizationScheduleModel generateFromAnnualEir(final WorkingCapitalAmortizationType amortizationType,
+            final BigDecimal discountFeeAmount, final BigDecimal netDisbursementAmount, final BigDecimal annualEirPercent,
+            final int npvDayCount, final LocalDate expectedDisbursementDate, final MathContext mc, final CurrencyData currency,
+            final LocalDate currentDate) {
+
+        Objects.requireNonNull(discountFeeAmount, "discountFeeAmount");
+        Objects.requireNonNull(netDisbursementAmount, "netDisbursementAmount");
+        Objects.requireNonNull(annualEirPercent, "annualEir");
+        Objects.requireNonNull(expectedDisbursementDate, "expectedDisbursementDate");
+        Objects.requireNonNull(currency, "currency");
+        final Money net = Money.of(currency, netDisbursementAmount, mc);
+        final Money fee = Money.of(currency, discountFeeAmount, mc);
+        if (!fee.isGreaterThanZero()) {
+            throw new IllegalArgumentException("discountFeeAmount must be positive for annual EIR strategy in the loan currency");
+        }
+        if (!net.isGreaterThanZero()) {
+            throw new IllegalArgumentException("netDisbursementAmount must be positive in the loan currency");
+        }
+        if (npvDayCount <= 0) {
+            throw new IllegalArgumentException("npvDayCount must be positive");
+        }
+
+        final WorkingCapitalAmortizationType type = amortizationType != null ? amortizationType : WorkingCapitalAmortizationType.EIR;
+        final AmortizationParams.Solved solved = AmortizationParams.solveFromAnnualEir(type, net.getAmount(), fee.getAmount(),
+                annualEirPercent, npvDayCount, currency.getDecimalPlaces(), mc);
+
+        return new ProjectedAmortizationScheduleModel(fee, net, null, null, annualEirPercent, npvDayCount, expectedDisbursementDate,
+                Money.of(currency, solved.dailyPayment(), mc), Money.of(currency, solved.closingPayment(), mc), solved.term(), solved.eir(),
+                solved.calculatedAnnualEir(), type, mc, currency, currentDate);
+    }
+
+    /**
+     * Feasibility pre-check reusing {@link #generateFromAnnualEir}'s formulas, without building the schedule. Callers
+     * must supply non-null inputs; missing mandatory fields are validated elsewhere before this is invoked.
+     */
+    public static boolean isAnnualEirCalculable(final WorkingCapitalAmortizationType amortizationType, final BigDecimal discountFeeAmount,
+            final BigDecimal netDisbursementAmount, final BigDecimal annualEirPercent, final int npvDayCount,
+            final MonetaryCurrency currency, final MathContext mc) {
+        Objects.requireNonNull(discountFeeAmount, "discountFeeAmount");
+        Objects.requireNonNull(netDisbursementAmount, "netDisbursementAmount");
+        Objects.requireNonNull(annualEirPercent, "annualEir");
+        Objects.requireNonNull(currency, "currency");
+        Objects.requireNonNull(mc, "mc");
+        final BigDecimal net = Money.of(currency, netDisbursementAmount, mc).getAmount();
+        final BigDecimal fee = Money.of(currency, discountFeeAmount, mc).getAmount();
+        if (fee.signum() <= 0 || net.signum() <= 0 || npvDayCount <= 0 || annualEirPercent.signum() <= 0) {
+            return false;
+        }
+        try {
+            final WorkingCapitalAmortizationType type = amortizationType != null ? amortizationType : WorkingCapitalAmortizationType.EIR;
+            AmortizationParams.solveFromAnnualEir(type, net, fee, annualEirPercent, npvDayCount, currency.getDigitsAfterDecimal(), mc);
+        } catch (final ArithmeticException | IllegalArgumentException | IllegalStateException e) {
+            return false;
+        }
+        return true;
     }
 
     /** First-period offset: 0 when a disbursement-date repayment shifts the grid onto the disbursement date, else 1. */
@@ -612,8 +681,11 @@ public final class ProjectedAmortizationScheduleModel {
     /** Creates a new model with updated parameters, preserving applied payments. */
     public ProjectedAmortizationScheduleModel regenerate(final BigDecimal newDiscountAmount, final BigDecimal newNetAmount,
             final LocalDate newStartDate, final LocalDate currentDate) {
-        final ProjectedAmortizationScheduleModel newModel = generate(amortizationType(), newDiscountAmount, newNetAmount,
-                totalPaymentVolume.getAmount(), periodPaymentRate, npvDayCount, newStartDate, mc, currency, currentDate);
+        final ProjectedAmortizationScheduleModel newModel = annualEir != null
+                ? generateFromAnnualEir(amortizationType(), newDiscountAmount, newNetAmount, annualEir, npvDayCount, newStartDate, mc,
+                        currency, currentDate)
+                : generate(amortizationType(), newDiscountAmount, newNetAmount, totalPaymentVolume.getAmount(), periodPaymentRate,
+                        npvDayCount, newStartDate, mc, currency, currentDate);
         newModel.actualPayments.addAll(actualPayments);
         newModel.copyPrincipalAdjustmentsFrom(this);
         newModel.rebuildPayments();
@@ -670,6 +742,9 @@ public final class ProjectedAmortizationScheduleModel {
     public void applyRateChange(final BigDecimal newPeriodPaymentRate, final LocalDate rateChangeDate, final LocalDate currentDate) {
         Objects.requireNonNull(newPeriodPaymentRate, "newPeriodPaymentRate");
         Objects.requireNonNull(rateChangeDate, "rateChangeDate");
+        if (annualEir != null) {
+            throw new IllegalStateException("rate change is not supported for Annual EIR payment amount calculation strategy");
+        }
         if (rateChangeDate.isBefore(expectedDisbursementDate)) {
             throw new IllegalArgumentException("rateChangeDate must not be before expectedDisbursementDate");
         }
@@ -749,9 +824,16 @@ public final class ProjectedAmortizationScheduleModel {
         // the flag still set would recurse. It also means every direct caller leaves the model fresh.
         this.derivedPaymentsStale = false;
         final Map<LocalDate, BigDecimal> paymentsByDate = aggregatePaymentsByDate();
-        final AmortizationWalk amortizationWalk = new AmortizationWalk(amortizationType(), netDisbursementAmount.getAmount(),
-                discountFeeAmount.getAmount(), totalPaymentVolume.getAmount(), periodPaymentRate, npvDayCount, expectedDisbursementDate,
-                currentFirstPeriodDayOffset(), calculatedTillDate, paymentsByDate, rateChanges, minimumScheduleDays(), currency, mc);
+        final AmortizationWalk amortizationWalk;
+        if (annualEir != null) {
+            amortizationWalk = new AmortizationWalk(amortizationType(), netDisbursementAmount.getAmount(), discountFeeAmount.getAmount(),
+                    annualEir, npvDayCount, expectedDisbursementDate, currentFirstPeriodDayOffset(), calculatedTillDate, paymentsByDate,
+                    minimumScheduleDays(), currency, mc);
+        } else {
+            amortizationWalk = new AmortizationWalk(amortizationType(), netDisbursementAmount.getAmount(), discountFeeAmount.getAmount(),
+                    totalPaymentVolume.getAmount(), periodPaymentRate, npvDayCount, expectedDisbursementDate, currentFirstPeriodDayOffset(),
+                    calculatedTillDate, paymentsByDate, rateChanges, minimumScheduleDays(), currency, mc);
+        }
         final AmortizationWalk.Result walked = amortizationWalk.walk();
         this.contractualTerm = walked.contractualTerm();
         final Map<LocalDate, RateChangeSolve> solves = new LinkedHashMap<>();

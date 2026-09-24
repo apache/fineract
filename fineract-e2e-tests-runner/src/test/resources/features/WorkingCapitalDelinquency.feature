@@ -54,6 +54,7 @@ Feature: Working Capital Delinquency
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
 
   @TestRailId:C74465
   Scenario: Verify working capital loan delinquency range schedule - UC4: delinquency range schedule on last day of 1st range
@@ -84,6 +85,7 @@ Feature: Working Capital Delinquency
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 January 2026"
 
   @TestRailId:C74466
   Scenario: Verify working capital loan delinquency range schedule - UC5: delinquency range schedule on first day of 2nd range
@@ -115,6 +117,7 @@ Feature: Working Capital Delinquency
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
       | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C74467
   Scenario: Verify working capital loan delinquency range schedule - UC6: delinquency range schedule, multiple ranges
@@ -151,6 +154,7 @@ Feature: Working Capital Delinquency
       | 5            | 2026-01-13 | 2026-01-15 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 4              |
       | 6            | 2026-01-16 | 2026-01-18 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
       | 7            | 2026-01-19 | 2026-01-21 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "19 January 2026"
 
   @TestRailId:C74468
   Scenario: Verify working capital loan delinquency range schedule - UC7: delinquency range schedule, multiple ranges with discount
@@ -187,6 +191,7 @@ Feature: Working Capital Delinquency
       | 5            | 2026-01-13 | 2026-01-15 | 300.0          | 0.0        | 300.0             | false                 | 300.0            | 4              |
       | 6            | 2026-01-16 | 2026-01-18 | 300.0          | 0.0        | 300.0             | false                 | 300.0            | 1              |
       | 7            | 2026-01-19 | 2026-01-21 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "19 January 2026"
 
   @TestRailId:C74525
   Scenario: Verify working capital loan delinquency tag history - UC1: multiple ranges
@@ -234,6 +239,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-03-02  |              | D00            | 1              | 30             |
       | 1            | 2026-03-02  |              | D30            | 31             | 60             |
       | 1            | 2026-01-31  |              | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 April 2026"
 
   @TestRailId:C74526
   Scenario: Verify working capital loan delinquency tag history - UC2: multiple ranges with (internal) payment
@@ -284,6 +290,7 @@ Feature: Working Capital Delinquency
     Then Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2020-12-04  | 2020-12-05   | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "06 December 2020"
 
   @TestRailId:C74527
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC1: full expectedAmount repaid on disbursement day
@@ -310,6 +317,7 @@ Feature: Working Capital Delinquency
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
     Then Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
 
   @TestRailId:C74528
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC2: full expectedAmount repaid after disbursement day
@@ -353,6 +361,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C74529
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC3: full expectedAmount repaid on last day of 1st period
@@ -396,6 +405,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C74530
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC4: full expectedAmount repaid on first day of 2nd period
@@ -444,6 +454,7 @@ Feature: Working Capital Delinquency
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2026-01-04  | 2026-01-04   | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "05 January 2026"
 
   @TestRailId:C74531
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC5: full expectedAmount repaid in 1st period with multiple payments on same day
@@ -488,6 +499,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C74532
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC6: full expectedAmount repaid in 1st period with multiple payments on different days
@@ -538,6 +550,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C74533
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC7: partial expectedAmount repaid in 1st period
@@ -582,6 +595,7 @@ Feature: Working Capital Delinquency
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2026-01-04  |              | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C74534
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC8: partial expectedAmount repaid in 2nd period
@@ -630,6 +644,7 @@ Feature: Working Capital Delinquency
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2026-01-04  |              | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "05 January 2026"
 
   @TestRailId:C74535
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC9: expectedAmount overpaid in 1st period
@@ -675,6 +690,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C74536
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC10: expectedAmount overpaid in 2nd period
@@ -723,6 +739,7 @@ Feature: Working Capital Delinquency
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2026-01-04  | 2026-01-05   | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "05 January 2026"
 
   @TestRailId:C74537
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC11: expectedAmount overpaid in late period
@@ -783,6 +800,7 @@ Feature: Working Capital Delinquency
       | 3            | 2026-01-10  | 2026-01-15   | D00            | 1              | 30             |
       | 2            | 2026-01-07  | 2026-01-15   | D00            | 1              | 30             |
       | 1            | 2026-01-04  | 2026-01-15   | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 January 2026"
 
   @TestRailId:C94056
   Scenario: Verify delinquency grace period boundary - UC1: delinquency range schedule with grace period set to 15 days.
@@ -872,6 +890,7 @@ Feature: Working Capital Delinquency
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 2            | 2026-01-22  | 2026-01-24   | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "24 January 2026"
 
   @TestRailId:C94057
   Scenario: Verify delinquency grace period boundary - UC2: no delinquency tags before grace expiry with 3 days
@@ -909,6 +928,7 @@ Feature: Working Capital Delinquency
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2026-02-03  |              | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 February 2026"
 
   @TestRailId:C94058
   Scenario: Verify delinquency grace period - UC3: payment on last grace day prevents delinquency
@@ -942,9 +962,10 @@ Feature: Working Capital Delinquency
       | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 February 2026"
 
   @TestRailId:C98172
-  Scenario: Verify that delinquency Id is overridable and applied
+  Scenario: Verify that delinquency Id is overridable and applied on create loan account with override allowed on loan product level - UC1
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
@@ -964,3 +985,73 @@ Feature: Working Capital Delinquency
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-27 | 248.0          | 0.0        | 248.0             | null                  | null             | null           |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
+
+  @Skip
+  @TestRailId:C106711
+  Scenario: Verify that delinquency Id is overridable and applied on modify loan account with override allowed on WC loan product level - UC2
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays |
+      | 1               | MONTHS              | FLAT                        | 500          | 5               |
+    And Admin creates WC Delinquency Bucket With Values:
+      | frequency | frequencyType | minimumPaymentType | minimumPayment |
+      | 2         | WEEKS         | FLAT               | 248            |
+    And Admin creates a working capital loan using created product with breachGraceDays 11 and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId | delinquencyGraceDays |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |                     | 13                   |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-12 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    Then Admin successfully undo Working Capital disbursal
+    Then Working Capital loan status will be "APPROVED"
+    When Admin makes undo approval on the working capital loan
+    Then Working capital loan undo approval was successful
+    Then Working Capital loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
+# --- modify WC loan product with override delinquency bucket --- #
+    And Admin modifies the working capital loan with delinquency override data
+    And Admin successfully approves the working capital loan on "02 January 2026" with "9000" amount and expected disbursement date on "02 January 2026"
+    When Admin successfully disburse the Working Capital loan on "02 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-27 | 248.0          | 0.0        | 248.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 January 2026"
+
+  @TestRailId:C106712
+  Scenario: Verify WC Loan account create with delinquency override while delinquency override is disallowed on WCLP is failed - UC3
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket With Values:
+      | frequency | frequencyType | minimumPaymentType | minimumPayment |
+      | 2         | WEEKS         | FLAT               | 248            |
+    And Admin failed to create working capital loan while delinquency override disallowed with delinquency bucket override and default following data:
+      | LoanProduct                       | submittedOnDate |
+      | WCLP_DISALLOW_ATTRIBUTES_OVERRIDE | 01 January 2026 |
+
+  @TestRailId:C106713
+  Scenario: Verify WC Loan account modify with delinquency override while delinquency override is disallowed on WCLP is failed - UC4
+    When Admin sets the business date to "01 January 2027"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket With Values:
+      | frequency | frequencyType | minimumPaymentType | minimumPayment |
+      | 2         | WEEKS         | FLAT               | 248            |
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct                       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DISALLOW_ATTRIBUTES_OVERRIDE | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+# -- modify with override delinquency bucket should fail as override is disallowed on loan product level --- #
+    And Admin failed to modify working capital loan while delinquency override disallowed with delinquency override
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
+

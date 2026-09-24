@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 
 /**
  * How much of the discount fee a given amount of money has earned.
@@ -60,6 +61,7 @@ final class PlanCursor {
     private final BigDecimal totalPaymentVolume;
     private final int npvDayCount;
     private final int currencyScale;
+    private final WorkingCapitalPaymentAmountCalculationStrategy strategy;
 
     /** Balance the plan has drawn down to at the cursor's position. */
     private BigDecimal balance;
@@ -78,6 +80,8 @@ final class PlanCursor {
     private boolean exhausted;
 
     /**
+     * TPV / period-payment-rate cursor: solves the plan instalment from TPV and rate.
+     *
      * @param flatRatio
      *            the walk's own FLAT share, handed over rather than re-derived so the plan and the schedule can never
      *            earn at two ratios; {@code null} under EIR
@@ -91,6 +95,7 @@ final class PlanCursor {
         this.totalPaymentVolume = totalPaymentVolume;
         this.npvDayCount = npvDayCount;
         this.currencyScale = currencyScale;
+        this.strategy = WorkingCapitalPaymentAmountCalculationStrategy.TPV;
         this.balance = netDisbursement;
         this.earned = BigDecimal.ZERO;
         this.billed = BigDecimal.ZERO;
@@ -98,6 +103,31 @@ final class PlanCursor {
         this.previousBilled = BigDecimal.ZERO;
         this.solved = AmortizationParams.solve(amortizationType, netDisbursement, discountFee, totalPaymentVolume, periodPaymentRate,
                 npvDayCount, currencyScale, mc);
+        this.stepsInSolve = 0;
+        this.exhausted = false;
+    }
+
+    /**
+     * Annual EIR cursor: solves the plan instalment from annual EIR (NPV search → IRR), same role as the TPV ctor
+     * solving from TPV × period payment rate. Rate changes are not supported on this path.
+     */
+    PlanCursor(final WorkingCapitalAmortizationType amortizationType, final BigDecimal flatRatio, final BigDecimal netDisbursement,
+            final BigDecimal discountFee, final BigDecimal annualEir, final int npvDayCount, final int currencyScale,
+            final MathContext mc) {
+        this.mc = mc;
+        this.amortizationType = amortizationType;
+        this.flatRatio = flatRatio;
+        this.totalPaymentVolume = null;
+        this.npvDayCount = npvDayCount;
+        this.currencyScale = currencyScale;
+        this.strategy = WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR;
+        this.balance = netDisbursement;
+        this.earned = BigDecimal.ZERO;
+        this.billed = BigDecimal.ZERO;
+        this.previousEarned = BigDecimal.ZERO;
+        this.previousBilled = BigDecimal.ZERO;
+        this.solved = AmortizationParams.solveFromAnnualEir(amortizationType, netDisbursement, discountFee, annualEir, npvDayCount,
+                currencyScale, mc);
         this.stepsInSolve = 0;
         this.exhausted = false;
     }
@@ -114,9 +144,15 @@ final class PlanCursor {
      * The fee already earned is carried across untouched, and the cursor is set level with the money already collected,
      * so the read that follows starts where the last one finished. Nothing the borrower has earned is un-earned and
      * nothing is earned twice.
+     *
+     * <p>
+     * Only valid for the TPV / period-payment-rate strategy.
      */
     void changeRateTo(final BigDecimal periodPaymentRate, final BigDecimal balanceNow, final BigDecimal unearnedFee,
             final BigDecimal collectedSoFar) {
+        if (strategy.isAnnualEir()) {
+            throw new IllegalStateException("rate change is not supported for Annual EIR payment amount calculation strategy");
+        }
         if (balanceNow.signum() <= 0) {
             throw new IllegalArgumentException("balance at a rate change must be positive, got: " + balanceNow);
         }
