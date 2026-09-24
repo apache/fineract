@@ -28293,6 +28293,18 @@ Request Body:
 	    </div>
 	</div>
 
+	<div class="method-section">
+    <div class="method-description">
+        <h2>Annual savings charges</h2>
+        <p><code>POST /v1/savingsaccounts/{accountId}?command=applyAnnualFees</code>
+        is unsupported and returns HTTP 400 with error code <code>error.msg.command.unsupported</code>
+        (global code <code>validation.msg.validation.errors.exist</code>).
+        Annual savings charges are processed through the configured scheduler using charges already attached to the account.
+        The manual command does not create charges, charge payments, savings transactions or journal entries.
+        The same rejection applies to the external-ID and GSIM command routes.</p>
+    </div>
+</div>
+
 	<a id="savingsaccounts_post_interest" name="savingsaccounts_post_interest" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
