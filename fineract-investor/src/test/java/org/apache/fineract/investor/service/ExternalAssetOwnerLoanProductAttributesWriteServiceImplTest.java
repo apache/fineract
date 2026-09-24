@@ -133,7 +133,9 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
     @CsvSource(value = { "SETTLEMENT_MODEL|DELAYED_SETTLEMENT|DELAYED_SETTLEMENT", "SETTLEMENT_MODEL|DEFAULT_SETTLEMENT|DEFAULT_SETTLEMENT",
             "EXCLUDED_TRANSACTION_TYPES|BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT|BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT",
             "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|DEFERRED|DEFERRED", "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|DEFerrED|DEFERRED",
-            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|IMMEDIATE|IMMEDIATE" }, delimiter = '|')
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|IMMEDIATE|IMMEDIATE",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|' immediate '|IMMEDIATE",
+            "BUY_DOWN_FEE_AMORTIZATION_STRATEGY|' Deferred '|DEFERRED" }, delimiter = '|')
     public void testCreateSuccess(String attributeKey, String attributeValue, String expectedSavedValue) {
         TestContext testContext = new TestContext(attributeKey, attributeValue);
 
@@ -154,6 +156,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository).saveAndFlush(loanProductAttributeArgumentCaptor.capture());
         verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
         ExternalAssetOwnerLoanProductAttributes savedAttribute = loanProductAttributeArgumentCaptor.getValue();
+        Assertions.assertEquals(testContext.loanProductId, savedAttribute.getLoanProductId());
         Assertions.assertEquals(attributeKey, savedAttribute.getAttributeKey());
         Assertions.assertEquals(expectedSavedValue, savedAttribute.getAttributeValue());
     }
@@ -374,10 +377,10 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = { "EXCLUDED_TRANSACTION_TYPES|BAD_VALUE", "EXCLUDED_TRANSACTION_TYPES|BUY_DOWN_FEE,NOT_A_TYPE",
-            "EXCLUDED_TRANSACTION_TYPES|,", "EXCLUDED_TRANSACTION_TYPES|BUY_DOWN_FEE,",
-            "EXCLUDED_TRANSACTION_TYPES|BUY_DOWN_FEE,BUY_DOWN_FEE", "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|BAD_VALUE" }, delimiter = '|')
-    public void testExternalAssetOwnerLoanProductAttributeInvalidValue(String attributeKey, String attributeValue) {
+    @CsvSource(value = { "EXCLUDED_TRANSACTION_TYPES|BAD_VALUE", "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|BAD_VALUE",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|DEFERRED,IMMEDIATE", "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|DELAYED_SETTLEMENT",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|CAPITALIZED_INCOME" }, delimiter = '|')
+    public void testCreateExternalAssetOwnerLoanProductAttributeWithInvalidValueIsRejected(String attributeKey, String attributeValue) {
         TestContext testContext = new TestContext(attributeKey, attributeValue);
 
         final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
@@ -423,7 +426,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
             "EXCLUDED_TRANSACTION_TYPES|BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT,BUY_DOWN_FEE_AMORTIZATION,BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT|BUY_DOWN_FEE",
             "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|DEFERRED|IMMEDIATE",
             "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|IMMEDIATE|DEFERRED" }, delimiter = '|')
-    public void testUpdateExcludedTransactionTypesAttributeReplacesTheValue(String attributeKey, String attributeValue,
+    public void testUpdateExternalAssetOwnerLoanProductAttributeReplacesTheValue(String attributeKey, String attributeValue,
             String currentValue) {
         TestContext testContext = new TestContext(attributeKey, attributeValue);
         ArgumentCaptor<ExternalAssetOwnerLoanProductAttributes> loanProductAttributeArgumentCaptor = ArgumentCaptor
@@ -617,8 +620,8 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
 
         return Stream.of(Arguments.of("blankAttributeValue", "SETTLEMENT_MODEL", "", "Validation errors exist."),
                 Arguments.of("blankAttributeKey", "", "DELAYED_SETTLEMENT", "Validation errors exist."),
-                Arguments.of("blankAttributeKey", "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY", "", "Validation errors exist."),
-                Arguments.of("blankAttributeKey", "EXCLUDED_TRANSACTION_TYPES", "", "Validation errors exist."));
+                Arguments.of("blankAttributeValue", "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY", "", "Validation errors exist."),
+                Arguments.of("blankAttributeValue", "EXCLUDED_TRANSACTION_TYPES", "", "Validation errors exist."));
     }
 
     private void assertLoanProductAttributeValues(final TestContext testContext,
