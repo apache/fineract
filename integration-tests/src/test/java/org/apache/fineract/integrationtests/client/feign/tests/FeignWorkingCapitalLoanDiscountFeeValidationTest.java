@@ -257,7 +257,7 @@ public class FeignWorkingCapitalLoanDiscountFeeValidationTest extends FeignInteg
     private Long createProduct() {
         return productHelper.createWorkingCapitalLoanProduct(
                 new WorkingCapitalLoanProductTestBuilder().withName("WCL DiscFeeVal " + Utils.uniqueRandomStringGenerator("", 8))
-                        .withShortName(Utils.uniqueRandomStringGenerator("", 4))
+                        .withShortName(Utils.uniqueRandomStringGenerator("", 8))
                         .withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build())
                 .getResourceId();
     }

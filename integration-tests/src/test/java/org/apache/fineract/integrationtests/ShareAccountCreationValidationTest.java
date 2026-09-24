@@ -43,7 +43,7 @@ public class ShareAccountCreationValidationTest extends IntegrationTest {
 
         Long productId = ok(fineractClient().shareProducts.createShareProduct("share",
                 new PostProductsTypeRequest().name(Utils.uniqueRandomStringGenerator("SHARE_PROD_", 6))
-                        .shortName(Utils.uniqueRandomStringGenerator("", 4)).description(Utils.randomStringGenerator("", 20))
+                        .shortName(Utils.uniqueRandomStringGenerator("", 8)).description(Utils.randomStringGenerator("", 20))
                         .currencyCode("USD").digitsAfterDecimal(4).inMultiplesOf(0).locale("en_GB").totalShares(10000).sharesIssued(10000)
                         .unitPrice(2).nominalShares(20).minimumShares(10).maximumShares(3000)
                         .allowDividendCalculationForInactiveClients(true).accountingRule(1).minimumActivePeriodForDividends(1)
@@ -54,7 +54,7 @@ public class ShareAccountCreationValidationTest extends IntegrationTest {
 
         Long savingsProductId = ok(fineractClient().savingsProducts
                 .createSavingsProduct(new PostSavingsProductsRequest().name(Utils.uniqueRandomStringGenerator("SAV_PROD_", 6))
-                        .shortName(Utils.uniqueRandomStringGenerator("", 4)).currencyCode("USD").digitsAfterDecimal(4).inMultiplesOf(0)
+                        .shortName(Utils.uniqueRandomStringGenerator("", 8)).currencyCode("USD").digitsAfterDecimal(4).inMultiplesOf(0)
                         .nominalAnnualInterestRate(10.0).locale("en_GB").interestCompoundingPeriodType(4).interestPostingPeriodType(4)
                         .interestCalculationType(1).interestCalculationDaysInYearType(365).accountingRule(1)))
                 .getResourceId();

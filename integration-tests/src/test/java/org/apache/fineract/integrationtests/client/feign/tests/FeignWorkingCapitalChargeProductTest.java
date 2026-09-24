@@ -588,7 +588,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         final Long clientId = clientHelper.createClient(LOAN_DATE);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(
                 new WorkingCapitalLoanProductTestBuilder().withName("WCL Charge " + Utils.uniqueRandomStringGenerator("", 8))
-                        .withShortName(Utils.uniqueRandomStringGenerator("", 4)).build())
+                        .withShortName(Utils.uniqueRandomStringGenerator("", 8)).build())
                 .getResourceId();
         final BigDecimal principal = BigDecimal.valueOf(9000);
         final Long loanId = wcLoanHelper.submitApplication(WorkingCapitalLoanRequestBuilders.submitApplication(clientId, productId,

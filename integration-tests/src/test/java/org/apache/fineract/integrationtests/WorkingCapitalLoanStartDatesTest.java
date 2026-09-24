@@ -224,7 +224,7 @@ public class WorkingCapitalLoanStartDatesTest {
         // Product wiring breach + delinquency, with distinct grace days for each.
         final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
         final String uniqueName = "WCL Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder() //
                 .withName(uniqueName) //
                 .withShortName(uniqueShortName) //
@@ -273,7 +273,7 @@ public class WorkingCapitalLoanStartDatesTest {
 
         final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
         final String uniqueName = "WCL Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder() //
                 .withName(uniqueName) //
                 .withShortName(uniqueShortName) //

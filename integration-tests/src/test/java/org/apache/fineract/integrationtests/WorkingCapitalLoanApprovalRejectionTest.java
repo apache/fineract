@@ -447,7 +447,7 @@ public class WorkingCapitalLoanApprovalRejectionTest {
 
     private Long createProduct() {
         final String uniqueName = "WCL Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         return productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName).build())
@@ -456,7 +456,7 @@ public class WorkingCapitalLoanApprovalRejectionTest {
 
     private Long createProductWithDiscountOverride() {
         final String uniqueName = "WCL Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         return productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder() //
                 .withName(uniqueName) //
                 .withShortName(uniqueShortName) //

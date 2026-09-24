@@ -309,7 +309,7 @@ public class WorkingCapitalLoanRepaymentAccountingTest {
         AtomicLong loanId = new AtomicLong(0L);
         BusinessDateHelper.runAt(currentDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")), () -> {
             final String uniqueName = "WCL NoAcct " + UUID.randomUUID().toString().substring(0, 8);
-            final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+            final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
             final Long productId = productHelper
                     .createWorkingCapitalLoanProduct(
                             new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName).build())
@@ -337,7 +337,7 @@ public class WorkingCapitalLoanRepaymentAccountingTest {
 
     private Long createAccrualWithDeferredRevenueAmortizationProduct() {
         final String uniqueName = "WCL Acct " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)
                 .withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())

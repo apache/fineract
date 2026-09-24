@@ -241,7 +241,7 @@ public class FeignWorkingCapitalLoanPrepaymentAsOfDateTest extends FeignIntegrat
 
     private Long createProduct() {
         final String uniqueName = "WCL PrepayAsOf " + Utils.uniqueRandomStringGenerator("", 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long productId = productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName).build())

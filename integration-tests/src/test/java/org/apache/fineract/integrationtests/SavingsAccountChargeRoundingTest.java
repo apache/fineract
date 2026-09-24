@@ -215,7 +215,7 @@ public class SavingsAccountChargeRoundingTest extends FeignSavingsTestBase {
 
     private PostSavingsProductsRequest baseSavingsProduct(int digitsAfterDecimal, int inMultiplesOf) {
         return new PostSavingsProductsRequest().locale("en").name(Utils.uniqueRandomStringGenerator("DAILY_INTEREST", 6))
-                .shortName(Utils.uniqueRandomStringGenerator("", 4)).description("Daily interest posting product")
+                .shortName(Utils.uniqueRandomStringGenerator("", 8)).description("Daily interest posting product")
                 .nominalAnnualInterestRate(10.0).digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf).currencyCode("USD")
                 .accountingRule(1).interestCalculationDaysInYearType(365).interestCompoundingPeriodType(1).interestCalculationType(2)
                 .interestPostingPeriodType(1).withdrawalFeeForTransfers(false).enforceMinRequiredBalance(false).allowOverdraft(false)

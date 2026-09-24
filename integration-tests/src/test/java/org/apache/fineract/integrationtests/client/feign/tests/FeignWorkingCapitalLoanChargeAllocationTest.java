@@ -349,7 +349,7 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
 
     private Long createProduct() {
         String uniqueName = "WCL ChargeAlloc " + Utils.uniqueRandomStringGenerator("", 8);
-        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         Long productId = productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName).build())

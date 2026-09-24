@@ -259,7 +259,7 @@ public class LoanBuyDownFeeTest extends FeignLoanTestBase {
             PostClassificationToIncomeAccountMappings buydownFeeClassificationAccountMappings) {
         // Create a progressive loan product with accrual-based accounting and proper GL mappings
         PostLoanProductsRequest postLoanProductsRequest = new PostLoanProductsRequest()
-                .name(Utils.uniqueRandomStringGenerator("BUY_DOWN_FEE_PROGRESSIVE_", 6)).shortName(Utils.uniqueRandomStringGenerator("", 4))
+                .name(Utils.uniqueRandomStringGenerator("BUY_DOWN_FEE_PROGRESSIVE_", 6)).shortName(Utils.uniqueRandomStringGenerator("", 8))
                 .description("Progressive loan product with buy down fee enabled").includeInBorrowerCycle(false).useBorrowerCycle(false)
                 .currencyCode("USD").digitsAfterDecimal(2).principal(1000.0).minPrincipal(100.0).maxPrincipal(10000.0)
                 .numberOfRepayments(12).minNumberOfRepayments(6).maxNumberOfRepayments(24).repaymentEvery(1)

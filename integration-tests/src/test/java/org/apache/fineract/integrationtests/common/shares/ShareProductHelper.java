@@ -44,7 +44,7 @@ public class ShareProductHelper {
     private String digitsAfterDecimal = "4";
     private String inMultiplesOf = "0";
     private String productName = Utils.uniqueRandomStringGenerator("SHARE_PRODUCT_", 6);
-    private String shortName = Utils.uniqueRandomStringGenerator("", 4);
+    private String shortName = Utils.uniqueRandomStringGenerator("", 8);
     private String description = Utils.randomStringGenerator("", 20);
     private String totalShares = "10000";
     private final String currencyCode = USD;

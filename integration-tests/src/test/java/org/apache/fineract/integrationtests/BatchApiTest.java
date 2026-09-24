@@ -1682,7 +1682,7 @@ public class BatchApiTest extends FeignLoanTestBase {
     private Long createBatchLoanProduct(final double principal) {
         return createLoanProduct(new PostLoanProductsRequest()//
                 .name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .currencyCode("USD")//
                 .digitsAfterDecimal(0)//
                 .inMultiplesOf(100)//

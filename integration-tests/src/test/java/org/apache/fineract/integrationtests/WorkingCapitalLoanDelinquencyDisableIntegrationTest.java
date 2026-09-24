@@ -374,7 +374,7 @@ public class WorkingCapitalLoanDelinquencyDisableIntegrationTest {
 
     private Long createProduct(final Long delinquencyBucketId) {
         final String uniqueName = "WCL Product " + Utils.randomStringGenerator("", 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         return productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withDelinquencyBucketId(delinquencyBucketId).build()).getResourceId();
     }

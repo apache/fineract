@@ -119,7 +119,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
      */
     private PostLoanProductsRequest createCashBasedLoanProduct() {
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_CASH_", 6))
-                .shortName(Utils.uniqueRandomStringGenerator("", 4)).description("Cash-based loan product for tax tests")
+                .shortName(Utils.uniqueRandomStringGenerator("", 8)).description("Cash-based loan product for tax tests")
                 .includeInBorrowerCycle(false).currencyCode("USD").digitsAfterDecimal(2).inMultiplesOf(0).installmentAmountInMultiplesOf(1)
                 .useBorrowerCycle(false).minPrincipal(100.0).principal(1000.0).maxPrincipal(100000.0).minNumberOfRepayments(1)
                 .numberOfRepayments(1).maxNumberOfRepayments(30).isLinkedToFloatingInterestRates(false).minInterestRatePerPeriod((double) 0)

@@ -500,7 +500,7 @@ public class WorkingCapitalLoanEirValidationTest {
     private Long createProduct(final UnaryOperator<WorkingCapitalLoanProductTestBuilder> customize) {
         final WorkingCapitalLoanProductTestBuilder builder = new WorkingCapitalLoanProductTestBuilder() //
                 .withName("WCL Product " + UUID.randomUUID().toString().substring(0, 8)) //
-                .withShortName(Utils.uniqueRandomStringGenerator("", 4));
+                .withShortName(Utils.uniqueRandomStringGenerator("", 8));
         return productHelper.createWorkingCapitalLoanProduct(customize.apply(builder).build()).getResourceId();
     }
 

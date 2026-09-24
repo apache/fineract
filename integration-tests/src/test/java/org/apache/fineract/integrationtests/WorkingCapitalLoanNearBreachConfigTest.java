@@ -361,7 +361,7 @@ public class WorkingCapitalLoanNearBreachConfigTest {
 
     private Long createProduct() {
         final String uniqueName = "WCL NB Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long productId = productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName).build())
@@ -372,7 +372,7 @@ public class WorkingCapitalLoanNearBreachConfigTest {
 
     private Long createProductWithNearBreach(final Long nearBreachId) {
         final String uniqueName = "WCL NB Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long breachId = breachHelper
                 .create(new WorkingCapitalBreachRequest().name(Utils.randomStringGenerator("Breach", 12)).breachFrequency(60)
                         .breachFrequencyType("DAYS").breachAmountCalculationType("PERCENTAGE").breachAmount(BigDecimal.valueOf(10)));

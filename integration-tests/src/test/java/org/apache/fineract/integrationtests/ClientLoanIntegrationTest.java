@@ -6707,7 +6707,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
     private PostLoanProductsRequest baseLoanProduct() {
         return new PostLoanProductsRequest()//
                 .name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .currencyCode("USD")//
                 .locale(LOCALE)//
                 .dateFormat(DATETIME_PATTERN)//
@@ -8097,7 +8097,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
     @Override
     protected PostLoanProductsRequest createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() {
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .description("Loan Product Description")//
                 .includeInBorrowerCycle(false)//
                 .currencyCode("USD")//

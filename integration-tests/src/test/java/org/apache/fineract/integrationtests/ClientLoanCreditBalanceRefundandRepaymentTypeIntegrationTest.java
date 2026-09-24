@@ -90,7 +90,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         Account overpaymentAccount = getAccounts().getOverpaymentAccount();
         loanProductTestBuilder = loanProductTestBuilder //
                 .withPrincipal(principal) //
-                .withShortName(Utils.uniqueRandomStringGenerator("", 4)) //
+                .withShortName(Utils.uniqueRandomStringGenerator("", 8)) //
                 .withNumberOfRepayments("4") //
                 .withRepaymentAfterEvery("1") //
                 .withRepaymentTypeAsMonth() //

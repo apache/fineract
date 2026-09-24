@@ -263,7 +263,7 @@ public class WorkingCapitalLoanCreditBalanceRefundTest {
 
     private Long createProduct() {
         final String uniqueName = "WCL Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         final Long productId = productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName).build())

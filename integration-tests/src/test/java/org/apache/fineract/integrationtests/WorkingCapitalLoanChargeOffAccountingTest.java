@@ -199,7 +199,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
         final Long[] loanIdHolder = new Long[1];
         businessDateHelper.runAt(DAY_1.toString(), () -> {
             final String uniqueName = "WCL CoNoAcct " + UUID.randomUUID().toString().substring(0, 8);
-            final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+            final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
             final Long productId = productHelper
                     .createWorkingCapitalLoanProduct(
                             new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName).build())
@@ -664,7 +664,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
 
     private Long createAccrualWithDeferredRevenueAmortizationProduct() {
         final String uniqueName = "WCL CoAcct " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)
                 .withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
@@ -693,7 +693,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
      */
     private Long createAccrualWithDeferredRevenueAmortizationProductWithDiscountOverride() {
         final String uniqueName = "WCL CoDiscAcct " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE))
                 .withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM).withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())

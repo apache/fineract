@@ -594,9 +594,11 @@ public class LoanChargeRoundingTest extends FeignLoanTestBase {
     private String randomShortName() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-        return "L" + chars.charAt(ThreadLocalRandom.current().nextInt(chars.length()))
-                + chars.charAt(ThreadLocalRandom.current().nextInt(chars.length()))
-                + chars.charAt(ThreadLocalRandom.current().nextInt(chars.length()));
+        StringBuilder shortName = new StringBuilder("L");
+        for (int i = 0; i < 7; i++) {
+            shortName.append(chars.charAt(ThreadLocalRandom.current().nextInt(chars.length())));
+        }
+        return shortName.toString();
     }
 
     private PostLoanProductsRequest baseLoanProductRequestMultiRepayment() {

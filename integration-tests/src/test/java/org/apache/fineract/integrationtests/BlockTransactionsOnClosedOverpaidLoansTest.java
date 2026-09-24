@@ -112,7 +112,7 @@ public class BlockTransactionsOnClosedOverpaidLoansTest extends FeignLoanTestBas
     private Long createLoanProduct() {
         return createLoanProduct(new LoanProductTestBuilder() //
                 .withPrincipal("1000.00") //
-                .withShortName(Utils.uniqueRandomStringGenerator("", 4)) //
+                .withShortName(Utils.uniqueRandomStringGenerator("", 8)) //
                 .withNumberOfRepayments("4") //
                 .withRepaymentAfterEvery("1") //
                 .withRepaymentTypeAsMonth() //

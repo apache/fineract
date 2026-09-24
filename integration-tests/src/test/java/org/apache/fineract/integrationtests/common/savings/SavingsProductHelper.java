@@ -62,7 +62,7 @@ public class SavingsProductHelper {
     private static final String ACCRUAL_PERIODIC = "3";
 
     private String nameOfSavingsProduct = Utils.uniqueRandomStringGenerator("SAVINGS_PRODUCT_", 6);
-    private String shortName = Utils.uniqueRandomStringGenerator("", 4);
+    private String shortName = Utils.uniqueRandomStringGenerator("", 8);
     private String description = Utils.randomStringGenerator("", 20);
     private String interestCompoundingPeriodType = "4";
     private String interestPostingPeriodType = "4";

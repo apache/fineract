@@ -198,7 +198,7 @@ public class FeignWorkingCapitalLoanReprocessJournalEntryTest extends FeignInteg
         final Long productId = productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName("WCL ReprocJe " + UUID.randomUUID().toString().substring(0, 8))
-                                .withShortName(UUID.randomUUID().toString().replace("-", "").substring(0, 4))
+                                .withShortName(UUID.randomUUID().toString().replace("-", "").substring(0, 8))
                                 .withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)
                                 .withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
                                 .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())

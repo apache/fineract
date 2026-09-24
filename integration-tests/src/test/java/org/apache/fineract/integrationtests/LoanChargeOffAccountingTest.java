@@ -844,7 +844,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
     private PostLoanProductsResponse createLoanProductWithAdvancedChargeOffAccounting(PostCodeValueDataResponse chargeOffReason,
             Account chargeOffDelinquentExpenseAccount) {
         return loanHelper.createLoanProduct(new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .description("Loan Product Description")//
                 .includeInBorrowerCycle(false)//
                 .currencyCode("USD")//

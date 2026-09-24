@@ -44,7 +44,7 @@ public final class SavingsProductRequestFactory {
     private SavingsProductRequestFactory() {}
 
     public static PostSavingsProductsRequest defaultSavingsProductRequest() {
-        String uniqueId = UUID.randomUUID().toString().replace("-", "").substring(0, 4).toUpperCase(Locale.ROOT);
+        String uniqueId = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
         List<PostSavingsCharges> charges = new ArrayList<>();
 
         return new PostSavingsProductsRequest().name(DEFAULT_SAVINGS_PRODUCT_NAME + "-" + uniqueId)//

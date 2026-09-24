@@ -346,7 +346,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
 
     private Long createAccrualWithDeferredRevenueAmortizationProductWithDiscount() {
         final String uniqueName = "WCL DiscAmort " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE))
                 .withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM).withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
@@ -367,7 +367,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
 
     private Long createAccrualWithDeferredRevenueAmortizationProductWithoutDiscount() {
         final String uniqueName = "WCL NoDisc " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)
                 .withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())

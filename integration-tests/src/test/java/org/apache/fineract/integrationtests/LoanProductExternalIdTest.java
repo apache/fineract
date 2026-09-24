@@ -70,7 +70,7 @@ public class LoanProductExternalIdTest {
         assertEquals(loanProductId, getLoanProductsProductIdResponse.getId().intValue());
 
         final PutLoanProductsProductIdRequest requestModifyLoan = new PutLoanProductsProductIdRequest()
-                .shortName(Utils.uniqueRandomStringGenerator("", 3));
+                .shortName(Utils.uniqueRandomStringGenerator("", 8));
         PutLoanProductsProductIdResponse putLoanProductsProductIdResponse = loanProductHelper.updateLoanProductByExternalId(externalId,
                 requestModifyLoan);
         assertNotNull(putLoanProductsProductIdResponse.getResourceId());

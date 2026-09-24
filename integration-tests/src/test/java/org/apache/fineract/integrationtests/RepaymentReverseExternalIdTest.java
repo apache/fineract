@@ -97,7 +97,7 @@ public class RepaymentReverseExternalIdTest extends FeignLoanTestBase {
     private PostLoanProductsRequest loanProductsRequest(String loanExternalId) {
         LoanTestAccounts accounts = getAccounts();
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
-        String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        String shortName = Utils.uniqueRandomStringGenerator("", 8);
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();

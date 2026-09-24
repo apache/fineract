@@ -1419,7 +1419,7 @@ public class DelinquencyBucketsIntegrationTest extends FeignLoanTestBase {
 
     private PostLoanProductsRequest baseDelinquencyLoanProductRequest(final Long delinquencyBucketId, final Integer inArrearsTolerance) {
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .currencyCode("USD")//
                 .locale(LoanTestData.LOCALE)//
                 .digitsAfterDecimal(2)//
