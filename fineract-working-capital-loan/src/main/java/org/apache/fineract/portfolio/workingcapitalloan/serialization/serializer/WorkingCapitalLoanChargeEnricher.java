@@ -54,7 +54,7 @@ public class WorkingCapitalLoanChargeEnricher {
         charges.forEach(charge -> {
             final BigDecimal amountAccrued = accruedAmountsByChargeId.getOrDefault(charge.getId(), BigDecimal.ZERO);
             charge.setAmountAccrued(amountAccrued);
-            charge.setAmountUnrecognized(MathUtil.subtractToZero(charge.getAmount(), amountAccrued));
+            charge.setAmountUnrecognized(MathUtil.subtractToZero(charge.getAmount(), amountAccrued, charge.getAmountWaived()));
         });
     }
 

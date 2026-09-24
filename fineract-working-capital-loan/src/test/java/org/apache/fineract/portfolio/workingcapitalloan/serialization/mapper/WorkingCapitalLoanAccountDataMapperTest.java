@@ -291,9 +291,11 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals(new BigDecimal("950"), result.getPrincipalDisbursed());
         assertEquals(new BigDecimal("50"), result.getFeeChargesCharged());
         assertEquals(new BigDecimal("20"), result.getFeeChargesPaid());
+        assertEquals(new BigDecimal("7"), result.getFeeChargesWaived());
         assertEquals(new BigDecimal("30"), result.getFeeChargesOutstanding());
         assertEquals(new BigDecimal("10"), result.getPenaltyChargesCharged());
         assertEquals(new BigDecimal("4"), result.getPenaltyChargesPaid());
+        assertEquals(new BigDecimal("3"), result.getPenaltyChargesWaived());
         assertEquals(new BigDecimal("6"), result.getPenaltyChargesOutstanding());
         assertEquals(new BigDecimal("60"), result.getTotalChargeAmount());
         assertEquals(new BigDecimal("100"), result.getPrincipalPaid());
@@ -440,7 +442,9 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals("2024-03-02", result.getDueDate());
         assertEquals(new BigDecimal("25.00"), result.getAmount());
         assertEquals(new BigDecimal("10.00"), result.getAmountPaid());
-        assertEquals(new BigDecimal("15.00"), result.getAmountOutstanding());
+        assertEquals(new BigDecimal("4.00"), result.getAmountWaived());
+        assertEquals(new BigDecimal("3.00"), result.getAmountWrittenOff());
+        assertEquals(new BigDecimal("8.00"), result.getAmountOutstanding());
         assertEquals(Boolean.FALSE, result.getPenalty());
         assertEquals(Boolean.FALSE, result.getPaid());
         assertEquals(99L, result.getLoanId());
@@ -462,8 +466,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertNull(result.getAmountAccrued());
         assertNull(result.getAmountUnrecognized());
 
-        // write-off is not implemented and custom data is never filled for the loan-details event
-        assertNull(result.getAmountWrittenOff());
+        // custom data is never filled for the loan-details event
         assertNull(result.getCustomData());
     }
 
@@ -597,10 +600,11 @@ class WorkingCapitalLoanAccountDataMapperTest {
     private static WorkingCapitalLoanSummaryData fullSummary() {
         return WorkingCapitalLoanSummaryData.builder().currency(currency()).principal(new BigDecimal("1000"))
                 .principalPaid(new BigDecimal("100")).principalOutstanding(new BigDecimal("900")).fee(new BigDecimal("50"))
-                .feePaid(new BigDecimal("20")).feeOutstanding(new BigDecimal("30")).penalty(new BigDecimal("10"))
-                .penaltyPaid(new BigDecimal("4")).penaltyOutstanding(new BigDecimal("6"))
-                .realizedIncomeFromDiscountFee(new BigDecimal("15")).unrealizedIncomeFromDiscountFee(new BigDecimal("35"))
-                .overpayment(new BigDecimal("9.99")).totalDisbursement(new BigDecimal("950")).totalDiscountFee(new BigDecimal("50"))
+                .feePaid(new BigDecimal("20")).feeWaived(new BigDecimal("7")).feeOutstanding(new BigDecimal("30"))
+                .penalty(new BigDecimal("10")).penaltyPaid(new BigDecimal("4")).penaltyWaived(new BigDecimal("3"))
+                .penaltyOutstanding(new BigDecimal("6")).realizedIncomeFromDiscountFee(new BigDecimal("15"))
+                .unrealizedIncomeFromDiscountFee(new BigDecimal("35")).overpayment(new BigDecimal("9.99"))
+                .totalDisbursement(new BigDecimal("950")).totalDiscountFee(new BigDecimal("50"))
                 .totalDiscountFeeAdjustment(new BigDecimal("5")).totalExpectedRepayment(new BigDecimal("1500"))
                 .totalRepayment(new BigDecimal("600")).totalOutstanding(new BigDecimal("900")).overdueSinceDate(LocalDate.of(2024, 1, 30))
                 .build();
@@ -639,8 +643,9 @@ class WorkingCapitalLoanAccountDataMapperTest {
                 .chargeTimeType(new EnumOptionData(1L, "chargeTimeType.disbursement", "Disbursement"))
                 .submittedOnDate(LocalDate.of(2024, 3, 1)).dueDate(LocalDate.of(2024, 3, 2))
                 .chargeCalculationType(new EnumOptionData(2L, "chargeCalculationType.flat", "Flat")).currency(currency())
-                .amount(new BigDecimal("25.00")).amountPaid(new BigDecimal("10.00")).amountOutstanding(new BigDecimal("15.00"))
-                .penalty(false).chargePaymentMode(new EnumOptionData(3L, "chargePaymentMode.regular", "Regular")).paid(false).loanId(99L)
+                .amount(new BigDecimal("25.00")).amountPaid(new BigDecimal("10.00")).amountWaived(new BigDecimal("4.00"))
+                .amountWrittenOff(new BigDecimal("3.00")).amountOutstanding(new BigDecimal("8.00")).penalty(false)
+                .chargePaymentMode(new EnumOptionData(3L, "chargePaymentMode.regular", "Regular")).paid(false).loanId(99L)
                 .externalId(new ExternalId("charge-ext")).externalLoanId(new ExternalId("loan-ext")).build();
     }
 

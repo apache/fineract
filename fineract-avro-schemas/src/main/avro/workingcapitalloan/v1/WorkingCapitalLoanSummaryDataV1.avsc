@@ -70,6 +70,14 @@
         },
         {
             "default": null,
+            "name": "feeChargesWaived",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "feeChargesWrittenOff",
             "doc": "Always null: working capital does not yet implement write-off.",
             "type": [
@@ -96,6 +104,14 @@
         {
             "default": null,
             "name": "penaltyChargesPaid",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "penaltyChargesWaived",
             "type": [
                 "null",
                 "bigdecimal"
