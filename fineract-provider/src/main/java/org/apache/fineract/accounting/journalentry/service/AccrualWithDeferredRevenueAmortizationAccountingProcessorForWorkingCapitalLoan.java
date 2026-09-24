@@ -75,6 +75,9 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     @Override
     public void postJournalEntriesForChargeWaiver(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final BigDecimal recognizedFeePortion, final BigDecimal recognizedPenaltyPortion, final boolean isChargedOff) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         final Office office = loan.getClient().getOffice();
         helper.checkForBranchClosures(helper.getLatestClosureByBranch(office.getId()), txn.getTransactionDate());
 

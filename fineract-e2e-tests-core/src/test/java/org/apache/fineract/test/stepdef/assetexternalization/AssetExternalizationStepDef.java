@@ -1308,6 +1308,73 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
                 attributeValue, errorCodeExpected, errorMessageType);
     }
 
+    @Then("External asset owner loan product attributes template contains exactly the attribute keys {string}")
+    public void checkExternalAssetOwnerLoanProductAttributesTemplateKeys(final String attributeKeys) {
+        final List<ExternalTransferLoanProductAttributesTemplateData> template = ok(
+                () -> externalAssetOwnerLoanProductAttributesApi().retrieveTemplateExternalAssetOwnerLoanProductAttributes());
+
+        assertThat(template.stream().map(ExternalTransferLoanProductAttributesTemplateData::getAttributeKey).toList())
+                .as("Attribute keys in the template").containsExactlyInAnyOrder(attributeKeys.split(",", -1));
+    }
+
+    @Then("External asset owner loan product attributes template attribute {string} has multiValue {string}, contains {string} and does not contain {string}")
+    public void checkExternalAssetOwnerLoanProductAttributesTemplateAttributeValues(final String attributeKey, final String multiValue,
+            final String containedValues, final String notContainedValues) {
+        final ExternalTransferLoanProductAttributesTemplateData attribute = ok(
+                () -> externalAssetOwnerLoanProductAttributesApi().retrieveTemplateExternalAssetOwnerLoanProductAttributes()).stream()
+                .filter(templateAttribute -> attributeKey.equals(templateAttribute.getAttributeKey())).findFirst()
+                .orElseThrow(() -> new IllegalStateException(String.format("No attribute %s is found in the template", attributeKey)));
+
+        assertThat(attribute.getMultiValue()).as("Multi value flag of attribute %s in the template", attributeKey)
+                .isEqualTo(Boolean.parseBoolean(multiValue));
+        assertThat(attribute.getAttributeValues()).as("Values of attribute %s in the template", attributeKey)
+                .contains(containedValues.split(",", -1)).doesNotContain(notContainedValues.split(",", -1));
+    }
+
+    @When("Admin deletes external asset owner loan product attribute {string} of the new loan product")
+    public void deleteExternalAssetOwnerLoanProductAttribute(final String attributeKey) {
+        final Long loanProductId = newLoanProductId();
+        final Long attributeId = retrieveAttributeOfNewLoanProduct(attributeKey).getAttributeId();
+
+        final CommandProcessingResult result = ok(() -> externalAssetOwnerLoanProductAttributesApi()
+                .deleteExternalAssetOwnerLoanProductAttribute(loanProductId, attributeId));
+
+        assertThat(result.getResourceId()).as("Resource id of the deleted attribute %s", attributeKey).isEqualTo(loanProductId);
+    }
+
+    @When("Created user creates external asset owner loan product attribute {string} with value {string} for the new loan product")
+    public void createExternalAssetOwnerLoanProductAttributeByCreatedUser(final String attributeKey, final String attributeValue) {
+        final Long loanProductId = newLoanProductId();
+
+        final CommandProcessingResult result = ok(() -> createdUserExternalAssetOwnerLoanProductAttributesApi()
+                .createExternalAssetOwnerLoanProductAttribute(loanProductId, createAttributeRequest(attributeKey, attributeValue)));
+
+        assertThat(result.getResourceId()).as("Resource id of the created attribute %s", attributeKey).isEqualTo(loanProductId);
+    }
+
+    @When("Created user updates external asset owner loan product attribute {string} of the new loan product to value {string}")
+    public void updateExternalAssetOwnerLoanProductAttributeByCreatedUser(final String attributeKey, final String attributeValue) {
+        final Long loanProductId = newLoanProductId();
+        final Long attributeId = retrieveAttributeOfNewLoanProduct(attributeKey).getAttributeId();
+
+        ok(() -> createdUserExternalAssetOwnerLoanProductAttributesApi().updateExternalAssetOwnerLoanProductAttribute(loanProductId,
+                attributeId, updateAttributeRequest(attributeKey, attributeValue)));
+    }
+
+    @Then("Updating external asset owner loan product attribute {string} of the new loan product through another loan product to value {string} results a {int} error and {string} error message")
+    public void updateExternalAssetOwnerLoanProductAttributeThroughAnotherLoanProductFails(final String attributeKey,
+            final String attributeValue, final int errorCodeExpected, final String errorMessageType) {
+        final Long attributeId = retrieveAttributeOfNewLoanProduct(attributeKey).getAttributeId();
+        final Long anotherLoanProductId = ok(
+                () -> loanProductsApi().createLoanProduct(loanProductsRequestFactory.defaultLoanProductsRequestLP1())).getResourceId();
+
+        final CallFailedRuntimeException exception = fail(
+                () -> externalAssetOwnerLoanProductAttributesApi().updateExternalAssetOwnerLoanProductAttribute(anotherLoanProductId,
+                        attributeId, updateAttributeRequest(attributeKey, attributeValue)));
+
+        assertExternalAssetOwnerLoanProductAttributeError(exception, errorCodeExpected, errorMessageType);
+    }
+
     private void assertExternalAssetOwnerLoanProductAttributeCreationFails(final ExternalAssetOwnerLoanProductAttributesApi attributesApi,
             final Long loanProductId, final String attributeKey, final String attributeValue, final int errorCodeExpected,
             final String errorMessageType) {
