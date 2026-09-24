@@ -245,7 +245,7 @@ dependencyManagement {
         }
         dependency 'org.postgresql:postgresql:42.7.11'
 
-        dependency 'com.mysql:mysql-connector-j:9.7.0'
+        dependency 'com.mysql:mysql-connector-j:26.7.0'
 
         dependency 'org.assertj:assertj-core:3.27.7'
 
