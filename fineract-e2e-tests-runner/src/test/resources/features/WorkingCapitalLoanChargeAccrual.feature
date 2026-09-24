@@ -512,6 +512,31 @@ Feature: Working Capital Loan Charge Accrual
       | 50.0       | 50.0            | 0.0      | 30.0           | 30.0                | 0.0          |
     And Admin sets the business date to "20 October 2026"
     Then Admin closes the Working Capital loan with a full repayment on "20 October 2026"
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 October 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 20 October 2026 | Repayment    | 9080.0            | 9000.0           | 50.0              | 30.0                  | false    |
+
+  @TestRailId:C106705
+  Scenario: Verify no accrual or accrual adjustment is created for Working Capital loan charges in real time and on undo disbursal when product accounting rule is NONE
+    Given Admin sets the business date to "01 May 2027"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 May 2027     | 01 May 2027              | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "real-time"
+    And Admin sets the business date to "10 May 2027"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 May 2027" due date and 100.0 transaction amount
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 May 2027     | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    When Admin successfully undo Working Capital disbursal
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 May 2027     | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+    And Admin successfully disburse the Working Capital loan on "10 May 2027" with "9000" EUR transaction amount
+    And Admin sets the business date to "15 May 2027"
+    Then Admin closes the Working Capital loan with a full repayment on "15 May 2027"
 
   @TestRailId:C85643
   Scenario: Verify pending charge accrual is posted at closure even when charge-accrual-date is submitted-date
@@ -901,3 +926,67 @@ Feature: Working Capital Loan Charge Accrual
     # --- Refund remaining overpayment to close ---
     And Customer makes credit balance refund on "05 September 2028" with 60.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:C106707
+  Scenario: Verify no accrual is created via the closure path when a charge is added to an overpaid Working Capital loan under real-time and submitted-date when product accounting rule is NONE
+    Given Admin sets the business date to "01 September 2028"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate   | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 September 2028 | 01 September 2028        | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "real-time"
+    And Admin sets the business date to "05 September 2028"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "05 September 2028" with 9100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 September 2028" due date and 40.0 transaction amount
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital Loan has transactions:
+      | transactionDate   | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 September 2028 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 September 2028 | Repayment    | 9100.0            | 9000.0           | 40.0              | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "05 September 2028" which has the following Journal entries:
+      | Type | Account code | Account name | Debit | Credit |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 40.0       | 0.0             | 40.0     | 0.0            | 0.0                 | 0.0          |
+    And Customer makes credit balance refund on "05 September 2028" with 60.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working Capital Loan has transactions:
+      | transactionDate   | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 September 2028 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 September 2028 | Repayment             | 9100.0            | 9000.0           | 40.0              | 0.0                   | false    |
+      | 05 September 2028 | Credit Balance Refund | 60.0              | 0.0              | 0.0               | 0.0                   | false    |
+
+  @TestRailId:C106708
+  Scenario: Verify undo disbursal with a live charge accrual is rejected when accounting is closed for the office on a product with accounting
+    When Admin sets the business date to "01 March 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 March 2026   | 01 March 2026            | 9000            | 100000             | 18                |          |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 March 2026" with "9000" amount and expected disbursement date on "01 March 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 March 2026" with "9000" EUR transaction amount
+    When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "real-time"
+    And Admin sets the business date to "10 March 2026"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 March 2026" due date and 100.0 transaction amount
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 March 2026   | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 March 2026   | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+    When Admin closes accounting for the last created office on "10 March 2026"
+    Then Undo Working Capital disbursal results an error with the following data:
+      | httpCode | message                                                                          |
+      | 403      | Journal entry cannot be made prior to last account closing date for the branch |
+    Then Working Capital loan status will be "ACTIVE"
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 March 2026   | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 March 2026   | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "10 March 2026" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 100.0 |        |
+      | INCOME | 404007       | Fee Income              |       | 100.0  |

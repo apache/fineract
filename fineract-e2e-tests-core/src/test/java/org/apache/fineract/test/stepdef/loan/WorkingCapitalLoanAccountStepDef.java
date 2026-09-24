@@ -1870,6 +1870,18 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         checkChangesExpectedStatus(TestContextKey.LOAN_UNDO_DISBURSE_RESPONSE, APPROVED);
     }
 
+    @Then("Undo Working Capital disbursal results an error with the following data:")
+    public void undoDisbursalWCLoanResultsAnError(final DataTable table) {
+        final PostWorkingCapitalLoansLoanIdRequest undoDisbursalRequest = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoanUndoDisburseRequest();
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoans()
+                .stateTransitionWorkingCapitalLoanById(getCreatedLoanId(), "undodisbursal", undoDisbursalRequest));
+
+        verifyErrorResponse(exception, table);
+        log.info("Verified working capital loan undo disbursal failed with expected error");
+    }
+
     @Then("Working Capital disbursal transaction business event is raised")
     public void workingCapitalDisbursalTransactionBusinessEventIsRaised() {
         eventCheckHelper.workingCapitalLoanDisbursalTransactionEventCheck(getCreatedLoanId());
