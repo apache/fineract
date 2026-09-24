@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
+import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -38,13 +39,6 @@ public class ApplyAnnualFeeSavingsAccountCommandHandler implements NewCommandSou
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        // TODO: why do we keep this class when we literally do nothing here?!?
-        // final LocalDate annualFeeTransactionDate =
-        // command.localDateValueOfParameterNamed("annualFeeTransactionDate");
-
-        // return
-        // this.writePlatformService.applyAnnualFee(command.getSavingsId(),
-        // annualFeeTransactionDate);
-        return null;
+        throw new UnsupportedCommandException("applyAnnualFees", "Annual savings charges are processed through the configured scheduler.");
     }
 }

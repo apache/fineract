@@ -363,7 +363,9 @@ public class SavingsAccountsApiResource {
             + "Optional Fields: note, withdrawBalance, paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber\n\n"
             + "Calculate Interest on Savings Account:\n\n"
             + "Calculates interest earned on a savings account based on todays date. It does not attempt to post or credit the interest on the account. That is responsibility of the Post Interest API that will likely be called by overnight process.\n\n"
-            + "Post Interest on Savings Account:\n\n"
+            + "Annual savings charges:\n\n"
+            + "The applyAnnualFees command is unsupported and returns HTTP 400 with error.msg.command.unsupported. "
+            + "Annual savings charges are processed through the configured scheduler.\n\n" + "Post Interest on Savings Account:\n\n"
             + "Calculates and Posts interest earned on a savings account based on today's date and whether an interest posting or crediting event is due.\n\n"
             + "Block Savings Account:\n\n" + "Blocks Savings account from all types of credit and debit transactions\n\n"
             + "Unblock Savings Account:\n\n"
@@ -379,6 +381,7 @@ public class SavingsAccountsApiResource {
     @AlternativeOperationId("handleCommands_6")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class)))
+    @ApiResponse(responseCode = "400", description = "Unsupported applyAnnualFees command: error.msg.command.unsupported")
     public String handleCommands(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -409,7 +412,9 @@ public class SavingsAccountsApiResource {
             + "Optional Fields: note, withdrawBalance, paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber\n\n"
             + "Calculate Interest on Savings Account:\n\n"
             + "Calculates interest earned on a savings account based on todays date. It does not attempt to post or credit the interest on the account. That is responsibility of the Post Interest API that will likely be called by overnight process.\n\n"
-            + "Post Interest on Savings Account:\n\n"
+            + "Annual savings charges:\n\n"
+            + "The applyAnnualFees command is unsupported and returns HTTP 400 with error.msg.command.unsupported. "
+            + "Annual savings charges are processed through the configured scheduler.\n\n" + "Post Interest on Savings Account:\n\n"
             + "Calculates and Posts interest earned on a savings account based on today's date and whether an interest posting or crediting event is due.\n\n"
             + "Block Savings Account:\n\n" + "Blocks Savings account from all types of credit and debit transactions\n\n"
             + "Unblock Savings Account:\n\n"
@@ -425,6 +430,7 @@ public class SavingsAccountsApiResource {
     @AlternativeOperationId("handleCommands_7")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class)))
+    @ApiResponse(responseCode = "400", description = "Unsupported applyAnnualFees command: error.msg.command.unsupported")
     public String handleCommands(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
