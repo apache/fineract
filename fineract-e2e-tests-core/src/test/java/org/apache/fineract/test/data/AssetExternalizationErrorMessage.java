@@ -32,6 +32,14 @@ public enum AssetExternalizationErrorMessage {
     LOAN_SUBMITTED_AND_PENDING_APPROVAL_INVALID("Loan status SUBMITTED_AND_PENDING_APPROVAL is not valid for transfer."), //
     LOAN_APPROVED_INVALID("Loan status APPROVED is not valid for transfer."), //
     ALREADY_IN_PROGRESS("This loan cannot be sold, there is already an in progress transfer"), //
+    LOAN_PRODUCT_ATTRIBUTE_ALREADY_EXISTS("attributeKey already exists for the loanProductId"), //
+    LOAN_PRODUCT_ATTRIBUTE_INVALID("The given attribute key or attribute value is not valid."), //
+    LOAN_PRODUCT_ATTRIBUTE_VALUE_INVALID("The given attribute value is not valid for the attribute key:"), //
+    LOAN_PRODUCT_NOT_FOUND("Loan product with identifier"), //
+    LOAN_PRODUCT_ATTRIBUTE_VALUE_MANDATORY("The parameter `attributeValue` is mandatory."), //
+    LOAN_PRODUCT_ATTRIBUTE_OF_ANOTHER_LOAN_PRODUCT("The requested attribute does not belong to the loanProductId"), //
+    USER_HAS_NO_CREATE_ATTRIBUTE_AUTHORITY("User has no authority to: CREATE_EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE"), //
+    USER_HAS_NO_UPDATE_ATTRIBUTE_AUTHORITY("User has no authority to: UPDATE_EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE"), //
     INVALID_REQUEST("The request was invalid. This typically will happen due to validation errors which are provided."); //
 
     public final String value;

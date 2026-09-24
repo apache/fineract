@@ -275,6 +275,7 @@ public abstract class TestContextKey {
     public static final String EXTERNAL_ASSET_OWNER_EXTERNAL_ID = "externalAssetOwnerExternalId";
     public static final String EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_TEMPLATE = "externalAssetOwnerLoanProductAttributeTemplate";
     public static final String EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_LAST_RESPONSE = "externalAssetOwnerLoanProductAttributeLastResponse";
+    public static final String EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_LOAN_PRODUCT_ID = "externalAssetOwnerLoanProductAttributeLoanProductId";
     public static final String TRANSACTION_EVENT = "transactionEvent";
     public static final String LOAN_WRITE_OFF_RESPONSE = "loanWriteOffResponse";
     public static final String LOAN_DELINQUENCY_ACTION_RESPONSE = "loanDelinquencyActionResponse";

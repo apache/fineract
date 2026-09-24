@@ -198,6 +198,38 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
     }
 
     @Test
+    public void testUpdateExternalAssetOwnerLoanProductAttributeBelongingToAnotherLoanProduct() {
+        final TestContext testContext = new TestContext();
+        final ArgumentCaptor<ExternalAssetOwnerLoanProductAttributes> loanProductAttributeArgumentCaptor = ArgumentCaptor
+                .forClass(ExternalAssetOwnerLoanProductAttributes.class);
+
+        final ExternalAssetOwnerLoanProductAttributes attributeInDB = new ExternalAssetOwnerLoanProductAttributes();
+        attributeInDB.setLoanProductId(testContext.loanProductId + 1);
+        attributeInDB.setAttributeKey(testContext.attributeKey);
+        attributeInDB.setAttributeValue("DIFFERENT_VALUE");
+        attributeInDB.setId(1L);
+
+        // given
+        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, attributeInDB.getId());
+        when(testContext.loanProductRepository.existsById(testContext.loanProductId)).thenReturn(true);
+        when(testContext.externalAssetOwnerLoanProductAttributesRepository.findById(command.entityId()))
+                .thenReturn(Optional.of(attributeInDB));
+
+        final ExternalAssetOwnerLoanProductAttributesException thrownException = assertThrows(
+                ExternalAssetOwnerLoanProductAttributesException.class,
+                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService.updateExternalAssetOwnerLoanProductAttribute(command,
+                        testContext.attributeKey, testContext.attributeValue));
+
+        // then
+        verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(command.entityId());
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0))
+                .saveAndFlush(loanProductAttributeArgumentCaptor.capture());
+        Assertions.assertEquals("The requested attribute does not belong to the loanProductId: " + testContext.loanProductId + ".",
+                thrownException.getMessage());
+    }
+
+    @Test
     public void testCreateExternalAssetOwnerLoanProductAttributeUsingDefaultSettlementValue() {
         TestContext testContext = new TestContext();
         ArgumentCaptor<ExternalAssetOwnerLoanProductAttributes> loanProductAttributeArgumentCaptor = ArgumentCaptor
