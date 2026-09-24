@@ -105,4 +105,5 @@
   <include relativeToChangelogFile="true" file="parts/0081_wc_payment_amount_calculation_strategy.xml"/>
   <include relativeToChangelogFile="true" file="parts/0082_wc_annual_eir_min_max.xml"/>
   <include relativeToChangelogFile="true" file="parts/0083_wc_loan_charge_waiver.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0084_wc_loan_missing_command_permissions.xml"/>
 </databaseChangeLog>
