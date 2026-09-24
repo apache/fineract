@@ -126,7 +126,7 @@ public class FeignLoanHelper {
     public PostLoanProductsResponse createSimpleLoanProduct() {
         PostLoanProductsRequest request = new PostLoanProductsRequest()//
                 .name("Simple Loan Product " + System.currentTimeMillis())//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .currencyCode("USD")//
                 .digitsAfterDecimal(2)//
                 .inMultiplesOf(1)//

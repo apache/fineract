@@ -673,7 +673,7 @@ public class FeignWorkingCapitalLoanFlatAmortizationTest extends FeignIntegratio
     private WorkingCapitalLoanProductTestBuilder productBuilder(final String amortizationType) {
         return new WorkingCapitalLoanProductTestBuilder()
                 .withName("WCL " + amortizationType + " " + UUID.randomUUID().toString().substring(0, 8))
-                .withShortName(Utils.uniqueRandomStringGenerator("", 4)).withAmortizationType(amortizationType)
+                .withShortName(Utils.uniqueRandomStringGenerator("", 8)).withAmortizationType(amortizationType)
                 .withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)
                 .withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
                 .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())

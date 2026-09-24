@@ -51,7 +51,7 @@ public interface LoanProductTemplates {
 
     default PostLoanProductsRequest onePeriod30DaysNoInterest() {
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .description("Loan Product Description")//
                 .includeInBorrowerCycle(false)//
                 .currencyCode("USD")//
@@ -165,7 +165,7 @@ public interface LoanProductTemplates {
 
     default PostLoanProductsRequest fourInstallmentsCumulativeTemplate() {
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("4I_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .description("4 installment product")//
                 .includeInBorrowerCycle(false)//
                 .useBorrowerCycle(false)//
@@ -312,7 +312,7 @@ public interface LoanProductTemplates {
     default PostLoanProductsRequest twelveMonthInterestRecalculationProduct() {
         return new PostLoanProductsRequest()//
                 .name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .description("12 month interest recalculation product")//
                 .currencyCode("USD")//
                 .digitsAfterDecimal(2)//
@@ -344,7 +344,7 @@ public interface LoanProductTemplates {
     default PostLoanProductsRequest singleRepaymentMultiDisbursePeriodicAccrual(Long delinquencyBucketId, Account... accounts) {
         return withPeriodicAccrualAccounting(new PostLoanProductsRequest()//
                 .name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .description("Single repayment multi-disburse product")//
                 .currencyCode("USD")//
                 .digitsAfterDecimal(2)//
@@ -421,7 +421,7 @@ public interface LoanProductTemplates {
         final Long delinquencyBucketId = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient())
                 .createDefaultBucket();
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("4I_PROGRESSIVE_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .description("4 installment product - progressive")//
                 .includeInBorrowerCycle(false)//
                 .useBorrowerCycle(false)//
@@ -539,7 +539,7 @@ public interface LoanProductTemplates {
     default PostLoanProductsRequest dueDateRespectiveNoAccountingNoInterestProduct(double principal, int repaymentEveryDays,
             int numberOfRepayments, double interestRatePerPeriod, String repaymentStrategy) {
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .description("Due date respective test product")//
                 .currencyCode("USD")//
                 .digitsAfterDecimal(2)//

@@ -246,7 +246,7 @@ public class WorkingCapitalLoanTransactionPaymentTypeTest {
 
     private Long createProduct() {
         final String name = "WCL-PaymentType-" + UUID.randomUUID().toString().substring(0, 8);
-        final String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String shortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long productId = productHelper
                 .createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(name).withShortName(shortName).build())
                 .getResourceId();

@@ -584,6 +584,8 @@ final class ProductsApiResourceSwagger {
 
         private PutProductsTypeProductIdRequest() {}
 
+        @Schema(example = "SP")
+        public String shortName;
         @Schema(example = "Share Product Description.")
         public String description;
         @Schema(example = "en")
