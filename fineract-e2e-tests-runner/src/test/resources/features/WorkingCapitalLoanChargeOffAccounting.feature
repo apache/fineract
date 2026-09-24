@@ -2615,16 +2615,16 @@ Feature: Working Capital Charge-Off Accounting Entries
       | Type      | Account code | Account name              | Debit  | Credit |
       | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt      |        | 1000.0 |
-      | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
-      | EXPENSE   | 744007       | Credit Loss/Bad Debt      |        | 1000.0 |
       | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt      | 1000.0 |        |
       | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
-      | EXPENSE   | 744007       | Credit Loss/Bad Debt      |         | 1000.0 |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt      |        | 1000.0 |
     Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_ADJUSTMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit  | Credit |
       | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
       | ASSET     | 112601       | Loans Receivable          |        | 1000.0 |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "08 January 2026"
 
   @TestRailId:C106652

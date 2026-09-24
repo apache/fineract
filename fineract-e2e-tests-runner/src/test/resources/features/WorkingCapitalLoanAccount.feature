@@ -1434,6 +1434,48 @@ Feature: WorkingCapitalLoanAccount
       | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
       | ASSET     | 112601       | Loans Receivable          |        | 9000.0 |
       | LIABILITY | 145023       | Suspense/Clearing account | 9000.0 |        |
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
+      | ASSET     | 112601       | Loans Receivable          |        | 1000.0 |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
+
+  @TestRailId:CXXXXX1
+  Scenario: Verify undo disbursal reverses the journal entries of the discount fee and its adjustment when accounting is enabled
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    And Admin adds Discount fee adjustment with "400" amount on transaction date "01 January 2026" on Working Capital loan account for last discount
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_ADJUSTMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 400.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |       | 400.0  |
+    When Admin sets the business date to "03 January 2026"
+    And Admin successfully undo Working Capital disbursal
+    Then Working Capital Loan has transactions:
+      | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement            | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+      | 01 January 2026 | Discount Fee            | 1000.0            | 1000.0           | 0.0               | 0.0                   | true     |
+      | 01 January 2026 | Discount Fee Adjustment | 400.0             | 400.0            | 0.0               | 0.0                   | true     |
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
+      | ASSET     | 112601       | Loans Receivable          |        | 1000.0 |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_ADJUSTMENT" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 400.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |       | 400.0  |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 400.0  |
+      | ASSET     | 112601       | Loans Receivable          | 400.0 |        |
 
   @TestRailId:C106687
   Scenario: Verify Working Capital loan disbursement GL entries - UC1: ACC_DEF_REV_AM, loan portfolio and fund source net to zero after full repayment

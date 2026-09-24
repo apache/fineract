@@ -157,6 +157,10 @@ Feature: Working Capital Discount Adjustment Backdated and Undo
       | Type      | Account code | Account name              | Debit | Credit |
       | INCOME    | 404000       | Interest Income           | 28.7  |        |
       | LIABILITY | 240005       | Deferred Interest Revenue |       | 28.7   |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_ADJUSTMENT" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 1000.0 |
     When Admin undo the last Discount fee adjustment on Working Capital loan account
     And Working capital loan account has the correct data:
       | discount | principal | totalPaidPrincipal |
@@ -177,6 +181,12 @@ Feature: Working Capital Discount Adjustment Backdated and Undo
       | LIABILITY | 240005       | Deferred Interest Revenue |       | 28.7   |
       | LIABILITY | 240005       | Deferred Interest Revenue | 28.7  |        |
       | INCOME    | 404000       | Interest Income           |       | 28.7   |
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_ADJUSTMENT" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 1000.0 |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
 
   @TestRailId:C106704
   Scenario: Verify full discount adjustment on a product without accounting posts an amortization adjustment with no journal entries; undo reverses both even when accounting is closed for the office

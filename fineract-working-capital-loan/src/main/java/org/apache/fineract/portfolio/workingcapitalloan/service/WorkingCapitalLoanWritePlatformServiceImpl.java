@@ -813,6 +813,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         validator.validateUndoDiscountAdjustmentTransaction(loan, adjustmentTransaction);
 
         reverseTransaction(adjustmentTransaction);
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            accountingProcessor.postReversalJournalEntries(loan, adjustmentTransaction);
+        }
         reverseDiscountFeeAmortizationAdjustments(loan, adjustmentTransaction);
 
         final BigDecimal currentDiscount = loan.getLoanProductRelatedDetails().getDiscount();
@@ -1378,21 +1381,29 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
         final WorkingCapitalLoanTransaction txn = activeDisbursements.getFirst();
 
-        final List<WorkingCapitalLoanTransaction> accrualsToReverse = transactions.stream()
-                .filter(t -> t.getTypeOf() == LoanTransactionType.ACCRUAL && !t.isReversed()).toList();
+        // Captured before marking: a transaction reversed earlier already had its journal entries cancelled, and
+        // reversing them again would mirror its mirrors.
+        final List<WorkingCapitalLoanTransaction> otherActiveTransactions = transactions.stream().filter(t -> t != txn && !t.isReversed())
+                .toList();
+        final List<WorkingCapitalLoanTransaction> accrualsToReverse = otherActiveTransactions.stream()
+                .filter(t -> t.getTypeOf() == LoanTransactionType.ACCRUAL).toList();
 
         transactions.forEach(this::markReversed);
 
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+        final boolean accountingEnabled = loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization();
+        if (accountingEnabled) {
             accountingProcessor.postReversalJournalEntries(loan, txn);
         }
 
         this.transactionRepository.saveAll(transactions);
         this.transactionRepository.flush();
 
-        // Reverse the journal entries of any charge accrual so the recognized income/receivable is backed out with the
-        // disbursement; marking the transaction reversed alone would leave the GL postings in place.
-        accrualsToReverse.forEach(accrual -> accountingProcessor.postReversalJournalEntries(loan, accrual));
+        // Reverse the journal entries of every other transaction the undo just reversed - the discount fee, its
+        // adjustments and amortizations, and any charge accrual - so they are backed out with the disbursement; marking
+        // the transactions reversed alone would leave their GL postings in place.
+        if (accountingEnabled) {
+            otherActiveTransactions.forEach(other -> accountingProcessor.postReversalJournalEntries(loan, other));
+        }
         accrualsToReverse.forEach(accrual -> businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent(accrual, loan.getId())));
 
