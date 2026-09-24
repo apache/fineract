@@ -206,7 +206,7 @@ public class FeignWorkingCapitalLoanRepaymentBeforeFirstCobTest extends FeignInt
 
     private Long createProductWithDelinquency() {
         final String uniqueName = "WCL PreCobRepay " + Utils.uniqueRandomStringGenerator("", 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final PostDelinquencyRangeResponse range = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest()
                 .classification(Utils.randomStringGenerator("DLQ_R_", 10)).minimumAgeDays(1).maximumAgeDays(60).locale("en"));
         final PostDelinquencyBucketResponse bucket = WorkingCapitalLoanDelinquencyRangeScheduleHelper

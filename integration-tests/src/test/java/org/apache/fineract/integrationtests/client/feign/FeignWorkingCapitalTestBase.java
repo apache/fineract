@@ -102,7 +102,7 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
         final Long breachId = breachHelper.create(breachHelper.createBreachRequest(Utils.randomStringGenerator("WC_BREACH_", 8),
                 breachFrequency, breachFrequencyType, breachAmountCalculationType, breachAmount));
         return productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder()
-                .withName("WCL Breach " + Utils.uniqueRandomStringGenerator("", 8)).withShortName(Utils.uniqueRandomStringGenerator("", 4))
+                .withName("WCL Breach " + Utils.uniqueRandomStringGenerator("", 8)).withShortName(Utils.uniqueRandomStringGenerator("", 8))
                 .withBreachId(breachId).withBreachGraceDays(breachGraceDays).build()).getResourceId();
     }
 

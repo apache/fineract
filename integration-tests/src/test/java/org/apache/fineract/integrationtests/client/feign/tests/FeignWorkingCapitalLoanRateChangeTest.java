@@ -273,7 +273,7 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
 
     private Long createProduct() {
         String uniqueName = "WCL Rate " + Utils.uniqueRandomStringGenerator("", 8);
-        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         Long productId = productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName).build())

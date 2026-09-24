@@ -91,7 +91,7 @@ public class LoanProductTestBuilder {
     private String inMultiplesOf = "0";
 
     private String nameOfLoanProduct = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
-    private String shortName = Utils.uniqueRandomStringGenerator("", 4);
+    private String shortName = Utils.uniqueRandomStringGenerator("", 8);
     private String externalId = null;
     private String principal = "10000.00";
     private String numberOfRepayments = "5";

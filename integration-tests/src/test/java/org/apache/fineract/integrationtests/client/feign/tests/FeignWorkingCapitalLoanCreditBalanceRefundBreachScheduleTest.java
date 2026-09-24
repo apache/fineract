@@ -205,7 +205,7 @@ public class FeignWorkingCapitalLoanCreditBalanceRefundBreachScheduleTest extend
         final Long productId = productHelper
                 .createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder()
                         .withName("WCL CBR Breach " + Utils.uniqueRandomStringGenerator("", 8))
-                        .withShortName(Utils.uniqueRandomStringGenerator("", 4)).withBreachId(breachId).withBreachGraceDays(0).build())
+                        .withShortName(Utils.uniqueRandomStringGenerator("", 8)).withBreachId(breachId).withBreachGraceDays(0).build())
                 .getResourceId();
         createdProductIds.add(productId);
         return productId;

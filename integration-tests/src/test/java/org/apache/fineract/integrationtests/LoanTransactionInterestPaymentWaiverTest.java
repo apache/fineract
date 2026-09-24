@@ -2017,7 +2017,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
     private Long createLoanProductAccountingAccuralPeriodicWithInterest() {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
-        String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        String shortName = Utils.uniqueRandomStringGenerator("", 8);
         return createLoanProduct(new PostLoanProductsRequest().name(name).shortName(shortName).description("Test loan description")
                 .currencyCode("USD").digitsAfterDecimal(2).daysInYearType(1).daysInMonthType(1).interestRecalculationCompoundingMethod(0)
                 .recalculationRestFrequencyType(1).rescheduleStrategyMethod(1).recalculationRestFrequencyInterval(0)

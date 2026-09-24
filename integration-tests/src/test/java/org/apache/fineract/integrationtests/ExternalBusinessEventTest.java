@@ -1032,7 +1032,7 @@ public class ExternalBusinessEventTest extends FeignLoanTestBase {
 
     private static Long createLoanProductPeriodicWithInterest() {
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
-        String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        String shortName = Utils.uniqueRandomStringGenerator("", 8);
         Long resourceId = loanHelper.createLoanProduct(new PostLoanProductsRequest() //
                 .name(name) //
                 .shortName(shortName) //

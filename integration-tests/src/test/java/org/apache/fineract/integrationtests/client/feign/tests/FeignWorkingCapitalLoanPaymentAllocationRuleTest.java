@@ -359,7 +359,7 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
 
     private Long createProductWithGoodwillCreditOverride() {
         String uniqueName = "WCL PayAlloc " + Utils.uniqueRandomStringGenerator("", 8);
-        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         Long productId = productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName)
@@ -373,7 +373,7 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
 
     private Long createProductWithChargeAdjustmentOverride() {
         String uniqueName = "WCL PayAlloc " + Utils.uniqueRandomStringGenerator("", 8);
-        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         Long productId = productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName)
@@ -387,7 +387,7 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
 
     private Long createProductWithChargeAdjustmentOverrideAndBreach(final Long breachId) {
         String uniqueName = "WCL PayAlloc " + Utils.uniqueRandomStringGenerator("", 8);
-        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withPaymentAllocationTypes(FEE_BEFORE_PRINCIPAL_ORDER)
                 .withPaymentAllocationForTransactionType(PostPaymentAllocation.TransactionTypeEnum.CHARGE_ADJUSTMENT,

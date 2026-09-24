@@ -267,7 +267,7 @@ public class WorkingCapitalLoanBreachActionTest {
 
     private Long createProductWithBreach() {
         final String uniqueName = "WCL Breach Test " + Utils.uniqueRandomStringGenerator("", 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long breachId = breachHelper
                 .create(new WorkingCapitalBreachRequest().name(Utils.randomStringGenerator("Breach", 12)).breachFrequency(60)
                         .breachFrequencyType("DAYS").breachAmountCalculationType("PERCENTAGE").breachAmount(BigDecimal.valueOf(10)));

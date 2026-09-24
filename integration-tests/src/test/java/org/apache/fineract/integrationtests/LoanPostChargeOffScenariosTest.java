@@ -1072,7 +1072,7 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
     private Long createLoanProductWithPeriodicAccrualAccounting() {
 
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
-        String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        String shortName = Utils.uniqueRandomStringGenerator("", 8);
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();

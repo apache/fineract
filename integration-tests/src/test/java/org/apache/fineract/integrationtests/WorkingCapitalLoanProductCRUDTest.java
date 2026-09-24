@@ -72,7 +72,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     public void testCreateWorkingCapitalLoanProduct() {
         // Given
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).build();
 
@@ -90,7 +90,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     public void testRetrieveWorkingCapitalLoanProductById() {
         // Given
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).build();
         final PostWorkingCapitalLoanProductsResponse createResponse = wclProductHelper.createWorkingCapitalLoanProduct(request);
@@ -109,7 +109,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     public void testRetrieveWorkingCapitalLoanProductByExternalId() {
         // Given
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final String externalId = UUID.randomUUID().toString();
         final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withExternalId(externalId).build();
@@ -133,9 +133,9 @@ public class WorkingCapitalLoanProductCRUDTest {
         final String uniqueId1 = UUID.randomUUID().toString().substring(0, 8);
         final String uniqueId2 = UUID.randomUUID().toString().substring(0, 8);
         final PostWorkingCapitalLoanProductsRequest request1 = new WorkingCapitalLoanProductTestBuilder()
-                .withName("wcl Product 1 " + uniqueId1).withShortName(Utils.uniqueRandomStringGenerator("", 4)).build();
+                .withName("wcl Product 1 " + uniqueId1).withShortName(Utils.uniqueRandomStringGenerator("", 8)).build();
         final PostWorkingCapitalLoanProductsRequest request2 = new WorkingCapitalLoanProductTestBuilder()
-                .withName("wcl Product 2 " + uniqueId2).withShortName(Utils.uniqueRandomStringGenerator("", 4)).build();
+                .withName("wcl Product 2 " + uniqueId2).withShortName(Utils.uniqueRandomStringGenerator("", 8)).build();
         final Long productId1 = wclProductHelper.createWorkingCapitalLoanProduct(request1).getResourceId();
         final Long productId2 = wclProductHelper.createWorkingCapitalLoanProduct(request2).getResourceId();
 
@@ -192,7 +192,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     public void testUpdateWorkingCapitalLoanProduct() {
         // Given
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest createRequest = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).build();
         final Long productId = wclProductHelper.createWorkingCapitalLoanProduct(createRequest).getResourceId();
@@ -216,7 +216,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     public void testUpdateWorkingCapitalLoanProductBreachGraceDays() {
         // Given - product created with default breachGraceDays = 0
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest createRequest = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).build();
         final Long productId = wclProductHelper.createWorkingCapitalLoanProduct(createRequest).getResourceId();
@@ -241,7 +241,7 @@ public class WorkingCapitalLoanProductCRUDTest {
         // Given
         final String externalId = UUID.randomUUID().toString();
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest createRequest = new WorkingCapitalLoanProductTestBuilder().withExternalId(externalId)
                 .withName(uniqueName).withShortName(uniqueShortName).build();
         final Long productId = wclProductHelper.createWorkingCapitalLoanProduct(createRequest).getResourceId();
@@ -265,7 +265,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     public void testDeleteWorkingCapitalLoanProduct() {
         // Given
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).build();
         final Long productId = wclProductHelper.createWorkingCapitalLoanProduct(request).getResourceId();
@@ -283,7 +283,7 @@ public class WorkingCapitalLoanProductCRUDTest {
         // Given
         final String externalId = UUID.randomUUID().toString();
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withExternalId(externalId)
                 .withName(uniqueName).withShortName(uniqueShortName).build();
         final Long productId = wclProductHelper.createWorkingCapitalLoanProduct(request).getResourceId();
@@ -323,7 +323,7 @@ public class WorkingCapitalLoanProductCRUDTest {
 
         final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder() //
                 .withName("Full wcl Product " + uniqueId) //
-                .withShortName(Utils.uniqueRandomStringGenerator("", 4)) //
+                .withShortName(Utils.uniqueRandomStringGenerator("", 8)) //
                 .withDescription("Full description") //
                 .withExternalId(externalId) //
                 .withFundId(fundId) //
@@ -364,7 +364,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     public void testHappyPath_CreateAndRetrieve_VerifyAllFields() {
         // Given - Create product with ALL possible fields
         final String productName = "Happy Path wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String shortName = Utils.uniqueRandomStringGenerator("", 8);
         final String externalId = UUID.randomUUID().toString();
         final String description = "Comprehensive test product with all fields";
         final List<String> paymentAllocationTypes = List.of("DUE_PENALTY", "DUE_FEE", "DUE_PRINCIPAL", "IN_ADVANCE_PENALTY",
@@ -576,7 +576,7 @@ public class WorkingCapitalLoanProductCRUDTest {
 
         // Given
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = "TW" + UUID.randomUUID().toString().substring(0, 2);
+        final String uniqueShortName = "TW" + UUID.randomUUID().toString().substring(0, 6);
         PostWorkingCapitalLoanProductsRequest requestFail1 = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withNearBreachId(nearBreachId).build();
 
@@ -622,7 +622,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     @Test
     public void testCreateAndRetrieveBreachStartType() {
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withBreachStartType(WorkingCapitalLoanBreachStartType.LOAN_CREATION.getCode()).build();
 
@@ -642,7 +642,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     @Test
     public void testBreachStartTypeDefaultsToDisbursementWhenNotProvided() {
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         // No breachStartType provided
         final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).build();
@@ -663,7 +663,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     @Test
     public void testUpdateBreachStartType() {
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest createRequest = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).build();
         final Long productId = wclProductHelper.createWorkingCapitalLoanProduct(createRequest).getResourceId();
@@ -689,7 +689,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     @Test
     public void testInvalidBreachStartTypeRejected() {
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withBreachStartType("FOO").build();
 

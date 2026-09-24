@@ -42,7 +42,7 @@ Feature: WorkingCapitalLoanProduct
     Examples:
       | wcp_field_name_max_length | wcp_invalid_field_value_max_length | wcp_invalid_field_value_max_allowed_length |
       | name                      | 101                                | 100                                        |
-      | shortName                 | 9                                  | 4                                          |
+      | shortName                 | 9                                  | 8                                          |
       | description               | 550                                | 500                                        |
       | currencyCode              | 4                                  | 3                                          |
 
@@ -55,7 +55,7 @@ Feature: WorkingCapitalLoanProduct
     Examples:
       | wcp_field_name_max_length | wcp_invalid_field_value_max_length | wcp_invalid_field_value_max_allowed_length |
       | name                      | 111                                | 100                                        |
-      | shortName                 | 5                                  | 4                                          |
+      | shortName                 | 9                                  | 8                                          |
       | description               | 600                                | 500                                        |
       | currencyCode              | 10                                 | 3                                          |
 

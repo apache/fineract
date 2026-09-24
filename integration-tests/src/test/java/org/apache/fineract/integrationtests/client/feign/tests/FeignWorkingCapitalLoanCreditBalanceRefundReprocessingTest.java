@@ -301,7 +301,7 @@ public class FeignWorkingCapitalLoanCreditBalanceRefundReprocessingTest extends 
 
     private Long createProduct() {
         String uniqueName = "WCL CBR " + Utils.uniqueRandomStringGenerator("", 8);
-        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         Long productId = productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName).build())

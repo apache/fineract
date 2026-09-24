@@ -1904,7 +1904,7 @@ public class LoanProductsRequestFactory {
 
     public String generateShortNameSafely() {
         for (int counter = 0; counter < 999; counter++) {
-            String generatedShortName = Utils.randomStringGenerator("", 4);
+            String generatedShortName = Utils.randomStringGenerator("", 8);
             if (productShortNameMap.add(generatedShortName)) {
                 return generatedShortName;
             }

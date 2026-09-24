@@ -33,7 +33,7 @@ public class LoanProductShortNameValidationTest {
 
     @Test
     public void createLoanProductsWithSameShortName() {
-        String shortName = uniqueRandomStringGenerator("", 4);
+        String shortName = uniqueRandomStringGenerator("", 8);
         PostLoanProductsRequest request = buildMinimalLoanProductRequest(shortName);
 
         // First creation should succeed

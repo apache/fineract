@@ -108,7 +108,7 @@ public class ShareProductDataSerializer {
                 .notExceedingLengthOf(200);
         final String shortName = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.shortname_paramname, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.shortname_paramname).value(shortName).notBlank()
-                .notExceedingLengthOf(4);
+                .notExceedingLengthOf(8);
 
         final String description = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.description_paramname, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.description_paramname).value(description).notBlank()
@@ -284,7 +284,8 @@ public class ShareProductDataSerializer {
 
         if (this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.shortname_paramname, element)) {
             final String shortName = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.shortname_paramname, element);
-            baseDataValidator.reset().parameter(ShareProductApiConstants.shortname_paramname).value(shortName).notBlank();
+            baseDataValidator.reset().parameter(ShareProductApiConstants.shortname_paramname).value(shortName).notBlank()
+                    .notExceedingLengthOf(8);
             if (product.setShortName(shortName)) {
                 actualChanges.put(ShareProductApiConstants.shortname_paramname, shortName);
             }

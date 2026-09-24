@@ -80,7 +80,7 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends FeignLoanTest
 
                 PostLoanProductsRequest loanProductRequest = createOnePeriod30DaysPeriodicAccrualProduct(12.0)
                         .name(Utils.uniqueRandomStringGenerator("UNDISBURSED_TEST_", 4))
-                        .shortName(Utils.uniqueRandomStringGenerator("UT", 2));
+                        .shortName(Utils.uniqueRandomStringGenerator("UT", 6));
 
                 Long loanProductId = createLoanProduct(loanProductRequest);
 
@@ -135,7 +135,7 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends FeignLoanTest
 
                 PostLoanProductsRequest loanProductRequest = createOnePeriod30DaysPeriodicAccrualProduct(12.0)
                         .name(Utils.uniqueRandomStringGenerator("BACKDATED_UNDISBURSED_", 4))
-                        .shortName(Utils.uniqueRandomStringGenerator("BU", 2));
+                        .shortName(Utils.uniqueRandomStringGenerator("BU", 6));
 
                 Long loanProductId = createLoanProduct(loanProductRequest);
 
@@ -187,7 +187,7 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends FeignLoanTest
 
                 PostLoanProductsRequest loanProductRequest = createOnePeriod30DaysPeriodicAccrualProduct(12.0)
                         .name(Utils.uniqueRandomStringGenerator("COMPARISON_TEST_", 4))
-                        .shortName(Utils.uniqueRandomStringGenerator("CT", 2));
+                        .shortName(Utils.uniqueRandomStringGenerator("CT", 6));
 
                 Long loanProductId = createLoanProduct(loanProductRequest);
 

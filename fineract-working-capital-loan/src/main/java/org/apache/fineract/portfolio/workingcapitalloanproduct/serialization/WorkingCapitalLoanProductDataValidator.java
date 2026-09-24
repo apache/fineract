@@ -311,7 +311,7 @@ public class WorkingCapitalLoanProductDataValidator {
             final String shortName = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanProductConstants.shortNameParamName,
                     element);
             baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.shortNameParamName).value(shortName).notBlank()
-                    .notExceedingLengthOf(4);
+                    .notExceedingLengthOf(8);
         }
 
         if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.descriptionParamName, element)) {

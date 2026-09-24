@@ -746,7 +746,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     public void updateWorkingCapitalLoanProduct() {
         final String workingCapitalProductDefaultName = DefaultWorkingCapitalLoanProduct.WCLP.getName()
                 + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
-        final String workingCapitalProductDefaultShortName = Utils.randomStringGenerator(4);
+        final String workingCapitalProductDefaultShortName = Utils.randomStringGenerator(8);
         final PutWorkingCapitalLoanProductsProductIdRequest workingCapitalLoanProductUpdateRequest = workingCapitalRequestFactory
                 .defaultWorkingCapitalLoanProductRequestUpdate() //
                 .name(workingCapitalProductDefaultName) //
@@ -769,7 +769,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     public void updateWorkingCapitalLoanProductViaExternalId() {
         final String workingCapitalProductDefaultName = DefaultWorkingCapitalLoanProduct.WCLP.getName()
                 + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
-        final String workingCapitalProductDefaultShortName = Utils.randomStringGenerator(4);
+        final String workingCapitalProductDefaultShortName = Utils.randomStringGenerator(8);
         final PutWorkingCapitalLoanProductsProductIdRequest workingCapitalLoanProductUpdateRequest = workingCapitalRequestFactory
                 .defaultWorkingCapitalLoanProductRequestUpdate() //
                 .name(workingCapitalProductDefaultName) //
@@ -1574,7 +1574,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     public void updateWorkingCapitalLoanProductWithBreachAndNearBreach(Long breachId, Long nearBreachId) {
         final String workingCapitalProductDefaultName = DefaultWorkingCapitalLoanProduct.WCLP.getName()
                 + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
-        final String workingCapitalProductDefaultShortName = Utils.randomStringGenerator(4);
+        final String workingCapitalProductDefaultShortName = Utils.randomStringGenerator(8);
         final PutWorkingCapitalLoanProductsProductIdRequest workingCapitalLoanProductUpdateRequest = workingCapitalRequestFactory
                 .defaultWorkingCapitalLoanProductRequestUpdate() //
                 .name(workingCapitalProductDefaultName) //

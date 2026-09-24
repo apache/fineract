@@ -113,7 +113,7 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
 
     protected PostSavingsProductsRequest dailyInterestPostingProduct() {
         return new PostSavingsProductsRequest().locale("en").name(Utils.uniqueRandomStringGenerator("DAILY_INTEREST", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .description("Daily interest posting product") //
                 .nominalAnnualInterestRate(10.0) //
                 .digitsAfterDecimal(0) //

@@ -76,7 +76,7 @@ public class FixedDepositProductHelper {
     private static final String TILL_PREMATURE_WITHDRAWAL = "2";
 
     private String name = Utils.uniqueRandomStringGenerator("FIXED_DEPOSIT_PRODUCT_", 6);
-    private String shortName = Utils.uniqueRandomStringGenerator("", 4);
+    private String shortName = Utils.uniqueRandomStringGenerator("", 8);
     private String description = Utils.randomStringGenerator("", 20);
     private String interestCompoundingPeriodType = MONTHLY;
     private String interestPostingPeriodType = MONTHLY;

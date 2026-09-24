@@ -328,7 +328,7 @@ public class WorkingCapitalLoanBreachPastDueAmountTest {
         createdBreachIds.add(breachId);
 
         final String uniqueName = "WCL Breach PastDue Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withBreachId(breachId).build()).getResourceId();
         createdProductIds.add(productId);

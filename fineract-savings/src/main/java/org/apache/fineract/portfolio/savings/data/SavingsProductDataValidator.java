@@ -130,7 +130,7 @@ public class SavingsProductDataValidator {
         baseDataValidator.reset().parameter(nameParamName).value(name).notBlank().notExceedingLengthOf(100);
 
         final String shortName = this.fromApiJsonHelper.extractStringNamed(shortNameParamName, element);
-        baseDataValidator.reset().parameter(shortNameParamName).value(shortName).notBlank().notExceedingLengthOf(4);
+        baseDataValidator.reset().parameter(shortNameParamName).value(shortName).notBlank().notExceedingLengthOf(8);
 
         final String currencyCode = this.fromApiJsonHelper.extractStringNamed(currencyCodeParamName, element);
         baseDataValidator.reset().parameter(currencyCodeParamName).value(currencyCode).notBlank();
@@ -297,7 +297,7 @@ public class SavingsProductDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(shortNameParamName, element)) {
             final String shortName = this.fromApiJsonHelper.extractStringNamed(shortNameParamName, element);
-            baseDataValidator.reset().parameter(shortNameParamName).value(shortName).notBlank().notExceedingLengthOf(4);
+            baseDataValidator.reset().parameter(shortNameParamName).value(shortName).notBlank().notExceedingLengthOf(8);
         }
 
         if (this.fromApiJsonHelper.parameterExists(descriptionParamName, element)) {

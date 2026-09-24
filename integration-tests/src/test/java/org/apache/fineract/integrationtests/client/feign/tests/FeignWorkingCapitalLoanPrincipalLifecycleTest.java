@@ -435,7 +435,7 @@ public class FeignWorkingCapitalLoanPrincipalLifecycleTest extends FeignIntegrat
      */
     private Long createProduct() {
         final String uniqueName = "WCL Principal " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         return productHelper
                 .createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                         .withShortName(uniqueShortName).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build())

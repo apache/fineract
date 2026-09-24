@@ -314,7 +314,7 @@ public class FeignWorkingCapitalLoanRateChangeEirHistoryTest extends FeignIntegr
 
     private Long createProduct() {
         final String uniqueName = "WCL EirHist " + Utils.uniqueRandomStringGenerator("", 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         return productHelper
                 .createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                         .withShortName(uniqueShortName).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build())

@@ -468,7 +468,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
     @Test
     public void testRetrieveTemplateWithProductId() {
         final String productName = "WCL Template Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String shortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(
                 new WorkingCapitalLoanProductTestBuilder().withName(productName).withShortName(shortName).build()).getResourceId();
         assertNotNull(productId);
@@ -515,7 +515,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
     @Test
     public void testRetrieveTemplateProductOptionsContainAllowAttributeOverrides() {
         final String productName = "WCL Template Product Overrides " + UUID.randomUUID().toString().substring(0, 8);
-        final String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String shortName = Utils.uniqueRandomStringGenerator("", 8);
 
         final Map<String, Boolean> allowOverrides = Map.of(//
                 "periodPaymentFrequency", Boolean.TRUE, //
@@ -939,7 +939,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
 
     private Long createProduct() {
         final String uniqueName = "WCL Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         return productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName).build())
@@ -948,7 +948,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
 
     private Long createProductWithAllOverridables() {
         final String uniqueName = "WCL Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         return productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder() //
                 .withName(uniqueName) //
                 .withShortName(uniqueShortName) //
@@ -975,7 +975,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
     private Long createProductWithKnownDefaults(final Integer repaymentEvery, final String repaymentFrequencyType,
             final BigDecimal discount) {
         final String uniqueName = "WCL Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         return productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder() //
                 .withName(uniqueName) //
                 .withShortName(uniqueShortName) //
@@ -1000,7 +1000,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
 
     private Long createProductWithBreachAndNearBreach(final Long breachId, final Long nearBreachId, final boolean allowOverrideBreach) {
         final String uniqueName = "WCL Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         return productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder() //
                 .withName(uniqueName) //
                 .withShortName(uniqueShortName) //

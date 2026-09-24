@@ -127,7 +127,7 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
     private PostLoanProductsRequest decliningBalanceTwelveMonthProduct() {
         return new PostLoanProductsRequest()//
                 .name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .description("12 month declining balance product")//
                 .currencyCode("USD")//
                 .digitsAfterDecimal(2)//

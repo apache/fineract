@@ -608,7 +608,7 @@ public class FeignWorkingCapitalLoanStatusHelpersTest extends FeignIntegrationTe
         final Long breachId = breachHelper.create(breachHelper.createBreachRequest(Utils.randomStringGenerator("WC_BREACH_", 8),
                 BREACH_FREQUENCY, BREACH_FREQUENCY_TYPE, BREACH_AMOUNT_CALCULATION_TYPE, BREACH_MIN_PAYMENT_AMOUNT));
         return productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder()
-                .withName("WCL Parity " + Utils.uniqueRandomStringGenerator("", 8)).withShortName(Utils.uniqueRandomStringGenerator("", 4))
+                .withName("WCL Parity " + Utils.uniqueRandomStringGenerator("", 8)).withShortName(Utils.uniqueRandomStringGenerator("", 8))
                 .withDelinquencyBucketId(bucketId).withDelinquencyGraceDays(DELINQUENCY_GRACE_DAYS).withBreachId(breachId)
                 .withBreachGraceDays(BREACH_GRACE_DAYS).build()).getResourceId();
     }
@@ -641,7 +641,7 @@ public class FeignWorkingCapitalLoanStatusHelpersTest extends FeignIntegrationTe
         if (discountOverridableProductId == null) {
             discountOverridableProductId = productHelper.createWorkingCapitalLoanProduct(
                     new WorkingCapitalLoanProductTestBuilder().withName("WCL Parity Disc " + Utils.uniqueRandomStringGenerator("", 8))
-                            .withShortName(Utils.uniqueRandomStringGenerator("", 4))
+                            .withShortName(Utils.uniqueRandomStringGenerator("", 8))
                             .withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build())
                     .getResourceId();
         }

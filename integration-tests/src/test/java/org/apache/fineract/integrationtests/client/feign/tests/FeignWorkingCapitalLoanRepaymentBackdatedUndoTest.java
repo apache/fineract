@@ -768,7 +768,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
     private Long createPlainProduct() {
         final Long productId = productHelper.createWorkingCapitalLoanProduct(
                 new WorkingCapitalLoanProductTestBuilder().withName("WCL UndoBackdate " + Utils.uniqueRandomStringGenerator("", 8))
-                        .withShortName(Utils.uniqueRandomStringGenerator("", 4)).build())
+                        .withShortName(Utils.uniqueRandomStringGenerator("", 8)).build())
                 .getResourceId();
         createdProductIds.add(productId);
         return productId;
@@ -782,7 +782,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
                         DELINQUENCY_MIN_PAYMENT_PERCENT, 1);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(
                 new WorkingCapitalLoanProductTestBuilder().withName("WCL UndoDelinq " + Utils.uniqueRandomStringGenerator("", 8))
-                        .withShortName(Utils.uniqueRandomStringGenerator("", 4)).withDelinquencyBucketId(bucket.getResourceId())
+                        .withShortName(Utils.uniqueRandomStringGenerator("", 8)).withDelinquencyBucketId(bucket.getResourceId())
                         .withDelinquencyGraceDays(DELINQUENCY_GRACE_DAYS).build())
                 .getResourceId();
         createdProductIds.add(productId);
@@ -794,7 +794,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
                 BREACH_FREQUENCY, BREACH_FREQUENCY_TYPE, BREACH_AMOUNT_CALCULATION_TYPE, BREACH_MIN_PAYMENT_AMOUNT));
         final Long productId = productHelper.createWorkingCapitalLoanProduct(
                 new WorkingCapitalLoanProductTestBuilder().withName("WCL UndoBreach " + Utils.uniqueRandomStringGenerator("", 8))
-                        .withShortName(Utils.uniqueRandomStringGenerator("", 4)).withBreachId(breachId).build())
+                        .withShortName(Utils.uniqueRandomStringGenerator("", 8)).withBreachId(breachId).build())
                 .getResourceId();
         createdProductIds.add(productId);
         return productId;
@@ -811,7 +811,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
     private Long createAccrualProduct(final boolean withDiscount) {
         WorkingCapitalLoanProductTestBuilder builder = new WorkingCapitalLoanProductTestBuilder()
                 .withName("WCL UndoCash " + UUID.randomUUID().toString().substring(0, 8))
-                .withShortName(UUID.randomUUID().toString().replace("-", "").substring(0, 4))
+                .withShortName(UUID.randomUUID().toString().replace("-", "").substring(0, 8))
                 .withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM).withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
                 .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())
                 .withTransfersInSuspenseAccountId(transfersSuspenseAccount.getAccountID().longValue())
