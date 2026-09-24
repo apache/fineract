@@ -23,6 +23,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -38,11 +40,13 @@ import org.apache.fineract.client.feign.services.ExternalAssetOwnerLoanProductAt
 import org.apache.fineract.client.feign.services.ExternalAssetOwnersApi;
 import org.apache.fineract.client.feign.services.LoanProductsApi;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
 import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.client.models.ExternalTransferData;
 import org.apache.fineract.client.models.ExternalTransferLoanProductAttributesData;
+import org.apache.fineract.client.models.ExternalTransferLoanProductAttributesTemplateData;
 import org.apache.fineract.client.models.ExternalTransferOwnerData;
 import org.apache.fineract.client.models.GetLoanProductsResponse;
 import org.apache.fineract.client.models.JournalEntryData;
@@ -52,9 +56,12 @@ import org.apache.fineract.client.models.PostExternalAssetOwnerLoanProductAttrib
 import org.apache.fineract.client.models.PostExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.PostExternalAssetOwnerResponse;
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutExternalAssetOwnerLoanProductAttributeRequest;
 import org.apache.fineract.test.data.AssetExternalizationErrorMessage;
+import org.apache.fineract.test.factory.LoanProductsRequestFactory;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.messaging.EventAssertion;
@@ -84,6 +91,9 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
 
     @Autowired
     private EventAssertion eventAssertion;
+
+    @Autowired
+    private LoanProductsRequestFactory loanProductsRequestFactory;
 
     private ExternalAssetOwnersApi externalAssetOwnersApi() {
         return fineractFeignClient.externalAssetOwners();
@@ -935,6 +945,187 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
             externalAssetOwnerLoanProductAttributesApi().updateExternalAssetOwnerLoanProductAttribute(loanProductId, attributeId,
                     setLoanProductAttributeRequest);
         }
+    }
+
+    private long resolveLoanProductIdByName(String loanProductName) {
+        List<GetLoanProductsResponse> loanProducts = loanProductsApi().retrieveAllLoanProducts(Map.of());
+        Long id = loanProducts.stream().filter(loanProduct -> loanProduct.getName().equals(loanProductName)).findFirst()
+                .orElseThrow(() -> new RuntimeException("No loan product is found!")).getId();
+        return Objects.requireNonNull(id, "Loan product '" + loanProductName + "' has no id");
+    }
+
+    @Given("Loan product {string} exists dedicated to this feature")
+    public void ensureDedicatedLoanProductExists(String loanProductName) {
+        List<GetLoanProductsResponse> loanProducts = loanProductsApi().retrieveAllLoanProducts(Map.of());
+        boolean alreadyExists = loanProducts.stream().anyMatch(loanProduct -> loanProduct.getName().equals(loanProductName));
+        if (!alreadyExists) {
+            PostLoanProductsRequest request = loanProductsRequestFactory.defaultLoanProductsRequestLP1().name(loanProductName)
+                    .dueDaysForRepaymentEvent(3).overDueDaysForRepaymentEvent(3);
+            PostLoanProductsResponse response = ok(() -> loanProductsApi().createLoanProduct(request));
+            log.debug("Created dedicated loan product '{}' with id {} for ExternalAssetOwnerLoanProductAttributes.feature", loanProductName,
+                    response.getResourceId());
+        }
+    }
+
+    private long resolveExternalAssetOwnerLoanProductAttributeId(long loanProductId, String attributeKey) {
+        PageExternalTransferLoanProductAttributesData attributes = externalAssetOwnerLoanProductAttributesApi()
+                .retrieveAllExternalAssetOwnerLoanProductAttributes(loanProductId, attributeKey);
+        List<ExternalTransferLoanProductAttributesData> pageItems = attributes.getPageItems();
+        assert pageItems != null;
+        Long attributeId = pageItems.stream().filter(attribute -> attribute.getAttributeKey().equals(attributeKey)).findFirst()
+                .orElseThrow(() -> new RuntimeException(
+                        ErrorMessageHelper.wrongDataInExternalAssetOwnerLoanProductAttribute(attributeKey, loanProductId)))
+                .getAttributeId();
+        return Objects.requireNonNull(attributeId, "Attribute '" + attributeKey + "' for loan product " + loanProductId + " has no id");
+    }
+
+    @When("Admin retrieves the external asset owner loan product attribute template")
+    public void retrieveExternalAssetOwnerLoanProductAttributeTemplate() {
+        List<ExternalTransferLoanProductAttributesTemplateData> template = ok(
+                () -> externalAssetOwnerLoanProductAttributesApi().retrieveTemplateExternalAssetOwnerLoanProductAttributes());
+        testContext().set(TestContextKey.EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_TEMPLATE, template);
+    }
+
+    @Then("The template contains attribute {string} with isMultiValue {string} and attributeValues containing {string} and {string} but not {string}")
+    public void checkTemplateAttributeContainsValues(String attributeKey, String isMultiValue, String valuePresent1, String valuePresent2,
+            String valueAbsent) {
+        ExternalTransferLoanProductAttributesTemplateData attribute = findTemplateAttribute(attributeKey);
+        assertThat(attribute.getMultiValue()).isEqualTo(Boolean.valueOf(isMultiValue));
+        assertThat(attribute.getAttributeValues()).contains(valuePresent1, valuePresent2);
+        assertThat(attribute.getAttributeValues()).doesNotContain(valueAbsent);
+    }
+
+    @Then("The template contains attribute {string} with isMultiValue {string} and exact attributeValues {string}")
+    public void checkTemplateAttributeExactValues(String attributeKey, String isMultiValue, String exactValuesCsv) {
+        ExternalTransferLoanProductAttributesTemplateData attribute = findTemplateAttribute(attributeKey);
+        assertThat(attribute.getMultiValue()).isEqualTo(Boolean.valueOf(isMultiValue));
+        assertThat(attribute.getAttributeValues()).containsExactlyElementsOf(List.of(exactValuesCsv.split(",")));
+    }
+
+    private ExternalTransferLoanProductAttributesTemplateData findTemplateAttribute(String attributeKey) {
+        List<ExternalTransferLoanProductAttributesTemplateData> template = testContext()
+                .get(TestContextKey.EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_TEMPLATE);
+        return template.stream().filter(entry -> attributeKey.equals(entry.getAttributeKey())).findFirst()
+                .orElseThrow(() -> new RuntimeException("No template entry found for attributeKey: " + attributeKey));
+    }
+
+    @When("Admin creates external asset owner loan product attribute {string} for loan product {string} with values:")
+    public void createExternalAssetOwnerLoanProductAttributeForProductWithValues(String attributeKey, String loanProductName,
+            DataTable table) {
+        createExternalAssetOwnerLoanProductAttributeForProductId(attributeKey, String.join(", ", table.asList()),
+                resolveLoanProductIdByName(loanProductName));
+    }
+
+    private void createExternalAssetOwnerLoanProductAttributeForProductId(String attributeKey, String attributeValue, long loanProductId) {
+        PostExternalAssetOwnerLoanProductAttributeRequest request = new PostExternalAssetOwnerLoanProductAttributeRequest()
+                .attributeKey(attributeKey).attributeValue(attributeValue);
+        CommandProcessingResult response = ok(
+                () -> externalAssetOwnerLoanProductAttributesApi().createExternalAssetOwnerLoanProductAttribute(loanProductId, request));
+        testContext().set(TestContextKey.EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_LAST_RESPONSE, response);
+    }
+
+    @Then("Creating external asset owner loan product attribute {string} value {string} for loan product {string} fails with:")
+    public void createExternalAssetOwnerLoanProductAttributeForProductFails(String attributeKey, String attributeValue,
+            String loanProductName, DataTable table) {
+        long loanProductId = resolveLoanProductIdByName(loanProductName);
+        assertCreateExternalAssetOwnerLoanProductAttributeFails(attributeKey, attributeValue, loanProductId, errorMessageFrom(table));
+    }
+
+    @Then("Creating external asset owner loan product attribute {string} value {string} for loan product id {long} fails with:")
+    public void createExternalAssetOwnerLoanProductAttributeForProductIdFails(String attributeKey, String attributeValue,
+            long loanProductId, DataTable table) {
+        assertCreateExternalAssetOwnerLoanProductAttributeFails(attributeKey, attributeValue, loanProductId, errorMessageFrom(table));
+    }
+
+    @Then("Creating external asset owner loan product attribute {string} with an attribute value exceeding the maximum length for loan product {string} fails with:")
+    public void createExternalAssetOwnerLoanProductAttributeExceedingMaxLengthFails(String attributeKey, String loanProductName,
+            DataTable table) {
+        long loanProductId = resolveLoanProductIdByName(loanProductName);
+        String tooLongValue = "A".repeat(2001);
+        assertCreateExternalAssetOwnerLoanProductAttributeFails(attributeKey, tooLongValue, loanProductId, errorMessageFrom(table));
+    }
+
+    private String errorMessageFrom(DataTable table) {
+        return table.asMaps().get(0).get("errorMessage");
+    }
+
+    private void assertCreateExternalAssetOwnerLoanProductAttributeFails(String attributeKey, String attributeValue, long loanProductId,
+            String expectedErrorMessagePart) {
+        PostExternalAssetOwnerLoanProductAttributeRequest request = new PostExternalAssetOwnerLoanProductAttributeRequest()
+                .attributeKey(attributeKey).attributeValue(attributeValue);
+        CallFailedRuntimeException exception = fail(
+                () -> externalAssetOwnerLoanProductAttributesApi().createExternalAssetOwnerLoanProductAttribute(loanProductId, request));
+        assertThat(exception.getMessage()).contains(expectedErrorMessagePart);
+    }
+
+    @When("Admin updates external asset owner loan product attribute {string} for loan product {string} with attributeKey {string} and value {string}")
+    public void updateExternalAssetOwnerLoanProductAttributeForProduct(String storedAttributeKey, String loanProductName,
+            String bodyAttributeKey, String bodyAttributeValue) {
+        long loanProductId = resolveLoanProductIdByName(loanProductName);
+        long attributeId = resolveExternalAssetOwnerLoanProductAttributeId(loanProductId, storedAttributeKey);
+        PutExternalAssetOwnerLoanProductAttributeRequest request = new PutExternalAssetOwnerLoanProductAttributeRequest()
+                .attributeKey(bodyAttributeKey).attributeValue(bodyAttributeValue);
+        CommandProcessingResult response = ok(() -> externalAssetOwnerLoanProductAttributesApi()
+                .updateExternalAssetOwnerLoanProductAttribute(loanProductId, attributeId, request));
+        testContext().set(TestContextKey.EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_LAST_RESPONSE, response);
+    }
+
+    @When("Admin updates external asset owner loan product attribute {string} for loan product {string} with attributeKey {string} and values:")
+    public void updateExternalAssetOwnerLoanProductAttributeForProductWithValues(String storedAttributeKey, String loanProductName,
+            String bodyAttributeKey, DataTable table) {
+        updateExternalAssetOwnerLoanProductAttributeForProduct(storedAttributeKey, loanProductName, bodyAttributeKey,
+                String.join(", ", table.asList()));
+    }
+
+    @Then("Updating external asset owner loan product attribute {string} for loan product {string} with attributeKey {string} and value {string} fails with:")
+    public void updateExternalAssetOwnerLoanProductAttributeForProductFails(String storedAttributeKey, String loanProductName,
+            String bodyAttributeKey, String bodyAttributeValue, DataTable table) {
+        long loanProductId = resolveLoanProductIdByName(loanProductName);
+        long attributeId = resolveExternalAssetOwnerLoanProductAttributeId(loanProductId, storedAttributeKey);
+        PutExternalAssetOwnerLoanProductAttributeRequest request = new PutExternalAssetOwnerLoanProductAttributeRequest()
+                .attributeKey(bodyAttributeKey).attributeValue(bodyAttributeValue);
+        CallFailedRuntimeException exception = fail(() -> externalAssetOwnerLoanProductAttributesApi()
+                .updateExternalAssetOwnerLoanProductAttribute(loanProductId, attributeId, request));
+        assertThat(exception.getMessage()).contains(errorMessageFrom(table));
+    }
+
+    @Then("The request succeeds and returns loan product {string}")
+    public void checkLastRequestSucceededForLoanProduct(String loanProductName) {
+        CommandProcessingResult response = testContext().get(TestContextKey.EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_LAST_RESPONSE);
+        long expectedLoanProductId = resolveLoanProductIdByName(loanProductName);
+        assertThat(response.getResourceId()).isEqualTo(expectedLoanProductId);
+    }
+
+    private void checkExternalAssetOwnerLoanProductAttributeValue(String attributeKey, String loanProductName, String expectedValue) {
+        long loanProductId = resolveLoanProductIdByName(loanProductName);
+        PageExternalTransferLoanProductAttributesData attributes = externalAssetOwnerLoanProductAttributesApi()
+                .retrieveAllExternalAssetOwnerLoanProductAttributes(loanProductId, attributeKey);
+        assertThat(attributes.getTotalFilteredRecords()).isEqualTo(1);
+        assertThat(attributes.getPageItems()).isNotNull();
+        ExternalTransferLoanProductAttributesData attribute = attributes.getPageItems().getFirst();
+        assertThat(attribute.getAttributeKey()).isEqualTo(attributeKey);
+        assertThat(attribute.getLoanProductId()).isEqualTo(loanProductId);
+        assertThat(attribute.getAttributeValue()).isEqualTo(expectedValue);
+    }
+
+    @Then("External asset owner loan product attribute {string} for loan product {string} has values:")
+    public void checkExternalAssetOwnerLoanProductAttributeValues(String attributeKey, String loanProductName, DataTable table) {
+        checkExternalAssetOwnerLoanProductAttributeValue(attributeKey, loanProductName, String.join(",", table.asList()));
+    }
+
+    @Then("External asset owner loan product attribute {string} for loan product {string} does not exist")
+    public void checkExternalAssetOwnerLoanProductAttributeDoesNotExist(String attributeKey, String loanProductName) {
+        long loanProductId = resolveLoanProductIdByName(loanProductName);
+        PageExternalTransferLoanProductAttributesData attributes = externalAssetOwnerLoanProductAttributesApi()
+                .retrieveAllExternalAssetOwnerLoanProductAttributes(loanProductId, attributeKey);
+        assertThat(attributes.getTotalFilteredRecords()).isEqualTo(0);
+    }
+
+    @When("Admin deletes external asset owner loan product attribute {string} for loan product {string}")
+    public void deleteExternalAssetOwnerLoanProductAttributeForProduct(String attributeKey, String loanProductName) {
+        long loanProductId = resolveLoanProductIdByName(loanProductName);
+        long attributeId = resolveExternalAssetOwnerLoanProductAttributeId(loanProductId, attributeKey);
+        ok(() -> externalAssetOwnerLoanProductAttributesApi().deleteExternalAssetOwnerLoanProductAttribute(loanProductId, attributeId));
     }
 
     @When("Admin makes asset externalization request for type {string} by Loan ID with unique ownerExternalId, force generated transferExternalId and without change test owner with following data:")
