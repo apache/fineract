@@ -3430,16 +3430,35 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     @When("Admin creates a Working Capital Loan Product with delinquencyGraceDays {int} and delinquencyStartType {string} for loan test")
     public void createProductWithGraceDaysForLoanTest(int graceDays, String startType) {
+        createGraceDaysProductForLoanTest(graceDays, startType, null);
+    }
+
+    @When("Admin creates a Working Capital Loan Product with delinquencyGraceDays {int} and delinquencyStartType {string} and the created delinquency bucket for loan test")
+    public void createProductWithGraceDaysAndBucketForLoanTest(int graceDays, String startType) {
+        final Long bucketId = testContext().get(TestContextKey.DELINQUENCY_BUCKET_ID);
+        assertThat(bucketId).as("delinquency bucket must be created in this scenario before the product").isNotNull();
+        createGraceDaysProductForLoanTest(graceDays, startType, bucketId);
+    }
+
+    /**
+     * Creates the grace days product used by the loan tests. A null bucketId leaves the factory default bucket in
+     * place, which is what the callers that do not build their own bucket rely on.
+     */
+    private void createGraceDaysProductForLoanTest(final int graceDays, final String startType, final Long bucketId) {
         final String name = "WCLP-GD-" + Utils.randomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest request = workingCapitalProductRequestFactory.defaultWorkingCapitalLoanProductRequest() //
                 .name(name) //
                 .delinquencyGraceDays(graceDays) //
                 .delinquencyStartType(startType);
+        if (bucketId != null) {
+            request.delinquencyBucketId(bucketId);
+        }
         final PostWorkingCapitalLoanProductsResponse response = ok(
                 () -> fineractClient.workingCapitalLoanProducts().createWorkingCapitalLoanProduct(request, Map.of()));
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_FOR_LOAN_TEST, response.getResourceId());
-        log.info("Created WC Loan Product with grace days for loan test, ID: {}", response.getResourceId());
+        log.info("Created WC Loan Product with grace days for loan test, ID: {}, delinquency bucket: {}", response.getResourceId(),
+                bucketId);
     }
 
     @When("Admin creates a working capital loan with the grace days product and the following data:")
