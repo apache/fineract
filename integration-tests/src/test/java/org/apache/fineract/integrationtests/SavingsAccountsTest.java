@@ -18,103 +18,81 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.time.format.DateTimeFormatter;
-import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
-import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
-import org.apache.fineract.client.models.PostSavingsAccountsRequest;
-import org.apache.fineract.client.models.PostSavingsAccountsResponse;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import retrofit2.Response;
 
 /**
  * Integration Test for /savingsaccounts API.
+ * <p>
+ * The three tests are one ordered chain over a single account, so this cannot extend {@code FeignSavingsTestBase}:
+ * {@code FeignSavingsLifecycleExtension} rejects every submitted account after each test, which would take the account
+ * away before the next test could approve it. It closes its own account instead.
  *
  * @author Danish Jamal
  *
  */
-@ExtendWith({ SavingsTestLifecycleExtension.class })
-public class SavingsAccountsTest extends IntegrationTest {
+public class SavingsAccountsTest extends FeignIntegrationTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountsTest.class);
-    private final String dateFormat = "dd MMMM yyyy";
-    private final String locale = "en";
-    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(dateFormat);
-    private final String formattedDate = dateFormatter.format(Utils.getLocalDateOfTenant());
+    private static FeignSavingsHelper savingsHelper;
+    private static FeignSavingsProductHelper savingsProductHelper;
+    private static FeignClientHelper clientHelper;
+
     // static: JUnit uses a new test instance per method, so instance fields do not carry between the ordered tests
-    private static long clientId;
-    private static long productId;
-    private static int savingId;
+    private static Long savingsId;
+
+    private final String formattedDate = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
+
+    @BeforeAll
+    public static void setupHelpers() {
+        FineractFeignClient client = FineractFeignClientHelper.getFineractFeignClient();
+        savingsHelper = new FeignSavingsHelper(client);
+        savingsProductHelper = new FeignSavingsProductHelper(client);
+        clientHelper = new FeignClientHelper(client);
+    }
+
+    @AfterAll
+    public static void closeAccount() {
+        if (savingsId != null) {
+            savingsHelper.closeSavings(savingsId, Utils.dateFormatter.format(Utils.getLocalDateOfTenant()), true);
+        }
+    }
 
     @Test
     @Order(1)
     void submitSavingsAccountsApplication() {
-        LOG.info("------------------------------ CREATING NEW SAVINGS ACCOUNT APPLICATION ---------------------------------------");
         // create a dedicated active client and savings product instead of relying on entities created by other test
         // classes in the same shard
-        final RequestSpecification requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        clientId = ClientHelper.createClient(requestSpec, responseSpec);
-        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsQuarterly().withInterestCalculationPeriodTypeAsDailyBalance().build();
-        productId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+        Long clientId = clientHelper.createClient();
+        Long productId = savingsProductHelper
+                .createSavingsProduct(SavingsRequestBuilders.savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY,
+                        SavingsTestData.InterestPostingPeriodType.QUARTERLY, SavingsTestData.InterestCalculationType.DAILY_BALANCE))
+                .getResourceId();
 
-        PostSavingsAccountsRequest request = new PostSavingsAccountsRequest();
-        request.setClientId(clientId);
-        request.setProductId(productId);
-        request.setLocale(locale);
-        request.setDateFormat(dateFormat);
-        request.submittedOnDate(formattedDate);
+        savingsId = savingsHelper.submitApplication(clientId, productId, formattedDate).getSavingsId();
 
-        Response<PostSavingsAccountsResponse> response = okR(fineractClient().savingsAccounts.submitSavingsApplication(request));
-
-        assertThat(response.isSuccessful()).isTrue();
-        assertThat(response.body()).isNotNull();
-        savingId = Math.toIntExact(response.body().getSavingsId());
+        assertThat(savingsId).isNotNull();
     }
 
     @Test
     @Order(2)
     void approveSavingsAccount() {
-        LOG.info("------------------------------ APPROVING SAVINGS ACCOUNT ---------------------------------------");
-        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
-        request.setLocale(locale);
-        request.setApprovedOnDate(formattedDate);
-        Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineractClient().savingsAccounts.handleCommandsSavingsAccount((long) savingId, request, "approve"));
-
-        assertThat(response.isSuccessful()).isTrue();
-        assertThat(response.body()).isNotNull();
+        assertThat(savingsHelper.approveSavings(savingsId, formattedDate)).isNotNull();
     }
 
     @Test
     @Order(3)
     void activateSavingsAccount() {
-        LOG.info("------------------------------ ACTIVATING SAVINGS ACCOUNT ---------------------------------------");
-        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
-        request.setLocale(locale);
-        request.setActivatedOnDate(formattedDate);
-        Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineractClient().savingsAccounts.handleCommandsSavingsAccount((long) savingId, request, "activate"));
-
-        assertThat(response.isSuccessful()).isTrue();
-        assertThat(response.body()).isNotNull();
+        assertThat(savingsHelper.activateSavings(savingsId, formattedDate)).isNotNull();
     }
-
 }

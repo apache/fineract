@@ -19,6 +19,9 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -58,6 +61,7 @@ public class DepositAccountOnHoldFundTransactionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve deposit account on hold fund transactions", operationId = "retrieveAllDepositAccountOnHoldFundTransactions")
     @AlternativeOperationId("retrieveAll_28")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DepositAccountOnHoldFundTransactionsApiResourceSwagger.GetSavingsAccountsSavingsAccountIdOnHoldTransactionsResponse.class)))
     public String retrieveAll(@PathParam("savingsId") final Long savingsId, @QueryParam("guarantorFundingId") final Long guarantorFundingId,
             @Context final UriInfo uriInfo, @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
