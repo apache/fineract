@@ -64,6 +64,11 @@ public class SavingsAccountChargeData implements Serializable {
     private final LocalDate inactivationDate;
     private final Collection<ChargeData> chargeOptions;
     private ChargeData chargeData;
+    private Collection<SavingsChargeTransactionData> transactions;
+
+    public void setTransactions(final Collection<SavingsChargeTransactionData> transactions) {
+        this.transactions = transactions;
+    }
 
     public SavingsAccountChargeData(Long chargeId, BigDecimal amount, LocalDate dueDate) {
         this.chargeId = chargeId;
