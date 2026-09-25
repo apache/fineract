@@ -33,6 +33,9 @@ public interface LoanCollateralManagementMapper {
     @Mapping(target = "quantity", source = "quantity")
     @Mapping(target = "total", ignore = true)
     @Mapping(target = "totalCollateral", ignore = true)
+    @Mapping(target = "name", ignore = true)
+    @Mapping(target = "unitPrice", ignore = true)
+    @Mapping(target = "pctToBase", ignore = true)
     LoanCollateralManagementData map(LoanCollateralManagement loanCollateralManagement);
 
     Set<LoanCollateralManagementData> map(Set<LoanCollateralManagement> loanCollateralManagements);
