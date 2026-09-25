@@ -21,6 +21,9 @@ package org.apache.fineract.infrastructure.security.service;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.nsimbi.userroles.service.NsimbiUserSecurityService;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,10 +31,16 @@ import org.springframework.stereotype.Component;
  * SpringSecurityPlatformSecurityContext and AuthenticationApiResource after authentication succeeds.
  */
 @Component
+@RequiredArgsConstructor
 public class PlatformUserDetailsChecker implements UserDetailsChecker {
+
+    private final NsimbiUserSecurityService nsimbiUserSecurityService;
 
     @Override
     public void check(UserDetails userDetails) {
+        if (userDetails instanceof AppUser appUser && nsimbiUserSecurityService.isSuspended(appUser.getId())) {
+            throw new org.springframework.security.authentication.DisabledException("User account is administratively suspended");
+        }
         if (!userDetails.isCredentialsNonExpired()) {
             throw new CredentialsExpiredException("User credentials have expired");
         }
