@@ -41,7 +41,12 @@ public final class WorkingCapitalLoanOutstandingMath {
      * outstanding rather than a negative amount that would eat into the other buckets once they are summed.
      */
     public static BigDecimal bucketOutstanding(final BigDecimal charged, final BigDecimal paid, final BigDecimal writtenOff) {
-        return MathUtil.subtract(charged, paid, writtenOff).max(BigDecimal.ZERO);
+        return bucketOutstanding(charged, paid, writtenOff, BigDecimal.ZERO);
+    }
+
+    public static BigDecimal bucketOutstanding(final BigDecimal charged, final BigDecimal paid, final BigDecimal writtenOff,
+            final BigDecimal waived) {
+        return MathUtil.subtract(charged, paid, writtenOff, waived).max(BigDecimal.ZERO);
     }
 
     /**

@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
@@ -236,6 +237,10 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public Integer loanProductCounter;
         @Schema(example = "10500.00")
         public BigDecimal totalPaymentVolume;
+        @Schema(example = "43.7562", description = "Configured annual EIR percentage for ANNUAL_EIR strategy loans")
+        public BigDecimal annualEir;
+        @Schema(description = "Payment amount calculation strategy inherited from product")
+        public StringEnumOptionData paymentAmountCalculationStrategy;
         @Schema(example = "0.0", description = "Discount fee set during loan disbursement")
         public BigDecimal discountFee;
         @Schema(example = "0.0", description = "Proposed discount fee at loan submission time")
@@ -324,6 +329,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
             @Schema(example = "0")
             public BigDecimal amountWrittenOff;
             @Schema(example = "0")
+            public BigDecimal amountWaived;
+            @Schema(example = "0")
             public BigDecimal amountOutstanding;
             @Schema(example = "false")
             public boolean penalty;
@@ -353,9 +360,13 @@ public final class WorkingCapitalLoanApiResourceSwagger {
             public BigDecimal principalOutstanding;
             public BigDecimal fee;
             public BigDecimal feePaid;
+            @Schema(description = "Fees moved out of the outstanding balance by a charge waiver")
+            public BigDecimal feeWaived;
             public BigDecimal feeOutstanding;
             public BigDecimal penalty;
             public BigDecimal penaltyPaid;
+            @Schema(description = "Penalties moved out of the outstanding balance by a charge waiver")
+            public BigDecimal penaltyWaived;
             public BigDecimal penaltyOutstanding;
             public BigDecimal realizedIncomeFromDiscountFee;
             public BigDecimal unrealizedIncomeFromDiscountFee;
@@ -449,6 +460,10 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal totalRecovered;
         @Schema(example = "8000.00", description = "Still recoverable (totalWrittenOff - totalRecovered); caps the next recovery payment")
         public BigDecimal writtenOffOutstanding;
+        @Schema(example = "0.00", description = "Fees moved out of the outstanding balance by a charge waiver")
+        public BigDecimal feeWaived;
+        @Schema(example = "0.00", description = "Penalties moved out of the outstanding balance by a charge waiver")
+        public BigDecimal penaltyWaived;
         @Schema(example = "10000.00")
         public BigDecimal realizedIncomeFromDiscountFee;
         @Schema(example = "10000.00")
@@ -533,6 +548,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal principalAmount;
         @Schema(example = "10500.00")
         public BigDecimal totalPaymentVolume;
+        @Schema(example = "43.7562", description = "Annual EIR percentage (6 decimal places max). Required for ANNUAL_EIR strategy products.")
+        public BigDecimal annualEir;
         @Schema(example = "15 January 2024")
         public String submittedOnDate;
         @Schema(example = "1 February 2024")
@@ -569,6 +586,9 @@ public final class WorkingCapitalLoanApiResourceSwagger {
                 If the global config 'enable_originator_creation_during_loan_application' is enabled, \
                 non-existing originators will be auto-created using the provided details (name, typeId, channelTypeId).""")
         public List<PostWorkingCapitalLoansOriginatorData> originators;
+
+        @Schema(example = "List of PostWorkingCapitalLoansDataTable")
+        public List<PostWorkingCapitalLoansDataTable> datatables;
 
         @Schema(example = "en_GB")
         public String locale;
@@ -615,6 +635,17 @@ public final class WorkingCapitalLoanApiResourceSwagger {
 
             @Schema(description = "Code value ID for channel type (from LoanOriginationChannelType code)", example = "2")
             public Long channelTypeId;
+        }
+
+        @Schema(description = "PostWorkingCapitalLoansDataTable")
+        public static final class PostWorkingCapitalLoansDataTable {
+
+            private PostWorkingCapitalLoansDataTable() {}
+
+            @Schema(example = "dt_wc_loan_extra")
+            public String registeredTableName;
+            @Schema(example = "Datatable data")
+            public Map<String, Object> data;
         }
     }
 

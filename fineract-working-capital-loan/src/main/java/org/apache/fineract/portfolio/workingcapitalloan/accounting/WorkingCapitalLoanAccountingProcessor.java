@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.accounting;
 
+import java.math.BigDecimal;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
@@ -26,6 +27,9 @@ public interface WorkingCapitalLoanAccountingProcessor {
 
     void postJournalEntries(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn, WorkingCapitalLoanTransactionAllocation allocation,
             boolean isChargedOff);
+
+    void postJournalEntriesForChargeWaiver(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn, BigDecimal recognizedFeePortion,
+            BigDecimal recognizedPenaltyPortion, boolean isChargedOff);
 
     void postReversalJournalEntries(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn);
 

@@ -46,6 +46,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapita
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductMinMaxConstraints;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -90,6 +91,7 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
         lenient().when(loan.isOpen()).thenReturn(true);
         lenient().when(loan.getLoanProductRelatedDetails()).thenReturn(relatedDetails);
         lenient().when(relatedDetails.getPeriodPaymentRate()).thenReturn(BigDecimal.TEN);
+        lenient().when(relatedDetails.getPaymentAmountCalculationStrategy()).thenReturn(WorkingCapitalPaymentAmountCalculationStrategy.TPV);
         lenient().when(loan.getLoanProduct()).thenReturn(product);
         lenient().when(product.getMinMaxConstraints()).thenReturn(minMaxConstraints);
         lenient().when(minMaxConstraints.getMinPeriodPaymentRate()).thenReturn(BigDecimal.ONE);
@@ -109,6 +111,15 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
     @Test
     void shouldThrowInvalidJsonWhenJsonIsNull() {
         assertThrows(InvalidJsonException.class, () -> validator.validateUpdatePeriodPaymentRate(null, loan));
+    }
+
+    @Test
+    void shouldRejectRateChangeForAnnualEirStrategy() {
+        when(relatedDetails.getPaymentAmountCalculationStrategy()).thenReturn(WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR);
+        PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateUpdatePeriodPaymentRate(validJson("20"), loan));
+        assertThat(ex.getErrors())
+                .anyMatch(e -> e.getUserMessageGlobalisationCode().contains("rate.change.not.allowed.for.annual.eir.strategy"));
     }
 
     @Test

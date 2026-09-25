@@ -2727,6 +2727,60 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 "every day bills something");
     }
 
+    @Test
+    void testAnnualEir_referenceLoan_matchesTpvEquivalentDailyPaymentAndTerm() {
+        // annualEir 46.8451 sizes the same 50.00 / 200-day plan as TPV rate 18 on 100000 volume
+        final BigDecimal annualEir = new BigDecimal("46.8451");
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateFromAnnualEir(
+                WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE, NET_DISBURSEMENT, annualEir, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC,
+                CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+
+        assertEquals(TERM, model.originalPaymentNumber());
+        assertMoneyValue(50.00, model.expectedPaymentAmount(), 2, "daily payment sized from annual EIR");
+        assertMoneyValue(50.00, model.finalPaymentAmount(), 2, "closing day is a full instalment");
+        assertEquals(0, annualEir.compareTo(model.annualEir()), "contractual annual EIR is stored");
+        assertNotNull(model.effectiveInterestRate(), "EIR amortization still stores a solved periodic rate");
+        assertNotNull(model.calculatedAnnualEir(), "calculated annual EIR is derived from the cash-flow IRR");
+
+        final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
+        assertTrue(ProjectedAmortizationScheduleModel.isAnnualEirCalculable(WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE,
+                NET_DISBURSEMENT, annualEir, DAY_COUNT, usd, MC));
+    }
+
+    @Test
+    void testAnnualEir_subCentDiscount_rejectedByPreCheckAndGenerate() {
+        // Raw 0.004 is positive, but Money stores 0.00 — generate must fail the same way rebuildPayments would
+        final BigDecimal annualEir = new BigDecimal("46.8451");
+        final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
+
+        assertFalse(ProjectedAmortizationScheduleModel.isAnnualEirCalculable(WorkingCapitalAmortizationType.EIR, new BigDecimal("0.004"),
+                NET_DISBURSEMENT, annualEir, DAY_COUNT, usd, MC), "sub-cent discount is nothing after currency rounding");
+        assertFalse(ProjectedAmortizationScheduleModel.isAnnualEirCalculable(WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE,
+                new BigDecimal("0.004"), annualEir, DAY_COUNT, usd, MC), "sub-cent disbursement is nothing to disburse");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> ProjectedAmortizationScheduleModel.generateFromAnnualEir(WorkingCapitalAmortizationType.EIR, new BigDecimal("0.004"),
+                        NET_DISBURSEMENT, annualEir, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE));
+    }
+
+    @Test
+    void testAnnualEir_subCentInputs_sizeTheTermFromTheStoredAmounts() {
+        final BigDecimal annualEir = new BigDecimal("46.8451");
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateFromAnnualEir(
+                WorkingCapitalAmortizationType.EIR, new BigDecimal("1000.004"), new BigDecimal("9000.004"), annualEir, DAY_COUNT,
+                EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+
+        assertMoneyValue(1000.00, model.discountFeeAmount(), 2, "the fee is stored in the currency");
+        assertMoneyValue(9000.00, model.netDisbursementAmount(), 2, "the net is stored in the currency");
+        assertEquals(TERM, model.originalPaymentNumber(), "the term is sized from the currency-rounded amounts");
+
+        final ProjectedAmortizationScheduleModel regenerated = model.regenerate(model.discountFeeAmount().getAmount(),
+                model.netDisbursementAmount().getAmount(), EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
+        assertEquals(model.originalPaymentNumber(), regenerated.originalPaymentNumber());
+        assertEquals(0, model.expectedPaymentAmount().getAmount().compareTo(regenerated.expectedPaymentAmount().getAmount()),
+                "regeneration keeps the daily payment");
+    }
+
     private void assertMoneyValue(final Double expected, final Money actual, final int scale, final String msg) {
         if (expected == null) {
             assertNull(actual, msg);

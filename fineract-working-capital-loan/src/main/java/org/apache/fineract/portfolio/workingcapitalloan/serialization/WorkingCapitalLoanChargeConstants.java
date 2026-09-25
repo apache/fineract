@@ -43,4 +43,7 @@ public final class WorkingCapitalLoanChargeConstants {
 
     // Adjustment command
     public static final String ADJUSTMENT_LOAN_CHARGE_COMMAND = "adjustment";
+
+    // Waiver command
+    public static final String WAIVE_LOAN_CHARGE_COMMAND = "waive";
 }

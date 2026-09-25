@@ -82,9 +82,11 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(source = "totalDisbursement", target = "principalDisbursed")
     @Mapping(source = "fee", target = "feeChargesCharged")
     @Mapping(source = "feePaid", target = "feeChargesPaid")
+    @Mapping(source = "feeWaived", target = "feeChargesWaived")
     @Mapping(source = "feeOutstanding", target = "feeChargesOutstanding")
     @Mapping(source = "penalty", target = "penaltyChargesCharged")
     @Mapping(source = "penaltyPaid", target = "penaltyChargesPaid")
+    @Mapping(source = "penaltyWaived", target = "penaltyChargesWaived")
     @Mapping(source = "penaltyOutstanding", target = "penaltyChargesOutstanding")
     @Mapping(target = "totalChargeAmount", source = ".", qualifiedByName = "toTotalChargeAmount")
     @Mapping(source = "principalAdjustment", target = "principalAdjustments")
@@ -117,7 +119,6 @@ public interface WorkingCapitalLoanAccountDataMapper {
 
     @Mapping(target = "amountAccrued", ignore = true)
     @Mapping(target = "amountUnrecognized", ignore = true)
-    @Mapping(target = "amountWrittenOff", ignore = true)
     @Mapping(target = "customData", ignore = true)
     WorkingCapitalLoanChargeDataV1 map(WorkingCapitalLoanChargeData source);
 

@@ -275,18 +275,7 @@ Neither operation emits a balance-changed or status-changed event: the outstandi
 |`RECOVERYPAYMENT_WORKINGCAPITALLOAN` |`transaction_loan` |`WORKINGCAPITALLOAN` |`RECOVERYPAYMENT`
 |===
 
-The reversal adds no permission of its own: it goes through the generic transaction-undo command, exactly as
-the reversal of a repayment, goodwill credit, payout refund or charge adjustment does. That command carries
-action `UNDO` on entity `ENTITY_WORKINGCAPITALLOANTRANSACTION`.
-
-[NOTE]
-====
-The permission code checked for a reversal is *not written anywhere in the source*: it is derived at runtime as
-`actionName + "_" + entityName`, which for this command yields `UNDO_ENTITY_WORKINGCAPITALLOANTRANSACTION`.
-Searching the codebase for that string finds nothing — the entity name and the action are declared separately
-and concatenated when the command wrapper is built.
-
-No `m_permission` row is seeded for it, so today it can only be exercised by a super user (`ALL_FUNCTIONS`);
-no other role can be granted it. This is pre-existing behaviour shared by every Working Capital transaction
-reversal, not something the recovery payment introduces.
-====
+The reversal is guarded by the shared transaction-undo permission `UNDO_WORKINGCAPITALLOANTRANSACTION`
+(grouping `transaction_loan`, entity `WORKINGCAPITALLOANTRANSACTION`, action `UNDO`), the same permission that
+guards the reversal of a repayment, goodwill credit, payout refund or charge adjustment. No permission specific
+to the recovery payment reversal exists.

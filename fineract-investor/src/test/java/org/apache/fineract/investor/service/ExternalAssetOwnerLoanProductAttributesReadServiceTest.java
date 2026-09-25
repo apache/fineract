@@ -22,19 +22,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.investor.data.ExternalTransferLoanProductAttributesData;
 import org.apache.fineract.investor.data.ExternalTransferLoanProductAttributesTemplateData;
+import org.apache.fineract.investor.data.attribute.ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttributes;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttributesRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,7 +77,7 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
     @BeforeEach
     public void setUp() {
         underTest = new ExternalAssetOwnerLoanProductAttributesReadServiceImpl(externalAssetOwnerLoanProductAttributesRepository,
-                loanProductRepository, mapper);
+                loanProductRepository, mapper, new ExternalAssetOwnerLoanProductAttributeProvider());
     }
 
     @ParameterizedTest
@@ -112,9 +116,17 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
         // then
         ExternalTransferLoanProductAttributesTemplateData settlementModel = result.stream()
                 .filter(attribute -> "SETTLEMENT_MODEL".equals(attribute.getAttributeKey())).findFirst().orElseThrow();
-        assertEquals(1, result.size());
+        assertEquals(3, result.size());
         assertEquals(List.of("DEFAULT_SETTLEMENT", "DELAYED_SETTLEMENT"), settlementModel.getAttributeValues());
         assertFalse(settlementModel.isMultiValue());
+
+        ExternalTransferLoanProductAttributesTemplateData excludedTransactionTypes = result.stream()
+                .filter(attribute -> ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY
+                        .equals(attribute.getAttributeKey()))
+                .findFirst().orElseThrow();
+        assertTrue(excludedTransactionTypes.isMultiValue());
+        assertEquals(Arrays.stream(LoanTransactionType.values()).filter(type -> !LoanTransactionType.INVALID.equals(type)).map(Enum::name)
+                .toList(), excludedTransactionTypes.getAttributeValues());
     }
 
     @Test

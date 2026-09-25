@@ -77,8 +77,15 @@
         },
         {
             "default": null,
+            "name": "amountWaived",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "amountWrittenOff",
-            "doc": "Always null: working capital does not yet implement write-off.",
             "type": [
                 "null",
                 "bigdecimal"

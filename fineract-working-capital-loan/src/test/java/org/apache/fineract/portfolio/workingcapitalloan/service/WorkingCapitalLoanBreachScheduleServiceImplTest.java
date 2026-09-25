@@ -324,7 +324,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
     }
 
     @Test
-    void recalculatePeriodsForPauses_recalculatesPastDueAmount() {
+    void replayForBreachAction_recalculatesPastDueAmount() {
         final WorkingCapitalBreach breachConfig = new WorkingCapitalBreach();
         breachConfig.setBreachFrequency(7);
         breachConfig.setBreachFrequencyType(WorkingCapitalLoanPeriodFrequencyType.DAYS);
@@ -341,23 +341,24 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         when(breachActionRepository.findByWorkingCapitalLoanIdAndActionOrderByIdDesc(anyLong(), any())).thenReturn(List.of());
         when(balanceRepository.findByWcLoan_Id(LOAN_ID)).thenReturn(Optional.of(balance));
 
-        underTest.recalculatePeriodsForPauses(loan);
+        underTest.replayForBreachAction(loan, pause(LocalDate.of(2026, 5, 2), LocalDate.of(2026, 5, 3)));
 
         assertEquals(0, BigDecimal.valueOf(100).compareTo(balance.getBreachPastDueAmount()));
     }
 
     @Test
-    void recalculatePeriodsForPauses_keepsTheGraceDaysOfTheFirstPeriod() {
+    void replayForBreachAction_keepsTheGraceDaysOfTheFirstPeriod() {
         givenBreachConfig(60, WorkingCapitalLoanPeriodFrequencyType.DAYS);
         loan.getLoanProductRelatedDetails().setBreachGraceDays(3);
         givenReschedules();
-        givenActions(pause(LocalDate.of(2026, 2, 10), LocalDate.of(2026, 2, 14)));
+        final WorkingCapitalLoanBreachAction pause = pause(LocalDate.of(2026, 2, 10), LocalDate.of(2026, 2, 14));
+        givenActions(pause);
         final WorkingCapitalLoanBreachSchedule firstPeriod = period(1, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 3, 4), 63);
         final WorkingCapitalLoanBreachSchedule secondPeriod = period(2, LocalDate.of(2026, 3, 5), LocalDate.of(2026, 5, 3), 60);
         when(repository.findByLoanIdOrderByPeriodNumberAsc(LOAN_ID)).thenReturn(List.of(firstPeriod, secondPeriod));
         when(balanceRepository.findByWcLoan_Id(LOAN_ID)).thenReturn(Optional.of(balance));
 
-        underTest.recalculatePeriodsForPauses(loan);
+        underTest.replayForBreachAction(loan, pause);
 
         assertBounds(firstPeriod, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 3, 9), 68);
         assertBounds(secondPeriod, LocalDate.of(2026, 3, 10), LocalDate.of(2026, 5, 8), 60);

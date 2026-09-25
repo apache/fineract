@@ -50,6 +50,7 @@ public final class WorkingCapitalLoanConstants {
     public static final String expectedDisbursementDateParameterName = "expectedDisbursementDate";
     public static final String submittedOnNoteParameterName = "submittedOnNote";
     public static final String totalPaymentVolumeParamName = "totalPaymentVolume";
+    public static final String annualEirParamName = "annualEir";
     public static final String principalAmountParamName = "principalAmount";
 
     // Loan commands
@@ -130,4 +131,7 @@ public final class WorkingCapitalLoanConstants {
 
     // Loan origination parameters
     public static final String originatorsParameterName = "originators";
+
+    // Datatable entries attached at loan application create
+    public static final String datatablesParameterName = "datatables";
 }

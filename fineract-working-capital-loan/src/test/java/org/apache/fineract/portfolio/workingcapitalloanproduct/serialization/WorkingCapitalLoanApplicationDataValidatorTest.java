@@ -292,7 +292,7 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
     private WorkingCapitalLoanProduct createMockProduct() {
         final WorkingCapitalLoanProduct product = org.mockito.Mockito.mock(WorkingCapitalLoanProduct.class);
         final org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductMinMaxConstraints minMax = new org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductMinMaxConstraints(
-                BigDecimal.valueOf(1000), BigDecimal.valueOf(10000), BigDecimal.valueOf(0.5), BigDecimal.valueOf(2.0));
+                BigDecimal.valueOf(1000), BigDecimal.valueOf(10000), BigDecimal.valueOf(0.5), BigDecimal.valueOf(2.0), null, null);
         when(product.getId()).thenReturn(PRODUCT_ID);
         when(product.getMinMaxConstraints()).thenReturn(minMax);
         when(product.getConfigurableAttributes()).thenReturn(null);
