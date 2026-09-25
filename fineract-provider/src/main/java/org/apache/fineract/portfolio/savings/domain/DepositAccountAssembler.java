@@ -70,6 +70,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -96,6 +97,7 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
+import org.apache.fineract.portfolio.savings.exception.DepositAccountApplicationDateException;
 import org.apache.fineract.portfolio.savings.exception.FixedDepositProductNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
@@ -223,6 +225,7 @@ public class DepositAccountAssembler {
         }
 
         final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(submittedOnDateParamName, element);
+        validateProductApplicationDate(submittedOnDate, product);
 
         BigDecimal interestRate = null;
         if (command.parameterExists(nominalAnnualInterestRateParamName)) {
@@ -365,6 +368,22 @@ public class DepositAccountAssembler {
         }
 
         return account;
+    }
+
+    public void validateProductApplicationDate(final LocalDate submittedOnDate, final SavingsProduct savingsProduct) {
+        final FixedDepositProduct product = (FixedDepositProduct) savingsProduct;
+        final LocalDate startDate = product.getStartDate();
+        final LocalDate closeDate = product.getCloseDate();
+
+        if (startDate != null && DateUtils.isBefore(submittedOnDate, startDate)) {
+            throw new DepositAccountApplicationDateException("submitted.on.date.cannot.be.before.the.deposit.product.start.date",
+                    "submittedOnDate cannot be before the deposit product startDate.", submittedOnDate.toString(), startDate.toString());
+        }
+
+        if (closeDate != null && DateUtils.isAfter(submittedOnDate, closeDate)) {
+            throw new DepositAccountApplicationDateException("submitted.on.date.cannot.be.after.the.deposit.product.close.date",
+                    "submittedOnDate cannot be after the deposit product closeDate.", submittedOnDate.toString(), closeDate.toString());
+        }
     }
 
     public SavingsAccount assembleFrom(final Long savingsId, DepositAccountType depositAccountType) {
