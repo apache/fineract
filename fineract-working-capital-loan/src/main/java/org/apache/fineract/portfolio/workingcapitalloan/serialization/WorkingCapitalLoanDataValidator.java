@@ -1141,9 +1141,13 @@ public class WorkingCapitalLoanDataValidator {
         // Period-payment-rate change is a TPV-strategy feature. Annual EIR loans derive the daily payment from annual
         // EIR instead; supporting an equivalent mid-lifecycle change is a follow-up, so reject clearly for now rather
         // than letting the TPV rate-change path run against a schedule that has no TPV.
-        if (resolvePaymentAmountCalculationStrategy(loan).isAnnualEir()) {
+        final WorkingCapitalPaymentAmountCalculationStrategy rateChangeStrategy = resolvePaymentAmountCalculationStrategy(loan);
+        if (rateChangeStrategy.isAnnualEir()) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.periodPaymentRateParamName)
                     .failWithCode("rate.change.not.allowed.for.annual.eir.strategy");
+        } else if (rateChangeStrategy.isPaymentAmount()) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.periodPaymentRateParamName)
+                    .failWithCode("rate.change.not.allowed.for.payment.amount.strategy");
         }
 
         final LocalDate effectiveDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.effectiveDateParamName,

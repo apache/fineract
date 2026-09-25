@@ -399,6 +399,9 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
         final BigDecimal annualEir = command.parameterExists(WorkingCapitalLoanProductConstants.annualEirParamName)
                 ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.annualEirParamName)
                 : null;
+        final BigDecimal paymentAmount = command.parameterExists(WorkingCapitalLoanProductConstants.paymentAmountParamName)
+                ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.paymentAmountParamName)
+                : null;
         final Integer npvDayCount = command.integerValueOfParameterNamed(WorkingCapitalLoanProductConstants.npvDayCountParamName);
         final BigDecimal principal = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.principalParamName);
         final BigDecimal periodPaymentRate = command.parameterExists(WorkingCapitalLoanProductConstants.periodPaymentRateParamName)
@@ -428,7 +431,7 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
                 : WorkingCapitalLoanBreachStartType.DISBURSEMENT;
 
         final WorkingCapitalLoanProductRelatedDetail relatedDetail = new WorkingCapitalLoanProductRelatedDetail(amortizationType,
-                paymentAmountCalculationStrategy, annualEir, npvDayCount, principal, periodPaymentRate, repaymentEvery,
+                paymentAmountCalculationStrategy, annualEir, paymentAmount, npvDayCount, principal, periodPaymentRate, repaymentEvery,
                 repaymentFrequencyType, discount, delinquencyGraceDays, delinquencyStartType, breachGraceDays, breachStartType);
 
         // Min/max constraints
@@ -450,8 +453,14 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
         final BigDecimal maxAnnualEir = command.parameterExists(WorkingCapitalLoanProductConstants.maxAnnualEirParamName)
                 ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.maxAnnualEirParamName)
                 : null;
+        final BigDecimal minPaymentAmount = command.parameterExists(WorkingCapitalLoanProductConstants.minPaymentAmountParamName)
+                ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.minPaymentAmountParamName)
+                : null;
+        final BigDecimal maxPaymentAmount = command.parameterExists(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName)
+                ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName)
+                : null;
         final WorkingCapitalLoanProductMinMaxConstraints minMaxConstraints = new WorkingCapitalLoanProductMinMaxConstraints(minPrincipal,
-                maxPrincipal, minPeriodPaymentRate, maxPeriodPaymentRate, minAnnualEir, maxAnnualEir);
+                maxPrincipal, minPeriodPaymentRate, maxPeriodPaymentRate, minAnnualEir, maxAnnualEir, minPaymentAmount, maxPaymentAmount);
 
         // Accounting
         final String accountingRuleValue = command.parameterExists(WorkingCapitalLoanProductConstants.accountingRuleParamName)

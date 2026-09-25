@@ -53,6 +53,9 @@ public class WorkingCapitalLoanProductRelatedDetail {
     @Column(name = "annual_eir", scale = 6, precision = 19)
     private BigDecimal annualEir;
 
+    @Column(name = "payment_amount", scale = 6, precision = 19)
+    private BigDecimal paymentAmount;
+
     @Column(name = "npv_day_count", nullable = false)
     private Integer npvDayCount;
 

@@ -276,6 +276,69 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         createWorkingCapitalLoanProduct(request);
     }
 
+    @When("Admin creates a new Working Capital Loan Product with Payment Amount strategy, paymentAmount {string} and discount {string}")
+    public void createWorkingCapitalLoanProductWithPaymentAmountStrategy(final String paymentAmount, final String discount) {
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory
+                .defaultPaymentAmountWorkingCapitalLoanProductRequest(new BigDecimal(paymentAmount), new BigDecimal(discount))//
+                .name(name);
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
+    @When("Admin creates a new Working Capital Loan Product with Payment Amount strategy, paymentAmount {string}, discount {string}, minPaymentAmount {string} and maxPaymentAmount {string}")
+    public void createWorkingCapitalLoanProductWithPaymentAmountStrategyAndMinMax(final String paymentAmount, final String discount,
+            final String minPaymentAmount, final String maxPaymentAmount) {
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory
+                .defaultPaymentAmountWorkingCapitalLoanProductRequest(new BigDecimal(paymentAmount), new BigDecimal(discount))//
+                .name(name)//
+                .minPaymentAmount(new BigDecimal(minPaymentAmount))//
+                .maxPaymentAmount(new BigDecimal(maxPaymentAmount));
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
+    @Then("Admin creates a Working Capital Loan Product with the following payment amount strategy data expecting error:")
+    public void createWorkingCapitalLoanProductWithPaymentAmountStrategyDataExpectingError(final DataTable table) {
+        final Map<String, String> rawData = table.asMaps().getFirst();
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+        final String strategy = blankToNull(rawData.get("paymentAmountCalculationStrategy"));
+
+        final PostWorkingCapitalLoanProductsRequest request;
+        if ("TPV".equalsIgnoreCase(strategy)) {
+            request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest().name(name);
+            applyOptionalBigDecimal(rawData, "annualEir", request::setAnnualEir);
+            applyOptionalBigDecimal(rawData, "paymentAmount", request::setPaymentAmount);
+            applyOptionalBigDecimal(rawData, "discount", request::setDiscount);
+        } else if ("ANNUAL_EIR".equalsIgnoreCase(strategy)) {
+            request = workingCapitalRequestFactory.defaultAnnualEirWorkingCapitalLoanProductRequest(
+                    parseOptionalBigDecimal(rawData.get("annualEir")), parseOptionalBigDecimal(rawData.get("discount"))).name(name);
+            applyOptionalBigDecimal(rawData, "paymentAmount", request::setPaymentAmount);
+        } else {
+            request = workingCapitalRequestFactory.defaultPaymentAmountWorkingCapitalLoanProductRequest(
+                    parseOptionalBigDecimal(rawData.get("paymentAmount")), parseOptionalBigDecimal(rawData.get("discount"))).name(name);
+            applyOptionalBigDecimal(rawData, "annualEir", request::setAnnualEir);
+        }
+        applyOptionalBigDecimal(rawData, "periodPaymentRate", request::setPeriodPaymentRate);
+        applyOptionalBigDecimal(rawData, "minPeriodPaymentRate", request::setMinPeriodPaymentRate);
+        applyOptionalBigDecimal(rawData, "maxPeriodPaymentRate", request::setMaxPeriodPaymentRate);
+        applyOptionalBigDecimal(rawData, "minAnnualEir", request::setMinAnnualEir);
+        applyOptionalBigDecimal(rawData, "maxAnnualEir", request::setMaxAnnualEir);
+        applyOptionalBigDecimal(rawData, "minPaymentAmount", request::setMinPaymentAmount);
+        applyOptionalBigDecimal(rawData, "maxPaymentAmount", request::setMaxPaymentAmount);
+
+        final int expectedHttpCode = Integer.parseInt(rawData.get("httpCode"));
+        final String expectedErrorMessage = rawData.get("errorMessage").trim();
+        checkCreateWorkingCapitalLoanProductWithInvalidDataFailure(request, expectedHttpCode, expectedErrorMessage);
+        log.info("Verified Working Capital Loan Product create failed with status {} and message: {}", expectedHttpCode,
+                expectedErrorMessage);
+    }
+
     @Then("Admin creates a Working Capital Loan Product with the following payment strategy data expecting error:")
     public void createWorkingCapitalLoanProductWithPaymentStrategyDataExpectingError(final DataTable table) {
         final Map<String, String> rawData = table.asMaps().getFirst();

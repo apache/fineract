@@ -65,6 +65,13 @@ public final class WorkingCapitalLoanRequestBuilders {
                 .discount(discount);
     }
 
+    public static PostWorkingCapitalLoansRequest submitPaymentAmountApplication(Long clientId, Long productId, BigDecimal principal,
+            BigDecimal discount, BigDecimal paymentAmount, String submittedOnDate, String expectedDisbursementDate) {
+        return new PostWorkingCapitalLoansRequest().clientId(clientId).productId(productId).principalAmount(principal).discount(discount)
+                .paymentAmount(paymentAmount).submittedOnDate(submittedOnDate).expectedDisbursementDate(expectedDisbursementDate)
+                .locale(LOCALE).dateFormat(DATE_FORMAT);
+    }
+
     /**
      * Modify (PUT) request changing only the requested principal of a submitted application.
      */

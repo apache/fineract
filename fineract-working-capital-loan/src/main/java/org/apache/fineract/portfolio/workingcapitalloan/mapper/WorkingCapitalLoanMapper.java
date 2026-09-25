@@ -89,6 +89,7 @@ public interface WorkingCapitalLoanMapper {
     @Mapping(target = "summary", source = ".", qualifiedByName = "toSummaryData")
     @Mapping(target = "totalPaymentVolume", source = "totalPaymentVolume")
     @Mapping(target = "annualEir", source = "loanProductRelatedDetails.annualEir")
+    @Mapping(target = "paymentAmount", source = "loanProductRelatedDetails.paymentAmount")
     @Mapping(target = "paymentAmountCalculationStrategy", source = "loanProductRelatedDetails", qualifiedByName = "paymentAmountCalculationStrategyData")
     @Mapping(target = "principal", source = "loanProductRelatedDetails.principal")
     @Mapping(target = "amortizationType", source = "loanProductRelatedDetails", qualifiedByName = "amortizationTypeData")

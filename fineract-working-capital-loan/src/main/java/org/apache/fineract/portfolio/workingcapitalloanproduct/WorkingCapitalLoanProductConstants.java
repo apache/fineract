@@ -55,6 +55,9 @@ public final class WorkingCapitalLoanProductConstants {
     public static final String maxPeriodPaymentRateParamName = "maxPeriodPaymentRate";
     public static final String minAnnualEirParamName = "minAnnualEir";
     public static final String maxAnnualEirParamName = "maxAnnualEir";
+    public static final String paymentAmountParamName = "paymentAmount";
+    public static final String minPaymentAmountParamName = "minPaymentAmount";
+    public static final String maxPaymentAmountParamName = "maxPaymentAmount";
     public static final String discountParamName = "discount";
     public static final String repaymentEveryParamName = "repaymentEvery";
     public static final String repaymentFrequencyTypeParamName = "repaymentFrequencyType";
