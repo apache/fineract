@@ -104,6 +104,8 @@ public class WorkingCapitalLoanData implements Serializable {
     private StringEnumOptionData paymentAmountCalculationStrategy;
     private LocalDate delinquencyStartDate;
     private LocalDate breachStartDate;
+    // Only set for the first breach period, which is the only one the breach grace days shift.
+    private LocalDate breachEffectiveStartDate;
     private WorkingCapitalLoanCollectionData delinquent;
     private Boolean enableInstallmentLevelDelinquency;
     private WorkingCapitalLoanSummaryData summary;

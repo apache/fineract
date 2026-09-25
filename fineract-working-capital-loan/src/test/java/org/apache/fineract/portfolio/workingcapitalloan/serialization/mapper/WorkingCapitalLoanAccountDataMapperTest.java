@@ -250,6 +250,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
         // loan-level fields lifted into the breach record
         assertEquals(3, breach.getBreachGraceDays());
         assertEquals("2024-01-06", breach.getBreachStartDate());
+        assertEquals("2024-01-09", breach.getBreachEffectiveStartDate());
 
         final WorkingCapitalNearBreachDataV1 nearBreach = breach.getNearBreach();
         assertNotNull(nearBreach);
@@ -278,6 +279,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertNull(breach.getNearBreach());
         assertEquals(3, breach.getBreachGraceDays());
         assertEquals("2024-01-06", breach.getBreachStartDate());
+        assertEquals("2024-01-09", breach.getBreachEffectiveStartDate());
     }
 
     @Test
@@ -571,11 +573,11 @@ class WorkingCapitalLoanAccountDataMapperTest {
                 .totalPaymentVolume(new BigDecimal("5000.00")).breachGraceDays(3).delinquencyGraceDays(7)
                 .delinquencyStartType(stringEnum("1", "delinquencyStart.disbursement", "Disbursement"))
                 .delinquencyStartDate(LocalDate.of(2024, 1, 5)).breachStartDate(LocalDate.of(2024, 1, 6))
-                .lastClosedBusinessDate(LocalDate.of(2024, 2, 1)).overpaidOnDate(LocalDate.of(2024, 2, 14)).chargedOff(Boolean.TRUE)
-                .enableInstallmentLevelDelinquency(Boolean.TRUE).currency(currency()).timeline(fullTimeline()).summary(fullSummary())
-                .delinquent(fullCollection()).breach(fullBreach()).nearBreach(fullNearBreach()).charges(List.of(fullCharge()))
-                .disbursementDetails(List.of(fullDisbursement())).originators(List.of(fullOriginator()))
-                .periodPaymentRateHistory(List.of(fullRateChange())).build();
+                .breachEffectiveStartDate(LocalDate.of(2024, 1, 9)).lastClosedBusinessDate(LocalDate.of(2024, 2, 1))
+                .overpaidOnDate(LocalDate.of(2024, 2, 14)).chargedOff(Boolean.TRUE).enableInstallmentLevelDelinquency(Boolean.TRUE)
+                .currency(currency()).timeline(fullTimeline()).summary(fullSummary()).delinquent(fullCollection()).breach(fullBreach())
+                .nearBreach(fullNearBreach()).charges(List.of(fullCharge())).disbursementDetails(List.of(fullDisbursement()))
+                .originators(List.of(fullOriginator())).periodPaymentRateHistory(List.of(fullRateChange())).build();
     }
 
     private static LoanStatusEnumData fullStatus() {
