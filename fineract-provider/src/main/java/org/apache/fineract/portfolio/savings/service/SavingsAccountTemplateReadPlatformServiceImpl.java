@@ -137,13 +137,13 @@ public class SavingsAccountTemplateReadPlatformServiceImpl implements SavingsAcc
             final Collection<EnumOptionData> withdrawalFeeTypeOptions = this.dropdownReadPlatformService.retrievewithdrawalFeeTypeOptions();
 
             final Collection<SavingsAccountTransactionData> transactions = null;
-            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId);
+            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId, officeId);
             // update charges from Product charges
             final Collection<SavingsAccountChargeData> charges = fromChargesToSavingsCharges(productCharges);
 
             final boolean feeChargesOnly = false;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsProductApplicableCharges(feeChargesOnly);
+                    .retrieveSavingsProductApplicableCharges(feeChargesOnly, officeId);
 
             Collection<StaffData> fieldOfficerOptions = null;
 
@@ -202,7 +202,7 @@ public class SavingsAccountTemplateReadPlatformServiceImpl implements SavingsAcc
 
             final boolean feeChargesOnly = false;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsProductApplicableCharges(feeChargesOnly);
+                    .retrieveSavingsProductApplicableCharges(feeChargesOnly, officeId);
 
             template = SavingsAccountData.withTemplateOptions(template, productOptions, fieldOfficerOptions,
                     interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
