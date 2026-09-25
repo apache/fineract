@@ -461,7 +461,7 @@ See <https://github.com/apache/fineract/releases> for a list of PRs and contribu
 
 EOL/unsupported releases are [archived](https://www.apache.org/legal/release-policy.html#archived).
 
-Versioned build products created from the `develop` branch will include `-SNAPSHOT`. See [related settings](https://github.com/qoomon/gradle-git-versioning-plugin) near `version` and `gitVersioning` in `build.gradle` for details.
+Versioned build products created from the `develop` branch will include `-SNAPSHOT`. The version is derived from git by `GitVersionValueSource` in `buildSrc`; see the settings near `version` in `build.gradle` for details.
 
 
 LICENSE

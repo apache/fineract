@@ -173,6 +173,7 @@ dependencyManagement {
         dependency 'org.eclipse.jgit:org.eclipse.jgit:7.6.0.202603022253-r'
         dependency 'org.eclipse.jgit:org.eclipse.jgit.gpg.bc:7.6.0.202603022253-r'
         dependency 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:7.6.0.202603022253-r'
+        dependency 'org.apache.maven:maven-artifact:3.9.16'
 
         dependency ('com.tmatesoft.svnkit:svnkit:1.10.13')
         dependency 'com.vdurmont:semver4j:3.1.0'

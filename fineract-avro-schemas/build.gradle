@@ -118,9 +118,6 @@ test {
     useJUnitPlatform()
 }
 
-licenseFormatMain.dependsOn buildJavaSdk
-licenseMain.dependsOn licenseFormatMain
-
 tasks.named('sourcesJar') {
     dependsOn tasks.named('buildJavaSdk')
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
