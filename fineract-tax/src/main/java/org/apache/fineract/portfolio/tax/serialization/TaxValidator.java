@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
@@ -44,6 +45,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
+import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupMappings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,10 +79,12 @@ public class TaxValidator {
     public static final String DOT = ".";
     public static final String AT_INDEX = ".at.index.";
     private final FromJsonHelper fromApiJsonHelper;
+    private final TaxComponentRepository taxComponentRepository;
 
     @Autowired
-    public TaxValidator(final FromJsonHelper fromApiJsonHelper) {
+    public TaxValidator(final FromJsonHelper fromApiJsonHelper, final TaxComponentRepository taxComponentRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.taxComponentRepository = taxComponentRepository;
     }
 
     public void validateForTaxComponentCreate(final String json) {
@@ -100,6 +104,14 @@ public class TaxValidator {
 
         final String name = this.fromApiJsonHelper.extractStringNamed(TaxApiConstants.nameParamName, element);
         baseDataValidator.reset().parameter(TaxApiConstants.nameParamName).value(name).notBlank();
+
+        // Check for duplicate name
+        if (name != null && this.taxComponentRepository.findByName(name).isPresent()) {
+            String errorCode = "tax.component.name.must.be.unique";
+            String userMessage = "Tax component with name '" + name + "' already exists";
+            ApiParameterError error = ApiParameterError.parameterError(errorCode, userMessage, TaxApiConstants.nameParamName, name);
+            dataValidationErrors.add(error);
+        }
 
         final BigDecimal percentage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(TaxApiConstants.percentageParamName, element);
         baseDataValidator.reset().parameter(TaxApiConstants.percentageParamName).value(percentage).notBlank().positiveAmount()
@@ -134,6 +146,10 @@ public class TaxValidator {
     }
 
     public void validateForTaxComponentUpdate(final String json) {
+        validateForTaxComponentUpdate(json, null);
+    }
+
+    public void validateForTaxComponentUpdate(final String json, final Long taxComponentId) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -151,6 +167,19 @@ public class TaxValidator {
         if (this.fromApiJsonHelper.parameterExists(TaxApiConstants.nameParamName, element)) {
             final String name = this.fromApiJsonHelper.extractStringNamed(TaxApiConstants.nameParamName, element);
             baseDataValidator.reset().parameter(TaxApiConstants.nameParamName).value(name).notBlank();
+
+            // Check for duplicate name (excluding current entity)
+            if (name != null && taxComponentId != null) {
+                this.taxComponentRepository.findByName(name).ifPresent(existingComponent -> {
+                    if (!Objects.equals(existingComponent.getId(), taxComponentId)) {
+                        String errorCode = "tax.component.name.must.be.unique";
+                        String userMessage = "Tax component with name '" + name + "' already exists";
+                        ApiParameterError error = ApiParameterError.parameterError(errorCode, userMessage, TaxApiConstants.nameParamName,
+                                name);
+                        dataValidationErrors.add(error);
+                    }
+                });
+            }
         }
 
         if (this.fromApiJsonHelper.parameterExists(TaxApiConstants.percentageParamName, element)) {
@@ -197,6 +226,10 @@ public class TaxValidator {
                         "Please add at least one Tax Component before submitting the Tax Group.", TaxApiConstants.taxComponentsParamName));
             }
             baseDataValidator.reset().parameter(TaxApiConstants.taxComponentsParamName).value(array.size()).integerGreaterThanZero();
+
+            // Ensure each taxComponentId appears at most once
+            Set<Long> seenComponentIds = new HashSet<>();
+
             for (int i = 1; i <= array.size(); i++) {
                 final JsonObject taxComponent = array.get(i - 1).getAsJsonObject();
                 final String arrayObjectJson = this.fromApiJsonHelper.toJson(taxComponent);
@@ -207,6 +240,11 @@ public class TaxValidator {
                         .parameterAtIndexArray(TaxApiConstants.taxComponentIdParamName, i).value(taxComponentId).notNull()
                         .longGreaterThanZero();
 
+                if (taxComponentId != null && !seenComponentIds.add(taxComponentId)) {
+                    dataValidationErrors.add(ApiParameterError.parameterError("validation.msg.tax.group.duplicate.component",
+                            "Each tax component can be included only once in a tax group.",
+                            TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.taxComponentIdParamName + AT_INDEX + i));
+                }
             }
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -240,6 +278,10 @@ public class TaxValidator {
             final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
             if (topLevelJsonElement.get(TaxApiConstants.taxComponentsParamName).isJsonArray()) {
                 final JsonArray array = topLevelJsonElement.get(TaxApiConstants.taxComponentsParamName).getAsJsonArray();
+
+                // Ensure each taxComponentId appears at most once in update payload
+                Set<Long> seenComponentIds = new HashSet<>();
+
                 for (int i = 1; i <= array.size(); i++) {
                     final JsonObject taxComponent = array.get(i - 1).getAsJsonObject();
                     final String arrayObjectJson = this.fromApiJsonHelper.toJson(taxComponent);
@@ -260,6 +302,12 @@ public class TaxValidator {
                         baseDataValidator.reset()
                                 .parameter(TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.idParamName + AT_INDEX + i)
                                 .value(taxMappingId).longGreaterThanZero();
+                    }
+
+                    if (taxComponentId != null && !seenComponentIds.add(taxComponentId)) {
+                        dataValidationErrors.add(ApiParameterError.parameterError("validation.msg.tax.group.duplicate.component",
+                                "Each tax component can be included only once in a tax group.",
+                                TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.taxComponentIdParamName + AT_INDEX + i));
                     }
 
                     final LocalDate endDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.endDateParamName, taxComponent,
