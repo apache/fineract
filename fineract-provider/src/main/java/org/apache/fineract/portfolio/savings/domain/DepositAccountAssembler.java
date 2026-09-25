@@ -65,7 +65,6 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
@@ -74,7 +73,6 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -107,8 +105,6 @@ import org.springframework.stereotype.Service;
 public class DepositAccountAssembler {
 
     private final PlatformSecurityContext context;
-    private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
-    private final SavingsHelper savingsHelper;
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepositoryWrapper groupRepository;
     private final StaffRepositoryWrapper staffRepository;
@@ -121,21 +117,16 @@ public class DepositAccountAssembler {
     private final PaymentDetailAssembler paymentDetailAssembler;
 
     private final ExternalIdFactory externalIdFactory;
-    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
-    public DepositAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
+    public DepositAccountAssembler(final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
             final StaffRepositoryWrapper staffRepository, final FixedDepositProductRepository fixedDepositProductRepository,
             final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
             final DepositProductAssembler depositProductAssembler,
-            final RecurringDepositProductRepository recurringDepositProductRepository,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final PlatformSecurityContext context,
-            final PaymentDetailAssembler paymentDetailAssembler, ExternalIdFactory externalIdFactory,
-            final ConfigurationDomainService configurationDomainService) {
+            final RecurringDepositProductRepository recurringDepositProductRepository, final PlatformSecurityContext context,
+            final PaymentDetailAssembler paymentDetailAssembler, ExternalIdFactory externalIdFactory) {
 
-        this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
         this.staffRepository = staffRepository;
@@ -145,11 +136,9 @@ public class DepositAccountAssembler {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.depositProductAssembler = depositProductAssembler;
         this.recurringDepositProductRepository = recurringDepositProductRepository;
-        this.savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
         this.context = context;
         this.paymentDetailAssembler = paymentDetailAssembler;
         this.externalIdFactory = externalIdFactory;
-        this.configurationDomainService = configurationDomainService;
     }
 
     /**
@@ -360,7 +349,6 @@ public class DepositAccountAssembler {
         }
 
         if (account != null) {
-            account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper, this.configurationDomainService);
             account.validateNewApplicationState(depositAccountType.resourceName());
         }
 
@@ -368,13 +356,7 @@ public class DepositAccountAssembler {
     }
 
     public SavingsAccount assembleFrom(final Long savingsId, DepositAccountType depositAccountType) {
-        final SavingsAccount account = this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId, depositAccountType);
-        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper, this.configurationDomainService);
-        return account;
-    }
-
-    public void assignSavingAccountHelpers(final SavingsAccount savingsAccount) {
-        savingsAccount.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper, this.configurationDomainService);
+        return this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId, depositAccountType);
     }
 
     public DepositAccountTermAndPreClosure assembleAccountTermAndPreClosure(final JsonCommand command,
