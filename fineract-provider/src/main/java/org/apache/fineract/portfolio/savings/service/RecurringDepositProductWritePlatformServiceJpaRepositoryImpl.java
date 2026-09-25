@@ -101,6 +101,8 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
 
             final RecurringDepositProduct product = this.recurringDepositProductRepository.findById(productId)
                     .orElseThrow(() -> new RecurringDepositProductNotFoundException(productId));
+            this.fromApiJsonDataValidator.validateProductDatesForUpdate(command.json(), RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME,
+                    product.getStartDate(), product.getCloseDate());
             final Map<String, Object> changes = product.update(command);
 
             if (changes.containsKey(chargesParamName)) {

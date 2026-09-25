@@ -294,4 +294,5 @@
     <include file="parts/0272_put_arrears_ageing_in_npa_scheduler_group.xml" relativeToChangelogFile="true" />
     <include file="parts/0273_add_allow_partial_transfer_to_standing_instruction.xml" relativeToChangelogFile="true" />
     <include file="parts/0274_clear_npa_on_settled_loans.xml" relativeToChangelogFile="true" />
+    <include file="parts/0275_add_deposit_product_validity_dates.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

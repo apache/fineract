@@ -101,6 +101,8 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
 
             final FixedDepositProduct product = this.fixedDepositProductRepository.findById(productId)
                     .orElseThrow(() -> new FixedDepositProductNotFoundException(productId));
+            this.fromApiJsonDataValidator.validateProductDatesForUpdate(command.json(), FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME,
+                    product.getStartDate(), product.getCloseDate());
             final Map<String, Object> changes = product.update(command);
 
             if (changes.containsKey(chargesParamName)) {
