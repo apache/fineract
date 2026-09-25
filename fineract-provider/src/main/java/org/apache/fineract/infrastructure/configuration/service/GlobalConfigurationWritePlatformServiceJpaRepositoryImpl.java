@@ -84,6 +84,8 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
         try {
             final GlobalConfigurationProperty ppi = GlobalConfigurationProperty.newSurveyConfiguration(name);
             this.repository.save(ppi);
+            // The cached snapshot of all properties must not outlive a newly created one.
+            this.repository.removeFromCache(name);
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleDataIntegrityIssues(throwable, dve);

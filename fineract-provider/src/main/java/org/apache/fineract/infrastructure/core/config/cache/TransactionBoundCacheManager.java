@@ -19,43 +19,53 @@
 package org.apache.fineract.infrastructure.core.config.cache;
 
 import java.util.Collection;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
+import java.util.Set;
+import org.apache.fineract.infrastructure.cache.service.ThreadLocalCacheStore;
+import org.apache.fineract.infrastructure.cache.service.TransactionScopedCacheManager;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.NoOpCacheManager;
 
-@RequiredArgsConstructor
-public class TransactionBoundCacheManager implements TransactionLifecycleCallback, CacheManager {
+/**
+ * Cache manager whose entries live for a single transaction of the current thread.
+ * <p>
+ * The supported cache names come from the delegate (see {@code CacheConfig}); every other name resolves to a no-op
+ * cache. Storage is thread-local ({@link ThreadLocalCacheStore}): it is cleared when a transaction begins and again
+ * when it completes on that thread, so a transaction always starts from the database, exactly as before, but other
+ * threads' transactions no longer wipe the entries and no lock is shared between threads.
+ * <p>
+ * It is deliberately not registered as a transaction lifecycle callback bean; {@code RuntimeDelegatingCacheManager}
+ * forwards the hooks only while this manager is the active one.
+ */
+public class TransactionBoundCacheManager implements TransactionScopedCacheManager {
 
-    private final CacheManager delegate;
+    private final Set<String> supportedCacheNames;
+    private final NoOpCacheManager noOpCacheManager = new NoOpCacheManager();
 
-    @Override
-    public void afterCompletion() {
-        clearAllCaches();
+    public TransactionBoundCacheManager(final CacheManager delegate) {
+        this.supportedCacheNames = Set.copyOf(delegate.getCacheNames());
     }
 
     @Override
     public void afterBegin() {
-        clearAllCaches();
-    }
-
-    private void clearAllCaches() {
-        Collection<String> cacheNames = delegate.getCacheNames();
-        cacheNames.forEach(c -> {
-            Cache cache = delegate.getCache(c);
-            if (cache != null) {
-                cache.clear();
-            }
-        });
+        ThreadLocalCacheStore.clear();
     }
 
     @Override
-    public Cache getCache(String name) {
-        return delegate.getCache(name);
+    public void afterCompletion() {
+        ThreadLocalCacheStore.clear();
+    }
+
+    @Override
+    public Cache getCache(final String name) {
+        if (supportedCacheNames.contains(name)) {
+            return ThreadLocalCacheStore.getCache(name);
+        }
+        return noOpCacheManager.getCache(name);
     }
 
     @Override
     public Collection<String> getCacheNames() {
-        return delegate.getCacheNames();
+        return supportedCacheNames;
     }
 }
