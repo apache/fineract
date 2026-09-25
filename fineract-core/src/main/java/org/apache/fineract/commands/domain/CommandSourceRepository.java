@@ -19,6 +19,7 @@
 package org.apache.fineract.commands.domain;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -28,6 +29,17 @@ import org.springframework.data.repository.query.Param;
 public interface CommandSourceRepository extends JpaRepository<CommandSource, Long>, JpaSpecificationExecutor<CommandSource> {
 
     CommandSource findByActionNameAndEntityNameAndIdempotencyKey(String actionName, String entityName, String idempotencyKey);
+
+    @Query("""
+            select c.id from CommandSource c
+            where upper(c.actionName) = upper(:actionName)
+            and upper(c.entityName) = upper(:entityName)
+            and (c.resourceId = :resourceId or c.loanId = :resourceId or c.savingsId = :resourceId)
+            and c.status = :status
+            order by c.madeOnDate desc
+            """)
+    List<Long> findPendingIdsByActionAndEntityAndResource(@Param("actionName") String actionName, @Param("entityName") String entityName,
+            @Param("resourceId") Long resourceId, @Param("status") Integer status);
 
     @Modifying(flushAutomatically = true)
     @Query("delete from CommandSource c where c.status = :status and c.madeOnDate is not null and c.madeOnDate <= :dateForPurgeCriteria")
