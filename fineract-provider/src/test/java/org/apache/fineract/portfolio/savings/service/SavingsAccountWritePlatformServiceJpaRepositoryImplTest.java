@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -284,6 +285,7 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         service.holdAmount(savingsId, command);
 
         verify(transaction).updateExternalId(externalId);
+        verify(transaction).setRunningBalance(argThat(balance -> balance.getAmount().compareTo(BigDecimal.valueOf(100)) == 0));
         verify(savingsAccountTransactionRepository).saveAndFlush(transaction);
     }
 
@@ -325,6 +327,7 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
 
         verify(savingsAccountTransactionDataValidator).validateReleaseAmount(command);
         verify(releaseTransaction).updateExternalId(externalId);
+        verify(releaseTransaction).setRunningBalance(argThat(balance -> balance.getAmount().compareTo(BigDecimal.valueOf(100)) == 0));
         verify(savingsAccountTransactionRepository).saveAndFlush(releaseTransaction);
         verify(holdTransaction).updateReleaseId(88L);
     }
