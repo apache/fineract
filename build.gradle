@@ -62,29 +62,7 @@ buildscript {
             [
                 'fineract-avro-schemas',
                 'fineract-client',
-                'fineract-client-feign',
-                'fineract-core',
-                'fineract-security',
-                'fineract-cob',
-                'fineract-validation',
-                'fineract-command',
-                'fineract-command-jdbc',
-                'fineract-command-audit',
-                'fineract-accounting',
-                'fineract-provider',
-                'fineract-investor',
-                'fineract-charge',
-                'fineract-rates',
-                'fineract-tax',
-                'fineract-loan-origination',
-                'fineract-loan',
-                'fineract-savings',
-                'fineract-report',
-                'fineract-branch',
-                'fineract-document',
-                'fineract-progressive-loan',
-                'fineract-progressive-loan-embeddable-schedule-generator',
-                'fineract-working-capital-loan'
+                'fineract-client-feign'
             ].contains(it.name)
         }
         npmRepository = 'https://npm.pkg.github.com'
@@ -171,7 +149,7 @@ gitVersioning.apply {
         }
     }
     rev {
-        version = '${describe.tag.version.major}.${describe.tag.version.minor.next}.0-SNAPSHOT'
+        version = '${describe.tag.version.major}.${describe.tag.version.minor.next}.0-${commit.short}-SNAPSHOT'
     }
 }
 
@@ -908,7 +886,7 @@ configure(project.fineractPublishProjects) {
             mavenJava(MavenPublication) {
                 groupId = 'org.apache.fineract'
                 artifactId = project.name
-                version = "${project.version}-SNAPSHOT"
+                version = "${project.version}"
 
                 from components.java
 
