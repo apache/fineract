@@ -47,12 +47,16 @@ public abstract class AbstractLoanItemReader<T extends AbstractPersistableCustom
         final Long loanId = remainingData.poll();
         if (loanId != null) {
             try {
-                return loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
+                return loadEntity(loanId);
             } catch (Exception e) {
                 throw new LockedReadException(loanId, e);
             }
         }
         return null;
+    }
+
+    protected T loadEntity(final Long id) {
+        return loanRepository.findById(id).orElseThrow(() -> new LoanNotFoundException(id));
     }
 
     @Override
