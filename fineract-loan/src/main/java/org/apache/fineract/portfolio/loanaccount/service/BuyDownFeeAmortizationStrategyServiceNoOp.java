@@ -16,23 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.service;
+package org.apache.fineract.portfolio.loanaccount.service;
 
-import static org.apache.fineract.investor.data.attribute.SettlementModelExternalAssetOwnerLoanProductAttribute.DELAYED_SETTLEMENT;
-
-import lombok.RequiredArgsConstructor;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.jspecify.annotations.NonNull;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Service;
 
+/**
+ * Default strategy when the investor module is disabled: buy-down fees stay deferred
+ */
 @Service
-@RequiredArgsConstructor
-public class DelayedSettlementAttributeServiceImpl implements DelayedSettlementAttributeService {
-
-    private final ExternalAssetOwnerLoanProductAttributesReadService externalAssetOwnerLoanProductAttributesReadService;
+@ConditionalOnMissingBean(name = "buyDownFeeAmortizationStrategyServiceImpl")
+public class BuyDownFeeAmortizationStrategyServiceNoOp implements BuyDownFeeAmortizationStrategyService {
 
     @Override
-    public boolean isEnabled(final Long loanProductId) {
-        // values stored before validation became case sensitive may be lower case
-        return externalAssetOwnerLoanProductAttributesReadService.getAttributeValue(loanProductId, DELAYED_SETTLEMENT.getAttributeKey())
-                .map(value -> DELAYED_SETTLEMENT.getAttributeValue().equalsIgnoreCase(value)).orElse(false);
+    public boolean shouldRecognizeImmediately(@NonNull final Loan loan) {
+        return false;
     }
 }
