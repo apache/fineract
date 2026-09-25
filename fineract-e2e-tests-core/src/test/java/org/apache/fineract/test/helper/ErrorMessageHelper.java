@@ -1052,6 +1052,10 @@ public final class ErrorMessageHelper {
         return "At least one DEFAULT payment allocation must be provided";
     }
 
+    public static String invalidTrnTypeDuplicatedForPaymentAllocationFailure() {
+        return "The same transaction type must be provided only once";
+    }
+
     public static String workingCapitalLoanProductIdentifiedDoesNotExistFailure(String identifierId) {
         return String.format("Working Capital Loan Product with identifier %s does not exist", identifierId);
     }

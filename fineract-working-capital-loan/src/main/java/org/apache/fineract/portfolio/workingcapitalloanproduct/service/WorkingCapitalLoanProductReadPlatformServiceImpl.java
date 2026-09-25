@@ -38,7 +38,6 @@ import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymen
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
@@ -53,6 +52,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductNotFoundException;
@@ -130,7 +130,7 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
                 .getValuesAsStringEnumOptionDataList(WorkingCapitalLoanBreachStartType.class);
         final List<StringEnumOptionData> delinquencyMinimumPaymentTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(DelinquencyMinimumPaymentType.class);
-        final List<EnumOptionData> advancedPaymentAllocationTransactionTypes = PaymentAllocationTransactionType
+        final List<EnumOptionData> advancedPaymentAllocationTransactionTypes = WorkingCapitalPaymentAllocationTransactionType
                 .getValuesAsEnumOptionDataList();
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = this.delinquencyReadPlatformService
                 .retrieveAllDelinquencyBuckets();

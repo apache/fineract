@@ -26,9 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.PostPaymentAllocationRule;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -41,6 +43,8 @@ import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.Wor
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class WorkingCapitalLoanApplicationValidationTest {
 
@@ -607,6 +611,38 @@ public class WorkingCapitalLoanApplicationValidationTest {
         assertEquals(403, ex.getStatus());
         assertNotNull(ex.getDeveloperMessage());
         assertEquals("Validation errors: [id] The date on which a loan is submitted cannot be in the future.", ex.getDeveloperMessage());
+        productHelper.deleteWorkingCapitalLoanProductById(productId);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "DOWN_PAYMENT", "INTEREST_REFUND", "MERCHANT_ISSUED_REFUND", "default" })
+    public void testSubmitAndModifyWithUnsupportedPaymentAllocationTransactionType(final String transactionType) {
+        final Long productId = createProduct();
+        final Long clientId = createClient();
+        final WorkingCapitalLoanApplicationTestBuilder builder = new WorkingCapitalLoanApplicationTestBuilder() //
+                .withClientId(clientId) //
+                .withProductId(productId) //
+                .withPrincipal(BigDecimal.valueOf(5000)) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
+                .withTotalPaymentVolume(BigDecimal.valueOf(5500)) //
+                .withPaymentAllocationTypes(
+                        List.of("DUE_PENALTY", "DUE_FEE", "DUE_PRINCIPAL", "IN_ADVANCE_PRINCIPAL", "IN_ADVANCE_FEE", "IN_ADVANCE_PENALTY"));
+        final PostWorkingCapitalLoansRequest submitRequest = builder.buildSubmitRequest();
+        final PostPaymentAllocationRule defaultRule = submitRequest.getPaymentAllocation().getFirst();
+        final List<PostPaymentAllocationRule> rules = List.of(defaultRule, new PostPaymentAllocationRule().transactionType(transactionType)
+                .paymentAllocationOrder(defaultRule.getPaymentAllocationOrder()));
+
+        final CallFailedRuntimeException submitError = applicationHelper.runSubmitExpectingFailure(submitRequest.paymentAllocation(rules));
+        assertEquals(400, submitError.getStatus());
+        assertTrue(submitError.getResponseBody().contains("wc-payment-allocation.with.not.valid.transaction.type"));
+
+        final Long loanId = applicationHelper.submit(builder.buildSubmitRequest());
+        final CallFailedRuntimeException modifyError = applicationHelper.runModifyExpectingFailure(loanId,
+                new PutWorkingCapitalLoansLoanIdRequest().paymentAllocation(rules));
+        assertEquals(400, modifyError.getStatus());
+        assertTrue(modifyError.getResponseBody().contains("wc-payment-allocation.with.not.valid.transaction.type"));
+
+        applicationHelper.deleteById(loanId);
         productHelper.deleteWorkingCapitalLoanProductById(productId);
     }
 
