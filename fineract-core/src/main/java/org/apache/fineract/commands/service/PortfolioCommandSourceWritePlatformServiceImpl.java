@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.domain.SavingsDepositCommandEnvelope;
 import org.apache.fineract.commands.exception.CommandNotAwaitingApprovalException;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
@@ -93,12 +94,20 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 commandSourceInput.getSavingsId(), commandSourceInput.getTransactionId(), commandSourceInput.getCreditBureauId(),
                 commandSourceInput.getOrganisationCreditBureauId(), commandSourceInput.getIdempotencyKey(),
                 commandSourceInput.getLoanExternalId());
-        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.getCommandAsJson());
-        final JsonCommand command = JsonCommand.fromExistingCommand(makerCheckerId, commandSourceInput.getCommandAsJson(), parsedCommand,
-                this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.getResourceId(),
-                commandSourceInput.getSubResourceId(), commandSourceInput.getGroupId(), commandSourceInput.getClientId(),
-                commandSourceInput.getLoanId(), commandSourceInput.getSavingsId(), commandSourceInput.getTransactionId(),
-                commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId(), commandSourceInput.getCreditBureauId(),
+        // Unwrap for presentation (including hooks); execution separately establishes trust in the persisted metadata.
+        String executionJson = commandSourceInput.getCommandAsJson();
+        if (SavingsDepositCommandEnvelope.appliesTo(commandSourceInput.getActionName(), commandSourceInput.getEntityName())) {
+            executionJson = SavingsDepositCommandEnvelope.forDisplay(executionJson);
+            if (executionJson == null || executionJson.isBlank()) {
+                executionJson = "{}";
+            }
+        }
+        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(executionJson);
+        final JsonCommand command = JsonCommand.fromExistingCommand(makerCheckerId, executionJson, parsedCommand, this.fromApiJsonHelper,
+                commandSourceInput.getEntityName(), commandSourceInput.getResourceId(), commandSourceInput.getSubResourceId(),
+                commandSourceInput.getGroupId(), commandSourceInput.getClientId(), commandSourceInput.getLoanId(),
+                commandSourceInput.getSavingsId(), commandSourceInput.getTransactionId(), commandSourceInput.getResourceGetUrl(),
+                commandSourceInput.getProductId(), commandSourceInput.getCreditBureauId(),
                 commandSourceInput.getOrganisationCreditBureauId(), commandSourceInput.getJobName(),
                 commandSourceInput.getLoanExternalId());
 

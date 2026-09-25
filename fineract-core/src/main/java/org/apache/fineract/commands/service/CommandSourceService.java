@@ -30,9 +30,12 @@ import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.domain.SavingsDepositCommandEnvelope;
+import org.apache.fineract.commands.domain.SavingsDepositExecutionContext;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
 import org.apache.fineract.commands.exception.RollbackTransactionNotApprovedException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
+import org.apache.fineract.commands.handler.SavingsDepositCommandHandler;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -106,9 +109,17 @@ public class CommandSourceService {
     public CommandSource getInitialCommandSource(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         CommandSource commandSourceResult = CommandSource.fullEntryFrom(wrapper, jsonCommand, maker, idempotencyKey,
                 UNDER_PROCESSING.getValue(), false);
+        if (SavingsDepositCommandEnvelope.appliesTo(wrapper.actionName(), wrapper.entityName())) {
+            // Reject client metadata before any audit masking could remove the reserved key.
+            SavingsDepositCommandEnvelope.clientPayload(jsonCommand.json());
+        }
         sanitizeJson(commandSourceResult, wrapper.getSanitizeJsonKeys());
         if (commandSourceResult.getCommandAsJson() == null) {
             commandSourceResult.setCommandAsJson("{}");
+        }
+        if (SavingsDepositCommandEnvelope.appliesTo(wrapper.actionName(), wrapper.entityName())) {
+            commandSourceResult.setCommandAsJson(
+                    SavingsDepositCommandEnvelope.encode(commandSourceResult.getCommandAsJson(), wrapper.getSavingsDepositOrigin()));
         }
         return commandSourceResult;
     }
@@ -117,7 +128,23 @@ public class CommandSourceService {
     public CommandExecutionResult processCommandAndSaveResult(NewCommandSourceHandler handler, JsonCommand command,
             CommandSource commandSource, AppUser user, boolean isApprovedByChecker,
             BiConsumer<CommandSource, CommandProcessingResult> resultUpdater) {
-        final CommandProcessingResult result = handler.processCommand(command);
+        final CommandProcessingResult result;
+        if (SavingsDepositCommandEnvelope.appliesTo(commandSource.getActionName(), commandSource.getEntityName())) {
+            var decoded = SavingsDepositCommandEnvelope.decode(commandSource.getCommandAsJson());
+            if (!(handler instanceof SavingsDepositCommandHandler depositHandler)) {
+                throw SavingsDepositCommandEnvelope.untrustedOrigin();
+            }
+            JsonCommand flatCommand = JsonCommand.fromExistingCommand(command.commandId(), decoded.payload().toString(), decoded.payload(),
+                    fromApiJsonHelper, commandSource.getEntityName(), commandSource.getResourceId(), commandSource.getSubResourceId(),
+                    commandSource.getGroupId(), commandSource.getClientId(), commandSource.getLoanId(), commandSource.getSavingsId(),
+                    commandSource.getTransactionId(), commandSource.getResourceGetUrl(), commandSource.getProductId(),
+                    commandSource.getCreditBureauId(), commandSource.getOrganisationCreditBureauId(), commandSource.getJobName(),
+                    commandSource.getLoanExternalId());
+            result = depositHandler.processDeposit(flatCommand,
+                    new SavingsDepositExecutionContext(decoded.origin(), commandSource.getMaker()));
+        } else {
+            result = handler.processCommand(command);
+        }
         validateMakerChecker(commandSource, user, isApprovedByChecker, result);
         resultUpdater.accept(commandSource, result);
         return new CommandExecutionResult(result, saveResult(commandSource));

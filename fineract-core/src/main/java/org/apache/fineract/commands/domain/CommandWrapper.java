@@ -45,6 +45,7 @@ import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstant
 public class CommandWrapper {
 
     private final Long commandId;
+    private final SavingsDepositOrigin savingsDepositOrigin;
     @SuppressWarnings("unused")
     private final Long officeId;
     private final Long groupId;
@@ -92,6 +93,7 @@ public class CommandWrapper {
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
             final Long subresourceId, final String resourceGetUrl, final Long productId) {
+        this.savingsDepositOrigin = null;
         this.commandId = commandId;
         this.officeId = null;
         this.groupId = null;
@@ -121,6 +123,18 @@ public class CommandWrapper {
             final Long organisationCreditBureauId, final String jobName, final String idempotencyKey, final ExternalId loanExternalId,
             final Set<String> sanitizeJsonKeys) {
 
+        this(officeId, groupId, clientId, loanId, savingsId, actionName, entityName, entityId, subentityId, href, json, transactionId,
+                productId, templateId, creditBureauId, organisationCreditBureauId, jobName, idempotencyKey, loanExternalId,
+                sanitizeJsonKeys, null);
+    }
+
+    public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
+            final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
+            final String json, final String transactionId, final Long productId, final Long templateId, final Long creditBureauId,
+            final Long organisationCreditBureauId, final String jobName, final String idempotencyKey, final ExternalId loanExternalId,
+            final Set<String> sanitizeJsonKeys, final SavingsDepositOrigin savingsDepositOrigin) {
+
+        this.savingsDepositOrigin = savingsDepositOrigin;
         this.commandId = null;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -151,6 +165,7 @@ public class CommandWrapper {
             final Long organisationCreditBureauId, final String idempotencyKey, final ExternalId loanExternalId,
             final Set<String> sanitizeJsonKeys) {
 
+        this.savingsDepositOrigin = null;
         this.commandId = commandId;
         this.officeId = officeId;
         this.groupId = groupId;
