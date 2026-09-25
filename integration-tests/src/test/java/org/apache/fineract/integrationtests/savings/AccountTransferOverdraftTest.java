@@ -67,7 +67,7 @@ class AccountTransferOverdraftTest extends BaseSavingsIntegrationTest {
                 final var destinationSavingsId = createActiveSavingsAccount(destinationClientId, savingsProductId);
 
                 deposit(sourceSavingsId, ACTIVATION_DATE, OPENING_BALANCE);
-                final var accountTransferId = transfer(sourceClientId, sourceSavingsId, destinationClientId, destinationSavingsId);
+                transfer(sourceClientId, sourceSavingsId, destinationClientId, destinationSavingsId);
 
                 final var originalWithdrawal = findActiveWithdrawal(sourceSavingsId);
                 assertNotNull(originalWithdrawal.getTransfer());
@@ -86,7 +86,7 @@ class AccountTransferOverdraftTest extends BaseSavingsIntegrationTest {
                 assertBackdatedDepositJournalEntries(backdatedDepositId, accounting);
                 assertNoJournalEntries(auditOnlyReversal.getId());
 
-                ok(fineractClient().accountTransfers.accountTransferOperation(accountTransferId, "undo"));
+                ok(fineractClient().accountTransfers.accountTransferOperation(transferId, "undo"));
                 assertBalance(sourceSavingsId, BigDecimal.valueOf(105));
                 assertBalance(destinationSavingsId, BigDecimal.ZERO);
             } finally {
