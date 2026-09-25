@@ -388,6 +388,17 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return loanHelper.moveLoanState(loanId, request, command);
     }
 
+    protected PostLoansLoanIdResponse applyContractTermination(Long loanId, String transactionDate) {
+        return moveLoanState(loanId,
+                new PostLoansLoanIdRequest().transactionDate(transactionDate).dateFormat(LoanTestData.DATETIME_PATTERN)
+                        .locale(LoanTestData.LOCALE).note("Contract Termination").externalId(Utils.randomStringGenerator("", 20)),
+                "contractTermination");
+    }
+
+    protected PostLoansLoanIdResponse undoContractTermination(Long loanId) {
+        return moveLoanState(loanId, new PostLoansLoanIdRequest().note("Undo Contract Termination"), "undoContractTermination");
+    }
+
     protected PostLoansLoanIdTransactionsResponse closeLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return loanHelper.closeLoan(loanId, request);
     }
@@ -1539,6 +1550,12 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
     protected void verifyRepaymentSchedule(Long loanId, LoanTestData.Installment... installments) {
         GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
         LoanTestValidators.verifyRepaymentSchedule(loanDetails, installments);
+    }
+
+    protected void verifyTransactionPortions(Long loanId, String type, String date, double amount, double principalPortion,
+            double interestPortion, double feePortion, double penaltyPortion) {
+        LoanTestValidators.verifyTransactionPortions(getLoanDetails(loanId), type, date, amount, principalPortion, interestPortion,
+                feePortion, penaltyPortion);
     }
 
     protected PostLoanProductsRequest createOnePeriod30DaysPeriodicAccrualProductWithAdvancedPaymentAllocationAndInterestRecalculation(

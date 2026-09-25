@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service.contracttermination;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -47,6 +49,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
+import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
@@ -74,6 +77,7 @@ public class LoanContractTerminationServiceImpl {
     private final LoanChargeValidator loanChargeValidator;
     private final ProgressiveLoanTransactionValidator loanTransactionValidator;
     private final LoanTransactionService loanTransactionService;
+    private final LoanJournalEntryPoster journalEntryPoster;
 
     public CommandProcessingResult applyContractTermination(final JsonCommand command) {
         Loan loan = loanAssembler.assembleFrom(command.getLoanId());
@@ -81,12 +85,15 @@ public class LoanContractTerminationServiceImpl {
         loanUtilService.checkClientOrGroupActive(loan);
 
         // validate Contract Termination
-        validateContractTermination(loan);
+        validateTerminationEligibility(loan);
+        loanTransactionValidator.validateContractTermination(command, loan.getId());
 
         final ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
         final Map<String, Object> changes = new LinkedHashMap<>();
 
-        final LoanTransaction contractTermination = LoanTransaction.contractTermination(loan, DateUtils.getBusinessLocalDate(), externalId);
+        final LocalDate transactionDate = Objects.requireNonNullElseGet(
+                command.localDateValueOfParameterNamed(LoanApiConstants.transactionDateParamName), DateUtils::getBusinessLocalDate);
+        final LoanTransaction contractTermination = LoanTransaction.contractTermination(loan, transactionDate, externalId);
 
         // Mark Contract Termination, Update Loan SubStatus
         loan.setLoanSubStatus(LoanSubStatus.CONTRACT_TERMINATION);
@@ -157,6 +164,8 @@ public class LoanContractTerminationServiceImpl {
         changes.put(LoanApiConstants.subStatusAttributeName, loan.getLoanSubStatus());
         loanTransactionRepository.saveAndFlush(contractTerminationTransaction);
 
+        reverseAccrualsOfFutureDatedTermination(loan, contractTerminationTransaction);
+
         final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
         if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
             loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
@@ -184,7 +193,31 @@ public class LoanContractTerminationServiceImpl {
                 .build();
     }
 
-    public void validateContractTermination(final Loan loan) {
+    // Future dated relative to the termination's own booking date, not to the current business date
+    private void reverseAccrualsOfFutureDatedTermination(final Loan loan, final LoanTransaction contractTermination) {
+        final LocalDate terminationDate = contractTermination.getTransactionDate();
+        if (!DateUtils.isAfter(terminationDate, contractTermination.getSubmittedOnDate())) {
+            return;
+        }
+        final List<LoanTransaction> accruals = loan.getLoanTransactions().stream() //
+                .filter(LoanTransaction::isNotReversed) //
+                .filter(transaction -> transaction.isAccrual() || transaction.isAccrualAdjustment()) //
+                .filter(transaction -> DateUtils.isEqual(terminationDate, transaction.getTransactionDate())) //
+                .toList();
+        accruals.forEach(accrual -> {
+            accrual.reverse();
+            // Without the flag the read platform hides the reversed accrual from GET /loans/{id} and the audit trail
+            accrual.manuallyAdjustedOrReversed();
+        });
+        loanTransactionRepository.saveAllAndFlush(accruals);
+        accruals.forEach(accrual -> {
+            journalEntryPoster.postJournalEntriesForLoanTransaction(accrual, false, false);
+            businessEventNotifierService
+                    .notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(new LoanAdjustTransactionBusinessEvent.Data(accrual)));
+        });
+    }
+
+    public void validateTerminationEligibility(final Loan loan) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         if (!loan.isOpen()) {
