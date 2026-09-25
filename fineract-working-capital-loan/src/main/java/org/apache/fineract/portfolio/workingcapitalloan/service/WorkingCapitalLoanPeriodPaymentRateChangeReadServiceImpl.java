@@ -18,14 +18,19 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateChange;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateHistoryHelper;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +53,20 @@ public class WorkingCapitalLoanPeriodPaymentRateChangeReadServiceImpl implements
     @Override
     public List<WorkingCapitalLoanPeriodPaymentRateChangeData> retrieveRateChangeHistory(final WorkingCapitalLoan loan) {
         return historyOf(loan.getId());
+    }
+
+    @Override
+    public BigDecimal retrieveEffectivePaymentRate(final WorkingCapitalLoan loan, final LocalDate asOf) {
+        final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();
+        if (details == null) {
+            return null;
+        }
+        final WorkingCapitalPaymentAmountCalculationStrategy strategy = details.getPaymentAmountCalculationStrategy();
+        if (strategy != null && !strategy.isTpv()) {
+            return null;
+        }
+        return WorkingCapitalLoanPeriodPaymentRateHistoryHelper
+                .rateInEffectAt(repository.findByWorkingCapitalLoanIdAndReversedFalse(loan.getId()), details.getPeriodPaymentRate(), asOf);
     }
 
     private List<WorkingCapitalLoanPeriodPaymentRateChangeData> historyOf(final Long loanId) {

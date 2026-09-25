@@ -103,6 +103,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals(7, result.getLoanProductCounter());
         assertEquals(360, result.getNpvDayCount());
         assertEquals(new BigDecimal("2.50"), result.getPaymentRate());
+        assertEquals(new BigDecimal("3.75"), result.getEffectivePaymentRate());
         assertEquals(new BigDecimal("12.00"), result.getDiscountFee());
         assertEquals(new BigDecimal("13.00"), result.getProposedDiscountFee());
         assertEquals(new BigDecimal("14.00"), result.getApprovedDiscountFee());
@@ -568,7 +569,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
                 .approvedPrincipal(new BigDecimal("1100.00")).principal(new BigDecimal("1000.00"))
                 .netDisbursalAmount(new BigDecimal("980.00"))
                 .amortizationType(stringEnum("1", "amortizationType.equal.installments", "Equal installments")).npvDayCount(360)
-                .loanProductCounter(7).paymentRate(new BigDecimal("2.50")).repaymentEvery(30)
+                .loanProductCounter(7).paymentRate(new BigDecimal("2.50")).effectivePaymentRate(new BigDecimal("3.75")).repaymentEvery(30)
                 .repaymentFrequencyType(stringEnum("0", "repaymentFrequency.days", "Days")).discountFee(new BigDecimal("12.00"))
                 .proposedDiscountFee(new BigDecimal("13.00")).approvedDiscountFee(new BigDecimal("14.00")).numberOfRepayments(90)
                 .periodPaymentAmount(new BigDecimal("120.00")).calculatedAnnualEir(new BigDecimal("18.25"))

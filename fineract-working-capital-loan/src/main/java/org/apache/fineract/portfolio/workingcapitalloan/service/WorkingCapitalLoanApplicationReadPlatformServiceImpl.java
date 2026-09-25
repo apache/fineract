@@ -185,6 +185,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         enrichWithSubmittedBy(loan, data);
         enrichWithRateAndTerm(loan, data);
         data.setPeriodPaymentRateHistory(rateChangeReadService.retrieveRateChangeHistory(loan));
+        data.setEffectivePaymentRate(rateChangeReadService.retrieveEffectivePaymentRate(loan, ThreadLocalContextUtil.getBusinessDate()));
         enrichWithStartDates(loan, data);
         enrichWithOriginators(loanId, data);
         return data;
