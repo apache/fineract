@@ -89,21 +89,99 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                 .filter(t -> transactionDate.equals(formatter.format(t.getDate()))
                         && transactionTypeExpected.equals(t.getType().getCode().substring(20)))
                 .collect(Collectors.toList());
-
         List<List<JournalEntryTransactionItem>> journalLinesActualList = getJournalLinesActualList(transactionsMatch);
         checkJournalEntriesData(journalLinesActualList, table);
+    }
+
+    @Then("Loan transaction of type {string} on {string} has journal entries with external asset owner {string}")
+    public void loanTransactionJournalEntriesWithOwner(String transactionType, String transactionDate, String owner) {
+        assertExternalOwnerOnTransactionJournalEntries(transactionType, transactionDate, resolveExternalOwner(owner));
+    }
+
+    private String resolveExternalOwner(String owner) {
+        if (owner == null || owner.isBlank() || "none".equalsIgnoreCase(owner)) {
+            return null;
+        }
+        if ("active owner".equalsIgnoreCase(owner)) {
+            return testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID);
+        }
+        if ("previous owner".equalsIgnoreCase(owner)) {
+            return testContext().get(TestContextKey.ASSET_EXTERNALIZATION_PREVIOUS_OWNER_EXTERNAL_ID);
+        }
+        return owner;
+    }
+
+    private void assertExternalOwnerOnTransactionJournalEntries(String transactionType, String transactionDate,
+            String expectedOwnerExternalId) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("staffInSelectedOfficeOnly", false);
+        queryParams.put("associations", "transactions");
+        GetLoansLoanIdResponse loanDetailsResponse = loansApi().retrieveOneLoan(loanId, queryParams);
+        TransactionType transactionType1 = TransactionType.valueOf(transactionType);
+        String transactionTypeExpected = transactionType1.getValue();
+
+        List<GetLoansLoanIdTransactions> transactionsMatch = loanDetailsResponse.getTransactions().stream()
+                .filter(t -> transactionDate.equals(formatter.format(t.getDate()))
+                        && transactionTypeExpected.equals(t.getType().getCode().substring(20)))
+                .collect(Collectors.toList());
+
+        List<List<JournalEntryTransactionItem>> journalLinesActualList = getJournalLinesActualList(transactionsMatch);
+        int totalJournalEntries = journalLinesActualList.stream().mapToInt(List::size).sum();
+        assertThat(totalJournalEntries).as("Expected journal entries for transaction type %s on %s", transactionType, transactionDate)
+                .isPositive();
+
+        for (List<JournalEntryTransactionItem> journalEntries : journalLinesActualList) {
+            for (JournalEntryTransactionItem entry : journalEntries) {
+                assertThat(entry.getExternalAssetOwner())
+                        .as("Journal entry for transaction type %s on %s must have external asset owner %s", transactionType,
+                                transactionDate, expectedOwnerExternalId)
+                        .isEqualTo(expectedOwnerExternalId);
+            }
+        }
     }
 
     public void checkJournalEntriesData(List<List<JournalEntryTransactionItem>> journalLinesActualList, DataTable table) {
         List<List<String>> data = table.asLists();
         final int expectedCount = data.size() - 1;
+        List<String> header = data.get(0);
+        int externalOwnerIndex = -1;
+        for (int i = 0; i < header.size(); i++) {
+            if (header.get(i) != null && header.get(i).toLowerCase(Locale.ROOT).contains("external")) {
+                externalOwnerIndex = i;
+                break;
+            }
+        }
 
-        List<List<String>> expectedJournalEntries = data.subList(1, data.size());
-        List<List<String>> actualJournalEntries = getActualJournalEntriesListFromLists(journalLinesActualList);
+        final int externalOwnerColumn = externalOwnerIndex;
+        List<List<String>> expectedJournalEntries = data.subList(1, data.size()).stream().map(row -> {
+            List<String> mutableRow = new ArrayList<>(row);
+            if (externalOwnerColumn >= 0) {
+                while (mutableRow.size() < 6) {
+                    mutableRow.add(null);
+                }
+            }
+            if (externalOwnerColumn >= 0 && externalOwnerColumn < mutableRow.size()) {
+                String expectedOwner = mutableRow.get(externalOwnerColumn);
+                if (expectedOwner == null || expectedOwner.isBlank() || "none".equalsIgnoreCase(expectedOwner)) {
+                    mutableRow.set(externalOwnerColumn, null);
+                } else if ("active owner".equalsIgnoreCase(expectedOwner)) {
+                    mutableRow.set(externalOwnerColumn, testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID));
+                } else if ("previous owner".equalsIgnoreCase(expectedOwner)) {
+                    mutableRow.set(externalOwnerColumn, testContext().get(TestContextKey.ASSET_EXTERNALIZATION_PREVIOUS_OWNER_EXTERNAL_ID));
+                }
+            }
+            return mutableRow;
+        }).collect(Collectors.toList());
+        boolean includeExternalOwner = externalOwnerColumn >= 0;
+        List<List<String>> actualJournalEntries = getActualJournalEntriesListFromLists(journalLinesActualList, includeExternalOwner);
 
         final int actualCount = journalLinesActualList.stream().mapToInt(List::size).sum();
         assertThat(actualCount).as("The number of journal entries for the transaction does not match the expected count! Expected: "
-                + expectedCount + ", Actual: " + actualCount).isEqualTo(expectedCount);
+                + expectedCount + ", Actual: " + actualCount + ", Actual entries: " + actualJournalEntries).isEqualTo(expectedCount);
 
         boolean containsExpectedValues = Utils.isEqualLists(expectedJournalEntries, actualJournalEntries);
         assertThat(containsExpectedValues).as(ErrorMessageHelper.wrongValueInInJournalEntries(expectedJournalEntries, actualJournalEntries))
@@ -127,7 +205,8 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         }).collect(Collectors.toList());
     }
 
-    public List<List<String>> getActualJournalEntriesListFromLists(List<List<JournalEntryTransactionItem>> journalLinesActualList) {
+    public List<List<String>> getActualJournalEntriesListFromLists(List<List<JournalEntryTransactionItem>> journalLinesActualList,
+            boolean includeExternalOwner) {
         List<List<String>> actualJournalEntries = new ArrayList<>();
         for (int j = 0; j < journalLinesActualList.size(); j++) {
             List<JournalEntryTransactionItem> journalLinesActual = journalLinesActualList.get(j);
@@ -139,6 +218,9 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                 actualValues.add(t.getGlAccountName() == null ? null : t.getGlAccountName());
                 actualValues.add("DEBIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
                 actualValues.add("CREDIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
+                if (includeExternalOwner) {
+                    actualValues.add(t.getExternalAssetOwner());
+                }
 
                 return actualValues;
             }).toList();
@@ -285,7 +367,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
 
         List<List<String>> data = table.asLists();
         List<List<String>> expectedJournalEntries = data.subList(1, data.size());
-        List<List<String>> actualJournalEntries = getActualJournalEntriesListFromLists(journalLinesActualList);
+        List<List<String>> actualJournalEntries = getActualJournalEntriesListFromLists(journalLinesActualList, false);
 
         boolean containsExpectedValues = Utils.isEqualLists(expectedJournalEntries, actualJournalEntries);
         assertThat(containsExpectedValues).as(ErrorMessageHelper.wrongValueInInJournalEntries(expectedJournalEntries, actualJournalEntries))

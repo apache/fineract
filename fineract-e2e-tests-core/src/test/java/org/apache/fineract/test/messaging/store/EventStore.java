@@ -43,6 +43,8 @@ public class EventStore {
 
     public static final String BULK_BUSINESS_EVENT_TYPE = "BulkBusinessEvent";
     private final List<EventMessage<?>> receivedEvents = new CopyOnWriteArrayList<>();
+    // Events removed by a verification, kept so a later step can still inspect their payload
+    private final List<EventMessage<?>> verifiedEvents = new CopyOnWriteArrayList<>();
 
     public <R, T extends Event<R>> boolean existsEventById(T type, Long id) {
         return findEventById(type, id).isPresent();
@@ -50,8 +52,16 @@ public class EventStore {
 
     public <R, T extends Event<R>> Optional<EventMessage<R>> removeEventById(T type, Long id) {
         Optional<EventMessage<R>> event = findEventById(type, id);
-        event.ifPresent(receivedEvents::remove);
+        event.ifPresent(e -> {
+            receivedEvents.remove(e);
+            verifiedEvents.add(e);
+        });
         return event;
+    }
+
+    public <R, T extends Event<R>> Optional<EventMessage<R>> findVerifiedEventById(T type, Long id) {
+        return verifiedEvents.stream().filter(em -> em.getType().equals(type.getEventName())).map(em -> (EventMessage<R>) em)
+                .filter(em -> id.equals(type.getIdExtractor().apply(em.getData()))).reduce((first, second) -> second);
     }
 
     public <R, T extends Event<R>> Optional<EventMessage<R>> findEventById(T type, Long id) {
@@ -125,5 +135,6 @@ public class EventStore {
 
     public void reset() {
         receivedEvents.clear();
+        verifiedEvents.clear();
     }
 }

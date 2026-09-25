@@ -64,7 +64,8 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
     private static final String EXCLUDED_TRANSACTION_TYPES = "EXCLUDED_TRANSACTION_TYPES";
     private static final String BUY_DOWN_FEE_TYPES = "BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT,BUY_DOWN_FEE_AMORTIZATION,BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT";
     private static final List<String> EVENTS_UNDER_TEST = List.of("LoanBuyDownFeeTransactionCreatedBusinessEvent",
-            "LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent", "LoanTransactionMakeRepaymentPostBusinessEvent");
+            "LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent", "LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent",
+            "LoanTransactionMakeRepaymentPostBusinessEvent", "LoanAdjustTransactionBusinessEvent");
 
     /** One account per type is enough: these tests assert who a journal entry belongs to, never what it is worth. */
     private static Account assetAccount;
@@ -187,7 +188,7 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
     }
 
     @Test
-    public void testReversalOfAnExcludedTransactionIsAlsoUntagged() {
+    public void testAdjustmentAndReversalOfExcludedTransactionsAreAlsoUntagged() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> buyDownFeeTxRef = new AtomicReference<>();
         final String ownerExternalId = UUID.randomUUID().toString();
@@ -211,8 +212,19 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
         });
 
         runAt("03 July 2026", () -> {
-            buyDownFeeAdjustment(loanIdRef.get(), buyDownFeeTxRef.get(), "03 July 2026", 50.0);
-            assertUntaggedOnBothSurfaces(buyDownFeeTxRef.get());
+            final Long loanId = loanIdRef.get();
+            final Long buyDownFeeTxId = buyDownFeeTxRef.get();
+            final Long adjustmentTxId = buyDownFeeAdjustment(loanId, buyDownFeeTxId, "03 July 2026", 20.0).getResourceId();
+            assertUntaggedOnBothSurfaces(adjustmentTxId);
+
+            // A buy down fee cannot be reversed while a non-reversed adjustment exists, so the adjustment goes first.
+            final int adjustmentEntryCount = journalEntriesOf(adjustmentTxId).size();
+            final int buyDownFeeEntryCount = journalEntriesOf(buyDownFeeTxId).size();
+            reverseLoanTransaction(loanId, adjustmentTxId, "03 July 2026");
+            reverseLoanTransaction(loanId, buyDownFeeTxId, "03 July 2026");
+
+            assertReversalUntaggedOnBothSurfaces(adjustmentTxId, adjustmentEntryCount);
+            assertReversalUntaggedOnBothSurfaces(buyDownFeeTxId, buyDownFeeEntryCount);
         });
     }
 
@@ -268,6 +280,18 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
         assertEventOwner(loanTransactionId, ownerExternalId);
     }
 
+    /**
+     * Reversal books a mirrored entry for every original line under the same loan transaction, so the transaction must
+     * now carry twice the entries, none of them owner tagged, and its adjust event must not name an owner either.
+     */
+    private void assertReversalUntaggedOnBothSurfaces(final Long loanTransactionId, final int originalEntryCount) {
+        final List<JournalEntryTransactionItem> entries = journalEntriesOf(loanTransactionId);
+        assertEquals(2 * originalEntryCount, entries.size(), "expected reversal journal entries for loan transaction " + loanTransactionId);
+        entries.forEach(entry -> assertNull(entry.getExternalAssetOwner(),
+                "journal entry of reversed loan transaction " + loanTransactionId + " must not be attributed to any owner"));
+        assertAdjustEventUntagged(loanTransactionId);
+    }
+
     private List<JournalEntryTransactionItem> journalEntriesOf(final Long loanTransactionId) {
         final List<JournalEntryTransactionItem> items = journalHelper.getJournalEntriesByTransactionId("L" + loanTransactionId)
                 .getPageItems();
@@ -283,6 +307,19 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
             assertFalse(payloads.isEmpty(), "expected an external event for loan transaction " + loanTransactionId);
             payloads.forEach(payload -> assertEquals(expectedOwnerExternalId, payload.get("externalOwnerId"),
                     "event of loan transaction " + loanTransactionId + " carries the wrong externalOwnerId"));
+        });
+    }
+
+    private void assertAdjustEventUntagged(final Long loanTransactionId) {
+        Awaitility.await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(500)).untilAsserted(() -> {
+            final List<Map<?, ?>> adjustedTransactions = externalEventHelper.getAllExternalEvents().stream()
+                    .filter(event -> "LoanAdjustTransactionBusinessEvent".equals(event.getType()))
+                    .map(event -> event.getPayLoad().get("transactionToAdjust")).filter(Map.class::isInstance)
+                    .<Map<?, ?>>map(Map.class::cast)
+                    .filter(transaction -> String.valueOf(loanTransactionId).equals(String.valueOf(transaction.get("id")))).toList();
+            assertFalse(adjustedTransactions.isEmpty(), "expected an adjust event for loan transaction " + loanTransactionId);
+            adjustedTransactions.forEach(transaction -> assertNull(transaction.get("externalOwnerId"),
+                    "adjust event of loan transaction " + loanTransactionId + " must not carry an externalOwnerId"));
         });
     }
 

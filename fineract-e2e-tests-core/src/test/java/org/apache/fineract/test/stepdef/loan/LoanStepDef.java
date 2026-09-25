@@ -160,6 +160,7 @@ import org.apache.fineract.test.messaging.config.JobPollingProperties;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.messaging.event.loan.LoanRescheduledDueAdjustScheduleEvent;
 import org.apache.fineract.test.messaging.event.loan.LoanStatusChangedEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.AbstractLoanTransactionEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.BulkBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
@@ -3803,8 +3804,16 @@ public class LoanStepDef extends AbstractStepDef {
             String value = loanData.getLast().get(i);
             switch (loanData.getFirst().get(i)) {
                 case "LoanProduct" -> {
-                    final DefaultLoanProduct product = DefaultLoanProduct.valueOf(value);
-                    final Long loanProductId = loanProductResolver.resolve(product);
+                    Long loanProductId;
+                    try {
+                        final DefaultLoanProduct product = DefaultLoanProduct.valueOf(value);
+                        loanProductId = loanProductResolver.resolve(product);
+                    } catch (IllegalArgumentException e) {
+                        // Dedicated product created on-the-fly: resolve by name
+                        List<GetLoanProductsResponse> products = ok(() -> fineractClient.loanProducts().retrieveAllLoanProducts(Map.of()));
+                        loanProductId = products.stream().filter(p -> value.equals(p.getName())).findAny()
+                                .orElseThrow(() -> new IllegalArgumentException("Loan product [%s] not found".formatted(value))).getId();
+                    }
                     loansRequest.productId(loanProductId);
                 }
                 case "submitted on date" -> {
@@ -6060,6 +6069,57 @@ public class LoanStepDef extends AbstractStepDef {
 
         eventAssertion.assertEventRaised(LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent.class,
                 buyDownFeeAmortizationAdjustmentTransactionId);
+    }
+
+    @Then("LoanBuyDownFeeTransactionCreatedBusinessEvent is created on {string} without external owner")
+    public void checkLoanBuyDownFeeTransactionCreatedBusinessEventWithoutExternalOwner(final String date) {
+        checkTransactionEventOwner(date, LoanBuyDownFeeTransactionCreatedBusinessEvent.class, "Buy Down Fee", null);
+    }
+
+    @Then("LoanBuyDownFeeTransactionCreatedBusinessEvent is created on {string} with the active external owner")
+    public void checkLoanBuyDownFeeTransactionCreatedBusinessEventWithActiveExternalOwner(final String date) {
+        String ownerExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID);
+        checkTransactionEventOwner(date, LoanBuyDownFeeTransactionCreatedBusinessEvent.class, "Buy Down Fee", ownerExternalId);
+    }
+
+    @Then("LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on {string} without external owner")
+    public void checkLoanBuyDownFeeAmortizationTransactionCreatedBusinessEventWithoutExternalOwner(final String date) {
+        checkTransactionEventOwner(date, LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent.class, "Buy Down Fee Amortization",
+                null);
+    }
+
+    @Then("LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent is created on {string} without external owner")
+    public void checkLoanBuyDownFeeAdjustmentTransactionCreatedBusinessEventWithoutExternalOwner(final String date) {
+        checkTransactionEventOwner(date, LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent.class, "Buy Down Fee Adjustment", null);
+    }
+
+    @Then("LoanChargeOffPostBusinessEvent is created on {string} without external owner")
+    public void checkLoanChargeOffPostBusinessEventWithoutExternalOwner(final String date) {
+        checkTransactionEventOwner(date, LoanChargeOffEvent.class, "Charge-off", null);
+    }
+
+    @Then("LoanAdjustTransactionBusinessEvent for {string} transaction on {string} is created without external owner")
+    public void checkLoanAdjustTransactionBusinessEventWithoutExternalOwner(final String transactionType, final String date) {
+        eventCheckHelper.loanAdjustTransactionEventCheck(findTransactionIdByTypeAndDate(transactionType, date), null);
+    }
+
+    private void checkTransactionEventOwner(final String date, final Class<? extends AbstractLoanTransactionEvent> eventClass,
+            final String transactionTypeValue, final String externalOwnerId) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        eventCheckHelper.transactionEventCheck(loanCreateResponse.getLoanId(), findTransactionIdByTypeAndDate(transactionTypeValue, date),
+                eventClass, externalOwnerId);
+    }
+
+    private Long findTransactionIdByTypeAndDate(String transactionType, String date) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.getLoanId();
+
+        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
+        return loanDetailsResponse.getTransactions().stream()
+                .filter(t -> date.equals(FORMATTER.format(t.getDate())) && transactionType.equals(t.getType().getValue())).findFirst()
+                .orElseThrow(() -> new IllegalStateException(String.format("No %s transaction found on %s", transactionType, date)))
+                .getId();
     }
 
     @And("Loan Transactions tab has a {string} transaction with date {string} which has classification code value {string}")
