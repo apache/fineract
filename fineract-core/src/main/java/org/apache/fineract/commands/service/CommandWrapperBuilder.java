@@ -864,6 +864,26 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder discountFeeWorkingCapitalLoanTransaction(final Long loanId, final Long transactionId) {
+        this.actionName = ACTION_DISCOUNTFEE;
+        this.entityName = ENTITY_WORKINGCAPITALLOAN;
+        this.entityId = loanId;
+        this.subentityId = transactionId;
+        this.loanId = loanId;
+        this.href = "/working-capital-loans/" + loanId + "/transactions/" + transactionId + "?command=discountFee";
+        return this;
+    }
+
+    public CommandWrapperBuilder discountFeeAdjustmentWorkingCapitalLoanTransaction(final Long loanId, final Long transactionId) {
+        this.actionName = ACTION_DISCOUNTFEEADJUSTMENT;
+        this.entityName = ENTITY_WORKINGCAPITALLOAN;
+        this.entityId = loanId;
+        this.subentityId = transactionId;
+        this.loanId = loanId;
+        this.href = "/working-capital-loans/" + loanId + "/transactions/" + transactionId + "?command=discountFeeAdjustment";
+        return this;
+    }
+
     public CommandWrapperBuilder undoWorkingCapitalLoanTransaction(final Long loanId, final Long transactionId) {
         this.actionName = ACTION_UNDO;
         this.entityName = ENTITY_WORKINGCAPITALLOANTRANSACTION;

@@ -64,6 +64,7 @@ public class WorkingCapitalLoanTransactionDataMapperTest {
         assertNotNull(result);
         assertEquals(100L, result.getId());
         assertEquals(200L, result.getWcLoanId());
+        assertEquals("loan-external-id", result.getExternalLoanId());
         assertEquals(TRANSACTION_DATE.toString(), result.getTransactionDate());
         assertEquals(SUBMITTED_ON_DATE.toString(), result.getSubmittedOnDate());
         assertEquals(new BigDecimal("125.50"), result.getTransactionAmount());
@@ -114,7 +115,7 @@ public class WorkingCapitalLoanTransactionDataMapperTest {
     private static WorkingCapitalLoanTransactionData transactionData(final LoanTransactionType transactionType, final boolean reversed,
             final LocalDate reversedOnDate) {
         final LoanTransactionEnumData type = LoanEnumerations.transactionType(transactionType);
-        return WorkingCapitalLoanTransactionData.builder().id(100L).wcLoanId(200L)
+        return WorkingCapitalLoanTransactionData.builder().id(100L).wcLoanId(200L).externalLoanId(new ExternalId("loan-external-id"))
                 .currency(new CurrencyData("EUR", "Euro", 2, 1, "€", "currency.EUR")).type(type).transactionDate(TRANSACTION_DATE)
                 .submittedOnDate(SUBMITTED_ON_DATE).transactionAmount(new BigDecimal("125.50"))
                 .externalId(new ExternalId("transaction-external-id")).reversed(reversed)

@@ -578,7 +578,7 @@ Feature: Working Capital Discount Adjustment Backdated and Undo
     Then Working capital loan creation was successful
     Then Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
     Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
-    Then Undo discount fee adjustment with a non-existent transaction id on Working Capital loan account failed as not found with status code 400
+    Then Undo discount fee adjustment with a non-existent transaction id on Working Capital loan account failed as not found with status code 404
 
   @TestRailId:C106709
   Scenario: Verify undo of a repayment on a product without accounting succeeds when accounting is closed for the office
