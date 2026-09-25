@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.apache.fineract.client.models.ClientFamilyMemberRequest;
+import org.apache.fineract.client.models.FamilyMemberCreateRequest;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.client.services.ClientFamilyMemberApi;
@@ -58,7 +58,7 @@ public class ClientFamilyMemberTest extends IntegrationTest {
                 new PostCodeValuesDataRequest().name(Utils.randomStringGenerator("Relative_", 4)).position(1).isActive(true)))
                 .getSubResourceId();
         Long familyMemberId = ok(familyMemberApi.createClientFamilyMember(ownerClientId,
-                new ClientFamilyMemberRequest().firstName("Ada").lastName("Lovelace").relationshipId(relationshipId))).getResourceId();
+                new FamilyMemberCreateRequest().firstName("Ada").lastName("Lovelace").relationshipId(relationshipId))).getResourceId();
 
         // sanity: reachable through the owning client
         assertEquals(familyMemberId, ok(familyMemberApi.retrieveOneClientFamilyMember(familyMemberId, ownerClientId)).getId());
