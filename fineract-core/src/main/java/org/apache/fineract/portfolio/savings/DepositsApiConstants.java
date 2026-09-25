@@ -69,6 +69,8 @@ public final class DepositsApiConstants {
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
     public static final String monthDayFormatParamName = "monthDayFormat";
+    public static final String startDateParamName = "startDate";
+    public static final String closeDateParamName = "closeDate";
 
     // deposit product and account parameters
     public static final String idParamName = "id";
@@ -217,10 +219,11 @@ public final class DepositsApiConstants {
      * Deposit Product Parameters
      */
     private static final Set<String> DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            monthDayFormatParamName, nameParamName, shortNameParamName, descriptionParamName, currencyCodeParamName,
-            digitsAfterDecimalParamName, inMultiplesOfParamName, nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName,
-            interestPostingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
-            lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, accountingRuleParamName, chargesParamName,
+            monthDayFormatParamName, dateFormatParamName, startDateParamName, closeDateParamName, nameParamName, shortNameParamName,
+            descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName, inMultiplesOfParamName,
+            nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
+            interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName, lockinPeriodFrequencyParamName,
+            lockinPeriodFrequencyTypeParamName, accountingRuleParamName, chargesParamName,
             SavingProductAccountingParams.INCOME_FROM_FEES.getValue(), SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(),
             SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(),
             SavingProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
@@ -277,6 +280,7 @@ public final class DepositsApiConstants {
         fixedDepositRequestData.addAll(DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
         fixedDepositRequestData.addAll(PRECLOSURE_RESPONSE_DATA_PARAMETERS);
         fixedDepositRequestData.addAll(DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS);
+        fixedDepositRequestData.add(statusParamName);
         return fixedDepositRequestData;
     }
 
@@ -296,6 +300,7 @@ public final class DepositsApiConstants {
         recurringDepositRequestData.addAll(PRECLOSURE_RESPONSE_DATA_PARAMETERS);
         recurringDepositRequestData.addAll(DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS);
         recurringDepositRequestData.addAll(RECURRING_DETAILS_RESPONSE_DATA_PARAMETERS);
+        recurringDepositRequestData.add(statusParamName);
         recurringDepositRequestData.add(SavingsApiConstants.minBalanceForInterestCalculationParamName);
         return recurringDepositRequestData;
     }
