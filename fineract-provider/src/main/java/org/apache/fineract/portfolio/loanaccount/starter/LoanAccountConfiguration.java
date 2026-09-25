@@ -104,6 +104,7 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionVa
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.loanaccount.service.BulkLoansReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.BulkLoansReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.BuyDownFeeAmortizationStrategyService;
 import org.apache.fineract.portfolio.loanaccount.service.BuyDownFeePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.BuyDownFeeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.BuyDownFeeReadPlatformServiceImpl;
@@ -596,8 +597,10 @@ public class LoanAccountConfiguration {
     @ConditionalOnMissingBean(LoanBuyDownFeeAmortizationEventService.class)
     public LoanBuyDownFeeAmortizationEventService loanBuyDownFeeAmortizationEventService(
             BusinessEventNotifierService businessEventNotifierService,
-            LoanBuyDownFeeAmortizationProcessingService loanBuyDownFeeAmortizationProcessingService) {
-        return new LoanBuyDownFeeAmortizationEventService(businessEventNotifierService, loanBuyDownFeeAmortizationProcessingService);
+            LoanBuyDownFeeAmortizationProcessingService loanBuyDownFeeAmortizationProcessingService,
+            BuyDownFeeAmortizationStrategyService buyDownFeeAmortizationStrategyService) {
+        return new LoanBuyDownFeeAmortizationEventService(businessEventNotifierService, loanBuyDownFeeAmortizationProcessingService,
+                buyDownFeeAmortizationStrategyService);
     }
 
     @Bean

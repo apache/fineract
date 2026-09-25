@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import jakarta.annotation.PostConstruct;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -42,6 +43,7 @@ public class LoanBuyDownFeeAmortizationEventService {
 
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanBuyDownFeeAmortizationProcessingService loanBuyDownFeeAmortizationProcessingService;
+    private final BuyDownFeeAmortizationStrategyService buyDownFeeAmortizationStrategyService;
 
     @PostConstruct
     public void addListeners() {
@@ -57,6 +59,26 @@ public class LoanBuyDownFeeAmortizationEventService {
         businessEventNotifierService.addPostBusinessEventListener(LoanUndoChargeOffBusinessEvent.class,
                 new LoanUndoChargeOffEventListener());
         businessEventNotifierService.addPreBusinessEventListener(LoanChargeOffPreBusinessEvent.class, new LoanChargeOffPreEventListener());
+    }
+
+    /**
+     * Closure recognition and IMMEDIATE recognition both recognize remaining unrecognized amounts. Guard so that at
+     * most one of them runs. IMMEDIATE only applies when the product is IMMEDIATE and the loan is already sold.
+     */
+    private void processBuyDownFeeAmortizationAfterFeeChange(final Loan loan, final LoanTransaction buyDownFeeRelatedTransaction,
+            final LocalDate transactionDate) {
+        if (!loan.getLoanProductRelatedDetail().isEnableBuyDownFee()) {
+            return;
+        }
+        final LoanStatus status = loan.getStatus();
+        if (status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid()) {
+            log.debug("Loan buy down fee change on buy down fee amortization for closed loan {}", loan.getId());
+            loanBuyDownFeeAmortizationProcessingService.processBuyDownFeeAmortizationOnLoanClosure(loan, true);
+        } else if (buyDownFeeAmortizationStrategyService.shouldRecognizeImmediately(loan)) {
+            log.debug("Immediate buy down fee amortization for loan {}", loan.getId());
+            loanBuyDownFeeAmortizationProcessingService.processBuyDownFeeAmortizationImmediately(loan, buyDownFeeRelatedTransaction,
+                    transactionDate, true);
+        }
     }
 
     private final class LoanCloseListener implements BusinessEventListener<LoanCloseBusinessEvent> {
@@ -91,13 +113,8 @@ public class LoanBuyDownFeeAmortizationEventService {
 
         @Override
         public void onBusinessEvent(final LoanBuyDownFeeTransactionCreatedBusinessEvent event) {
-            final Loan loan = event.get().getLoan();
-            final LoanStatus status = loan.getStatus();
-            if (loan.getLoanProductRelatedDetail().isEnableBuyDownFee()
-                    && (status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid())) {
-                log.debug("Loan buy down fee change on buy down fee amortization for closed loan {}", loan.getId());
-                loanBuyDownFeeAmortizationProcessingService.processBuyDownFeeAmortizationOnLoanClosure(loan, true);
-            }
+            final LoanTransaction loanTransaction = event.get();
+            processBuyDownFeeAmortizationAfterFeeChange(loanTransaction.getLoan(), loanTransaction, loanTransaction.getTransactionDate());
         }
     }
 
@@ -106,13 +123,8 @@ public class LoanBuyDownFeeAmortizationEventService {
 
         @Override
         public void onBusinessEvent(final LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent event) {
-            final Loan loan = event.get().getLoan();
-            final LoanStatus status = loan.getStatus();
-            if (loan.getLoanProductRelatedDetail().isEnableBuyDownFee()
-                    && (status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid())) {
-                log.debug("Loan buy down fee change on buy down fee amortization for closed loan {}", loan.getId());
-                loanBuyDownFeeAmortizationProcessingService.processBuyDownFeeAmortizationOnLoanClosure(loan, true);
-            }
+            final LoanTransaction loanTransaction = event.get();
+            processBuyDownFeeAmortizationAfterFeeChange(loanTransaction.getLoan(), loanTransaction, loanTransaction.getTransactionDate());
         }
     }
 
@@ -123,13 +135,11 @@ public class LoanBuyDownFeeAmortizationEventService {
             final LoanTransaction transactionToAdjust = event.get().getTransactionToAdjust();
             final boolean isTransactionBuyDownFeeRelated = transactionToAdjust.isBuyDownFee()
                     || transactionToAdjust.isBuyDownFeeAdjustment();
-            final Loan loan = transactionToAdjust.getLoan();
-            final LoanStatus status = loan.getStatus();
-            if (loan.getLoanProductRelatedDetail().isEnableBuyDownFee() && isTransactionBuyDownFeeRelated
-                    && (status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid())) {
-                log.debug("Loan buy down fee change on buy down fee amortization for closed loan {}", loan.getId());
-                loanBuyDownFeeAmortizationProcessingService.processBuyDownFeeAmortizationOnLoanClosure(loan, true);
+            if (!isTransactionBuyDownFeeRelated) {
+                return;
             }
+            processBuyDownFeeAmortizationAfterFeeChange(transactionToAdjust.getLoan(), transactionToAdjust,
+                    DateUtils.getBusinessLocalDate());
         }
     }
 
