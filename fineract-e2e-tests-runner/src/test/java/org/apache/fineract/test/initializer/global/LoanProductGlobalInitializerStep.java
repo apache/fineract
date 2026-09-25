@@ -5298,6 +5298,31 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                     responseLoanProductsRequestLP2AdvPmntIntEmi36030IntRecalcDailyMultiDisburseAutoDownpaymentAccelerateMaturity);
         });
 
+        tasks.add(() -> {
+            // LP2 with interest recalculation + chargeback allocation(INTEREST, PENALTY, FEE, PRINCIPAL)
+            // + accrual activity posting
+            // (LP2_INTEREST_RECALC_CHARGEBACK_ALLOCATION_INTEREST_FIRST_ACCRUAL_ACTIVITY)
+            final String name181 = DefaultLoanProduct.LP2_INTEREST_RECALC_CHARGEBACK_ALLOCATION_INTEREST_FIRST_ACCRUAL_ACTIVITY.getName();
+            final PostLoanProductsRequest loanProductsRequestInterestRecalcChargebackAccrualActivity = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2InterestDailyRecalculation()//
+                    .name(name181)//
+                    .enableAccrualActivityPosting(true)//
+                    .multiDisburseLoan(false)//
+                    .disallowExpectedDisbursements(false)//
+                    .creditAllocation(List.of(//
+                            createCreditAllocation("CHARGEBACK", List.of("INTEREST", "PENALTY", "FEE", "PRINCIPAL"))//
+            ))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse loanProductsResponseInterestRecalcChargebackAccrualActivity = createLoanProductIdempotent(
+                    loanProductsRequestInterestRecalcChargebackAccrualActivity);
+            TestContext.INSTANCE.set(TestContextKey.LP2_INTEREST_RECALC_CHARGEBACK_ALLOCATION_INTEREST_FIRST_ACCRUAL_ACTIVITY_RESPONSE,
+                    loanProductsResponseInterestRecalcChargebackAccrualActivity);
+        });
+
         ParallelExecutionHelper.runInParallel(tasks);
     }
 
