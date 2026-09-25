@@ -422,4 +422,17 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         }
     }
 
+    /**
+     * CodeIntent Studio governance-rule demonstration fixture: a clean-PASS
+     * candidate. Deliberately touches none of the five tracked idiom name
+     * patterns -- no CommandProcessingResult-returning method, no
+     * authenticatedUser()/validateHas* call, no validateFor* call, no
+     * save*/delete* call, no JSR-380 field annotation -- so every existing
+     * governed behavior in this file stays untouched and should reconcile as
+     * Preserved rather than surface a new fact to review.
+     */
+    private String demoInertNoteFormatter(String label) {
+        return "[teller-note] " + label;
+    }
+
 }
