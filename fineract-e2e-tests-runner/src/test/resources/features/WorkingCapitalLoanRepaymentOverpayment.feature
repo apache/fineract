@@ -225,7 +225,7 @@ Feature: Working Capital Loan Repayment - Overpayment
     And Working capital loan details has the following field values:
       | overpaidOnDate            | 2026-01-04 |
       | balance.overpaymentAmount | 200.0      |
-    # full CBR closes the loan, overpaidOnDate must be cleared
+    # full CBR closes the loan on its own date, overpaidOnDate must be cleared
     And Customer makes credit balance refund on "06 January 2026" with 200.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
     And Working capital loan details has the following field values:

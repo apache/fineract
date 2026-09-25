@@ -507,7 +507,7 @@ Feature: WorkingCapitalAmortizationScheduleMatrixPt2
     When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
     # --- Repayment ---
-    When Admin sets the business date to "02 January 2026"
+    When Admin sets the business date to "03 January 2026"
     And Customer makes repayment on "02 January 2026" with 1234 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     # --- Amortization schedule verification ---
@@ -566,6 +566,8 @@ Feature: WorkingCapitalAmortizationScheduleMatrixPt2
     And Customer makes repayment on "02 January 2026" with 50 transaction amount on Working Capital loan
     # --- Rate change ---
     And Admin update Working Capital period payment rate with "9" value
+    # --- COB ---
+    When Admin sets the business date to "03 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     # --- Amortization schedule verification ---
     And Admin retrieves the projected amortization schedule

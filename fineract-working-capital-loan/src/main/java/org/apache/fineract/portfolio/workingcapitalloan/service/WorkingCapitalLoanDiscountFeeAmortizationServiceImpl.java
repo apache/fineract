@@ -76,7 +76,12 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
         final boolean fullyPaid = loan.isOverpaid() || loan.isClosedObligationsMet();
         // Derive the already-amortized income from the (non-reversed) amortization transactions rather than the cached
         // balance, so the recalculation stays correct after backdated payments, reversals or schedule config changes.
-        final BigDecimal alreadyPosted = queryNetAmortized(loan.getId());
+        // Bounded by the same date as the target above: a replayed day corrects itself against the income posted by
+        // that day, or it would reverse income dated after it and date the reversal before what it reverses.
+        // The closing top-up is not bounded: its target is the whole discount, not the schedule as of a day, so it is
+        // measured against everything posted. A backdated settlement can precede income COB already posted against a
+        // payment that has since become surplus, and leaving that income out would recognize it a second time.
+        final BigDecimal alreadyPosted = fullyPaid ? queryNetAmortized(loan.getId()) : queryNetAmortizedAsOf(loan.getId(), transactionDate);
 
         if (MathUtil.isZero(scheduleAmortization) && !fullyPaid && MathUtil.isZero(alreadyPosted)) {
             log.debug("Skipping discount fee amortization for WC loan [{}] - no amortization on schedule", loan.getId());
@@ -331,10 +336,15 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
                 LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT);
     }
 
+    private BigDecimal queryNetAmortizedAsOf(final Long loanId, final LocalDate asOfDate) {
+        return transactionRepository.sumNetAmortizationAsOf(loanId, LoanTransactionType.DISCOUNT_FEE_AMORTIZATION,
+                LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT, asOfDate);
+    }
+
     private BigDecimal calculateScheduleAmortization(final WorkingCapitalLoan loan, final LocalDate cobDate) {
         final MathContext mc = MoneyHelper.getMathContext();
         return scheduleRepositoryWrapper.readModel(loan.getId(), mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan))
-                .map(model -> model.totalActualAmortizationWithDiscount(discountInForceOn(loan, model, cobDate))).orElse(BigDecimal.ZERO);
+                .map(model -> model.totalActualAmortizationAsOf(discountInForceOn(loan, model, cobDate), cobDate)).orElse(BigDecimal.ZERO);
     }
 
     /**
