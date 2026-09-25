@@ -26,6 +26,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRI
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.chartsParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.closeDateParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositAmountParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositMaxAmountParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositMinAmountParamName;
@@ -39,6 +40,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.minDepo
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalApplicableParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestOnTypeIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.startDateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
@@ -66,6 +68,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +83,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartDataValidator;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;
@@ -119,7 +123,7 @@ public class DepositProductDataValidator {
 
         validateDepositTermDeatilForCreate(element, baseDataValidator);
 
-        validateChartsData(element, baseDataValidator);
+        validateChartsData(element, baseDataValidator, true);
 
         validateDepositAmountForCreate(element, baseDataValidator);
 
@@ -145,7 +149,7 @@ public class DepositProductDataValidator {
 
         validateDepositTermDetailForUpdate(element, baseDataValidator);
 
-        validateChartsData(element, baseDataValidator);
+        validateChartsData(element, baseDataValidator, false);
 
         validateDepositAmountForUpdate(element, baseDataValidator);
 
@@ -174,7 +178,7 @@ public class DepositProductDataValidator {
 
         validateRecurringDetailForCreate(element, baseDataValidator);
 
-        validateChartsData(element, baseDataValidator);
+        validateChartsData(element, baseDataValidator, true);
 
         validateDepositAmountForCreate(element, baseDataValidator);
 
@@ -202,11 +206,21 @@ public class DepositProductDataValidator {
 
         validateRecurringDepositUpdate(element, baseDataValidator);
 
-        validateChartsData(element, baseDataValidator);
+        validateChartsData(element, baseDataValidator, false);
 
         validateDepositAmountForUpdate(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateStartDateBeforeCloseDate(final JsonElement element, final FromJsonHelper fromApiJsonHelper,
+            final DataValidatorBuilder baseDataValidator) {
+        final LocalDate startDate = fromApiJsonHelper.extractLocalDateNamed(startDateParamName, element);
+        final LocalDate closeDate = fromApiJsonHelper.extractLocalDateNamed(closeDateParamName, element);
+        if (startDate != null && closeDate != null && DateUtils.isBefore(closeDate, startDate)) {
+            baseDataValidator.reset().parameter(closeDateParamName).value(closeDate).failWithCode("must.be.after.startDate",
+                    closeDate.toString(), startDate.toString());
+        }
     }
 
     private void validateDepositDetailForCreate(final JsonElement element, final FromJsonHelper fromApiJsonHelper,
@@ -305,6 +319,8 @@ public class DepositProductDataValidator {
                     baseDataValidator, accountType, true);
         }
 
+        validateStartDateBeforeCloseDate(element, fromApiJsonHelper, baseDataValidator);
+
         validateTaxWithHoldingParams(baseDataValidator, element, true);
     }
 
@@ -360,7 +376,10 @@ public class DepositProductDataValidator {
         }
     }
 
-    private void validateChartsData(JsonElement element, DataValidatorBuilder baseDataValidator) {
+    private void validateChartsData(JsonElement element, DataValidatorBuilder baseDataValidator, boolean chartsMandatory) {
+        if (!chartsMandatory && !this.fromApiJsonHelper.parameterExists(chartsParamName, element)) {
+            return;
+        }
         if (element.isJsonObject()) {
 
             final JsonArray array = this.fromApiJsonHelper.extractJsonArrayNamed(chartsParamName, element);
@@ -515,6 +534,7 @@ public class DepositProductDataValidator {
 
         savingsProductAccountingDataValidator.validatePaymentChannelFundSourceMappings(baseDataValidator, element);
         savingsProductAccountingDataValidator.validateChargeToIncomeAccountMappings(baseDataValidator, element);
+        validateStartDateBeforeCloseDate(element, fromApiJsonHelper, baseDataValidator);
         validateTaxWithHoldingParams(baseDataValidator, element, false);
     }
 
