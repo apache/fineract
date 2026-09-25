@@ -26,9 +26,9 @@ The scope of this document includes:
 
 * Working Capital Loan only
 * Loan must be ACTIVE for post-disbursement `discountFee`
-* Loan must not be charged off
+* Loan must not be charged off. The Discount Fee is rejected even though it is dated on the disbursement date, which is never after the charge-off date: it would add principal that the charge-off has not written off. A Discount Fee Adjustment dated before the charge-off date is allowed, because it only reduces the discount and the loan is reprocessed to restate the charge-off's final amortization.
 * The related disbursement must not already have an active Discount Fee transaction
-* Post-disbursement `discountFee` can only be run when the business date equals the actual disbursement date
+* The Discount Fee transaction is dated on the disbursement date. Post-disbursement `discountFee` can be run on a later business date and is then backdated to the disbursement date
 
 === Transaction Creation
 
@@ -141,6 +141,7 @@ POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions?command
 {
   "transactionAmount": 5000.00,
   "relatedResourceId": 123,
+  "transactionDate": "2026-01-01",
   "classificationId": 1,
   "externalId": "WC-DISC-001",
   "note": "Discount applied",
@@ -157,7 +158,8 @@ POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions?command
 ----
 
 * `transactionAmount` is optional. If omitted, the service defaults to the loan's current discount.
-* `relatedResourceId` is mandatory and must be the related disbursement transaction ID.
+* `relatedResourceId` is the related disbursement transaction ID. It may be omitted when `transactionDate` is sent: the active disbursement on that date is used, and if there is none, the request is rejected with `disbursement.transaction.not.found`.
+* `transactionDate` is optional and defaults to the date of the related disbursement. When sent, it must be equal to the disbursement date, otherwise the request is rejected with `transaction.date.must.be.equal.disbursement.date`.
 * `classificationId` is optional and must reference `working_capital_loan_discount_fee_classification` when provided.
 
 === Create Discount Fee Adjustment

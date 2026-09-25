@@ -545,20 +545,10 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                     "Add discount is allowed only for disbursed (active) loans", "loanStatus");
         }
 
-        if (relatedDisbursementTransactionId == null) {
-            throw new PlatformApiDataValidationException("validation.msg.wc.loan.related.resource.id.required",
-                    "Related disbursement transaction ID is required for discount fee transaction", "relatedResourceId");
-        }
-
-        final WorkingCapitalLoanTransaction relatedDisbursementTransaction = transactionRepository
-                .findByIdAndWcLoan_Id(relatedDisbursementTransactionId, loanId)
-                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.disbursement.transaction.not.found",
-                        "Disbursement transaction not found", WorkingCapitalLoanConstants.relatedResourceIdParamName));
-        if (!relatedDisbursementTransaction.getTypeOf().isDisbursement() || relatedDisbursementTransaction.isReversed()) {
-            throw new PlatformApiDataValidationException("validation.msg.wc.loan.disbursement.transaction.invalid",
-                    "Related transaction must be an active disbursement transaction of the same loan",
-                    WorkingCapitalLoanConstants.relatedResourceIdParamName);
-        }
+        final LocalDate requestedTransactionDate = command
+                .localDateValueOfParameterNamed(WorkingCapitalLoanConstants.transactionDateParamName);
+        final WorkingCapitalLoanTransaction relatedDisbursementTransaction = resolveRelatedDisbursementTransaction(loanId,
+                relatedDisbursementTransactionId, requestedTransactionDate);
 
         // Loan-scoped, not disbursement-scoped: the discount, the amortization schedule and the unrealized income are
         // all held on the loan, so a second discount fee against any disbursement would desynchronize them for good.
@@ -586,7 +576,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         handleNote(loan, command, changes);
 
         changes.put(WorkingCapitalLoanConstants.transactionAmountParamName, amount);
-        changes.put(WorkingCapitalLoanConstants.relatedResourceIdParamName, relatedDisbursementTransactionId);
+        changes.put(WorkingCapitalLoanConstants.relatedResourceIdParamName, relatedDisbursementTransaction.getId());
         changes.put(WorkingCapitalLoanConstants.transactionDateParamName, relatedDisbursementTransaction.getTransactionDate());
         changes.put(WorkingCapitalLoanConstants.transactionTypeParamName, LoanTransactionType.DISCOUNT_FEE);
         changes.put(WorkingCapitalLoanConstants.externalIdParameterName, txnExternalId);
@@ -605,6 +595,46 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(discountTransaction.getId())
                 .withEntityExternalId(discountTransaction.getExternalId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
                 .withLoanId(loanId).with(changes).build();
+    }
+
+    WorkingCapitalLoanTransaction resolveRelatedDisbursementTransaction(final Long loanId, final Long relatedDisbursementTransactionId,
+            final LocalDate requestedTransactionDate) {
+        if (relatedDisbursementTransactionId == null && requestedTransactionDate == null) {
+            throw new PlatformApiDataValidationException("validation.msg.wc.loan.related.resource.id.required",
+                    "Related disbursement transaction ID or transaction date is required for discount fee transaction",
+                    "relatedResourceId");
+        }
+        final WorkingCapitalLoanTransaction relatedDisbursementTransaction = Optional.ofNullable(relatedDisbursementTransactionId)
+                .map(transactionId -> findRelatedDisbursementTransaction(loanId, transactionId))
+                .orElseGet(() -> findActiveDisbursementTransactionOn(loanId, requestedTransactionDate));
+        if (requestedTransactionDate != null
+                && !DateUtils.isEqual(requestedTransactionDate, relatedDisbursementTransaction.getTransactionDate())) {
+            throw new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.date.must.be.equal.disbursement.date",
+                    "Discount fee transaction date must be equal to the disbursement date",
+                    WorkingCapitalLoanConstants.transactionDateParamName);
+        }
+        return relatedDisbursementTransaction;
+    }
+
+    private WorkingCapitalLoanTransaction findActiveDisbursementTransactionOn(final Long loanId, final LocalDate transactionDate) {
+        return transactionRepository.findActiveByTypeAndTransactionDate(loanId, LoanTransactionType.DISBURSEMENT, transactionDate)
+                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.disbursement.transaction.not.found",
+                        "No active disbursement transaction on the transaction date",
+                        WorkingCapitalLoanConstants.transactionDateParamName));
+    }
+
+    private WorkingCapitalLoanTransaction findRelatedDisbursementTransaction(final Long loanId,
+            final Long relatedDisbursementTransactionId) {
+        final WorkingCapitalLoanTransaction relatedDisbursementTransaction = transactionRepository
+                .findByIdAndWcLoan_Id(relatedDisbursementTransactionId, loanId)
+                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.disbursement.transaction.not.found",
+                        "Disbursement transaction not found", WorkingCapitalLoanConstants.relatedResourceIdParamName));
+        if (!relatedDisbursementTransaction.getTypeOf().isDisbursement() || relatedDisbursementTransaction.isReversed()) {
+            throw new PlatformApiDataValidationException("validation.msg.wc.loan.disbursement.transaction.invalid",
+                    "Related transaction must be an active disbursement transaction of the same loan",
+                    WorkingCapitalLoanConstants.relatedResourceIdParamName);
+        }
+        return relatedDisbursementTransaction;
     }
 
     @Override

@@ -57,7 +57,7 @@ public class WorkingCapitalLoanDataValidatorDiscountTest {
     }
 
     @Test
-    public void discountValidationUsesAnyActualDateForDisbursedAndTheEarliestActualDateForTheTransactionDate() {
+    public void discountValidationTreatsAnyActualDateAsDisbursed() {
         final WorkingCapitalLoan loan = configuredLoan();
 
         loan.getDisbursementDetails().add(disbursementDetail(null));
@@ -76,19 +76,6 @@ public class WorkingCapitalLoanDataValidatorDiscountTest {
                 () -> validator.validateDiscountTransaction(loan, "{}", BigDecimal.ZERO, null));
 
         assertThat(exception.getErrors()).anyMatch(error -> error.getUserMessageGlobalisationCode().contains("loan.not.disbursed"));
-    }
-
-    @Test
-    public void discountValidationUsesTheEarliestActualDateWhenALaterDateMatchesBusinessDate() {
-        final WorkingCapitalLoan loan = configuredLoan();
-        loan.getDisbursementDetails().add(disbursementDetail(BUSINESS_DATE));
-        loan.getDisbursementDetails().add(disbursementDetail(BUSINESS_DATE.minusDays(1)));
-
-        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
-                () -> validator.validateDiscountTransaction(loan, "{}", BigDecimal.ZERO, null));
-
-        assertThat(exception.getErrors())
-                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("transaction.date.must.be.equal.disbursement.date"));
     }
 
     @Test
