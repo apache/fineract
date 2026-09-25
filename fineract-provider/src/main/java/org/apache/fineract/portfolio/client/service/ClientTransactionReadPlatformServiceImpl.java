@@ -101,6 +101,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "transactionAmount");
             final boolean reversed = rs.getBoolean("reversed");
+            final Long clientChargeId = JdbcSupport.getLong(rs, "clientChargeId");
 
             PaymentDetailData paymentDetailData = null;
             if (ClientTransactionType.fromInt(transactionType.getId().intValue()).equals(ClientTransactionType.PAY_CHARGE)) {
@@ -128,7 +129,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
                     currencyNameCode);
 
             return ClientTransactionData.create(id, officeId, officeName, transactionType, date, currency, paymentDetailData, amount,
-                    externalId, submittedOnDate, reversed);
+                    externalId, submittedOnDate, reversed, clientChargeId);
         }
     }
 
