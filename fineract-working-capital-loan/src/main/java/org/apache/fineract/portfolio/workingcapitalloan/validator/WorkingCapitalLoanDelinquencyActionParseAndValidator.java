@@ -51,6 +51,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPausePeriodUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -272,15 +273,19 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
 
     /**
      * Rejects a frequency change whose resulting period end date falls before the business date. The candidate end date
-     * is derived exactly as the re-date derives it: from the current open period fromDate, extended by the pauses.
+     * is derived exactly as the re-date derives it: from the current open period fromDate, carrying the delinquency
+     * grace days when that period is the first one, and extended by the pauses.
      */
     private void validateFrequencyDoesNotEndBeforeBusinessDate(final WorkingCapitalLoanDelinquencyAction action,
             final WorkingCapitalLoan workingCapitalLoan, final List<WorkingCapitalLoanDelinquencyAction> existing,
             final DataValidatorBuilder dataValidator) {
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
+        final Integer delinquencyGraceDays = details == null ? null : details.getDelinquencyGraceDays();
         final Optional<LocalDate> candidateToDate = rangeScheduleRepository.findCurrentOpenPeriod(workingCapitalLoan.getId(), businessDate)
                 .map(currentPeriod -> WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils.calculateRescheduledToDate(
-                        currentPeriod.getFromDate(), action.getFrequency(), action.getFrequencyType(), existing));
+                        currentPeriod.getFromDate(), currentPeriod.getPeriodNumber(), action.getFrequency(), action.getFrequencyType(),
+                        delinquencyGraceDays, existing));
         if (candidateToDate.filter(toDate -> toDate.isBefore(businessDate)).isPresent()) {
             failGeneralValidation(dataValidator, "reschedule.frequency.results.endDate.before.businessDate",
                     "Frequency change results a delinquency period endDate before current businessDate is not allowed");

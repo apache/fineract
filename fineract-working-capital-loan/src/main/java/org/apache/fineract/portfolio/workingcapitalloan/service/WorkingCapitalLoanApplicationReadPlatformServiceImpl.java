@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import jakarta.persistence.criteria.Predicate;
 import java.math.MathContext;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +49,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanC
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTemplateData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanMapper;
@@ -242,12 +244,35 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         breachScheduleRepository.findTopByLoanIdAndBreachTrueOrderByFromDateAsc(loan.getId())
                 .ifPresent(period -> data.setBreachStartDate(period.getFromDate()));
 
-        // delinquencyStartDate: fromDate of the earliest delinquent period. The delinquency range
+        // delinquencyStartDate: fromDate of the earliest delinquent period. The delinquency range schedule bakes the
+        // delinquency grace days into the toDate of its first period, so the fromDate is the raw anchor date.
         delinquencyRangeScheduleRepository.findTopByLoanIdAndMinPaymentCriteriaMetFalseOrderByFromDateAsc(loan.getId())
                 .ifPresent(period -> {
                     data.setDelinquencyStartDate(period.getFromDate());
+                    data.setDelinquencyEffectiveStartDate(resolveDelinquencyEffectiveStartDate(period, data.getDelinquencyGraceDays()));
                     Optional.ofNullable(data.getSummary()).ifPresent(summary -> summary.setOverdueSinceDate(period.getToDate()));
                 });
+    }
+
+    /**
+     * Resolves the "effective" start of the delinquency, i.e. the date the delinquency clock starts ticking once the
+     * configured cool off period is taken into account.
+     *
+     * Only the first delinquency range schedule period carries the delinquency grace days: the schedule generator
+     * extends that period's toDate by the grace days and every subsequent period is chained from it, so the grace is
+     * equivalent to shifting the first period forward. The effective start date makes that shift explicit for API
+     * consumers. It is {@code null} for any later period and when no grace days are configured.
+     *
+     * The grace days are read from the loan rather than from what the schedule used when it was generated. The two
+     * cannot diverge: the loan-level value can only be changed while the application is still submitted and pending
+     * approval, and the schedule is only generated at disbursement.
+     */
+    private LocalDate resolveDelinquencyEffectiveStartDate(final WorkingCapitalLoanDelinquencyRangeSchedule period,
+            final Integer delinquencyGraceDays) {
+        if (!Integer.valueOf(1).equals(period.getPeriodNumber()) || delinquencyGraceDays == null || delinquencyGraceDays <= 0) {
+            return null;
+        }
+        return period.getFromDate().plusDays(delinquencyGraceDays);
     }
 
     private void enrichWithOriginators(final Long loanId, final WorkingCapitalLoanData data) {

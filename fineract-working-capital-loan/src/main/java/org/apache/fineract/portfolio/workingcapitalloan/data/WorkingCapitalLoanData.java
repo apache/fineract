@@ -103,6 +103,8 @@ public class WorkingCapitalLoanData implements Serializable {
     private BigDecimal annualEir;
     private StringEnumOptionData paymentAmountCalculationStrategy;
     private LocalDate delinquencyStartDate;
+    // Only set for the first delinquency period, which is the only one the delinquency grace days shift.
+    private LocalDate delinquencyEffectiveStartDate;
     private LocalDate breachStartDate;
     private WorkingCapitalLoanCollectionData delinquent;
     private Boolean enableInstallmentLevelDelinquency;
