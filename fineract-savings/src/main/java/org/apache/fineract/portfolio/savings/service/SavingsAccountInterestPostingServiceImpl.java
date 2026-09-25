@@ -82,7 +82,11 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         for (final PostingPeriod interestPostingPeriod : postingPeriods) {
             final LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
             final Money interestEarnedToBePostedForPeriod = interestPostingPeriod.getInterestEarned();
-            final Boolean isOverdraft = interestPostingPeriod.isOverdraftInterest();
+            // Derive the transaction type to look for from the sign of the interest earned, the same criterion
+            // used below to pick the factory. The PostingPeriod flag is only set for products mapped to an
+            // interest receivable GL account; on any other product overdraft interest would be searched as a
+            // regular interest posting, never matched, and duplicated on every run.
+            final Boolean isOverdraft = interestEarnedToBePostedForPeriod.isLessThanZero();
 
             if (!DateUtils.isAfter(interestPostingTransactionDate, interestPostingUpToDate)) {
                 interestPostedToDate = interestPostedToDate.plus(interestEarnedToBePostedForPeriod);

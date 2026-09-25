@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
+import java.util.stream.Stream;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
 import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
@@ -47,6 +48,9 @@ public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBa
     private static final String DEPOSIT_AMOUNT = "10000";
     private static final BigDecimal OVERDRAFT_LIMIT = new BigDecimal("10000.0");
     private static final BigDecimal OVERDRAFT_INTEREST_RATE = new BigDecimal("10");
+    private static final String SEPTEMBER_START_DATE = "23 September 2022";
+    private static final String SEPTEMBER_WITHDRAWAL_DATE = "28 September 2022";
+    private static final BigDecimal LARGE_OVERDRAFT_LIMIT = new BigDecimal("20000.0");
 
     @Test
     public void testSavingsBalanceCheckAfterDailyInterestPostingJob() {
@@ -167,6 +171,57 @@ public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBa
         });
     }
 
+    @Test
+    public void testRunningPostInterestJobTwiceDoesNotCreateDuplicateOverdraftInterest() {
+        businessDateHelper.runAt("2022-04-13", () -> {
+            final Long savingsId = createActiveSavings(START_DATE, overdraftDailyPostingProduct());
+            withdraw(savingsId, DEPOSIT_AMOUNT, START_DATE);
+
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+
+            assertEquals(1, countActiveOverdraftInterestOn(savingsId, LocalDate.of(2022, Month.APRIL, 11)),
+                    "Running job twice must not create duplicate overdraft interest postings on the same date");
+        });
+    }
+
+    /**
+     * The posting date of a monthly period stays fixed while the business date moves on, so every run of the job looks
+     * up the same date again. Each lookup has to find the overdraft interest already posted there.
+     */
+    @Test
+    public void testOverdraftInterestNotDuplicatedOnSuccessiveBusinessDates() {
+        businessDateHelper.runAt("2022-09-30", () -> {
+            final Long savingsId = createActiveSavings(SEPTEMBER_START_DATE, overdraftMonthlyPostingProduct());
+            deposit(savingsId, "5000", SEPTEMBER_START_DATE);
+            withdraw(savingsId, "16000", SEPTEMBER_WITHDRAWAL_DATE);
+
+            final LocalDate postingDate = LocalDate.of(2022, Month.OCTOBER, 1);
+            for (int day = 0; day < 3; day++) {
+                businessDateHelper.updateBusinessDate("BUSINESS_DATE", postingDate.plusDays(day).toString());
+                schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            }
+
+            assertEquals(1, countActiveOverdraftInterestOn(savingsId, postingDate),
+                    "Successive business dates must not create duplicate overdraft interest postings on the posting date");
+            assertEquals(1, countActiveOverdraftInterest(savingsId),
+                    "Only the September period is closed, so the account must hold a single overdraft interest posting");
+        });
+    }
+
+    private long countActiveOverdraftInterestOn(final Long savingsId, final LocalDate date) {
+        return activeOverdraftInterest(savingsId).filter(t -> date.equals(t.getDate())).count();
+    }
+
+    private long countActiveOverdraftInterest(final Long savingsId) {
+        return activeOverdraftInterest(savingsId).count();
+    }
+
+    private Stream<SavingsAccountTransactionData> activeOverdraftInterest(final Long savingsId) {
+        return savingsTransactionHelper.getTransactions(savingsId).stream().filter(t -> !Boolean.TRUE.equals(t.getReversed()))
+                .filter(t -> t.getTransactionType() != null && Boolean.TRUE.equals(t.getTransactionType().getOverDraftInterestPosting()));
+    }
+
     private long countActiveTransactionsOn(final Long savingsId, final LocalDate date) {
         return savingsTransactionHelper.getTransactions(savingsId).stream().filter(t -> date.equals(t.getDate()))
                 .filter(t -> !Boolean.TRUE.equals(t.getReversed())).count();
@@ -227,6 +282,15 @@ public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBa
         return savingsProductHelper.createSavingsProduct(dailyPostingProductRequest()//
                 .allowOverdraft(true)//
                 .overdraftLimit(OVERDRAFT_LIMIT)//
+                .nominalAnnualInterestRateOverdraft(OVERDRAFT_INTEREST_RATE)).getResourceId();
+    }
+
+    /** Accounting is left at NONE, so the product has no interest receivable mapping. */
+    private Long overdraftMonthlyPostingProduct() {
+        return savingsProductHelper.createSavingsProduct(dailyPostingProductRequest()//
+                .interestPostingPeriodType(SavingsTestData.InterestPostingPeriodType.MONTHLY)//
+                .allowOverdraft(true)//
+                .overdraftLimit(LARGE_OVERDRAFT_LIMIT)//
                 .nominalAnnualInterestRateOverdraft(OVERDRAFT_INTEREST_RATE)).getResourceId();
     }
 
