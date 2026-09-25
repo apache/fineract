@@ -28,15 +28,13 @@ public enum CapitalizedIncomeAmortizationStrategyExternalAssetOwnerLoanProductAt
     DEFERRED, //
     IMMEDIATE; //
 
-    private final String attributeKey;
+    public static final String ATTRIBUTE_KEY = "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY";
 
-    CapitalizedIncomeAmortizationStrategyExternalAssetOwnerLoanProductAttribute() {
-        this.attributeKey = "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY";
-    }
+    CapitalizedIncomeAmortizationStrategyExternalAssetOwnerLoanProductAttribute() {}
 
     @Override
     public String getAttributeKey() {
-        return attributeKey;
+        return ATTRIBUTE_KEY;
     }
 
     @Override

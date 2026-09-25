@@ -27,6 +27,8 @@ public interface LoanCapitalizedIncomeAmortizationProcessingService {
 
     void processCapitalizedIncomeAmortizationOnLoanClosure(@NonNull Loan loan, boolean addJournal);
 
+    void processCapitalizedIncomeAmortizationImmediate(@NonNull Loan loan, @NonNull LocalDate transactionDate, boolean addJournal);
+
     void processCapitalizedIncomeAmortizationOnLoanSale(@NonNull Loan loan, @NonNull LocalDate transactionDate, boolean addJournal);
 
     void processCapitalizedIncomeAmortizationOnLoanChargeOff(@NonNull Loan loan, @NonNull LoanTransaction chargeOffTransaction);
