@@ -53,6 +53,8 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsLif
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSchedulerHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignShareAccountHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignShareProductHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.BeforeAll;
@@ -75,6 +77,8 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
     protected static FeignSavingsChargeHelper savingsChargeHelper;
     protected static FeignAccountTransferHelper accountTransferHelper;
     protected static FeignPaymentTypeHelper paymentTypeHelper;
+    protected static FeignShareProductHelper shareProductHelper;
+    protected static FeignShareAccountHelper shareAccountHelper;
 
     @BeforeAll
     public static void setupSavingsHelpers() {
@@ -93,6 +97,8 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
         savingsChargeHelper = new FeignSavingsChargeHelper(client);
         accountTransferHelper = new FeignAccountTransferHelper(client);
         paymentTypeHelper = new FeignPaymentTypeHelper(client);
+        shareProductHelper = new FeignShareProductHelper(client);
+        shareAccountHelper = new FeignShareAccountHelper(client);
     }
 
     protected Long createClient() {

@@ -137,6 +137,7 @@ import org.apache.fineract.client.feign.services.SchedulerJobApi;
 import org.apache.fineract.client.feign.services.ScoreCardApi;
 import org.apache.fineract.client.feign.services.SearchApiApi;
 import org.apache.fineract.client.feign.services.ShareAccountApi;
+import org.apache.fineract.client.feign.services.ShareAccountV2Api;
 import org.apache.fineract.client.feign.services.SmsApi;
 import org.apache.fineract.client.feign.services.SpmApiLookUpTableApi;
 import org.apache.fineract.client.feign.services.SpmSurveysApi;
@@ -684,6 +685,10 @@ public final class FineractFeignClient {
 
     public ShareAccountApi shareAccount() {
         return create(ShareAccountApi.class);
+    }
+
+    public ShareAccountV2Api shareAccountV2() {
+        return create(ShareAccountV2Api.class);
     }
 
     public SmsApi sms() {

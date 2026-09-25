@@ -18,24 +18,22 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.client.feign.modules.FeignTestConstants.DATETIME_PATTERN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.Gson;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.accounting.journalentry.service.AccountingProcessorHelper;
-import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AccountChargesRequest;
 import org.apache.fineract.client.models.AccountRequest;
 import org.apache.fineract.client.models.ChargeRequest;
@@ -44,37 +42,28 @@ import org.apache.fineract.client.models.GetAccountsPurchasedShares;
 import org.apache.fineract.client.models.GetAccountsTypeAccountIdResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
+import org.apache.fineract.client.models.PostAccountsTypeAccountIdRedeemRequest;
 import org.apache.fineract.client.models.PostAccountsTypeAccountIdRequest;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostProductsTypeRequest;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
-import org.apache.fineract.integrationtests.common.shares.ShareAccountTransactionHelper;
-import org.apache.fineract.integrationtests.common.shares.ShareProductHelper;
-import org.apache.fineract.integrationtests.common.shares.ShareProductTransactionHelper;
-import org.apache.fineract.integrationtests.savings.base.BaseSavingsIntegrationTest;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountStatusType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
+public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
 
     private Long clientId;
-    private ChargesHelper chargesHelper;
     private static final String DATE = "01 January 2026";
     private static final String LATER_DATE = "01 June 2026";
 
     @BeforeEach
     public void setup() {
-        clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-        chargesHelper = new ChargesHelper();
+        clientId = createClient();
     }
 
     /** ACTIVATION CHARGE - FLAT **/
@@ -82,7 +71,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldApplyRoundingRules_forFlatActivationCharge() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createActivationFeeFlatCharge(19.8);
 
@@ -103,7 +92,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldRoundUpFlatActivationCharge_whenValueIsAboveHalf() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createActivationFeeFlatCharge(0.55);
 
@@ -125,7 +114,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldFailToAddFlatActivationCharge_whenRoundedToZero() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createActivationFeeFlatCharge(0.5);
 
@@ -133,7 +122,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 0.5, DATE));
 
-            assertEquals(400, exception.getResponse().code());
+            assertEquals(400, exception.getStatus());
             assertTrue(exception.getMessage().contains("error.msg.share.charge.amount.rounded.to.zero"));
         });
     }
@@ -142,7 +131,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     void verifyActivationChargeRoundedCorrectlyWithAccountingEnabled() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createActivationFeeFlatCharge(19.8);
 
@@ -155,8 +144,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             BigDecimal expectedChargeAmount = applyRoundingRules(new BigDecimal("19.8"), 0, 1);
             assertBigDecimalEquals(expectedChargeAmount, actualChargeAmount);
 
-            GetAccountsTypeAccountIdResponse accountData = ok(
-                    fineractClient().shareAccounts.retrieveOneShareAccount(shareAccountId, "share"));
+            GetAccountsTypeAccountIdResponse accountData = getShareAccount(shareAccountId);
             assertShareAccountActive(accountData);
 
             // Find the charge payment transaction
@@ -183,7 +171,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldApplyRoundingRules_forFlatPurchaseCharge() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 3);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createPurchaseFeeFlatCharge(19.8);
 
@@ -202,7 +190,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldRoundUpFlatPurchaseCharge_whenValueIsAboveHalf() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createPurchaseFeeFlatCharge(0.51);
 
@@ -222,7 +210,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldFailToAddFlatPurchaseCharge_whenRoundedToZero() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createPurchaseFeeFlatCharge(0.5);
 
@@ -230,7 +218,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 0.5, DATE));
 
-            assertEquals(400, exception.getResponse().code());
+            assertEquals(400, exception.getStatus());
             assertTrue(exception.getMessage().contains("error.msg.share.charge.amount.rounded.to.zero"));
         });
     }
@@ -240,7 +228,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldApplyRoundingRules_forPercentagePurchaseCharge() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createPurchaseFeePercentCharge(2.5);
 
@@ -259,7 +247,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldRoundUpPercentagePurchaseCharge_whenValueIsAboveHalf() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createPurchaseFeePercentCharge(0.51);
 
@@ -279,7 +267,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldFailToAddPercentagePurchaseCharge_whenRoundedToZero() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createPurchaseFeePercentCharge(0.5);
 
@@ -287,7 +275,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 0.5, DATE));
 
-            assertEquals(400, exception.getResponse().code());
+            assertEquals(400, exception.getStatus());
             assertTrue(exception.getMessage().contains("error.msg.share.charge.amount.rounded.to.zero"));
         });
     }
@@ -297,7 +285,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldApplyRoundingRules_forFlatRedeemCharge() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createRedeemFeeFlatCharge(10.7);
 
@@ -319,7 +307,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldRoundUpFlatRedeemCharge_whenValueIsAboveHalf() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createRedeemFeeFlatCharge(0.6);
 
@@ -342,7 +330,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldIgnoreFlatRedeemCharge_whenRoundedToZero() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createRedeemFeeFlatCharge(0.5);
 
@@ -366,7 +354,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldApplyRoundingRules_forPercentageRedeemCharge() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createRedeemFeePercentCharge(5.5);
 
@@ -388,7 +376,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldRoundUpPercentageRedeemCharge_whenValueIsAboveHalf() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createRedeemFeePercentCharge(1.5);
 
@@ -411,7 +399,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     public void shouldIgnorePercentageRedeemCharge_whenRoundedToZero() {
         runAt(DATE, () -> {
             Long savingsProductId = createSavingsProduct(0, 1);
-            Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
+            Long savingsAccountId = createApproveActivateSavings(clientId, savingsProductId, DATE);
 
             PostChargesResponse chargeResponse = createRedeemFeePercentCharge(1);
 
@@ -435,23 +423,21 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
     // -----------------------------
 
     private Long createSavingsProduct(int digitsAfterDecimal, int inMultiplesOf) {
-        return createProduct(baseSavingsProduct(digitsAfterDecimal, inMultiplesOf)).getResourceId();
+        return createSavingsProduct(baseSavingsProduct(digitsAfterDecimal, inMultiplesOf)).getResourceId();
     }
 
     private PostSavingsProductsRequest baseSavingsProduct(int digitsAfterDecimal, int inMultiplesOf) {
-        return dailyInterestPostingProduct().digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf).currencyCode("USD");
-    }
-
-    private Long createAndActivateSavingsAccount(Long productId, String date) {
-        Long savingsId = applySavingsAccount(applySavingsRequest(clientId, productId, date)).getSavingsId();
-        approveSavingsAccount(savingsId, date);
-        activateSavingsAccount(savingsId, date);
-        return savingsId;
+        return new PostSavingsProductsRequest().locale("en").name(Utils.uniqueRandomStringGenerator("DAILY_INTEREST", 6))
+                .shortName(Utils.uniqueRandomStringGenerator("", 4)).description("Daily interest posting product")
+                .nominalAnnualInterestRate(10.0).digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf).currencyCode("USD")
+                .accountingRule(1).interestCalculationDaysInYearType(365).interestCompoundingPeriodType(1).interestCalculationType(2)
+                .interestPostingPeriodType(1).withdrawalFeeForTransfers(false).enforceMinRequiredBalance(false).allowOverdraft(false)
+                .withHoldTax(false).isDormancyTrackingActive(false);
     }
 
     private PostChargesResponse createActivationFeeFlatCharge(double amount) {
         String uniqueChargeName = "Share Account Activation Fee Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(13) // ACTIVATION
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
@@ -459,7 +445,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
 
     private PostChargesResponse createPurchaseFeeFlatCharge(double amount) {
         String uniqueChargeName = "Share Account Purchase Fee Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(14) // PURCHASE
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
@@ -467,7 +453,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
 
     private PostChargesResponse createPurchaseFeePercentCharge(double amount) {
         String uniqueChargeName = "Share Account Purchase Fee Percent " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(14) // PURCHASE
                 .chargeCalculationType(2) // PERCENT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
@@ -475,7 +461,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
 
     private PostChargesResponse createRedeemFeeFlatCharge(double amount) {
         String uniqueChargeName = "Share Account Redeem Fee Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(15) // REDEEM
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
@@ -483,7 +469,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
 
     private PostChargesResponse createRedeemFeePercentCharge(double amount) {
         String uniqueChargeName = "Share Account Redeem Fee Percent " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(15) // REDEEM
                 .chargeCalculationType(2) // PERCENT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
@@ -496,26 +482,25 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
                 .locale("en").totalShares(1000).unitPrice(1).nominalShares(20).allowDividendCalculationForInactiveClients(true)
                 .accountingRule(1);
 
-        return ok(fineractClient().shareProducts.createShareProduct("share", request)).getResourceId();
+        return shareProductHelper.createShareProduct(request).getResourceId();
     }
 
     private Long createShareProductWithAccountingRule2(int digitsAfterDecimal, int inMultiplesOf) {
         String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
-
-        FineractFeignClient feignClient = FineractFeignClientHelper.getFineractFeignClient();
-        FeignAccountHelper accountHelper = new FeignAccountHelper(feignClient);
 
         Account shareReference = accountHelper.createAssetAccount("Share Reference " + suffix);
         Account shareSuspense = accountHelper.createLiabilityAccount("Share Suspense " + suffix);
         Account feeIncome = accountHelper.createIncomeAccount("Share Fee Income " + suffix);
         Account shareEquity = accountHelper.createEquityAccount("Share Equity " + suffix);
 
-        Account[] accounts = { shareReference, shareSuspense, shareEquity, feeIncome };
+        PostProductsTypeRequest request = new PostProductsTypeRequest().name("Share Product " + UUID.randomUUID()).shortName("SP")
+                .description("Description").currencyCode("USD").digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf)
+                .locale("en").totalShares(1000).unitPrice(1).nominalShares(20).allowDividendCalculationForInactiveClients(true)
+                .accountingRule(2).shareReferenceId(shareReference.getAccountID().longValue())
+                .shareSuspenseId(shareSuspense.getAccountID().longValue()).incomeFromFeeAccountId(feeIncome.getAccountID().longValue())
+                .shareEquityId(shareEquity.getAccountID().longValue());
 
-        String shareProductJson = new ShareProductHelper().withCashBasedAccounting(accounts).withDigitsAfterDecimal(digitsAfterDecimal)
-                .withInMultiplesOf(inMultiplesOf).build();
-
-        return ShareProductTransactionHelper.createShareProduct(shareProductJson, requestSpec, responseSpec).longValue();
+        return shareProductHelper.createShareProduct(request).getResourceId();
     }
 
     private Long applyShareAccount(Long clientId, Long productId, Long savingsAccountId, Long chargeId, double chargeAmount, String date) {
@@ -525,39 +510,29 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
                 .dateFormat(DATETIME_PATTERN).savingsAccountId(savingsAccountId).requestedShares(100L).applicationDate(date)
                 .charges(List.of(charge));
 
-        return ok(fineractClient().shareAccounts.createShareAccount("share", request)).getResourceId();
+        return shareAccountHelper.createShareAccount(request).getResourceId();
     }
 
     private void approveShareAccount(Long shareAccountId) {
-        ok(fineractClient().shareAccounts.handleCommandsShareAccount("share", shareAccountId, new PostAccountsTypeAccountIdRequest(),
-                "approve"));
+        shareAccountHelper.approveShareAccount(shareAccountId);
     }
 
-    private void activateShareAccount(Long shareAccountId, String activationDate) {
-        Map<String, Object> activateMap = new HashMap<>();
-        activateMap.put("dateFormat", "dd MMMM yyyy");
-        activateMap.put("activatedDate", activationDate);
-        activateMap.put("locale", "en");
+    private void activateShareAccount(Long shareAccountId, String date) {
+        PostAccountsTypeAccountIdRequest request = new PostAccountsTypeAccountIdRequest().locale("en").dateFormat("dd MMMM yyyy")
+                .activatedDate(date);
 
-        String activateJson = new Gson().toJson(activateMap);
-
-        ShareAccountTransactionHelper.postCommand("activate", shareAccountId.intValue(), activateJson, requestSpec, responseSpec);
+        shareAccountHelper.activateShareAccount(shareAccountId, request);
     }
 
-    private void redeemShares(Long shareAccountId, long shares, String requestedDate) {
-        Map<String, Object> redeemMap = new HashMap<>();
-        redeemMap.put("requestedDate", requestedDate);
-        redeemMap.put("dateFormat", "dd MMMM yyyy");
-        redeemMap.put("locale", "en");
-        redeemMap.put("requestedShares", String.valueOf(shares));
+    private void redeemShares(Long shareAccountId, long shares, String date) {
+        PostAccountsTypeAccountIdRedeemRequest request = new PostAccountsTypeAccountIdRedeemRequest().locale("en")
+                .dateFormat("dd MMMM yyyy").requestedDate(date).requestedShares(shares);
 
-        String redeemJson = new Gson().toJson(redeemMap);
-
-        ShareAccountTransactionHelper.postCommand("redeemshares", shareAccountId.intValue(), redeemJson, requestSpec, responseSpec);
+        shareAccountHelper.redeemShares(shareAccountId, request);
     }
 
     private GetAccountsTypeAccountIdResponse getShareAccount(Long shareAccountId) {
-        return ok(fineractClient().shareAccounts.retrieveOneShareAccount(shareAccountId, "share"));
+        return shareAccountHelper.getShareAccount(shareAccountId);
     }
 
     private BigDecimal getShareChargeAmount(Long shareAccountId, Long chargeId) {
@@ -631,9 +606,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
 
     private GetJournalEntriesTransactionIdResponse getJournalEntriesForShareTransaction(Long id) {
         String transactionId = AccountingProcessorHelper.SHARE_TRANSACTION_IDENTIFIER + id;
-        FineractFeignClient feignClient = FineractFeignClientHelper.getFineractFeignClient();
-        FeignJournalEntryHelper feignJournalEntryHelper = new FeignJournalEntryHelper(feignClient);
-        return feignJournalEntryHelper.getJournalEntriesByTransactionId(transactionId);
+        return journalEntryHelper.getJournalEntriesByTransactionId(transactionId);
     }
 
     private JournalEntryTransactionItem getDebitEntry(List<JournalEntryTransactionItem> entries) {

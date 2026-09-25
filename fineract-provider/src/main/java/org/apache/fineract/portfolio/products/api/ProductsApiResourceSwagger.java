@@ -547,6 +547,14 @@ final class ProductsApiResourceSwagger {
         public Set<PostProductsChargesSelected> chargesSelected;
         @Schema(example = "1")
         public Integer accountingRule;
+        @Schema(example = "1")
+        public Long shareReferenceId;
+        @Schema(example = "2")
+        public Long shareSuspenseId;
+        @Schema(example = "3")
+        public Long shareEquityId;
+        @Schema(example = "4")
+        public Long incomeFromFeeAccountId;
     }
 
     @Schema(description = "PostProductsTypeResponse")
