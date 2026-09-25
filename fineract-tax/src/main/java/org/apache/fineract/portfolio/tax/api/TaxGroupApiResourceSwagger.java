@@ -54,6 +54,8 @@ final class TaxGroupApiResourceSwagger {
             public GetTaxesGroupTaxComponent taxComponent;
             @Schema(example = "[2016, 4, 11]")
             public LocalDate startDate;
+            @Schema(example = "true", description = "Only present on the template response. True if this component's start date is in the future and can still be edited.")
+            public Boolean componentEditable;
         }
 
         @Schema(example = "7")
@@ -61,6 +63,8 @@ final class TaxGroupApiResourceSwagger {
         @Schema(example = "tax group 1")
         public String name;
         public Set<GetTaxesGroupTaxAssociations> taxAssociations;
+        @Schema(example = "true", description = "Only present on the template response. False if the group is linked to charge products and none of its components can still be edited.")
+        public Boolean groupEditable;
     }
 
     @Schema(description = "PostTaxesGroupRequest")
@@ -109,6 +113,8 @@ final class TaxGroupApiResourceSwagger {
             public Long id;
             @Schema(example = "7")
             public Long taxComponentId;
+            @Schema(example = "22 April 2016", description = "Only accepted when this component's current start date has not taken effect yet, i.e. is still in the future.")
+            public String startDate;
             @Schema(example = "22 April 2016")
             public String endDate;
         }
@@ -135,6 +141,8 @@ final class TaxGroupApiResourceSwagger {
 
                 private PutTaxesGroupModifiedComponents() {}
 
+                @Schema(example = "Apr 22, 2016 12:00:00 AM")
+                public String startDate;
                 @Schema(example = "Apr 22, 2016 12:00:00 AM")
                 public String endDate;
                 @Schema(example = "7")
