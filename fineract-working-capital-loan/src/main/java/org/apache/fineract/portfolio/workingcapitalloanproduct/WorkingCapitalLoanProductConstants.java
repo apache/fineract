@@ -114,4 +114,7 @@ public final class WorkingCapitalLoanProductConstants {
 
     // Resource name for permissions
     public static final String WCLP_RESOURCE_NAME = "WORKINGCAPITALLOANPRODUCT";
+
+    public static final String DELINQUENCY_BUCKET_ID_MUST_BE_OF_TYPE_VALIDATION_CODE = "validation.msg." + WCLP_RESOURCE_NAME
+            + ".delinquencyBucketId.must.be.of.type";
 }

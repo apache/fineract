@@ -75,8 +75,8 @@ public class DelinquencyBucketParseAndValidator extends ParseAndValidator {
         if (dataValidator.hasError()) {
             return null;
         }
-        DelinquencyBucketType bucketType = bucketTypeParam == null ? DelinquencyBucketType.REGULAR
-                : DelinquencyBucketType.valueOf(bucketTypeParam);
+        // Keep null when omitted so updates preserve the existing type instead of defaulting to REGULAR.
+        final DelinquencyBucketType bucketType = bucketTypeParam == null ? null : DelinquencyBucketType.valueOf(bucketTypeParam);
 
         ArrayList<DelinquencyRangeData> ranges = new ArrayList<>();
         final String[] rangeIds = jsonHelper.extractArrayNamed(DelinquencyApiConstants.RANGES_PARAM_NAME, element);

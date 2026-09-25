@@ -101,6 +101,7 @@ import org.apache.fineract.test.data.codevalue.CodeNames;
 import org.apache.fineract.test.data.codevalue.CodeValue;
 import org.apache.fineract.test.data.codevalue.CodeValueResolver;
 import org.apache.fineract.test.data.codevalue.DefaultCodeValue;
+import org.apache.fineract.test.data.delinquency.DelinquencyBucketResolver;
 import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
 import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
 import org.apache.fineract.test.data.workingcapitalproduct.DefaultWorkingCapitalLoanProduct;
@@ -158,6 +159,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     private final ClientRequestFactory clientRequestFactory;
     private final CodeValueResolver codeValueResolver;
     private final FineractClientConfiguration fineractClientConfiguration;
+    private final DelinquencyBucketResolver delinquencyBucketResolver;
 
     @Given("Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:")
     public void createClientAndDisburseWorkingCapitalLoanWithData(final DataTable table) {
@@ -640,8 +642,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         return value == null ? "null" : value.toString();
     }
 
-    @Then("Creating a working capital loan with LP overridables disabled and with the following data will result an error:")
-    public void creatingWorkingCapitalLoanWithLpOverridablesDisabledWillResultAnError(final DataTable table) {
+    @Then("Creating a working capital loan with LP overridable disabled and with the following data will result an error:")
+    public void creatingWorkingCapitalLoanWithLpOverridableDisabledWillResultAnError(final DataTable table) {
         final List<List<String>> data = table.asLists();
         final List<String> loanData = data.get(1);
 
@@ -664,8 +666,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .principalAmount(new BigDecimal(principal)).totalPaymentVolume(new BigDecimal(totalPaymentVolume))
                 .periodPaymentRate(new BigDecimal(periodPaymentRate))
                 .discount(discount != null && !discount.isEmpty() ? new BigDecimal(discount) : null)
-                .delinquencyBucketId(
-                        delinquencyBucketId != null && !delinquencyBucketId.isEmpty() ? Long.valueOf(delinquencyBucketId) : null)
+                .delinquencyBucketId(delinquencyBucketResolver.resolveBucketId(delinquencyBucketId))
                 .repaymentEvery(repaymentEvery != null && !repaymentEvery.isEmpty() ? Integer.valueOf(repaymentEvery) : null)
                 .repaymentFrequencyType(repaymentFrequencyType != null && !repaymentFrequencyType.isEmpty()
                         ? PostWorkingCapitalLoansRequest.RepaymentFrequencyTypeEnum.valueOf(repaymentFrequencyType)
@@ -682,6 +683,31 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertValidationError(exception, "validation.msg.WORKINGCAPITALLOAN.discount.override.not.allowed.by.product");
 
         log.info("Verified working capital loan creation failed with expected validation errors for LP overridables disabled");
+    }
+
+    @Then("Creating a working capital loan with the following data will result an error {string}:")
+    public void creatingWorkingCapitalLoanWithDataWillResultAnError(final String errorMessage, final DataTable table) {
+        final Map<String, String> rawData = table.asMaps().getFirst();
+        final Long clientId = extractClientId();
+        final Long loanProductId = resolveLoanProductId(rawData.get("LoanProduct"));
+
+        final PostWorkingCapitalLoansRequest loansRequest = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansRequest(clientId)
+                .productId(loanProductId).submittedOnDate(rawData.get("submittedOnDate"))
+                .expectedDisbursementDate(rawData.get("expectedDisbursementDate"))
+                .principalAmount(new BigDecimal(rawData.get("principalAmount")))
+                .totalPaymentVolume(new BigDecimal(rawData.get("totalPaymentVolume")))
+                .periodPaymentRate(new BigDecimal(rawData.get("periodPaymentRate")))
+                .discount(rawData.get("discount") != null && !rawData.get("discount").isEmpty() ? new BigDecimal(rawData.get("discount"))
+                        : null);
+        if (rawData.get("delinquencyBucketId") != null && !rawData.get("delinquencyBucketId").isEmpty()) {
+            loansRequest.delinquencyBucketId(delinquencyBucketResolver.resolveBucketId(rawData.get("delinquencyBucketId")));
+        }
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
+        assertHttpStatus(exception, 400);
+        assertValidationError(exception, errorMessage);
     }
 
     @Then("Creating a working capital loan with principal amount greater than Working Capital Loan Product max will result an error:")
@@ -1099,6 +1125,32 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
         testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, response);
         log.info("Working Capital Loan modified with delinquency bucket with ID: {}", response.getResourceId());
+    }
+
+    @Then("Admin failed to modify working capital loan with delinquencyBucketId {string} and got an error {string}")
+    public void adminFailedToModifyWorkingCapitalLoanWithDelinquencyBucketId(final String delinquencyBucketId, final String expectedError) {
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .delinquencyBucketId(delinquencyBucketResolver.resolveBucketId(delinquencyBucketId));
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, exception);
+        assertHttpStatus(exception, 400);
+        assertValidationError(exception, expectedError);
+    }
+
+    @When("Admin modifies the working capital loan resenting its current delinquencyBucketId")
+    public void adminModifiesWorkingCapitalLoanResentingCurrentDelinquencyBucketId() {
+        final GetWorkingCapitalLoansLoanIdResponse loanDetails = retrieveLoanDetails(getCreatedLoanId());
+        assertThat(loanDetails.getDelinquencyBucket()).as("Loan must have a delinquency bucket to resent").isNotNull();
+        assertThat(loanDetails.getDelinquencyBucket().getId()).as("Loan delinquency bucket id").isNotNull();
+        final Long currentBucketId = loanDetails.getDelinquencyBucket().getId();
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .delinquencyBucketId(currentBucketId);
+        final PutWorkingCapitalLoansLoanIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, response);
+        log.info("Working Capital Loan modified resenting delinquencyBucketId {}, resource ID: {}", currentBucketId,
+                response.getResourceId());
     }
 
     @When("Admin modifies the working capital loan with {int} {string} breach override data")

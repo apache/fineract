@@ -74,7 +74,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
 
     @BeforeAll
     static void initDelinquency() {
-        delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        delinquencyBucketId = DelinquencyBucketsHelper.createDefaultWorkingCapitalBucket();
         fundId = FundsResourceHandler.createFund().getResourceId();
     }
 

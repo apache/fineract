@@ -47,6 +47,7 @@ import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DeleteWorkingCapitalLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.EnumOptionData;
 import org.apache.fineract.client.models.GetConfigurableAttributes;
+import org.apache.fineract.client.models.GetDelinquencyBucket;
 import org.apache.fineract.client.models.GetPaymentAllocation;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanDelinquencyRangeScheduleTagHistoryResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsProductIdResponse;
@@ -72,6 +73,7 @@ import org.apache.fineract.test.data.accounttype.DefaultAccountType;
 import org.apache.fineract.test.data.codevalue.CodeNames;
 import org.apache.fineract.test.data.codevalue.CodeValueResolver;
 import org.apache.fineract.test.data.codevalue.DefaultCodeValue;
+import org.apache.fineract.test.data.delinquency.DelinquencyBucketResolver;
 import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
 import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
 import org.apache.fineract.test.data.workingcapitalproduct.DefaultWorkingCapitalLoanProduct;
@@ -98,6 +100,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     private final AccountTypeResolver accountTypeResolver;
     private final PaymentTypeResolver paymentTypeResolver;
     private final CodeValueResolver codeValueResolver;
+    private final DelinquencyBucketResolver delinquencyBucketResolver;
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.getShared();
     private static final String WC_ADVANCED_MAPPINGS_EXPECTED_CREATE = "wcAdvancedMappingsExpectedCreate";
     private static final String WC_ADVANCED_MAPPINGS_EXPECTED_UPDATE = "wcAdvancedMappingsExpectedUpdate";
@@ -1793,9 +1796,11 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                 || fieldName.equalsIgnoreCase(MAX_PERIOD_PAYMENT_RATE_FIELD_NAME) || fieldName.equalsIgnoreCase(DISCOUNT_FIELD_NAME)) {
             valueBigDecimal = fieldValue != null ? new BigDecimal(fieldValue) : null;
         }
-        if (fieldName.equalsIgnoreCase(BREACH_ID_FIELD_NAME) || fieldName.equalsIgnoreCase(NEAR_BREACH_ID_FIELD_NAME)
-                || fieldName.equalsIgnoreCase(DELINQUENCY_BUCKET_ID_FIELD_NAME)) {
+        if (fieldName.equalsIgnoreCase(BREACH_ID_FIELD_NAME) || fieldName.equalsIgnoreCase(NEAR_BREACH_ID_FIELD_NAME)) {
             valueLong = fieldValue != null ? Long.valueOf(fieldValue) : null;
+        }
+        if (fieldName.equalsIgnoreCase(DELINQUENCY_BUCKET_ID_FIELD_NAME)) {
+            valueLong = delinquencyBucketResolver.resolveBucketId(fieldValue);
         }
 
         switch (fieldName) {
@@ -1917,9 +1922,11 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                 || fieldName.equalsIgnoreCase(MAX_PERIOD_PAYMENT_RATE_FIELD_NAME) || fieldName.equalsIgnoreCase(DISCOUNT_FIELD_NAME)) {
             valueBigDecimal = fieldValue != null ? new BigDecimal(fieldValue) : null;
         }
-        if (fieldName.equalsIgnoreCase(BREACH_ID_FIELD_NAME) || fieldName.equalsIgnoreCase(NEAR_BREACH_ID_FIELD_NAME)
-                || fieldName.equalsIgnoreCase(DELINQUENCY_BUCKET_ID_FIELD_NAME)) {
+        if (fieldName.equalsIgnoreCase(BREACH_ID_FIELD_NAME) || fieldName.equalsIgnoreCase(NEAR_BREACH_ID_FIELD_NAME)) {
             valueLong = fieldValue != null ? Long.valueOf(fieldValue) : null;
+        }
+        if (fieldName.equalsIgnoreCase(DELINQUENCY_BUCKET_ID_FIELD_NAME)) {
+            valueLong = delinquencyBucketResolver.resolveBucketId(fieldValue);
         }
 
         switch (fieldName) {
@@ -2090,6 +2097,24 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final GetWorkingCapitalLoanProductsTemplateResponse template = ok(
                 () -> workingCapitalApi().retrieveTemplateWorkingCapitalLoanProduct(Map.of()));
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_TEMPLATE_RESPONSE, template);
+    }
+
+    @Then("Working Capital Loan Product template delinquencyBucketOptions all have bucketType {string}")
+    public void verifyTemplateDelinquencyBucketOptionsBucketType(final String expectedBucketType) {
+        final GetWorkingCapitalLoanProductsTemplateResponse template = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_TEMPLATE_RESPONSE);
+        assertThat(template.getDelinquencyBucketOptions()).isNotNull().isNotEmpty();
+        assertThat(template.getDelinquencyBucketOptions())
+                .allSatisfy(bucket -> assertThat(bucket.getBucketType()).isEqualTo(expectedBucketType));
+    }
+
+    @Then("Working Capital Loan Product template delinquencyBucketOptions do not contain:")
+    public void verifyTemplateDelinquencyBucketOptionsDoNotContain(final DataTable table) {
+        final GetWorkingCapitalLoanProductsTemplateResponse template = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_TEMPLATE_RESPONSE);
+        assertThat(template.getDelinquencyBucketOptions()).isNotNull();
+        final List<String> bucketNames = template.getDelinquencyBucketOptions().stream().map(GetDelinquencyBucket::getName).toList();
+        assertThat(bucketNames).doesNotContainAnyElementsOf(table.asList());
     }
 
     @When("Admin creates a new Working Capital Loan Product with Accrual with deferred revenue amortization accounting and advanced mappings")

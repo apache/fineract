@@ -101,7 +101,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Collection<AdvancedPaymentData> advancedPaymentData = retrieveAdvancedPaymentData(loanProductId);
             final Collection<CreditAllocationData> creditAllocationData = retrieveCreditAllocationData(loanProductId);
             final Collection<DelinquencyBucketData> delinquencyBucketOptions = this.delinquencyReadPlatformService
-                    .retrieveAllDelinquencyBuckets();
+                    .retrieveDelinquencyBucketsByType(DelinquencyBucketType.REGULAR);
             final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas, rates, delinquencyBucketOptions,
                     advancedPaymentData, creditAllocationData);
             final String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";

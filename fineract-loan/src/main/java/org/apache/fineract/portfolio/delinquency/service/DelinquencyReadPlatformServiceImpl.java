@@ -104,8 +104,16 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
 
     @Override
     public List<DelinquencyBucketData> retrieveAllDelinquencyBuckets() {
-        final List<DelinquencyBucket> delinquencyRangeList = repositoryBucket.findAllBuckets();
-        final List<DelinquencyBucketData> result = mapperBucket.map(delinquencyRangeList);
+        return mapAndEnrich(repositoryBucket.findAllBuckets());
+    }
+
+    @Override
+    public List<DelinquencyBucketData> retrieveDelinquencyBucketsByType(final DelinquencyBucketType bucketType) {
+        return mapAndEnrich(repositoryBucket.findByBucketType(bucketType));
+    }
+
+    private List<DelinquencyBucketData> mapAndEnrich(final List<DelinquencyBucket> delinquencyBuckets) {
+        final List<DelinquencyBucketData> result = mapperBucket.map(delinquencyBuckets);
         result.forEach(this::enrichWorkingCapitalConfiguration);
         return result;
     }
