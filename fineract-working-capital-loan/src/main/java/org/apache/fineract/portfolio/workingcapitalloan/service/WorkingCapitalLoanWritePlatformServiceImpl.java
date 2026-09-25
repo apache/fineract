@@ -138,6 +138,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanChargeAccrualService chargeAccrualService;
     private final WorkingCapitalLoanTransactionFinder transactionFinder;
     private final WorkingCapitalLoanChargeWaiverDomainService chargeWaiverDomainService;
+    private final WorkingCapitalLoanChargeWritePlatformService chargeWritePlatformService;
 
     @Override
     public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command) {
@@ -491,6 +492,25 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         transactionRepository.saveAndFlush(fromTxn);
     }
 
+    /**
+     * Charge adjustments stay linked to a specific charge. When replacing one via adjust, the new transaction must keep
+     * that link so JE posting and available-amount checks continue to resolve the charge.
+     */
+    private void copyChargeAdjustmentRelation(final WorkingCapitalLoanTransaction newTransaction, final WorkingCapitalLoanCharge charge) {
+        newTransaction.getLoanTransactionRelations().add(WorkingCapitalLoanTransactionRelation.linkToCharge(newTransaction, charge,
+                LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT));
+    }
+
+    private WorkingCapitalLoanCharge resolveChargeAdjustmentCharge(final WorkingCapitalLoanTransaction chargeAdjustmentTransaction) {
+        return chargeAdjustmentTransaction.getLoanTransactionRelations().stream()
+                .filter(relation -> LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT.equals(relation.getRelationType())
+                        && relation.getToCharge() != null)
+                .map(WorkingCapitalLoanTransactionRelation::getToCharge).findFirst()
+                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.charge.adjustment.relation.not.found",
+                        "Charge adjustment transaction is missing its charge relation",
+                        WorkingCapitalLoanConstants.transactionIdParamName));
+    }
+
     private WorkingCapitalLoanTransaction createAndPersistDiscountFeeTransaction(final WorkingCapitalLoan loan,
             final WorkingCapitalLoanTransaction disbursementTransaction, ExternalId txnExternalId, BigDecimal amount,
             LocalDate transactionDate, CodeValue classification, PaymentDetail paymentDetail) {
@@ -801,6 +821,21 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 .withLoanId(loan.getId()).with(changes).build();
     }
 
+    @Override
+    public CommandProcessingResult adjustTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
+        final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        final WorkingCapitalLoanTransaction transaction = transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
+                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
+                        "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
+
+        return switch (transaction.getTypeOf()) {
+            case REPAYMENT, GOODWILL_CREDIT, CHARGE_ADJUSTMENT, PAYOUT_REFUND -> adjustRepaymentLikeTransaction(loan, transaction, command);
+            default -> throw new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.adjust.not.supported",
+                    "Adjust is not supported for transaction type " + transaction.getTypeOf(),
+                    WorkingCapitalLoanConstants.transactionTypeParamName);
+        };
+    }
+
     private CommandProcessingResult undoDiscountFeeAdjustment(final WorkingCapitalLoan loan,
             final WorkingCapitalLoanTransaction adjustmentTransaction, final JsonCommand command) {
         validator.validateUndoDiscountAdjustmentTransaction(loan, adjustmentTransaction);
@@ -946,6 +981,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                     classification, txnExternalId);
             case PAYOUT_REFUND -> WorkingCapitalLoanTransaction.payoutRefund(loan, transactionAmount, paymentDetail, transactionDate,
                     classification, txnExternalId);
+            case CHARGE_ADJUSTMENT ->
+                WorkingCapitalLoanTransaction.chargeAdjustment(loan, txnExternalId, transactionAmount, transactionDate, paymentDetail);
             default -> throw new NotImplementedException("Missing implementation for : " + transactionType.getCode());
         };
     }
@@ -1148,22 +1185,29 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
     public CommandProcessingResult undoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
             JsonCommand command) {
-
         validator.validateUndoTransaction(command, loan, transaction);
+        return reverseRepaymentLikeTransaction(loan, transaction, command);
+    }
+
+    private CommandProcessingResult reverseRepaymentLikeTransaction(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transaction, final JsonCommand command) {
 
         final LoanStatus oldStatus = loan.getLoanStatus();
-        Map<String, Object> changes = new HashMap<>();
-        changes.put("reversed", true);
-        transaction.setReversed(true);
+        final Map<String, Object> changes = reverseRepaymentLikeTransactionCore(loan, transaction, command);
 
-        ExternalId reversalExternalId = externalIdFactory
-                .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.reversalExternalIdParamName));
-        transaction.setReversalExternalId(reversalExternalId);
-        changes.put("reversalExternalId", reversalExternalId);
+        handleNote(loan, command, changes);
+        this.loanRepository.saveAndFlush(loan);
+        adjustTransactionEventPublisher.publishReversal(loan.getId(), transaction);
+        notifyBalanceChanged(loan);
+        notifyStatusChanged(loan, oldStatus);
 
-        LocalDate reversedOnDate = ThreadLocalContextUtil.getBusinessDate();
-        transaction.setReversedOnDate(reversedOnDate);
-        changes.put("reversedOnDate", reversedOnDate);
+        return new CommandProcessingResultBuilder().withLoanId(loan.getId()).withLoanExternalId(loan.getExternalId())
+                .withEntityId(transaction.getId()).withEntityExternalId(transaction.getExternalId()).with(changes).build();
+    }
+
+    private Map<String, Object> reverseRepaymentLikeTransactionCore(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transaction, final JsonCommand command) {
+        Map<String, Object> changes = markRepaymentLikeTransactionReversed(transaction, command);
 
         final boolean lastMonetaryAction = transactionProcessor.isLastMonetaryAction(transaction);
         final boolean isAccountingOnly = isAccountingOnlyTransaction(transaction);
@@ -1200,16 +1244,134 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
 
         changes.put("status", loan.getLoanStatus());
+        return changes;
+    }
 
+    /**
+     * Marks the transaction reversed and stamps reversal metadata only. Does not reprocess history — callers that need
+     * a replacement transaction must reprocess once after both the reverse mark and the new row exist.
+     */
+    private Map<String, Object> markRepaymentLikeTransactionReversed(final WorkingCapitalLoanTransaction transaction,
+            final JsonCommand command) {
+        Map<String, Object> changes = new HashMap<>();
+        changes.put("reversed", true);
+        transaction.setReversed(true);
+
+        ExternalId reversalExternalId = externalIdFactory
+                .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.reversalExternalIdParamName));
+        transaction.setReversalExternalId(reversalExternalId);
+        changes.put("reversalExternalId", reversalExternalId);
+
+        LocalDate reversedOnDate = ThreadLocalContextUtil.getBusinessDate();
+        transaction.setReversedOnDate(reversedOnDate);
+        changes.put("reversedOnDate", reversedOnDate);
+        return changes;
+    }
+
+    private CommandProcessingResult adjustRepaymentLikeTransaction(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transactionToAdjust, final JsonCommand command) {
+        validator.validateAdjustTransaction(command, loan, transactionToAdjust);
+
+        final BigDecimal newAmount = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanConstants.transactionAmountParamName);
+        if (!MathUtil.isGreaterThanZero(newAmount)) {
+            // Zero amount reuses the undo reverse path (same behaviour as ?command=undo).
+            return reverseRepaymentLikeTransaction(loan, transactionToAdjust, command);
+        }
+
+        final WorkingCapitalLoanCharge chargeAdjustmentCharge = LoanTransactionType.CHARGE_ADJUSTMENT
+                .equals(transactionToAdjust.getTypeOf()) ? resolveChargeAdjustmentCharge(transactionToAdjust) : null;
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed(WorkingCapitalLoanConstants.transactionDateParamName);
+        if (chargeAdjustmentCharge != null) {
+            chargeWritePlatformService.validateChargeAdjustmentEntrance(loan, chargeAdjustmentCharge, newAmount,
+                    transactionToAdjust.getId());
+            if (chargeAdjustmentCharge.getDueDate() != null && DateUtils.isBefore(transactionDate, chargeAdjustmentCharge.getDueDate())) {
+                throw new PlatformApiDataValidationException("validation.msg.wc.loan.charge.adjustment.invalid.date",
+                        "Charge adjustment transaction date cannot be before the charge due date: " + chargeAdjustmentCharge.getDueDate(),
+                        WorkingCapitalLoanConstants.transactionDateParamName);
+            }
+        }
+
+        final LoanStatus oldStatus = loan.getLoanStatus();
+        final LocalDate originalTransactionDate = transactionToAdjust.getTransactionDate();
+        final BigDecimal originalAmount = transactionToAdjust.getTransactionAmount();
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put(WorkingCapitalLoanConstants.transactionDateParamName, transactionDate);
+        changes.put(WorkingCapitalLoanConstants.transactionAmountParamName, newAmount);
+
+        // Same as term-loan adjust: replacement gets externalId from the command (or auto-generated); the reversed
+        // transaction keeps its original external id.
+        final ExternalId txnExternalId = this.externalIdFactory.createFromCommand(command,
+                WorkingCapitalLoanConstants.externalIdParameterName);
+        if (!txnExternalId.isEmpty()) {
+            changes.put(WorkingCapitalLoanConstants.externalIdParameterName, txnExternalId);
+        }
+
+        // Mark reversed + post reversal JE only — do not reprocess yet.
+        changes.putAll(markRepaymentLikeTransactionReversed(transactionToAdjust, command));
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            accountingProcessor.postReversalJournalEntries(loan, transactionToAdjust);
+        }
+        this.transactionRepository.saveAndFlush(transactionToAdjust);
+
+        final PaymentDetail paymentDetail = resolvePaymentDetailForAdjust(command, changes, transactionToAdjust);
+        final WorkingCapitalLoanTransaction newTransaction = resolveNewTransaction(transactionToAdjust.getTypeOf(), loan, newAmount,
+                paymentDetail, transactionDate, transactionToAdjust.getClassification(), txnExternalId);
+        if (chargeAdjustmentCharge != null) {
+            copyChargeAdjustmentRelation(newTransaction, chargeAdjustmentCharge);
+        }
+
+        saveNewTransactionRelation(newTransaction, transactionToAdjust, LoanTransactionRelationTypeEnum.REPLAYED);
+
+        final LocalDate reprocessFrom = DateUtils.isBefore(transactionDate, originalTransactionDate) ? transactionDate
+                : originalTransactionDate;
+        if (isChargesInvolved(loan)) {
+            transactionReprocessingService.reprocessTransactions(loan);
+        } else {
+            transactionReprocessingService.reprocessChargeFreeSuffix(loan, reprocessFrom, transactionToAdjust);
+        }
+
+        breachScheduleService.applyRepaymentUndo(loan.getId(), originalTransactionDate, originalAmount);
+        breachScheduleService.applyRepayment(loan.getId(), transactionDate, newAmount);
+        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+
+        stateMachine.determineAndTransition(loan, transactionDate);
+        transactionProcessor.recalculateOverpaidOnDate(loan, newTransaction);
+        transactionProcessor.triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
+        chargeAccrualService.accrueOnClosure(loan, transactionDate);
+
+        changes.put("status", loan.getLoanStatus());
         handleNote(loan, command, changes);
 
         this.loanRepository.saveAndFlush(loan);
-        adjustTransactionEventPublisher.publishReversal(loan.getId(), transaction);
+        adjustTransactionEventPublisher.publishAdjustment(loan.getId(), transactionToAdjust, newTransaction);
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, oldStatus);
 
-        return new CommandProcessingResultBuilder().withLoanId(loan.getId()).withLoanExternalId(loan.getExternalId())
-                .withEntityId(transaction.getId()).withEntityExternalId(transaction.getExternalId()).with(changes).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withLoanId(loan.getId())
+                .withLoanExternalId(loan.getExternalId()).withEntityId(newTransaction.getId())
+                .withEntityExternalId(newTransaction.getExternalId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
+                .with(changes).build();
+    }
+
+    private PaymentDetail resolvePaymentDetailForAdjust(final JsonCommand command, final Map<String, Object> changes,
+            final WorkingCapitalLoanTransaction transactionToAdjust) {
+        final JsonElement paymentDetailsElement = command.jsonElement(WorkingCapitalLoanConstants.paymentDetailsParamName);
+        if (paymentDetailsElement != null && paymentDetailsElement.isJsonNull()) {
+            return null;
+        }
+        if (paymentDetailsElement != null && paymentDetailsElement.isJsonObject()) {
+            final JsonCommand paymentDetailsCommand = JsonCommand.fromExistingCommand(command, paymentDetailsElement);
+            return paymentDetailService.createPaymentDetail(paymentDetailsCommand, changes);
+        }
+        if (command.parameterExists(WorkingCapitalLoanConstants.paymentDetailsParamName)) {
+            return paymentDetailService.createPaymentDetail(command, changes);
+        }
+        final PaymentDetail original = transactionToAdjust.getPaymentDetail();
+        if (original == null) {
+            return null;
+        }
+        return PaymentDetail.instance(original.getPaymentType(), original.getAccountNumber(), original.getCheckNumber(),
+                original.getRoutingCode(), original.getReceiptNumber(), original.getBankNumber());
     }
 
     private boolean isChargesInvolved(WorkingCapitalLoan loan) {
