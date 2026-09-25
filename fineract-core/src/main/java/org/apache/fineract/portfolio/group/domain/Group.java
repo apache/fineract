@@ -31,15 +31,12 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
@@ -279,67 +276,6 @@ public final class Group extends AbstractPersistableCustom<Long> {
 
     public boolean isPending() {
         return GroupingTypeStatus.fromInt(this.status).isPending();
-    }
-
-    public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
-
-        if (command.isChangeInIntegerParameterNamed(GroupingTypesApiConstants.statusParamName, this.status)) {
-            final Integer newValue = command.integerValueOfParameterNamed(GroupingTypesApiConstants.statusParamName);
-            actualChanges.put(GroupingTypesApiConstants.statusParamName, GroupingTypeEnumerations.status(newValue));
-            this.status = GroupingTypeStatus.fromInt(newValue).getValue();
-        }
-
-        if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.externalIdParamName, this.externalId)) {
-            final String newValue = command.stringValueOfParameterNamed(GroupingTypesApiConstants.externalIdParamName);
-            actualChanges.put(GroupingTypesApiConstants.externalIdParamName, newValue);
-            this.externalId = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.officeIdParamName, this.office.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.officeIdParamName);
-            actualChanges.put(GroupingTypesApiConstants.officeIdParamName, newValue);
-        }
-
-        if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.staffIdParamName, staffId())) {
-            final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
-            actualChanges.put(GroupingTypesApiConstants.staffIdParamName, newValue);
-        }
-
-        if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.nameParamName, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(GroupingTypesApiConstants.nameParamName);
-            actualChanges.put(GroupingTypesApiConstants.nameParamName, newValue);
-            this.name = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();
-
-        if (command.isChangeInLocalDateParameterNamed(GroupingTypesApiConstants.activationDateParamName, getActivationDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
-            actualChanges.put(GroupingTypesApiConstants.activationDateParamName, valueAsInput);
-            actualChanges.put(GroupingTypesApiConstants.dateFormatParamName, dateFormatAsInput);
-            actualChanges.put(GroupingTypesApiConstants.localeParamName, localeAsInput);
-
-            this.activationDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
-        }
-
-        if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.accountNoParamName, this.accountNumber)) {
-            final String newValue = command.stringValueOfParameterNamed(GroupingTypesApiConstants.accountNoParamName);
-            actualChanges.put(GroupingTypesApiConstants.accountNoParamName, newValue);
-            this.accountNumber = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInLocalDateParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName, getSubmittedOnDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
-            actualChanges.put(GroupingTypesApiConstants.submittedOnDateParamName, valueAsInput);
-            actualChanges.put(GroupingTypesApiConstants.dateFormatParamName, dateFormatAsInput);
-            actualChanges.put(GroupingTypesApiConstants.localeParamName, localeAsInput);
-
-            this.submittedOnDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
-        }
-
-        return actualChanges;
     }
 
     public List<String> associateClients(final Set<Client> clientMembersSet) {

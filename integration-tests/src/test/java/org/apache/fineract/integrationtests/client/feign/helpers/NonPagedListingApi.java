@@ -22,8 +22,8 @@ import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import java.util.List;
-import org.apache.fineract.client.models.GetCentersPageItems;
-import org.apache.fineract.client.models.GetGroupsPageItems;
+import org.apache.fineract.client.models.CenterData;
+import org.apache.fineract.client.models.GroupGeneralData;
 
 /**
  * Feign interface for the non-paged variants of {@code GET /centers} and {@code GET /groups}, which answer a bare JSON
@@ -35,11 +35,11 @@ import org.apache.fineract.client.models.GetGroupsPageItems;
 public interface NonPagedListingApi {
 
     @RequestLine("GET /v1/centers?limit=-1")
-    List<GetCentersPageItems> listCenters();
+    List<CenterData> listCenters();
 
     @RequestLine("GET /v1/centers?limit=-1&orderBy=id&sortOrder=asc")
-    List<GetCentersPageItems> listCentersOrdered();
+    List<CenterData> listCentersOrdered();
 
     @RequestLine("GET /v1/groups?officeId={officeId}&orphansOnly=true")
-    List<GetGroupsPageItems> listOrphanGroups(@Param("officeId") Long officeId);
+    List<GroupGeneralData> listOrphanGroups(@Param("officeId") Long officeId);
 }

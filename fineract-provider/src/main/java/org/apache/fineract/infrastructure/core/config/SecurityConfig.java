@@ -25,6 +25,7 @@ import static org.springframework.security.authorization.AuthorityAuthorizationM
 import jakarta.servlet.Filter;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -78,6 +79,9 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @ConditionalOnProperty("fineract.security.basicauth.enabled")
@@ -88,6 +92,16 @@ public class SecurityConfig {
     private static final String ALL_FUNCTIONS = "ALL_FUNCTIONS";
     private static final String ALL_FUNCTIONS_READ = "ALL_FUNCTIONS_READ";
     private static final String ALL_FUNCTIONS_WRITE = "ALL_FUNCTIONS_WRITE";
+
+    // Jersey treats a trailing slash as optional, so the group and centre matchers must too.
+    static RequestMatcher pathMatcher(final HttpMethod method, final String pattern) {
+        return new OrRequestMatcher(API_MATCHER.matcher(method, pattern), API_MATCHER.matcher(method, pattern + "/"));
+    }
+
+    static RequestMatcher commandMatcher(final HttpMethod method, final String pattern, final String command) {
+        return new AndRequestMatcher(pathMatcher(method, pattern),
+                request -> command.equalsIgnoreCase(StringUtils.trim(request.getParameter("command"))));
+    }
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -353,6 +367,70 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_INTERESTRATECHART")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/interestratecharts/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_INTERESTRATECHART")
+                    // groups
+                    .requestMatchers(pathMatcher(HttpMethod.POST, "/api/*/groups/uploadtemplate"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_GROUP")
+                    .requestMatchers(pathMatcher(HttpMethod.POST, "/api/*/groups/*/command/unassign_staff"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UNASSIGNSTAFF_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "activate"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "ACTIVATE_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "close"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CLOSE_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "associateClients"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "ASSOCIATECLIENTS_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "disassociateClients"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DISASSOCIATECLIENTS_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "assignStaff"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "ASSIGNSTAFF_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "unassignStaff"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UNASSIGNSTAFF_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "assignRole"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "ASSIGNROLE_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "unassignRole"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UNASSIGNROLE_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "updateRole"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATEROLE_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "transferClients"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "TRANSFERCLIENTS_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "saveCollectionSheet"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "SAVECOLLECTIONSHEET_GROUP")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/groups/*", "generateCollectionSheet"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_GROUP")
+                    .requestMatchers(pathMatcher(HttpMethod.POST, "/api/*/groups"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_GROUP")
+                    .requestMatchers(pathMatcher(HttpMethod.PUT, "/api/*/groups/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_GROUP")
+                    .requestMatchers(pathMatcher(HttpMethod.DELETE, "/api/*/groups/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_GROUP")
+                    .requestMatchers(pathMatcher(HttpMethod.GET, "/api/*/groups"), pathMatcher(HttpMethod.GET, "/api/*/groups/*"),
+                            pathMatcher(HttpMethod.GET, "/api/*/groups/*/accounts"),
+                            pathMatcher(HttpMethod.GET, "/api/*/groups/*/glimaccounts"),
+                            pathMatcher(HttpMethod.GET, "/api/*/groups/*/gsimaccounts"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_GROUP")
+                    // centers
+                    .requestMatchers(pathMatcher(HttpMethod.POST, "/api/*/centers/uploadtemplate"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CENTER")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/centers/*", "activate"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "ACTIVATE_CENTER")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/centers/*", "close"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CLOSE_CENTER")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/centers/*", "associateGroups"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "ASSOCIATEGROUPS_CENTER")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/centers/*", "disassociateGroups"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DISASSOCIATEGROUPS_CENTER")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/centers/*", "saveCollectionSheet"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "SAVECOLLECTIONSHEET_CENTER")
+                    .requestMatchers(commandMatcher(HttpMethod.POST, "/api/*/centers/*", "generateCollectionSheet"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CENTER")
+                    .requestMatchers(pathMatcher(HttpMethod.POST, "/api/*/centers"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CENTER")
+                    .requestMatchers(pathMatcher(HttpMethod.PUT, "/api/*/centers/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CENTER")
+                    .requestMatchers(pathMatcher(HttpMethod.DELETE, "/api/*/centers/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CENTER")
+                    .requestMatchers(pathMatcher(HttpMethod.GET, "/api/*/centers"), pathMatcher(HttpMethod.GET, "/api/*/centers/*"),
+                            pathMatcher(HttpMethod.GET, "/api/*/centers/*/accounts"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CENTER")
                     // staff
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/staff/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STAFF")

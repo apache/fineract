@@ -19,7 +19,6 @@
 
 package org.apache.fineract.portfolio.group.starter;
 
-import org.apache.fineract.commands.service.CommandProcessingService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -44,8 +43,7 @@ import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.GroupRoleRepositoryWrapper;
-import org.apache.fineract.portfolio.group.serialization.GroupRolesDataValidator;
-import org.apache.fineract.portfolio.group.serialization.GroupingTypesDataValidator;
+import org.apache.fineract.portfolio.group.mapping.GroupDateMapper;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.group.service.GroupLevelReadPlatformService;
@@ -54,10 +52,10 @@ import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.group.service.GroupRolesReadPlatformService;
 import org.apache.fineract.portfolio.group.service.GroupRolesReadPlatformServiceImpl;
-import org.apache.fineract.portfolio.group.service.GroupRolesWritePlatformService;
-import org.apache.fineract.portfolio.group.service.GroupRolesWritePlatformServiceJpaRepositoryImpl;
-import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
-import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformServiceJpaRepositoryImpl;
+import org.apache.fineract.portfolio.group.service.GroupRolesWriteService;
+import org.apache.fineract.portfolio.group.service.GroupRolesWriteServiceImpl;
+import org.apache.fineract.portfolio.group.service.GroupingTypesWriteService;
+import org.apache.fineract.portfolio.group.service.GroupingTypesWriteServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
@@ -80,30 +78,6 @@ public class GroupConfiguration {
         return new CenterReadPlatformServiceImpl(jdbcTemplate, context, clientReadPlatformService, officeReadPlatformService,
                 staffReadPlatformService, codeValueReadPlatformService, configurationDomainService, inputValidator, paginationHelper,
                 sqlGenerator, paginationParametersDataValidator);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(GroupingTypesWritePlatformService.class)
-    public GroupingTypesWritePlatformService groupingTypesWritePlatformService(PlatformSecurityContext context,
-            GroupRepositoryWrapper groupRepository, ClientRepositoryWrapper clientRepositoryWrapper,
-            OfficeRepositoryWrapper officeRepositoryWrapper, StaffRepositoryWrapper staffRepository, NoteRepository noteRepository,
-            GroupLevelRepository groupLevelRepository, GroupingTypesDataValidator fromApiJsonDeserializer,
-            LoanRepositoryWrapper loanRepositoryWrapper, CodeValueRepositoryWrapper codeValueRepository,
-            CommandProcessingService commandProcessingService, CalendarInstanceRepository calendarInstanceRepository,
-            ConfigurationDomainService configurationDomainService, SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
-            AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, AccountNumberGenerator accountNumberGenerator,
-            EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
-            BusinessEventNotifierService businessEventNotifierService, LoanOfficerService loanOfficerService,
-            ExternalIdFactory externalIdFactory
-
-    ) {
-        return new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context, groupRepository, clientRepositoryWrapper,
-                officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository, fromApiJsonDeserializer,
-                loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
-                configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
-                entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory
-
-        );
     }
 
     @Bean
@@ -132,12 +106,29 @@ public class GroupConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(GroupRolesWritePlatformService.class)
-    public GroupRolesWritePlatformService groupRolesWritePlatformService(PlatformSecurityContext context,
-            GroupRepositoryWrapper groupRepository, GroupRolesDataValidator fromApiJsonDeserializer,
+    @ConditionalOnMissingBean(GroupingTypesWriteService.class)
+    public GroupingTypesWriteService groupingTypesWriteService(PlatformSecurityContext context, GroupRepositoryWrapper groupRepository,
+            ClientRepositoryWrapper clientRepositoryWrapper, OfficeRepositoryWrapper officeRepositoryWrapper,
+            StaffRepositoryWrapper staffRepository, NoteRepository noteRepository, GroupLevelRepository groupLevelRepository,
+            LoanRepositoryWrapper loanRepositoryWrapper, CodeValueRepositoryWrapper codeValueRepository,
+            CalendarInstanceRepository calendarInstanceRepository, ConfigurationDomainService configurationDomainService,
+            SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
+            AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, AccountNumberGenerator accountNumberGenerator,
+            EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
+            BusinessEventNotifierService businessEventNotifierService, LoanOfficerService loanOfficerService,
+            ExternalIdFactory externalIdFactory, GroupDateMapper groupDateMapper) {
+        return new GroupingTypesWriteServiceImpl(context, groupRepository, clientRepositoryWrapper, officeRepositoryWrapper,
+                staffRepository, noteRepository, groupLevelRepository, loanRepositoryWrapper, codeValueRepository,
+                calendarInstanceRepository, configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository,
+                accountNumberGenerator, entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService,
+                externalIdFactory, groupDateMapper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(GroupRolesWriteService.class)
+    public GroupRolesWriteService groupRolesWriteService(PlatformSecurityContext context, GroupRepositoryWrapper groupRepository,
             CodeValueRepositoryWrapper codeValueRepository, ClientRepositoryWrapper clientRepository,
             GroupRoleRepositoryWrapper groupRoleRepository) {
-        return new GroupRolesWritePlatformServiceJpaRepositoryImpl(context, groupRepository, fromApiJsonDeserializer, codeValueRepository,
-                clientRepository, groupRoleRepository);
+        return new GroupRolesWriteServiceImpl(context, groupRepository, codeValueRepository, clientRepository, groupRoleRepository);
     }
 }
