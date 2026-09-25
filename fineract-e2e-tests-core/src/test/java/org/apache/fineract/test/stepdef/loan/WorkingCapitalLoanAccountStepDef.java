@@ -3314,13 +3314,13 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     }
 
     /**
-     * Asserts the rate the loan is actually being billed at on {@code asOf}, derived from the rate-change history
-     * rather than read off the loan.
+     * Asserts the rate the loan is actually being billed at on {@code asOf}, derived from the rate-change history.
      *
      * <p>
-     * The loan resource reports the rate the loan was created with and does not move when a rate change is booked, so
-     * the two answers differ for any loan with a change in force. The rate in force is the newest non-reversed change
-     * effective on or before the date, and the loan's own rate when none has taken effect yet.
+     * {@code paymentRate} on the loan resource is the rate the loan was created with and does not move when a rate
+     * change is booked; {@code effectivePaymentRate} does move and should match this answer on the business date. The
+     * rate in force is the newest non-reversed change effective on or before the date, and the loan's own
+     * {@code paymentRate} when none has taken effect yet.
      *
      * <p>
      * Ranked by effective date, not by id: a backdated change is created after the changes it precedes, so insertion
