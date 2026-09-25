@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.domain.SavingsDepositOrigin;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
@@ -141,7 +142,8 @@ public class SavingsTransactionImportHandler implements ImportHandler {
 
                 } else if (transaction.getTransactionType().getValue().equals(DEPOSIT)) {
                     commandRequest = new CommandWrapperBuilder() //
-                            .savingsAccountDeposit(transaction.getSavingsAccountId()) //
+                            .savingsAccountDeposit(transaction.getSavingsAccountId())
+                            .withSavingsDepositOrigin(SavingsDepositOrigin.SPREADSHEET_IMPORT) //
                             .withJson(payload) //
                             .build();
                 }

@@ -43,6 +43,7 @@ import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.domain.SavingsDepositOrigin;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
@@ -311,7 +312,8 @@ public class SavingsAccountTransactionsApiResource {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         final CommandWrapper commandRequest = switch (StringUtils.trimToEmpty(commandParam)) {
-            case "deposit" -> builder.savingsAccountDeposit(resolvedSavingsId).build();
+            case "deposit" ->
+                builder.savingsAccountDeposit(resolvedSavingsId).withSavingsDepositOrigin(SavingsDepositOrigin.STAFF_API).build();
             case "gsimDeposit" -> builder.gsimSavingsAccountDeposit(resolvedSavingsId).build();
             case "withdrawal" -> builder.savingsAccountWithdrawal(resolvedSavingsId).build();
             case "force-withdrawal" -> builder.savingsAccountForceWithdrawal(resolvedSavingsId).build();
