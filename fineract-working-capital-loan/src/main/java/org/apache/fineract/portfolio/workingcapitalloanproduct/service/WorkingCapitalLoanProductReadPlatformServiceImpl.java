@@ -35,14 +35,13 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
-import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalDelinquencyBucketResolver;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.data.WorkingCapitalBreachData;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.service.WorkingCapitalBreachReadPlatformService;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.data.WorkingCapitalNearBreachData;
@@ -53,6 +52,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductNotFoundException;
@@ -70,7 +70,7 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
     private final WorkingCapitalLoanProductMapper mapper;
     private final FundReadPlatformService fundReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
-    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
+    private final WorkingCapitalDelinquencyBucketResolver workingCapitalDelinquencyBucketResolver;
     private final WorkingCapitalBreachReadPlatformService breachReadPlatformService;
     private final PaymentTypeReadService paymentTypeReadService;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
@@ -130,10 +130,12 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
                 .getValuesAsStringEnumOptionDataList(WorkingCapitalLoanBreachStartType.class);
         final List<StringEnumOptionData> delinquencyMinimumPaymentTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(DelinquencyMinimumPaymentType.class);
-        final List<EnumOptionData> advancedPaymentAllocationTransactionTypes = PaymentAllocationTransactionType
+        final List<EnumOptionData> advancedPaymentAllocationTransactionTypes = WorkingCapitalPaymentAllocationTransactionType
                 .getValuesAsEnumOptionDataList();
-        final Collection<DelinquencyBucketData> delinquencyBucketOptions = this.delinquencyReadPlatformService
-                .retrieveAllDelinquencyBuckets();
+        final Collection<DelinquencyBucketData> delinquencyBucketOptionsRaw = this.workingCapitalDelinquencyBucketResolver
+                .retrieveWorkingCapitalDelinquencyBucketOptions();
+        final Collection<DelinquencyBucketData> delinquencyBucketOptions = delinquencyBucketOptionsRaw.isEmpty() ? null
+                : delinquencyBucketOptionsRaw;
         final List<WorkingCapitalNearBreachData> nearBreachOptions = nearBreachReadPlatformService.retrieveAll();
         final List<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadService.retrieveAllPaymentTypes();
 
@@ -157,8 +159,7 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
                 .delinquencyStartTypeOptions(delinquencyStartTypeOptions) //
                 .breachStartTypeOptions(breachStartTypeOptions) //
                 .delinquencyMinimumPaymentTypeOptions(delinquencyMinimumPaymentTypeOptions) //
-                .delinquencyBucketOptions(
-                        delinquencyBucketOptions != null && !delinquencyBucketOptions.isEmpty() ? delinquencyBucketOptions : null) //
+                .delinquencyBucketOptions(delinquencyBucketOptions) //
                 .paymentTypeOptions(paymentTypeOptions != null && !paymentTypeOptions.isEmpty() ? paymentTypeOptions : null) //
                 // TODO: Populate WC-specific charge options when WC charges are introduced.
                 .chargeOptions(List.of()) //

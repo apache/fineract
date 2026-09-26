@@ -24,7 +24,6 @@ dependencies {
     implementation(
             'io.swagger.core.v3:swagger-annotations-jakarta',
             'com.squareup.retrofit2:retrofit',
-            'com.squareup.retrofit2:adapter-java8',
             'com.squareup.retrofit2:adapter-rxjava2', // TODO https://github.com/OpenAPITools/openapi-generator/issues/7758
             'com.squareup.retrofit2:converter-scalars',
             'com.squareup.retrofit2:converter-gson',

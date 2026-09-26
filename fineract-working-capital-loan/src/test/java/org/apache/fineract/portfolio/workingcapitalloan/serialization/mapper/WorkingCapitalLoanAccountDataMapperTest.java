@@ -61,6 +61,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanP
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanSummaryData;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.data.WorkingCapitalBreachData;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.data.WorkingCapitalNearBreachData;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.junit.jupiter.api.Test;
 
 class WorkingCapitalLoanAccountDataMapperTest {
@@ -107,6 +108,9 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals(new BigDecimal("14.00"), result.getApprovedDiscountFee());
         assertEquals(new BigDecimal("120.00"), result.getPeriodPaymentAmount());
         assertEquals(new BigDecimal("5000.00"), result.getTotalPaymentVolume());
+        assertEquals(new BigDecimal("43.7562"), result.getAnnualEir());
+        assertEquals(new BigDecimal("47.22"), result.getPaymentAmount());
+        assertStringEnum(source.getPaymentAmountCalculationStrategy(), result.getPaymentAmountCalculationStrategy());
         assertEquals(Boolean.TRUE, result.getChargedOff());
         assertEquals(Boolean.TRUE, result.getEnableInstallmentLevelDelinquency());
 
@@ -568,7 +572,10 @@ class WorkingCapitalLoanAccountDataMapperTest {
                 .repaymentFrequencyType(stringEnum("0", "repaymentFrequency.days", "Days")).discountFee(new BigDecimal("12.00"))
                 .proposedDiscountFee(new BigDecimal("13.00")).approvedDiscountFee(new BigDecimal("14.00")).numberOfRepayments(90)
                 .periodPaymentAmount(new BigDecimal("120.00")).calculatedAnnualEir(new BigDecimal("18.25"))
-                .totalPaymentVolume(new BigDecimal("5000.00")).breachGraceDays(3).delinquencyGraceDays(7)
+                .totalPaymentVolume(new BigDecimal("5000.00")).annualEir(new BigDecimal("43.7562")).paymentAmount(new BigDecimal("47.22"))
+                .paymentAmountCalculationStrategy(
+                        WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT.getValueAsStringEnumOptionData())
+                .breachGraceDays(3).delinquencyGraceDays(7)
                 .delinquencyStartType(stringEnum("1", "delinquencyStart.disbursement", "Disbursement"))
                 .delinquencyStartDate(LocalDate.of(2024, 1, 5)).breachStartDate(LocalDate.of(2024, 1, 6))
                 .lastClosedBusinessDate(LocalDate.of(2024, 2, 1)).overpaidOnDate(LocalDate.of(2024, 2, 14)).chargedOff(Boolean.TRUE)

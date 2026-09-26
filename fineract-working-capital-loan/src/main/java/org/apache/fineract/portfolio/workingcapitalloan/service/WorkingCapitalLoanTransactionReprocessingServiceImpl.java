@@ -151,7 +151,6 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         }
 
         // 3) Forward-replay the suffix onto the rewound balance, re-planning each allocation and mutating it in place.
-        final boolean accountingEnabled = loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization();
         final boolean chargeOffInSuffix = replaySet.stream().anyMatch(this::isChargeOff);
         boolean afterChargeOff = loan.isChargedOff() && !chargeOffInSuffix;
         boolean afterLiftedChargeOff = false;
@@ -163,8 +162,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         final List<WorkingCapitalLoanTransaction> adjustedTransactions = new ArrayList<>();
         for (final WorkingCapitalLoanTransaction txn : replaySet) {
             if (isChargeOff(txn)) {
-                final boolean stillChargedOff = replayChargeOff(loan, balance, txn, accountingEnabled, updatedAllocations,
-                        adjustedTransactions);
+                final boolean stillChargedOff = replayChargeOff(loan, balance, txn, updatedAllocations, adjustedTransactions);
                 afterChargeOff = stillChargedOff;
                 afterLiftedChargeOff = !stillChargedOff;
                 if (afterLiftedChargeOff) {
@@ -193,11 +191,10 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
                 adjustedTransactions.add(txn);
             }
 
-            if (accountingEnabled) {
-                final boolean chargeOffRoutingMayHaveChanged = afterChargeOff || afterLiftedChargeOff;
-                postOrRestateJournalEntries(loan, txn, allocated.allocation(), afterChargeOff, allocated.hadStoredAllocation(),
-                        allocated.allocationChanged(), chargeOffRoutingMayHaveChanged);
-            }
+            final boolean chargeOffRoutingMayHaveChanged = afterChargeOff || afterLiftedChargeOff;
+            postOrRestateJournalEntries(loan, txn, allocated.allocation(), afterChargeOff, allocated.hadStoredAllocation(),
+                    allocated.allocationChanged(), chargeOffRoutingMayHaveChanged);
+
         }
 
         allocationRepository.saveAll(updatedAllocations);
@@ -267,7 +264,6 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         final Map<Long, WorkingCapitalLoanCharge> chargesById = charges.stream()
                 .collect(Collectors.toMap(WorkingCapitalLoanCharge::getId, Function.identity()));
 
-        final boolean accountingEnabled = loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization();
         final List<PrincipalPayment> principalPayments = new ArrayList<>();
         final List<PrincipalAdjustment> principalAdjustments = new ArrayList<>();
         final List<WorkingCapitalLoanTransactionAllocation> updatedAllocations = new ArrayList<>();
@@ -277,8 +273,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         WorkingCapitalLoanTransaction liftedChargeOffTransaction = null;
         for (final WorkingCapitalLoanTransaction txn : replayable) {
             if (isChargeOff(txn)) {
-                final boolean stillChargedOff = replayChargeOff(loan, balance, txn, accountingEnabled, updatedAllocations,
-                        adjustedTransactions);
+                final boolean stillChargedOff = replayChargeOff(loan, balance, txn, updatedAllocations, adjustedTransactions);
                 afterChargeOff = stillChargedOff;
                 afterLiftedChargeOff = !stillChargedOff;
                 if (afterLiftedChargeOff) {
@@ -324,11 +319,10 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
                 adjustedTransactions.add(txn);
             }
 
-            if (accountingEnabled) {
-                final boolean chargeOffRoutingMayHaveChanged = afterChargeOff || afterLiftedChargeOff;
-                postOrRestateJournalEntries(loan, txn, updatedAllocation, afterChargeOff, hadStoredAllocation, allocationChanged,
-                        chargeOffRoutingMayHaveChanged);
-            }
+            final boolean chargeOffRoutingMayHaveChanged = afterChargeOff || afterLiftedChargeOff;
+            postOrRestateJournalEntries(loan, txn, updatedAllocation, afterChargeOff, hadStoredAllocation, allocationChanged,
+                    chargeOffRoutingMayHaveChanged);
+
         }
 
         allocationRepository.saveAll(updatedAllocations);
@@ -398,7 +392,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
      * @return {@code false} when outstanding is zero and the charge-off is lifted.
      */
     private boolean replayChargeOff(final WorkingCapitalLoan loan, final WorkingCapitalLoanBalance balance,
-            final WorkingCapitalLoanTransaction chargeOffTransaction, final boolean accountingEnabled,
+            final WorkingCapitalLoanTransaction chargeOffTransaction,
             final List<WorkingCapitalLoanTransactionAllocation> updatedAllocations,
             final List<WorkingCapitalLoanTransaction> adjustedTransactions) {
         // A waiver that sorts after the charge-off is not part of what that charge-off had to write off, but its
@@ -428,9 +422,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
             transactionRepository.saveAndFlush(chargeOffTransaction);
             loan.liftChargeOff();
             loanRepository.saveAndFlush(loan);
-            if (accountingEnabled) {
-                accountingProcessor.postReversalJournalEntries(loan, chargeOffTransaction);
-            }
+            accountingProcessor.postReversalJournalEntries(loan, chargeOffTransaction);
             return false;
         }
 
@@ -455,13 +447,10 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         // amountChanged half of the condition.
         if (amountChanged || allocationChanged) {
             adjustedTransactions.add(chargeOffTransaction);
-        }
-
-        if (accountingEnabled && (amountChanged || allocationChanged)) {
             accountingProcessor.restateJournalEntries(loan, chargeOffTransaction, storedAllocation, true);
         }
 
-        discountFeeAmortizationService.restateFinalDiscountFeeAmortization(loan, balance, chargeOffTransaction, accountingEnabled);
+        discountFeeAmortizationService.restateFinalDiscountFeeAmortization(loan, balance, chargeOffTransaction);
 
         return true;
     }

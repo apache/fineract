@@ -21,13 +21,13 @@ package org.apache.fineract.portfolio.workingcapitalloanproduct.domain;
 import com.google.common.base.Enums;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -63,8 +63,14 @@ public class WorkingCapitalAdvancedPaymentAllocationsJsonParser {
 
     private void populateTransactionType(final Map<String, JsonElement> map, final WorkingCapitalLoanProductPaymentAllocationRule rule) {
         final String transactionType = asStringOrNull(map.get("transactionType"));
-        if (transactionType != null) {
-            rule.setTransactionType(Enums.getIfPresent(PaymentAllocationTransactionType.class, transactionType).orNull());
+        final WorkingCapitalPaymentAllocationTransactionType type = transactionType == null ? null
+                : Enums.getIfPresent(WorkingCapitalPaymentAllocationTransactionType.class, transactionType).orNull();
+        if (type == null) {
+            validator.raiseValidationError("wc-payment-allocation.with.not.valid.transaction.type",
+                    "Invalid paymentAllocation.transactionType '" + transactionType + "'. Supported values: "
+                            + Arrays.toString(WorkingCapitalPaymentAllocationTransactionType.values()));
+        } else {
+            rule.setTransactionType(type.toPaymentAllocationTransactionType());
         }
     }
 

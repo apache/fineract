@@ -40,6 +40,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 
 /**
  * Projected Amortization Schedule model for Working Capital loans.
@@ -84,7 +85,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 @Slf4j
 public final class ProjectedAmortizationScheduleModel {
 
-    private static final String MODEL_VERSION = "9";
+    private static final String MODEL_VERSION = "10";
 
     /**
      * Cap on Total Days: beyond this the schedule materialises an unreasonable number of rows and the EIR is
@@ -98,6 +99,8 @@ public final class ProjectedAmortizationScheduleModel {
     private final Money totalPaymentVolume;
     private final BigDecimal periodPaymentRate;
     private final BigDecimal annualEir;
+    private final BigDecimal paymentAmount;
+    private final WorkingCapitalPaymentAmountCalculationStrategy paymentAmountCalculationStrategy;
     private final int npvDayCount;
     private final LocalDate expectedDisbursementDate;
 
@@ -202,7 +205,8 @@ public final class ProjectedAmortizationScheduleModel {
     private LocalDate calculatedTillDate;
 
     private ProjectedAmortizationScheduleModel(final Money discountFeeAmount, final Money netDisbursementAmount,
-            final Money totalPaymentVolume, final BigDecimal periodPaymentRate, final BigDecimal annualEir, final int npvDayCount,
+            final Money totalPaymentVolume, final BigDecimal periodPaymentRate, final BigDecimal annualEir, final BigDecimal paymentAmount,
+            final WorkingCapitalPaymentAmountCalculationStrategy paymentAmountCalculationStrategy, final int npvDayCount,
             final LocalDate expectedDisbursementDate, final Money expectedPaymentAmount, final Money finalPaymentAmount,
             final int originalPaymentNumber, final BigDecimal effectiveInterestRate, final BigDecimal calculatedAnnualEir,
             final WorkingCapitalAmortizationType amortizationType, final MathContext mc, final CurrencyData currency,
@@ -213,6 +217,8 @@ public final class ProjectedAmortizationScheduleModel {
         this.totalPaymentVolume = totalPaymentVolume;
         this.periodPaymentRate = periodPaymentRate;
         this.annualEir = annualEir;
+        this.paymentAmount = paymentAmount;
+        this.paymentAmountCalculationStrategy = paymentAmountCalculationStrategy;
         this.npvDayCount = npvDayCount;
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.expectedPaymentAmount = expectedPaymentAmount;
@@ -246,6 +252,8 @@ public final class ProjectedAmortizationScheduleModel {
         this.totalPaymentVolume = null;
         this.periodPaymentRate = null;
         this.annualEir = null;
+        this.paymentAmount = null;
+        this.paymentAmountCalculationStrategy = null;
         this.npvDayCount = 0;
         this.expectedDisbursementDate = null;
         this.expectedPaymentAmount = null;
@@ -360,28 +368,79 @@ public final class ProjectedAmortizationScheduleModel {
                 .map(p -> p.actualAmortizationAmount().getAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal totalActualAmortizationWithDiscount(final BigDecimal asOfDiscount) {
-        if (asOfDiscount == null || discountFeeAmount == null || asOfDiscount.compareTo(discountFeeAmount.getAmount()) == 0) {
-            return totalActualAmortization();
+    /**
+     * The amortization earned by the payments dated on or before {@code asOfDate}, measured against
+     * {@code asOfDiscount}.
+     */
+    public BigDecimal totalActualAmortizationAsOf(final BigDecimal asOfDiscount, final LocalDate asOfDate) {
+        Objects.requireNonNull(asOfDate, "asOfDate");
+        Objects.requireNonNull(discountFeeAmount, "discountFeeAmount");
+        // The ordinary case, and the cheap one: the discount that was in force on asOfDate is the one the live schedule
+        // was built with, so its rows already carry the right figures. A row's actual amortization is a function of the
+        // payments up to its own day, so the as-of answer is simply the rows up to that day - no rebuild needed. This
+        // is the path every COB day takes.
+        if (asOfDiscount == null || asOfDiscount.compareTo(discountFeeAmount.getAmount()) == 0) {
+            return totalActualAmortizationUpTo(asOfDate);
         }
-        return withDiscount(asOfDiscount).totalActualAmortization();
+        // The discounts differ, which means an adjustment landed after asOfDate. The model keeps only one discount, the
+        // latest, and restates the whole schedule whenever it changes - so every row now reports what it would have
+        // earned under the new discount, including the rows dated before the adjustment. Those rows are answering the
+        // wrong question, and filtering cannot fix it: it drops rows, it never restates the ones it keeps. The schedule
+        // has to be rebuilt at the discount that was actually in force on the day.
+        return asOfModel(asOfDiscount, asOfDate).totalActualAmortization();
     }
 
-    private ProjectedAmortizationScheduleModel withDiscount(final BigDecimal asOfDiscount) {
-        final LocalDate asOfDate = calculatedTillDate != null ? calculatedTillDate : expectedDisbursementDate;
-        final ProjectedAmortizationScheduleModel asOfModel = annualEir != null
-                ? generateFromAnnualEir(amortizationType(), asOfDiscount, netDisbursementAmount.getAmount(), annualEir, npvDayCount,
-                        expectedDisbursementDate, mc, currency, asOfDate)
-                : generate(amortizationType(), asOfDiscount, netDisbursementAmount.getAmount(), totalPaymentVolume.getAmount(),
-                        periodPaymentRate, npvDayCount, expectedDisbursementDate, mc, currency, asOfDate);
-        asOfModel.copyPrincipalAdjustmentsFrom(this);
+    /**
+     * Sum of {@code actualAmortizationAmount} across the applied payment periods dated on or before {@code asOfDate}.
+     */
+    private BigDecimal totalActualAmortizationUpTo(final LocalDate asOfDate) {
+        materializeDerivedPayments();
+        if (projectedPayments == null) {
+            return BigDecimal.ZERO;
+        }
+        return projectedPayments.stream()
+                .filter(p -> p.paymentNo() > 0 && p.actualAmortizationAmount() != null && !p.date().isAfter(asOfDate))
+                .map(p -> p.actualAmortizationAmount().getAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * The model as it stood at the end of {@code asOfDate}: the discount in force then, and only the payments, rate
+     * changes and principal adjustments dated on or before it. {@code calculatedTillDate} is pinned to that day too, so
+     * the days after it are not billed as elapsed.
+     */
+    private ProjectedAmortizationScheduleModel asOfModel(final BigDecimal asOfDiscount, final LocalDate asOfDate) {
+        final LocalDate reachedDate = calculatedTillDate != null && calculatedTillDate.isBefore(asOfDate) ? calculatedTillDate : asOfDate;
+        // Rebuilt through whichever generator the live schedule was built with: an annual EIR or payment amount model
+        // carries no total payment volume or period payment rate to regenerate from.
+        final ProjectedAmortizationScheduleModel asOfModel = rebuildThroughSameStrategy(asOfDiscount, netDisbursementAmount.getAmount(),
+                expectedDisbursementDate, reachedDate);
+        // Rate changes first: a payment is walked at the rate in force on its day, so the rates have to be in place
+        // before any payment is applied. periodPaymentRate is the rate the schedule was generated at and nothing moves
+        // it - the changes live only in this list - so a copy that skipped them would amortize a re-rated loan at its
+        // original rate.
+        if (rateChanges != null) {
+            for (final RateChange rateChange : rateChanges) {
+                if (!rateChange.effectiveDate().isAfter(reachedDate)) {
+                    asOfModel.rateChanges.add(rateChange);
+                }
+            }
+        }
+        if (principalAdjustments != null) {
+            for (final PrincipalAdjustment adjustment : principalAdjustments) {
+                if (!adjustment.date().isAfter(reachedDate)) {
+                    asOfModel.principalAdjustments.add(adjustment);
+                }
+            }
+        }
+        // Added straight to the list, the way regenerate does: these dates were already resolved to their allocation
+        // day when they were first applied, and applyPayment would rebuild the whole schedule once per payment.
         for (final ActualPayment payment : actualPayments) {
-            asOfModel.applyPayment(payment.date(), payment.amount().getAmount());
+            if (!payment.date().isAfter(reachedDate)) {
+                asOfModel.actualPayments.add(payment);
+            }
         }
-        if (calculatedTillDate != null) {
-            asOfModel.updateCalculatedTillDate(calculatedTillDate);
-            asOfModel.rebuildPayments();
-        }
+        asOfModel.updateCalculatedTillDate(reachedDate);
+        asOfModel.rebuildPayments();
         return asOfModel;
     }
 
@@ -514,7 +573,8 @@ public final class ProjectedAmortizationScheduleModel {
         final AmortizationParams.Solved solved = AmortizationParams.solve(type, net.getAmount(), fee.getAmount(), volume.getAmount(),
                 periodPaymentRate, npvDayCount, currency.getDecimalPlaces(), mc);
 
-        return new ProjectedAmortizationScheduleModel(fee, net, volume, periodPaymentRate, null, npvDayCount, expectedDisbursementDate,
+        return new ProjectedAmortizationScheduleModel(fee, net, volume, periodPaymentRate, null, null,
+                WorkingCapitalPaymentAmountCalculationStrategy.TPV, npvDayCount, expectedDisbursementDate,
                 Money.of(currency, solved.dailyPayment(), mc), Money.of(currency, solved.closingPayment(), mc), solved.term(), solved.eir(),
                 solved.calculatedAnnualEir(), type, mc, currency, currentDate);
     }
@@ -551,7 +611,8 @@ public final class ProjectedAmortizationScheduleModel {
         final AmortizationParams.Solved solved = AmortizationParams.solveFromAnnualEir(type, net.getAmount(), fee.getAmount(),
                 annualEirPercent, npvDayCount, currency.getDecimalPlaces(), mc);
 
-        return new ProjectedAmortizationScheduleModel(fee, net, null, null, annualEirPercent, npvDayCount, expectedDisbursementDate,
+        return new ProjectedAmortizationScheduleModel(fee, net, null, null, annualEirPercent, null,
+                WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, npvDayCount, expectedDisbursementDate,
                 Money.of(currency, solved.dailyPayment(), mc), Money.of(currency, solved.closingPayment(), mc), solved.term(), solved.eir(),
                 solved.calculatedAnnualEir(), type, mc, currency, currentDate);
     }
@@ -576,6 +637,60 @@ public final class ProjectedAmortizationScheduleModel {
         try {
             final WorkingCapitalAmortizationType type = amortizationType != null ? amortizationType : WorkingCapitalAmortizationType.EIR;
             AmortizationParams.solveFromAnnualEir(type, net, fee, annualEirPercent, npvDayCount, currency.getDigitsAfterDecimal(), mc);
+        } catch (final ArithmeticException | IllegalArgumentException | IllegalStateException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static ProjectedAmortizationScheduleModel generateFromPaymentAmount(final WorkingCapitalAmortizationType amortizationType,
+            final BigDecimal discountFeeAmount, final BigDecimal netDisbursementAmount, final BigDecimal paymentAmount,
+            final int npvDayCount, final LocalDate expectedDisbursementDate, final MathContext mc, final CurrencyData currency,
+            final LocalDate currentDate) {
+
+        Objects.requireNonNull(discountFeeAmount, "discountFeeAmount");
+        Objects.requireNonNull(netDisbursementAmount, "netDisbursementAmount");
+        Objects.requireNonNull(paymentAmount, "paymentAmount");
+        Objects.requireNonNull(expectedDisbursementDate, "expectedDisbursementDate");
+        Objects.requireNonNull(currency, "currency");
+        final Money net = Money.of(currency, netDisbursementAmount, mc);
+        final Money fee = Money.of(currency, discountFeeAmount, mc);
+        if (!fee.isGreaterThanZero()) {
+            throw new IllegalArgumentException("discountFeeAmount must be positive for payment amount strategy in the loan currency");
+        }
+        if (!net.isGreaterThanZero()) {
+            throw new IllegalArgumentException("netDisbursementAmount must be positive in the loan currency");
+        }
+        if (npvDayCount <= 0) {
+            throw new IllegalArgumentException("npvDayCount must be positive");
+        }
+
+        final WorkingCapitalAmortizationType type = amortizationType != null ? amortizationType : WorkingCapitalAmortizationType.EIR;
+        final AmortizationParams.Solved solved = AmortizationParams.solveFromKnownPayment(type, net.getAmount(), fee.getAmount(),
+                paymentAmount, mc, npvDayCount, currency.getDecimalPlaces());
+
+        return new ProjectedAmortizationScheduleModel(fee, net, null, null, null, paymentAmount,
+                WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, npvDayCount, expectedDisbursementDate,
+                Money.of(currency, solved.dailyPayment(), mc), Money.of(currency, solved.closingPayment(), mc), solved.term(), solved.eir(),
+                solved.calculatedAnnualEir(), type, mc, currency, currentDate);
+    }
+
+    public static boolean isPaymentAmountCalculable(final WorkingCapitalAmortizationType amortizationType,
+            final BigDecimal discountFeeAmount, final BigDecimal netDisbursementAmount, final BigDecimal paymentAmount,
+            final int npvDayCount, final MonetaryCurrency currency, final MathContext mc) {
+        Objects.requireNonNull(discountFeeAmount, "discountFeeAmount");
+        Objects.requireNonNull(netDisbursementAmount, "netDisbursementAmount");
+        Objects.requireNonNull(paymentAmount, "paymentAmount");
+        Objects.requireNonNull(currency, "currency");
+        Objects.requireNonNull(mc, "mc");
+        final BigDecimal net = Money.of(currency, netDisbursementAmount, mc).getAmount();
+        final BigDecimal fee = Money.of(currency, discountFeeAmount, mc).getAmount();
+        if (fee.signum() <= 0 || net.signum() <= 0 || npvDayCount <= 0 || paymentAmount.signum() <= 0) {
+            return false;
+        }
+        try {
+            final WorkingCapitalAmortizationType type = amortizationType != null ? amortizationType : WorkingCapitalAmortizationType.EIR;
+            AmortizationParams.solveFromKnownPayment(type, net, fee, paymentAmount, mc, npvDayCount, currency.getDigitsAfterDecimal());
         } catch (final ArithmeticException | IllegalArgumentException | IllegalStateException e) {
             return false;
         }
@@ -681,15 +796,42 @@ public final class ProjectedAmortizationScheduleModel {
     /** Creates a new model with updated parameters, preserving applied payments. */
     public ProjectedAmortizationScheduleModel regenerate(final BigDecimal newDiscountAmount, final BigDecimal newNetAmount,
             final LocalDate newStartDate, final LocalDate currentDate) {
-        final ProjectedAmortizationScheduleModel newModel = annualEir != null
-                ? generateFromAnnualEir(amortizationType(), newDiscountAmount, newNetAmount, annualEir, npvDayCount, newStartDate, mc,
-                        currency, currentDate)
-                : generate(amortizationType(), newDiscountAmount, newNetAmount, totalPaymentVolume.getAmount(), periodPaymentRate,
-                        npvDayCount, newStartDate, mc, currency, currentDate);
+        final ProjectedAmortizationScheduleModel newModel = rebuildThroughSameStrategy(newDiscountAmount, newNetAmount, newStartDate,
+                currentDate);
         newModel.actualPayments.addAll(actualPayments);
         newModel.copyPrincipalAdjustmentsFrom(this);
         newModel.rebuildPayments();
         return newModel;
+    }
+
+    private ProjectedAmortizationScheduleModel rebuildThroughSameStrategy(final BigDecimal discountAmount, final BigDecimal netAmount,
+            final LocalDate startDate, final LocalDate currentDate) {
+        return switch (strategy()) {
+            case PAYMENT_AMOUNT -> generateFromPaymentAmount(amortizationType(), discountAmount, netAmount, paymentAmount, npvDayCount,
+                    startDate, mc, currency, currentDate);
+            case ANNUAL_EIR -> generateFromAnnualEir(amortizationType(), discountAmount, netAmount, annualEir, npvDayCount, startDate, mc,
+                    currency, currentDate);
+            case TPV -> generate(amortizationType(), discountAmount, netAmount, totalPaymentVolume.getAmount(), periodPaymentRate,
+                    npvDayCount, startDate, mc, currency, currentDate);
+        };
+    }
+
+    /**
+     * The strategy this model was built under. JSON that does not carry it records the strategy only through which
+     * input it holds; every input is inferred, not just the ones old JSON can have, because stored JSON is read without
+     * a version check and a model misread as TPV would fail on the total payment volume it does not have.
+     */
+    public WorkingCapitalPaymentAmountCalculationStrategy strategy() {
+        if (paymentAmountCalculationStrategy != null) {
+            return paymentAmountCalculationStrategy;
+        }
+        if (paymentAmount != null) {
+            return WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT;
+        }
+        if (annualEir != null) {
+            return WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR;
+        }
+        return WorkingCapitalPaymentAmountCalculationStrategy.TPV;
     }
 
     private void copyPrincipalAdjustmentsFrom(final ProjectedAmortizationScheduleModel source) {
@@ -742,8 +884,8 @@ public final class ProjectedAmortizationScheduleModel {
     public void applyRateChange(final BigDecimal newPeriodPaymentRate, final LocalDate rateChangeDate, final LocalDate currentDate) {
         Objects.requireNonNull(newPeriodPaymentRate, "newPeriodPaymentRate");
         Objects.requireNonNull(rateChangeDate, "rateChangeDate");
-        if (annualEir != null) {
-            throw new IllegalStateException("rate change is not supported for Annual EIR payment amount calculation strategy");
+        if (!strategy().isTpv()) {
+            throw new IllegalStateException("rate change is not supported for the " + strategy().name() + " strategy");
         }
         if (rateChangeDate.isBefore(expectedDisbursementDate)) {
             throw new IllegalArgumentException("rateChangeDate must not be before expectedDisbursementDate");
@@ -824,16 +966,17 @@ public final class ProjectedAmortizationScheduleModel {
         // the flag still set would recurse. It also means every direct caller leaves the model fresh.
         this.derivedPaymentsStale = false;
         final Map<LocalDate, BigDecimal> paymentsByDate = aggregatePaymentsByDate();
-        final AmortizationWalk amortizationWalk;
-        if (annualEir != null) {
-            amortizationWalk = new AmortizationWalk(amortizationType(), netDisbursementAmount.getAmount(), discountFeeAmount.getAmount(),
+        final AmortizationWalk amortizationWalk = switch (strategy()) {
+            case PAYMENT_AMOUNT -> AmortizationWalk.forPaymentAmount(amortizationType(), netDisbursementAmount.getAmount(),
+                    discountFeeAmount.getAmount(), paymentAmount, npvDayCount, expectedDisbursementDate, currentFirstPeriodDayOffset(),
+                    calculatedTillDate, paymentsByDate, minimumScheduleDays(), currency, mc);
+            case ANNUAL_EIR -> new AmortizationWalk(amortizationType(), netDisbursementAmount.getAmount(), discountFeeAmount.getAmount(),
                     annualEir, npvDayCount, expectedDisbursementDate, currentFirstPeriodDayOffset(), calculatedTillDate, paymentsByDate,
                     minimumScheduleDays(), currency, mc);
-        } else {
-            amortizationWalk = new AmortizationWalk(amortizationType(), netDisbursementAmount.getAmount(), discountFeeAmount.getAmount(),
+            case TPV -> new AmortizationWalk(amortizationType(), netDisbursementAmount.getAmount(), discountFeeAmount.getAmount(),
                     totalPaymentVolume.getAmount(), periodPaymentRate, npvDayCount, expectedDisbursementDate, currentFirstPeriodDayOffset(),
                     calculatedTillDate, paymentsByDate, rateChanges, minimumScheduleDays(), currency, mc);
-        }
+        };
         final AmortizationWalk.Result walked = amortizationWalk.walk();
         this.contractualTerm = walked.contractualTerm();
         final Map<LocalDate, RateChangeSolve> solves = new LinkedHashMap<>();

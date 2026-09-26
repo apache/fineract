@@ -72,19 +72,19 @@ jobs:
 
       - name: Generate baseline client
         working-directory: baseline
-        run: ./gradlew --no-daemon :fineract-client:cleanupGeneratedJavaFiles -x :fineract-client-feign:cleanupGeneratedJavaFiles
+        run: ./gradlew --no-daemon --no-configuration-cache :fineract-client:cleanupGeneratedJavaFiles -x :fineract-client-feign:cleanupGeneratedJavaFiles
 
       - name: Generate baseline feign client
         working-directory: baseline
-        run: ./gradlew --no-daemon -x :fineract-client:cleanupGeneratedJavaFiles :fineract-client-feign:cleanupGeneratedJavaFiles
+        run: ./gradlew --no-daemon --no-configuration-cache -x :fineract-client:cleanupGeneratedJavaFiles :fineract-client-feign:cleanupGeneratedJavaFiles
 
       - name: Generate merged client
         working-directory: current
-        run: ./gradlew --no-daemon :fineract-client:cleanupGeneratedJavaFiles -x :fineract-client-feign:cleanupGeneratedJavaFiles
+        run: ./gradlew --no-daemon --no-configuration-cache :fineract-client:cleanupGeneratedJavaFiles -x :fineract-client-feign:cleanupGeneratedJavaFiles
 
       - name: Generate merged feign client
         working-directory: current
-        run: ./gradlew --no-daemon -x :fineract-client:cleanupGeneratedJavaFiles :fineract-client-feign:cleanupGeneratedJavaFiles
+        run: ./gradlew --no-daemon --no-configuration-cache -x :fineract-client:cleanupGeneratedJavaFiles :fineract-client-feign:cleanupGeneratedJavaFiles
 
       - name: Check generated client API method compatibility
         run: |

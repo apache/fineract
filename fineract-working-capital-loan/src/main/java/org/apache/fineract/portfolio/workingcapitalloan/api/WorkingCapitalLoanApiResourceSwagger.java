@@ -239,6 +239,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal totalPaymentVolume;
         @Schema(example = "43.7562", description = "Configured annual EIR percentage for ANNUAL_EIR strategy loans")
         public BigDecimal annualEir;
+        @Schema(example = "47.22", description = "Configured daily payment amount for PAYMENT_AMOUNT strategy loans")
+        public BigDecimal paymentAmount;
         @Schema(description = "Payment amount calculation strategy inherited from product")
         public StringEnumOptionData paymentAmountCalculationStrategy;
         @Schema(example = "0.0", description = "Discount fee set during loan disbursement")
@@ -252,8 +254,10 @@ public final class WorkingCapitalLoanApiResourceSwagger {
                 + "solved to close the schedule on - a day the amounts here cannot be used to derive, because it falls out of the balance "
                 + "and the fee still unearned when the change takes effect. Null if schedule not yet generated")
         public Integer numberOfRepayments;
-        @Schema(example = "0.29", description = "Daily payment amount the loan was priced at: totalPaymentVolume x paymentRate / 100 / "
-                + "npvDayCount, rounded to the currency. A rate change does not restate it, no more than it restates paymentRate or "
+        @Schema(example = "0.29", description = "Daily payment amount the loan was priced at, following "
+                + "paymentAmountCalculationStrategy: totalPaymentVolume x paymentRate / 100 / npvDayCount rounded to the currency under "
+                + "TPV, solved from annualEir under ANNUAL_EIR, and paymentAmount itself under PAYMENT_AMOUNT. A rate change does not "
+                + "restate it, no more than it restates paymentRate or "
                 + "calculatedAnnualEir - what is billed from the day a change takes effect follows the rate then in force, and is read "
                 + "off the amortization schedule rows. Null if schedule not yet generated")
         public BigDecimal periodPaymentAmount;
@@ -550,6 +554,9 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal totalPaymentVolume;
         @Schema(example = "43.7562", description = "Annual EIR percentage (6 decimal places max). Required for ANNUAL_EIR strategy products.")
         public BigDecimal annualEir;
+        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+                + "Overrides the product default on PAYMENT_AMOUNT strategy products.")
+        public BigDecimal paymentAmount;
         @Schema(example = "15 January 2024")
         public String submittedOnDate;
         @Schema(example = "1 February 2024")
@@ -702,6 +709,9 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal principalAmount;
         @Schema(example = "10500.00")
         public BigDecimal totalPaymentVolume;
+        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+                + "Overrides the product default on PAYMENT_AMOUNT strategy products.")
+        public BigDecimal paymentAmount;
         @Schema(example = "15 January 2024")
         public String submittedOnDate;
         @Schema(example = "1 February 2024")

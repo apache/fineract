@@ -157,6 +157,10 @@ Feature: Working Capital Discount Adjustment Backdated and Undo
       | Type      | Account code | Account name              | Debit | Credit |
       | INCOME    | 404000       | Interest Income           | 28.7  |        |
       | LIABILITY | 240005       | Deferred Interest Revenue |       | 28.7   |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_ADJUSTMENT" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 1000.0 |
     When Admin undo the last Discount fee adjustment on Working Capital loan account
     And Working capital loan account has the correct data:
       | discount | principal | totalPaidPrincipal |
@@ -177,6 +181,12 @@ Feature: Working Capital Discount Adjustment Backdated and Undo
       | LIABILITY | 240005       | Deferred Interest Revenue |       | 28.7   |
       | LIABILITY | 240005       | Deferred Interest Revenue | 28.7  |        |
       | INCOME    | 404000       | Interest Income           |       | 28.7   |
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_ADJUSTMENT" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 1000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 1000.0 |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
 
   @TestRailId:C106704
   Scenario: Verify full discount adjustment on a product without accounting posts an amortization adjustment with no journal entries; undo reverses both even when accounting is closed for the office
@@ -229,6 +239,64 @@ Feature: Working Capital Discount Adjustment Backdated and Undo
       | 05 January 2026 | Discount Fee Adjustment              | 1000.0            | 1000.0           | 0.0               | 0.0                   | true     |
       | 05 January 2026 | Discount Fee Amortization Adjustment | 28.70             |                  |                   |                       | true     |
     Then Admin closes the Working Capital loan with a full repayment on "06 January 2026"
+
+  @TestRailId:C106828
+  Scenario: Verify undo of a backdated discount fee adjustment books its reversal on the undo date, after an accounting closure that covers the adjustment date
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Admin successfully add discount with "1000" amount on Working Capital loan account
+    And Admin loads discount fee transaction from Working Capital loan for adjustment
+    When Admin sets the business date to "03 January 2026"
+    And Admin adds Discount fee adjustment with "400" amount on transaction date "02 January 2026" on Working Capital loan account for last discount
+    When Admin sets the business date to "05 January 2026"
+    When Admin closes accounting for the last created office on "04 January 2026"
+    When Admin undo the last Discount fee adjustment on Working Capital loan account
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_ADJUSTMENT" transaction with date "02 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 400.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |       | 400.0  |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 400.0  |
+      | ASSET     | 112601       | Loans Receivable          | 400.0 |        |
+
+  @TestRailId:C106829
+  Scenario: Verify undo of a discount fee adjustment is rejected when accounting is closed on the undo date and leaves the adjustment and its journal entries in place
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Admin successfully add discount with "1000" amount on Working Capital loan account
+    And Admin loads discount fee transaction from Working Capital loan for adjustment
+    When Admin sets the business date to "03 January 2026"
+    And Admin adds Discount fee adjustment with "400" amount on transaction date "02 January 2026" on Working Capital loan account for last discount
+    When Admin sets the business date to "05 January 2026"
+    When Admin closes accounting for the last created office on "05 January 2026"
+    When Customer tries to undo "1"th "DISCOUNT_FEE_ADJUSTMENT" transaction made on "02 January 2026" on Working Capital loan and gets error:
+      | httpCode | errorMessage                                                                   |
+      | 403      | Journal entry cannot be made prior to last account closing date for the branch |
+    Then Working Capital Loan has transactions:
+      | transactionDate | type                    | transactionAmount | reversed |
+      | 01 January 2026 | Disbursement            | 9000.0            | false    |
+      | 01 January 2026 | Discount Fee            | 1000.0            | false    |
+      | 02 January 2026 | Discount Fee Adjustment | 400.0             | false    |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_ADJUSTMENT" transaction with date "02 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 400.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |       | 400.0  |
+    And Working capital loan account has the correct data:
+      | discount | principal |
+      | 600.0    | 9600.0    |
 
   @TestRailId:C83068
   Scenario: Multiple backdated discount fee adjustments are allowed; undo of the last one restores its share of the discount
@@ -510,7 +578,7 @@ Feature: Working Capital Discount Adjustment Backdated and Undo
     Then Working capital loan creation was successful
     Then Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
     Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
-    Then Undo discount fee adjustment with a non-existent transaction id on Working Capital loan account failed as not found with status code 400
+    Then Undo discount fee adjustment with a non-existent transaction id on Working Capital loan account failed as not found with status code 404
 
   @TestRailId:C106709
   Scenario: Verify undo of a repayment on a product without accounting succeeds when accounting is closed for the office

@@ -80,6 +80,7 @@ import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
 import org.apache.fineract.client.models.CapitalizedIncomeDetails;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
+import org.apache.fineract.client.models.DelinquencyBucketData;
 import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.GetCodeValuesDataResponse;
 import org.apache.fineract.client.models.GetLoanProductsChargeOffReasonOptions;
@@ -107,6 +108,8 @@ import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.client.models.PostLoansLoanIdOriginatorData;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
@@ -139,10 +142,12 @@ import org.apache.fineract.test.data.codevalue.CodeNames;
 import org.apache.fineract.test.data.codevalue.CodeValue;
 import org.apache.fineract.test.data.codevalue.CodeValueResolver;
 import org.apache.fineract.test.data.codevalue.DefaultCodeValue;
+import org.apache.fineract.test.data.delinquency.DelinquencyBucketResolver;
 import org.apache.fineract.test.data.loanproduct.DefaultLoanProduct;
 import org.apache.fineract.test.data.loanproduct.LoanProductResolver;
 import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
 import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
+import org.apache.fineract.test.factory.LoanProductsRequestFactory;
 import org.apache.fineract.test.factory.LoanRequestFactory;
 import org.apache.fineract.test.helper.BusinessDateHelper;
 import org.apache.fineract.test.helper.CodeHelper;
@@ -202,6 +207,8 @@ public class LoanStepDef extends AbstractStepDef {
     private final PaymentTypeResolver paymentTypeResolver;
     private final LoanProductResolver loanProductResolver;
     private final LoanRequestFactory loanRequestFactory;
+    private final LoanProductsRequestFactory loanProductsRequestFactory;
+    private final DelinquencyBucketResolver delinquencyBucketResolver;
     private final EventCheckHelper eventCheckHelper;
     private final EventStore eventStore;
     private final CodeValueResolver codeValueResolver;
@@ -3711,6 +3718,80 @@ public class LoanStepDef extends AbstractStepDef {
                     assertThat(linesActual).as(ErrorMessageHelper.wrongNumberOfLinesInChargeOffReasonOptions(linesActual, linesExpected))
                             .isEqualTo(linesExpected);
                 });
+    }
+
+    @When("Admin creates a new Loan Product")
+    public void createLoanProduct() {
+        final PostLoanProductsRequest request = loanProductsRequestFactory.defaultLoanProductsRequestLP1();
+        final PostLoanProductsResponse response = ok(() -> fineractClient.loanProducts().createLoanProduct(request));
+        testContext().set(TestContextKey.LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.LOAN_PRODUCT_CREATE_REQUEST, request);
+    }
+
+    @When("Admin retrieves the Loan Product template")
+    public void retrieveLoanProductTemplate() {
+        final Long loanProductId = loanProductResolver.resolve(DefaultLoanProduct.LP1);
+        final GetLoanProductsProductIdResponse template = ok(
+                () -> fineractClient.loanProducts().retrieveOneLoanProductUniversal(loanProductId, Map.of("template", "true")));
+        testContext().set(TestContextKey.LOAN_PRODUCT_TEMPLATE_RESPONSE, template);
+    }
+
+    @Then("Loan Product template delinquencyBucketOptions all have bucketType {string}")
+    public void verifyTemplateDelinquencyBucketOptionsBucketType(final String expectedBucketType) {
+        final GetLoanProductsProductIdResponse template = testContext().get(TestContextKey.LOAN_PRODUCT_TEMPLATE_RESPONSE);
+        assertThat(template.getDelinquencyBucketOptions()).isNotNull().isNotEmpty();
+        final DelinquencyBucketData.BucketTypeEnum expectedType = DelinquencyBucketData.BucketTypeEnum.fromValue(expectedBucketType);
+        assertThat(template.getDelinquencyBucketOptions()).allSatisfy(bucket -> assertThat(bucket.getBucketType()).isEqualTo(expectedType));
+    }
+
+    @Then("Loan Product template delinquencyBucketOptions do not contain:")
+    public void verifyTemplateDelinquencyBucketOptionsDoNotContain(final DataTable table) {
+        final GetLoanProductsProductIdResponse template = testContext().get(TestContextKey.LOAN_PRODUCT_TEMPLATE_RESPONSE);
+        assertThat(template.getDelinquencyBucketOptions()).isNotNull();
+        final List<String> bucketNames = template.getDelinquencyBucketOptions().stream().map(DelinquencyBucketData::getName).toList();
+        assertThat(bucketNames).doesNotContainAnyElementsOf(table.asList());
+    }
+
+    @Then("Admin failed to create a new Loan Product with field {string} invalid data {string} and got an error {string}")
+    public void createLoanProductWithInvalidDataFailed(final String fieldName, final String value, final String errorMessage) {
+        final PostLoanProductsRequest request = setLoanProductCreateFieldValue(loanProductsRequestFactory.defaultLoanProductsRequestLP1(),
+                fieldName, value);
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.loanProducts().createLoanProduct(request));
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.incorrectExpectedValueInResponse()).isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
+    @Then("Admin failed to update a new Loan Product field {string} with invalid data {string} and got an error {string}")
+    public void updateLoanProductWithInvalidDataFailed(final String fieldName, final String value, final String errorMessage) {
+        final PostLoanProductsResponse createResponse = testContext().get(TestContextKey.LOAN_PRODUCT_CREATE_RESPONSE);
+        final PutLoanProductsProductIdRequest updateRequest = setLoanProductUpdateFieldValue(
+                new PutLoanProductsProductIdRequest().locale(LOCALE_EN), fieldName, value);
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.loanProducts().updateLoanProduct(createResponse.getResourceId(), updateRequest));
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.incorrectExpectedValueInResponse()).isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
+    private PostLoanProductsRequest setLoanProductCreateFieldValue(final PostLoanProductsRequest request, final String fieldName,
+            String fieldValue) {
+        if ("null".equals(fieldValue)) {
+            fieldValue = null;
+        }
+        if ("delinquencyBucketId".equalsIgnoreCase(fieldName)) {
+            request.setDelinquencyBucketId(delinquencyBucketResolver.resolveBucketId(fieldValue));
+        }
+        return request;
+    }
+
+    private PutLoanProductsProductIdRequest setLoanProductUpdateFieldValue(final PutLoanProductsProductIdRequest request,
+            final String fieldName, String fieldValue) {
+        if ("null".equals(fieldValue)) {
+            fieldValue = null;
+        }
+        if ("delinquencyBucketId".equalsIgnoreCase(fieldName)) {
+            request.setDelinquencyBucketId(delinquencyBucketResolver.resolveBucketId(fieldValue));
+        }
+        return request;
     }
 
     private void createCustomizedLoan(final List<List<String>> loanData, final String emiStr) {

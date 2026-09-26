@@ -69,6 +69,14 @@ class FineractPlugin implements Plugin<Project> {
             this.context = context(project)
         }
 
+        // Their actions close over this plugin and the services it creates in afterEvaluate, which the configuration
+        // cache cannot store; builds that include them run uncached instead.
+        project.tasks.configureEach { task ->
+            if (task.name == "fineractDocPublish" || task.name.startsWith("fineractRelease")) {
+                task.notCompatibleWithConfigurationCache("release tasks keep plugin services in their actions")
+            }
+        }
+
         project.tasks.register("fineractDocPublish") {
             dependsOn(":fineract-doc:doc")
 

@@ -125,6 +125,19 @@ public class WorkingCapitalAnnualEirStepDef extends AbstractStepDef {
                 .extractingBigDecimal(WorkingCapitalLoanAccountDataV1::getCalculatedAnnualEir).isEqualTo(apiValue);
     }
 
+    @Then("a Working Capital Loan Status Changed business event carries the same payment amount calculation strategy and inputs as loan details")
+    public void statusChangedEventStrategyMatchesLoanDetails() {
+        eventCheckHelper.waitForTransactionCommit();
+        final GetWorkingCapitalLoansLoanIdResponse loan = retrieveLoanDetails();
+        assertThat(loan.getPaymentAmountCalculationStrategy()).as("paymentAmountCalculationStrategy on loan details").isNotNull();
+        eventAssertion.assertEvent(WorkingCapitalLoanStatusChangedEvent.class, getCreatedLoanId())
+                .extractingData(event -> event.getPaymentAmountCalculationStrategy() == null ? null
+                        : event.getPaymentAmountCalculationStrategy().getId())
+                .isEqualTo(loan.getPaymentAmountCalculationStrategy().getId())
+                .extractingBigDecimal(WorkingCapitalLoanAccountDataV1::getPaymentAmount).isEqualTo(loan.getPaymentAmount())
+                .extractingBigDecimal(WorkingCapitalLoanAccountDataV1::getAnnualEir).isEqualTo(loan.getAnnualEir());
+    }
+
     // --- persisted amortization model --------------------------------------------------------------------------------
 
     @Then("The persisted amortization model of the Working Capital loan stores annual effective interest rate literal {string}")

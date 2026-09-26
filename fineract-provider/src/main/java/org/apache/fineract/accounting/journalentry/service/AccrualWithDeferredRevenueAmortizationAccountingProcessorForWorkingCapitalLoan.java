@@ -387,6 +387,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         if (isAccountingDisabled(loan)) {
             return;
         }
+        retireUndoMirrors(txn);
         final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
         if (!splitDiffersFromLedger(loan, txn, allocation, effectiveEntries, isChargedOff)) {
             // The ledger already reflects the recomputed split; re-posting would only add cancelling noise.
@@ -404,6 +405,23 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     private List<JournalEntry> effectiveJournalEntries(final WorkingCapitalLoanTransaction txn) {
         final String transactionId = AccountingProcessorHelper.WORKING_CAPITAL_LOAN_TRANSACTION_IDENTIFIER + txn.getId();
         return journalEntryRepository.findJournalEntries(transactionId, WORKING_CAPITAL_LOAN_ENTITY_TYPE);
+    }
+
+    /**
+     * An undo keeps its mirrors live (see {@link #reverseExistingEntries}), so on a transaction that was undone the
+     * live set holds only those mirrors: they cancel the originals, which are flagged reversed, and the transaction's
+     * net on the ledger is zero. A restatement treats the live set as the current posting, so when such a transaction
+     * is revived it must not see the mirrors: cancelling them would reinstate the originals and the fresh posting would
+     * then be booked on top of them. Flagging each mirror reversed retires the undo pair from the live set without
+     * touching the ledger - the pair still nets to zero - so the restatement posts the transaction afresh.
+     */
+    private void retireUndoMirrors(final WorkingCapitalLoanTransaction txn) {
+        final String transactionId = AccountingProcessorHelper.WORKING_CAPITAL_LOAN_TRANSACTION_IDENTIFIER + txn.getId();
+        for (final JournalEntry mirror : journalEntryRepository.findLiveReversalJournalEntries(transactionId,
+                WORKING_CAPITAL_LOAN_ENTITY_TYPE)) {
+            mirror.setReversed(true);
+            helper.persistJournalEntry(mirror);
+        }
     }
 
     private JournalEntry createMirrorEntry(final JournalEntry journalEntry, final String transactionId, final LocalDate transactionDate) {
@@ -543,6 +561,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         if (isAccountingDisabled(loan)) {
             return;
         }
+        retireUndoMirrors(txn);
         final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
         if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff, false)) {
             // The ledger already reflects the recomputed amount; re-posting would only add cancelling noise.
@@ -558,6 +577,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         if (isAccountingDisabled(loan)) {
             return;
         }
+        retireUndoMirrors(txn);
         final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
         if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff, true)) {
             return;

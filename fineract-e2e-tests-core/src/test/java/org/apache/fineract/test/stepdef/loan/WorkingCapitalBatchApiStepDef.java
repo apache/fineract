@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,11 +48,13 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.Header;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
+import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
+import org.apache.fineract.test.data.TransactionType;
 import org.apache.fineract.test.data.workingcapitalproduct.DefaultWorkingCapitalLoanProduct;
 import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalLoanProductResolver;
 import org.apache.fineract.test.factory.WorkingCapitalLoanRequestFactory;
@@ -79,6 +82,7 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
     private static final String COMMAND_REJECT = "?command=reject";
     private static final String COMMAND_DISBURSE = "?command=disburse";
     private static final String COMMAND_DISCOUNT = "?command=discountFee";
+    private static final String COMMAND_DISCOUNT_ADJUSTMENT = "?command=discountFeeAdjustment";
     private static final String WCL_TRANSACTIONS_PATH = "/transactions";
 
     private final FineractFeignClient fineractFeignClient;
@@ -229,6 +233,58 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
         final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
         final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
         testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API adds discount fee with {string} amount referencing the disbursement external-id in relatedResourceId on the working capital loan")
+    public void batchApiAddDiscountFeeWithDisbursementExternalIdInRelatedResourceId(final String amount) throws IOException {
+        final PostWorkingCapitalLoansLoanIdResponse disburseResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
+        batchApiDiscountCommandWithStringRelatedResourceId(COMMAND_DISCOUNT, amount, disburseResponse.getResourceExternalId());
+    }
+
+    @When("Batch API adds discount fee adjustment with {string} amount referencing the discount fee external-id in relatedResourceId on the working capital loan")
+    public void batchApiAddDiscountFeeAdjustmentWithDiscountFeeExternalIdInRelatedResourceId(final String amount) throws IOException {
+        final List<BatchResponse> discountFeeResponses = testContext().get(TestContextKey.BATCH_API_CALL_RESPONSE);
+        final String discountFeeExternalId = fromJson(discountFeeResponses.getFirst().getBody(),
+                PostWorkingCapitalLoanTransactionsResponse.class).getResourceExternalId();
+        batchApiDiscountCommandWithStringRelatedResourceId(COMMAND_DISCOUNT_ADJUSTMENT, amount, discountFeeExternalId);
+    }
+
+    private void batchApiDiscountCommandWithStringRelatedResourceId(final String command, final String amount,
+            final String relatedResourceId) throws IOException {
+        assertThat(relatedResourceId).as("The external id sent in relatedResourceId must be resolved by a prior step").isNotBlank();
+        final DiscountCommandBodyWithStringRelatedResourceId body = new DiscountCommandBodyWithStringRelatedResourceId("01 January 2026",
+                new BigDecimal(amount), WorkingCapitalLoanRequestFactory.DEFAULT_LOCALE, WorkingCapitalLoanRequestFactory.DATE_FORMAT,
+                relatedResourceId);
+        final String url = resolveLoanUrlForGet() + WCL_TRANSACTIONS_PATH + command;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(body));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API adds discount fee adjustment with {string} amount referencing the discount fee external-id in relatedExternalResourceId on the working capital loan")
+    public void batchApiAddDiscountFeeAdjustmentWithRelatedExternalResourceId(final String amount) throws IOException {
+        final String discountFeeExternalId = retrieveActiveDiscountFeeExternalId();
+        final PostWorkingCapitalLoanTransactionsRequest request = new PostWorkingCapitalLoanTransactionsRequest()
+                .transactionDate("01 January 2026").transactionAmount(new BigDecimal(amount))
+                .relatedExternalResourceId(discountFeeExternalId).locale(WorkingCapitalLoanRequestFactory.DEFAULT_LOCALE)
+                .dateFormat(WorkingCapitalLoanRequestFactory.DATE_FORMAT);
+        final String url = resolveLoanUrlForGet() + WCL_TRANSACTIONS_PATH + COMMAND_DISCOUNT_ADJUSTMENT;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    private String retrieveActiveDiscountFeeExternalId() {
+        final List<GetWorkingCapitalLoanTransactionIdResponse> transactions = ok(
+                () -> fineractFeignClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTransactionsById(getCreatedWCLoanId()))
+                .getContent();
+        final String expectedCode = "loanTransactionType." + TransactionType.DISCOUNT_FEE.getValue();
+        return transactions.stream()
+                .filter(transaction -> transaction.getType() != null && expectedCode.equals(transaction.getType().getCode()))
+                .filter(transaction -> !Boolean.TRUE.equals(transaction.getReversed()))
+                .max(Comparator.comparing(GetWorkingCapitalLoanTransactionIdResponse::getId))
+                .map(GetWorkingCapitalLoanTransactionIdResponse::getExternalId)
+                .orElseThrow(() -> new IllegalStateException("No active discount fee transaction on the Working Capital loan"));
     }
 
     @When("Batch API fetches working capital loan details by loan ID")
@@ -784,5 +840,9 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
         request.headers(Set.of(HEADER_JSON));
         request.body(body);
         return request;
+    }
+
+    private record DiscountCommandBodyWithStringRelatedResourceId(String transactionDate, BigDecimal transactionAmount, String locale,
+            String dateFormat, String relatedResourceId) {
     }
 }

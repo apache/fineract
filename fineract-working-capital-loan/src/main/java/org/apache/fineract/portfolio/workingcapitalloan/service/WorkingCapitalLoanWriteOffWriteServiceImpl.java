@@ -137,9 +137,8 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
         // Nothing else would do it - a CLOSED_WRITTEN_OFF loan is out of COB scope, so the tag would stay frozen.
         this.delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            this.accountingProcessor.postJournalEntries(loan, writeOffTransaction, allocation, loan.isChargedOff());
-        }
+        this.accountingProcessor.postJournalEntries(loan, writeOffTransaction, allocation, loan.isChargedOff());
+
         // Same final discount-fee amortization charge-off already posts: recognize any remaining deferred income on
         // the write-off date (CLOSED_WRITTEN_OFF loans are out of COB, so otherwise it would stay parked forever).
         this.discountFeeAmortizationService.processFinalDiscountFeeAmortization(loan, writeOffTransaction);
@@ -207,9 +206,8 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
         // repayment history and reclassifies against the outstanding that is back on the books.
         this.delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            this.accountingProcessor.postReversalJournalEntries(loan, writeOffTransaction);
-        }
+        this.accountingProcessor.postReversalJournalEntries(loan, writeOffTransaction);
+
         this.businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent(writeOffTransaction, loan.getId()));
         notifyBalanceChanged(loan);

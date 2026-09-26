@@ -66,6 +66,24 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
             @Param("adjustmentType") LoanTransactionType adjustmentType);
 
     /**
+     * The same net, restricted to the transactions dated on or before {@code asOfDate}. A COB day compares what the
+     * schedule has earned by that day against what has been posted by that day; summing every amortization whatever its
+     * date would measure the two over different periods, so a replayed day would correct itself against income that
+     * belongs to a later one.
+     */
+    @Query("""
+            select coalesce(sum(case when t.transactionType = :amortizationType then t.transactionAmount
+                                     when t.transactionType = :adjustmentType then (0 - t.transactionAmount)
+                                     else 0 end), 0)
+            from WorkingCapitalLoanTransaction t
+            where t.wcLoan.id = :wcLoanId and t.reversed = false
+              and t.transactionType in (:amortizationType, :adjustmentType)
+              and t.transactionDate <= :asOfDate
+            """)
+    BigDecimal sumNetAmortizationAsOf(@Param("wcLoanId") Long wcLoanId, @Param("amortizationType") LoanTransactionType amortizationType,
+            @Param("adjustmentType") LoanTransactionType adjustmentType, @Param("asOfDate") LocalDate asOfDate);
+
+    /**
      * Total amount of non-reversed discount fee adjustments dated strictly after {@code date} (not yet effective then).
      */
     @Query("""
@@ -155,6 +173,40 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
             """)
     List<TransactionDateAndAmountHolder> findFirstActiveTransactionDateAndAmountByLoanIdWithOverpaidPortion(
             @Param("wcLoanId") Long wcLoanId, @Param("transactionTypes") List<LoanTransactionType> transactionTypes, Pageable pageable);
+
+    /**
+     * The date of the latest non-reversed transaction of the given types that was actually needed to meet the loan's
+     * obligations - that is, whose allocation is not wholly overpayment - or {@code null} when there is none.
+     * <p>
+     * Money is allocated in date order, so every transaction up to and including that one paid down something that was
+     * due, and the ones after it are pure excess. That makes its date the day the obligations were met. A plain
+     * {@code MAX(transactionDate)} would answer the same on a loan that is settled exactly, where nothing is excess,
+     * but would name a surplus payment on a loan that is or once was overpaid - a payment the loan never needed, and
+     * which therefore says nothing about when it was settled.
+     * <p>
+     * The left join keeps transactions that carry no allocation at all rather than silently dropping them.
+     */
+    @Query("""
+            SELECT MAX(t.transactionDate) FROM WorkingCapitalLoanTransaction t
+            LEFT JOIN t.allocation a
+            WHERE t.wcLoan.id = :wcLoanId
+            AND t.reversed = FALSE
+            AND t.transactionType in :transactionTypes
+            AND (a IS NULL OR COALESCE(a.overpaymentPortion, 0) < t.transactionAmount)
+            """)
+    LocalDate findLatestActiveTransactionDateWithDuePortion(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
+
+    /** Whether the loan carries a non-reversed transaction of the given type dated exactly on {@code date}. */
+    @Query("""
+            SELECT CASE WHEN COUNT(t) > 0 THEN TRUE ELSE FALSE END FROM WorkingCapitalLoanTransaction t
+            WHERE t.wcLoan.id = :wcLoanId
+            AND t.reversed = FALSE
+            AND t.transactionType = :transactionType
+            AND t.transactionDate = :date
+            """)
+    boolean existsActiveTransactionOn(@Param("wcLoanId") Long wcLoanId, @Param("transactionType") LoanTransactionType transactionType,
+            @Param("date") LocalDate date);
 
     /**
      * Non-reversed transactions of the loan whose type is none of {@code excludedTypes}, latest first in the

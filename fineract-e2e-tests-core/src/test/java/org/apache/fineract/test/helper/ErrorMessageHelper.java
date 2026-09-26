@@ -1052,6 +1052,10 @@ public final class ErrorMessageHelper {
         return "At least one DEFAULT payment allocation must be provided";
     }
 
+    public static String invalidTrnTypeDuplicatedForPaymentAllocationFailure() {
+        return "The same transaction type must be provided only once";
+    }
+
     public static String workingCapitalLoanProductIdentifiedDoesNotExistFailure(String identifierId) {
         return String.format("Working Capital Loan Product with identifier %s does not exist", identifierId);
     }
@@ -1144,8 +1148,9 @@ public final class ErrorMessageHelper {
         return "Undo is not supported for transaction type";
     }
 
-    public static String discountAdjustmentUndoTransactionNotFoundFailure() {
-        return "Working capital loan transaction not found";
+    public static String workingCapitalLoanTransactionNotFoundFailure(final long transactionId, final long loanId) {
+        return String.format("Working Capital Loan transaction with identifier %s does not exist for loan with identifier %s.",
+                transactionId, loanId);
     }
 
     public static String discountAdjustmentUndoNotActiveLoanFailure() {

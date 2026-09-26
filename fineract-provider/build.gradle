@@ -38,16 +38,17 @@ swaggerBrake {
     strictValidation = false
 }
 
-checkBreakingChanges.onlyIf {
-    def baseline = findProperty('apiBaseline') ?: "${projectDir}/config/swagger/fineract-baseline.json"
-    def exists = file(baseline).exists()
+// Resolved here: onlyIf runs at execution time, where project lookups are unsupported with the configuration cache.
+def breakingChangesBaseline = file(findProperty('apiBaseline') ?: "${projectDir}/config/swagger/fineract-baseline.json")
+def breakingChangesNewApi = file(findProperty('apiNew') ?: "${project.buildDir}/resources/main/static/fineract.json")
+checkBreakingChanges.onlyIf { task ->
+    def exists = breakingChangesBaseline.exists()
     if (!exists) {
-        logger.lifecycle("Skipping checkBreakingChanges: baseline file not found at ${baseline}")
+        task.logger.lifecycle("Skipping checkBreakingChanges: baseline file not found at ${breakingChangesBaseline}")
     }
-    def apiNew = findProperty('apiNew') ?: "${project.buildDir}/resources/main/static/fineract.json"
-    def existsApiNew = file(apiNew).exists()
+    def existsApiNew = breakingChangesNewApi.exists()
     if (!existsApiNew) {
-        logger.lifecycle("Skipping checkBreakingChanges: new api file not found at ${apiNew}")
+        task.logger.lifecycle("Skipping checkBreakingChanges: new api file not found at ${breakingChangesNewApi}")
     }
     exists && existsApiNew
 }
@@ -65,16 +66,32 @@ compileJava {
 // Configuration for Swagger documentation generation task
 // https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.api.file.FileSystemOperations
+
+import javax.inject.Inject
+
+// Project.copy() is unsupported in a task action under the configuration cache; the injected
+// FileSystemOperations service is the supported replacement (same reasoning as ExecOperations
+// for Project.javaexec() in static-weaving.gradle).
+interface PrepareInputYamlOperations {
+    @Inject
+    FileSystemOperations getFileSystemOperations()
+}
 
 tasks.register('prepareInputYaml') {
+    def templateFile = file("${projectDir}/config/swagger/fineract-input.yaml.template")
+    def outputDir = file("${buildDir}/tmp/swagger")
+    def versionToken = "${project.version}".toString()
+    def fileSystemOperations = objects.newInstance(PrepareInputYamlOperations).fileSystemOperations
+
     outputs.file("${buildDir}/tmp/swagger/fineract-input.yaml")
 
     doLast {
-        copy {
-            from file("${projectDir}/config/swagger/fineract-input.yaml.template")
-            into file("${buildDir}/tmp/swagger")
+        fileSystemOperations.copy {
+            from templateFile
+            into outputDir
             rename { String filename -> return 'fineract-input.yaml' }
-            filter(ReplaceTokens, tokens: [VERSION: "${project.version}".toString()])
+            filter(ReplaceTokens, tokens: [VERSION: versionToken])
         }
     }
 }
@@ -279,6 +296,14 @@ tasks.register('setBlankPassword') {
     }
 }
 
+// These tasks read project properties from their actions, and rely on the JDBC drivers being added to groovy-sql's
+// classloader while the build is configured -- which does not happen when a cached configuration is reused.
+['createDB', 'dropDB', 'createPGDB', 'dropPGDB', 'createMySQLDB', 'dropMySQLDB', 'setBlankPassword'].each { name ->
+    tasks.named(name) {
+        notCompatibleWithConfigurationCache('reads project properties at execution time and needs configuration-time JDBC driver loading')
+    }
+}
+
 tasks.named('sourcesJar') {
     dependsOn(processResources, generateGitProperties, resolve)
     mustRunAfter(processResources, generateGitProperties, resolve)
@@ -289,11 +314,6 @@ tasks.named('sourcesJar') {
     }
 }
 
-tasks.named('licenseMain') {
-    dependsOn(processResources, generateGitProperties)
-    mustRunAfter(processResources, generateGitProperties)
-    source = sourceSets.main.java.srcDirs
-}
 
 bootRun {
     classpath += configurations.bootRunDriver
@@ -313,6 +333,10 @@ bootJar {
     }
     archiveClassifier = ''
     dependsOn resolve, generateGitProperties
+}
+
+tasks.withType(com.google.cloud.tools.jib.gradle.JibTask).configureEach {
+    notCompatibleWithConfigurationCache('jib 3.5.x keeps a Project reference in its tasks')
 }
 
 jib {

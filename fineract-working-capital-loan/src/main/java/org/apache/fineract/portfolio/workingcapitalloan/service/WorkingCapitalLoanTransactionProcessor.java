@@ -25,6 +25,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
 import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionDateAndAmountHolder;
@@ -131,10 +132,8 @@ public class WorkingCapitalLoanTransactionProcessor {
                 delinquencyRangeScheduleService.applyRepayment(loan, transactionDate, transactionAmount);
             }
 
-            if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-                accountingProcessor.postJournalEntries(loan, transaction, allocation,
-                        transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, transaction));
-            }
+            accountingProcessor.postJournalEntries(loan, transaction, allocation,
+                    transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, transaction));
         }
 
         // Breach schedule is maintained incrementally here; reprocessing does not rebuild it.
@@ -142,10 +141,11 @@ public class WorkingCapitalLoanTransactionProcessor {
 
         stateMachine.determineAndTransition(loan, transactionDate);
         recalculateOverpaidOnDate(loan, transaction);
+        recalculateSettlementDates(loan);
         triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
         // On early closure the loan leaves the COB scope, so any charge whose due-date accrual has not been posted yet
-        // is accrued as of the closing date to make sure the income is recognized before the loan is closed.
-        chargeAccrualService.accrueOnClosure(loan, transactionDate);
+        // is accrued as of the day the loan settled - not the day the closing transaction happens to carry.
+        chargeAccrualService.accrueOnClosure(loan, closureIncomeDate(loan, transactionDate));
     }
 
     /**
@@ -212,8 +212,116 @@ public class WorkingCapitalLoanTransactionProcessor {
                     && MathUtil.isGreaterThanZero(loan.getBalance().getRealizedIncomeFromDiscountFee());
 
             if (MathUtil.isGreaterThanZero(discount) || adjustmentNeeded) {
-                discountFeeAmortizationService.processDiscountFeeAmortization(loan, transactionDate);
+                discountFeeAmortizationService.processDiscountFeeAmortization(loan, settlementDate(loan, transactionDate));
             }
         }
+    }
+
+    /**
+     * Re-derives the two dates published as {@code timeline.closedOnDate} and {@code timeline.actualMaturityDate} from
+     * the loan's history, correcting the optimistic values the lifecycle state machine stamps when a loan settles.
+     * <p>
+     * The machine stamps whichever transaction triggered the transition, which is the day the loan settled only when
+     * that transaction is also the one that finished the settlement. A backdated repayment completing an already
+     * part-paid loan is not, and neither is a surplus payment, a refund or an undo on an already-settled loan. It is
+     * the same defect {@link #recalculateOverpaidOnDate} fixes on {@code overpaidOnDate}, reaching the API the same way
+     * through {@code WorkingCapitalLoanSummaryMapper.buildTimeline}.
+     * <p>
+     * Must be called wherever a transaction can settle the loan, alongside
+     * {@link #recalculateOverpaidOnDate(WorkingCapitalLoan, WorkingCapitalLoanTransaction)}: the repayment path here, a
+     * discount fee adjustment and a transaction undo. {@link #settlementDate} reads what this writes, so a site that
+     * settles a loan without correcting these dates would date the closing amortization and the closure accruals from
+     * the raw stamp.
+     * <p>
+     * A credit balance refund is deliberately not one of those sites. It is a real money movement rather than a
+     * reallocation of one, and the account is not closed until it happens, so it closes the loan on its own date the
+     * way core's {@code DefaultLoanLifecycleStateMachine} does.
+     */
+    public void recalculateSettlementDates(final WorkingCapitalLoan loan) {
+        // Mirrors determineAndTransition's own tolerance of a not-yet-established status: a freshly built loan with no
+        // balance is left unset.
+        final LoanStatus status = loan.getLoanStatus();
+        if (status == null || (!status.isOverpaid() && !status.isClosedObligationsMet())) {
+            return;
+        }
+        final LocalDate settledOn = settlementDateFromHistory(loan);
+        if (settledOn == null) {
+            return;
+        }
+        // An overpaid loan has met its obligations too, so it carries a maturity date even though it is not closed.
+        loan.setMaturedOnDate(settledOn);
+        if (status.isClosedObligationsMet()) {
+            loan.setClosedOnDate(settledOn);
+        }
+    }
+
+    /**
+     * The day the loan's obligations were met, read off its history rather than off the event in hand: the last
+     * repayment the loan actually needed. Money is allocated in date order, so everything after that payment - a
+     * surplus payment, and the refund or undo that takes the surplus away again - is excess, and excess says nothing
+     * about when the loan was settled. Being a function of history alone it lands on the same day whichever event
+     * recalculates it, including when that moves the answer earlier.
+     * <p>
+     * A discount fee adjustment can settle a loan too, by reducing what is owed to what has already been paid. It is
+     * not a repayment-like transaction, so the query cannot see it, and the stamp is the only record of that day - kept
+     * for exactly as long as an adjustment on that day backs it up, so a payment-derived stamp cannot outlive the
+     * payment it came from.
+     */
+    private LocalDate settlementDateFromHistory(final WorkingCapitalLoan loan) {
+        final LocalDate obligationsMetOn = transactionRepository.findLatestActiveTransactionDateWithDuePortion(loan.getId(),
+                LoanTransactionType.getRepaymentLikeTransactionTypes());
+        final LocalDate stamped = loan.getMaturedOnDate();
+        if (DateUtils.isAfter(stamped, obligationsMetOn)
+                && transactionRepository.existsActiveTransactionOn(loan.getId(), LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT, stamped)) {
+            return stamped;
+        }
+        return obligationsMetOn;
+    }
+
+    /**
+     * The day the loan actually became settled, which is the day the whole discount is earned - not the date of
+     * whichever transaction happened to trigger the recalculation.
+     * <p>
+     * The two are the same only when the triggering transaction is also the chronologically last one. A backdated
+     * repayment that completes an already part-paid loan is not: it carries an earlier date, while the money that
+     * finished the settlement arrived later. Dating the closing amortization on the trigger would recognize the income
+     * before that cash came in.
+     * <p>
+     * Mirrors core's {@code getFinalAccrualTransactionDate}: it reads the loan's settlement state rather than the
+     * transaction in hand. It reads {@code maturedOnDate}, which
+     * {@link #recalculateSettlementDates(WorkingCapitalLoan)} re-derives immediately before this runs and maintains on
+     * an overpaid loan as well as a closed one, so the income, the closure accruals and the closure the API reports are
+     * all dated from the same answer rather than drifting apart.
+     * <p>
+     * Never earlier than the triggering transaction. Settlement can be completed by something that is not a repayment
+     * at all - a write-off, a waiver, a charge adjustment - and for those the trigger's own date remains the best
+     * answer, so this only ever moves the recognition later, never earlier than it is booked today.
+     */
+    private LocalDate settlementDate(final WorkingCapitalLoan loan, final LocalDate transactionDate) {
+        final LocalDate settledOn = settledOn(loan);
+        return settledOn == null || !settledOn.isAfter(transactionDate) ? transactionDate : settledOn;
+    }
+
+    /**
+     * The day the loan settled, for the income that belongs to the closure itself rather than to whichever transaction
+     * revealed it.
+     * <p>
+     * Unlike {@link #settlementDate} this is not floored at the transaction in hand, because the two answer different
+     * questions. The discount is measured against a schedule, and a schedule changes on the day it is changed, so an
+     * adjustment arriving after the settlement earns its correction on its own later day. A charge accrual is not: it
+     * recognizes income the closure leaves unrecognized, and the closure happened when the loan met its obligations. A
+     * surplus payment, a credit balance refund or an undo arriving afterwards hands back or removes money the loan
+     * never needed, so none of them closed it and none of them may date its income.
+     * <p>
+     * Falls back to {@code transactionDate} for a loan with no settlement date of its own - a write-off, where the
+     * closing transaction is the settlement.
+     */
+    public LocalDate closureIncomeDate(final WorkingCapitalLoan loan, final LocalDate transactionDate) {
+        final LocalDate settledOn = settledOn(loan);
+        return settledOn == null ? transactionDate : settledOn;
+    }
+
+    private static LocalDate settledOn(final WorkingCapitalLoan loan) {
+        return loan.isOverpaid() || loan.isClosedObligationsMet() ? loan.getMaturedOnDate() : null;
     }
 }

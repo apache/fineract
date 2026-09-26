@@ -1108,8 +1108,10 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder scaleNotGreaterThan(Integer scale) {
-        final BigDecimal value = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
-        if (value.scale() > scale.intValue()) {
+        // Parsed exactly, not through a double: Double.toString gives a whole number a ".0" (scale 1), which would
+        // reject every whole value at scale 0; trailing zeros carry no precision so they do not count either.
+        final BigDecimal value = new BigDecimal(this.value.toString());
+        if (value.stripTrailingZeros().scale() > scale.intValue()) {
             String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".scale.is.greater.than." + scale;
             String defaultEnglishMessage = "The parameter `" + this.parameter + "` value " + value + " decimal place must not be more than "
                     + scale + " places";

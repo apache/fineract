@@ -77,6 +77,7 @@ class WorkingCapitalLoanTransactionMapperTest {
         when(allocation.getPenaltyChargesPortion()).thenReturn(null);
 
         when(transaction.getWcLoan()).thenReturn(wcLoan);
+        when(wcLoan.getExternalId()).thenReturn(new ExternalId("loan-ext-1"));
         when(wcLoan.getLoanProduct()).thenReturn(wcProduct);
         when(wcProduct.getCurrency()).thenReturn(currency);
 
@@ -84,6 +85,7 @@ class WorkingCapitalLoanTransactionMapperTest {
 
         assertNotNull(data);
         assertEquals(1L, data.getId());
+        assertEquals("loan-ext-1", data.getExternalLoanId().getValue());
         assertNotNull(data.getType());
         assertNotNull(data.getCurrency());
         assertEquals(LoanTransactionType.DISBURSEMENT.getValue().longValue(), data.getType().getId());

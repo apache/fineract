@@ -380,4 +380,51 @@ public class WorkingCapitalDelinquencyConfigStepDef extends AbstractStepDef {
                 .doesNotContain("m_wc_loan_product");
     }
 
+    @When("Admin updates WC Delinquency Bucket name without bucketType")
+    public void adminUpdatesWCDelinquencyBucketNameWithoutBucketType() {
+        final Long id = TestContext.GLOBAL.get(TestContextKey.DELINQUENCY_BUCKET_ID);
+        final DelinquencyBucketResponse existing = ok(() -> fineractFeignClient.delinquencyRangeAndBucketsManagement().getBucket(id));
+        assert existing.getRanges() != null;
+        final DelinquencyBucketRequest updateRequest = new DelinquencyBucketRequest() //
+                .name(existing.getName() + "-renamed") //
+                .ranges(existing.getRanges().stream().map(DelinquencyRangeResponse::getId).toList());
+        ok(() -> fineractFeignClient.delinquencyRangeAndBucketsManagement().updateBucket(id, updateRequest));
+        TestContext.GLOBAL.set(TestContextKey.DELINQUENCY_BUCKET_UPDATE_REQUEST, updateRequest);
+    }
+
+    @Then("Check Delinquency Bucket still has bucketType {string}")
+    public void checkDelinquencyBucketStillHasBucketType(final String expectedBucketType) {
+        final Long id = TestContext.GLOBAL.get(TestContextKey.DELINQUENCY_BUCKET_ID);
+        final DelinquencyBucketResponse bucket = ok(() -> fineractFeignClient.delinquencyRangeAndBucketsManagement().getBucket(id));
+        assertThat(bucket.getBucketType()).as("bucketType").isNotNull();
+        assertThat(bucket.getBucketType().getId()).as("bucketType id").isEqualTo(expectedBucketType);
+        log.info("Verified delinquency bucket {} still has bucketType {}", id, expectedBucketType);
+    }
+
+    @Then("Admin failed to update WC Delinquency Bucket bucketType to {string} while assigned to a Working Capital Loan Product")
+    public void adminFailedToUpdateWCDelinquencyBucketTypeWhileAssigned(final String newBucketType) {
+        verifyDelinquencyBucketTypeUpdateRejectedAsLinked(TestContext.GLOBAL.get(TestContextKey.DELINQUENCY_BUCKET_ID), newBucketType);
+    }
+
+    @Then("Admin failed to update WC Delinquency Bucket bucketType to {string} while overridden on a Working Capital Loan")
+    public void adminFailedToUpdateWCDelinquencyBucketTypeWhileOverriddenOnLoan(final String newBucketType) {
+        verifyDelinquencyBucketTypeUpdateRejectedAsLinked(testContext().get(TestContextKey.DELINQUENCY_BUCKET_ID), newBucketType);
+    }
+
+    private void verifyDelinquencyBucketTypeUpdateRejectedAsLinked(final Long id, final String newBucketType) {
+        final DelinquencyBucketResponse existing = ok(() -> fineractFeignClient.delinquencyRangeAndBucketsManagement().getBucket(id));
+        assert existing.getRanges() != null;
+        final DelinquencyBucketRequest updateRequest = new DelinquencyBucketRequest() //
+                .name(existing.getName()) //
+                .bucketType(newBucketType) //
+                .ranges(existing.getRanges().stream().map(DelinquencyRangeResponse::getId).toList());
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractFeignClient.delinquencyRangeAndBucketsManagement().updateBucket(id, updateRequest));
+
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.incorrectExpectedValueInResponse()).isEqualTo(403);
+        assertThat(exception.getUserMessageGlobalisationCode()).isEqualTo(ErrorMessageHelper.DATA_INTEGRITY_ISSUE_ENTITY_LINKED_CODE);
+        assertThat(exception.getDeveloperMessage()) //
+                .contains(ErrorMessageHelper.workingCapitalDelinquencyBucketLinkedToLoanProductFailure(id));
+    }
+
 }

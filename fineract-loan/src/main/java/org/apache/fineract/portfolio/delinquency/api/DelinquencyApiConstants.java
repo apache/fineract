@@ -37,4 +37,7 @@ public final class DelinquencyApiConstants {
     public static final String MAXIMUMAGEDAYS_PARAM_NAME = "maximumAgeDays";
     public static final String LOCALE_PARAM_NAME = "locale";
 
+    public static final String DELINQUENCY_BUCKET_ID_MUST_BE_OF_TYPE_MESSAGE = "The parameter `delinquencyBucketId` must reference a {0} delinquency bucket.";
+    public static final String LOAN_PRODUCT_DELINQUENCY_BUCKET_ID_MUST_BE_OF_TYPE_CODE = "validation.msg.loanproduct.delinquencyBucketId.must.be.of.type";
+
 }

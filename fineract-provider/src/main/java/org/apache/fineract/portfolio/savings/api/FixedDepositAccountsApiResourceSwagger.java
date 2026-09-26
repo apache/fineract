@@ -85,6 +85,8 @@ final class FixedDepositAccountsApiResourceSwagger {
             public Boolean transferInProgress;
             @Schema(example = "false")
             public Boolean transferOnHold;
+            @Schema(example = "false")
+            public Boolean matured;
         }
 
         static final class GetFixedDepositAccountsTimeline {
@@ -175,7 +177,7 @@ final class FixedDepositAccountsApiResourceSwagger {
 
             public GetFixedDepositAccountsCurrency currency;
             @Schema(example = "0")
-            public Float accountBalance;
+            public BigDecimal accountBalance;
         }
 
         static final class GetFixedDepositAccountsMinDepositTermType {
@@ -247,9 +249,9 @@ final class FixedDepositAccountsApiResourceSwagger {
         public GetFixedDepositAccountsMinDepositTermType minDepositTermType;
         public GetFixedDepositAccountsMaxDepositTermType maxDepositTermType;
         @Schema(example = "5000")
-        public Float depositAmount;
+        public BigDecimal depositAmount;
         @Schema(example = "5140.25")
-        public Float maturityAmount;
+        public BigDecimal maturityAmount;
         @Schema(example = "[2014, 9, 1]")
         public LocalDate maturityDate;
         @Schema(example = "6")
@@ -300,14 +302,52 @@ final class FixedDepositAccountsApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
+        @Schema(example = "dd MMMM")
+        public String monthDayFormat;
         @Schema(example = "01 March 2014")
         public String submittedOnDate;
         @Schema(example = "5000")
-        public Float depositAmount;
+        public BigDecimal depositAmount;
         @Schema(example = "6")
         public Integer depositPeriod;
         @Schema(example = "2")
         public Long depositPeriodFrequencyId;
+        @Schema(example = "1")
+        public Integer interestCompoundingPeriodType;
+        @Schema(example = "4")
+        public Integer interestPostingPeriodType;
+        @Schema(example = "1")
+        public Integer interestCalculationType;
+        @Schema(example = "365")
+        public Integer interestCalculationDaysInYearType;
+        @Schema(example = "1")
+        public Integer lockinPeriodFrequency;
+        @Schema(example = "2")
+        public Integer lockinPeriodFrequencyType;
+        @Schema(example = "true")
+        public Boolean preClosurePenalApplicable;
+        @Schema(example = "1.75")
+        public BigDecimal preClosurePenalInterest;
+        @Schema(example = "1")
+        public Integer preClosurePenalInterestOnTypeId;
+        @Schema(example = "1")
+        public Integer minDepositTerm;
+        @Schema(example = "2")
+        public Integer minDepositTermTypeId;
+        @Schema(example = "5")
+        public Integer maxDepositTerm;
+        @Schema(example = "3")
+        public Integer maxDepositTermTypeId;
+        @Schema(example = "2")
+        public Integer inMultiplesOfDepositTerm;
+        @Schema(example = "2")
+        public Integer inMultiplesOfDepositTermTypeId;
+        @Schema(example = "1")
+        public Long linkAccountId;
+        @Schema(example = "false")
+        public Boolean transferInterestToSavings;
+        @Schema(example = "100")
+        public Integer maturityInstructionId;
     }
 
     @Schema(description = "PostFixedDepositAccountsResponse")
@@ -430,7 +470,13 @@ final class FixedDepositAccountsApiResourceSwagger {
 
             public GetFixedDepositAccountsAccountIdCurrency currency;
             @Schema(example = "0")
-            public Float accountBalance;
+            public BigDecimal accountBalance;
+            @Schema(example = "5000")
+            public BigDecimal totalDeposits;
+            @Schema(example = "140.25")
+            public BigDecimal totalInterestPosted;
+            @Schema(example = "14.02")
+            public BigDecimal totalWithholdTax;
         }
 
         @Schema(example = "1")
@@ -460,6 +506,10 @@ final class FixedDepositAccountsApiResourceSwagger {
         public Boolean interestFreePeriodApplicable;
         @Schema(example = "false")
         public Boolean preClosurePenalApplicable;
+        @Schema(example = "1.75")
+        public BigDecimal preClosurePenalInterest;
+        @Schema(example = "5")
+        public BigDecimal nominalAnnualInterestRate;
         @Schema(example = "3")
         public Integer minDepositTerm;
         @Schema(example = "4")
@@ -467,9 +517,9 @@ final class FixedDepositAccountsApiResourceSwagger {
         public GetFixedDepositAccountsResponse.GetFixedDepositAccountsMinDepositTermType minDepositTermType;
         public GetFixedDepositAccountsResponse.GetFixedDepositAccountsMaxDepositTermType maxDepositTermType;
         @Schema(example = "5000")
-        public Float depositAmount;
+        public BigDecimal depositAmount;
         @Schema(example = "5140.25")
-        public Float maturityAmount;
+        public BigDecimal maturityAmount;
         @Schema(example = "[2014, 9, 1]")
         public LocalDate maturityDate;
         @Schema(example = "6")
@@ -484,10 +534,60 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         private PutFixedDepositAccountsAccountIdRequest() {}
 
+        @Schema(example = "1")
+        public Long clientId;
+        @Schema(example = "1")
+        public Long productId;
         @Schema(example = "en")
         public String locale;
-        @Schema(example = "6000")
-        public Float depositAmount;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "dd MMMM")
+        public String monthDayFormat;
+        @Schema(example = "01 March 2014")
+        public String submittedOnDate;
+        @Schema(example = "5000")
+        public BigDecimal depositAmount;
+        @Schema(example = "6")
+        public Integer depositPeriod;
+        @Schema(example = "2")
+        public Long depositPeriodFrequencyId;
+        @Schema(example = "1")
+        public Integer interestCompoundingPeriodType;
+        @Schema(example = "4")
+        public Integer interestPostingPeriodType;
+        @Schema(example = "1")
+        public Integer interestCalculationType;
+        @Schema(example = "365")
+        public Integer interestCalculationDaysInYearType;
+        @Schema(example = "1")
+        public Integer lockinPeriodFrequency;
+        @Schema(example = "2")
+        public Integer lockinPeriodFrequencyType;
+        @Schema(example = "true")
+        public Boolean preClosurePenalApplicable;
+        @Schema(example = "1.75")
+        public BigDecimal preClosurePenalInterest;
+        @Schema(example = "1")
+        public Integer preClosurePenalInterestOnTypeId;
+        @Schema(example = "1")
+        public Integer minDepositTerm;
+        @Schema(example = "2")
+        public Integer minDepositTermTypeId;
+        @Schema(example = "5")
+        public Integer maxDepositTerm;
+        @Schema(example = "3")
+        public Integer maxDepositTermTypeId;
+        @Schema(example = "2")
+        public Integer inMultiplesOfDepositTerm;
+        @Schema(example = "2")
+        public Integer inMultiplesOfDepositTermTypeId;
+        @Schema(example = "1")
+        public Long linkAccountId;
+        @Schema(example = "false")
+        public Boolean transferInterestToSavings;
+        @Schema(example = "100")
+        public Integer maturityInstructionId;
     }
 
     @Schema(description = "PutFixedDepositAccountsAccountIdResponse")
@@ -500,9 +600,11 @@ final class FixedDepositAccountsApiResourceSwagger {
             private PutFixedDepositAccountsChanges() {}
 
             @Schema(example = "6000")
-            public Float depositAmount;
+            public BigDecimal depositAmount;
             @Schema(example = "en")
             public String locale;
+            @Schema(example = "01 March 2014")
+            public String submittedOnDate;
         }
 
         @Schema(example = "2")
@@ -520,6 +622,29 @@ final class FixedDepositAccountsApiResourceSwagger {
     public static final class PostFixedDepositAccountsAccountIdRequest {
 
         private PostFixedDepositAccountsAccountIdRequest() {}
+
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "01 March 2014", description = "command=approve")
+        public String approvedOnDate;
+        @Schema(example = "01 March 2014", description = "command=activate")
+        public String activatedOnDate;
+        @Schema(example = "01 March 2014", description = "command=reject")
+        public String rejectedOnDate;
+        @Schema(example = "01 March 2014", description = "command=withdrawnByApplicant")
+        public String withdrawnOnDate;
+        @Schema(example = "01 March 2014", description = "command=prematureClose, calculatePrematureAmount")
+        public String closedOnDate;
+        @Schema(example = "100", description = "command=prematureClose")
+        public Integer onAccountClosureId;
+        @Schema(example = "1", description = "command=prematureClose, transfer to savings")
+        public Long toSavingsAccountId;
+        @Schema(example = "Transfer to savings", description = "command=prematureClose, transfer to savings")
+        public String transferDescription;
+        @Schema(example = "Approved by the branch manager")
+        public String note;
     }
 
     @Schema(description = "PostFixedDepositAccountsAccountIdResponse")

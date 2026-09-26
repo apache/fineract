@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -108,16 +109,20 @@ public class WorkingCapitalLoanDataValidator {
             WorkingCapitalLoanConstants.transactionDateParamName, WorkingCapitalLoanConstants.transactionAmountParamName,
             WorkingCapitalLoanConstants.classificationIdParamName, WorkingCapitalLoanConstants.noteParamName,
             WorkingCapitalLoanConstants.paymentDetailsParamName, WorkingCapitalLoanConstants.externalIdParameterName));
-    private static final Set<String> DISCOUNT_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(
-            Arrays.asList("locale", "dateFormat", WorkingCapitalLoanConstants.noteParamName,
-                    WorkingCapitalLoanConstants.transactionAmountParamName, WorkingCapitalLoanConstants.classificationIdParamName,
-                    WorkingCapitalLoanConstants.relatedResourceIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
-                    WorkingCapitalLoanConstants.transactionDateParamName, WorkingCapitalLoanConstants.externalIdParameterName));
-    private static final Set<String> DISCOUNT_ADJUSTMENT_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(
-            Arrays.asList("locale", "dateFormat", WorkingCapitalLoanConstants.noteParamName,
-                    WorkingCapitalLoanConstants.transactionAmountParamName, WorkingCapitalLoanConstants.classificationIdParamName,
-                    WorkingCapitalLoanConstants.relatedResourceIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
-                    WorkingCapitalLoanConstants.externalIdParameterName, WorkingCapitalLoanConstants.transactionDateParamName));
+    private static final Set<String> RELATED_RESOURCE_PARAMETERS = Set.of(WorkingCapitalLoanConstants.relatedResourceIdParamName,
+            WorkingCapitalLoanConstants.relatedExternalResourceIdParamName);
+    private static final Set<String> DISCOUNT_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
+            WorkingCapitalLoanConstants.noteParamName, WorkingCapitalLoanConstants.transactionAmountParamName,
+            WorkingCapitalLoanConstants.classificationIdParamName, WorkingCapitalLoanConstants.relatedResourceIdParamName,
+            WorkingCapitalLoanConstants.relatedExternalResourceIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
+            WorkingCapitalLoanConstants.transactionDateParamName, WorkingCapitalLoanConstants.externalIdParameterName));
+    private static final Set<String> DISCOUNT_ADJUSTMENT_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale",
+            "dateFormat", WorkingCapitalLoanConstants.noteParamName, WorkingCapitalLoanConstants.transactionAmountParamName,
+            WorkingCapitalLoanConstants.classificationIdParamName, WorkingCapitalLoanConstants.relatedResourceIdParamName,
+            WorkingCapitalLoanConstants.relatedExternalResourceIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
+            WorkingCapitalLoanConstants.externalIdParameterName, WorkingCapitalLoanConstants.transactionDateParamName));
+    private static final Set<String> DISCOUNT_TRANSACTION_IN_PATH_SUPPORTED_PARAMETERS = DISCOUNT_TRANSACTION_SUPPORTED_PARAMETERS.stream()
+            .filter(parameter -> !RELATED_RESOURCE_PARAMETERS.contains(parameter)).collect(Collectors.toUnmodifiableSet());
     private static final Set<String> CREDIT_BALANCE_REFUND_SUPPORTED_PARAMETERS = new HashSet<>(REPAYMENT_SUPPORTED_PARAMETERS);
     // Incoming write-off parameters follow the progressive-loan shape.
     private static final Set<String> WRITE_OFF_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
@@ -152,6 +157,47 @@ public class WorkingCapitalLoanDataValidator {
     private static final int PAYMENT_DETAIL_STRING_MAX_LENGTH = 50;
     private static final Set<LoanStatus> REPAYMENT_LIKE_TXN_ALLOWED_LOAN_STATUSES = Set.of(LoanStatus.ACTIVE,
             LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID);
+
+    public void validateRelatedResourceIdIsPositiveNumber(final JsonElement element) {
+        requireJsonBody(element);
+        final String relatedResourceId = fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.relatedResourceIdParamName,
+                element);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.relatedResourceIdParamName).value(relatedResourceId).ignoreIfNull()
+                .longGreaterThanZero();
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateRelatedExternalResourceId(final JsonElement element) {
+        requireJsonBody(element);
+        final String relatedExternalResourceId = fromApiJsonHelper
+                .extractStringNamed(WorkingCapitalLoanConstants.relatedExternalResourceIdParamName, element);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.relatedExternalResourceIdParamName).value(relatedExternalResourceId)
+                .ignoreIfNull().notExceedingLengthOf(EXTERNAL_ID_MAX_LENGTH);
+        final String relatedResourceId = fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.relatedResourceIdParamName,
+                element);
+        if (relatedExternalResourceId != null && relatedResourceId != null) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.relatedExternalResourceIdParamName)
+                    .value(relatedExternalResourceId).failWithCode("cannot.also.be.provided.when.relatedResourceId.is.populated");
+        }
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateRelatedResourceIsNotInBody(final JsonElement element) {
+        requireJsonBody(element);
+        fromApiJsonHelper.checkForUnsupportedParameters(element.getAsJsonObject(), DISCOUNT_TRANSACTION_IN_PATH_SUPPORTED_PARAMETERS);
+    }
+
+    private void requireJsonBody(final JsonElement element) {
+        if (element == null || !element.isJsonObject()) {
+            throw new InvalidJsonException();
+        }
+    }
 
     public void validateDiscountTransaction(final WorkingCapitalLoan loan, final String json, BigDecimal discountAmount,
             final String note) {
@@ -1095,9 +1141,13 @@ public class WorkingCapitalLoanDataValidator {
         // Period-payment-rate change is a TPV-strategy feature. Annual EIR loans derive the daily payment from annual
         // EIR instead; supporting an equivalent mid-lifecycle change is a follow-up, so reject clearly for now rather
         // than letting the TPV rate-change path run against a schedule that has no TPV.
-        if (resolvePaymentAmountCalculationStrategy(loan).isAnnualEir()) {
+        final WorkingCapitalPaymentAmountCalculationStrategy rateChangeStrategy = resolvePaymentAmountCalculationStrategy(loan);
+        if (rateChangeStrategy.isAnnualEir()) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.periodPaymentRateParamName)
                     .failWithCode("rate.change.not.allowed.for.annual.eir.strategy");
+        } else if (rateChangeStrategy.isPaymentAmount()) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.periodPaymentRateParamName)
+                    .failWithCode("rate.change.not.allowed.for.payment.amount.strategy");
         }
 
         final LocalDate effectiveDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.effectiveDateParamName,

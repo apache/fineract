@@ -23,14 +23,17 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
+import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
@@ -105,6 +108,37 @@ public class WorkingCapitalLoanDataValidatorDiscountTest {
 
         assertThat(loan.getFirstActualDisbursement()).isSameAs(lowerId);
         assertThat(loan.getFirstActualDisbursementAmount()).isEqualByComparingTo("125.00");
+    }
+
+    @Test
+    public void relatedResourceIdInTheBodyIsRejectedWhenTheTransactionIsNamedInThePath() {
+        final JsonElement body = parsedBody("{\"transactionAmount\":12,\"relatedResourceId\":1}");
+
+        final UnsupportedParameterException exception = assertThrows(UnsupportedParameterException.class,
+                () -> validator.validateRelatedResourceIsNotInBody(body));
+
+        assertThat(exception.getUnsupportedParameters()).containsExactly(WorkingCapitalLoanConstants.relatedResourceIdParamName);
+    }
+
+    @Test
+    public void relatedExternalResourceIdInTheBodyIsRejectedWhenTheTransactionIsNamedInThePath() {
+        final JsonElement body = parsedBody("{\"transactionAmount\":12,\"relatedExternalResourceId\":\"txn-ext-001\"}");
+
+        final UnsupportedParameterException exception = assertThrows(UnsupportedParameterException.class,
+                () -> validator.validateRelatedResourceIsNotInBody(body));
+
+        assertThat(exception.getUnsupportedParameters()).containsExactly(WorkingCapitalLoanConstants.relatedExternalResourceIdParamName);
+    }
+
+    @Test
+    public void bodyWithoutRelatedResourceFieldsIsAcceptedWhenTheTransactionIsNamedInThePath() {
+        final JsonElement body = parsedBody("{\"transactionAmount\":12,\"externalId\":\"discount-fee-ext-001\"}");
+
+        assertDoesNotThrow(() -> validator.validateRelatedResourceIsNotInBody(body));
+    }
+
+    private static JsonElement parsedBody(final String json) {
+        return new FromJsonHelper().parse(json);
     }
 
     private static WorkingCapitalLoan configuredLoan() {

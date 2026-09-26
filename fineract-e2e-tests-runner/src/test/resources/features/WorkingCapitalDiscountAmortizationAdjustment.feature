@@ -1146,6 +1146,11 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 10000.0   | 9900.0             | 0.0            | 1000.0           | 0.0               |
+    # 100 of the 10000 is still owed, so nothing has settled: the loan carries no settlement dates at all
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null |
+      | timeline.closedOnDate       | null |
+      | timeline.actualMaturityDate | null |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -1166,6 +1171,14 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9500.0    | 9500.0             | 500.0          | 0.0              | 400.0             |
+    # The adjustment - not the 02 January repayment - is what met the obligations: until it posted the loan still owed
+    # 100, and a discount fee adjustment is effective from its own date. So 03 January is the day the loan matured, and
+    # the day its overpayment began. The repayment on 02 January is reallocated, but that restates how the money is
+    # apportioned, not when the obligation existed.
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | 2026-01-03 |
+      | timeline.closedOnDate       | null       |
+      | timeline.actualMaturityDate | 2026-01-03 |
     And Working Capital Loan has transactions:
       | transactionDate | type                                 | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement                         | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -1202,6 +1215,12 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 03 January 2026 | Discount Fee Adjustment              | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
       | 03 January 2026 | Discount Fee Amortization Adjustment | 499.84            |                  |                   |                       | false    |
       | 04 January 2026 | Credit Balance Refund                | 400.0             | 0.0              | 0.0               | 0.0                   | false    |
+    # A refund is a real money movement and the account was not closed until it happened, so it closes the loan on its
+    # own date - as core's state machine does, stamping both dates from the refund.
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null       |
+      | timeline.closedOnDate       | 2026-01-04 |
+      | timeline.actualMaturityDate | 2026-01-04 |
 
   @TestRailId:C94062
   Scenario: Working Capital loan raises Discount Fee Amortization Adjustment transaction business event when the amortization runs backwards
@@ -1353,3 +1372,69 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And The retrieved amortization schedule actual payments plus future expected payments total "9500.00"
     And The retrieved amortization schedule has no negative monetary amounts
     Then Admin closes the Working Capital loan with a full repayment on "08 January 2026"
+
+  @TestRailId:C106808
+  Scenario: Verify settlement dates - undo of the discount fee adjustment that settled the loan exactly clears the dates again
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "02 January 2026" with 9900.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds Discount fee adjustment with "100" amount on transaction date "03 January 2026" on Working Capital loan account for last discount
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null       |
+      | timeline.closedOnDate       | 2026-01-03 |
+      | timeline.actualMaturityDate | 2026-01-03 |
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin undo the Discount fee adjustment with "100" amount on Working Capital loan account
+    Then Working Capital loan status will be "ACTIVE"
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null |
+      | timeline.closedOnDate       | null |
+      | timeline.actualMaturityDate | null |
+
+  @TestRailId:C106809
+  Scenario: Verify settlement dates - a discount fee adjustment that settles the loan exactly dates the closure, a later extra payment keeps it and the refund closes it on its own date
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "02 January 2026" with 9900.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds Discount fee adjustment with "100" amount on transaction date "03 January 2026" on Working Capital loan account for last discount
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null       |
+      | timeline.closedOnDate       | 2026-01-03 |
+      | timeline.actualMaturityDate | 2026-01-03 |
+    When Admin sets the business date to "05 January 2026"
+    And Customer makes repayment on "05 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | 2026-01-05 |
+      | timeline.closedOnDate       | null       |
+      | timeline.actualMaturityDate | 2026-01-03 |
+    When Admin sets the business date to "06 January 2026"
+    And Customer makes credit balance refund on "06 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null       |
+      | timeline.closedOnDate       | 2026-01-06 |
+      | timeline.actualMaturityDate | 2026-01-06 |

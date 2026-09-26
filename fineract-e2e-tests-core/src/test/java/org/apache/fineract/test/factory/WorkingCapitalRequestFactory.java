@@ -37,6 +37,7 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
 import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.DelinquencyRangeResponse;
+import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
@@ -186,6 +187,19 @@ public class WorkingCapitalRequestFactory {
                 .periodPaymentRate(null);
     }
 
+    /**
+     * Payment Amount strategy product: no period payment rate / annual EIR, required discount, and discount override
+     * enabled so loan applications may pass a discount (as in the reference Payment Amount calculation scenarios).
+     */
+    public PostWorkingCapitalLoanProductsRequest defaultPaymentAmountWorkingCapitalLoanProductRequest(final BigDecimal paymentAmount,
+            final BigDecimal discount) {
+        return defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                .paymentAmountCalculationStrategy(PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.PAYMENT_AMOUNT) //
+                .paymentAmount(paymentAmount) //
+                .discount(discount) //
+                .periodPaymentRate(null);
+    }
+
     public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductBreachRequest() {
         String name = Utils.randomStringGenerator(WCLP_NAME_PREFIX, 10);
         String shortName = loanProductsRequestFactory.generateShortNameSafely();
@@ -255,6 +269,15 @@ public class WorkingCapitalRequestFactory {
                 .paymentAllocation(List.of(//
                         createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(), //
                                 List.of(DUE_FEE, DUE_PRINCIPAL, DUE_PENALTY, IN_ADVANCE_FEE, IN_ADVANCE_PRINCIPAL, IN_ADVANCE_PENALTY))));//
+    }
+
+    public List<PostPaymentAllocation> invalidPaymentAllocationRulesWithTrnTypeForWorkingCapitalLoanProductRequest() {
+        return List.of(//
+                createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(), //
+                        List.of(DUE_FEE, DUE_PRINCIPAL, DUE_PENALTY, IN_ADVANCE_FEE, IN_ADVANCE_PRINCIPAL, IN_ADVANCE_PENALTY)), //
+                createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(), //
+                        List.of(DUE_FEE, DUE_PRINCIPAL, DUE_PENALTY, IN_ADVANCE_FEE, IN_ADVANCE_PRINCIPAL, IN_ADVANCE_PENALTY))//
+        );//
     }
 
     public List<PostPaymentAllocation> invalidNumberOfPaymentAllocationRulesForWorkingCapitalLoanProductCreateRequest() {
@@ -350,6 +373,12 @@ public class WorkingCapitalRequestFactory {
 
     public PostWorkingCapitalLoanTransactionsRequest defaultWorkingCapitalLoanRepaymentRequest() {
         return new PostWorkingCapitalLoanTransactionsRequest() //
+                .dateFormat(DATE_FORMAT) //
+                .locale(LOCALE_EN);
+    }
+
+    public ExecuteWorkingCapitalLoanTransactionCommandRequest defaultWorkingCapitalLoanTransactionCommandRequest() {
+        return new ExecuteWorkingCapitalLoanTransactionCommandRequest() //
                 .dateFormat(DATE_FORMAT) //
                 .locale(LOCALE_EN);
     }

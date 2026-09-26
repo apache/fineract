@@ -55,6 +55,9 @@ public final class WorkingCapitalLoanProductConstants {
     public static final String maxPeriodPaymentRateParamName = "maxPeriodPaymentRate";
     public static final String minAnnualEirParamName = "minAnnualEir";
     public static final String maxAnnualEirParamName = "maxAnnualEir";
+    public static final String paymentAmountParamName = "paymentAmount";
+    public static final String minPaymentAmountParamName = "minPaymentAmount";
+    public static final String maxPaymentAmountParamName = "maxPaymentAmount";
     public static final String discountParamName = "discount";
     public static final String repaymentEveryParamName = "repaymentEvery";
     public static final String repaymentFrequencyTypeParamName = "repaymentFrequencyType";
@@ -114,4 +117,7 @@ public final class WorkingCapitalLoanProductConstants {
 
     // Resource name for permissions
     public static final String WCLP_RESOURCE_NAME = "WORKINGCAPITALLOANPRODUCT";
+
+    public static final String DELINQUENCY_BUCKET_ID_MUST_BE_OF_TYPE_VALIDATION_CODE = "validation.msg." + WCLP_RESOURCE_NAME
+            + ".delinquencyBucketId.must.be.of.type";
 }

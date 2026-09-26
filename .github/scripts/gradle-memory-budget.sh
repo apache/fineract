@@ -70,7 +70,9 @@ mkdir -p "$GUH"
 {
   echo "org.gradle.jvmargs=$GRADLE_JVMARGS"
   echo "org.gradle.workers.max=$WORKERS_MAX"
+  # Enabled in gradle.properties for local builds; fresh CI runners with --no-daemon gain nothing from it.
+  echo "org.gradle.configuration-cache=false"
 } >> "$GUH/gradle.properties"
 
-echo "Gradle build JVM capped at -Xmx${MAX_HEAP}, org.gradle.workers.max=${WORKERS_MAX}"
+echo "Gradle build JVM capped at -Xmx${MAX_HEAP}, org.gradle.workers.max=${WORKERS_MAX}, configuration cache off"
 echo "(written to $GUH/gradle.properties)."

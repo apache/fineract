@@ -460,6 +460,15 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
         assertInt(assertions, "npvDayCount", response.getNpvDayCount(), expected.get("npvDayCount"));
         assertDecimal(assertions, "expectedPaymentAmount", response.getExpectedPaymentAmount(), expected.get("expectedPaymentAmount"));
         assertInt(assertions, "originalPaymentNumber", response.getOriginalPaymentNumber(), expected.get("originalPaymentNumber"));
+        assertDecimal(assertions, "annualEir", response.getAnnualEir(), expected.get("annualEir"));
+        assertDecimal(assertions, "paymentAmount", response.getPaymentAmount(), expected.get("paymentAmount"));
+        final String expectedStrategy = expected.get("paymentAmountCalculationStrategy");
+        if (!WorkingCapitalScheduleMatcher.isBlank(expectedStrategy)) {
+            assertions
+                    .assertThat(response.getPaymentAmountCalculationStrategy() == null ? null
+                            : response.getPaymentAmountCalculationStrategy().getId())
+                    .as("paymentAmountCalculationStrategy").isEqualTo(expectedStrategy);
+        }
     }
 
     private void verifySummaryFields(final DataTable dataTable) {

@@ -63,6 +63,7 @@ dependencies {
     implementation 'org.eclipse.jgit:org.eclipse.jgit'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.gpg.bc'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache'
+    implementation 'org.apache.maven:maven-artifact'
     implementation 'com.vdurmont:semver4j'
     implementation 'org.beryx:text-io'
     implementation 'commons-io:commons-io'

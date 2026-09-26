@@ -158,6 +158,10 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     private CodeValue writeOffReason;
     @Mock
     private ProductToGLAccountMapping writeOffReasonMapping;
+    @Mock
+    private GLAccount deferredIncomeGLAccount;
+    @Mock
+    private GLAccount incomeFromDiscountFeeGLAccount;
 
     @BeforeEach
     void setUp() {
@@ -871,6 +875,63 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
         final ArgumentCaptor<JournalEntry> persisted = ArgumentCaptor.forClass(JournalEntry.class);
         verify(helper, atLeastOnce()).persistJournalEntry(persisted.capture());
         assertTrue(persisted.getAllValues().stream().anyMatch(entry -> !entry.isReversed()), "the reversal mirrors must stay live");
+    }
+
+    // --- restatement of a discount fee amortization that an undo had reversed and a reprocess revives ---
+
+    private void stubDiscountFeeAccounts() {
+        lenient().when(deferredIncomeGLAccount.getId()).thenReturn(20L);
+        lenient().when(incomeFromDiscountFeeGLAccount.getId()).thenReturn(21L);
+        stubGLAccountMapping(CashAccountsForLoan.DEFERRED_INCOME_LIABILITY, deferredIncomeGLAccount);
+        stubGLAccountMapping(CashAccountsForLoan.INCOME_FROM_DISCOUNT_FEE, incomeFromDiscountFeeGLAccount);
+    }
+
+    /**
+     * The undo left the originals flagged reversed and their mirrors live, so the transaction nets to zero on the
+     * ledger. Cancelling the mirrors would reinstate the originals under the fresh posting and book the amortization
+     * twice; they must be retired instead, leaving the fresh posting as the only live - and only net - booking.
+     */
+    @Test
+    void testRestatingARevivedAmortizationRetiresTheUndoMirrorsAndBooksItOnce() {
+        stubDiscountFeeAccounts();
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("1000"));
+        final JournalEntry mirrorCredit = postedEntry(deferredIncomeGLAccount, JournalEntryType.CREDIT, "1000");
+        final JournalEntry mirrorDebit = postedEntry(incomeFromDiscountFeeGLAccount, JournalEntryType.DEBIT, "1000");
+        final List<JournalEntry> liveEntries = List.of(mirrorCredit, mirrorDebit);
+        when(journalEntryRepository.findLiveReversalJournalEntries("WC" + TXN_ID, WORKING_CAPITAL_LOAN_ENTITY_TYPE))
+                .thenReturn(liveEntries);
+        when(journalEntryRepository.findJournalEntries("WC" + TXN_ID, WORKING_CAPITAL_LOAN_ENTITY_TYPE))
+                .thenAnswer(invocation -> liveEntries.stream().filter(entry -> !entry.isReversed()).toList());
+
+        processor.restateJournalEntriesForDiscountFeeAmortization(loan, txn, false);
+
+        assertTrue(mirrorCredit.isReversed() && mirrorDebit.isReversed(), "the undo mirrors must drop out of the live set");
+        // The only persists are the two retired mirrors: nothing was mirrored, so the originals stay cancelled.
+        final ArgumentCaptor<JournalEntry> persisted = ArgumentCaptor.forClass(JournalEntry.class);
+        verify(helper, org.mockito.Mockito.times(2)).persistJournalEntry(persisted.capture());
+        assertEquals(liveEntries, persisted.getAllValues());
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(any(), any(), eq(deferredIncomeGLAccount), anyLong(), anyLong(), any(),
+                eq(new BigDecimal("1000")), any());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(any(), any(), eq(incomeFromDiscountFeeGLAccount), anyLong(), anyLong(),
+                any(), eq(new BigDecimal("1000")), any());
+    }
+
+    /** A transaction that was never undone has no undo mirrors, so its restatement still cancels what is live. */
+    @Test
+    void testRestatingALiveAmortizationCancelsItsEntriesBeforeRebooking() {
+        stubDiscountFeeAccounts();
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("600"));
+        stubLiveEntries(postedEntry(deferredIncomeGLAccount, JournalEntryType.DEBIT, "1000"),
+                postedEntry(incomeFromDiscountFeeGLAccount, JournalEntryType.CREDIT, "1000"));
+
+        processor.restateJournalEntriesForDiscountFeeAmortization(loan, txn, false);
+
+        // 4 persists: 2 mirrors + 2 superseded originals
+        verify(helper, org.mockito.Mockito.times(4)).persistJournalEntry(any());
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(any(), any(), eq(deferredIncomeGLAccount), anyLong(), anyLong(), any(),
+                eq(new BigDecimal("600")), any());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(any(), any(), eq(incomeFromDiscountFeeGLAccount), anyLong(), anyLong(),
+                any(), eq(new BigDecimal("600")), any());
     }
 
     private static Stream<Arguments> accountingProcessorEntryPoints() {

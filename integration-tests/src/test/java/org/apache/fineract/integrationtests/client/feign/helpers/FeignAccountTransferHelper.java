@@ -18,10 +18,15 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.util.List;
+import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AccountTransferRequest;
+import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.GetAccountTransfersPageItems;
 import org.apache.fineract.client.models.PostAccountTransfersRefundByTransferResponse;
 import org.apache.fineract.client.models.PostAccountTransfersResponse;
@@ -42,6 +47,15 @@ public class FeignAccountTransferHelper {
 
     public GetAccountTransfersPageItems getAccountTransfer(Long transferId) {
         return ok(() -> fineractClient.accountTransfers().retrieveOneAccountTransfer(transferId));
+    public CallFailedRuntimeException createAccountTransferExpectingError(AccountTransferRequest request) {
+        return fail(() -> fineractClient.accountTransfers().createAccountTransfer(request));
+    }
+
+    /** The transfers of one account transfer detail, which is what a transfer's resourceId identifies. */
+    public List<GetAccountTransfersPageItems> retrieveTransfersByAccountDetailId(Long accountDetailId) {
+        return List
+                .copyOf(ok(() -> fineractClient.accountTransfers().retrieveAllAccountTransfers(Map.of("accountDetailId", accountDetailId)))
+                        .getPageItems());
     }
 
     /**
@@ -56,5 +70,10 @@ public class FeignAccountTransferHelper {
 
     public PostAccountTransfersRefundByTransferResponse refundLoanByTransfer(AccountTransferRequest request) {
         return ok(() -> fineractClient.accountTransfers().refundByTransfer(request));
+    }
+
+    /** Undoing a transfer reverses both of its legs, returning each account to the balance it had before. */
+    public CommandProcessingResult undoTransfer(Long accountTransferId) {
+        return ok(() -> fineractClient.accountTransfers().accountTransferOperation(accountTransferId, "undo"));
     }
 }

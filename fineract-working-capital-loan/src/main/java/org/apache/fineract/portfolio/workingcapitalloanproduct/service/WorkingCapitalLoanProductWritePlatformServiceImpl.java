@@ -37,14 +37,13 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
-import org.apache.fineract.portfolio.delinquency.exception.DelinquencyBucketNotFoundException;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.fund.domain.FundRepository;
 import org.apache.fineract.portfolio.fund.exception.FundNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalDelinquencyBucketResolver;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.domain.WorkingCapitalBreach;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.repository.WorkingCapitalBreachRepository;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.domain.WorkingCapitalNearBreach;
@@ -80,7 +79,7 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
     private final WorkingCapitalLoanRepository workingCapitalLoanRepository;
     private final WorkingCapitalLoanProductUpdateUtil updateUtil;
     private final FundRepository fundRepository;
-    private final DelinquencyBucketRepository delinquencyBucketRepository;
+    private final WorkingCapitalDelinquencyBucketResolver workingCapitalDelinquencyBucketResolver;
     private final WorkingCapitalAdvancedPaymentAllocationsJsonParser advancedPaymentAllocationsJsonParser;
     private final WorkingCapitalBreachRepository breachRepository;
     private final WorkingCapitalProductAccountingMappingService wcAccountingMappingService;
@@ -94,7 +93,7 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
         final Fund fund = findFundByIdIfProvided(command.parameterExists(WorkingCapitalLoanProductConstants.fundIdParamName)
                 ? command.longValueOfParameterNamed(WorkingCapitalLoanProductConstants.fundIdParamName)
                 : null);
-        final DelinquencyBucket delinquencyBucket = findDelinquencyBucketByIdIfProvided(
+        final DelinquencyBucket delinquencyBucket = this.workingCapitalDelinquencyBucketResolver.findWorkingCapitalBucketByIdIfProvided(
                 command.parameterExists(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName)
                         ? command.longValueOfParameterNamed(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName)
                         : null);
@@ -284,7 +283,8 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
                 existingDelinquencyBucketId)) {
             final Long delinquencyBucketId = command
                     .longValueOfParameterNamed(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName);
-            final DelinquencyBucket delinquencyBucket = findDelinquencyBucketByIdIfProvided(delinquencyBucketId);
+            final DelinquencyBucket delinquencyBucket = this.workingCapitalDelinquencyBucketResolver
+                    .findWorkingCapitalBucketByIdIfProvided(delinquencyBucketId);
             product.setDelinquencyBucket(delinquencyBucket);
             changes.put(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, delinquencyBucketId);
         }
@@ -399,6 +399,9 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
         final BigDecimal annualEir = command.parameterExists(WorkingCapitalLoanProductConstants.annualEirParamName)
                 ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.annualEirParamName)
                 : null;
+        final BigDecimal paymentAmount = command.parameterExists(WorkingCapitalLoanProductConstants.paymentAmountParamName)
+                ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.paymentAmountParamName)
+                : null;
         final Integer npvDayCount = command.integerValueOfParameterNamed(WorkingCapitalLoanProductConstants.npvDayCountParamName);
         final BigDecimal principal = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.principalParamName);
         final BigDecimal periodPaymentRate = command.parameterExists(WorkingCapitalLoanProductConstants.periodPaymentRateParamName)
@@ -428,7 +431,7 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
                 : WorkingCapitalLoanBreachStartType.DISBURSEMENT;
 
         final WorkingCapitalLoanProductRelatedDetail relatedDetail = new WorkingCapitalLoanProductRelatedDetail(amortizationType,
-                paymentAmountCalculationStrategy, annualEir, npvDayCount, principal, periodPaymentRate, repaymentEvery,
+                paymentAmountCalculationStrategy, annualEir, paymentAmount, npvDayCount, principal, periodPaymentRate, repaymentEvery,
                 repaymentFrequencyType, discount, delinquencyGraceDays, delinquencyStartType, breachGraceDays, breachStartType);
 
         // Min/max constraints
@@ -450,8 +453,14 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
         final BigDecimal maxAnnualEir = command.parameterExists(WorkingCapitalLoanProductConstants.maxAnnualEirParamName)
                 ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.maxAnnualEirParamName)
                 : null;
+        final BigDecimal minPaymentAmount = command.parameterExists(WorkingCapitalLoanProductConstants.minPaymentAmountParamName)
+                ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.minPaymentAmountParamName)
+                : null;
+        final BigDecimal maxPaymentAmount = command.parameterExists(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName)
+                ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName)
+                : null;
         final WorkingCapitalLoanProductMinMaxConstraints minMaxConstraints = new WorkingCapitalLoanProductMinMaxConstraints(minPrincipal,
-                maxPrincipal, minPeriodPaymentRate, maxPeriodPaymentRate, minAnnualEir, maxAnnualEir);
+                maxPrincipal, minPeriodPaymentRate, maxPeriodPaymentRate, minAnnualEir, maxAnnualEir, minPaymentAmount, maxPaymentAmount);
 
         // Accounting
         final String accountingRuleValue = command.parameterExists(WorkingCapitalLoanProductConstants.accountingRuleParamName)
@@ -536,14 +545,6 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
             return null;
         }
         return this.fundRepository.findById(fundId).orElseThrow(() -> new FundNotFoundException(fundId));
-    }
-
-    private DelinquencyBucket findDelinquencyBucketByIdIfProvided(final Long delinquencyBucketId) {
-        if (delinquencyBucketId == null) {
-            return null;
-        }
-        return this.delinquencyBucketRepository.findById(delinquencyBucketId)
-                .orElseThrow(() -> DelinquencyBucketNotFoundException.notFound(delinquencyBucketId));
     }
 
 }
