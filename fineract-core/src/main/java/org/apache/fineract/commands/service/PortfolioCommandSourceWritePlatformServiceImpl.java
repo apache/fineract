@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.domain.SavingsDepositCommandEnvelope;
+import org.apache.fineract.commands.domain.SavingsTransactionCommandEnvelope;
 import org.apache.fineract.commands.exception.CommandNotAwaitingApprovalException;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
@@ -96,8 +96,8 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 commandSourceInput.getLoanExternalId());
         // Unwrap for presentation (including hooks); execution separately establishes trust in the persisted metadata.
         String executionJson = commandSourceInput.getCommandAsJson();
-        if (SavingsDepositCommandEnvelope.appliesTo(commandSourceInput.getActionName(), commandSourceInput.getEntityName())) {
-            executionJson = SavingsDepositCommandEnvelope.forDisplay(executionJson);
+        if (SavingsTransactionCommandEnvelope.appliesTo(commandSourceInput.getActionName(), commandSourceInput.getEntityName())) {
+            executionJson = SavingsTransactionCommandEnvelope.forDisplay(executionJson);
             if (executionJson == null || executionJson.isBlank()) {
                 executionJson = "{}";
             }

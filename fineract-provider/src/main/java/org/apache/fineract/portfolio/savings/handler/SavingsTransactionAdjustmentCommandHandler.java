@@ -20,7 +20,10 @@ package org.apache.fineract.portfolio.savings.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
+import org.apache.fineract.commands.domain.SavingsTransactionCommandEnvelope;
+import org.apache.fineract.commands.domain.SavingsTransactionExecutionContext;
+import org.apache.fineract.commands.domain.SavingsTransactionKind;
+import org.apache.fineract.commands.handler.SavingsTransactionCommandHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
@@ -30,15 +33,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "SAVINGSACCOUNT", action = "ADJUSTTRANSACTION")
 @RequiredArgsConstructor
-public class SavingsTransactionAdjustmentCommandHandler implements NewCommandSourceHandler {
+public class SavingsTransactionAdjustmentCommandHandler implements SavingsTransactionCommandHandler {
 
     private final SavingsAccountWritePlatformService writePlatformService;
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        final Long transactionId = Long.valueOf(command.getTransactionId());
-        return this.writePlatformService.adjustSavingsTransaction(command.getSavingsId(), transactionId, command);
+        throw SavingsTransactionCommandEnvelope.untrustedOrigin(SavingsTransactionKind.ADJUSTTRANSACTION);
     }
 
+    @Transactional
+    @Override
+    public CommandProcessingResult processTransaction(JsonCommand command, SavingsTransactionExecutionContext context) {
+        if (context == null) {
+            throw SavingsTransactionCommandEnvelope.untrustedOrigin(SavingsTransactionKind.ADJUSTTRANSACTION);
+        }
+        context.requireKind(SavingsTransactionKind.ADJUSTTRANSACTION);
+        return this.writePlatformService.adjustSavingsTransaction(command.getSavingsId(), Long.valueOf(command.getTransactionId()), command,
+                context);
+    }
 }

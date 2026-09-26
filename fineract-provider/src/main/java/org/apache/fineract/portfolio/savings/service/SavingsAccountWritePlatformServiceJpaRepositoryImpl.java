@@ -49,6 +49,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.commands.domain.SavingsTransactionCommandEnvelope;
+import org.apache.fineract.commands.domain.SavingsTransactionExecutionContext;
+import org.apache.fineract.commands.domain.SavingsTransactionKind;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -168,6 +171,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsAccountActivationService savingsAccountActivationService;
     private final ExternalIdFactory externalIdFactory;
     private final ErrorHandler errorHandler;
+    private final SavingsWithdrawalAuthorityService withdrawalAuthority;
 
     @Transactional
     @Override
@@ -867,6 +871,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Override
     public CommandProcessingResult adjustSavingsTransaction(final Long savingsId, final Long transactionId, final JsonCommand command) {
+        return adjustSavingsTransaction(savingsId, transactionId, command, null);
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult adjustSavingsTransaction(final Long savingsId, final Long transactionId, final JsonCommand command,
+            SavingsTransactionExecutionContext executionContext) {
         context.authenticatedUser();
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
@@ -895,6 +906,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final LocalDate today = DateUtils.getBusinessLocalDate();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        if (savingsAccountTransaction.isWithdrawal()) {
+            withdrawalAuthority.require(executionContext, SavingsTransactionKind.ADJUSTTRANSACTION, account,
+                    command.bigDecimalValueOfParameterNamed(SavingsApiConstants.transactionAmountParamName));
+        }
 
         if (account.isNotActive()) {
             throwValidationForActiveStatus(SavingsApiConstants.adjustTransactionAction);
@@ -998,6 +1013,19 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Override
     public CommandProcessingResult bulkGSIMClose(final Long gsimId, final JsonCommand command) {
+        return bulkGSIMClose(gsimId, command, null);
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult bulkGSIMClose(final Long gsimId, final JsonCommand command,
+            SavingsTransactionExecutionContext executionContext) {
+        if (executionContext == null) {
+            throw SavingsTransactionCommandEnvelope.untrustedOrigin(SavingsTransactionKind.GSIM_CLOSE);
+        }
+        executionContext.requireKind(SavingsTransactionKind.GSIM_CLOSE);
+        final var childContext = new SavingsTransactionExecutionContext(SavingsTransactionKind.CLOSE, executionContext.origin(),
+                executionContext.maker());
 
         final Long parentSavingId = gsimId;
         GroupSavingsIndividualMonitoring parentSavings = gsimRepository.findById(parentSavingId).orElseThrow();
@@ -1006,7 +1034,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         CommandProcessingResult result = null;
         int count = 0;
         for (SavingsAccount account : childSavings) {
-            result = close(account.getId(), command);
+            result = close(account.getId(), command, childContext);
 
             if (result != null) {
                 count++;
@@ -1021,6 +1049,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Override
     public CommandProcessingResult close(final Long savingsId, final JsonCommand command) {
+        return close(savingsId, command, null);
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult close(final Long savingsId, final JsonCommand command,
+            SavingsTransactionExecutionContext executionContext) {
         final AppUser user = this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
@@ -1064,6 +1099,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         if (isWithdrawBalance && account.getSummary().getAccountBalance(account.getCurrency()).isGreaterThanZero()) {
 
             final BigDecimal transactionAmount = account.getSummary().getAccountBalance();
+            withdrawalAuthority.require(executionContext, SavingsTransactionKind.CLOSE, account, transactionAmount);
 
             final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
+import org.apache.fineract.commands.domain.SavingsTransactionExecutionContext;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -49,6 +50,11 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult adjustSavingsTransaction(Long savingsId, Long transactionId, JsonCommand command);
 
     CommandProcessingResult close(Long savingsId, JsonCommand command);
+
+    CommandProcessingResult close(Long savingsId, JsonCommand command, SavingsTransactionExecutionContext context);
+
+    CommandProcessingResult adjustSavingsTransaction(Long savingsId, Long transactionId, JsonCommand command,
+            SavingsTransactionExecutionContext context);
 
     SavingsAccountTransaction initiateSavingsTransfer(SavingsAccount account, LocalDate transferDate);
 
@@ -117,6 +123,8 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult gsimActivate(Long gsimId, JsonCommand command);
 
     CommandProcessingResult gsimDeposit(Long gsimId, JsonCommand command);
+
+    CommandProcessingResult bulkGSIMClose(Long gsimId, JsonCommand command, SavingsTransactionExecutionContext context);
 
     CommandProcessingResult bulkGSIMClose(Long gsimId, JsonCommand command);
 

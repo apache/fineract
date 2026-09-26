@@ -46,6 +46,7 @@ public class CommandWrapper {
 
     private final Long commandId;
     private final SavingsDepositOrigin savingsDepositOrigin;
+    private final SavingsTransactionOrigin savingsTransactionOrigin;
     @SuppressWarnings("unused")
     private final Long officeId;
     private final Long groupId;
@@ -93,6 +94,7 @@ public class CommandWrapper {
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
             final Long subresourceId, final String resourceGetUrl, final Long productId) {
+        this.savingsTransactionOrigin = null;
         this.savingsDepositOrigin = null;
         this.commandId = commandId;
         this.officeId = null;
@@ -134,6 +136,20 @@ public class CommandWrapper {
             final Long organisationCreditBureauId, final String jobName, final String idempotencyKey, final ExternalId loanExternalId,
             final Set<String> sanitizeJsonKeys, final SavingsDepositOrigin savingsDepositOrigin) {
 
+        this(officeId, groupId, clientId, loanId, savingsId, actionName, entityName, entityId, subentityId, href, json, transactionId,
+                productId, templateId, creditBureauId, organisationCreditBureauId, jobName, idempotencyKey, loanExternalId,
+                sanitizeJsonKeys, savingsDepositOrigin,
+                savingsDepositOrigin == null ? null : SavingsTransactionOrigin.valueOf(savingsDepositOrigin.name()));
+    }
+
+    public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
+            final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
+            final String json, final String transactionId, final Long productId, final Long templateId, final Long creditBureauId,
+            final Long organisationCreditBureauId, final String jobName, final String idempotencyKey, final ExternalId loanExternalId,
+            final Set<String> sanitizeJsonKeys, final SavingsDepositOrigin savingsDepositOrigin,
+            final SavingsTransactionOrigin savingsTransactionOrigin) {
+
+        this.savingsTransactionOrigin = savingsTransactionOrigin;
         this.savingsDepositOrigin = savingsDepositOrigin;
         this.commandId = null;
         this.officeId = officeId;
@@ -165,6 +181,7 @@ public class CommandWrapper {
             final Long organisationCreditBureauId, final String idempotencyKey, final ExternalId loanExternalId,
             final Set<String> sanitizeJsonKeys) {
 
+        this.savingsTransactionOrigin = null;
         this.savingsDepositOrigin = null;
         this.commandId = commandId;
         this.officeId = officeId;

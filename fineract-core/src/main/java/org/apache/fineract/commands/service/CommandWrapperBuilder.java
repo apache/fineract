@@ -253,6 +253,7 @@ import java.util.Locale;
 import java.util.Set;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.domain.SavingsDepositOrigin;
+import org.apache.fineract.commands.domain.SavingsTransactionOrigin;
 import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
@@ -262,9 +263,16 @@ import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstant
 public class CommandWrapperBuilder {
 
     private SavingsDepositOrigin savingsDepositOrigin;
+    private SavingsTransactionOrigin savingsTransactionOrigin;
+
+    public CommandWrapperBuilder withSavingsTransactionOrigin(SavingsTransactionOrigin origin) {
+        this.savingsTransactionOrigin = origin;
+        return this;
+    }
 
     public CommandWrapperBuilder withSavingsDepositOrigin(SavingsDepositOrigin origin) {
         this.savingsDepositOrigin = origin;
+        this.savingsTransactionOrigin = origin == null ? null : SavingsTransactionOrigin.valueOf(origin.name());
         return this;
     }
 
@@ -288,14 +296,15 @@ public class CommandWrapperBuilder {
     public CommandWrapper build() {
         return new CommandWrapper(null, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
                 this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, null, null,
-                this.organisationCreditBureauId, this.jobName, null, this.loanExternalId, this.sanitizeJsonKeys, this.savingsDepositOrigin);
+                this.organisationCreditBureauId, this.jobName, null, this.loanExternalId, this.sanitizeJsonKeys, this.savingsDepositOrigin,
+                this.savingsTransactionOrigin);
     }
 
     public CommandWrapper build(String idempotencyKey) {
         return new CommandWrapper(null, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
                 this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, null, null,
                 this.organisationCreditBureauId, this.jobName, idempotencyKey, this.loanExternalId, this.sanitizeJsonKeys,
-                this.savingsDepositOrigin);
+                this.savingsDepositOrigin, this.savingsTransactionOrigin);
     }
 
     public CommandWrapperBuilder updateCreditBureau() {
