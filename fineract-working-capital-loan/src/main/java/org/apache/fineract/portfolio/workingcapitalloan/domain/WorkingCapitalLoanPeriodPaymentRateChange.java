@@ -64,9 +64,10 @@ public class WorkingCapitalLoanPeriodPaymentRateChange extends AbstractAuditable
 
     /**
      * Snapshot taken when the change was booked, never restated; null for changes booked before it existed. The annual
-     * EIR is a percentage, like the rates.
+     * EIR is a percentage, like the rates. Wider than the other rate columns because it is solved rather than entered:
+     * it matches the decimal(27,8) field the same figure is published in, and the cap the solver enforces on it.
      */
-    @Column(name = "calculated_annual_eir", scale = 6, precision = 19)
+    @Column(name = "calculated_annual_eir", scale = 8, precision = 27)
     private BigDecimal calculatedAnnualEir;
 
     @Column(name = "daily_payment_amount", scale = 6, precision = 19)

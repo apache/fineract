@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloanproduct.serialization;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
@@ -220,6 +221,33 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
         final JsonCommand command = jsonCommand(
                 createJsonWithField(WorkingCapitalLoanConstants.submittedOnNoteParameterName, "x".repeat(501)));
         assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(command));
+    }
+
+    @Test
+    void testValidateForCreate_WithDiscountAboveThePrincipal_ShouldThrowException() {
+        final JsonObject json = createBaseJsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.discountParamName, 6000);
+        final JsonCommand command = jsonCommand(json.toString());
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateForCreate(command));
+
+        assertTrue(exception.getErrors().stream()
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal")));
+    }
+
+    /** The modification is validated on the assembled loan, so it sees whichever side of the pair the request moved. */
+    @Test
+    void testValidateForModify_WithDiscountAboveThePrincipal_ShouldThrowException() {
+        final WorkingCapitalLoan loan = submittedLoanWithStrategy(WorkingCapitalPaymentAmountCalculationStrategy.TPV);
+        lenient().when(loan.getLoanProductRelatedDetails().getDiscountProposed()).thenReturn(new BigDecimal("150"));
+        lenient().when(loan.getProposedPrincipal()).thenReturn(new BigDecimal("100"));
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateForModify(loan));
+
+        assertTrue(exception.getErrors().stream()
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal")));
     }
 
     @Test

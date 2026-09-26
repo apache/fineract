@@ -229,6 +229,8 @@ public class WorkingCapitalLoanDataValidator {
             validateDiscountAmountWithProductDiscount(discountAmount, loan.getLoanProduct().getRelatedDetail(), baseDataValidator);
         }
 
+        validateDiscountDoesNotExceedPrincipal(discountAmount, loan.getFirstActualDisbursementAmount(), baseDataValidator);
+
         if (loan.isNotDisbursed()) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.actualDisbursementDateParamName)
                     .failWithCode("loan.not.disbursed");
@@ -444,7 +446,68 @@ public class WorkingCapitalLoanDataValidator {
             }
         }
 
+        // Resolved rather than read off the request: approval can lower the principal without touching the discount,
+        // which is the other way the pair ends up inverted.
+        validateDiscountDoesNotExceedPrincipal(effectiveDiscountForApproval(element, loan), effectivePrincipalForApproval(element, loan),
+                baseDataValidator);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    /** Mirrors the approval write path: the requested discount, else the one proposed on submission. */
+    private BigDecimal effectiveDiscountForApproval(final JsonElement element, final WorkingCapitalLoan loan) {
+        if (this.fromApiJsonHelper.parameterHasValue(WorkingCapitalLoanConstants.discountAmountParamName, element)) {
+            return this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.discountAmountParamName, element,
+                    new HashSet<>());
+        }
+        return loan.getLoanProductRelatedDetails() != null ? loan.getLoanProductRelatedDetails().getDiscountProposed() : null;
+    }
+
+    /** Mirrors the approval write path: the approved amount when positive, else the proposed principal. */
+    private BigDecimal effectivePrincipalForApproval(final JsonElement element, final WorkingCapitalLoan loan) {
+        if (this.fromApiJsonHelper.parameterHasValue(WorkingCapitalLoanConstants.approvedLoanAmountParamName, element)) {
+            final BigDecimal approvedLoanAmount = this.fromApiJsonHelper
+                    .extractBigDecimalNamed(WorkingCapitalLoanConstants.approvedLoanAmountParamName, element, new HashSet<>());
+            if (approvedLoanAmount != null && approvedLoanAmount.signum() > 0) {
+                return approvedLoanAmount;
+            }
+        }
+        return loan.getProposedPrincipal();
+    }
+
+    /**
+     * Mirrors the disbursement write path: the approved discount when the product forbids overriding it, else the
+     * requested one, else nothing - a loan disbursed without a discount books no discount fee transaction.
+     */
+    private BigDecimal effectiveDiscountForDisbursement(final JsonElement element, final WorkingCapitalLoan loan) {
+        if (isDiscountOverrideDisallowed(loan)) {
+            return loan.getLoanProductRelatedDetails() != null ? loan.getLoanProductRelatedDetails().getDiscountApproved() : null;
+        }
+        if (this.fromApiJsonHelper.parameterHasValue(WorkingCapitalLoanConstants.discountAmountParamName, element)) {
+            return this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.discountAmountParamName, element,
+                    new HashSet<>());
+        }
+        return null;
+    }
+
+    /**
+     * The discount fee is charged on top of the principal rather than deducted from it, so a fee worth more than the
+     * principal means the borrower owes more in fee than in money received. The schedule that follows earns the whole
+     * fee over the handful of days the payments take to repay the balance, which solves to an annual EIR of
+     * astronomical magnitude - see
+     * {@link org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel#MAX_CALCULABLE_ANNUAL_EIR}.
+     * Applied at every point the pair can be set, since either side of it moves independently: submission,
+     * modification, approval, disbursement and the discount fee transaction itself.
+     */
+    private void validateDiscountDoesNotExceedPrincipal(final BigDecimal discount, final BigDecimal principal,
+            final DataValidatorBuilder baseDataValidator) {
+        if (discount == null || principal == null || principal.signum() <= 0) {
+            return;
+        }
+        if (discount.compareTo(principal) > 0) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.discountAmountParamName).value(discount)
+                    .failWithCode("amount.cannot.exceed.principal");
+        }
     }
 
     private void validateDiscountAmountWithProductDiscount(final BigDecimal discountAmount,
@@ -583,6 +646,10 @@ public class WorkingCapitalLoanDataValidator {
                 }
             }
         }
+
+        // Against the amount actually being disbursed, not the approved principal: disbursing less than approved is
+        // allowed above, and it is the disbursed amount the discount fee is charged on.
+        validateDiscountDoesNotExceedPrincipal(effectiveDiscountForDisbursement(element, loan), transactionAmount, baseDataValidator);
 
         final String note = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.noteParamName, element);
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.noteParamName).value(note).ignoreIfNull()

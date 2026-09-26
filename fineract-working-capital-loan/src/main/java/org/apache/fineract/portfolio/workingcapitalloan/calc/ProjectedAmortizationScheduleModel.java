@@ -93,6 +93,18 @@ public final class ProjectedAmortizationScheduleModel {
      */
     public static final int MAX_CALCULABLE_TOTAL_DAYS = 100_000;
 
+    /**
+     * Cap on the calculated annual EIR, as a percentage. A schedule whose payments repay the balance in a handful of
+     * days earns its whole discount fee over that handful of days, and compounding that daily return over the day count
+     * produces a rate of astronomical magnitude - 5.8E+55 % for a 100 balance against a 150 fee repaid in five days.
+     * Such a rate is not merely meaningless, it is wider than the {@code decimal(27,8)} Avro field every external event
+     * carries the account in, where encoding it fails with the schedule already written and the approval already done.
+     * The cap is that field's own ceiling, so nothing calculable here is unpublishable there, and it turns what was a
+     * failure deep in the event pipeline into the ordinary "not calculable" rejection every entry point already handles
+     * - both feasibility pre-checks run the same solve.
+     */
+    public static final BigDecimal MAX_CALCULABLE_ANNUAL_EIR = new BigDecimal("1E+19");
+
     @SerializedName(value = "discountFeeAmount", alternate = "originationFeeAmount")
     private final Money discountFeeAmount;
     private final Money netDisbursementAmount;

@@ -1363,8 +1363,17 @@ Feature: WorkingCapitalLoanAccount
   Scenario: Verify loan creation with input values with non-overridable pre-defined discount that unable to calculate a valid EIR leads to error - UC6
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
-    And Admin creates a new Working Capital Loan Product with discount value "300000" that is forbidden to be overridden
+    And Admin creates a new Working Capital Loan Product with discount value "5000" that is forbidden to be overridden
     Then Creating a working capital loan using created product with input values that cause unable to calculate a valid EIR will result into an error:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 5000            | 55           | 18                |          |
+
+  @TestRailId:CTBD
+  Scenario: Verify loan creation with non-overridable pre-defined discount above the principal leads to error - UC6
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new Working Capital Loan Product with discount value "300000" that is forbidden to be overridden
+    Then Creating a working capital loan using created product will result an error "validation.msg.WORKINGCAPITALLOAN.discount.amount.cannot.exceed.principal":
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
       | 01 January 2026 | 01 January 2026          | 5000            | 5500         | 18                |          |
 

@@ -796,6 +796,12 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     @Then("Creating a working capital loan using created product with input values that cause unable to calculate a valid EIR will result into an error:")
     public void creatingAWorkingCapitalLoanUsingLpWithInvalidInputValuesCauseUnableToCalculateEIrResultAnError(final DataTable table) {
+        creatingAWorkingCapitalLoanUsingLpWillResultAnError(
+                ErrorMessageHelper.workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure(), table);
+    }
+
+    @Then("Creating a working capital loan using created product will result an error {string}:")
+    public void creatingAWorkingCapitalLoanUsingLpWillResultAnError(final String errorMessage, final DataTable table) {
         final List<List<String>> data = table.asLists();
         final List<String> loanData = data.get(1);
         final Long clientId = extractClientId();
@@ -825,10 +831,9 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
 
         assertHttpStatus(exception, 400);
-        String errorMessage = ErrorMessageHelper.workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure();
         assertValidationError(exception, errorMessage);
 
-        log.info("Verified working capital loan creation failed with principal amount exceeding max");
+        log.info("Verified working capital loan creation failed with error message '{}'", errorMessage);
     }
 
     @Then("Creating a working capital loan with missing mandatory fields will result an error:")
