@@ -2801,4 +2801,31 @@ class ProjectedAmortizationScheduleCalculatorTest {
         assertEquals(0, exp.compareTo(act), msg + " — expected: " + exp + ", actual: " + act);
     }
 
+    /**
+     * A 100 balance against a 150 discount fee is repaid in five days, so the schedule earns the whole fee over those
+     * five days and solves to 5.8E+55 % a year - wider than the decimal field the external event carries the account
+     * in. The pre-check rejects it, so the approval that produced it fails as a validation error rather than breaking
+     * inside the event pipeline with the schedule already written and the loan already approved.
+     */
+    @Test
+    void aFeeEarnedInDaysSolvesToARateTooWideToReport() {
+        final MonetaryCurrency eur = new MonetaryCurrency("EUR", 2, null);
+        final BigDecimal fee = new BigDecimal("150");
+        final BigDecimal net = new BigDecimal("100");
+
+        assertFalse(
+                ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.EIR, fee, net, TPV, RATE, DAY_COUNT,
+                        eur, MC),
+                "an annual EIR above " + ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR + " % is not reportable");
+        assertThrows(IllegalStateException.class,
+                () -> ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR, fee, net, TPV, RATE, DAY_COUNT,
+                        EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE),
+                "and generate() refuses the same shape the pre-check refused");
+
+        // FLAT earns a fixed share of every payment and solves no rate, so there is no figure to overflow and the cap
+        // has nothing to say about it - what keeps this shape off a FLAT loan is the discount-versus-principal rule.
+        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, fee, net, TPV, RATE,
+                DAY_COUNT, eur, MC));
+    }
+
 }

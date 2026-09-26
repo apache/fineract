@@ -108,4 +108,5 @@
   <include relativeToChangelogFile="true" file="parts/0084_wc_loan_missing_command_permissions.xml"/>
   <include relativeToChangelogFile="true" file="parts/0085_wc_remove_unsupported_payment_allocation_rules.xml"/>
   <include relativeToChangelogFile="true" file="parts/0086_wc_payment_amount_strategy.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0087_wc_rate_change_calculated_annual_eir_width.xml"/>
 </databaseChangeLog>
