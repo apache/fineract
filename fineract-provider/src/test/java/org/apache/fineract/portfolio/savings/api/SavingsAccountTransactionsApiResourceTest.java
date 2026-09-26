@@ -29,6 +29,8 @@ import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.UriInfo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -76,6 +78,41 @@ class SavingsAccountTransactionsApiResourceTest {
 
     @InjectMocks
     private SavingsAccountTransactionsApiResource underTest;
+
+    @Test
+    void transactionResponseFieldsShouldIncludeTransactionTime() {
+        assertThat(SavingsApiSetConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS)
+                .contains(SavingsApiConstants.transactionTimeParamName);
+    }
+
+    @Test
+    void retrieveOneWithTemplateShouldPreserveTransactionTime() {
+        Long savingsId = 1L;
+        Long transactionId = 42L;
+        OffsetTime transactionTime = OffsetTime.of(2, 0, 0, 0, ZoneOffset.ofHoursMinutes(5, 30));
+        UriInfo uriInfo = org.mockito.Mockito.mock(UriInfo.class);
+        AppUser user = org.mockito.Mockito.mock(AppUser.class);
+        ApiRequestJsonSerializationSettings settings = org.mockito.Mockito.mock(ApiRequestJsonSerializationSettings.class);
+        SavingsAccountTransactionData transactionData = org.mockito.Mockito.mock(SavingsAccountTransactionData.class);
+        ArgumentCaptor<SavingsAccountTransactionData> serializedData = ArgumentCaptor.forClass(SavingsAccountTransactionData.class);
+
+        when(context.authenticatedUser()).thenReturn(user);
+        when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
+        when(savingsAccountReadPlatformService.retrieveSavingsTransaction(savingsId, transactionId, DepositAccountType.SAVINGS_DEPOSIT))
+                .thenReturn(transactionData);
+        when(transactionData.getTransactionTime()).thenReturn(transactionTime);
+        when(paymentTypeReadPlatformService.retrieveAllPaymentTypes()).thenReturn(List.of());
+        when(apiRequestParameterHelper.process(any())).thenReturn(settings);
+        when(settings.isTemplate()).thenReturn(true);
+        when(toApiJsonSerializer.serialize(eq(settings), any(SavingsAccountTransactionData.class),
+                eq(SavingsApiSetConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS))).thenReturn("serialized");
+
+        assertThat(underTest.retrieveOne(savingsId, transactionId, uriInfo)).isEqualTo("serialized");
+
+        verify(toApiJsonSerializer).serialize(eq(settings), serializedData.capture(),
+                eq(SavingsApiSetConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS));
+        assertThat(serializedData.getValue().getTransactionTime()).isEqualTo(transactionTime);
+    }
 
     @Test
     void retrieveTemplateBySavingsExternalId_shouldResolveSavingsIdAndDelegateToReadService() {

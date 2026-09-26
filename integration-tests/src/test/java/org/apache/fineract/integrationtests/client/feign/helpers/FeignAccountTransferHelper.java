@@ -45,6 +45,8 @@ public class FeignAccountTransferHelper {
         return ok(() -> fineractClient.accountTransfers().createAccountTransfer(request));
     }
 
+    public GetAccountTransfersPageItems getAccountTransfer(Long transferId) {
+        return ok(() -> fineractClient.accountTransfers().retrieveOneAccountTransfer(transferId));
     public CallFailedRuntimeException createAccountTransferExpectingError(AccountTransferRequest request) {
         return fail(() -> fineractClient.accountTransfers().createAccountTransfer(request));
     }
