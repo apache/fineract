@@ -41,10 +41,20 @@ class SavingsDepositAuditTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "WITHDRAWAL", "POSTINTEREST", "ACTIVATE" })
+    @ValueSource(strings = { "POSTINTEREST", "ACTIVATE" })
     void unrelatedAuditCommandsAreUntouched(String action) throws Exception {
         String stored = "{\"_serverCommand\":\"ordinary data for another command\"}";
         assertThat(map(action, stored).getCommandAsJson()).isEqualTo(stored);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    void withdrawalAuditShowsBusinessPayloadForCompletedLegacyAndNewCommands(boolean enveloped) throws Exception {
+        String payload = "{\"transactionAmount\":50}";
+        String stored = enveloped ? org.apache.fineract.commands.domain.SavingsTransactionCommandEnvelope.encode(payload,
+                org.apache.fineract.commands.domain.SavingsTransactionKind.WITHDRAWAL,
+                org.apache.fineract.commands.domain.SavingsTransactionOrigin.STAFF_API) : payload;
+        assertThat(map("WITHDRAWAL", stored).getCommandAsJson()).isEqualTo(payload);
     }
 
     private AuditData map(String action, String stored) throws Exception {

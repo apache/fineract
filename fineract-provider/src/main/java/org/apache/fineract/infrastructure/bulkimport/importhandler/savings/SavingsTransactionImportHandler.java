@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.domain.SavingsDepositOrigin;
+import org.apache.fineract.commands.domain.SavingsTransactionOrigin;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
@@ -132,11 +133,17 @@ public class SavingsTransactionImportHandler implements ImportHandler {
                 savingsTransactionJsonob.remove(TRANSACTION_TYPE);
                 savingsTransactionJsonob.remove(REVERSED);
                 savingsTransactionJsonob.remove(INTERESTED_POSTED_AS_ON);
+                if (transaction.getTransactionType().getValue().equals(WITHDRAWAL)) {
+                    // DTO response fields are not withdrawal request parameters.
+                    savingsTransactionJsonob.remove("entryType");
+                    savingsTransactionJsonob.remove("isOverdraft");
+                }
                 String payload = savingsTransactionJsonob.toString();
                 CommandWrapper commandRequest = null;
                 if (transaction.getTransactionType().getValue().equals(WITHDRAWAL)) {
                     commandRequest = new CommandWrapperBuilder() //
-                            .savingsAccountWithdrawal(transaction.getSavingsAccountId()) //
+                            .savingsAccountWithdrawal(transaction.getSavingsAccountId())
+                            .withSavingsTransactionOrigin(SavingsTransactionOrigin.SPREADSHEET_IMPORT) //
                             .withJson(payload) //
                             .build(); //
 

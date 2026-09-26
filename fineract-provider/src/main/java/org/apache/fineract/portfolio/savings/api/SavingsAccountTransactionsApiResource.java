@@ -44,6 +44,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.domain.SavingsDepositOrigin;
+import org.apache.fineract.commands.domain.SavingsTransactionOrigin;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
@@ -315,8 +316,10 @@ public class SavingsAccountTransactionsApiResource {
             case "deposit" ->
                 builder.savingsAccountDeposit(resolvedSavingsId).withSavingsDepositOrigin(SavingsDepositOrigin.STAFF_API).build();
             case "gsimDeposit" -> builder.gsimSavingsAccountDeposit(resolvedSavingsId).build();
-            case "withdrawal" -> builder.savingsAccountWithdrawal(resolvedSavingsId).build();
-            case "force-withdrawal" -> builder.savingsAccountForceWithdrawal(resolvedSavingsId).build();
+            case "withdrawal" -> builder.savingsAccountWithdrawal(resolvedSavingsId)
+                    .withSavingsTransactionOrigin(SavingsTransactionOrigin.STAFF_API).build();
+            case "force-withdrawal" -> builder.savingsAccountForceWithdrawal(resolvedSavingsId)
+                    .withSavingsTransactionOrigin(SavingsTransactionOrigin.STAFF_API).build();
             case "postInterestAsOn" -> builder.savingsAccountInterestPosting(resolvedSavingsId).build();
             case SavingsApiConstants.COMMAND_HOLD_AMOUNT -> builder.holdAmount(resolvedSavingsId).build();
             default -> throw new UnrecognizedQueryParamException("command", commandParam, "deposit", "withdrawal", "force-withdrawal",
@@ -376,7 +379,8 @@ public class SavingsAccountTransactionsApiResource {
             case SavingsApiConstants.COMMAND_REVERSE_TRANSACTION ->
                 builder.reverseSavingsAccountTransaction(resolvedSavingsId, resolvedTransactionId).build();
             case SavingsApiConstants.COMMAND_ADJUST_TRANSACTION ->
-                builder.adjustSavingsAccountTransaction(resolvedSavingsId, resolvedTransactionId).build();
+                builder.adjustSavingsAccountTransaction(resolvedSavingsId, resolvedTransactionId)
+                        .withSavingsTransactionOrigin(SavingsTransactionOrigin.STAFF_API).build();
             case SavingsApiConstants.COMMAND_RELEASE_AMOUNT -> builder.releaseAmount(resolvedSavingsId, resolvedTransactionId).build();
             default -> throw new UnrecognizedQueryParamException("command", commandParam, SavingsApiConstants.COMMAND_UNDO_TRANSACTION,
                     SavingsApiConstants.COMMAND_ADJUST_TRANSACTION, SavingsApiConstants.COMMAND_RELEASE_AMOUNT,

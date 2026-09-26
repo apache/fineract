@@ -46,6 +46,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.domain.SavingsTransactionOrigin;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
@@ -325,7 +326,8 @@ public class SavingsAccountsApiResource {
             final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(parentAccountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close")) {
-            final CommandWrapper commandRequest = builder.closeGSIMApplication(parentAccountId).build();
+            final CommandWrapper commandRequest = builder.closeGSIMApplication(parentAccountId)
+                    .withSavingsTransactionOrigin(SavingsTransactionOrigin.STAFF_API).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
         if (result == null) {
@@ -577,7 +579,8 @@ public class SavingsAccountsApiResource {
             final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close")) {
-            final CommandWrapper commandRequest = builder.closeSavingsAccountApplication(accountId).build();
+            final CommandWrapper commandRequest = builder.closeSavingsAccountApplication(accountId)
+                    .withSavingsTransactionOrigin(SavingsTransactionOrigin.STAFF_API).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "assignSavingsOfficer")) {
             final CommandWrapper commandRequest = builder.assignSavingsOfficer(accountId).build();

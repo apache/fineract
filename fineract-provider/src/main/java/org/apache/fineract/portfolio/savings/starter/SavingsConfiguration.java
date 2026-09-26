@@ -144,6 +144,7 @@ import org.apache.fineract.portfolio.savings.service.SavingsProductWritePlatform
 import org.apache.fineract.portfolio.savings.service.SavingsProductWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPoster;
 import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPosterTask;
+import org.apache.fineract.portfolio.savings.service.SavingsWithdrawalAuthorityService;
 import org.apache.fineract.portfolio.savings.service.search.SavingsAccountTransactionSearchService;
 import org.apache.fineract.portfolio.savings.service.search.SavingsAccountTransactionsSearchServiceImpl;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
@@ -396,8 +397,8 @@ public class SavingsConfiguration {
             StandingInstructionRepository standingInstructionRepository, BusinessEventNotifierService businessEventNotifierService,
             GSIMRepositoy gsimRepository, SavingsAccountInterestPostingService savingsAccountInterestPostingService,
             SavingsAccountPostInterestService savingsAccountPostInterestService,
-            SavingsAccountActivationService savingsAccountActivationService, ExternalIdFactory externalIdFactory,
-            ErrorHandler errorHandler) {
+            SavingsAccountActivationService savingsAccountActivationService, ExternalIdFactory externalIdFactory, ErrorHandler errorHandler,
+            SavingsWithdrawalAuthorityService withdrawalAuthority) {
         return new SavingsAccountWritePlatformServiceJpaRepositoryImpl(context, fromApiJsonDeserializer, savingAccountRepositoryWrapper,
                 staffRepository, savingsAccountTransactionRepository, savingAccountAssembler, savingsAccountTransactionDataValidator,
                 savingsAccountChargeDataValidator, paymentDetailWritePlatformService, savingsAccountDomainService, noteRepository,
@@ -405,7 +406,7 @@ public class SavingsConfiguration {
                 savingsAccountChargeRepository, holidayRepository, workingDaysRepository, configurationDomainService,
                 depositAccountOnHoldTransactionRepository, entityDatatableChecksWritePlatformService, appuserRepository,
                 standingInstructionRepository, businessEventNotifierService, gsimRepository, savingsAccountInterestPostingService,
-                savingsAccountPostInterestService, savingsAccountActivationService, externalIdFactory, errorHandler);
+                savingsAccountPostInterestService, savingsAccountActivationService, externalIdFactory, errorHandler, withdrawalAuthority);
     }
 
     @Bean

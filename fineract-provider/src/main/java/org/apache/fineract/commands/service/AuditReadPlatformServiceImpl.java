@@ -39,7 +39,7 @@ import org.apache.fineract.commands.data.AuditData;
 import org.apache.fineract.commands.data.AuditSearchData;
 import org.apache.fineract.commands.data.ProcessingResultLookup;
 import org.apache.fineract.commands.data.request.AuditRequest;
-import org.apache.fineract.commands.domain.SavingsDepositCommandEnvelope;
+import org.apache.fineract.commands.domain.SavingsTransactionCommandEnvelope;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
@@ -168,8 +168,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             ZonedDateTime madeOnDate = madeOnDateUTC != null ? madeOnDateUTC.toZonedDateTime() : madeOnDateTenant;
             ZonedDateTime checkedOnDate = checkedOnDateUTC != null ? checkedOnDateUTC.toZonedDateTime() : checkedOnDateTenant;
 
-            if (SavingsDepositCommandEnvelope.appliesTo(actionName, entityName)) {
-                commandAsJson = SavingsDepositCommandEnvelope.forDisplay(commandAsJson);
+            if (SavingsTransactionCommandEnvelope.appliesTo(actionName, entityName)) {
+                commandAsJson = SavingsTransactionCommandEnvelope.forDisplay(commandAsJson);
             }
             return new AuditData(id, actionName, entityName, resourceId, subresourceId, maker, madeOnDate, checker, checkedOnDate,
                     processingResult, commandAsJson, officeName, groupLevelName, groupName, clientName, loanAccountNo, savingsAccountNo,

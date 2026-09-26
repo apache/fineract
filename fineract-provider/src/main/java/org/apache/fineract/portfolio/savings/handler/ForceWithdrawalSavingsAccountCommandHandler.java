@@ -20,23 +20,45 @@ package org.apache.fineract.portfolio.savings.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
+import org.apache.fineract.commands.domain.SavingsTransactionCommandEnvelope;
+import org.apache.fineract.commands.domain.SavingsTransactionExecutionContext;
+import org.apache.fineract.commands.domain.SavingsTransactionKind;
+import org.apache.fineract.commands.handler.SavingsTransactionCommandHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDataValidator;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
+import org.apache.fineract.portfolio.savings.service.SavingsWithdrawalAuthorityService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "SAVINGSACCOUNT", action = "FORCE_WITHDRAWAL")
 @RequiredArgsConstructor
-public class ForceWithdrawalSavingsAccountCommandHandler implements NewCommandSourceHandler {
+public class ForceWithdrawalSavingsAccountCommandHandler implements SavingsTransactionCommandHandler {
 
     private final SavingsAccountWritePlatformService writePlatformService;
+    private final SavingsWithdrawalAuthorityService authority;
+    private final SavingsAccountRepositoryWrapper accounts;
+    private final SavingsAccountTransactionDataValidator validator;
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
+        throw SavingsTransactionCommandEnvelope.untrustedOrigin(SavingsTransactionKind.FORCE_WITHDRAWAL);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult processTransaction(JsonCommand command, SavingsTransactionExecutionContext context) {
+        if (context == null) {
+            throw SavingsTransactionCommandEnvelope.untrustedOrigin(SavingsTransactionKind.FORCE_WITHDRAWAL);
+        }
+        context.requireKind(SavingsTransactionKind.FORCE_WITHDRAWAL);
+        validator.validate(command);
+        authority.require(context, SavingsTransactionKind.FORCE_WITHDRAWAL, accounts.findOneWithNotFoundDetection(command.getSavingsId()),
+                command.bigDecimalValueOfParameterNamed("transactionAmount"));
         return this.writePlatformService.forceWithdrawal(command.getSavingsId(), command);
     }
 }

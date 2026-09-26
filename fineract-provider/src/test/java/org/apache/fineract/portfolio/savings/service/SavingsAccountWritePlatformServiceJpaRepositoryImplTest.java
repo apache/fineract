@@ -39,6 +39,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.fineract.commands.domain.SavingsTransactionExecutionContext;
+import org.apache.fineract.commands.domain.SavingsTransactionKind;
+import org.apache.fineract.commands.domain.SavingsTransactionOrigin;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -52,6 +55,8 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.nsimbi.userroles.domain.MonetaryAuthorityType;
+import org.apache.fineract.nsimbi.userroles.service.NsimbiMonetaryAuthorityPolicyService;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -88,6 +93,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -154,6 +160,69 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
 
     @InjectMocks
     private SavingsAccountWritePlatformServiceJpaRepositoryImpl service;
+
+    private final NsimbiMonetaryAuthorityPolicyService monetaryAuthority = mock(NsimbiMonetaryAuthorityPolicyService.class);
+
+    private SavingsTransactionExecutionContext execution(SavingsTransactionKind kind) {
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "test", "Test", "UTC", null));
+        MoneyHelper.initializeTenantRoundingMode("test", 6);
+        var maker = mock(AppUser.class);
+        when(maker.getId()).thenReturn(2L);
+        ReflectionTestUtils.setField(service, "withdrawalAuthority", new SavingsWithdrawalAuthorityService(monetaryAuthority));
+        return new SavingsTransactionExecutionContext(kind, SavingsTransactionOrigin.STAFF_API, maker);
+    }
+
+    @Test
+    void withdrawalAdjustmentChecksFullReplacementBeforeUndoAndFinancialWrites() {
+        var execution = execution(SavingsTransactionKind.ADJUSTTRANSACTION);
+        var transaction = mock(SavingsAccountTransaction.class);
+        when(transaction.isWithdrawal()).thenReturn(true);
+        when(savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(7L, 42L)).thenReturn(transaction);
+        var account = mock(SavingsAccount.class);
+        when(account.getCurrency()).thenReturn(new MonetaryCurrency("UGX", 2, 0));
+        when(savingAccountAssembler.assembleFrom(42L, false)).thenReturn(account);
+        ThreadLocalContextUtil.setBusinessDates(new java.util.HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 9, 25))));
+        var command = businessCommand("{\"locale\":\"en\",\"transactionAmount\":150}");
+        assertThatThrownBy(() -> service.adjustSavingsTransaction(42L, 7L, command, execution))
+                .isInstanceOf(GeneralPlatformDomainRuleException.class);
+        verify(monetaryAuthority).allows(2L, MonetaryAuthorityType.WITHDRAWALS, "UGX", new BigDecimal("150"));
+        verify(account, Mockito.never()).undoTransaction(anyLong());
+        Mockito.verifyNoInteractions(paymentDetailWritePlatformService, savingsAccountDomainService, savingAccountRepositoryWrapper,
+                savingsAccountPostInterestService);
+    }
+
+    @Test
+    void closureChecksActualBalanceBeforePaymentOrWithdrawal() {
+        var execution = execution(SavingsTransactionKind.CLOSE);
+        var account = mock(SavingsAccount.class, Mockito.RETURNS_DEEP_STUBS);
+        when(account.getCurrency()).thenReturn(new MonetaryCurrency("UGX", 2, 0));
+        when(account.getSummary().getAccountBalance()).thenReturn(new BigDecimal("250"));
+        when(account.getSummary().getAccountBalance(account.getCurrency()).isGreaterThanZero()).thenReturn(true);
+        when(savingAccountAssembler.assembleFrom(42L, false)).thenReturn(account);
+        var command = businessCommand(
+                "{\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"closedOnDate\":\"2026-09-25\",\"withdrawBalance\":true}");
+        assertThatThrownBy(() -> service.close(42L, command, execution)).isInstanceOf(GeneralPlatformDomainRuleException.class);
+        verify(monetaryAuthority).allows(2L, MonetaryAuthorityType.WITHDRAWALS, "UGX", new BigDecimal("250"));
+        verify(account, Mockito.never()).close(any(), any());
+        Mockito.verifyNoInteractions(paymentDetailWritePlatformService, savingsAccountDomainService, savingAccountRepositoryWrapper);
+    }
+
+    @Test
+    void closureWithoutWithdrawalDoesNotInvokeAuthority() {
+        var execution = execution(SavingsTransactionKind.CLOSE);
+        var account = mock(SavingsAccount.class);
+        when(savingAccountAssembler.assembleFrom(42L, false)).thenReturn(account);
+        var command = businessCommand(
+                "{\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"closedOnDate\":\"2026-09-25\",\"withdrawBalance\":false}");
+        service.close(42L, command, execution);
+        Mockito.verifyNoInteractions(monetaryAuthority, paymentDetailWritePlatformService, savingsAccountDomainService);
+    }
+
+    private JsonCommand businessCommand(String json) {
+        var helper = new org.apache.fineract.infrastructure.core.serialization.FromJsonHelper();
+        return JsonCommand.from(json, helper.parse(json), helper, "SAVINGSACCOUNT", 42L, null, null, null, null, 42L, null, null, null,
+                null, null, null, ExternalId.empty());
+    }
 
     private Method validateTransactionsForTransfer;
 

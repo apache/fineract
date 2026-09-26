@@ -18,90 +18,41 @@
  */
 package org.apache.fineract.commands.domain;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
-import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 
-/** Versioned server metadata in command_as_json, restricted to DEPOSIT_SAVINGSACCOUNT. */
+/** Compatibility API for the unchanged deposit version-1 envelope. */
 public final class SavingsDepositCommandEnvelope {
 
-    public static final String METADATA = "_serverCommand";
+    public static final String METADATA = SavingsTransactionCommandEnvelope.METADATA;
     public static final String UNTRUSTED_ORIGIN = "error.msg.savings.deposit.untrusted.origin";
 
     private SavingsDepositCommandEnvelope() {}
 
     public static boolean appliesTo(String action, String entity) {
-        return "DEPOSIT".equals(action) && "SAVINGSACCOUNT".equals(entity);
+        return SavingsTransactionKind.fromCommand(action, entity) == SavingsTransactionKind.DEPOSIT;
     }
 
     public static String encode(String json, SavingsDepositOrigin origin) {
-        JsonObject payload = clientPayload(json);
-        if (origin == null) {
-            throw untrustedOrigin();
-        }
-        JsonObject metadata = new JsonObject();
-        metadata.addProperty("version", 1);
-        metadata.addProperty("origin", origin.name());
-        JsonObject envelope = new JsonObject();
-        envelope.add(METADATA, metadata);
-        envelope.add("payload", payload);
-        return envelope.toString();
+        return SavingsTransactionCommandEnvelope.encode(json, SavingsTransactionKind.DEPOSIT,
+                origin == null ? null : SavingsTransactionOrigin.valueOf(origin.name()));
     }
 
     public static JsonObject clientPayload(String json) {
-        final JsonObject payload;
-        try {
-            payload = JsonParser.parseString(json).getAsJsonObject();
-        } catch (RuntimeException exception) {
-            throw new InvalidJsonException();
-        }
-        if (payload.has(METADATA)) {
-            throw new GeneralPlatformDomainRuleException("error.msg.savings.deposit.reserved.metadata",
-                    "The _serverCommand property is reserved for server use and must not be supplied in a deposit request.");
-        }
-        return payload;
+        return SavingsTransactionCommandEnvelope.clientPayload(json, SavingsTransactionKind.DEPOSIT);
     }
 
     public static Decoded decode(String json) {
-        try {
-            JsonObject envelope = JsonParser.parseString(json).getAsJsonObject();
-            JsonObject metadata = envelope.getAsJsonObject(METADATA);
-            JsonElement version = metadata.get("version");
-            JsonElement origin = metadata.get("origin");
-            JsonObject payload = envelope.getAsJsonObject("payload");
-            if (envelope.size() != 2 || metadata.size() != 2 || !version.isJsonPrimitive() || !version.getAsJsonPrimitive().isNumber()
-                    || !"1".equals(version.getAsString()) || !origin.isJsonPrimitive() || !origin.getAsJsonPrimitive().isString()
-                    || payload == null || payload.has(METADATA)) {
-                throw untrustedOrigin();
-            }
-            return new Decoded(SavingsDepositOrigin.valueOf(origin.getAsString()), payload);
-        } catch (RuntimeException exception) {
-            throw untrustedOrigin();
-        }
+        var decoded = SavingsTransactionCommandEnvelope.decode(json, SavingsTransactionKind.DEPOSIT);
+        return new Decoded(SavingsDepositOrigin.valueOf(decoded.origin().name()), decoded.payload());
     }
 
-    /** Read-only compatibility: legacy flat history remains readable without establishing execution trust. */
     public static String forDisplay(String json) {
-        if (json == null || json.isBlank()) {
-            return json;
-        }
-        try {
-            JsonObject object = JsonParser.parseString(json).getAsJsonObject();
-            if (!object.has(METADATA)) {
-                return json;
-            }
-            JsonElement payload = object.get("payload");
-            return payload != null && payload.isJsonObject() ? payload.toString() : "{}";
-        } catch (RuntimeException exception) {
-            return "{}";
-        }
+        return SavingsTransactionCommandEnvelope.forDisplay(json);
     }
 
     public static GeneralPlatformDomainRuleException untrustedOrigin() {
-        return new GeneralPlatformDomainRuleException(UNTRUSTED_ORIGIN,
-                "This deposit command has untrusted or unsupported origin metadata. Cancel it and resubmit the deposit.");
+        return SavingsTransactionCommandEnvelope.untrustedOrigin(SavingsTransactionKind.DEPOSIT);
     }
 
     public record Decoded(SavingsDepositOrigin origin, JsonObject payload) {
