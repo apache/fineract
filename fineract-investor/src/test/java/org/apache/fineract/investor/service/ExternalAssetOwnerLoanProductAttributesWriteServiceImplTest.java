@@ -59,6 +59,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.cache.annotation.CacheEvict;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -553,6 +554,22 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
                 .delete(any(ExternalAssetOwnerLoanProductAttributes.class));
         Assertions.assertEquals("The requested attribute does not belong to the loanProductId: " + testContext.loanProductId + ".",
                 thrownException.getMessage());
+    }
+
+    /**
+     * Creating an attribute must evict the loan product attribute cache. The attribute key is only present in the
+     * request body, so the per-key cache key that update uses cannot be built here and the whole cache is evicted
+     * instead. Without this, a cached "attribute not configured" result would survive the create and the new
+     * configuration would silently not take effect.
+     */
+    @Test
+    public void testCreateEvictsTheLoanProductAttributeCache() throws NoSuchMethodException {
+        CacheEvict cacheEvict = ExternalAssetOwnerLoanProductAttributesWriteServiceImpl.class
+                .getMethod("createExternalAssetOwnerLoanProductAttribute", JsonCommand.class).getAnnotation(CacheEvict.class);
+
+        Assertions.assertNotNull(cacheEvict, "createExternalAssetOwnerLoanProductAttribute must be annotated with @CacheEvict");
+        Assertions.assertTrue(cacheEvict.allEntries(), "the whole attribute cache must be evicted on create");
+        Assertions.assertArrayEquals(new String[] { "externalAssetOwnerLoanProductAttributes" }, cacheEvict.cacheNames());
     }
 
     private static Stream<Arguments> externalAssetOwnerLoanProductAttributeApiRequestDataValidationErrors() {

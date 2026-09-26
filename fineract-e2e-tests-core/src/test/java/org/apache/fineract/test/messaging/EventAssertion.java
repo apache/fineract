@@ -24,6 +24,7 @@ import static org.awaitility.Awaitility.await;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import lombok.AccessLevel;
@@ -107,6 +108,29 @@ public class EventAssertion {
         }
         log.debug("Assert event: {}", eventMessage.getIdempotencyKey());
         return new EventAssertionBuilder<>(eventMessage);
+    }
+
+    /**
+     * Like {@link #assertEvent(Class, Long)}, but also accepts an event that an earlier step has already verified (and
+     * so removed from the store), for steps that inspect the payload of an event raised by a previous action step.
+     */
+    public <R, T extends Event<R>> EventAssertionBuilder<R> assertEventReceived(Class<T> eventClazz, Long id) {
+        if (eventProperties.isEventVerificationDisabled()) {
+            return new EventAssertionBuilder<>((EventMessage<R>) new EmptyEventMessage());
+        }
+        T event = eventFactory.create(eventClazz);
+        AtomicReference<EventMessage<R>> eventMessage = new AtomicReference<>();
+        try {
+            await().atMost(Duration.ofMillis(eventProperties.getWaitTimeoutInMillis())).until(() -> {
+                eventStore.removeEventById(event, id).or(() -> eventStore.findVerifiedEventById(event, id)).ifPresent(eventMessage::set);
+                return eventMessage.get() != null;
+            });
+        } catch (ConditionTimeoutException e) {
+            Assertions.fail(
+                    event.getEventName() + " hasn't been received within " + eventProperties.getWaitTimeoutInMillis() / 1000 + " seconds");
+        }
+        log.debug("Assert event: {}", eventMessage.get().getIdempotencyKey());
+        return new EventAssertionBuilder<>(eventMessage.get());
     }
 
     public <R, T extends Event<R>> void assertEventNotRaised(Class<T> eventClazz, Predicate<? super EventMessage<R>> filter) {

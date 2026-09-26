@@ -41,6 +41,7 @@ import org.apache.fineract.client.feign.services.ExternalAssetOwnerLoanProductAt
 import org.apache.fineract.client.feign.services.ExternalAssetOwnersApi;
 import org.apache.fineract.client.feign.services.LoanProductsApi;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
@@ -53,6 +54,7 @@ import org.apache.fineract.client.models.GetLoanProductsResponse;
 import org.apache.fineract.client.models.JournalEntryData;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PageExternalTransferLoanProductAttributesData;
+import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostExternalAssetOwnerLoanProductAttributeRequest;
 import org.apache.fineract.client.models.PostExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.PostExternalAssetOwnerResponse;
@@ -678,6 +680,16 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         assertOwnerJournalEntries(ownerExternalId, table, false);
     }
 
+    @Then("The previous asset external owner has owner-tagged journal entries")
+    public void checkPreviousOwnerHasOwnerTaggedJournalEntries() throws IOException {
+        final String ownerExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_PREVIOUS_OWNER_EXTERNAL_ID);
+        ExternalOwnerJournalEntryData journalEntriesOfOwner = externalAssetOwnersApi().getJournalEntriesOfOwner(ownerExternalId, Map.of());
+        assertThat(journalEntriesOfOwner.getJournalEntryData()).as("Previous asset external owner must have owner-tagged journal entries")
+                .isNotNull();
+        assertThat(journalEntriesOfOwner.getJournalEntryData().getContent()).as("Previous asset external owner must have journal entries")
+                .isNotEmpty();
+    }
+
     private void assertOwnerJournalEntries(final String ownerExternalId, final DataTable table, final boolean assertExactCount) {
         ExternalOwnerJournalEntryData journalEntriesOfOwner = externalAssetOwnersApi().getJournalEntriesOfOwner(ownerExternalId, Map.of());
         assert journalEntriesOfOwner.getJournalEntryData() != null;
@@ -964,6 +976,52 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         }
     }
 
+    @Given("Loan product {string} exists dedicated to this feature with buy down fees")
+    public void ensureDedicatedBuyDownFeeLoanProductExists(String loanProductName) {
+        List<GetLoanProductsResponse> loanProducts = loanProductsApi().retrieveAllLoanProducts(Map.of());
+        boolean alreadyExists = loanProducts.stream().anyMatch(loanProduct -> loanProduct.getName().equals(loanProductName));
+        if (!alreadyExists) {
+            PostLoanProductsRequest request = loanProductsRequestFactory.defaultLoanProductsRequestLP2BuyDownFees()
+                    .paymentAllocation(List.of(createDefaultPaymentAllocation())).name(loanProductName);
+            PostLoanProductsResponse response = ok(() -> loanProductsApi().createLoanProduct(request));
+            log.debug("Created dedicated loan product '{}' with id {} for ExternalAssetOwnerExcludedTransactionTypes.feature",
+                    loanProductName, response.getResourceId());
+        }
+    }
+
+    @Given("Loan product {string} exists dedicated to this feature with buy down fees and charge off reasons")
+    public void ensureDedicatedBuyDownFeeWithChargeOffReasonsLoanProductExists(String loanProductName) {
+        List<GetLoanProductsResponse> loanProducts = loanProductsApi().retrieveAllLoanProducts(Map.of());
+        boolean alreadyExists = loanProducts.stream().anyMatch(loanProduct -> loanProduct.getName().equals(loanProductName));
+        if (!alreadyExists) {
+            PostLoanProductsRequest request = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2ChargeOffReasonToExpenseAccountMappingsWithBuyDownFee()
+                    .paymentAllocation(List.of(createDefaultPaymentAllocation())).name(loanProductName);
+            PostLoanProductsResponse response = ok(() -> loanProductsApi().createLoanProduct(request));
+            log.debug("Created dedicated loan product '{}' with id {} for ExternalAssetOwnerExcludedTransactionTypes.feature",
+                    loanProductName, response.getResourceId());
+        }
+    }
+
+    private AdvancedPaymentData createDefaultPaymentAllocation() {
+        return new AdvancedPaymentData()//
+                .transactionType("DEFAULT")//
+                .futureInstallmentAllocationRule("NEXT_INSTALLMENT")//
+                .paymentAllocationOrder(List.of(//
+                        new PaymentAllocationOrder().order(1).paymentAllocationRule("PAST_DUE_PENALTY"),
+                        new PaymentAllocationOrder().order(2).paymentAllocationRule("PAST_DUE_FEE"),
+                        new PaymentAllocationOrder().order(3).paymentAllocationRule("PAST_DUE_INTEREST"),
+                        new PaymentAllocationOrder().order(4).paymentAllocationRule("PAST_DUE_PRINCIPAL"),
+                        new PaymentAllocationOrder().order(5).paymentAllocationRule("DUE_PENALTY"),
+                        new PaymentAllocationOrder().order(6).paymentAllocationRule("DUE_FEE"),
+                        new PaymentAllocationOrder().order(7).paymentAllocationRule("DUE_INTEREST"),
+                        new PaymentAllocationOrder().order(8).paymentAllocationRule("DUE_PRINCIPAL"),
+                        new PaymentAllocationOrder().order(9).paymentAllocationRule("IN_ADVANCE_PENALTY"),
+                        new PaymentAllocationOrder().order(10).paymentAllocationRule("IN_ADVANCE_FEE"),
+                        new PaymentAllocationOrder().order(11).paymentAllocationRule("IN_ADVANCE_PRINCIPAL"),
+                        new PaymentAllocationOrder().order(12).paymentAllocationRule("IN_ADVANCE_INTEREST")));
+    }
+
     private long resolveExternalAssetOwnerLoanProductAttributeId(long loanProductId, String attributeKey) {
         PageExternalTransferLoanProductAttributesData attributes = externalAssetOwnerLoanProductAttributesApi()
                 .retrieveAllExternalAssetOwnerLoanProductAttributes(loanProductId, attributeKey);
@@ -1014,11 +1072,22 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
     }
 
     private void createExternalAssetOwnerLoanProductAttributeForProductId(String attributeKey, String attributeValue, long loanProductId) {
-        PostExternalAssetOwnerLoanProductAttributeRequest request = new PostExternalAssetOwnerLoanProductAttributeRequest()
-                .attributeKey(attributeKey).attributeValue(attributeValue);
-        CommandProcessingResult response = ok(
-                () -> externalAssetOwnerLoanProductAttributesApi().createExternalAssetOwnerLoanProductAttribute(loanProductId, request));
-        testContext().set(TestContextKey.EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_LAST_RESPONSE, response);
+        PageExternalTransferLoanProductAttributesData existingAttributes = externalAssetOwnerLoanProductAttributesApi()
+                .retrieveAllExternalAssetOwnerLoanProductAttributes(loanProductId, attributeKey);
+        if (existingAttributes.getTotalFilteredRecords() > 0) {
+            ExternalTransferLoanProductAttributesData existingAttribute = existingAttributes.getPageItems().getFirst();
+            PutExternalAssetOwnerLoanProductAttributeRequest request = new PutExternalAssetOwnerLoanProductAttributeRequest()
+                    .attributeKey(attributeKey).attributeValue(attributeValue);
+            CommandProcessingResult response = ok(() -> externalAssetOwnerLoanProductAttributesApi()
+                    .updateExternalAssetOwnerLoanProductAttribute(loanProductId, existingAttribute.getAttributeId(), request));
+            testContext().set(TestContextKey.EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_LAST_RESPONSE, response);
+        } else {
+            PostExternalAssetOwnerLoanProductAttributeRequest request = new PostExternalAssetOwnerLoanProductAttributeRequest()
+                    .attributeKey(attributeKey).attributeValue(attributeValue);
+            CommandProcessingResult response = ok(() -> externalAssetOwnerLoanProductAttributesApi()
+                    .createExternalAssetOwnerLoanProductAttribute(loanProductId, request));
+            testContext().set(TestContextKey.EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_LAST_RESPONSE, response);
+        }
     }
 
     @Then("Creating external asset owner loan product attribute {string} value {string} for loan product {string} fails with:")
