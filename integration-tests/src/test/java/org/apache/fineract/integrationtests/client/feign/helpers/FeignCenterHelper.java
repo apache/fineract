@@ -22,6 +22,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -136,6 +137,18 @@ public class FeignCenterHelper {
     public List<GetCentersPageItems> paginatedListCenters() {
         GetCentersResponse response = ok(() -> fineractClient.centers().retrieveAllCenters(Map.of("paged", true, "limit", -1)));
         return response.getPageItems() == null ? List.of() : new ArrayList<>(response.getPageItems());
+    }
+
+    /** Lists centers with raw {@code orderBy}/{@code sortOrder} values expecting a rejection; returns the error. */
+    public CallFailedRuntimeException listCentersExpectingError(String orderBy, String sortOrder, boolean paged) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("limit", -1);
+        if (paged) {
+            queryParams.put("paged", true);
+        }
+        queryParams.put("orderBy", orderBy);
+        queryParams.put("sortOrder", sortOrder);
+        return fail(() -> fineractClient.centers().retrieveAllCenters(queryParams));
     }
 
     /** Updates a center with the given fields; returns the {@code changes} object. */

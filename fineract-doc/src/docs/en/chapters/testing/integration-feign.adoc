@@ -6,7 +6,7 @@ Apache Fineract is migrating its integration tests from REST Assured to the gene
 
 The shared machinery is the `client/feign` package tree — the `FeignLoanTestBase` and `FeignSavingsTestBase` base classes and the helpers under `client/feign/helpers` — together with the `FeignIntegrationTest` root base class one directory above it and the `FineractFeignClientHelper` client factory in `common`. Most migrated tests sit alongside the unmigrated ones in the `org.apache.fineract.integrationtests` package and reach the client by extending one of those base classes.
 
-A Checkstyle rule keeps REST Assured out of that machinery rather than out of individual tests, because a leak there is inherited by every test extending a Feign base class, while a leak in one test file affects only that test.
+A Checkstyle rule rejects REST Assured imports in every file except those listed in a baseline of files that still use it. The baseline only shrinks: each migration removes entries from it, so neither a new test nor a migrated one can bring REST Assured back.
 
 This chapter covers the guardrail and the conventions that apply to tests written against the Feign client. For prerequisites, database setup, and how to run a suite, see the <<_integration_testing,Integration Testing>> chapter.
 
@@ -14,14 +14,12 @@ This chapter covers the guardrail and the conventions that apply to tests writte
 
 === How It Works
 
-An `IllegalImport` check in `config/checkstyle/checkstyle.xml` rejects any `io.restassured` import, and a `SuppressionSingleFilter` narrows it to the shared machinery:
+An `IllegalImport` check in `config/checkstyle/checkstyle.xml` rejects any `io.restassured` import, and a `SuppressionFilter` exempts the files listed in `config/checkstyle/restassured-baseline.xml`:
 
 [source,xml]
 ----
-<module name="SuppressionSingleFilter">
-    <property name="id" value="FeignNoRestAssured"/>
-    <property name="files"
-              value="^(?!.*[\\/]integrationtests[\\/](?:client[\\/]feign[\\/]|client[\\/]FeignIntegrationTest\.java|common[\\/]FineractFeignClientHelper\.java)).*$"/>
+<module name="SuppressionFilter">
+    <property name="file" value="${config_loc}/restassured-baseline.xml"/>
 </module>
 ----
 
@@ -32,15 +30,30 @@ An `IllegalImport` check in `config/checkstyle/checkstyle.xml` rejects any `io.r
     <property name="regexp" value="true" />
     <property name="illegalPkgs" value="^io\.restassured" />
     <message key="import.illegal"
-             value="Feign integration tests must call the server through the generated Feign client, not REST Assured: ''{0}''" />
+             value="Integration tests must call the server through the generated Feign client, not REST Assured: ''{0}''. Do not add this file to restassured-baseline.xml." />
 </module>
 ----
 
-The filter sits at `Checker` level and the check inside `TreeWalker`. Both carry the same `id`, so the filter applies to this check alone and leaves every other check untouched. The `files` pattern suppresses the check on every path that is not one of the three guarded locations, which is what limits its reach.
+Each baseline entry names one file by its full path and carries the check's `id`, so it exempts that file from this check alone and leaves every other check untouched:
+
+[source,xml]
+----
+<suppress id="FeignNoRestAssured" files="[/\\]integration-tests[/\\]src[/\\]test[/\\]java[/\\]org[/\\]apache[/\\]fineract[/\\]integrationtests[/\\]StaffTest\.java$"/>
+----
 
 The check runs as part of `checkstyleTest`, which the `build-quality-checks.yml` workflow executes on every pull request. A violation fails the build.
 
-Migrated tests outside those locations are not covered. They live in the root `org.apache.fineract.integrationtests` package next to the tests that still use REST Assured, and Checkstyle scopes by file path, not by supertype, so a rule covering them would fail on their unmigrated neighbours. The scope widens as the migration progresses.
+=== The Baseline
+
+The baseline lists every file that imported REST Assured when the check was widened to the whole tree. Checkstyle selects files by path, not by supertype, so a plain ban would have failed on those files at once; the baseline lets the ban apply everywhere else from the start.
+
+* A new file that imports REST Assured fails the build.
+* A migrated file that imports REST Assured again fails the build, because it is no longer listed.
+* A listed file builds as before, so work on unmigrated tests is not blocked.
+
+The list only shrinks. A PR that removes the last REST Assured import from a file deletes that file's entry in the same change. Never add an entry: a file that needs REST Assured to pass the check needs migrating instead. Once the list is empty, the baseline, the check and the `io.rest-assured` dependency are removed together, after which a REST Assured import no longer compiles.
+
+The check works per file. New REST Assured code inside a file that is still listed is not caught, so reviewers still watch for it until that file is migrated.
 
 === What the Check Does and Does Not Catch
 
@@ -54,10 +67,10 @@ Utility methods on `Utils` that do not touch the transport — `uniqueRandomStri
 
 [source,bash]
 ----
-./gradlew :integration-tests:checkstyleTest
+./gradlew :integration-tests:checkstyleTest :oauth2-tests:checkstyleTest :twofactor-tests:checkstyleTest
 ----
 
-The report is written to `integration-tests/build/reports/checkstyle/`.
+The report is written to each module's `build/reports/checkstyle/` directory.
 
 The task compiles the test sources first, which for this module means generating both clients. No server is involved: nothing in the build starts one, so a static check never needs a running instance.
 
@@ -69,7 +82,7 @@ A violation means a call is being made outside the generated client. Resolve it 
 . **The endpoint is in the client, but the generated model is missing a field you need.** Fix the schema at source. See <<feign-fix-model-at-source>>.
 . **The generated client cannot express the call.** Where an endpoint declares no response schema the generator types the result as a bare `String` — `retrieveOneSavingsAccountTransaction` is one example — and some multi-step commands are not modelled at all. Give the endpoint an `@ApiResponse` schema where you can (IT-06); otherwise call it over plain HTTP and add a Javadoc comment stating why the typed client cannot express it.
 
-Suppressing the rule, dropping the assertion, or substituting a different field are not resolutions. See rules IT-05 and IT-09.
+Suppressing the rule, adding the file to the baseline, dropping the assertion, or substituting a different field are not resolutions. See rules IT-05 and IT-09.
 
 == Writing a Feign Integration Test
 
@@ -264,7 +277,8 @@ The suite talks to whatever is listening at `BACKEND_PROTOCOL`://`BACKEND_HOST`:
 
 * **Checkstyle**: https://checkstyle.org/[checkstyle] 13.4.2, configured in `config/checkstyle/checkstyle.xml`
 * **IllegalImport**: https://checkstyle.org/checks/imports/illegalimport.html[check reference]
-* **SuppressionSingleFilter**: https://checkstyle.org/filters/suppressionsinglefilter.html[filter reference]
+* **SuppressionFilter**: https://checkstyle.org/filters/suppressionfilter.html[filter reference]
+* **Baseline**: `config/checkstyle/restassured-baseline.xml`
 * **Workflow**: `.github/workflows/build-quality-checks.yml`
 * **Generated client**: `fineract-client-feign`
 * **Migrated tests**: `integration-tests/src/test/java/org/apache/fineract/integrationtests/client/feign`
