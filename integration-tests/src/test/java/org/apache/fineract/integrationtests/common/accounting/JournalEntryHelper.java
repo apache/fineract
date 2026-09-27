@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.integrationtests.common.accounting;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -52,16 +50,8 @@ public class JournalEntryHelper {
         this.responseSpec = responseSpec;
     }
 
-    public void checkJournalEntryForExpenseAccount(final Account expenseAccount, final String date, final JournalEntry... accountEntries) {
-        checkJournalEntry(null, expenseAccount, date, accountEntries);
-    }
-
     public void checkJournalEntryForAssetAccount(final Account assetAccount, final String date, final JournalEntry... accountEntries) {
         checkJournalEntry(null, assetAccount, date, accountEntries);
-    }
-
-    public void checkJournalEntryForIncomeAccount(final Account incomeAccount, final String date, final JournalEntry... accountEntries) {
-        checkJournalEntry(null, incomeAccount, date, accountEntries);
     }
 
     public void checkJournalEntryForLiabilityAccount(final Account liabilityAccount, final String date,
@@ -69,23 +59,9 @@ public class JournalEntryHelper {
         checkJournalEntry(null, liabilityAccount, date, accountEntries);
     }
 
-    public void checkJournalEntryForEquityAccount(final Account equityAccount, final String date, final JournalEntry... accountEntries) {
-        checkJournalEntry(null, equityAccount, date, accountEntries);
-    }
-
     public void checkJournalEntryForLiabilityAccount(final Integer officeId, final Account liabilityAccount, final String date,
             final JournalEntry... accountEntries) {
         checkJournalEntry(officeId, liabilityAccount, date, accountEntries);
-    }
-
-    public void ensureNoAccountingTransactionsWithTransactionId(final String transactionId) {
-        ArrayList<HashMap> transactions = getJournalEntriesByTransactionId(transactionId);
-        assertTrue(transactions.isEmpty(), "Tranasactions are is not empty");
-
-    }
-
-    public String getJournalEntryTransactionIdByAccount(final Account account, final String date, final JournalEntry... accountEntries) {
-        return getJournalEntryTransactionId(account, date, accountEntries);
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -109,26 +85,6 @@ public class JournalEntryHelper {
                 Assertions.assertTrue(matchFound, "Journal Entry not found");
             }
         }
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private String getJournalEntryTransactionId(final Account account, final String date, final JournalEntry... accountEntries) {
-        final String url = createURLForGettingAccountEntries(account, date, null);
-        final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
-
-        for (JournalEntry entry : accountEntries) {
-            for (HashMap map : response) {
-                final HashMap entryType = (HashMap) map.get("entryType");
-                if (entry.getTransactionType().equals(entryType.get("value")) && entry.getTransactionAmount().equals(map.get("amount"))) {
-                    return map.get("transactionId").toString();
-                }
-            }
-        }
-
-        return "";
     }
 
     // TODO: Rewrite to use fineract-client instead!

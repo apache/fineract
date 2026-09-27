@@ -21,10 +21,8 @@ package org.apache.fineract.integrationtests.common.charges;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
@@ -48,7 +46,6 @@ public final class ChargesHelper {
 
     private static final Integer CHARGE_APPLIES_TO_LOAN = 1;
     private static final Integer CHARGE_APPLIES_TO_SAVINGS = 2;
-    private static final Integer CHARGE_APPLIES_TO_CLIENT = 3;
     private static final Integer CHARGE_APPLIES_TO_SHARES = 4;
 
     public static final Integer CHARGE_DISBURSEMENT_FEE = 1;
@@ -104,24 +101,8 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getSavingsActivationFeeJSON() {
-        return getSavingsJSON(AMOUNT, CURRENCY_CODE, ChargeTimeType.SAVINGS_ACTIVATION);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static String getSavingsNoActivityFeeJSON() {
         return getSavingsJSON(AMOUNT, CURRENCY_CODE, ChargeTimeType.SAVINGS_NOACTIVITY_FEE);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getSavingsWithdrawalFeeJSON() {
-        return getSavingsJSON(AMOUNT, CURRENCY_CODE, ChargeTimeType.WITHDRAWAL_FEE);
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -153,36 +134,10 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getSavingsMonthlyFeeJSON() {
-        final HashMap<String, Object> map = populateDefaultsForSavings();
-        map.put("feeOnMonthDay", ChargesHelper.FEE_ON_MONTH_DAY);
-        map.put("chargeTimeType", CHARGE_MONTHLY_FEE);
-        map.put("feeInterval", 2);
-        String chargesCreateJson = new Gson().toJson(map);
-        LOG.info("{}", chargesCreateJson);
-        return chargesCreateJson;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static String getSavingsWeeklyFeeJSON() {
         final HashMap<String, Object> map = populateDefaultsForSavings();
         map.put("chargeTimeType", WEEKLY_FEE);
         map.put("feeInterval", 1);
-        String chargesCreateJson = new Gson().toJson(map);
-        LOG.info("{}", chargesCreateJson);
-        return chargesCreateJson;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getSavingsOverdraftFeeJSON() {
-        final HashMap<String, Object> map = populateDefaultsForSavings();
-        map.put("chargeTimeType", CHARGE_OVERDRAFT_FEE);
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);
         return chargesCreateJson;
@@ -418,14 +373,6 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanInstallmentFeeJSON() {
-        return getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.AMOUNT, ChargesHelper.PENALTY);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static String getShareAccountActivationChargeJson() {
         HashMap<String, Object> map = populateDefaultsShareActivationCharge();
         String chargesCreateJson = new Gson().toJson(map);
@@ -528,24 +475,6 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static HashMap<String, Object> populateDefaultsClientCharge() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("active", ChargesHelper.ACTIVE);
-        map.put("amount", ChargesHelper.AMOUNT);
-        map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_CLIENT);
-        map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
-        map.put("chargeTimeType", ChargesHelper.CHARGE_SPECIFIED_DUE_DATE);
-        map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("monthDayFormat", ChargesHelper.MONTH_DAY_FORMAT);
-        map.put("name", Utils.uniqueRandomStringGenerator("Charge_client_", 8));
-        return map;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static HashMap<String, Object> populateDefaultsShareActivationCharge() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("active", ChargesHelper.ACTIVE);
@@ -616,14 +545,6 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static ArrayList<HashMap> getCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return (ArrayList) Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "?" + Utils.TENANT_IDENTIFIER, "");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static HashMap getChargeById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer chargeId) {
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, "");
@@ -637,94 +558,6 @@ public final class ChargesHelper {
             final Integer chargeId) {
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
                 CommonConstants.RESPONSE_CHANGES);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static HashMap updateCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer chargeId, final String request) {
-        return Utils.performServerPut(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, request,
-                CommonConstants.RESPONSE_CHANGES);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer deleteCharge(final ResponseSpecification responseSpec, final RequestSpecification requestSpec,
-            final Integer chargeId) {
-        return Utils.performServerDelete(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
-                CommonConstants.RESPONSE_RESOURCE_ID);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getModifyChargeJSON() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("amount", 200.0);
-        String json = new Gson().toJson(map);
-        LOG.info("{}", json);
-        return json;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getModifyWithdrawalFeeSavingsChargeJSON() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("chargeCalculationType", CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT);
-        String json = new Gson().toJson(map);
-        LOG.info("{}", json);
-        return json;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getModifyChargeAsPecentageAmountJSON() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("chargeCalculationType", CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT);
-        map.put("chargePaymentMode", CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
-        String json = new Gson().toJson(map);
-        LOG.info("{}", json);
-        return json;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getModifyChargeAsPecentageLoanAmountWithInterestJSON() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("chargeCalculationType", CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST);
-        map.put("chargePaymentMode", CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
-        String json = new Gson().toJson(map);
-        LOG.info("{}", json);
-        return json;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getModifyChargeAsPercentageInterestJSON() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("chargeCalculationType", CHARGE_CALCULATION_TYPE_PERCENTAGE_INTEREST);
-        map.put("chargePaymentMode", CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
-        String json = new Gson().toJson(map);
-        LOG.info("{}", json);
-        return json;
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -773,31 +606,6 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getModifyChargeFeeFrequencyAsYearsJSON() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("feeFrequency", ChargesHelper.CHARGE_FEE_FREQUENCY_YEARS);
-        map.put("feeInterval", 2);
-        String json = new Gson().toJson(map);
-        LOG.info("{}", json);
-        return json;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getChargeSpecifiedDueDateJSON() {
-        final HashMap<String, Object> map = populateDefaultsClientCharge();
-        String chargesCreateJson = new Gson().toJson(map);
-        LOG.info("chargesCreateJson: {}", chargesCreateJson);
-        return chargesCreateJson;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static String applyCharge(RequestSpecification requestSpec, ResponseSpecification responseSpec, String chargeId, String json) {
         return Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, json,
                 "status");
@@ -806,9 +614,5 @@ public final class ChargesHelper {
 
     public PostChargesResponse createCharges(ChargeRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().charges.createCharge(request));
-    }
-
-    public GetChargesResponse retrieveCharge(final Long chargeId) {
-        return Calls.ok(FineractClientHelper.getFineractClient().charges.retrieveOneCharge(chargeId));
     }
 }

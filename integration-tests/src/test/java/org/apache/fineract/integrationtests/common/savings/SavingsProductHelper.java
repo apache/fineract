@@ -26,8 +26,6 @@ import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
-import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.slf4j.Logger;
@@ -39,7 +37,6 @@ public class SavingsProductHelper {
     private static final Logger LOG = LoggerFactory.getLogger(SavingsProductHelper.class);
     private static final String SAVINGS_PRODUCT_URL = "/fineract-provider/api/v1/savingsproducts";
     private static final String CREATE_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER;
-    private static final Gson GSON = new JSON().getGson();
 
     private static final String LOCALE = "en_GB";
     private static final String DIGITS_AFTER_DECIMAL = "4";
@@ -489,18 +486,6 @@ public class SavingsProductHelper {
         this.daysToDormancy = "60";
         this.daysToEscheat = "90";
         return this;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static GetSavingsProductsProductIdResponse getSavingsProductById(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer productId) {
-        LOG.info("-------------------- RETRIEVING SAVINGS DEPOSIT PRODUCT BY ID --------------------------");
-        final String GET_PRODUCT_BY_ID_URL = SAVINGS_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
-        final String response = Utils.performServerGet(requestSpec, responseSpec, GET_PRODUCT_BY_ID_URL);
-        return GSON.fromJson(response, GetSavingsProductsProductIdResponse.class);
     }
 
     @Deprecated(forRemoval = true)
