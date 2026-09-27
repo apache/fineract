@@ -20,13 +20,6 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -38,63 +31,63 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
+import org.apache.fineract.client.models.AccountRequest;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
+import org.apache.fineract.client.models.GetLoansLoanIdStatus;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetRecurringDepositProductsProductIdResponse;
+import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.client.models.PostFixedDepositProductsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansRequestCollateralData;
+import org.apache.fineract.client.models.PostProductsTypeRequest;
+import org.apache.fineract.client.models.PostRecurringDepositProductsRequest;
+import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFixedDepositHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFixedDepositProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRecurringDepositHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRecurringDepositProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsChargeHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignShareAccountHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.DepositRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.DepositTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.DepositTestValidators;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAccountingHelper;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
-import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountHelper;
-import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountStatusChecker;
-import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProductHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.recurringdeposit.RecurringDepositAccountHelper;
-import org.apache.fineract.integrationtests.common.recurringdeposit.RecurringDepositAccountStatusChecker;
-import org.apache.fineract.integrationtests.common.recurringdeposit.RecurringDepositProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
-import org.apache.fineract.integrationtests.common.shares.ShareAccountHelper;
-import org.apache.fineract.integrationtests.common.shares.ShareAccountTransactionHelper;
-import org.apache.fineract.integrationtests.common.shares.ShareProductHelper;
-import org.apache.fineract.integrationtests.common.shares.ShareProductTransactionHelper;
+import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "unchecked" })
 @Order(2)
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class AccountingScenarioIntegrationTest {
+public class AccountingScenarioIntegrationTest extends FeignLoanTestBase {
 
-    private static final String PRE_CLOSURE_PENAL_INTEREST_ON_WHOLE_TERM = "1";
+    private static final int PRE_CLOSURE_PENAL_INTEREST_ON_WHOLE_TERM = 1;
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountingScenarioIntegrationTest.class);
-    private static RequestSpecification requestSpec;
-    private static ResponseSpecification responseSpec;
 
     private static final String DATE_OF_JOINING = "01 January 2011";
 
@@ -105,13 +98,16 @@ public class AccountingScenarioIntegrationTest {
     private static final String EXPECTED_DISBURSAL_DATE = "04 March 2011";
     private static final String LOAN_APPLICATION_SUBMISSION_DATE = "03 March 2011";
     private static final String TRANSACTION_DATE = "01 March 2013";
-    private static final String LOAN_TERM_FREQUENCY = "10";
-    private static final String INDIVIDUAL_LOAN = "individual";
-    public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    private static final int LOAN_TERM_FREQUENCY = 10;
     public static final String MINIMUM_OPENING_BALANCE = "1000.0";
     public static final String DEPOSIT_AMOUNT = "7000";
     public static final String WITHDRAWAL_AMOUNT = "3000";
     public static final String WITHDRAWAL_AMOUNT_ADJUSTED = "2000";
+    private static final String SAVINGS_SUBMITTED_ON_DATE = "08 January 2013";
+    private static final String SAVINGS_APPROVED_ON_DATE = "09 January 2013";
+    private static final String SAVINGS_CHARGE_AMOUNT = "100";
+    private static final String SAVINGS_CHARGE_FEE_ON_MONTH_DAY = "15 January";
+    private static final String SHARE_DATE = "01 Jan 2016";
 
     static Float SP_BALANCE = Float.valueOf(MINIMUM_OPENING_BALANCE);
     static Float SP_DEPOSIT_AMOUNT = Float.valueOf(DEPOSIT_AMOUNT);
@@ -123,368 +119,243 @@ public class AccountingScenarioIntegrationTest {
     private static final Float[] REPAYMENT_AMOUNT = { .0f, 2200.0f, 3000.0f, 900.0f, 2000.0f, 2500.0f };
 
     private static final Float AMOUNT_TO_BE_WAIVE = 400.0f;
-    private LoanTransactionHelper loanTransactionHelper;
-    private AccountHelper accountHelper;
-    private JournalEntryHelper journalEntryHelper;
-    private SavingsAccountHelper savingsAccountHelper;
-    private FixedDepositAccountHelper fixedDepositAccountHelper;
-    private RecurringDepositAccountHelper recurringDepositAccountHelper;
+    private static final String DEBIT = "DEBIT";
+    private static final String CREDIT = "CREDIT";
+
+    private FeignCollateralHelper collateralHelper;
+    private FeignSavingsHelper savingsHelper;
+    private FeignSavingsProductHelper savingsProductHelper;
+    private FeignSavingsTransactionHelper savingsTransactionHelper;
+    private FeignSavingsChargeHelper savingsChargeHelper;
+    private FeignFixedDepositHelper fixedDepositHelper;
+    private FeignFixedDepositProductHelper fixedDepositProductHelper;
+    private FeignRecurringDepositHelper recurringDepositHelper;
+    private FeignRecurringDepositProductHelper recurringDepositProductHelper;
+    private FeignShareAccountHelper shareAccountHelper;
 
     private TimeZone tenantTimeZone;
 
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", "default");
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
-        this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.collateralHelper = new FeignCollateralHelper(fineractClient());
+        this.savingsHelper = new FeignSavingsHelper(fineractClient());
+        this.savingsProductHelper = new FeignSavingsProductHelper(fineractClient());
+        this.savingsTransactionHelper = new FeignSavingsTransactionHelper(fineractClient());
+        this.savingsChargeHelper = new FeignSavingsChargeHelper(fineractClient());
+        this.fixedDepositHelper = new FeignFixedDepositHelper(fineractClient());
+        this.fixedDepositProductHelper = new FeignFixedDepositProductHelper(fineractClient());
+        this.recurringDepositHelper = new FeignRecurringDepositHelper(fineractClient());
+        this.recurringDepositProductHelper = new FeignRecurringDepositProductHelper(fineractClient());
+        this.shareAccountHelper = new FeignShareAccountHelper(fineractClient());
 
         this.tenantTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
     }
 
     @Test
     public void checkUpfrontAccrualAccountingFlow() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProductWithUpfrontAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
+        final Long loanProductID = createLoanProductWithUpfrontAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        final Long clientID = createClient(DATE_OF_JOINING);
 
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
-                collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, createClientCollateral(clientID));
 
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, collaterals);
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(EXPECTED_DISBURSAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(EXPECTED_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        approveAndDisburse(loanID, EXPECTED_DISBURSAL_DATE);
 
         // CHECK ACCOUNT ENTRIES
         LOG.info("Entries ......");
         final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
         final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(TOTAL_INTEREST, JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, assetAccountInitialEntry);
+        checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, journal(TOTAL_INTEREST, assetAccount, DEBIT),
+                journal(LP_PRINCIPAL, assetAccount, CREDIT), journal(LP_PRINCIPAL, assetAccount, DEBIT));
         LOG.info("CHECKING INCOME: ******************************************");
-        final JournalEntry incomeJournalEntry = new JournalEntry(TOTAL_INTEREST, JournalEntry.TransactionType.CREDIT);
-        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, EXPECTED_DISBURSAL_DATE, incomeJournalEntry);
+        checkJournalEntryForIncomeAccount(incomeAccount, EXPECTED_DISBURSAL_DATE, journal(TOTAL_INTEREST, incomeAccount, CREDIT));
 
         // MAKE 1
         LOG.info("Repayment 1 ......");
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[1], REPAYMENT_AMOUNT[1], loanID);
+        makeRepayment(REPAYMENT_DATE[1], REPAYMENT_AMOUNT[1], loanID);
         final float FIRST_INTEREST = 200.0f;
         final float FIRST_PRINCIPAL = 2000.0f;
         float expected_value = LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
-        final JournalEntry[] assetAccountFirstEntry = { new JournalEntry(REPAYMENT_AMOUNT[1], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(FIRST_INTEREST + FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], assetAccountFirstEntry);
+        verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], journal(REPAYMENT_AMOUNT[1], assetAccount, DEBIT),
+                journal(FIRST_INTEREST + FIRST_PRINCIPAL, assetAccount, CREDIT));
         LOG.info("Repayment 1 Done......");
 
         // REPAYMENT 2
         LOG.info("Repayment 2 ......");
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[2], REPAYMENT_AMOUNT[2], loanID);
+        makeRepayment(REPAYMENT_DATE[2], REPAYMENT_AMOUNT[2], loanID);
         final float SECOND_AND_THIRD_INTEREST = 400.0f;
         final float SECOND_PRINCIPAL = REPAYMENT_AMOUNT[2] - SECOND_AND_THIRD_INTEREST;
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(2, expected_value, loanID);
-        final JournalEntry[] assetAccountSecondEntry = { new JournalEntry(REPAYMENT_AMOUNT[2], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SECOND_AND_THIRD_INTEREST + SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[2], assetAccountSecondEntry);
+        verifyRepaymentScheduleEntryFor(2, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[2], journal(REPAYMENT_AMOUNT[2], assetAccount, DEBIT),
+                journal(SECOND_AND_THIRD_INTEREST + SECOND_PRINCIPAL, assetAccount, CREDIT));
         LOG.info("Repayment 2 Done ......");
 
         // WAIVE INTEREST
         LOG.info("Waive Interest  ......");
-        this.loanTransactionHelper.waiveInterest(REPAYMENT_DATE[4], AMOUNT_TO_BE_WAIVE.toString(), loanID);
+        addInterestWaiver(loanID, waiveInterest(AMOUNT_TO_BE_WAIVE, REPAYMENT_DATE[4]));
 
-        final JournalEntry waivedEntry = new JournalEntry(AMOUNT_TO_BE_WAIVE, JournalEntry.TransactionType.CREDIT);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], waivedEntry);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], journal(AMOUNT_TO_BE_WAIVE, assetAccount, CREDIT));
 
-        final JournalEntry expenseJournalEntry = new JournalEntry(AMOUNT_TO_BE_WAIVE, JournalEntry.TransactionType.DEBIT);
-        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, REPAYMENT_DATE[4], expenseJournalEntry);
+        checkJournalEntryForExpenseAccount(expenseAccount, REPAYMENT_DATE[4], journal(AMOUNT_TO_BE_WAIVE, expenseAccount, DEBIT));
         LOG.info("Waive Interest Done......");
 
         // REPAYMENT 3
         LOG.info("Repayment 3 ......");
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[3], REPAYMENT_AMOUNT[3], loanID);
+        makeRepayment(REPAYMENT_DATE[3], REPAYMENT_AMOUNT[3], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        final JournalEntry[] assetAccountThirdEntry = { new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.CREDIT) };
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(3, expected_value, loanID);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[3], assetAccountThirdEntry);
+        verifyRepaymentScheduleEntryFor(3, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[3], journal(REPAYMENT_AMOUNT[3], assetAccount, DEBIT),
+                journal(REPAYMENT_AMOUNT[3], assetAccount, CREDIT));
         LOG.info("Repayment 3 Done ......");
 
         // REPAYMENT 4
         LOG.info("Repayment 4 ......");
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[4], REPAYMENT_AMOUNT[4], loanID);
+        makeRepayment(REPAYMENT_DATE[4], REPAYMENT_AMOUNT[4], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(4, expected_value, loanID);
-        final JournalEntry[] assetAccountFourthEntry = { new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], assetAccountFourthEntry);
+        verifyRepaymentScheduleEntryFor(4, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], journal(REPAYMENT_AMOUNT[4], assetAccount, DEBIT),
+                journal(REPAYMENT_AMOUNT[4], assetAccount, CREDIT));
         LOG.info("Repayment 4 Done  ......");
 
         // Repayment 5
         LOG.info("Repayment 5 ......");
-        final JournalEntry[] assetAccountFifthEntry = { new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.CREDIT) };
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[5], REPAYMENT_AMOUNT[5], loanID);
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(5, expected_value, loanID);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[5], assetAccountFifthEntry);
+        makeRepayment(REPAYMENT_DATE[5], REPAYMENT_AMOUNT[5], loanID);
+        verifyRepaymentScheduleEntryFor(5, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[5], journal(REPAYMENT_AMOUNT[5], assetAccount, DEBIT),
+                journal(REPAYMENT_AMOUNT[5], assetAccount, CREDIT));
         LOG.info("Repayment 5 Done  ......");
     }
 
-    private Integer createLoanProductWithUpfrontAccrualAccountingEnabled(final Account... accounts) {
+    private Long createLoanProductWithUpfrontAccrualAccountingEnabled(final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(LP_PRINCIPAL.toString()).withRepaymentTypeAsMonth()
+        return createLoanProduct(new LoanProductTestBuilder().withPrincipal(LP_PRINCIPAL.toString()).withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery(LP_REPAYMENT_PERIOD).withNumberOfRepayments(LP_REPAYMENTS).withRepaymentTypeAsMonth()
                 .withinterestRatePerPeriod(LP_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()
                 .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRuleUpfrontAccrual(accounts)
-                .build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+                .buildRequest());
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> collaterals) {
+    private Long applyForLoanApplication(final Long clientID, final Long loanProductID, final Long clientCollateralId) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(LP_PRINCIPAL.toString())
-                .withLoanTermFrequency(LOAN_TERM_FREQUENCY).withLoanTermFrequencyAsMonths().withNumberOfRepayments(LP_REPAYMENTS)
-                .withRepaymentEveryAfter(LP_REPAYMENT_PERIOD).withRepaymentFrequencyTypeAsMonths()
-                .withInterestRatePerPeriod(LP_INTEREST_RATE).withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualPrincipalPayments()
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate(EXPECTED_DISBURSAL_DATE)
-                .withSubmittedOnDate(LOAN_APPLICATION_SUBMISSION_DATE).withLoanType(INDIVIDUAL_LOAN).withCollaterals(collaterals)
-                .build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        final PostLoansRequest loanApplication = LoanRequestBuilders
+                .legacyIndividualApplication(clientID, loanProductID, LP_PRINCIPAL.toString(), Integer.parseInt(LP_REPAYMENTS),
+                        new BigDecimal(LP_INTEREST_RATE), EXPECTED_DISBURSAL_DATE)//
+                .loanTermFrequency(LOAN_TERM_FREQUENCY)//
+                .repaymentEvery(Integer.parseInt(LP_REPAYMENT_PERIOD))//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .submittedOnDate(LOAN_APPLICATION_SUBMISSION_DATE)//
+                .collateral(List.of(new PostLoansRequestCollateralData().clientCollateralId(clientCollateralId).quantity(BigDecimal.ONE)));
+        return applyForLoan(loanApplication);
     }
 
     @Test
     public void checkAccountingWithSavingsFlow() {
 
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account liabilityAccount = accountHelper.createLiabilityAccount();
 
-        final Integer savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount, expenseAccount,
-                liabilityAccount);
+        final Long savingsProductID = createSavingsProduct(SavingsRequestBuilders.withCashBasedAccounting(savingsProductRequest(),
+                assetAccount, liabilityAccount, incomeAccount, expenseAccount));
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
-        final Integer savingsID = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsID);
-        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
-
-        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsID);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
-
-        // Checking initial Account entries.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountInitialEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, liablilityAccountInitialEntry);
-
-        // First Transaction-Deposit
-        this.savingsAccountHelper.depositToSavingsAccount(savingsID, DEPOSIT_AMOUNT, SavingsAccountHelper.TRANSACTION_DATE,
-                CommonConstants.RESPONSE_RESOURCE_ID);
-        Float balance = SP_BALANCE + SP_DEPOSIT_AMOUNT;
-        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance after Deposit");
-
-        LOG.info("----------------------Verifying Journal Entry after the Transaction Deposit----------------------------");
-        final JournalEntry[] assetAccountFirstTransactionEntry = {
-                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liabililityAccountFirstTransactionEntry = {
-                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountFirstTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
-                liabililityAccountFirstTransactionEntry);
-
-        // Second Transaction-Withdrawal
-        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsID, WITHDRAWAL_AMOUNT, SavingsAccountHelper.TRANSACTION_DATE,
-                CommonConstants.RESPONSE_RESOURCE_ID);
-        balance -= SP_WITHDRAWAL_AMOUNT;
-        summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance after Withdrawal");
-
-        LOG.info("-------------------Verifying Journal Entry after the Transaction Withdrawal----------------------");
-        final JournalEntry[] assetAccountSecondTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] liabililityAccountSecondTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.DEBIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountSecondTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
-                liabililityAccountSecondTransactionEntry);
-
-        // Third Transaction-Add Charges for Withdrawal Fee
-        final Integer withdrawalChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getSavingsWithdrawalFeeJSON());
-        Assertions.assertNotNull(withdrawalChargeId);
-
-        this.savingsAccountHelper.addChargesForSavings(savingsID, withdrawalChargeId, false);
-        ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsID);
-        assertEquals(1, chargesPendingState.size());
-        HashMap savingsChargeForPay = chargesPendingState.get(0);
-        HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsID, (Integer) savingsChargeForPay.get("id"));
-        Float chargeAmount = (Float) paidCharge.get("amount");
-
-        // Withdrawal after adding Charge of type Withdrawal Fee
-        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsID, WITHDRAWAL_AMOUNT_ADJUSTED, SavingsAccountHelper.TRANSACTION_DATE,
-                CommonConstants.RESPONSE_RESOURCE_ID);
-        summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        balance = balance - SP_WITHDRAWAL_AMOUNT_ADJUSTED - chargeAmount;
-
-        final JournalEntry[] liabililityAccountThirdTransactionEntry = { new JournalEntry(chargeAmount, JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] assetAccountThirdTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] incomeAccountThirdTransactionEntry = { new JournalEntry(chargeAmount, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountThirdTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
-                liabililityAccountThirdTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, TRANSACTION_DATE, incomeAccountThirdTransactionEntry);
-
-        // Verifying Balance after applying Charge for Withdrawal Fee
-        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance");
-
-        // "Post Interest For Savings" is a server wide job: an account left active on a 2013 date forces every
-        // later run to replay more than a decade of interest, which times out other tests sharing the instance
-        this.savingsAccountHelper.closeSavingsAccount(savingsID, "true");
+        verifySavingsAccountingFlow(savingsProductID, assetAccount, incomeAccount, liabilityAccount);
     }
 
     @Test
     public void checkAccountingWithSavingsFlowUsingAccrualAccounting() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account liabilityAccount = accountHelper.createLiabilityAccount();
 
-        final Integer savingsProductID = createSavingsProductWithAccrualAccounting(MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount,
-                expenseAccount, liabilityAccount);
-        final GetSavingsProductsProductIdResponse savingsProductsResponse = SavingsProductHelper.getSavingsProductById(requestSpec,
-                responseSpec, savingsProductID);
+        final Long savingsProductID = createSavingsProduct(SavingsRequestBuilders.withAccrualAccountingMappings(
+                savingsProductRequest().accountingRule(SavingsTestData.AccountingRule.ACCRUAL_PERIODIC), assetAccount, liabilityAccount,
+                incomeAccount, expenseAccount));
+        final GetSavingsProductsProductIdResponse savingsProductsResponse = savingsProductHelper.getSavingsProduct(savingsProductID);
         Assertions.assertNotNull(savingsProductsResponse);
         Assertions.assertNotNull(savingsProductsResponse.getAccountingMappings());
         Assertions.assertNotNull(savingsProductsResponse.getAccountingMappings().getSavingsControlAccount());
         Assertions.assertNotNull(savingsProductsResponse.getAccountingMappings().getInterestPayableAccount());
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
-        final Integer savingsID = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        verifySavingsAccountingFlow(savingsProductID, assetAccount, incomeAccount, liabilityAccount);
+    }
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsID);
-        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+    private void verifySavingsAccountingFlow(final Long savingsProductID, final Account assetAccount, final Account incomeAccount,
+            final Account liabilityAccount) {
+        final Long clientID = createClient(DATE_OF_JOINING);
+        final Long savingsID = savingsHelper.submitApplication(clientID, savingsProductID, SAVINGS_SUBMITTED_ON_DATE).getSavingsId();
 
-        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+        SavingsTestValidators.verifySavingsIsPending(savingsHelper.getSavingsStatus(savingsID));
 
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsID);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        savingsHelper.approveSavings(savingsID, SAVINGS_APPROVED_ON_DATE);
+        SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsID));
+
+        savingsHelper.activateSavings(savingsID, TRANSACTION_DATE);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsID));
 
         // Checking initial Account entries.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountInitialEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, liablilityAccountInitialEntry);
+        checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, journal(SP_BALANCE, assetAccount, DEBIT));
+        checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, journal(SP_BALANCE, liabilityAccount, CREDIT));
 
         // First Transaction-Deposit
-        this.savingsAccountHelper.depositToSavingsAccount(savingsID, DEPOSIT_AMOUNT, SavingsAccountHelper.TRANSACTION_DATE,
-                CommonConstants.RESPONSE_RESOURCE_ID);
+        savingsTransactionHelper.deposit(savingsID, DEPOSIT_AMOUNT, TRANSACTION_DATE);
         Float balance = SP_BALANCE + SP_DEPOSIT_AMOUNT;
-        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance after Deposit");
+        assertBalance(balance, savingsID, "Verifying Balance after Deposit");
 
         LOG.info("----------------------Verifying Journal Entry after the Transaction Deposit----------------------------");
-        final JournalEntry[] assetAccountFirstTransactionEntry = {
-                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liabililityAccountFirstTransactionEntry = {
-                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountFirstTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
-                liabililityAccountFirstTransactionEntry);
+        checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, journal(SP_DEPOSIT_AMOUNT, assetAccount, DEBIT));
+        checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, journal(SP_DEPOSIT_AMOUNT, liabilityAccount, CREDIT));
 
         // Second Transaction-Withdrawal
-        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsID, WITHDRAWAL_AMOUNT, SavingsAccountHelper.TRANSACTION_DATE,
-                CommonConstants.RESPONSE_RESOURCE_ID);
+        savingsTransactionHelper.withdraw(savingsID, WITHDRAWAL_AMOUNT, TRANSACTION_DATE);
         balance -= SP_WITHDRAWAL_AMOUNT;
-        summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance after Withdrawal");
+        assertBalance(balance, savingsID, "Verifying Balance after Withdrawal");
 
         LOG.info("-------------------Verifying Journal Entry after the Transaction Withdrawal----------------------");
-        final JournalEntry[] assetAccountSecondTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] liabililityAccountSecondTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.DEBIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountSecondTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
-                liabililityAccountSecondTransactionEntry);
+        checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, journal(SP_WITHDRAWAL_AMOUNT, assetAccount, CREDIT));
+        checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, journal(SP_WITHDRAWAL_AMOUNT, liabilityAccount, DEBIT));
 
         // Third Transaction-Add Charges for Withdrawal Fee
-        final Integer withdrawalChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getSavingsWithdrawalFeeJSON());
+        final Long withdrawalChargeId = chargesHelper.createCharge(SavingsRequestBuilders.savingsWithdrawalFeeCharge()).getResourceId();
         Assertions.assertNotNull(withdrawalChargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsID, withdrawalChargeId, false);
-        ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsID);
-        Assertions.assertEquals(1, chargesPendingState.size());
-        HashMap savingsChargeForPay = chargesPendingState.get(0);
-        HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsID, (Integer) savingsChargeForPay.get("id"));
-        Float chargeAmount = (Float) paidCharge.get("amount");
+        savingsChargeHelper.addChargeWithFeeOnMonthDay(savingsID, withdrawalChargeId, SAVINGS_CHARGE_AMOUNT,
+                SAVINGS_CHARGE_FEE_ON_MONTH_DAY);
+        List<GetSavingsAccountsSavingsAccountIdChargesResponse> chargesPendingState = savingsHelper.getSavingsCharges(savingsID);
+        assertEquals(1, chargesPendingState.size());
+        GetSavingsAccountsSavingsAccountIdChargesResponse savingsChargeForPay = chargesPendingState.get(0);
+        Float chargeAmount = savingsHelper.getSavingsAccountCharge(savingsID, savingsChargeForPay.getId()).getAmount().floatValue();
 
         // Withdrawal after adding Charge of type Withdrawal Fee
-        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsID, WITHDRAWAL_AMOUNT_ADJUSTED, SavingsAccountHelper.TRANSACTION_DATE,
-                CommonConstants.RESPONSE_RESOURCE_ID);
-        summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
+        savingsTransactionHelper.withdraw(savingsID, WITHDRAWAL_AMOUNT_ADJUSTED, TRANSACTION_DATE);
         balance = balance - SP_WITHDRAWAL_AMOUNT_ADJUSTED - chargeAmount;
 
-        final JournalEntry[] liabililityAccountThirdTransactionEntry = { new JournalEntry(chargeAmount, JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] assetAccountThirdTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] incomeAccountThirdTransactionEntry = { new JournalEntry(chargeAmount, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountThirdTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
-                liabililityAccountThirdTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, TRANSACTION_DATE, incomeAccountThirdTransactionEntry);
+        checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, journal(SP_WITHDRAWAL_AMOUNT_ADJUSTED, assetAccount, CREDIT));
+        checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, journal(chargeAmount, liabilityAccount, DEBIT),
+                journal(SP_WITHDRAWAL_AMOUNT_ADJUSTED, liabilityAccount, DEBIT));
+        checkJournalEntryForIncomeAccount(incomeAccount, TRANSACTION_DATE, journal(chargeAmount, incomeAccount, CREDIT));
 
         // Verifying Balance after applying Charge for Withdrawal Fee
-        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance");
+        assertBalance(balance, savingsID, "Verifying Balance");
 
-        // see checkAccountingWithSavingsFlow: do not leave a 2013 dated account active for the interest posting job
-        this.savingsAccountHelper.closeSavingsAccount(savingsID, "true");
+        // "Post Interest For Savings" is a server wide job: an account left active on a 2013 date forces every
+        // later run to replay more than a decade of interest, which times out other tests sharing the instance
+        savingsHelper.closeSavings(savingsID, TRANSACTION_DATE, true);
     }
 
     @Test
     public void testFixedDepositAccountingFlow() {
-        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
-        this.fixedDepositAccountHelper = new FixedDepositAccountHelper(requestSpec, responseSpec);
-
         final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
 
         LocalDate todaysDate = Utils.getLocalDateOfTenant();
@@ -502,66 +373,54 @@ public class AccountingScenarioIntegrationTest {
         todaysDate = todaysDate.plusMonths(1).withDayOfMonth(1);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate);
 
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account liabilityAccount = accountHelper.createLiabilityAccount();
 
-        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
-        // Assertions.assertNotNull(clientId);
+        Long clientId = createClient();
+        Assertions.assertEquals(clientId, clientHelper.getClient(clientId).getId());
 
-        Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, assetAccount, incomeAccount, expenseAccount,
-                liabilityAccount);
+        Long fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, assetAccount, liabilityAccount, incomeAccount,
+                expenseAccount);
         Assertions.assertNotNull(fixedDepositProductId);
 
-        Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE, PRE_CLOSURE_PENAL_INTEREST_ON_WHOLE_TERM);
+        Long fixedDepositAccountId = fixedDepositHelper.submitApplication(DepositRequestBuilders.fixedDepositAccount(clientId,
+                fixedDepositProductId, SUBMITTED_ON_DATE, PRE_CLOSURE_PENAL_INTEREST_ON_WHOLE_TERM)).getSavingsId();
         Assertions.assertNotNull(fixedDepositAccountId);
 
-        HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(requestSpec,
-                responseSpec, fixedDepositAccountId.toString());
-        FixedDepositAccountStatusChecker.verifyFixedDepositIsPending(fixedDepositAccountStatusHashMap);
+        DepositTestValidators.verifyFixedDepositIsPending(fixedDepositHelper.getAccount(fixedDepositAccountId).getStatus());
 
-        fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
-        FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
+        fixedDepositHelper.approve(fixedDepositAccountId, APPROVED_ON_DATE);
+        DepositTestValidators.verifyFixedDepositIsApproved(fixedDepositHelper.getAccount(fixedDepositAccountId).getStatus());
 
-        fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
-        FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
+        fixedDepositHelper.activate(fixedDepositAccountId, ACTIVATION_DATE);
+        DepositTestValidators.verifyFixedDepositIsActive(fixedDepositHelper.getAccount(fixedDepositAccountId).getStatus());
 
-        HashMap accountSummary = this.fixedDepositAccountHelper.getFixedDepositSummary(fixedDepositAccountId);
-
-        Float depositAmount = (Float) accountSummary.get("totalDeposits");
+        Float depositAmount = fixedDepositHelper.getSummary(fixedDepositAccountId).getTotalDeposits().floatValue();
 
         // Checking initial Journal entries after Activation.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, ACTIVATION_DATE, assetAccountInitialEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, liablilityAccountInitialEntry);
+        checkJournalEntryForAssetAccount(assetAccount, ACTIVATION_DATE, journal(depositAmount, assetAccount, DEBIT));
+        checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, journal(depositAmount, liabilityAccount, CREDIT));
 
-        Integer transactionIdForPostInterest = this.fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
+        Long transactionIdForPostInterest = fixedDepositHelper.postInterest(fixedDepositAccountId).getResourceId();
         Assertions.assertNotNull(transactionIdForPostInterest);
 
-        accountSummary = this.fixedDepositAccountHelper.getFixedDepositSummary(fixedDepositAccountId);
-        Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
+        Float totalInterestPosted = fixedDepositHelper.getSummary(fixedDepositAccountId).getTotalInterestPosted().floatValue();
 
         // Checking initial Journal entries after Interest Posting.
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
+        checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, journal(totalInterestPosted, expenseAccount, DEBIT));
+        checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE,
+                journal(totalInterestPosted, liabilityAccount, CREDIT));
 
     }
 
     @Test
     public void testRecurringDepositAccountingFlow() {
-        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
-        this.recurringDepositAccountHelper = new RecurringDepositAccountHelper(requestSpec, responseSpec);
-
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account liabilityAccount = accountHelper.createLiabilityAccount();
 
         final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
 
@@ -581,164 +440,114 @@ public class AccountingScenarioIntegrationTest {
         todaysDate = todaysDate.plusMonths(1).withDayOfMonth(1);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate);
 
-        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
+        Long clientId = createClient();
+        Assertions.assertEquals(clientId, clientHelper.getClient(clientId).getId());
 
-        Integer recurringDepositProductId = createRecurringDepositProduct(VALID_FROM, VALID_TO, assetAccount, liabilityAccount,
-                incomeAccount, expenseAccount);
+        Long recurringDepositProductId = createRecurringDepositProduct(VALID_FROM, VALID_TO, assetAccount, liabilityAccount, incomeAccount,
+                expenseAccount);
         Assertions.assertNotNull(recurringDepositProductId);
-        final GetRecurringDepositProductsProductIdResponse recurringDepositProductsProduct = RecurringDepositProductHelper
-                .getRecurringDepositProductById(requestSpec, responseSpec, recurringDepositProductId);
+        final GetRecurringDepositProductsProductIdResponse recurringDepositProductsProduct = recurringDepositProductHelper
+                .getProduct(recurringDepositProductId);
         Assertions.assertNotNull(recurringDepositProductsProduct);
         Assertions.assertNotNull(recurringDepositProductsProduct.getAccountingMappings());
         Assertions.assertNotNull(recurringDepositProductsProduct.getAccountingMappings().getSavingsControlAccount());
         Assertions.assertNull(recurringDepositProductsProduct.getAccountingMappings().getInterestPayableAccount());
 
-        Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, PRE_CLOSURE_PENAL_INTEREST_ON_WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+        Long recurringDepositAccountId = recurringDepositHelper.submitApplication(DepositRequestBuilders.recurringDepositAccount(clientId,
+                recurringDepositProductId, SUBMITTED_ON_DATE, EXPECTED_FIRST_DEPOSIT_ON_DATE, PRE_CLOSURE_PENAL_INTEREST_ON_WHOLE_TERM))
+                .getSavingsId();
         Assertions.assertNotNull(recurringDepositAccountId);
 
-        HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker.getStatusOfRecurringDepositAccount(requestSpec,
-                responseSpec, recurringDepositAccountId.toString());
-        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsPending(recurringDepositAccountStatusHashMap);
+        DepositTestValidators.verifyRecurringDepositIsPending(recurringDepositHelper.getAccount(recurringDepositAccountId).getStatus());
 
-        recurringDepositAccountStatusHashMap = this.recurringDepositAccountHelper.approveRecurringDeposit(recurringDepositAccountId,
-                APPROVED_ON_DATE);
-        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsApproved(recurringDepositAccountStatusHashMap);
+        recurringDepositHelper.approve(recurringDepositAccountId, APPROVED_ON_DATE);
+        DepositTestValidators.verifyRecurringDepositIsApproved(recurringDepositHelper.getAccount(recurringDepositAccountId).getStatus());
 
-        recurringDepositAccountStatusHashMap = this.recurringDepositAccountHelper.activateRecurringDeposit(recurringDepositAccountId,
-                ACTIVATION_DATE);
-        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsActive(recurringDepositAccountStatusHashMap);
+        recurringDepositHelper.activate(recurringDepositAccountId, ACTIVATION_DATE);
+        DepositTestValidators.verifyRecurringDepositIsActive(recurringDepositHelper.getAccount(recurringDepositAccountId).getStatus());
 
-        HashMap recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(requestSpec, responseSpec,
-                recurringDepositAccountId);
-        Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
+        BigDecimal depositAmount = recurringDepositHelper.getAccount(recurringDepositAccountId).getMandatoryRecommendedDepositAmount();
 
-        Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                depositAmount, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+        Long depositTransactionId = recurringDepositHelper.deposit(recurringDepositAccountId, EXPECTED_FIRST_DEPOSIT_ON_DATE, depositAmount)
+                .getResourceId();
         Assertions.assertNotNull(depositTransactionId);
 
         // Checking initial Journal entries after Activation.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE, assetAccountInitialEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
-                liablilityAccountInitialEntry);
+        checkJournalEntryForAssetAccount(assetAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
+                journal(depositAmount.floatValue(), assetAccount, DEBIT));
+        checkJournalEntryForLiabilityAccount(liabilityAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
+                journal(depositAmount.floatValue(), liabilityAccount, CREDIT));
 
-        Integer interestPostingTransactionId = this.recurringDepositAccountHelper
-                .postInterestForRecurringDeposit(recurringDepositAccountId);
+        Long interestPostingTransactionId = recurringDepositHelper.postInterest(recurringDepositAccountId).getResourceId();
         Assertions.assertNotNull(interestPostingTransactionId);
 
-        HashMap accountSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
-        Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
+        Float totalInterestPosted = recurringDepositHelper.getSummary(recurringDepositAccountId).getTotalInterestPosted().floatValue();
 
         // Checking initial Journal entries after Interest Posting.
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
+        checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, journal(totalInterestPosted, expenseAccount, DEBIT));
+        checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE,
+                journal(totalInterestPosted, liabilityAccount, CREDIT));
 
     }
 
-    public static Integer createSavingsProduct(final String minOpenningBalance, final Account... accounts) {
+    private Long createSavingsProduct(final PostSavingsProductsRequest request) {
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
-        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
-                .withInterestPostingPeriodTypeAsQuarterly() //
-                .withInterestCalculationPeriodTypeAsDailyBalance() //
-                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsCashBased(accounts).build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+        return savingsProductHelper.createSavingsProduct(request).getResourceId();
     }
 
-    private Integer createFixedDepositProduct(final String validFrom, final String validTo, Account... accounts) {
+    private static PostSavingsProductsRequest savingsProductRequest() {
+        return SavingsRequestBuilders
+                .savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY, SavingsTestData.InterestPostingPeriodType.QUARTERLY,
+                        SavingsTestData.InterestCalculationType.DAILY_BALANCE)//
+                .minRequiredOpeningBalance(new BigDecimal(MINIMUM_OPENING_BALANCE));
+    }
+
+    private Long createFixedDepositProduct(final String validFrom, final String validTo, final Account assetAccount,
+            final Account liabilityAccount, final Account incomeAccount, final Account expenseAccount) {
         LOG.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
-        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(requestSpec, responseSpec);
-        final String fixedDepositProductJSON = fixedDepositProductHelper //
-                .withPeriodRangeChart()//
-                .withAccountingRuleAsCashBased(accounts).build(validFrom, validTo);
-        return FixedDepositProductHelper.createFixedDepositProduct(fixedDepositProductJSON, requestSpec, responseSpec);
+        PostFixedDepositProductsRequest request = DepositRequestBuilders.withCashBasedAccounting(
+                DepositRequestBuilders.fixedDepositProduct(), assetAccount, liabilityAccount, incomeAccount, expenseAccount);
+        return fixedDepositProductHelper
+                .createProduct(DepositRequestBuilders.withChart(request, validFrom, validTo, DepositTestData.periodRangeChartSlabs()))
+                .getResourceId();
     }
 
-    private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String validFrom,
-            final String validTo, final String submittedOnDate, final String penalInterestType) {
-        LOG.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
-        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(requestSpec, responseSpec) //
-                .withSubmittedOnDate(submittedOnDate).build(clientID, productID, penalInterestType);
-        return FixedDepositAccountHelper.applyFixedDepositApplicationGetId(fixedDepositApplicationJSON, requestSpec, responseSpec);
-    }
-
-    private Integer createRecurringDepositProduct(final String validFrom, final String validTo, Account... accounts) {
+    private Long createRecurringDepositProduct(final String validFrom, final String validTo, final Account assetAccount,
+            final Account liabilityAccount, final Account incomeAccount, final Account expenseAccount) {
         LOG.info("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
-        RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(requestSpec, responseSpec);
-        final String recurringDepositProductJSON = recurringDepositProductHelper //
-                .withPeriodRangeChart()//
-                .withAccountingRuleAsCashBased(accounts).build(validFrom, validTo);
-        return RecurringDepositProductHelper.createRecurringDepositProduct(recurringDepositProductJSON, requestSpec, responseSpec);
-    }
-
-    private Integer applyForRecurringDepositApplication(final String clientID, final String productID, final String validFrom,
-            final String validTo, final String submittedOnDate, final String penalInterestType, final String expectedFirstDepositOnDate) {
-        LOG.info("--------------------------------APPLYING FOR RECURRING DEPOSIT ACCOUNT --------------------------------");
-        final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(requestSpec, responseSpec)
-                //
-                .withSubmittedOnDate(submittedOnDate).withExpectedFirstDepositOnDate(expectedFirstDepositOnDate)
-                .build(clientID, productID, penalInterestType);
-        return RecurringDepositAccountHelper.applyRecurringDepositApplication(recurringDepositApplicationJSON, requestSpec, responseSpec);
-    }
-
-    public static Integer createSavingsProductWithAccrualAccounting(final String minOpenningBalance, final Account... accounts) {
-        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
-        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
-                .withInterestPostingPeriodTypeAsQuarterly() //
-                .withInterestCalculationPeriodTypeAsDailyBalance() //
-                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsAccrualBased(accounts).build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+        PostRecurringDepositProductsRequest request = DepositRequestBuilders.withCashBasedAccounting(
+                DepositRequestBuilders.recurringDepositProduct(), assetAccount, liabilityAccount, incomeAccount, expenseAccount);
+        return recurringDepositProductHelper
+                .createProduct(
+                        DepositRequestBuilders.withChart(request, validFrom, validTo, DepositTestData.recurringChartSlabsFor("period")))
+                .getResourceId();
     }
 
     @Test
     public void checkPeriodicAccrualAccountingFlow() throws InterruptedException, ParseException {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
+        final Long loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        final Long clientID = createClient(DATE_OF_JOINING);
 
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
-                collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, createClientCollateral(clientID));
 
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, collaterals);
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(EXPECTED_DISBURSAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(EXPECTED_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        approveAndDisburse(loanID, EXPECTED_DISBURSAL_DATE);
 
         // CHECK ACCOUNT ENTRIES
         LOG.info("Entries ......");
         final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
-        final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, assetAccountInitialEntry);
+        checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, journal(LP_PRINCIPAL, assetAccount, CREDIT),
+                journal(LP_PRINCIPAL, assetAccount, DEBIT));
 
         final String jobName = "Add Accrual Transactions";
 
-        SchedulerJobHelper.executeAndAwaitJob(jobName);
+        schedulerHelper.executeAndAwaitJob(jobName);
 
         // MAKE 1
         LOG.info("Repayment 1 ......");
@@ -746,190 +555,130 @@ public class AccountingScenarioIntegrationTest {
         final float FIRST_PRINCIPAL = 2000.0f;
         final float FEE_PORTION = 0.0f;
         final float PENALTY_PORTION = 0.0f;
-        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[1]), FIRST_INTEREST, FEE_PORTION,
-                PENALTY_PORTION, loanID);
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[1], REPAYMENT_AMOUNT[1], loanID);
+        checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[1]), FIRST_INTEREST, FEE_PORTION, PENALTY_PORTION, loanID);
+        makeRepayment(REPAYMENT_DATE[1], REPAYMENT_AMOUNT[1], loanID);
         float expected_value = LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
-        final JournalEntry[] assetAccountFirstEntry = { new JournalEntry(REPAYMENT_AMOUNT[1], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(FIRST_INTEREST + FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], assetAccountFirstEntry);
+        verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], journal(REPAYMENT_AMOUNT[1], assetAccount, DEBIT),
+                journal(FIRST_INTEREST + FIRST_PRINCIPAL, assetAccount, CREDIT));
         LOG.info("Repayment 1 Done......");
 
         // REPAYMENT 2
         LOG.info("Repayment 2 ......");
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[2], REPAYMENT_AMOUNT[2], loanID);
+        makeRepayment(REPAYMENT_DATE[2], REPAYMENT_AMOUNT[2], loanID);
         final float SECOND_AND_THIRD_INTEREST = 400.0f;
         final float SECOND_PRINCIPAL = REPAYMENT_AMOUNT[2] - SECOND_AND_THIRD_INTEREST;
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[2]), FIRST_INTEREST, FEE_PORTION,
-                PENALTY_PORTION, loanID);
-        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[3]), FIRST_INTEREST, FEE_PORTION,
-                PENALTY_PORTION, loanID);
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(2, expected_value, loanID);
-        final JournalEntry[] assetAccountSecondEntry = { new JournalEntry(REPAYMENT_AMOUNT[2], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SECOND_AND_THIRD_INTEREST + SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[2], assetAccountSecondEntry);
+        checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[2]), FIRST_INTEREST, FEE_PORTION, PENALTY_PORTION, loanID);
+        checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[3]), FIRST_INTEREST, FEE_PORTION, PENALTY_PORTION, loanID);
+        verifyRepaymentScheduleEntryFor(2, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[2], journal(REPAYMENT_AMOUNT[2], assetAccount, DEBIT),
+                journal(SECOND_AND_THIRD_INTEREST + SECOND_PRINCIPAL, assetAccount, CREDIT));
         LOG.info("Repayment 2 Done ......");
 
         // WAIVE INTEREST
         LOG.info("Waive Interest  ......");
-        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[4]), FIRST_INTEREST, FEE_PORTION,
-                PENALTY_PORTION, loanID);
-        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[5]), FIRST_INTEREST, FEE_PORTION,
-                PENALTY_PORTION, loanID);
-        this.loanTransactionHelper.waiveInterest(REPAYMENT_DATE[4], AMOUNT_TO_BE_WAIVE.toString(), loanID);
+        checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[4]), FIRST_INTEREST, FEE_PORTION, PENALTY_PORTION, loanID);
+        checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[5]), FIRST_INTEREST, FEE_PORTION, PENALTY_PORTION, loanID);
+        addInterestWaiver(loanID, waiveInterest(AMOUNT_TO_BE_WAIVE, REPAYMENT_DATE[4]));
 
-        final JournalEntry waivedEntry = new JournalEntry(AMOUNT_TO_BE_WAIVE, JournalEntry.TransactionType.CREDIT);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], waivedEntry);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], journal(AMOUNT_TO_BE_WAIVE, assetAccount, CREDIT));
 
-        final JournalEntry expenseJournalEntry = new JournalEntry(AMOUNT_TO_BE_WAIVE, JournalEntry.TransactionType.DEBIT);
-        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, REPAYMENT_DATE[4], expenseJournalEntry);
+        checkJournalEntryForExpenseAccount(expenseAccount, REPAYMENT_DATE[4], journal(AMOUNT_TO_BE_WAIVE, expenseAccount, DEBIT));
         LOG.info("Waive Interest Done......");
 
         // REPAYMENT 3
         LOG.info("Repayment 3 ......");
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[3], REPAYMENT_AMOUNT[3], loanID);
+        makeRepayment(REPAYMENT_DATE[3], REPAYMENT_AMOUNT[3], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        final JournalEntry[] assetAccountThirdEntry = { new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.CREDIT) };
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(3, expected_value, loanID);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[3], assetAccountThirdEntry);
+        verifyRepaymentScheduleEntryFor(3, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[3], journal(REPAYMENT_AMOUNT[3], assetAccount, DEBIT),
+                journal(REPAYMENT_AMOUNT[3], assetAccount, CREDIT));
         LOG.info("Repayment 3 Done ......");
 
         // REPAYMENT 4
         LOG.info("Repayment 4 ......");
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[4], REPAYMENT_AMOUNT[4], loanID);
+        makeRepayment(REPAYMENT_DATE[4], REPAYMENT_AMOUNT[4], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(4, expected_value, loanID);
-        final JournalEntry[] assetAccountFourthEntry = { new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], assetAccountFourthEntry);
+        verifyRepaymentScheduleEntryFor(4, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], journal(REPAYMENT_AMOUNT[4], assetAccount, DEBIT),
+                journal(REPAYMENT_AMOUNT[4], assetAccount, CREDIT));
         LOG.info("Repayment 4 Done  ......");
 
         // Repayment 5
         LOG.info("Repayment 5 ......");
-        final JournalEntry[] assetAccountFifthEntry = { new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.CREDIT) };
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[5], REPAYMENT_AMOUNT[5], loanID);
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(5, expected_value, loanID);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[5], assetAccountFifthEntry);
+        makeRepayment(REPAYMENT_DATE[5], REPAYMENT_AMOUNT[5], loanID);
+        verifyRepaymentScheduleEntryFor(5, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[5], journal(REPAYMENT_AMOUNT[5], assetAccount, DEBIT),
+                journal(REPAYMENT_AMOUNT[5], assetAccount, CREDIT));
         LOG.info("Repayment 5 Done  ......");
     }
 
     @Test
     public void checkPeriodicAccrualAccountingFlow_OVER_PAYMENT() throws InterruptedException, ParseException {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
+        final Long loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        final Long clientID = createClient(DATE_OF_JOINING);
 
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
-                collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, createClientCollateral(clientID));
 
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, collaterals);
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(EXPECTED_DISBURSAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(EXPECTED_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        approveAndDisburse(loanID, EXPECTED_DISBURSAL_DATE);
 
         // CHECK ACCOUNT ENTRIES
         LOG.info("Entries ......");
         final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
-        final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, assetAccountInitialEntry);
+        checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, journal(LP_PRINCIPAL, assetAccount, CREDIT),
+                journal(LP_PRINCIPAL, assetAccount, DEBIT));
 
         final String jobName = "Add Accrual Transactions";
 
-        SchedulerJobHelper.executeAndAwaitJob(jobName);
+        schedulerHelper.executeAndAwaitJob(jobName);
 
         // MAKE 1
         LOG.info("Repayment 1 ......");
         final float FIRST_INTEREST = 200.0f;
-        final float FIRST_PRINCIPAL = 2000.0f;
         final float FEE_PORTION = 0.0f;
         final float PENALTY_PORTION = 0.0f;
-        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[1]), FIRST_INTEREST, FEE_PORTION,
-                PENALTY_PORTION, loanID);
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[1], 15000f, loanID);
+        checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[1]), FIRST_INTEREST, FEE_PORTION, PENALTY_PORTION, loanID);
+        makeRepayment(REPAYMENT_DATE[1], 15000f, loanID);
         float expected_value = LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
-        final JournalEntry[] assetAccountEntry = { new JournalEntry(15000f, JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(11000f, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], assetAccountEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, REPAYMENT_DATE[1],
-                new JournalEntry(4000f, JournalEntry.TransactionType.CREDIT));
+        verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], journal(15000f, assetAccount, DEBIT),
+                journal(11000f, assetAccount, CREDIT));
+        checkJournalEntryForLiabilityAccount(overpaymentAccount, REPAYMENT_DATE[1], journal(4000f, overpaymentAccount, CREDIT));
         LOG.info("Repayment  Done......");
 
     }
 
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
-        collaterals.add(collaterals(collateralId, quantity));
-    }
-
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
-        HashMap<String, String> collateral = new HashMap<String, String>(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("quantity", quantity.toString());
-        return collateral;
-    }
-
     @Test
     public void checkPeriodicAccrualAccountingTillCurrentDateFlow() throws InterruptedException, ParseException {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
+        final Long loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        final Long clientID = createClient(DATE_OF_JOINING);
 
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
-                collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, collaterals);
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, createClientCollateral(clientID));
 
         final float FEE_PORTION = 50.0f;
         final float PENALTY_PORTION = 100.0f;
-        Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(FEE_PORTION), false));
-        Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(PENALTY_PORTION), true));
+        Long flat = createLoanSpecifiedDueDateCharge(FEE_PORTION, false);
+        Long flatSpecifiedDueDate = createLoanSpecifiedDueDateCharge(PENALTY_PORTION, true);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(EXPECTED_DISBURSAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+        approve(loanID, EXPECTED_DISBURSAL_DATE);
 
         final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
 
@@ -940,98 +689,62 @@ public class AccountingScenarioIntegrationTest {
 
         zonedDate = currentDate.minusDays(2);
 
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSEMENT_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        disburse(loanID, LOAN_DISBURSEMENT_DATE);
 
-        this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                String.valueOf(flatSpecifiedDueDate), dateFormat.format(zonedDate), String.valueOf(PENALTY_PORTION)));
+        addLoanCharge(loanID, flatSpecifiedDueDate, dateFormat.format(zonedDate), (double) PENALTY_PORTION);
         zonedDate = zonedDate.plusDays(1);
-        this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
-                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flat), dateFormat.format(zonedDate), String.valueOf(FEE_PORTION)));
+        addLoanCharge(loanID, flat, dateFormat.format(zonedDate), (double) FEE_PORTION);
 
         // CHECK ACCOUNT ENTRIES
         LOG.info("Entries ......");
-        final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
-        final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, LOAN_DISBURSEMENT_DATE, assetAccountInitialEntry);
+        checkJournalEntryForAssetAccount(assetAccount, LOAN_DISBURSEMENT_DATE, journal(LP_PRINCIPAL, assetAccount, CREDIT),
+                journal(LP_PRINCIPAL, assetAccount, DEBIT));
 
         final String jobName = "Add Periodic Accrual Transactions";
 
-        SchedulerJobHelper.executeAndAwaitJob(jobName);
+        schedulerHelper.executeAndAwaitJob(jobName);
 
-        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
+        final GetLoansLoanIdRepaymentPeriod firstPeriod = getRepaymentPeriods(loanID).get(1);
         // MAKE 1
-        List fromDateList = (List) loanSchedule.get(1).get("fromDate");
-        LocalDate fromDateLocal = LocalDate.now(Utils.getZoneIdOfTenant());
-        fromDateLocal = fromDateLocal.withYear((int) fromDateList.get(0));
-        fromDateLocal = fromDateLocal.withMonth((int) fromDateList.get(1));
-        fromDateLocal = fromDateLocal.withDayOfMonth((int) fromDateList.get(2));
+        int totalDaysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(firstPeriod.getFromDate(), firstPeriod.getDueDate()));
 
-        List dueDateList = (List) loanSchedule.get(1).get("dueDate");
-        LocalDate dueDateLocal = LocalDate.now(Utils.getZoneIdOfTenant());
-        dueDateLocal = dueDateLocal.withYear((int) dueDateList.get(0));
-        dueDateLocal = dueDateLocal.withMonth((int) dueDateList.get(1));
-        dueDateLocal = dueDateLocal.withDayOfMonth((int) dueDateList.get(2));
-
-        int totalDaysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDateLocal, dueDateLocal));
-
-        float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
+        float totalInterest = firstPeriod.getInterestOriginalDue().floatValue();
         DecimalFormat numberFormat = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
         float interest4Days = totalInterest / totalDaysInPeriod * 4;
         interest4Days = Float.parseFloat(numberFormat.format(interest4Days));
 
-        this.loanTransactionHelper.checkAccrualTransactionForRepayment(currentDate.toLocalDate(), interest4Days, FEE_PORTION,
-                PENALTY_PORTION, loanID);
+        checkAccrualTransactionForRepayment(currentDate.toLocalDate(), interest4Days, FEE_PORTION, PENALTY_PORTION, loanID);
 
     }
 
     @Test
     public void checkPeriodicAccrualAccountingAPIFlow() throws ParseException {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
+        final Long loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        final Long clientID = createClient(DATE_OF_JOINING);
 
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
-                collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, collaterals);
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, createClientCollateral(clientID));
 
         final float FEE_PORTION = 50.0f;
         final float PENALTY_PORTION = 100.0f;
         final float NEXT_FEE_PORTION = 55.0f;
         final float NEXT_PENALTY_PORTION = 105.0f;
 
-        Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(FEE_PORTION), false));
-        Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(PENALTY_PORTION), true));
+        Long flat = createLoanSpecifiedDueDateCharge(FEE_PORTION, false);
+        Long flatSpecifiedDueDate = createLoanSpecifiedDueDateCharge(PENALTY_PORTION, true);
 
-        Integer flatNext = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(NEXT_FEE_PORTION), false));
-        Integer flatSpecifiedDueDateNext = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(NEXT_PENALTY_PORTION), true));
+        Long flatNext = createLoanSpecifiedDueDateCharge(NEXT_FEE_PORTION, false);
+        Long flatSpecifiedDueDateNext = createLoanSpecifiedDueDateCharge(NEXT_PENALTY_PORTION, true);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(EXPECTED_DISBURSAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+        approve(loanID, EXPECTED_DISBURSAL_DATE);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 
@@ -1046,197 +759,144 @@ public class AccountingScenarioIntegrationTest {
         todayDate = Calendar.getInstance(this.tenantTimeZone);
         todayDate.add(Calendar.DATE, -2);
 
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSEMENT_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        disburse(loanID, LOAN_DISBURSEMENT_DATE);
 
-        this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                String.valueOf(flatSpecifiedDueDate), dateFormat.format(todayDate.getTime()), String.valueOf(PENALTY_PORTION)));
+        addLoanCharge(loanID, flatSpecifiedDueDate, dateFormat.format(todayDate.getTime()), (double) PENALTY_PORTION);
         todayDate.add(Calendar.DATE, 1);
         String runOndate = dateFormat.format(todayDate.getTime());
 
-        this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
-                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flat), runOndate, String.valueOf(FEE_PORTION)));
+        addLoanCharge(loanID, flat, runOndate, (double) FEE_PORTION);
 
         todayDate.add(Calendar.DATE, 1);
-        this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                String.valueOf(flatSpecifiedDueDateNext), dateFormat.format(todayDate.getTime()), String.valueOf(NEXT_PENALTY_PORTION)));
+        addLoanCharge(loanID, flatSpecifiedDueDateNext, dateFormat.format(todayDate.getTime()), (double) NEXT_PENALTY_PORTION);
 
-        this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                String.valueOf(flatNext), dateFormat.format(todayDate.getTime()), String.valueOf(NEXT_FEE_PORTION)));
+        addLoanCharge(loanID, flatNext, dateFormat.format(todayDate.getTime()), (double) NEXT_FEE_PORTION);
 
         // CHECK ACCOUNT ENTRIES
         LOG.info("Entries ......");
-        final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
-        final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, LOAN_DISBURSEMENT_DATE, assetAccountInitialEntry);
+        checkJournalEntryForAssetAccount(assetAccount, LOAN_DISBURSEMENT_DATE, journal(LP_PRINCIPAL, assetAccount, CREDIT),
+                journal(LP_PRINCIPAL, assetAccount, DEBIT));
 
-        PeriodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOndate);
+        runPeriodicAccrualAccounting(runOndate);
 
-        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
+        final GetLoansLoanIdRepaymentPeriod firstPeriod = getRepaymentPeriods(loanID).get(1);
         // MAKE 1
-        List fromDateList = (List) loanSchedule.get(1).get("fromDate");
-        LocalDate fromDateLocal = LocalDate.now(Utils.getZoneIdOfTenant());
-        fromDateLocal = fromDateLocal.withYear((int) fromDateList.get(0));
-        fromDateLocal = fromDateLocal.withMonth((int) fromDateList.get(1));
-        fromDateLocal = fromDateLocal.withDayOfMonth((int) fromDateList.get(2));
+        int totalDaysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(firstPeriod.getFromDate(), firstPeriod.getDueDate()));
 
-        List dueDateList = (List) loanSchedule.get(1).get("dueDate");
-        LocalDate dueDateLocal = LocalDate.now(Utils.getZoneIdOfTenant());
-        dueDateLocal = dueDateLocal.withYear((int) dueDateList.get(0));
-        dueDateLocal = dueDateLocal.withMonth((int) dueDateList.get(1));
-        dueDateLocal = dueDateLocal.withDayOfMonth((int) dueDateList.get(2));
-
-        int totalDaysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDateLocal, dueDateLocal));
-
-        float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
+        float totalInterest = firstPeriod.getInterestOriginalDue().floatValue();
         DecimalFormat numberFormat = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
         float interest3Days = totalInterest / totalDaysInPeriod * 3;
         interest3Days = Float.parseFloat(numberFormat.format(interest3Days));
-        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), interest3Days, FEE_PORTION,
-                PENALTY_PORTION, loanID);
+        checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), interest3Days, FEE_PORTION, PENALTY_PORTION, loanID);
 
         runOndate = dateFormat.format(todayDate.getTime());
 
-        PeriodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOndate);
+        runPeriodicAccrualAccounting(runOndate);
         float interestPerDay = (totalInterest / totalDaysInPeriod * 4) - interest3Days;
         interestPerDay = Float.parseFloat(numberFormat.format(interestPerDay));
-        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), interestPerDay, NEXT_FEE_PORTION,
-                NEXT_PENALTY_PORTION, loanID);
+        checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), interestPerDay, NEXT_FEE_PORTION, NEXT_PENALTY_PORTION, loanID);
 
     }
 
-    private Integer createLoanProductWithPeriodicAccrualAccountingEnabled(final Account... accounts) {
+    private Long createLoanProductWithPeriodicAccrualAccountingEnabled(final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(LP_PRINCIPAL.toString()).withRepaymentTypeAsMonth()
+        return createLoanProduct(new LoanProductTestBuilder().withPrincipal(LP_PRINCIPAL.toString()).withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery(LP_REPAYMENT_PERIOD).withNumberOfRepayments(LP_REPAYMENTS).withRepaymentTypeAsMonth()
                 .withinterestRatePerPeriod(LP_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()
                 .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
-                .withDaysInMonth("30").withDaysInYear("365").build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+                .withDaysInMonth("30").withDaysInYear("365").buildRequest());
     }
 
     @Test
     public void checkCashBasedAccountingFlow() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProductWithCashBasedAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
+        final Long loanProductID = createLoanProductWithCashBasedAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        final Long clientID = createClient(DATE_OF_JOINING);
 
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
-                collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, createClientCollateral(clientID));
 
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, collaterals);
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(EXPECTED_DISBURSAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(EXPECTED_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        approveAndDisburse(loanID, EXPECTED_DISBURSAL_DATE);
 
         // CHECK ACCOUNT ENTRIES
         LOG.info("Entries ......");
         final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
-        final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, assetAccountInitialEntry);
+        checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, journal(LP_PRINCIPAL, assetAccount, CREDIT),
+                journal(LP_PRINCIPAL, assetAccount, DEBIT));
 
         // MAKE 1
         LOG.info("Repayment 1 ......");
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[1], REPAYMENT_AMOUNT[1], loanID);
+        makeRepayment(REPAYMENT_DATE[1], REPAYMENT_AMOUNT[1], loanID);
         final float FIRST_INTEREST = 200.0f;
         final float FIRST_PRINCIPAL = 2000.0f;
         float expected_value = LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
-        final JournalEntry[] assetAccountFirstEntry = { new JournalEntry(REPAYMENT_AMOUNT[1], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], assetAccountFirstEntry);
+        verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], journal(REPAYMENT_AMOUNT[1], assetAccount, DEBIT),
+                journal(FIRST_PRINCIPAL, assetAccount, CREDIT));
         LOG.info("CHECKING INCOME: ******************************************");
-        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, REPAYMENT_DATE[1],
-                new JournalEntry(FIRST_INTEREST, JournalEntry.TransactionType.CREDIT));
+        checkJournalEntryForIncomeAccount(incomeAccount, REPAYMENT_DATE[1], journal(FIRST_INTEREST, incomeAccount, CREDIT));
         LOG.info("Repayment 1 Done......");
 
         // REPAYMENT 2
         LOG.info("Repayment 2 ......");
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[2], REPAYMENT_AMOUNT[2], loanID);
+        makeRepayment(REPAYMENT_DATE[2], REPAYMENT_AMOUNT[2], loanID);
         final float SECOND_AND_THIRD_INTEREST = 400.0f;
         final float SECOND_PRINCIPAL = REPAYMENT_AMOUNT[2] - SECOND_AND_THIRD_INTEREST;
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(2, expected_value, loanID);
-        final JournalEntry[] assetAccountSecondEntry = { new JournalEntry(REPAYMENT_AMOUNT[2], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT), };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[2], assetAccountSecondEntry);
+        verifyRepaymentScheduleEntryFor(2, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[2], journal(REPAYMENT_AMOUNT[2], assetAccount, DEBIT),
+                journal(SECOND_PRINCIPAL, assetAccount, CREDIT));
         LOG.info("CHECKING INCOME: ******************************************");
-        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, REPAYMENT_DATE[2],
-                new JournalEntry(SECOND_AND_THIRD_INTEREST, JournalEntry.TransactionType.CREDIT));
+        checkJournalEntryForIncomeAccount(incomeAccount, REPAYMENT_DATE[2], journal(SECOND_AND_THIRD_INTEREST, incomeAccount, CREDIT));
         LOG.info("Repayment 2 Done ......");
 
         // WAIVE INTEREST
         LOG.info("Waive Interest  ......");
-        Integer transactionId = this.loanTransactionHelper.waiveInterestAndReturnTransactionId(REPAYMENT_DATE[4],
-                AMOUNT_TO_BE_WAIVE.toString(), loanID);
+        Long transactionId = addInterestWaiver(loanID, waiveInterest(AMOUNT_TO_BE_WAIVE, REPAYMENT_DATE[4]));
         // waive of fees and interest are not considered in cash based
         // accounting,
-        this.journalEntryHelper.ensureNoAccountingTransactionsWithTransactionId("L" + transactionId);
+        Assertions.assertTrue(getJournalEntries("L" + transactionId).getPageItems().isEmpty(), "Tranasactions are is not empty");
 
         // REPAYMENT 3
         LOG.info("Repayment 3 ......");
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[3], REPAYMENT_AMOUNT[3], loanID);
+        makeRepayment(REPAYMENT_DATE[3], REPAYMENT_AMOUNT[3], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        final JournalEntry[] assetAccountThirdEntry = { new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.CREDIT) };
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(3, expected_value, loanID);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[3], assetAccountThirdEntry);
+        verifyRepaymentScheduleEntryFor(3, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[3], journal(REPAYMENT_AMOUNT[3], assetAccount, DEBIT),
+                journal(REPAYMENT_AMOUNT[3], assetAccount, CREDIT));
         LOG.info("Repayment 3 Done ......");
 
         // REPAYMENT 4
         LOG.info("Repayment 4 ......");
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[4], REPAYMENT_AMOUNT[4], loanID);
+        makeRepayment(REPAYMENT_DATE[4], REPAYMENT_AMOUNT[4], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(4, expected_value, loanID);
-        final JournalEntry[] assetAccountFourthEntry = { new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], assetAccountFourthEntry);
+        verifyRepaymentScheduleEntryFor(4, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], journal(REPAYMENT_AMOUNT[4], assetAccount, DEBIT),
+                journal(REPAYMENT_AMOUNT[4], assetAccount, CREDIT));
         LOG.info("Repayment 4 Done  ......");
 
         // Repayment 5
         LOG.info("Repayment 5 ......");
-        final JournalEntry[] assetAccountFifthEntry = { new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.CREDIT) };
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[5], REPAYMENT_AMOUNT[5], loanID);
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(5, expected_value, loanID);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[5], assetAccountFifthEntry);
+        makeRepayment(REPAYMENT_DATE[5], REPAYMENT_AMOUNT[5], loanID);
+        verifyRepaymentScheduleEntryFor(5, expected_value, loanID);
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[5], journal(REPAYMENT_AMOUNT[5], assetAccount, DEBIT),
+                journal(REPAYMENT_AMOUNT[5], assetAccount, CREDIT));
         LOG.info("Repayment 5 Done  ......");
     }
 
-    private Integer createLoanProductWithCashBasedAccountingEnabled(final Account... accounts) {
+    private Long createLoanProductWithCashBasedAccountingEnabled(final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(LP_PRINCIPAL.toString()).withRepaymentTypeAsMonth()
+        return createLoanProduct(new LoanProductTestBuilder().withPrincipal(LP_PRINCIPAL.toString()).withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery(LP_REPAYMENT_PERIOD).withNumberOfRepayments(LP_REPAYMENTS).withRepaymentTypeAsMonth()
                 .withinterestRatePerPeriod(LP_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()
-                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRuleAsCashBased(accounts).build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRuleAsCashBased(accounts)
+                .buildRequest());
     }
 
     private LocalDate getDateAsLocalDate(String dateAsString) {
@@ -1246,66 +906,151 @@ public class AccountingScenarioIntegrationTest {
     @Test
     public void checkAccountingWithSharingFlow() {
 
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account equityAccount = this.accountHelper.createEquityAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account equityAccount = accountHelper.createEquityAccount(Utils.uniqueRandomStringGenerator("EQUITY_", 6));
+        final Account liabilityAccount = accountHelper.createLiabilityAccount();
 
-        final Integer shareProductID = createSharesProduct(assetAccount, incomeAccount, equityAccount, liabilityAccount);
+        final Long shareProductID = createSharesProduct(assetAccount, incomeAccount, equityAccount, liabilityAccount);
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        final Long clientID = createClient(DATE_OF_JOINING);
         Assertions.assertNotNull(clientID);
-        final Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientID, "1000");
+        final Long savingsAccountId = openSavingsAccount(clientID);
         Assertions.assertNotNull(savingsAccountId);
-        final Integer shareAccountId = createShareAccount(clientID, shareProductID, savingsAccountId);
+        final Long shareAccountId = createShareAccount(clientID, shareProductID, savingsAccountId);
         Assertions.assertNotNull(shareAccountId);
-        final Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
-                responseSpec);
-        Assertions.assertNotNull(shareAccountData);
+        Assertions.assertNotNull(shareAccountHelper.getShareAccount(shareAccountId));
         // Approve share Account
-        final Map<String, Object> approveMap = new HashMap<>();
-        approveMap.put("note", "Share Account Approval Note");
-        approveMap.put("dateFormat", "dd MMMM yyyy");
-        approveMap.put("approvedDate", "01 Jan 2016");
-        approveMap.put("locale", "en");
-        final String approve = new Gson().toJson(approveMap);
-        ShareAccountTransactionHelper.postCommand("approve", shareAccountId, approve, requestSpec, responseSpec);
+        shareAccountHelper.approve(shareAccountId, SHARE_DATE, "Share Account Approval Note", "dd MMMM yyyy", "en");
         // Activate Share Account
-        final Map<String, Object> activateMap = new HashMap<>();
-        activateMap.put("dateFormat", "dd MMMM yyyy");
-        activateMap.put("activatedDate", "01 Jan 2016");
-        activateMap.put("locale", "en");
-        final String activateJson = new Gson().toJson(activateMap);
-        ShareAccountTransactionHelper.postCommand("activate", shareAccountId, activateJson, requestSpec, responseSpec);
+        shareAccountHelper.activate(shareAccountId, SHARE_DATE, "dd MMMM yyyy", "en");
 
         // Checking sharing entries.
-        final JournalEntry[] assetAccountEntry = { new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liabilityAccountEntry = { new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] checkJournalEntryForEquityAccount = {
-                new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "01 Jan 2016", assetAccountEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, "01 Jan 2016", liabilityAccountEntry);
-        this.journalEntryHelper.checkJournalEntryForEquityAccount(equityAccount, "01 Jan 2016", checkJournalEntryForEquityAccount);
+        final LoanTestData.Journal assetAccountEntry = journal(200f, assetAccount, DEBIT);
+        checkJournalEntryForAssetAccount(assetAccount, SHARE_DATE, assetAccountEntry);
+        checkJournalEntryForLiabilityAccount(liabilityAccount, SHARE_DATE, journal(200f, liabilityAccount, CREDIT));
+        journalHelper.checkJournalEntryForEquityAccount(equityAccount, SHARE_DATE, journal(200f, equityAccount, CREDIT));
 
-        final String transactionId = this.journalEntryHelper.getJournalEntryTransactionIdByAccount(assetAccount, "01 Jan 2016",
-                assetAccountEntry);
+        final String transactionId = journalHelper.getJournalEntryTransactionIdByAccount(assetAccount, SHARE_DATE, assetAccountEntry);
         Assertions.assertNotEquals("", transactionId);
 
-        final GetJournalEntriesTransactionIdResponse journalEntriesTransactionIdResponse = this.journalEntryHelper
-                .getJournalEntries(transactionId);
+        final GetJournalEntriesTransactionIdResponse journalEntriesTransactionIdResponse = getJournalEntries(transactionId);
         Assertions.assertNotNull(journalEntriesTransactionIdResponse);
     }
 
-    public static Integer createSharesProduct(final Account... accounts) {
+    /** The cash-based share product the RestAssured {@code ShareProductHelper} built by default. */
+    private Long createSharesProduct(final Account assetAccount, final Account incomeAccount, final Account equityAccount,
+            final Account liabilityAccount) {
         LOG.info("------------------------------CREATING NEW SHARE PRODUCT ---------------------------------------");
-        final String shareProductJSON = new ShareProductHelper().withCashBasedAccounting(accounts).build();
-        return ShareProductTransactionHelper.createShareProduct(shareProductJSON, requestSpec, responseSpec);
+        return shareAccountHelper.createShareProduct(new PostProductsTypeRequest()//
+                .name(Utils.uniqueRandomStringGenerator("SHARE_PRODUCT_", 6))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .description(Utils.randomStringGenerator("", 20))//
+                .currencyCode("USD")//
+                .locale("en_GB")//
+                .digitsAfterDecimal(4)//
+                .inMultiplesOf(0)//
+                .totalShares(10000)//
+                .sharesIssued(10000)//
+                .unitPrice(2)//
+                .minimumShares(10)//
+                .nominalShares(20)//
+                .maximumShares(3000)//
+                .allowDividendCalculationForInactiveClients(true)//
+                .minimumActivePeriodForDividends(1)//
+                .minimumactiveperiodFrequencyType(0)//
+                .lockinPeriodFrequency(1)//
+                .lockinPeriodFrequencyType(0)//
+                .accountingRule(SavingsTestData.AccountingRule.CASH_BASED)//
+                .shareReferenceId(SavingsRequestBuilders.accountId(assetAccount))//
+                .shareSuspenseId(SavingsRequestBuilders.accountId(liabilityAccount))//
+                .shareEquityId(SavingsRequestBuilders.accountId(equityAccount))//
+                .incomeFromFeeAccountId(SavingsRequestBuilders.accountId(incomeAccount)));
     }
 
-    private Integer createShareAccount(final Integer clientId, final Integer productId, final Integer savingsAccountId) {
-        final String shareAccountJSON = new ShareAccountHelper().withClientId(String.valueOf(clientId))
-                .withProductId(String.valueOf(productId)).withExternalId("External1").withSavingsAccountId(String.valueOf(savingsAccountId))
-                .withSubmittedDate("01 Jan 2016").withApplicationDate("01 Jan 2016").withRequestedShares("100").build();
-        return ShareAccountTransactionHelper.createShareAccount(shareAccountJSON, requestSpec, responseSpec);
+    private Long createShareAccount(final Long clientId, final Long productId, final Long savingsAccountId) {
+        return shareAccountHelper.applyShareAccount(new AccountRequest().clientId(clientId).productId(productId).externalId("External1")
+                .savingsAccountId(savingsAccountId).submittedDate(SHARE_DATE).applicationDate(SHARE_DATE).requestedShares(100L)
+                .dateFormat("dd MMMM yyyy").locale("en"));
+    }
+
+    private Long openSavingsAccount(final Long clientId) {
+        final Long savingsProductId = createSavingsProduct(
+                SavingsRequestBuilders.defaultSavingsProduct().minRequiredOpeningBalance(BigDecimal.valueOf(1000)));
+        final Long savingsId = savingsHelper.submitApplication(clientId, savingsProductId, SAVINGS_SUBMITTED_ON_DATE).getSavingsId();
+        SavingsTestValidators.verifySavingsIsPending(savingsHelper.getSavingsStatus(savingsId));
+        savingsHelper.approveSavings(savingsId, SAVINGS_APPROVED_ON_DATE);
+        SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsId));
+        savingsHelper.activateSavings(savingsId, TRANSACTION_DATE);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
+        return savingsId;
+    }
+
+    private Long createClientCollateral(final Long clientId) {
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        Assertions.assertNotNull(collateralId);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientId, collateralId).getResourceId();
+        Assertions.assertNotNull(clientCollateralId);
+        return clientCollateralId;
+    }
+
+    private Long createLoanSpecifiedDueDateCharge(final float amount, final boolean penalty) {
+        return chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, amount, penalty))
+                .getResourceId();
+    }
+
+    private void approveAndDisburse(final Long loanId, final String date) {
+        verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
+        approve(loanId, date);
+        disburse(loanId, date);
+    }
+
+    private void approve(final Long loanId, final String date) {
+        approveLoan(loanId,
+                new PostLoansLoanIdRequest().approvedOnDate(date).locale(LoanTestData.LOCALE).dateFormat(LoanTestData.DATETIME_PATTERN));
+        verifyLoanStatus(loanId, LoanStatus.APPROVED);
+        verifyLoanStatus(getLoanDetails(loanId), GetLoansLoanIdStatus::getWaitingForDisbursal);
+    }
+
+    private void disburse(final Long loanId, final String date) {
+        disburseLoan(loanId, LoanRequestBuilders.disburseLoanWithNetDisbursalAmount(date, getLoanDetails(loanId).getNetDisbursalAmount())
+                .note("DISBURSE NOTE"));
+        verifyLoanStatus(getLoanDetails(loanId), GetLoansLoanIdStatus::getActive);
+    }
+
+    private List<GetLoansLoanIdRepaymentPeriod> getRepaymentPeriods(final Long loanId) {
+        return getLoanDetails(loanId).getRepaymentSchedule().getPeriods();
+    }
+
+    private void verifyRepaymentScheduleEntryFor(final int repaymentNumber, final float expectedPrincipalOutstanding, final Long loanId) {
+        final BigDecimal actual = getRepaymentPeriods(loanId).get(repaymentNumber).getPrincipalLoanBalanceOutstanding();
+        Assertions.assertEquals(0, BigDecimal.valueOf(expectedPrincipalOutstanding).compareTo(actual),
+                () -> "Mismatch in Principal Loan Balance Outstanding: expected " + expectedPrincipalOutstanding + " but was " + actual);
+    }
+
+    private void checkAccrualTransactionForRepayment(final LocalDate transactionDate, final float interestPortion, final float feePortion,
+            final float penaltyPortion, final Long loanId) {
+        GetLoansLoanIdTransactions accrual = getLoanDetails(loanId).getTransactions().stream()
+                .filter(transaction -> Boolean.TRUE.equals(transaction.getType().getAccrual()))
+                .filter(transaction -> transactionDate.equals(transaction.getDate())).findFirst().orElse(null);
+        Assertions.assertNotNull(accrual, "No Accrual entries are posted");
+        assertPortion(interestPortion, accrual.getInterestPortion());
+        assertPortion(feePortion, accrual.getFeeChargesPortion());
+        assertPortion(penaltyPortion, accrual.getPenaltyChargesPortion());
+    }
+
+    private static void assertPortion(final float expected, final BigDecimal actual) {
+        Assertions.assertEquals(0, new BigDecimal(String.valueOf(expected)).compareTo(actual),
+                () -> "Mismatch in transaction amounts: expected " + expected + " but was " + actual);
+    }
+
+    private void assertBalance(final Float expected, final Long savingsId, final String message) {
+        final BigDecimal actual = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
+        Assertions.assertEquals(0, new BigDecimal(String.valueOf(expected)).compareTo(actual),
+                () -> message + ": expected " + expected + " but was " + actual);
+    }
+
+    private LoanTestData.Journal journal(final float amount, final Account account, final String type) {
+        return journalEntry(amount, account, type);
     }
 }
