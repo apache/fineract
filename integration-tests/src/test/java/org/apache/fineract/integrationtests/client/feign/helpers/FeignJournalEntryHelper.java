@@ -151,7 +151,46 @@ public class FeignJournalEntryHelper {
         checkJournalEntryForAccount(null, expenseAccount, date, accountEntries);
     }
 
+    public void checkJournalEntryForEquityAccount(Account equityAccount, String date, LoanTestData.Journal... accountEntries) {
+        checkJournalEntryForAccount(null, equityAccount, date, accountEntries);
+    }
+
+    /**
+     * The transaction id of the first entry on the account and date that matches one of the expected entries, or empty.
+     */
+    public String getJournalEntryTransactionIdByAccount(Account account, String date, LoanTestData.Journal... accountEntries) {
+        List<JournalEntryTransactionItem> actualEntries = retrieveJournalEntries(null, account, date);
+        for (LoanTestData.Journal expected : accountEntries) {
+            for (JournalEntryTransactionItem item : actualEntries) {
+                if (matchesJournalEntry(item, expected)) {
+                    return item.getTransactionId();
+                }
+            }
+        }
+        return "";
+    }
+
     private void checkJournalEntryForAccount(Long officeId, Account account, String date, LoanTestData.Journal... accountEntries) {
+        List<JournalEntryTransactionItem> actualEntries = retrieveJournalEntries(officeId, account, date);
+
+        List<JournalEntryTransactionItem> remaining = new ArrayList<>(actualEntries);
+        for (LoanTestData.Journal expected : accountEntries) {
+            if (expected.amount > 0) {
+                int matchIndex = -1;
+                for (int i = 0; i < remaining.size(); i++) {
+                    if (matchesJournalEntry(remaining.get(i), expected)) {
+                        matchIndex = i;
+                        break;
+                    }
+                }
+                assertTrue(matchIndex >= 0,
+                        "Journal entry not found for account " + account.getAccountID() + " on " + date + ": " + expected);
+                remaining.remove(matchIndex);
+            }
+        }
+    }
+
+    private List<JournalEntryTransactionItem> retrieveJournalEntries(Long officeId, Account account, String date) {
         Map<String, Object> queryParams = new HashMap<>();
         if (officeId != null) {
             queryParams.put("officeId", officeId);
@@ -169,21 +208,6 @@ public class FeignJournalEntryHelper {
                 () -> fineractClient.journalEntries().retrieveAllJournalEntries(queryParams));
         List<JournalEntryTransactionItem> actualEntries = journalEntries.getPageItems();
         assertNotNull(actualEntries);
-
-        List<JournalEntryTransactionItem> remaining = new ArrayList<>(actualEntries);
-        for (LoanTestData.Journal expected : accountEntries) {
-            if (expected.amount > 0) {
-                int matchIndex = -1;
-                for (int i = 0; i < remaining.size(); i++) {
-                    if (matchesJournalEntry(remaining.get(i), expected)) {
-                        matchIndex = i;
-                        break;
-                    }
-                }
-                assertTrue(matchIndex >= 0,
-                        "Journal entry not found for account " + account.getAccountID() + " on " + date + ": " + expected);
-                remaining.remove(matchIndex);
-            }
-        }
+        return actualEntries;
     }
 }

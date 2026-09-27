@@ -18,14 +18,17 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.DeleteFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsResponse;
+import org.apache.fineract.client.models.PutFinancialActivityAccountsResponse;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 
 public class FeignFinancialActivityAccountHelper {
@@ -43,8 +46,27 @@ public class FeignFinancialActivityAccountHelper {
         return ok(() -> fineractClient.mappingFinancialActivitiesToAccounts().createGLAccountMappingFinancialActivityAccount(request));
     }
 
+    public CallFailedRuntimeException createMappingExpectingError(Integer financialActivityId, Account glAccount) {
+        return fail(() -> fineractClient.mappingFinancialActivitiesToAccounts()
+                .createGLAccountMappingFinancialActivityAccount(mappingRequest(financialActivityId, glAccount)));
+    }
+
+    public PutFinancialActivityAccountsResponse updateMapping(Long mappingId, Integer financialActivityId, Account glAccount) {
+        return ok(() -> fineractClient.mappingFinancialActivitiesToAccounts().updateGLAccountMappingFinancialActivityAccount(mappingId,
+                mappingRequest(financialActivityId, glAccount)));
+    }
+
+    public CallFailedRuntimeException updateMappingExpectingError(Long mappingId, Integer financialActivityId, Account glAccount) {
+        return fail(() -> fineractClient.mappingFinancialActivitiesToAccounts().updateGLAccountMappingFinancialActivityAccount(mappingId,
+                mappingRequest(financialActivityId, glAccount)));
+    }
+
     public GetFinancialActivityAccountsResponse getMapping(Long mappingId) {
         return ok(() -> fineractClient.mappingFinancialActivitiesToAccounts().retreive(mappingId));
+    }
+
+    public CallFailedRuntimeException getMappingExpectingError(Long mappingId) {
+        return fail(() -> fineractClient.mappingFinancialActivitiesToAccounts().retreive(mappingId));
     }
 
     public List<GetFinancialActivityAccountsResponse> getAllMappings() {
@@ -53,5 +75,11 @@ public class FeignFinancialActivityAccountHelper {
 
     public DeleteFinancialActivityAccountsResponse deleteMapping(Long mappingId) {
         return ok(() -> fineractClient.mappingFinancialActivitiesToAccounts().deleteGLAccountMappingFinancialActivityAccount(mappingId));
+    }
+
+    private static PostFinancialActivityAccountsRequest mappingRequest(Integer financialActivityId, Account glAccount) {
+        return new PostFinancialActivityAccountsRequest()//
+                .financialActivityId(financialActivityId.longValue())//
+                .glAccountId(glAccount.getAccountID().longValue());
     }
 }
