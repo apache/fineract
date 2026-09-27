@@ -21,86 +21,85 @@ package org.apache.fineract.integrationtests.client;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetClientsClientIdTransactionsResponse;
 import org.apache.fineract.client.models.GetClientsClientIdTransactionsTransactionIdResponse;
+import org.apache.fineract.client.models.PostClientsClientIdChargesRequest;
 import org.apache.fineract.client.models.PostClientsClientIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class ClientTransactionTest {
+public class ClientTransactionTest extends FeignIntegrationTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
+    private static final double CHARGE_AMOUNT = 100.0;
+    private static final BigDecimal CLIENT_CHARGE_AMOUNT = BigDecimal.valueOf(200);
+    private static final String CHARGE_DUE_DATE = "29 October 2011";
 
-    @BeforeEach
+    private FeignClientHelper clientHelper;
+    private FeignChargesHelper chargesHelper;
+
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        clientHelper = new ClientHelper(requestSpec, responseSpec);
+        clientHelper = new FeignClientHelper(fineractClient());
+        chargesHelper = new FeignChargesHelper(fineractClient());
     }
 
     @Test
     public void testClientTransactions() {
-        PostClientsRequest createClientRequest = ClientHelper.defaultClientCreationRequest();
+        PostClientsRequest createClientRequest = ClientRequestBuilders.defaultClient();
         String clientExternalId = UUID.randomUUID().toString();
         createClientRequest.setExternalId(clientExternalId);
         PostClientsResponse client = clientHelper.createClient(createClientRequest);
         Long clientId = client.getClientId();
         assertNotNull(clientId);
 
-        final Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getChargeSpecifiedDueDateJSON());
+        final Long chargeId = chargesHelper.createClientSpecifiedDueDateCharge(CHARGE_AMOUNT).getResourceId();
         Assertions.assertNotNull(chargeId);
-        final Integer clientChargeId1 = ClientHelper.addChargesForClient(requestSpec, responseSpec, clientId.intValue(),
-                ClientHelper.getSpecifiedDueDateChargesClientAsJSON(chargeId.toString(), "29 October 2011"));
+        final Long clientChargeId1 = chargesHelper.addClientCharge(clientId, clientCharge(chargeId)).getResourceId();
         Assertions.assertNotNull(clientChargeId1);
         String transactionExternalId = UUID.randomUUID().toString();
-        final String clientChargePaidTransactionId1 = ClientHelper.payChargesForClients(requestSpec, responseSpec, clientId.intValue(),
-                clientChargeId1, ClientHelper.getPayChargeJSON("25 AUGUST 2015", "10"));
+        final Long clientChargePaidTransactionId1 = chargesHelper
+                .payClientCharge(clientId, clientChargeId1, ChargeRequestBuilders.payClientCharge("25 AUGUST 2015", 10)).getTransactionId();
         assertNotNull(clientChargePaidTransactionId1);
 
-        final Integer clientChargeId2 = ClientHelper.addChargesForClient(requestSpec, responseSpec, clientId.intValue(),
-                ClientHelper.getSpecifiedDueDateChargesClientAsJSON(chargeId.toString(), "29 October 2011"));
+        final Long clientChargeId2 = chargesHelper.addClientCharge(clientId, clientCharge(chargeId)).getResourceId();
         Assertions.assertNotNull(clientChargeId2);
-        final String clientChargePaidTransactionExternalId = ClientHelper.payChargesForClientsTransactionExternalId(requestSpec,
-                responseSpec, clientId.intValue(), clientChargeId2,
-                ClientHelper.getPayChargeJSONWithExternalId("25 AUGUST 2015", "12", transactionExternalId));
+        final String clientChargePaidTransactionExternalId = chargesHelper
+                .payClientCharge(clientId, clientChargeId2,
+                        ChargeRequestBuilders.payClientCharge("25 AUGUST 2015", 12).externalId(transactionExternalId))
+                .getSubResourceExternalId();
         assertNotNull(clientChargePaidTransactionExternalId);
 
-        GetClientsClientIdTransactionsResponse allClientTransactionsByExternalId = clientHelper
-                .getAllClientTransactionsByExternalId(clientExternalId);
+        GetClientsClientIdTransactionsResponse allClientTransactionsByExternalId = clientHelper.getClientTransactions(clientExternalId);
         assertEquals(2, allClientTransactionsByExternalId.getTotalFilteredRecords());
 
         GetClientsClientIdTransactionsTransactionIdResponse clientTransactionByExternalId = clientHelper
-                .getClientTransactionByExternalId(clientExternalId, clientChargePaidTransactionId1);
-        assertEquals(Integer.parseInt(clientChargePaidTransactionId1), clientTransactionByExternalId.getId());
+                .getClientTransaction(clientExternalId, clientChargePaidTransactionId1);
+        assertEquals(clientChargePaidTransactionId1, clientTransactionByExternalId.getId());
 
         GetClientsClientIdTransactionsTransactionIdResponse clientTransactionByTransactionExternalId = clientHelper
                 .getClientTransactionByTransactionExternalId(clientId, clientChargePaidTransactionExternalId);
         assertNotNull(clientTransactionByTransactionExternalId);
         assertEquals(BigDecimal.valueOf(12), clientTransactionByTransactionExternalId.getAmount().stripTrailingZeros());
 
-        PostClientsClientIdTransactionsTransactionIdResponse undoTransactionResponse = clientHelper
-                .undoClientTransactionByExternalId(clientExternalId, clientChargePaidTransactionId1);
+        PostClientsClientIdTransactionsTransactionIdResponse undoTransactionResponse = clientHelper.undoClientTransaction(clientExternalId,
+                clientChargePaidTransactionId1);
         assertNotNull(undoTransactionResponse.getResourceId());
 
         PostClientsClientIdTransactionsTransactionIdResponse undoTransactionResponse2 = clientHelper
                 .undoClientTransactionByTransactionExternalId(clientId, clientChargePaidTransactionExternalId);
         assertNotNull(undoTransactionResponse2.getResourceId());
+    }
+
+    private static PostClientsClientIdChargesRequest clientCharge(Long chargeId) {
+        return ChargeRequestBuilders.clientCharge(chargeId, CHARGE_DUE_DATE, CLIENT_CHARGE_AMOUNT);
     }
 }
