@@ -179,6 +179,8 @@ final class ClientChargesApiResourceSwagger {
         public Long resourceId;
         @Schema(example = "221")
         public Long transactionId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String subResourceExternalId;
     }
 
     @Schema(description = "DeleteClientsClientIdChargesChargeIdResponse")
