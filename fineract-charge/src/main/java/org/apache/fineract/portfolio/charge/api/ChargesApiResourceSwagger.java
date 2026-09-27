@@ -96,6 +96,18 @@ final class ChargesApiResourceSwagger {
             public String description;
         }
 
+        static final class GetChargesFeeFrequencyResponse {
+
+            private GetChargesFeeFrequencyResponse() {}
+
+            @Schema(example = "2")
+            public Long id;
+            @Schema(example = "periodFrequencyType.months")
+            public String code;
+            @Schema(example = "Monthly")
+            public String value;
+        }
+
         static final class GetChargesTaxGroup {
 
             private GetChargesTaxGroup() {}
@@ -121,6 +133,7 @@ final class ChargesApiResourceSwagger {
         public GetChargesAppliesToResponse chargeAppliesTo;
         public GetChargesCalculationTypeResponse chargeCalculationType;
         public GetChargesPaymentModeResponse chargePaymentMode;
+        public GetChargesFeeFrequencyResponse feeFrequency;
         public BigDecimal minCap;
         public BigDecimal maxCap;
         public GetChargesTaxGroup taxGroup;
