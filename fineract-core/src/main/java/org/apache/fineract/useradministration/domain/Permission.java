@@ -81,4 +81,13 @@ public class Permission extends AbstractPersistableCustom<Long> implements Seria
 
         return !isUpdatedValueSame;
     }
+
+    /**
+     * For permissions whose entityName/code is derived from a user-renamable entity (e.g. a report's
+     * READ_&lt;reportName&gt; permission) - keeps this permission's code in sync when that entity is renamed.
+     */
+    public void updateEntityName(final String newEntityName) {
+        this.entityName = newEntityName;
+        this.code = this.actionName + "_" + this.entityName;
+    }
 }
