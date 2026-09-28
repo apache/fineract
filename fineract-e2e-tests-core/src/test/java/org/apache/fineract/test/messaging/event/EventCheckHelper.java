@@ -480,15 +480,6 @@ public class EventCheckHelper {
             PostLoansLoanIdTransactionsResponse transactionResponse, TransactionType transactionType, String externalOwnerId) {
         Long loanId = transactionResponse.getLoanId();
         Long transactionId = transactionResponse.getResourceId();
-        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
-                Map.of("staffInSelectedOfficeOnly", false, "associations", "transactions", "exclude", "", "fields", "")));
-        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
-        GetLoansLoanIdTransactions transactionFound = transactions//
-                .stream()//
-                .filter(t -> t.getId().equals(transactionId))//
-                .findAny()//
-                .orElseThrow(() -> new IllegalStateException("Transaction cannot be found"));//
-
         Class<? extends AbstractLoanTransactionEvent> eventClass = switch (transactionType) {
             case REPAYMENT -> LoanTransactionMakeRepaymentPostEvent.class;
             case GOODWILL_CREDIT -> LoanTransactionGoodwillCreditPostEvent.class;
@@ -499,12 +490,41 @@ public class EventCheckHelper {
             case INTEREST_REFUND -> LoanTransactionInterestRefundPostEvent.class;
             default -> throw new IllegalStateException(String.format("transaction type %s cannot be found", transactionType.getValue()));
         };
+        return transactionEventCheck(loanId, transactionId, eventClass, externalOwnerId);
+    }
 
-        EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> eventBuilder = eventAssertion.assertEvent(eventClass, transactionId);
+    public EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> transactionEventCheck(Long loanId, Long transactionId,
+            Class<? extends AbstractLoanTransactionEvent> eventClass, String externalOwnerId) {
+        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", false, "associations", "transactions", "exclude", "", "fields", "")));
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
+        GetLoansLoanIdTransactions transactionFound = transactions//
+                .stream()//
+                .filter(t -> t.getId().equals(transactionId))//
+                .findAny()//
+                .orElseThrow(() -> new IllegalStateException("Transaction cannot be found"));//
+
+        // The action step that raised the event may already have verified (and so removed) it
+        EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> eventBuilder = eventAssertion.assertEventReceived(eventClass,
+                transactionId);
         eventBuilder.extractingData(LoanTransactionDataV1::getLoanId).isEqualTo(loanDetailsResponse.getId())//
                 .extractingData(LoanTransactionDataV1::getDate).isEqualTo(FORMATTER_EVENTS.format(transactionFound.getDate()))//
                 .extractingBigDecimal(LoanTransactionDataV1::getAmount).isEqualTo(transactionFound.getAmount())//
                 .extractingData(LoanTransactionDataV1::getExternalOwnerId).isEqualTo(externalOwnerId);//
+        return eventBuilder;
+    }
+
+    public EventAssertion.EventAssertionBuilder<LoanTransactionAdjustmentDataV1> loanAdjustTransactionEventCheck(Long originalTransactionId,
+            String externalOwnerId) {
+        // The undo step already verifies (and so removes) this event
+        EventAssertion.EventAssertionBuilder<LoanTransactionAdjustmentDataV1> eventBuilder = eventAssertion
+                .assertEventReceived(LoanAdjustTransactionBusinessEvent.class, originalTransactionId);
+        eventBuilder.extractingData(data -> data.getTransactionToAdjust().getId()).isEqualTo(originalTransactionId)//
+                .extractingData(data -> data.getTransactionToAdjust().getExternalOwnerId()).isEqualTo(externalOwnerId)//
+                // A plain reversal has no replacement transaction; when there is one it must carry the same owner
+                .extractingData(data -> data.getNewTransactionDetail() == null
+                        || Objects.equals(externalOwnerId, data.getNewTransactionDetail().getExternalOwnerId()))
+                .isEqualTo(true); //
         return eventBuilder;
     }
 

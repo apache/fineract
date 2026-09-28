@@ -215,6 +215,9 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_LOAN_DATA_FOR_EXTERNAL_TRANSFER)
     Optional<LoanDataForExternalTransfer> findLoanDataForExternalTransferByLoanId(@Param("loanId") Long loanId);
 
+    @Query("SELECT loan.loanProduct.id FROM Loan loan WHERE loan.id = :loanId")
+    Optional<Long> findLoanProductIdByLoanId(@Param("loanId") Long loanId);
+
     @Query(EXISTS_BY_EXTERNAL_LOAN_ID_AND_STATUSES)
     boolean existsLoanByExternalLoanIdAndStatuses(@Param("externalLoanId") ExternalId externalLoanId,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
