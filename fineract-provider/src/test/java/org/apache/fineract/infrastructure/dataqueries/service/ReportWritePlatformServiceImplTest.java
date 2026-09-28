@@ -40,6 +40,7 @@ import org.apache.fineract.infrastructure.dataqueries.serialization.ReportComman
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
+import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,6 +69,8 @@ class ReportWritePlatformServiceImplTest {
     @Mock
     private PermissionRepository permissionRepository;
     @Mock
+    private RoleRepository roleRepository;
+    @Mock
     private ReportingProcessServiceProvider reportingProcessServiceProvider;
 
     private ReportWritePlatformServiceImpl service;
@@ -77,7 +80,7 @@ class ReportWritePlatformServiceImplTest {
         when(reportingProcessServiceProvider.findAllReportingTypes()).thenReturn(List.of("Table"));
         when(reportParameterRepository.findById(1L)).thenReturn(Optional.of(mock(ReportParameter.class)));
         service = new ReportWritePlatformServiceImpl(context, fromApiJsonDeserializer, reportRepository, reportParameterRepository,
-                reportParameterUsageRepository, permissionRepository, reportingProcessServiceProvider);
+                reportParameterUsageRepository, permissionRepository, roleRepository, reportingProcessServiceProvider);
     }
 
     @Test
