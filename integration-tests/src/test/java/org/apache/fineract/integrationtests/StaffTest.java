@@ -190,6 +190,23 @@ public class StaffTest {
     }
 
     @Test
+    public void testStaffUpdateJoiningDate() {
+        final Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
+        final Map<String, Object> map = new HashMap<>();
+        map.put("joiningDate", "15 March 2021");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("locale", "en");
+
+        Map<String, Object> response = StaffHelper.updateStaff(requestSpec, responseSpec, staffId, map);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> changes = (Map<String, Object>) response.get("changes");
+        Assertions.assertEquals("15 March 2021", changes.get("joiningDate"));
+
+        Map<String, Object> staff = StaffHelper.getStaff(requestSpec, responseSpec, staffId);
+        Assertions.assertEquals("2021-03-15", staff.get("joiningDate"));
+    }
+
+    @Test
     public void testStaffUpdateLongExternalIdError() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("externalId", Utils.randomStringGenerator("EXT", 98));
