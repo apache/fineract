@@ -64,6 +64,7 @@ public class ShareDividendApiResource {
     private final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
     private final ShareProductDividendReadPlatformService shareProductDividendReadPlatformService;
     private final SqlValidator sqlValidator;
+    private final NsimbiShareDividendRequestMapper nsimbiRequestMapper = new NsimbiShareDividendRequestMapper();
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
@@ -115,6 +116,20 @@ public class ShareDividendApiResource {
                 .withJson(apiRequestBodyAsJson).build();
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
         return this.toApiJsonSerializer.serialize(commandProcessingResult);
+    }
+
+    @POST
+    @Path("nsimbi")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Submit a Nsimbi fixed-amount share dividend", operationId = "createNsimbiShareDividend")
+    public String createNsimbiDividend(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
+        this.platformSecurityContext.authenticatedUser().validateHasPermissionTo("CREATE_DIVIDEND_SHAREPRODUCT");
+        final String commandJson = this.nsimbiRequestMapper.toFineractCommand(apiRequestBodyAsJson);
+        final CommandWrapper commandWrapper = new CommandWrapperBuilder().createShareProductDividendPayoutCommand(productId)
+                .withJson(commandJson).build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @PUT

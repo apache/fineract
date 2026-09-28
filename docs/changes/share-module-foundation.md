@@ -190,7 +190,7 @@ Extend existing suites:
 | Migration/read behavior | New/upgraded tenants, constraints/defaults, permission capability, pagination/filter regressions, tenant/office isolation, and role visibility. |
 | Reauthentication, if adopted | Missing/invalid/expired proof, correct operator, replay rules, and no secret in command/audit/error payloads. |
 
-No tests were added or executed in this analysis-only task.
+At the time of the original analysis, no tests had been added or executed. Phase 2 test additions and execution status are recorded below.
 
 ## Open questions
 
@@ -220,4 +220,29 @@ No tests were added or executed in this analysis-only task.
 | Frontend | No Nsimbi frontend is in scope; keep backend contracts backward compatible and independent of unverified upstream UI. |
 | Migrations | Share tables contain core financial records. Use additive Liquibase changes only. |
 
-The next safe step is to align the branch with `dev`, execute focused existing share tests, and resolve the policy questions before changing backend behavior.
+## Phase 2: Nsimbi Share Dividends submission (implemented on `feat/share-module`)
+
+This focused backend extension adds `POST /v1/shareproduct/{productId}/dividend/nsimbi`. It is scoped to the share product in the URL. The existing Fineract `POST /v1/shareproduct/{productId}/dividend` contract remains unchanged and continues to accept explicit `dividendPeriodStartDate`, `dividendPeriodEndDate`, and `dividendAmount`. The Nsimbi route checks the existing `CREATE_DIVIDEND_SHAREPRODUCT` permission before validating the body, then submits a translated payload through the existing dividend command handler. It creates a dividend declaration; approval and payout remain separate existing steps.
+
+Example request (fixed amount only):
+
+```json
+{
+  "amount": 50000,
+  "usePercentages": false,
+  "date": "2026-09-20",
+  "sharePeriodMonths": 1,
+  "method": "Savings",
+  "password": "<operator-entered value>"
+}
+```
+
+`date` is assumed to be the **dividend period end date**, not the accounting posting date. Subtracting `sharePeriodMonths` calendar months derives the start date; in the example, the existing command receives `dividendPeriodStartDate=2026-08-20`, `dividendPeriodEndDate=2026-09-20`, `dividendAmount=50000`, `dateFormat=yyyy-MM-dd`, and `locale=en`. This month subtraction is an explicit Phase 2 assumption, pending Finance approval of period boundaries and eligibility policy. The existing share-day allocation behavior determines the financial distribution.
+
+Missing or blank `password` produces the validation message **“Password is required To Perform This Action.”** This is presence validation only: no password reauthentication service is integrated, and a nonblank value does **not** prove the operator's identity. The password is removed before creation of the audited Fineract command. The unchanged public Fineract route does not gain password validation. Clients must avoid logging the raw request body or treating this presence check as transaction authorization.
+
+`usePercentages=true` is rejected. Only `method="Savings"` (or omitted method) is supported. A nonblank `savingProductId` is rejected: the existing payout destination remains each eligible share account's linked savings account. Nonblank `referenceNumber` and `comment` are rejected because neither is stored by this command; blank or omitted values are accepted. Unknown fields, invalid/nonpositive amounts, invalid ISO dates, and nonpositive/non-whole month periods are rejected. The route does not enable maker-checker, change approval or posting, add migrations, or enforce Nsimbi `SHARES` monetary limits. Existing maker-checker command behavior, if configured for the dividend command, remains in the command framework.
+
+Focused tests were added in `NsimbiShareDividendRequestMapperTest` and `NsimbiShareDividendApiResourceTest` for field mapping, period derivation, password omission from the command, required password, unsupported percentage and metadata options, invalid amount/date/period, permission denial before validation, and reuse of the existing command. The focused command `timeout 180 ./gradlew :fineract-provider:test --tests org.apache.fineract.portfolio.shareproducts.api.NsimbiShareDividendRequestMapperTest --tests org.apache.fineract.portfolio.shareproducts.api.NsimbiShareDividendApiResourceTest --no-daemon --offline` was attempted once. It failed during `:fineract-avro-schemas:compileJava` dependency resolution because `com.google.protobuf:protobuf-java:4.34.2` was not cached for offline mode. Compilation of the changed share code and the test classes did not start; no test results are available.
+
+Follow-up decisions remain: actual password reauthentication and its secure request/audit design; percentage basis and calculation; selected savings-product semantics; reference/comment persistence; Finance-approved month boundaries and accounting dates; dividend maker-checker activation; and whether/where `SHARES` monetary authority applies. No successful submission is shown in the reference video, so these business choices are not inferred from it.
