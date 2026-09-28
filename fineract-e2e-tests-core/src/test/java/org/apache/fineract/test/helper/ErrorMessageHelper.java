@@ -171,6 +171,10 @@ public final class ErrorMessageHelper {
                 loanIdStr);
     }
 
+    public static String writeOffBeforeLastTransactionFailure() {
+        return "The date of the writeoff transaction must occur on or after previous transactions.";
+    }
+
     public static String notChargedOffFailure(Long loanId) {
         String loanIdStr = String.valueOf(loanId);
         return String.format("Loan: %s is not charged-off", loanIdStr);
@@ -1017,6 +1021,14 @@ public final class ErrorMessageHelper {
 
     public static String reAmortizeSameDateFailure() {
         return "Validation errors: [id] Loan reamortization can only be done once a day. There has already been a reamortization done for today";
+    }
+
+    public static String contractTerminationBeforeBusinessDateFailure() {
+        return "[transactionDate] Failed data validation due to: cannot.be.before.business.date.";
+    }
+
+    public static String contractTerminationNotBeforeMaturityDateFailure() {
+        return "[transactionDate] Failed data validation due to: must.be.before.maturity.date.";
     }
 
     public static String incorrectExpectedValueInResponse() {
