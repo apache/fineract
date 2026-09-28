@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.data.ProjectedAmortizationScheduleData;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +44,8 @@ class ProjectedAmortizationScheduleMapperTest {
     @Test
     void paymentAmountSchedule_DisclosesTheStrategyAndItsInput() {
         final ProjectedAmortizationScheduleData data = mapper.toData(ProjectedAmortizationScheduleModel.generateFromPaymentAmount(
-                WorkingCapitalAmortizationType.EIR, DISCOUNT, NET, new BigDecimal("47.22"), 360, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT));
+                WorkingCapitalAmortizationType.EIR, DISCOUNT, NET, new BigDecimal("47.22"), 360, WorkingCapitalLoanPeriodFrequencyType.DAYS,
+                1, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT));
 
         assertEquals("PAYMENT_AMOUNT", data.getPaymentAmountCalculationStrategy().getId());
         assertEquals(0, new BigDecimal("47.22").compareTo(data.getPaymentAmount()));
@@ -54,9 +56,9 @@ class ProjectedAmortizationScheduleMapperTest {
 
     @Test
     void annualEirSchedule_DisclosesTheStrategyAndItsInput() {
-        final ProjectedAmortizationScheduleData data = mapper
-                .toData(ProjectedAmortizationScheduleModel.generateFromAnnualEir(WorkingCapitalAmortizationType.EIR, DISCOUNT, NET,
-                        new BigDecimal("46.8451"), 360, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT));
+        final ProjectedAmortizationScheduleData data = mapper.toData(ProjectedAmortizationScheduleModel.generateFromAnnualEir(
+                WorkingCapitalAmortizationType.EIR, DISCOUNT, NET, new BigDecimal("46.8451"), 360,
+                WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT));
 
         assertEquals("ANNUAL_EIR", data.getPaymentAmountCalculationStrategy().getId());
         assertEquals(0, new BigDecimal("46.8451").compareTo(data.getAnnualEir()));
@@ -66,9 +68,9 @@ class ProjectedAmortizationScheduleMapperTest {
 
     @Test
     void tpvSchedule_DisclosesTheStrategy() {
-        final ProjectedAmortizationScheduleData data = mapper
-                .toData(ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR, DISCOUNT, NET,
-                        new BigDecimal("100000"), new BigDecimal("18"), 360, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT));
+        final ProjectedAmortizationScheduleData data = mapper.toData(ProjectedAmortizationScheduleModel.generate(
+                WorkingCapitalAmortizationType.EIR, DISCOUNT, NET, new BigDecimal("100000"), new BigDecimal("18"), 360,
+                WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT));
 
         assertEquals("TPV", data.getPaymentAmountCalculationStrategy().getId());
         assertNull(data.getAnnualEir());

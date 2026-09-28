@@ -1220,7 +1220,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                     rateChange.getId(), rateChange.getEffectiveDate());
             return;
         }
-        rateChange.applyCalculatedValues(solve.calculatedAnnualEir(), solve.dailyPayment().getAmount(), solve.term());
+        rateChange.applyCalculatedValues(solve.calculatedAnnualEir(), solve.periodPayment().getAmount(), solve.term());
         this.rateChangeRepository.save(rateChange);
     }
 
@@ -1487,7 +1487,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         breachScheduleService.deleteScheduleAndActions(loan.getId());
         deactivateCharges(loan);
         replaceBalance(loan);
-        amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnApproval(loan);
+        amortizationScheduleWriteService.regenerateAmortizationScheduleOnUndoDisbursal(loan);
     }
 
     private void deactivateCharges(final WorkingCapitalLoan loan) {

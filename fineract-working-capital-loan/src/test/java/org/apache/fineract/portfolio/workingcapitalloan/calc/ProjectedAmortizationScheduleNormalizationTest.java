@@ -39,6 +39,8 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -80,8 +82,9 @@ class ProjectedAmortizationScheduleNormalizationTest {
      * exist to exercise: a fee worth a large share of the principal, repaid over few weeks.
      */
     private ProjectedAmortizationScheduleModel model(final String netDisbursement, final String discountFee, final String rate) {
-        return ProjectedAmortizationScheduleModel.generateEir(new BigDecimal(discountFee), new BigDecimal(netDisbursement), TPV,
-                new BigDecimal(rate), DAY_COUNT, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT);
+        return ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR, new BigDecimal(discountFee),
+                new BigDecimal(netDisbursement), TPV, new BigDecimal(rate), DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1,
+                DISBURSEMENT, MC, CURRENCY, DISBURSEMENT);
     }
 
     private static BigDecimal amount(final Money money) {

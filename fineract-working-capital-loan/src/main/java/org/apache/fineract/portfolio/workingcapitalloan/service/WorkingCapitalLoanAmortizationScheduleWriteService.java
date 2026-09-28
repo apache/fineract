@@ -52,6 +52,9 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
 
     void generateAndSaveAmortizationScheduleOnApproval(WorkingCapitalLoan loan);
 
+    /** As on approval, but keeping the repayment frequency the existing schedule was dated with. */
+    void regenerateAmortizationScheduleOnUndoDisbursal(WorkingCapitalLoan loan);
+
     void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
 
     void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
@@ -81,9 +84,10 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
      * until something writes it back that way for good.
      *
      * <p>
-     * Nothing is read out of the model being replaced, which is what makes this safe for a version bump of any size:
-     * the model is suspect by definition here, so a rebuild that consulted it would inherit whatever the older shape
-     * had lost. Every input comes from a table the model does not own.
+     * Nothing but its repayment frequency is read out of the model being replaced, which is what makes this safe for a
+     * version bump of any size: the model is suspect by definition here, so a rebuild that consulted it would inherit
+     * whatever the older shape had lost. Every other input comes from a table the model does not own. The frequency is
+     * the exception because the loan's own may never have dated the schedule: a model stored without one was daily.
      */
     void rebuildScheduleModelFromRecordedHistory(WorkingCapitalLoan loan);
 

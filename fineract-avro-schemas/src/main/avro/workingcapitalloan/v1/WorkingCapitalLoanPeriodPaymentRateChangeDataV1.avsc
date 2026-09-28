@@ -58,6 +58,7 @@
         {
             "default": null,
             "name": "dailyPaymentAmount",
+            "doc": "Payment amount per repayment period of the segment this change opened (per day on a daily schedule)",
             "type": [
                 "null",
                 "bigdecimal"

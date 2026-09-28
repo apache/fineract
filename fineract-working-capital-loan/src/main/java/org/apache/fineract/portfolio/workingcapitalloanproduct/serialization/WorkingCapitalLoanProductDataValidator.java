@@ -476,9 +476,9 @@ public class WorkingCapitalLoanProductDataValidator {
             if (repaymentFrequencyTypeValue != null && !repaymentFrequencyTypeValue.isBlank()) {
                 final WorkingCapitalLoanPeriodFrequencyType repaymentFrequencyType = WorkingCapitalLoanPeriodFrequencyType
                         .fromString(repaymentFrequencyTypeValue);
-                if (repaymentFrequencyType == null) {
+                if (repaymentFrequencyType == null || !repaymentFrequencyType.isRepaymentFrequency()) {
                     baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName)
-                            .failWithCode("invalid.period.frequency.type");
+                            .failWithCode(WorkingCapitalLoanProductConstants.INVALID_PERIOD_FREQUENCY_TYPE_CODE);
                 }
             }
         }

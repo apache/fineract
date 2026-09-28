@@ -490,7 +490,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
                         WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT.compareTo(loanData.getPaymentRate()));
             }
             if (loanData.getRepaymentEvery() != null) {
-                assertEquals(30, loanData.getRepaymentEvery());
+                assertEquals(1, loanData.getRepaymentEvery());
             }
             if (loanData.getRepaymentFrequencyType() != null) {
                 assertEquals("Days", loanData.getRepaymentFrequencyType().getValue());

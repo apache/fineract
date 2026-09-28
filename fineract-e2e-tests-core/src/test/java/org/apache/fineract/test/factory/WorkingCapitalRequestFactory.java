@@ -23,7 +23,6 @@ import static org.apache.fineract.test.data.DaysInYearType.DAYS365;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.CURRENCY_CODE;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.CURRENCY_CODE_USD;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.DATE_FORMAT;
-import static org.apache.fineract.test.factory.LoanProductsRequestFactory.DAYS_IN_MONTH_TYPE_30;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.DAYS_IN_YEAR_TYPE_360;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.FUND_ID;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.LOCALE_EN;
@@ -142,7 +141,7 @@ public class WorkingCapitalRequestFactory {
                 .fundId(FUND_ID)//
                 .periodPaymentRate(new BigDecimal(1))//
                 .repaymentFrequencyType(PostWorkingCapitalLoanProductsRequest.RepaymentFrequencyTypeEnum.DAYS)//
-                .repaymentEvery(DAYS_IN_MONTH_TYPE_30)//
+                .repaymentEvery(1)//
                 .startDate(null)//
                 .closeDate(null)//
                 .currencyCode(CURRENCY_CODE)//

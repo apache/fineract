@@ -207,7 +207,7 @@ public class WorkingCapitalLoanUndoDisbursalTest {
         order.verify(balanceRepository).delete(staleBalance);
         order.verify(balanceRepository).flush();
         order.verify(balanceRepository).saveAndFlush(any(WorkingCapitalLoanBalance.class));
-        order.verify(amortizationScheduleWriteService).generateAndSaveAmortizationScheduleOnApproval(loan);
+        order.verify(amortizationScheduleWriteService).regenerateAmortizationScheduleOnUndoDisbursal(loan);
         assertThat(fee.isActive()).isFalse();
         assertThat(penalty.isActive()).isFalse();
 
