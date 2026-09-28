@@ -121,12 +121,12 @@ public class FeignWorkingCapitalPaymentAmountStrategyTest extends FeignWorkingCa
             assertEqualBigDecimal(new BigDecimal(CALCULATED_ANNUAL_EIR), round(loan.getCalculatedAnnualEir(), 6),
                     "loan calculatedAnnualEir (percentage, ^npvDayCount convention)");
 
-            validatePayment(schedule, 1, "47.22", "8961.86", "9.08", "990.92");
-            validatePayment(schedule, 2, "47.22", "8923.68", "9.04", "981.88");
-            validatePayment(schedule, 3, "47.22", "8885.46", "9.00", "972.88");
-            validatePayment(schedule, 210, "47.22", "83.68", "0.13", "0.12");
-            validatePayment(schedule, 211, "47.22", "36.54", "0.08", "0.04");
-            validatePayment(schedule, 212, "36.58", "0.00", "0.04", "0.00");
+            validatePayment(schedule, 1, "2026-01-02", "47.22", "8961.86", "9.08", "990.92");
+            validatePayment(schedule, 2, "2026-01-03", "47.22", "8923.68", "9.04", "981.88");
+            validatePayment(schedule, 3, "2026-01-04", "47.22", "8885.46", "9.00", "972.88");
+            validatePayment(schedule, 210, "2026-07-30", "47.22", "83.68", "0.13", "0.12");
+            validatePayment(schedule, 211, "2026-07-31", "47.22", "36.54", "0.08", "0.04");
+            validatePayment(schedule, 212, "2026-08-01", "36.58", "0.00", "0.04", "0.00");
 
             assertEqualBigDecimal(new BigDecimal("1000.00"), totalExpectedAmortization(schedule),
                     "the schedule must earn exactly the discount fee — feature:35 'expected amortization sums to the discount fee'");

@@ -99,8 +99,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
     public WorkingCapitalLoanTemplateData retrieveTemplate(final Long productId, final Long clientId) {
         final List<WorkingCapitalLoanProductData> productOptions = this.productReadPlatformService.retrieveAllWorkingCapitalLoanProducts();
         final WorkingCapitalLoanProductData productTemplate = this.productReadPlatformService.retrieveNewWorkingCapitalLoanProductDetails();
-        final List<StringEnumOptionData> periodFrequencyTypeOptions = ApiFacingEnum
-                .getValuesAsStringEnumOptionDataList(WorkingCapitalLoanPeriodFrequencyType.class);
+        final List<StringEnumOptionData> periodFrequencyTypeOptions = WorkingCapitalLoanPeriodFrequencyType.repaymentFrequencyOptions();
         final List<WorkingCapitalBreachData> breachOptions = breachReadPlatformService.retrieveAll();
         final List<WorkingCapitalNearBreachData> nearBreachOptions = nearBreachReadPlatformService.retrieveAll();
         final List<StringEnumOptionData> delinquencyStartTypeOptions = ApiFacingEnum

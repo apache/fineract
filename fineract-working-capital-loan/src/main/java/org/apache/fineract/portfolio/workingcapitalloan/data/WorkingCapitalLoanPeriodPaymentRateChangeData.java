@@ -28,6 +28,8 @@ public record WorkingCapitalLoanPeriodPaymentRateChangeData(Long id, Long loanId
         @Schema(deprecated = true, description = "Audit/system timestamp. Prefer submittedOnDate for the booking business/tenant date.") //
         OffsetDateTime createdDate, LocalDate submittedOnDate,
         @Schema(description = "Annual EIR of the segment this change opened, as a percentage (e.g. 43.756245), snapshotted when the change was booked") //
-        BigDecimal calculatedAnnualEir, BigDecimal dailyPaymentAmount, Integer segmentTerm) {
+        BigDecimal calculatedAnnualEir,
+        @Schema(description = "Payment amount per repayment period of the segment this change opened (per day on a daily schedule), snapshotted when the change was booked") //
+        BigDecimal dailyPaymentAmount, Integer segmentTerm) {
 
 }

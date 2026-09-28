@@ -96,8 +96,8 @@ class WorkingCapitalLoanRateChangeSnapshotTest {
         final WorkingCapitalLoanPeriodPaymentRateChange rateChange = WorkingCapitalLoanPeriodPaymentRateChange.create(null, EFFECTIVE_DATE,
                 new BigDecimal("18"), new BigDecimal("17"));
         final MonetaryCurrency currency = new MonetaryCurrency("EUR", 2, null);
-        final Money dailyPayment = Money.of(currency, new BigDecimal("47.22"), MoneyHelper.getMathContext());
-        final RateChangeSolve solve = new RateChangeSolve(EFFECTIVE_DATE, dailyPayment, 212, new BigDecimal("0.001008699894"),
+        final Money periodPayment = Money.of(currency, new BigDecimal("47.22"), MoneyHelper.getMathContext());
+        final RateChangeSolve solve = new RateChangeSolve(EFFECTIVE_DATE, periodPayment, 212, new BigDecimal("0.001008699894"),
                 new BigDecimal("43.756245"));
         when(model.rateChangeSolveOn(EFFECTIVE_DATE)).thenReturn(solve);
 

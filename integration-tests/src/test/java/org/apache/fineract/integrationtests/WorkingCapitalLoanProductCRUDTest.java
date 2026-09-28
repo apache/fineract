@@ -226,6 +226,7 @@ public class WorkingCapitalLoanProductCRUDTest {
         assertFalse(response.getAmortizationTypeOptions().isEmpty(), "Amortization type options should not be empty");
         assertNotNull(response.getPeriodFrequencyTypeOptions());
         assertFalse(response.getPeriodFrequencyTypeOptions().isEmpty(), "Period frequency type options should not be empty");
+        assertThat(response.getPeriodFrequencyTypeOptions()).extracting("id").containsExactly("DAYS", "WEEKS", "MONTHS");
         assertNotNull(response.getBreachOptions());
         assertNotNull(response.getAdvancedPaymentAllocationTypes());
         assertFalse(response.getAdvancedPaymentAllocationTypes().isEmpty(), "Payment allocation type options should not be empty");

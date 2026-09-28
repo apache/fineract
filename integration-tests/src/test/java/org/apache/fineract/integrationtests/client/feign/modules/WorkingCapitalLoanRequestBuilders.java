@@ -65,6 +65,28 @@ public final class WorkingCapitalLoanRequestBuilders {
                 .discount(discount);
     }
 
+    /**
+     * Submit overload carrying a loan-level repayment frequency override. Only usable on a product whose
+     * {@code periodPaymentFrequency} / {@code periodPaymentFrequencyType} attributes are overridable.
+     */
+    public static PostWorkingCapitalLoansRequest submitApplicationWithFrequency(Long clientId, Long productId, BigDecimal principal,
+            BigDecimal periodPaymentRate, String submittedOnDate, String expectedDisbursementDate, BigDecimal discount,
+            Integer repaymentEvery, String repaymentFrequencyType) {
+        return submitApplicationWithDiscount(clientId, productId, principal, periodPaymentRate, submittedOnDate, expectedDisbursementDate,
+                discount).repaymentEvery(repaymentEvery)
+                .repaymentFrequencyType(PostWorkingCapitalLoansRequest.RepaymentFrequencyTypeEnum.fromValue(repaymentFrequencyType));
+    }
+
+    /**
+     * An ANNUAL_EIR loan carries neither a TPV nor a % payment rate: the payment is solved from the annual EIR.
+     */
+    public static PostWorkingCapitalLoansRequest submitAnnualEirApplication(Long clientId, Long productId, BigDecimal principal,
+            BigDecimal annualEir, BigDecimal discount, String submittedOnDate, String expectedDisbursementDate) {
+        return new PostWorkingCapitalLoansRequest().clientId(clientId).productId(productId).principalAmount(principal).annualEir(annualEir)
+                .discount(discount).submittedOnDate(submittedOnDate).expectedDisbursementDate(expectedDisbursementDate).locale(LOCALE)
+                .dateFormat(DATE_FORMAT);
+    }
+
     public static PostWorkingCapitalLoansRequest submitPaymentAmountApplication(Long clientId, Long productId, BigDecimal principal,
             BigDecimal discount, BigDecimal paymentAmount, String submittedOnDate, String expectedDisbursementDate) {
         return new PostWorkingCapitalLoansRequest().clientId(clientId).productId(productId).principalAmount(principal).discount(discount)

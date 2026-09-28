@@ -630,6 +630,7 @@ Feature: WorkingCapitalAmortizationScheduleMatrixPt2
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
       | 0         | 2026-01-01 | -9000.00              | 9000.00         |                            |                     |                          | 1000.00                    | 9000.00       | 1000.00                  |
       | 1         | 2026-01-02 | 50.00                 | 8959.61         | 1000.00                    | 10000.00            | 1000.00                  | 0.00                       | 0.00          | 0.00                     |
-    And The retrieved amortization schedule has exactly 201 payment rows
+    # The fee repayment carries no principal, so the schedule still ends on the payoff day
+    And The retrieved amortization schedule has exactly 2 payment rows
     And The retrieved amortization schedule actual amortization total is "1000"
 
