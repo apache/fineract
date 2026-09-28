@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -28,7 +29,10 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -37,16 +41,20 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanEirNotCalculableException;
+import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanPaymentAmountNotCalculableException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -62,6 +70,7 @@ class WorkingCapitalLoanAmortizationScheduleWriteServiceImplTest {
     void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         MoneyHelper.initializeTenantRoundingMode("default", 6);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 1, 1))));
     }
 
     @AfterEach
@@ -96,6 +105,46 @@ class WorkingCapitalLoanAmortizationScheduleWriteServiceImplTest {
 
         assertThrows(WorkingCapitalLoanEirNotCalculableException.class,
                 () -> service.generateAndSaveAmortizationScheduleOnDisbursement(loan, new BigDecimal("9000"), LocalDate.of(2026, 1, 1)));
+        verify(scheduleRepositoryWrapper, never()).writeModel(any(), any());
+    }
+
+    /** YEARS used to be accepted on products, so disbursement must fail on the frequency, not as uncalculable. */
+    @Test
+    void productStillStoringYears_ShouldBeAFrequencyTypeValidationError() {
+        final WorkingCapitalLoan loan = loan(WorkingCapitalPaymentAmountCalculationStrategy.TPV, new BigDecimal("100000"),
+                new BigDecimal("18"));
+        final WorkingCapitalLoanProductRelatedDetail productDetail = loan.getLoanProduct().getRelatedDetail();
+        when(productDetail.getRepaymentFrequencyType()).thenReturn(WorkingCapitalLoanPeriodFrequencyType.YEARS);
+        when(productDetail.getRepaymentEvery()).thenReturn(1);
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> service.generateAndSaveAmortizationScheduleOnDisbursement(loan, new BigDecimal("9000"), LocalDate.of(2026, 1, 1)));
+
+        assertEquals(
+                List.of("validation.msg." + WorkingCapitalLoanConstants.WCL_RESOURCE_NAME
+                        + ".repaymentFrequencyType.invalid.period.frequency.type"),
+                exception.getErrors().stream().map(ApiParameterError::getUserMessageGlobalisationCode).toList());
+        verify(scheduleRepositoryWrapper, never()).writeModel(any(), any());
+    }
+
+    /**
+     * The term solves to ten periods, but a month interval this large dates the eighth past the calendar: not
+     * calculable rather than a 500.
+     */
+    @Test
+    void dueDatesPastTheCalendar_ShouldBeNotCalculable() {
+        final WorkingCapitalLoan loan = loan(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, null, null);
+        final WorkingCapitalLoanProductRelatedDetails loanDetails = loan.getLoanProductRelatedDetails();
+        when(loanDetails.getAmortizationType()).thenReturn(WorkingCapitalAmortizationType.FLAT);
+        when(loanDetails.getPaymentAmount()).thenReturn(new BigDecimal("1000"));
+        when(loanDetails.getRepaymentFrequencyType()).thenReturn(WorkingCapitalLoanPeriodFrequencyType.MONTHS);
+        when(loanDetails.getRepaymentEvery()).thenReturn(1_500_000_000);
+
+        final WorkingCapitalLoanPaymentAmountNotCalculableException exception = assertThrows(
+                WorkingCapitalLoanPaymentAmountNotCalculableException.class,
+                () -> service.generateAndSaveAmortizationScheduleOnDisbursement(loan, new BigDecimal("9000"), LocalDate.of(2026, 1, 1)));
+
+        assertInstanceOf(ArithmeticException.class, exception.getCause());
         verify(scheduleRepositoryWrapper, never()).writeModel(any(), any());
     }
 

@@ -60,6 +60,7 @@ final class PlanCursor {
     private final BigDecimal flatRatio;
     private final BigDecimal totalPaymentVolume;
     private final int npvDayCount;
+    private final RepaymentFrequency frequency;
     private final int currencyScale;
     private final WorkingCapitalPaymentAmountCalculationStrategy strategy;
 
@@ -88,10 +89,10 @@ final class PlanCursor {
      */
     PlanCursor(final WorkingCapitalAmortizationType amortizationType, final BigDecimal flatRatio, final BigDecimal netDisbursement,
             final BigDecimal discountFee, final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount,
-            final int currencyScale, final MathContext mc) {
+            final RepaymentFrequency frequency, final int currencyScale, final MathContext mc) {
         this(amortizationType, flatRatio, WorkingCapitalPaymentAmountCalculationStrategy.TPV, netDisbursement, totalPaymentVolume,
-                npvDayCount, currencyScale, mc, AmortizationParams.solve(amortizationType, netDisbursement, discountFee, totalPaymentVolume,
-                        periodPaymentRate, npvDayCount, currencyScale, mc));
+                npvDayCount, frequency, currencyScale, mc, AmortizationParams.solve(amortizationType, netDisbursement, discountFee,
+                        totalPaymentVolume, periodPaymentRate, npvDayCount, frequency, currencyScale, mc));
     }
 
     /**
@@ -99,35 +100,36 @@ final class PlanCursor {
      * solving from TPV × period payment rate. Rate changes are not supported on this path.
      */
     PlanCursor(final WorkingCapitalAmortizationType amortizationType, final BigDecimal flatRatio, final BigDecimal netDisbursement,
-            final BigDecimal discountFee, final BigDecimal annualEir, final int npvDayCount, final int currencyScale,
-            final MathContext mc) {
+            final BigDecimal discountFee, final BigDecimal annualEir, final int npvDayCount, final RepaymentFrequency frequency,
+            final int currencyScale, final MathContext mc) {
         this(amortizationType, flatRatio, WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, netDisbursement, null, npvDayCount,
-                currencyScale, mc, AmortizationParams.solveFromAnnualEir(amortizationType, netDisbursement, discountFee, annualEir,
-                        npvDayCount, currencyScale, mc));
+                frequency, currencyScale, mc, AmortizationParams.solveFromAnnualEir(amortizationType, netDisbursement, discountFee,
+                        annualEir, npvDayCount, frequency, currencyScale, mc));
     }
 
     /**
-     * Payment Amount cursor: the plan instalment is the product's fixed daily payment, so nothing is solved for it -
+     * Payment Amount cursor: the plan instalment is the product's fixed period payment, so nothing is solved for it -
      * only the term, closing payment and IRR that follow from it. Rate changes are not supported on this path.
      */
     static PlanCursor forPaymentAmount(final WorkingCapitalAmortizationType amortizationType, final BigDecimal flatRatio,
             final BigDecimal netDisbursement, final BigDecimal discountFee, final BigDecimal paymentAmount, final int npvDayCount,
-            final int currencyScale, final MathContext mc) {
+            final RepaymentFrequency frequency, final int currencyScale, final MathContext mc) {
         return new PlanCursor(amortizationType, flatRatio, WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, netDisbursement,
-                null, npvDayCount, currencyScale, mc, AmortizationParams.solveFromKnownPayment(amortizationType, netDisbursement,
-                        discountFee, paymentAmount, mc, npvDayCount, currencyScale));
+                null, npvDayCount, frequency, currencyScale, mc, AmortizationParams.solveFromKnownPayment(amortizationType, netDisbursement,
+                        discountFee, paymentAmount, mc, npvDayCount, frequency, currencyScale));
     }
 
     /** Positions the cursor at disbursement on a plan each strategy has already solved from its own input. */
     private PlanCursor(final WorkingCapitalAmortizationType amortizationType, final BigDecimal flatRatio,
             final WorkingCapitalPaymentAmountCalculationStrategy strategy, final BigDecimal netDisbursement,
-            final BigDecimal totalPaymentVolume, final int npvDayCount, final int currencyScale, final MathContext mc,
-            final AmortizationParams.Solved solved) {
+            final BigDecimal totalPaymentVolume, final int npvDayCount, final RepaymentFrequency frequency, final int currencyScale,
+            final MathContext mc, final AmortizationParams.Solved solved) {
         this.mc = mc;
         this.amortizationType = amortizationType;
         this.flatRatio = flatRatio;
         this.totalPaymentVolume = totalPaymentVolume;
         this.npvDayCount = npvDayCount;
+        this.frequency = frequency;
         this.currencyScale = currencyScale;
         this.strategy = strategy;
         this.balance = netDisbursement;
@@ -165,13 +167,11 @@ final class PlanCursor {
         if (balanceNow.signum() <= 0) {
             throw new IllegalArgumentException("balance at a rate change must be positive, got: " + balanceNow);
         }
-        // Read the cursor before moving it. It sits at the end of whichever plan instalment the money collected reached
-        // into, which is past the money itself, and the fee earned is the value interpolated back to the money - not
-        // the
-        // whole instalment the cursor happens to be standing on. Carrying the cursor's own position across as the new
-        // baseline would hand the borrower the rest of that instalment's fee for free, and a rate change would appear
-        // to
-        // restate fee that was already earned.
+        // Read the cursor before moving it. It sits at the end of whichever plan instalment the money collected
+        // reached into, which is past the money itself, and the fee earned is the value interpolated back to the money
+        // - not the whole instalment the cursor happens to be standing on. Carrying the cursor's own position across
+        // as the new baseline would hand the borrower the rest of that instalment's fee for free, and a rate change
+        // would appear to restate fee that was already earned.
         final BigDecimal earnedAtCollected = feeEarnedAt(collectedSoFar);
         this.balance = balanceNow;
         this.earned = earnedAtCollected;
@@ -181,7 +181,7 @@ final class PlanCursor {
         this.stepsInSolve = 0;
         this.exhausted = false;
         this.solved = AmortizationParams.solve(amortizationType, this.balance, MathUtil.negativeToZero(unearnedFee), totalPaymentVolume,
-                periodPaymentRate, npvDayCount, currencyScale, mc);
+                periodPaymentRate, npvDayCount, frequency, currencyScale, mc);
     }
 
     /**
@@ -221,7 +221,7 @@ final class PlanCursor {
         // paying exactly to plan earns exactly what the plan projected rather than nearly it. The plan's last step
         // bills what is left on it, which the cap already gives; naming a separate closing amount here would have that
         // step bill the remainder the plan was solved for even once a repositioning had left it owing more.
-        final AmortizationStep.DayStep step = AmortizationStep.project(balance, solved.dailyPayment(), solved.eir(), flatRatio, mc);
+        final AmortizationStep.DayStep step = AmortizationStep.project(balance, solved.periodPayment(), solved.eir(), flatRatio, mc);
         if (step.instalment().signum() <= 0) {
             // Nothing left to bill: the plan has run out and the fee it holds is all there is to earn.
             exhausted = true;

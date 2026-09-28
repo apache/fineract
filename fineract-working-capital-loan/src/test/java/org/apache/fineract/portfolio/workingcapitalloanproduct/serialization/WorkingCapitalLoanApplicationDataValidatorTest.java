@@ -53,6 +53,7 @@ import org.apache.fineract.portfolio.client.domain.ClientRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.ExpectedDisbursementDateValidator;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanApplicationDataValidator;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
@@ -360,6 +361,27 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
                 WCL + "paymentAmount.unable.to.build.schedule.from.payment.amount");
     }
 
+    /** YEARS used to be accepted on products, so a stored one must fail on the frequency, not as uncalculable. */
+    @Test
+    void tpvLoan_OnAProductStillStoringYears_ShouldReportTheFrequencyType() {
+        stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.TPV, null, null, null);
+        final WorkingCapitalLoanProductRelatedDetail relatedDetail = productRepository.findById(PRODUCT_ID).orElseThrow()
+                .getRelatedDetail();
+        when(relatedDetail.getRepaymentFrequencyType()).thenReturn(WorkingCapitalLoanPeriodFrequencyType.YEARS);
+        assertCreateCodes(createBaseJsonObject(), WCL + "repaymentFrequencyType.invalid.period.frequency.type");
+    }
+
+    @Test
+    void modifiedLoan_StillStoringYears_ShouldReportTheFrequencyType() {
+        final WorkingCapitalLoan loan = submittedLoanWithStrategy(WorkingCapitalPaymentAmountCalculationStrategy.TPV);
+        final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();
+        when(details.getNpvDayCount()).thenReturn(360);
+        when(details.getRepaymentFrequencyType()).thenReturn(WorkingCapitalLoanPeriodFrequencyType.YEARS);
+        when(details.getRepaymentEvery()).thenReturn(1);
+        assertCodes(() -> validator.validateForModify(loan), new JsonObject(),
+                WCL + "repaymentFrequencyType.invalid.period.frequency.type");
+    }
+
     private static final String WCL = "validation.msg." + WorkingCapitalLoanConstants.WCL_RESOURCE_NAME + ".";
 
     private void stubProduct(final WorkingCapitalPaymentAmountCalculationStrategy strategy, final BigDecimal paymentAmount,
@@ -369,6 +391,8 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
         lenient().when(relatedDetail.getPaymentAmountCalculationStrategy()).thenReturn(strategy);
         lenient().when(relatedDetail.getPaymentAmount()).thenReturn(paymentAmount);
         lenient().when(relatedDetail.getNpvDayCount()).thenReturn(360);
+        lenient().when(relatedDetail.getRepaymentFrequencyType()).thenReturn(WorkingCapitalLoanPeriodFrequencyType.DAYS);
+        lenient().when(relatedDetail.getRepaymentEvery()).thenReturn(1);
         lenient().when(product.getRelatedDetail()).thenReturn(relatedDetail);
         lenient().when(product.getMinMaxConstraints())
                 .thenReturn(new WorkingCapitalLoanProductMinMaxConstraints(BigDecimal.valueOf(1000), BigDecimal.valueOf(10000),

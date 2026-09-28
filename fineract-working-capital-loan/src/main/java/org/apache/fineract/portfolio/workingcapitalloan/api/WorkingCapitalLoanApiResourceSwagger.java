@@ -239,7 +239,7 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal totalPaymentVolume;
         @Schema(example = "43.7562", description = "Configured annual EIR percentage for ANNUAL_EIR strategy loans")
         public BigDecimal annualEir;
-        @Schema(example = "47.22", description = "Configured daily payment amount for PAYMENT_AMOUNT strategy loans")
+        @Schema(example = "47.22", description = "Configured payment amount per repayment period for PAYMENT_AMOUNT strategy loans")
         public BigDecimal paymentAmount;
         @Schema(description = "Payment amount calculation strategy inherited from product")
         public StringEnumOptionData paymentAmountCalculationStrategy;
@@ -254,23 +254,23 @@ public final class WorkingCapitalLoanApiResourceSwagger {
                 + "solved to close the schedule on - a day the amounts here cannot be used to derive, because it falls out of the balance "
                 + "and the fee still unearned when the change takes effect. Null if schedule not yet generated")
         public Integer numberOfRepayments;
-        @Schema(example = "0.29", description = "Daily payment amount the loan was priced at, following "
-                + "paymentAmountCalculationStrategy: totalPaymentVolume x paymentRate / 100 / npvDayCount rounded to the currency under "
-                + "TPV, solved from annualEir under ANNUAL_EIR, and paymentAmount itself under PAYMENT_AMOUNT. A rate change does not "
-                + "restate it, no more than it restates paymentRate or "
+        @Schema(example = "0.29", description = "Payment amount per repayment period the loan was priced at, following "
+                + "paymentAmountCalculationStrategy: totalPaymentVolume x paymentRate / 100 x the period's length in days / npvDayCount "
+                + "(in months / 12 for a monthly period) rounded to the currency under TPV, solved from annualEir under ANNUAL_EIR, and "
+                + "paymentAmount itself under PAYMENT_AMOUNT. A rate change does not restate it, no more than it restates paymentRate or "
                 + "calculatedAnnualEir - what is billed from the day a change takes effect follows the rate then in force, and is read "
                 + "off the amortization schedule rows. Null if schedule not yet generated")
         public BigDecimal periodPaymentAmount;
         @Schema(example = "46.845102", description = "Annual effective rate the loan was priced at, as a percentage: compounded over "
-                + "the product's NPV day count, not a calendar year, and rounded to six decimals. The base schedule's daily "
-                + "discounting derives from it. A rate change does not restate it - the schedule re-solves its own rate from the day "
-                + "the change takes effect. Comes from discount-fee pricing, not a lending interest rate. Null if schedule not yet "
-                + "generated or if the loan amortizes FLAT, which solves no rate")
+                + "the product's NPV day count (twelve months for a monthly period), not a calendar year, and rounded to six decimals. "
+                + "The base schedule's per-period discounting derives from it. A rate change does not restate it - the schedule "
+                + "re-solves its own rate from the day the change takes effect. Comes from discount-fee pricing, not a lending interest "
+                + "rate. Null if schedule not yet generated or if the loan amortizes FLAT, which solves no rate")
         public BigDecimal calculatedAnnualEir;
         @Schema(description = "Period payment rate change history, most recently booked first - which for a backdated change is not "
                 + "the same as effective-date order. Each entry carries the annual EIR (as a percentage, e.g. 43.756245, the unit the "
-                + "top-level calculatedAnnualEir is expressed in as well), daily payment amount and segment term the amortization "
-                + "schedule computed when that change was booked; those are null for changes booked before the snapshot was "
+                + "top-level calculatedAnnualEir is expressed in as well), payment amount per repayment period and segment term the "
+                + "amortization schedule computed when that change was booked; those are null for changes booked before the snapshot was "
                 + "introduced, and the EIR is null on a FLAT loan")
         public List<WorkingCapitalLoanPeriodPaymentRateChangeData> periodPaymentRateHistory;
         @Schema(description = "Working capital breach)")
@@ -564,7 +564,7 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal totalPaymentVolume;
         @Schema(example = "43.7562", description = "Annual EIR percentage (6 decimal places max). Required for ANNUAL_EIR strategy products.")
         public BigDecimal annualEir;
-        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+        @Schema(example = "47.22", description = "Payment amount per repayment period, at most the currency's decimal precision. "
                 + "Overrides the product default on PAYMENT_AMOUNT strategy products.")
         public BigDecimal paymentAmount;
         @Schema(example = "15 January 2024")
@@ -578,7 +578,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal periodPaymentRate;
         @Schema(example = "30")
         public Integer repaymentEvery;
-        @Schema(example = "DAYS", allowableValues = { "DAYS", "MONTHS", "YEARS" })
+        @Schema(example = "DAYS", allowableValues = { "DAYS", "WEEKS", "MONTHS", "YEARS" }, description = "Unit of the repayment "
+                + "period, which is repaymentEvery of these. DAYS, WEEKS and MONTHS are supported; YEARS is rejected.")
         public String repaymentFrequencyType;
         @Schema(example = "0.0")
         public BigDecimal discount;
@@ -719,7 +720,7 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal principalAmount;
         @Schema(example = "10500.00")
         public BigDecimal totalPaymentVolume;
-        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+        @Schema(example = "47.22", description = "Payment amount per repayment period, at most the currency's decimal precision. "
                 + "Overrides the product default on PAYMENT_AMOUNT strategy products.")
         public BigDecimal paymentAmount;
         @Schema(example = "15 January 2024")
@@ -733,7 +734,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal periodPaymentRate;
         @Schema(example = "30")
         public Integer repaymentEvery;
-        @Schema(example = "DAYS", allowableValues = { "DAYS", "MONTHS", "YEARS" })
+        @Schema(example = "DAYS", allowableValues = { "DAYS", "WEEKS", "MONTHS", "YEARS" }, description = "Unit of the repayment "
+                + "period, which is repaymentEvery of these. DAYS, WEEKS and MONTHS are supported; YEARS is rejected.")
         public String repaymentFrequencyType;
         @Schema(example = "0.0")
         public BigDecimal discount;

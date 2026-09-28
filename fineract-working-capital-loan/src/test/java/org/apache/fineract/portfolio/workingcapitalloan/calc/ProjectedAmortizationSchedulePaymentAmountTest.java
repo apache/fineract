@@ -130,12 +130,12 @@ class ProjectedAmortizationSchedulePaymentAmountTest {
     @Test
     void planCursor_solvesFromTheKnownPayment() {
         final PlanCursor cursor = PlanCursor.forPaymentAmount(WorkingCapitalAmortizationType.EIR, null, NET_DISBURSEMENT, DISCOUNT_FEE,
-                new BigDecimal("47.22"), DAY_COUNT, 2, MC);
+                new BigDecimal("47.22"), DAY_COUNT, RepaymentFrequency.DAILY, 2, MC);
         final AmortizationParams.Solved expected = AmortizationParams.solveFromKnownPayment(WorkingCapitalAmortizationType.EIR,
-                NET_DISBURSEMENT, DISCOUNT_FEE, new BigDecimal("47.22"), MC, DAY_COUNT, 2);
+                NET_DISBURSEMENT, DISCOUNT_FEE, new BigDecimal("47.22"), MC, DAY_COUNT, RepaymentFrequency.DAILY, 2);
 
         assertEquals(212, cursor.solved().term());
-        assertEquals(0, new BigDecimal("47.22").compareTo(cursor.solved().dailyPayment()));
+        assertEquals(0, new BigDecimal("47.22").compareTo(cursor.solved().periodPayment()));
         assertEquals(0, new BigDecimal("36.58").compareTo(cursor.solved().closingPayment()));
         assertEquals(0, expected.eir().compareTo(cursor.solved().eir()));
         assertEquals(0, expected.calculatedAnnualEir().compareTo(cursor.solved().calculatedAnnualEir()));
