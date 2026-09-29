@@ -1274,6 +1274,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new InvalidLoanTransactionTypeException("transaction", "error.msg.loan.transaction.update.not.allowed", errorMessage);
         }
 
+        if (transactionToAdjust.isChargeback() && !loan.isProgressiveSchedule()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.update.not.allowed",
+                    "Chargeback transaction: " + transactionId + " reversal is only supported for progressive loans", transactionId);
+        }
+
         // We dont need auto generation for reversal external id... if it is not provided, it remains null (empty)
         final String reversalExternalId = command.stringValueOfParameterNamedAllowingNull(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME);
         final ExternalId reversalTxnExternalId = ExternalIdFactory.produce(reversalExternalId);
