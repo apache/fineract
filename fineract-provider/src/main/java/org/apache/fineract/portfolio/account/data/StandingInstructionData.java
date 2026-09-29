@@ -48,6 +48,7 @@ public final class StandingInstructionData {
     private final Long accountDetailId;
     @Getter
     private final String name;
+    @Getter
     private final OfficeData fromOffice;
     @Getter
     private final ClientData fromClient;
@@ -57,6 +58,7 @@ public final class StandingInstructionData {
     private final EnumOptionData fromAccountType;
     @Getter
     private final PortfolioAccountData fromAccount;
+    @Getter
     private final OfficeData toOffice;
     @Getter
     private final ClientData toClient;
@@ -91,19 +93,33 @@ public final class StandingInstructionData {
     private final MonthDay recurrenceOnMonthDay;
     private final Page<AccountTransferData> transactions;
 
+    @Getter
     private final Collection<OfficeData> fromOfficeOptions;
+    @Getter
     private final Collection<ClientData> fromClientOptions;
+    @Getter
     private final Collection<EnumOptionData> fromAccountTypeOptions;
+    @Getter
     private final Collection<PortfolioAccountData> fromAccountOptions;
+    @Getter
     private final Collection<OfficeData> toOfficeOptions;
+    @Getter
     private final Collection<ClientData> toClientOptions;
+    @Getter
     private final Collection<EnumOptionData> toAccountTypeOptions;
+    @Getter
     private final Collection<PortfolioAccountData> toAccountOptions;
+    @Getter
     private final Collection<EnumOptionData> transferTypeOptions;
+    @Getter
     private final Collection<EnumOptionData> statusOptions;
+    @Getter
     private final Collection<EnumOptionData> instructionTypeOptions;
+    @Getter
     private final Collection<EnumOptionData> priorityOptions;
+    @Getter
     private final Collection<EnumOptionData> recurrenceTypeOptions;
+    @Getter
     private final Collection<EnumOptionData> recurrenceFrequencyOptions;
 
     public static StandingInstructionData template(final Collection<OfficeData> fromOfficeOptions,
