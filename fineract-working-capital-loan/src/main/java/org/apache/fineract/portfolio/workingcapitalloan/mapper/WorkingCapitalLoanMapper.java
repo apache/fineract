@@ -81,6 +81,7 @@ public interface WorkingCapitalLoanMapper {
     @Mapping(target = "breachStartType", source = "loanProductRelatedDetails", qualifiedByName = "breachStartTypeData")
     @Mapping(target = "breachStartDate", ignore = true)
     @Mapping(target = "delinquencyStartDate", ignore = true)
+    @Mapping(target = "delinquencyEffectiveStartDate", ignore = true)
     @Mapping(target = "delinquent", ignore = true)
     @Mapping(target = "numberOfRepayments", ignore = true)
     @Mapping(target = "periodPaymentAmount", ignore = true)

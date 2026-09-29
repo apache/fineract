@@ -871,6 +871,31 @@ public class EventCheckHelper {
         });
     }
 
+    public void workingCapitalLoanDelinquencyRangeChangeEventWithDelinquencyDataCheck(final Long loanId,
+            final Map<String, String> expected) {
+        workingCapitalLoanEventPayloadCheck(WorkingCapitalLoanDelinquencyRangeChangeEvent.class, loanId, event -> {
+            final WorkingCapitalLoanDelinquencyDataV1 delinquency = event.getDelinquency();
+            assertThat(delinquency).as("delinquency").isNotNull();
+            Optional.ofNullable(expected.get("delinquencyStartType")).ifPresent(expectedType -> {
+                assertThat(delinquency.getDelinquencyStartType()).as("delinquency.delinquencyStartType").isNotNull();
+                assertThat(delinquency.getDelinquencyStartType().getCode()).as("delinquency.delinquencyStartType.code")
+                        .isEqualTo(expectedType);
+            });
+            assertEventDateEquals("delinquency.delinquencyStartDate", delinquency.getDelinquencyStartDate(),
+                    expected.get("delinquencyStartDate"));
+            assertEventDateEquals("delinquency.delinquencyEffectiveStartDate", delinquency.getDelinquencyEffectiveStartDate(),
+                    expected.get("delinquencyEffectiveStartDate"));
+
+            final WorkingCapitalLoanCollectionDataV1 delinquent = event.getDelinquent();
+            assertThat(delinquent).as("delinquent").isNotNull();
+            Optional.ofNullable(expected.get("delinquentAmount")).ifPresent(
+                    amount -> assertAmountEquals("delinquent.delinquentAmount", delinquent.getDelinquentAmount(), new BigDecimal(amount)));
+            Optional.ofNullable(expected.get("totalDelinquentAmount"))
+                    .ifPresent(amount -> assertAmountEquals("delinquent.totalDelinquentAmount", delinquent.getTotalDelinquentAmount(),
+                            new BigDecimal(amount)));
+        });
+    }
+
     public void workingCapitalLoanDelinquencyRangeChangeEventNamesRangeCheck(final Long loanId) {
         workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanDelinquencyRangeChangeEvent.class, loanId, (event, body) -> {
             assertWorkingCapitalLoanAccountData(event, body);
@@ -1426,6 +1451,11 @@ public class EventCheckHelper {
 
     private static void assertEventDateEqualsApiDate(final String description, final String eventDate, final LocalDate apiDate) {
         assertThat(eventDate).as(description).isEqualTo(apiDate == null ? null : FORMATTER_EVENTS.format(apiDate));
+    }
+
+    private static void assertEventDateEquals(final String description, final String eventDate, final String expectedDate) {
+        Optional.ofNullable(expectedDate).filter(s -> !s.isEmpty())
+                .ifPresent(expected -> assertThat(eventDate).as(description).isEqualTo(expected));
     }
 
     private void workingCapitalLoanAccountDataV1Check(final Class<? extends AbstractWorkingCapitalLoanEvent> eventClazz,

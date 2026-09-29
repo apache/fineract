@@ -82,12 +82,10 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         }
 
         final EffectiveDelinquencyRescheduleParams params = resolveEffectiveRescheduleParams(loan.getId(), rule);
-        final LocalDate toDate = WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils.calculateToDate(fromDate, params.frequency(),
-                params.frequencyType());
-        final Integer graceDays = loan.getLoanProductRelatedDetails().getDelinquencyGraceDays();
-        final LocalDate graceDaysAdjustedToDate = graceDays == null ? toDate : toDate.plusDays(graceDays);
+        final LocalDate toDate = WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils.calculateNaturalToDate(fromDate, 1,
+                params.frequency(), params.frequencyType(), getDelinquencyGraceDays(loan));
 
-        final WorkingCapitalLoanDelinquencyRangeSchedule period = buildPeriod(loan, 1, fromDate, graceDaysAdjustedToDate,
+        final WorkingCapitalLoanDelinquencyRangeSchedule period = buildPeriod(loan, 1, fromDate, toDate,
                 calculateExpectedAmount(loan, params));
 
         loanDelinquencyRangeScheduleRepository.saveAndFlush(period);
@@ -334,8 +332,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
 
         loanDelinquencyRangeScheduleRepository.findCurrentOpenPeriod(loan.getId(), businessDate).ifPresent(currentPeriod -> {
             if (frequencyProvided) {
-                final LocalDate newToDate = resolveRescheduledToDate(loan.getId(), currentPeriod, action.getFrequency(),
-                        action.getFrequencyType());
+                final LocalDate newToDate = resolveRescheduledToDate(loan, currentPeriod, action.getFrequency(), action.getFrequencyType());
                 currentPeriod.setToDate(newToDate);
             }
             currentPeriod.setBaseExpectedAmount(newExpectedAmount);
@@ -350,10 +347,16 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
                 params.minimumPayment(), params.minimumPaymentType(), params.frequency(), params.frequencyType());
     }
 
-    private LocalDate resolveRescheduledToDate(final Long loanId, final WorkingCapitalLoanDelinquencyRangeSchedule currentPeriod,
-            final Integer frequency, final DelinquencyFrequencyType frequencyType) {
-        return WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils.calculateRescheduledToDate(currentPeriod.getFromDate(), frequency,
-                frequencyType, findAllActions(loanId));
+    private LocalDate resolveRescheduledToDate(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanDelinquencyRangeSchedule currentPeriod, final Integer frequency,
+            final DelinquencyFrequencyType frequencyType) {
+        return WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils.calculateRescheduledToDate(currentPeriod.getFromDate(),
+                currentPeriod.getPeriodNumber(), frequency, frequencyType, getDelinquencyGraceDays(loan), findAllActions(loan.getId()));
+    }
+
+    private Integer getDelinquencyGraceDays(final WorkingCapitalLoan loan) {
+        final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();
+        return details == null ? null : details.getDelinquencyGraceDays();
     }
 
     @Override
@@ -452,8 +455,10 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
      * <li>{@code DISBURSEMENT} (or unset): the first actual disbursement date is used as the basis.</li>
      * </ul>
      *
-     * The configured {@code delinquencyGraceDays} are not applied here; they are added when the derived
-     * {@code delinquencyStartDate} is computed at read time.
+     * The configured {@code delinquencyGraceDays} are not applied here: they extend the {@code toDate} of the first
+     * period in {@link #generateInitialPeriod(WorkingCapitalLoan)}, so the anchor date stays the raw
+     * {@code delinquencyStartDate} exposed by the read model. The read model derives
+     * {@code delinquencyEffectiveStartDate} from it by shifting it forward by the grace days.
      */
     private LocalDate resolveScheduleAnchorDate(final WorkingCapitalLoan loan) {
         final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();

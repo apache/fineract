@@ -2324,6 +2324,11 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         eventCheckHelper.workingCapitalLoanDelinquencyRangeChangeEventNamesRangeCheck(getCreatedLoanId());
     }
 
+    @Then("Working Capital Loan Delinquency Range Change business event is raised with delinquency data:")
+    public void aWorkingCapitalLoanDelinquencyRangeChangeBusinessEventIsRaisedWithDelinquencyData(final DataTable table) {
+        eventCheckHelper.workingCapitalLoanDelinquencyRangeChangeEventWithDelinquencyDataCheck(getCreatedLoanId(), table.asMaps().get(0));
+    }
+
     @Then("a Working Capital Loan Balance Changed business event is raised with transaction type totals:")
     public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaisedWithTransactionTypeTotals(final DataTable table) {
         eventCheckHelper.workingCapitalLoanBalanceChangedEventSummaryTotalsCheck(getCreatedLoanId(), table.asMaps().get(0));
@@ -3692,6 +3697,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                     actualValues.add(response.getBreachStartDate() == null ? "null" : response.getBreachStartDate().toString());
                 case "delinquencyStartDate" ->
                     actualValues.add(response.getDelinquencyStartDate() == null ? "null" : response.getDelinquencyStartDate().toString());
+                case "delinquencyEffectiveStartDate" -> actualValues.add(response.getDelinquencyEffectiveStartDate() == null ? "null"
+                        : response.getDelinquencyEffectiveStartDate().toString());
                 case "totalDiscountFeeAdjustment" ->
                     actualValues.add(response.getBalance() == null || response.getBalance().getTotalDiscountFeeAdjustment() == null ? null
                             : new Utils.DoubleFormatter(response.getBalance().getTotalDiscountFeeAdjustment().doubleValue()).format());
