@@ -122,6 +122,9 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
         assertThat(result).isNotNull();
         assertThat(result.getResourceId()).isNotNull();
         TestContext.GLOBAL.set(TestContextKey.DELINQUENCY_BUCKET_ID, result.getResourceId());
+        // also published scenario-scoped, so a step that needs a bucket built in its own scenario cannot silently
+        // pick up one left behind by an earlier scenario: the global context is never reset between scenarios
+        testContext().set(TestContextKey.DELINQUENCY_BUCKET_ID, result.getResourceId());
         log.info("Created WC delinquency bucket id={} with frequency={} {} minimumPayment={} {}", result.getResourceId(), frequency,
                 frequencyType, minimumPayment, minimumPaymentType);
     }
