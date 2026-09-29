@@ -981,7 +981,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     }
 
     public boolean hasChargebackLoanTransactionRelations() {
-        return !getLoanTransactionRelations(e -> LoanTransactionRelationTypeEnum.CHARGEBACK.equals(e.getRelationType())).isEmpty();
+        return !getLoanTransactionRelations(e -> LoanTransactionRelationTypeEnum.CHARGEBACK.equals(e.getRelationType())
+                && !e.getToTransaction().isManuallyAdjustedOrReversed()).isEmpty();
     }
 
     public void copyLoanTransactionRelations(Set<LoanTransactionRelation> sourceLoanTransactionRelations) {
