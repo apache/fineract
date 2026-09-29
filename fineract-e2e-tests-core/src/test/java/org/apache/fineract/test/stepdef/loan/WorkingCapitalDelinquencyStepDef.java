@@ -35,6 +35,8 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
+import org.apache.fineract.client.models.WorkingCapitalCollection;
+import org.apache.fineract.client.models.WorkingCapitalCollectionRangeScheduleDelinquency;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.test.api.FineractClientConfiguration;
@@ -200,6 +202,52 @@ public class WorkingCapitalDelinquencyStepDef extends AbstractStepDef {
         verifyAllRangeScheduleFields(actualRangeSchedule, headers, expectedData);
 
         log.info("Successfully verified  actual delinquency range schedule {} range schedule entries", actualRangeSchedule.size());
+    }
+
+    @Then("Working Capital loan installment level delinquency has the following data:")
+    public void verifyInstallmentLevelDelinquency(final DataTable dataTable) {
+        final Long loanId = extractLoanId();
+        final List<WorkingCapitalCollectionRangeScheduleDelinquency> actual = retrieveInstallmentLevelDelinquency(loanId);
+
+        final List<List<String>> rows = dataTable.asLists();
+        final List<String> headers = rows.getFirst();
+        final List<List<String>> expectedData = rows.subList(1, rows.size());
+
+        assertThat(actual).as("Installment level delinquency size should match expected data").hasSize(expectedData.size());
+
+        for (int i = 0; i < expectedData.size(); i++) {
+            final List<String> expectedRow = expectedData.get(i);
+            final WorkingCapitalCollectionRangeScheduleDelinquency actualRow = actual.get(i);
+            for (int j = 0; j < headers.size(); j++) {
+                verifyInstallmentLevelDelinquencyField(actualRow, headers.get(j), expectedRow.get(j), i + 1);
+            }
+        }
+
+        log.info("Successfully verified {} installment level delinquency entries", actual.size());
+    }
+
+    private List<WorkingCapitalCollectionRangeScheduleDelinquency> retrieveInstallmentLevelDelinquency(final Long loanId) {
+        final WorkingCapitalCollection delinquent = ok(() -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId))
+                .getDelinquent();
+        final List<WorkingCapitalCollectionRangeScheduleDelinquency> installmentLevelDelinquency = delinquent == null ? null
+                : delinquent.getInstallmentLevelDelinquency();
+        log.debug("Installment level delinquency for loan {}: {}", loanId, installmentLevelDelinquency);
+        return installmentLevelDelinquency == null ? List.of() : installmentLevelDelinquency;
+    }
+
+    private void verifyInstallmentLevelDelinquencyField(final WorkingCapitalCollectionRangeScheduleDelinquency actual,
+            final String fieldName, final String expectedValue, final int rowNumber) {
+        switch (fieldName) {
+            case "classification" ->
+                assertThat(actual.getClassification()).as("Classification for row %d", rowNumber).isEqualTo(expectedValue);
+            case "minimumAgeDays" -> assertThat(actual.getMinimumAgeDays()).as("Minimum age days for row %d", rowNumber)
+                    .isEqualTo(Integer.parseInt(expectedValue));
+            case "maximumAgeDays" -> assertThat(actual.getMaximumAgeDays()).as("Maximum age days for row %d", rowNumber)
+                    .isEqualTo(Integer.parseInt(expectedValue));
+            case "delinquentAmount" ->
+                verifyNullableBigDecimal(actual.getDelinquentAmount(), expectedValue, "Delinquent amount", rowNumber);
+            default -> throw new IllegalArgumentException("Unknown field name: " + fieldName);
+        }
     }
 
     public Long extractLoanId() {
