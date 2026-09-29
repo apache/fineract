@@ -21,6 +21,8 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -131,6 +133,10 @@ public class FeignCenterHelper {
 
     public List<GetCentersPageItems> listCentersOrdered() {
         return ok(nonPagedListingApi::listCentersOrdered);
+    }
+
+    public List<JsonNode> listCentersByMeetingDate(Long officeId, Long staffId, LocalDate meetingDate) {
+        return ok(() -> nonPagedListingApi.listCentersByMeetingDate(officeId, staffId, meetingDate.toString()));
     }
 
     public List<GetCentersPageItems> paginatedListCenters() {

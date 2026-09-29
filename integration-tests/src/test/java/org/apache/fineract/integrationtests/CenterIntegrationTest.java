@@ -338,6 +338,14 @@ public class CenterIntegrationTest {
         return center.getGroupMembers().stream().map(GetCentersGroupMembers::getId).toList();
     }
 
+    @Test
+    public void testListCentersByMeetingDate() {
+        Long officeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getResourceId();
+        Long staffId = staffHelper.createStaff(officeId, "01 January 2011").getResourceId();
+
+        assertTrue(centerHelper.listCentersByMeetingDate(officeId, staffId, LocalDate.of(2026, 9, 22)).isEmpty());
+    }
+
     private static List<GetCentersPageItems> byId(List<GetCentersPageItems> centers) {
         return centers.stream().sorted(Comparator.comparing(GetCentersPageItems::getId)).toList();
     }
