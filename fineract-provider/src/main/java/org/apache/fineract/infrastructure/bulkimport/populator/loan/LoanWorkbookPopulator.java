@@ -534,7 +534,11 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         // Default Charge Name, Charge Amount, Charge Amount Type, Charge Due Date
         Set<String> seenChargeNames = new HashSet<>();
         for (Integer i = 0; i < charges.size(); i++) {
-            String chargeName = charges.get(i).getName().trim().replaceAll("[ )(]", "_");
+            // sanitizeName() strips every character Excel disallows in a defined name (POI only permits
+            // letter/digit/period/underscore) - the previous "[ )(]" regex left characters like '%' or '-'
+            // in place, which crashed the whole template download the moment a charge name contained one
+            // (e.g. "Service Fee 5%-10% (VAT)").
+            String chargeName = sanitizeName(charges.get(i).getName());
             // Guard against duplicate charge-keyed defined names — POI rejects a duplicate and 500s the whole
             // template. Excel defined names are case-insensitive, so upper-case the key. The names are resolved
             // before any createName() call so a skipped charge leaves no orphan Name in the workbook.
