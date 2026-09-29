@@ -332,8 +332,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
     private void addAccruals(@NonNull final Loan loan, @NonNull LocalDate tillDate, final boolean periodic, final boolean isFinal,
             final boolean addJournal, final boolean chargeOnDueDate) {
-        if ((!isFinal && !loan.isOpen()) || loan.isNpa() || loan.isChargedOff() || !loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()
-                || loan.isContractTermination()) {
+        if ((!isFinal && !loan.isOpen()) || loan.isNpa() || loan.isChargedOff()
+                || !loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
             return;
         }
 

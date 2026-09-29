@@ -308,6 +308,25 @@ public final class LoanTestValidators {
         assertEquals(paidLate, Utils.getDoubleValue(period.getTotalPaidLateForPeriod()));
     }
 
+    public static void verifyTransactionPortions(GetLoansLoanIdResponse loanDetails, String type, String date, double amount,
+            double principalPortion, double interestPortion, double feePortion, double penaltyPortion) {
+        assertNotNull(loanDetails.getTransactions(), "Loan has no transactions at all");
+        LocalDate expectedDate = LocalDate.parse(date, DATE_FORMATTER);
+        List<GetLoansLoanIdTransactions> matches = loanDetails.getTransactions().stream()
+                .filter(transaction -> Objects.equals(transaction.getType().getValue(), type))
+                .filter(transaction -> Objects.equals(transaction.getDate(), expectedDate)).toList();
+        assertEquals(1, matches.size(), () -> "Expected exactly one " + type + " transaction dated " + date + ", found " + matches.size()
+                + " of them. All " + type + " transactions: "
+                + loanDetails.getTransactions().stream().filter(transaction -> Objects.equals(transaction.getType().getValue(), type))
+                        .map(transaction -> transaction.getDate() + " amount=" + Utils.getDoubleValue(transaction.getAmount())).toList());
+        GetLoansLoanIdTransactions transaction = matches.get(0);
+        assertEquals(amount, Utils.getDoubleValue(transaction.getAmount()), type + " amount on " + date);
+        assertEquals(principalPortion, Utils.getDoubleValue(transaction.getPrincipalPortion()), type + " principal portion on " + date);
+        assertEquals(interestPortion, Utils.getDoubleValue(transaction.getInterestPortion()), type + " interest portion on " + date);
+        assertEquals(feePortion, Utils.getDoubleValue(transaction.getFeeChargesPortion()), type + " fee portion on " + date);
+        assertEquals(penaltyPortion, Utils.getDoubleValue(transaction.getPenaltyChargesPortion()), type + " penalty portion on " + date);
+    }
+
     public static void verifyLoanStatus(GetLoansLoanIdResponse loanDetails, Function<GetLoansLoanIdStatus, Boolean> extractor) {
         assertNotNull(loanDetails);
         assertNotNull(loanDetails.getStatus());

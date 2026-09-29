@@ -598,10 +598,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         if (transactionCtx.getInstallments().stream().anyMatch(this::isNotObligationsMet)) {
             handleAccelerateMaturityDate(loanTransaction, transactionCtx);
 
-            final BigDecimal newInterest = getInterestTillChargeOffForPeriod(loanTransaction.getLoan(),
-                    loanTransaction.getTransactionDate(), transactionCtx);
-            createMissingAccrualTransactionDuringChargeOffIfNeeded(newInterest, loanTransaction, loanTransaction.getTransactionDate(),
-                    transactionCtx);
+            // A pending termination accrues through the regular daily accruals until its date
+            if (!DateUtils.isAfterBusinessDate(loanTransaction.getTransactionDate())) {
+                final BigDecimal newInterest = getInterestTillChargeOffForPeriod(loanTransaction.getLoan(),
+                        loanTransaction.getTransactionDate(), transactionCtx);
+                createMissingAccrualTransactionDuringChargeOffIfNeeded(newInterest, loanTransaction, loanTransaction.getTransactionDate(),
+                        transactionCtx);
+            }
 
             if (!loanTransaction.getLoan().isInterestBearingAndInterestRecalculationEnabled()) {
                 recalculateInstallmentFeeCharges(loanTransaction);
@@ -627,8 +630,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             progressiveTransactionCtx.setContractTerminated(true);
         }
 
+        // A pending termination survives an early payoff, so reversing that payoff brings the termination amount back
         if (isAllComponentsZero(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion)
-                && loanTransaction.isNotReversed()) {
+                && loanTransaction.isNotReversed() && !DateUtils.isAfterBusinessDate(loanTransaction.getTransactionDate())) {
             loanTransaction.reverse();
             loanTransaction.getLoan().liftContractTerminationSubStatus();
 
@@ -3775,11 +3779,18 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             return;
         }
 
-        final BigDecimal sumOfAccrualsTillChargeOff = loan.getLoanTransactions().stream()
+        // Accruals created earlier in the same reprocessing are not attached to the loan yet
+        final List<LoanTransaction> accrualCandidates = Stream
+                .concat(loan.getLoanTransactions().stream(),
+                        ctx.getChangedTransactionDetail().getTransactionChanges().stream()
+                                .filter(change -> change.getOldTransaction() == null).map(TransactionChangeData::getNewTransaction))
+                .distinct().toList();
+
+        final BigDecimal sumOfAccrualsTillChargeOff = accrualCandidates.stream()
                 .filter(lt -> lt.isAccrual() && !lt.getTransactionDate().isAfter(chargeOffDate) && lt.isNotReversed())
                 .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(ZERO)).reduce(ZERO, BigDecimal::add);
 
-        final BigDecimal sumOfAccrualAdjustmentsTillChargeOff = loan.getLoanTransactions().stream()
+        final BigDecimal sumOfAccrualAdjustmentsTillChargeOff = accrualCandidates.stream()
                 .filter(lt -> lt.isAccrualAdjustment() && !lt.getTransactionDate().isAfter(chargeOffDate) && lt.isNotReversed())
                 .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(ZERO)).reduce(ZERO, BigDecimal::add);
 

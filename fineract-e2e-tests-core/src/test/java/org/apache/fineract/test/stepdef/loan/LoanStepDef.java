@@ -200,6 +200,7 @@ public class LoanStepDef extends AbstractStepDef {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
     private static final DateTimeFormatter FORMATTER_EVENTS = DateTimeFormatter.ofPattern(DATE_FORMAT_EVENTS);
     private static final String TRANSACTION_DATE_FORMAT = "dd MMMM yyyy";
+    private static final String CONTRACT_TERMINATION_COMMAND = "contractTermination";
 
     private final BusinessDateHelper businessDateHelper;
     private final FineractFeignClient fineractClient;
@@ -3509,6 +3510,18 @@ public class LoanStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_WRITE_OFF_RESPONSE, writeOffResponse);
     }
 
+    @Then("Write-off transaction is not possible on {string}")
+    public void writeOffFailure(final String transactionDate) {
+        final long loanId = getLoanId();
+        final PostLoansLoanIdTransactionsRequest writeOffRequest = loanRequestFactory.defaultWriteOffRequest()
+                .transactionDate(transactionDate).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId,
+                writeOffRequest, Map.of("command", "writeoff")));
+
+        assertCallRejected(exception, 403, ErrorMessageHelper.writeOffBeforeLastTransactionFailure());
+    }
+
     @Then("Loan {string} repayment transaction on {string} with {double} EUR transaction amount results in error")
     public void loanTransactionWithErrorCheck(String repaymentType, String transactionDate, double transactionAmount) {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -5559,33 +5572,68 @@ public class LoanStepDef extends AbstractStepDef {
 
     @And("Admin successfully terminates loan contract")
     public void makeLoanContractTermination() {
-        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        assert loanResponse != null;
-        final long loanId = loanResponse.getLoanId();
+        terminateLoanContractAndAssertEvent(loanRequestFactory.defaultLoanContractTerminationRequest());
+    }
 
-        final PostLoansLoanIdRequest contractTerminationRequest = loanRequestFactory.defaultLoanContractTerminationRequest();
+    @And("Admin successfully terminates loan contract on {string}")
+    public void makeLoanContractTerminationOnDate(final String transactionDate) {
+        terminateLoanContractAndAssertEvent(loanRequestFactory.defaultLoanContractTerminationRequest().transactionDate(transactionDate))
+                .extractingData(LoanTransactionDataV1::getDate).isEqualTo(FORMATTER_EVENTS.format(FORMATTER.parse(transactionDate)));
+    }
 
-        final PostLoansLoanIdResponse loanContractTerminationResponse = ok(() -> fineractClient.loans().handleCommandsLoan(loanId,
-                contractTerminationRequest, Map.of("command", "contractTermination")));
-        testContext().set(TestContextKey.LOAN_CONTRACT_TERMINATION_RESPONSE, loanContractTerminationResponse);
-        assert loanContractTerminationResponse != null;
-        final Long transactionId = loanContractTerminationResponse.getResourceId();
-        eventAssertion.assertEvent(LoanTransactionContractTerminationPostBusinessEvent.class, transactionId)
+    @Then("Admin fails to terminate loan contract on {string} because the date is before the business date")
+    public void loanContractTerminationBeforeBusinessDateFailure(final String transactionDate) {
+        assertLoanContractTerminationRejected(transactionDate, ErrorMessageHelper.contractTerminationBeforeBusinessDateFailure());
+    }
+
+    @Then("Admin fails to terminate loan contract on {string} because the date is not before the maturity date")
+    public void loanContractTerminationNotBeforeMaturityDateFailure(final String transactionDate) {
+        assertLoanContractTerminationRejected(transactionDate, ErrorMessageHelper.contractTerminationNotBeforeMaturityDateFailure());
+    }
+
+    @And("Admin successfully terminates loan contract - no event check")
+    public void makeLoanContractTerminationNoEventCheck() {
+        terminateLoanContract(getLoanId(), loanRequestFactory.defaultLoanContractTerminationRequest());
+    }
+
+    private EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> terminateLoanContractAndAssertEvent(
+            final PostLoansLoanIdRequest request) {
+        final long loanId = getLoanId();
+        final Long transactionId = terminateLoanContract(loanId, request).getResourceId();
+        return eventAssertion.assertEvent(LoanTransactionContractTerminationPostBusinessEvent.class, transactionId)
                 .extractingData(LoanTransactionDataV1::getLoanId).isEqualTo(loanId).extractingData(LoanTransactionDataV1::getId)
                 .isEqualTo(transactionId);
     }
 
-    @And("Admin successfully terminates loan contract - no event check")
-    public void makeLoanContractTerminationNoEventCheck() throws IOException {
+    private PostLoansLoanIdResponse terminateLoanContract(final long loanId, final PostLoansLoanIdRequest request) {
+        final PostLoansLoanIdResponse response = ok(
+                () -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", CONTRACT_TERMINATION_COMMAND)));
+        testContext().set(TestContextKey.LOAN_CONTRACT_TERMINATION_RESPONSE, response);
+        return response;
+    }
+
+    private void assertLoanContractTerminationRejected(final String transactionDate, final String errorMessageExpected) {
+        final long loanId = getLoanId();
+        final PostLoansLoanIdRequest request = loanRequestFactory.defaultLoanContractTerminationRequest().transactionDate(transactionDate);
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", CONTRACT_TERMINATION_COMMAND)));
+
+        assertCallRejected(exception, 400, errorMessageExpected);
+    }
+
+    private void assertCallRejected(final CallFailedRuntimeException exception, final int statusExpected,
+            final String errorMessageExpected) {
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.wrongErrorCode(exception.getStatus(), statusExpected))
+                .isEqualTo(statusExpected);
+        assertThat(exception.getDeveloperMessage())
+                .as(ErrorMessageHelper.wrongErrorMessage(exception.getDeveloperMessage(), errorMessageExpected))
+                .contains(errorMessageExpected);
+    }
+
+    private long getLoanId() {
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        assert loanResponse != null;
-        final long loanId = loanResponse.getLoanId();
-
-        final PostLoansLoanIdRequest contractTerminationRequest = loanRequestFactory.defaultLoanContractTerminationRequest();
-
-        final PostLoansLoanIdResponse loanContractTerminationResponse = ok(() -> fineractClient.loans().handleCommandsLoan(loanId,
-                contractTerminationRequest, Map.of("command", "contractTermination")));
-        testContext().set(TestContextKey.LOAN_CONTRACT_TERMINATION_RESPONSE, loanContractTerminationResponse);
+        return loanResponse.getLoanId();
     }
 
     @And("Admin successfully undoes loan contract termination")
