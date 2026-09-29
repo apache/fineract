@@ -21,6 +21,7 @@ package org.apache.fineract.accounting.journalentry.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
@@ -176,7 +177,7 @@ final class JournalEntriesApiResourceSwagger {
         @Schema(example = "mifos")
         public String createdByUserName;
         @Schema(example = "[2022, 07, 01]")
-        public LocalDate createdDate;
+        public OffsetDateTime createdDate;
         @Schema(example = "qwerty1234")
         public String externalAssetOwner;
 
