@@ -125,6 +125,11 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             LocalDate seedDate = null;
             String reccuringString = null;
             Calendar currentCalendar = loanApplicationTerms.getLoanCalendar();
+            if (loanApplicationTerms.getRepaymentPeriodFrequencyType().isSemiMonthly()) {
+                // The two due days are fixed points of the calendar month, so the next date is the first of them
+                // after the previous one rather than an offset added to it.
+                return SemiMonthlyScheduleDates.next(lastRepaymentDate, semiMonthlyFirstDayOfMonth(loanApplicationTerms));
+            }
             dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
                     loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate);
             dueRepaymentPeriodDate = (LocalDate) adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
@@ -323,6 +328,10 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             case YEARS:
                 dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
             break;
+            case SEMI_MONTHLY:
+                // A semi-monthly due date depends on the configured day of the month, which this method does not
+                // receive. Callers must go through generateNextRepaymentDate, which has the loan terms at hand.
+                throw new UnsupportedOperationException("A semi-monthly repayment date cannot be derived from a period length");
             case INVALID:
             break;
             case WHOLE_TERM:
@@ -330,6 +339,10 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
         }
         return dueRepaymentPeriodDate;
+    }
+
+    private int semiMonthlyFirstDayOfMonth(final LoanApplicationTerms loanApplicationTerms) {
+        return SemiMonthlyScheduleDates.requireFirstDayOfMonth(loanApplicationTerms.getFirstRepaymentDayOfMonth());
     }
 
     @Override
@@ -366,6 +379,9 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 }
             break;
             case INVALID:
+                // This is only asked of a standing instruction recurrence, and SEMI_MONTHLY is not offered as one, so
+                // no date falls in such a schedule.
+            case SEMI_MONTHLY:
             break;
             case WHOLE_TERM:
             // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
@@ -401,6 +417,10 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case YEARS:
                 idealDisbursementDate = firstRepaymentDate.minusYears(repaidEvery);
+            break;
+            case SEMI_MONTHLY:
+                idealDisbursementDate = SemiMonthlyScheduleDates.previous(firstRepaymentDate,
+                        semiMonthlyFirstDayOfMonth(loanApplicationTerms));
             break;
             case INVALID:
             break;

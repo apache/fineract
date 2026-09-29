@@ -27,7 +27,10 @@ public enum PeriodFrequencyType {
     MONTHS(2, "periodFrequencyType.months"), //
     YEARS(3, "periodFrequencyType.years"), //
     WHOLE_TERM(4, "periodFrequencyType.whole_term"), //
-    INVALID(5, "periodFrequencyType.invalid");
+    INVALID(5, "periodFrequencyType.invalid"), //
+    // Twice a month on two fixed days, always 24 periods a year. Appended after INVALID on purpose: the value is
+    // persisted as the enum ordinal, so inserting a constant before INVALID would reinterpret existing rows.
+    SEMI_MONTHLY(6, "periodFrequencyType.semiMonthly");
 
     private final Integer value;
     private final String code;
@@ -61,6 +64,8 @@ public enum PeriodFrequencyType {
                 return YEARS;
             case 4:
                 return WHOLE_TERM;
+            case 6:
+                return SEMI_MONTHLY;
             default:
                 return INVALID;
         }
@@ -86,8 +91,15 @@ public enum PeriodFrequencyType {
         return this.equals(DAYS);
     }
 
+    public boolean isSemiMonthly() {
+        return this.equals(SEMI_MONTHLY);
+    }
+
     // TODO: do we really need this?!?
     public static Object[] integerValues() {
-        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
+        // SEMI_MONTHLY only makes sense as a loan repayment frequency, so it is left out of the generic value list
+        // that savings interest rate charts validate against.
+        return Arrays.stream(values()).filter(value -> !INVALID.equals(value) && !SEMI_MONTHLY.equals(value)).map(value -> value.value)
+                .toList().toArray();
     }
 }

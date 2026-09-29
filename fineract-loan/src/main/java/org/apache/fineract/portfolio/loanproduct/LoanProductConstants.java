@@ -166,6 +166,7 @@ public interface LoanProductConstants {
     String ADVANCED_PAYMENT_ALLOCATION_STRATEGY = "advanced-payment-allocation-strategy";
 
     String FIXED_LENGTH = "fixedLength";
+    String FIRST_REPAYMENT_DAY_OF_MONTH = "firstRepaymentDayOfMonth";
 
     String ENABLE_ACCRUAL_ACTIVITY_POSTING = "enableAccrualActivityPosting";
     String SUPPORTED_INTEREST_REFUND_TYPES = "supportedInterestRefundTypes";

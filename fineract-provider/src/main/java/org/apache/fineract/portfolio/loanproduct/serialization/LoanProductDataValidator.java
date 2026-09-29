@@ -62,6 +62,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTra
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyScheduleDates;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.AdvancedPaymentAllocationsJsonParser;
 import org.apache.fineract.portfolio.loanproduct.domain.AdvancedPaymentAllocationsValidator;
@@ -98,6 +99,10 @@ public final class LoanProductDataValidator {
     public static final String MAX_NUMBER_OF_REPAYMENTS = "maxNumberOfRepayments";
     public static final String REPAYMENT_EVERY = "repaymentEvery";
     public static final String REPAYMENT_FREQUENCY_TYPE = "repaymentFrequencyType";
+    /** WHOLE_TERM and INVALID are not repayment frequencies a product can be created with. */
+    private static final Object[] SUPPORTED_REPAYMENT_FREQUENCY_TYPES = { PeriodFrequencyType.DAYS.getValue(),
+            PeriodFrequencyType.WEEKS.getValue(), PeriodFrequencyType.MONTHS.getValue(), PeriodFrequencyType.YEARS.getValue(),
+            PeriodFrequencyType.SEMI_MONTHLY.getValue() };
     public static final String AMORTIZATION_TYPE = "amortizationType";
     public static final String INTEREST_TYPE = "interestType";
     public static final String INTEREST_CALCULATION_PERIOD_TYPE = "interestCalculationPeriodType";
@@ -127,21 +132,21 @@ public final class LoanProductDataValidator {
      */
     private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat", NAME, DESCRIPTION, FUND_ID,
             CURRENCY_CODE, DIGITS_AFTER_DECIMAL, IN_MULTIPLES_OF, PRINCIPAL, MIN_PRINCIPAL, MAX_PRINCIPAL, REPAYMENT_EVERY,
-            NUMBER_OF_REPAYMENTS, MIN_NUMBER_OF_REPAYMENTS, MAX_NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY_TYPE, INTEREST_RATE_PER_PERIOD,
-            MIN_INTEREST_RATE_PER_PERIOD, MAX_INTEREST_RATE_PER_PERIOD, INTEREST_RATE_FREQUENCY_TYPE, AMORTIZATION_TYPE, INTEREST_TYPE,
-            INTEREST_CALCULATION_PERIOD_TYPE, LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
-            IN_ARREARS_TOLERANCE, TRANSACTION_PROCESSING_STRATEGY_CODE, ADVANCED_PAYMENT_ALLOCATIONS, CREDIT_ALLOCATIONS,
-            GRACE_ON_PRINCIPAL_PAYMENT, "recurringMoratoriumOnPrincipalPeriods", GRACE_ON_INTEREST_PAYMENT, GRACE_ON_INTEREST_CHARGED,
-            "charges", ACCOUNTING_RULE, INCLUDE_IN_BORROWER_CYCLE, "startDate", "closeDate", "externalId",
-            IS_LINKED_TO_FLOATING_INTEREST_RATES, FLOATING_RATES_ID, INTEREST_RATE_DIFFERENTIAL, MIN_DIFFERENTIAL_LENDING_RATE,
-            DEFAULT_DIFFERENTIAL_LENDING_RATE, MAX_DIFFERENTIAL_LENDING_RATE, IS_FLOATING_INTEREST_RATE_CALCULATION_ALLOWED,
-            "syncExpectedWithDisbursementDate", LoanProductAccountingParams.FEES_RECEIVABLE.getValue(),
-            LoanProductAccountingParams.FUND_SOURCE.getValue(), LoanProductAccountingParams.INCOME_FROM_FEES.getValue(),
-            LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), LoanProductAccountingParams.INTEREST_ON_LOANS.getValue(),
-            LoanProductAccountingParams.INTEREST_RECEIVABLE.getValue(), LoanProductAccountingParams.LOAN_PORTFOLIO.getValue(),
-            LoanProductAccountingParams.OVERPAYMENT.getValue(), LoanProductAccountingParams.TRANSFERS_SUSPENSE.getValue(),
-            LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), LoanProductAccountingParams.GOODWILL_CREDIT.getValue(),
-            LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(),
+            NUMBER_OF_REPAYMENTS, MIN_NUMBER_OF_REPAYMENTS, MAX_NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY_TYPE,
+            LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH, INTEREST_RATE_PER_PERIOD, MIN_INTEREST_RATE_PER_PERIOD,
+            MAX_INTEREST_RATE_PER_PERIOD, INTEREST_RATE_FREQUENCY_TYPE, AMORTIZATION_TYPE, INTEREST_TYPE, INTEREST_CALCULATION_PERIOD_TYPE,
+            LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME, IN_ARREARS_TOLERANCE,
+            TRANSACTION_PROCESSING_STRATEGY_CODE, ADVANCED_PAYMENT_ALLOCATIONS, CREDIT_ALLOCATIONS, GRACE_ON_PRINCIPAL_PAYMENT,
+            "recurringMoratoriumOnPrincipalPeriods", GRACE_ON_INTEREST_PAYMENT, GRACE_ON_INTEREST_CHARGED, "charges", ACCOUNTING_RULE,
+            INCLUDE_IN_BORROWER_CYCLE, "startDate", "closeDate", "externalId", IS_LINKED_TO_FLOATING_INTEREST_RATES, FLOATING_RATES_ID,
+            INTEREST_RATE_DIFFERENTIAL, MIN_DIFFERENTIAL_LENDING_RATE, DEFAULT_DIFFERENTIAL_LENDING_RATE, MAX_DIFFERENTIAL_LENDING_RATE,
+            IS_FLOATING_INTEREST_RATE_CALCULATION_ALLOWED, "syncExpectedWithDisbursementDate",
+            LoanProductAccountingParams.FEES_RECEIVABLE.getValue(), LoanProductAccountingParams.FUND_SOURCE.getValue(),
+            LoanProductAccountingParams.INCOME_FROM_FEES.getValue(), LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(),
+            LoanProductAccountingParams.INTEREST_ON_LOANS.getValue(), LoanProductAccountingParams.INTEREST_RECEIVABLE.getValue(),
+            LoanProductAccountingParams.LOAN_PORTFOLIO.getValue(), LoanProductAccountingParams.OVERPAYMENT.getValue(),
+            LoanProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(),
+            LoanProductAccountingParams.GOODWILL_CREDIT.getValue(), LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(),
             LoanProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
             LoanProductAccountingParams.FEE_INCOME_ACCOUNT_MAPPING.getValue(), LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(),
             LoanProductAccountingParams.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(),
@@ -357,7 +362,9 @@ public final class LoanProductDataValidator {
 
         final Integer repaymentFrequencyType = this.fromApiJsonHelper.extractIntegerNamed(REPAYMENT_FREQUENCY_TYPE, element,
                 Locale.getDefault());
-        baseDataValidator.reset().parameter(REPAYMENT_FREQUENCY_TYPE).value(repaymentFrequencyType).notNull().inMinMaxRange(0, 3);
+        baseDataValidator.reset().parameter(REPAYMENT_FREQUENCY_TYPE).value(repaymentFrequencyType).notNull()
+                .isOneOfTheseValues(SUPPORTED_REPAYMENT_FREQUENCY_TYPES);
+        validateSemiMonthlyRepayment(element, baseDataValidator, repaymentFrequencyType, repaymentEvery, true);
 
         // settings
         final Integer amortizationType = this.fromApiJsonHelper.extractIntegerNamed(AMORTIZATION_TYPE, element, Locale.getDefault());
@@ -1440,11 +1447,15 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(REPAYMENT_EVERY).value(repaymentEvery).notNull().integerGreaterThanZero();
         }
 
+        Integer repaymentFrequencyType = loanProduct.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType() == null ? null
+                : loanProduct.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType().getValue();
         if (this.fromApiJsonHelper.parameterExists(REPAYMENT_FREQUENCY_TYPE, element)) {
-            final Integer repaymentFrequencyType = this.fromApiJsonHelper.extractIntegerNamed(REPAYMENT_FREQUENCY_TYPE, element,
-                    Locale.getDefault());
-            baseDataValidator.reset().parameter(REPAYMENT_FREQUENCY_TYPE).value(repaymentFrequencyType).notNull().inMinMaxRange(0, 3);
+            repaymentFrequencyType = this.fromApiJsonHelper.extractIntegerNamed(REPAYMENT_FREQUENCY_TYPE, element, Locale.getDefault());
+            baseDataValidator.reset().parameter(REPAYMENT_FREQUENCY_TYPE).value(repaymentFrequencyType).notNull()
+                    .isOneOfTheseValues(SUPPORTED_REPAYMENT_FREQUENCY_TYPES);
         }
+        validateSemiMonthlyRepayment(element, baseDataValidator, repaymentFrequencyType, repaymentEvery,
+                this.fromApiJsonHelper.parameterExists(REPAYMENT_FREQUENCY_TYPE, element));
 
         String transactionProcessingStrategyCode = loanProduct.getTransactionProcessingStrategyCode();
         if (this.fromApiJsonHelper.parameterExists(TRANSACTION_PROCESSING_STRATEGY_CODE, element)) {
@@ -3014,5 +3025,33 @@ public final class LoanProductDataValidator {
 
     private Integer defaultToZeroIfNull(Integer value) {
         return value != null ? value : 0;
+    }
+
+    /**
+     * A semi-monthly loan is repaid on two fixed days of every calendar month, so it needs the first of those days and
+     * it cannot repeat on a multiple of its period.
+     */
+    private void validateSemiMonthlyRepayment(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            final Integer repaymentFrequencyType, final Integer repaymentEvery, final boolean frequencyIsBeingSet) {
+        final boolean isSemiMonthly = PeriodFrequencyType.SEMI_MONTHLY.getValue().equals(repaymentFrequencyType);
+        final boolean dayIsBeingSet = this.fromApiJsonHelper.parameterExists(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH, element);
+
+        if (dayIsBeingSet) {
+            final Integer firstRepaymentDayOfMonth = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH).value(firstRepaymentDayOfMonth).notNull()
+                    .inMinMaxRange(SemiMonthlyScheduleDates.MIN_FIRST_DAY_OF_MONTH, SemiMonthlyScheduleDates.MAX_FIRST_DAY_OF_MONTH);
+            if (!isSemiMonthly) {
+                baseDataValidator.reset().parameter(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH)
+                        .failWithCode("supported.only.for.semi.monthly.repayment.frequency");
+            }
+        } else if (isSemiMonthly && frequencyIsBeingSet) {
+            baseDataValidator.reset().parameter(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH).value(null).notNull();
+        }
+
+        if (isSemiMonthly && repaymentEvery != null && repaymentEvery != 1) {
+            baseDataValidator.reset().parameter(REPAYMENT_EVERY).value(repaymentEvery)
+                    .failWithCode("must.be.one.for.semi.monthly.repayment.frequency");
+        }
     }
 }

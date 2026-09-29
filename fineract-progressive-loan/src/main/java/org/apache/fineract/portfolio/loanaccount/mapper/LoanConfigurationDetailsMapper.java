@@ -54,10 +54,11 @@ public final class LoanConfigurationDetailsMapper {
                 DaysInYearType.fromInt(loanProductRelatedDetail.getDaysInYearType()),
                 DaysInMonthType.fromInt(loanProductRelatedDetail.getDaysInMonthType()), loanProductRelatedDetail.getAmortizationMethod(),
                 loanProductRelatedDetail.getRepaymentPeriodFrequencyType(), loanProductRelatedDetail.getRepayEvery(),
-                loanProductRelatedDetail.getNumberOfRepayments(), loanProductRelatedDetail.isInterestRecognitionOnDisbursementDate(),
-                loanProductRelatedDetail.getDaysInYearCustomStrategy(), loanProductRelatedDetail.isAllowPartialPeriodInterestCalculation(),
-                loan.isInterestRecalculationEnabled(), getRestFrequencyType(loan), getPreCloseInterestCalculationStrategy(loan),
-                loan.isAllowFullTermForTranche(), loan.getLoanProductRelatedDetail().getLoanScheduleProcessingType());
+                loanProductRelatedDetail.getFirstRepaymentDayOfMonth(), loanProductRelatedDetail.getNumberOfRepayments(),
+                loanProductRelatedDetail.isInterestRecognitionOnDisbursementDate(), loanProductRelatedDetail.getDaysInYearCustomStrategy(),
+                loanProductRelatedDetail.isAllowPartialPeriodInterestCalculation(), loan.isInterestRecalculationEnabled(),
+                getRestFrequencyType(loan), getPreCloseInterestCalculationStrategy(loan), loan.isAllowFullTermForTranche(),
+                loan.getLoanProductRelatedDetail().getLoanScheduleProcessingType());
     }
 
     private static RecalculationFrequencyType getRestFrequencyType(Loan loan) {

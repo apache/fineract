@@ -514,7 +514,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
                 possiblyModifedLoanCollateralItems = this.loanCollateralAssembler.fromParsedJson(command.parsedJson());
             }
         }
-        this.loanScheduleAssembler.updateLoanApplicationAttributes(command, loan, changes);
+        this.loanScheduleAssembler.updateLoanApplicationAttributes(command, loan, loanProduct, changes);
 
         if (!changes.isEmpty()) {
             final boolean recalculateLoanSchedule = !(changes.size() == 1

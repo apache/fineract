@@ -115,6 +115,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyScheduleDates;
 import org.apache.fineract.portfolio.loanaccount.serialization.VariableLoanScheduleFromApiJsonValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeAssembler;
@@ -203,6 +204,10 @@ public class LoanScheduleAssembler {
                 : loanProduct.getLoanProductRelatedDetail().getRepayEvery();
         final Integer repaymentFrequencyType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element);
         final PeriodFrequencyType repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(repaymentFrequencyType);
+        // A semi-monthly loan may pin its due days to the client's payroll cycle, so the loan overrides the product.
+        final Integer firstRepaymentDayOfMonth = this.fromApiJsonHelper.parameterExists(LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH,
+                element) ? this.fromApiJsonHelper.extractIntegerWithLocaleNamed(LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH, element)
+                        : loanProduct.getLoanProductRelatedDetail().getFirstRepaymentDayOfMonth();
         final Integer nthDay = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentFrequencyNthDayType", element);
         final Integer dayOfWeek = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentFrequencyDayOfWeekType", element);
         final DayOfWeekType weekDayType = DayOfWeekType.fromInt(dayOfWeek);
@@ -317,13 +322,16 @@ public class LoanScheduleAssembler {
          */
         if (calculatedRepaymentsStartingFromDate == null) {
             LocalDate tmpCalculatedRepaymentsStartingFromDate = deriveFirstRepaymentDate(loanType, repaymentEvery, expectedDisbursementDate,
-                    repaymentPeriodFrequencyType, 0, calendar, submittedOnDate, repaymentStartDateType);
+                    repaymentPeriodFrequencyType, 0, calendar, submittedOnDate, repaymentStartDateType, firstRepaymentDayOfMonth);
             calculatedRepaymentsStartingFromDate = deriveFirstRepaymentDate(loanType, repaymentEvery, expectedDisbursementDate,
                     repaymentPeriodFrequencyType, loanProduct.getMinimumDaysBetweenDisbursalAndFirstRepayment(), calendar, submittedOnDate,
-                    repaymentStartDateType);
+                    repaymentStartDateType, firstRepaymentDayOfMonth);
             if (!tmpCalculatedRepaymentsStartingFromDate.equals(calculatedRepaymentsStartingFromDate)) {
                 repaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
             }
+        } else if (repaymentPeriodFrequencyType.isSemiMonthly() && calendar == null) {
+            // A first repayment date given by the caller is not moved; it has to be one of the configured due days.
+            validateRepaymentsStartDateIsSemiMonthlyDueDate(calculatedRepaymentsStartingFromDate, firstRepaymentDayOfMonth);
         }
 
         /*
@@ -412,7 +420,7 @@ public class LoanScheduleAssembler {
             Integer frequency = loanProductInterestRecalculationDetails.getRestInterval();
             if (recalculationFrequencyType.isSameAsRepayment()) {
                 restCalendarInstance = createCalendarForSameAsRepayment(repaymentEvery, repaymentPeriodFrequencyType,
-                        expectedDisbursementDate);
+                        firstRepaymentDayOfMonth, expectedDisbursementDate);
             } else {
                 LocalDate calendarStartDate = expectedDisbursementDate;
                 restCalendarInstance = createInterestRecalculationCalendarInstance(calendarStartDate, recalculationFrequencyType, frequency,
@@ -430,7 +438,7 @@ public class LoanScheduleAssembler {
                 compoundingFrequencyType = loanProductInterestRecalculationDetails.getCompoundingFrequencyType();
                 if (compoundingFrequencyType.isSameAsRepayment()) {
                     compoundingCalendarInstance = createCalendarForSameAsRepayment(repaymentEvery, repaymentPeriodFrequencyType,
-                            expectedDisbursementDate);
+                            firstRepaymentDayOfMonth, expectedDisbursementDate);
                 } else {
                     LocalDate calendarStartDate = expectedDisbursementDate;
                     compoundingCalendarInstance = createInterestRecalculationCalendarInstance(calendarStartDate, compoundingFrequencyType,
@@ -545,16 +553,16 @@ public class LoanScheduleAssembler {
             allowFullTermForTranche = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element);
         }
 
-        return LoanApplicationTerms.assembleFrom(applicationCurrency.toData(), loanTermFrequency, loanTermPeriodFrequencyType,
-                numberOfRepayments, repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
-                interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
-                allowPartialPeriodInterestCalculation, principalMoney, expectedDisbursementDate, repaymentsStartingFromDate,
-                calculatedRepaymentsStartingFromDate, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods,
-                graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney,
-                loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, graceOnArrearsAgeing,
-                daysInMonthType, daysInYearType, isInterestRecalculationEnabled, recalculationFrequencyType, restCalendarInstance,
-                compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
-                loanProduct.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf(),
+        final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(applicationCurrency.toData(), loanTermFrequency,
+                loanTermPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType,
+                amortizationMethod, interestMethod, interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate,
+                interestCalculationPeriodMethod, allowPartialPeriodInterestCalculation, principalMoney, expectedDisbursementDate,
+                repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate, graceOnPrincipalPayment,
+                recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate,
+                inArrearsToleranceMoney, loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance,
+                graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, recalculationFrequencyType,
+                restCalendarInstance, compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType,
+                principalThresholdForLastInstalment, loanProduct.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf(),
                 loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO, loanTermVariations,
                 isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
                 allowCompoundingOnEod, isEqualAmortization, isInterestToBeRecoveredFirstWhenGreaterThanEMI,
@@ -574,10 +582,20 @@ public class LoanScheduleAssembler {
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeStrategy(),
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeIncomeType(),
                 loanProduct.getLoanProductRelatedDetail().isMerchantBuyDownFee(), allowFullTermForTranche);
+        loanApplicationTerms.setFirstRepaymentDayOfMonth(firstRepaymentDayOfMonth);
+        return loanApplicationTerms;
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
-            final PeriodFrequencyType repaymentPeriodFrequencyType, final LocalDate expectedDisbursementDate) {
+            final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer firstRepaymentDayOfMonth,
+            final LocalDate expectedDisbursementDate) {
+        if (repaymentPeriodFrequencyType.isSemiMonthly()) {
+            // Calendar frequencies have no semi-monthly value, so the two due days are written as a monthly rule.
+            final Calendar calendar = Calendar.createRepeatingCalendar("loan_recalculation_detail", expectedDisbursementDate,
+                    CalendarType.COLLECTION.getValue(),
+                    SemiMonthlyScheduleDates.toRecurrence(semiMonthlyFirstDayOfMonth(firstRepaymentDayOfMonth)));
+            return CalendarInstance.from(calendar, null, CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue());
+        }
         final Integer recalculationFrequencyNthDay = null;
         final Integer repeatsOnDay = expectedDisbursementDate.get(ChronoField.DAY_OF_WEEK);
         CalendarInstance restCalendarInstance = createInterestRecalculationCalendarInstance(expectedDisbursementDate, repaymentEvery,
@@ -672,6 +690,20 @@ public class LoanScheduleAssembler {
             throw new LoanApplicationDateException("first.repayment.date.do.not.match.meeting.date", errorMessage,
                     repaymentsStartingFromDate);
         }
+    }
+
+    private void validateRepaymentsStartDateIsSemiMonthlyDueDate(final LocalDate repaymentsStartingFromDate,
+            final Integer firstRepaymentDayOfMonth) {
+        if (!SemiMonthlyScheduleDates.isDueDate(repaymentsStartingFromDate, semiMonthlyFirstDayOfMonth(firstRepaymentDayOfMonth))) {
+            final String errorMessage = "First repayment date '" + repaymentsStartingFromDate
+                    + "' does not fall on a due day of the semi-monthly schedule";
+            throw new LoanApplicationDateException("first.repayment.date.not.a.semi.monthly.due.day", errorMessage,
+                    repaymentsStartingFromDate);
+        }
+    }
+
+    private int semiMonthlyFirstDayOfMonth(final Integer firstRepaymentDayOfMonth) {
+        return SemiMonthlyScheduleDates.requireFirstDayOfMonth(firstRepaymentDayOfMonth);
     }
 
     private void validateRepaymentFrequencyIsSameAsMeetingFrequency(final Integer meetingFrequency, final Integer repaymentFrequency,
@@ -1171,13 +1203,22 @@ public class LoanScheduleAssembler {
     private LocalDate deriveFirstRepaymentDate(final AccountType loanType, final Integer repaymentEvery,
             final LocalDate expectedDisbursementDate, final PeriodFrequencyType repaymentPeriodFrequencyType,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final Calendar calendar, final LocalDate submittedOnDate,
-            final RepaymentStartDateType repaymentStartDateType) {
+            final RepaymentStartDateType repaymentStartDateType, final Integer firstRepaymentDayOfMonth) {
         LocalDate derivedFirstRepayment = null;
 
         final LocalDate dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment = expectedDisbursementDate
                 .plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);
         final LocalDate seedDate = repaymentStartDateType.isDisbursementDate() ? expectedDisbursementDate : submittedOnDate;
-        if (calendar != null) {
+        if (calendar == null && repaymentPeriodFrequencyType.isSemiMonthly()) {
+            // The due dates are fixed days of the month, so the first one is the earliest due day after the seed date
+            // that also honours the minimum gap, rather than the seed date shifted by a period length.
+            final int firstDayOfMonth = semiMonthlyFirstDayOfMonth(firstRepaymentDayOfMonth);
+            final LocalDate dateBasedOnRepaymentFrequency = SemiMonthlyScheduleDates.next(seedDate, firstDayOfMonth);
+            derivedFirstRepayment = DateUtils.isAfter(dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment,
+                    dateBasedOnRepaymentFrequency)
+                            ? SemiMonthlyScheduleDates.onOrAfter(dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment, firstDayOfMonth)
+                            : dateBasedOnRepaymentFrequency;
+        } else if (calendar != null) {
             derivedFirstRepayment = deriveFirstRepaymentDateForLoans(repaymentEvery, expectedDisbursementDate, seedDate,
                     repaymentPeriodFrequencyType, minimumDaysBetweenDisbursalAndFirstRepayment, calendar, submittedOnDate);
         } else { // Individual or group account, or JLG not linked to a meeting
@@ -1262,7 +1303,12 @@ public class LoanScheduleAssembler {
         }
     }
 
-    public void updateLoanApplicationAttributes(JsonCommand command, Loan loan, Map<String, Object> changes) {
+    /**
+     * @param loanProduct
+     *            the product the loan ends up with, which differs from the loan's current one when the request moves it
+     *            to another product
+     */
+    public void updateLoanApplicationAttributes(JsonCommand command, Loan loan, LoanProduct loanProduct, Map<String, Object> changes) {
         final String localeAsInput = command.locale();
 
         final String principalParamName = "principal";
@@ -1290,6 +1336,7 @@ public class LoanScheduleAssembler {
             changes.put("locale", localeAsInput);
             loanProductRelatedDetail.setRepaymentPeriodFrequencyType(PeriodFrequencyType.fromInt(newValue));
         }
+        updateFirstRepaymentDayOfMonth(command, loanProductRelatedDetail, loanProduct, changes);
         if (PeriodFrequencyType.MONTHS.equals(loanProductRelatedDetail.getRepaymentPeriodFrequencyType())) {
             final String repaymentFrequencyNthDayTypeParamName = "repaymentFrequencyNthDayType";
             Integer newValue = command.integerValueOfParameterNamed(repaymentFrequencyNthDayTypeParamName);
@@ -1497,6 +1544,28 @@ public class LoanScheduleAssembler {
                     .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE);
             changes.put(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, newValue);
             loanProductRelatedDetail.updateInterestRecognitionOnDisbursementDate(newValue);
+        }
+    }
+
+    /**
+     * Resolves the first due day of a semi-monthly loan being modified: a value in the request wins, otherwise the day
+     * the loan already has is kept, and only a loan that has none (e.g. it was monthly until now) takes the product's.
+     * The schedule is regenerated from the loan itself, so the day has to be settled on the loan here.
+     */
+    private void updateFirstRepaymentDayOfMonth(final JsonCommand command, final LoanProductRelatedDetail loanProductRelatedDetail,
+            final LoanProduct loanProduct, final Map<String, Object> changes) {
+        if (command.isChangeInIntegerParameterNamed(LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH,
+                loanProductRelatedDetail.getFirstRepaymentDayOfMonth())) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH);
+            changes.put(LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH, newValue);
+            changes.put("locale", command.locale());
+            loanProductRelatedDetail.setFirstRepaymentDayOfMonth(newValue);
+        } else if (loanProductRelatedDetail.getRepaymentPeriodFrequencyType().isSemiMonthly()
+                && loanProductRelatedDetail.getFirstRepaymentDayOfMonth() == null
+                && loanProduct.getLoanProductRelatedDetail().getFirstRepaymentDayOfMonth() != null) {
+            final Integer productValue = loanProduct.getLoanProductRelatedDetail().getFirstRepaymentDayOfMonth();
+            changes.put(LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH, productValue);
+            loanProductRelatedDetail.setFirstRepaymentDayOfMonth(productValue);
         }
     }
 

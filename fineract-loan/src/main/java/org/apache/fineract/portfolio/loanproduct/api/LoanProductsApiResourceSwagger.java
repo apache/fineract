@@ -118,6 +118,10 @@ public final class LoanProductsApiResourceSwagger {
         public Double maxInterestRatePerPeriod;
         @Schema(example = "1")
         public Integer repaymentEvery;
+        @Schema(example = "15", description = "First due day of the month of a semi-monthly product, between 1 and 15. "
+                + "The second due day is derived from it: 1 pairs with the 15th, 15 pairs with the last day of the month, "
+                + "and any day in between pairs with itself plus fifteen days.")
+        public Integer firstRepaymentDayOfMonth;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "true")
@@ -691,6 +695,10 @@ public final class LoanProductsApiResourceSwagger {
         public Integer maxNumberOfRepayments;
         @Schema(example = "7")
         public Integer repaymentEvery;
+        @Schema(example = "15", description = "First due day of the month of a semi-monthly product, between 1 and 15. "
+                + "The second due day is derived from it: 1 pairs with the 15th, 15 pairs with the last day of the month, "
+                + "and any day in between pairs with itself plus fifteen days.")
+        public Integer firstRepaymentDayOfMonth;
         public GetLoanProductsRepaymentFrequencyType repaymentFrequencyType;
         @Schema(example = "10")
         public Integer fixedLength;
@@ -1443,6 +1451,10 @@ public final class LoanProductsApiResourceSwagger {
         public Integer maxNumberOfRepayments;
         @Schema(example = "7")
         public Integer repaymentEvery;
+        @Schema(example = "15", description = "First due day of the month of a semi-monthly product, between 1 and 15. "
+                + "The second due day is derived from it: 1 pairs with the 15th, 15 pairs with the last day of the month, "
+                + "and any day in between pairs with itself plus fifteen days.")
+        public Integer firstRepaymentDayOfMonth;
         public GetLoanProductsResponse.GetLoanProductsRepaymentFrequencyType repaymentFrequencyType;
         @Schema(example = "10")
         public Integer fixedLength;
@@ -1645,6 +1657,10 @@ public final class LoanProductsApiResourceSwagger {
         public Double maxInterestRatePerPeriod;
         @Schema(example = "1")
         public Integer repaymentEvery;
+        @Schema(example = "15", description = "First due day of the month of a semi-monthly product, between 1 and 15. "
+                + "The second due day is derived from it: 1 pairs with the 15th, 15 pairs with the last day of the month, "
+                + "and any day in between pairs with itself plus fifteen days.")
+        public Integer firstRepaymentDayOfMonth;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "true")

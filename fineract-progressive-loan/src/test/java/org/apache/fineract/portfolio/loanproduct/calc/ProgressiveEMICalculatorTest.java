@@ -1113,6 +1113,42 @@ class ProgressiveEMICalculatorTest {
         checkPeriod(interestSchedule, 3, 0, 250.0, 0.0, 0.0, 250.0, 0.0);
     }
 
+    /**
+     * With 30-day months every semi-monthly period counts as 15 days whatever its actual length (16 days in January, 13
+     * in February), so 24% a year gives the same 1% rate factor for each period and a regular annuity.
+     */
+    @Test
+    public void test_disbursedAmt1000_dayInYears360_daysInMonth30_repayEverySemiMonthly() {
+
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
+                periodData(LocalDate.of(2023, 1, 15), LocalDate.of(2023, 1, 31)),
+                periodData(LocalDate.of(2023, 1, 31), LocalDate.of(2023, 2, 15)),
+                periodData(LocalDate.of(2023, 2, 15), LocalDate.of(2023, 2, 28)),
+                periodData(LocalDate.of(2023, 2, 28), LocalDate.of(2023, 3, 15)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(24);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.SEMI_MONTHLY);
+        Mockito.when(loanProductRelatedDetail.getFirstRepaymentDayOfMonth()).thenReturn(15);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrencyData()).thenReturn(currency);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                expectedRepaymentPeriods, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+
+        final Money disbursedAmount = toMoney(1000.0);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2023, 1, 15), disbursedAmount);
+
+        checkPeriod(interestSchedule, 0, 256.28, 10.0, 246.28, 753.72, false);
+        checkPeriod(interestSchedule, 1, 256.28, 7.54, 248.74, 504.98, false);
+        checkPeriod(interestSchedule, 2, 256.28, 5.05, 251.23, 253.75, false);
+        checkPeriod(interestSchedule, 3, 256.29, 2.54, 253.75, 0.0, false);
+    }
+
     @Test
     public void test_disbursedAmt100_dayInYears364_daysInMonthActual_repayEvery1Week() {
 
