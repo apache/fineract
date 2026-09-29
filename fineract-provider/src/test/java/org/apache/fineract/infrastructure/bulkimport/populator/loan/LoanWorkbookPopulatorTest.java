@@ -123,4 +123,23 @@ class LoanWorkbookPopulatorTest {
             assertEquals(1, definedNamesStartingWith(workbook, "Group_"), "colliding office names must yield a single Group_ defined name");
         }
     }
+
+    // A charge name containing characters Excel forbids in a defined name (e.g. '%') survived the old "[ )(]"-only
+    // sanitisation, so POI's HSSFName.setNameName rejected it with "Invalid name: ... name must be letter, digit,
+    // period, or underscore" and 500'd the whole template download.
+    @Test
+    void chargeNameWithExcelIllegalCharactersDoesNotCrashTemplateDownload() throws Exception {
+        ChargeData charge = mock(ChargeData.class);
+        when(charge.getName()).thenReturn("Service Fee 5%-10% (VAT)");
+        ChargeSheetPopulator charges = spy(new ChargeSheetPopulator(List.of()));
+        doReturn(List.of(charge)).when(charges).getCharges();
+
+        try (Workbook workbook = new HSSFWorkbook()) {
+            LoanWorkbookPopulator populator = populator(new LoanProductSheetPopulator(List.of()), charges);
+
+            assertDoesNotThrow(() -> populator.populate(workbook, DATE_FORMAT));
+
+            assertEquals(1, definedNamesStartingWith(workbook, "CHARGE_NAME_"));
+        }
+    }
 }
