@@ -836,7 +836,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
             if (!StringUtils.isBlank(loanTypeStr) && loanType.isIndividualAccount()) {
                 final String collateralParamName = "collateral";
                 if (changes.containsKey(collateralParamName)) {
-                    loan.updateLoanCollateral(possiblyModifedLoanCollateralItems);
+                    loan.mergeLoanCollateral(possiblyModifedLoanCollateralItems);
                 }
             }
         }

@@ -46,6 +46,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -707,6 +708,34 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         }
         this.loanCollateralManagements.clear();
         this.loanCollateralManagements.addAll(associateWithThisLoan(loanCollateral));
+    }
+
+    /**
+     * Applies a modified collateral set onto the managed collection: an item whose id matches an existing collateral
+     * updates that row in place, an item without a match is added, and an existing row absent from the set is removed.
+     * Replacing the managed rows with detached copies instead would insert duplicates and never update the originals.
+     */
+    public void mergeLoanCollateral(final Set<LoanCollateralManagement> loanCollateral) {
+        if (this.loanCollateralManagements == null) {
+            this.loanCollateralManagements = new HashSet<>();
+        }
+        final Map<Long, LoanCollateralManagement> existingById = this.loanCollateralManagements.stream()
+                .filter(existing -> existing.getId() != null)
+                .collect(Collectors.toMap(LoanCollateralManagement::getId, existing -> existing));
+        final Set<LoanCollateralManagement> merged = new HashSet<>();
+        for (final LoanCollateralManagement item : loanCollateral) {
+            final LoanCollateralManagement existing = item.getId() == null ? null : existingById.get(item.getId());
+            if (existing == null) {
+                item.setLoan(this);
+                merged.add(item);
+            } else {
+                existing.setQuantity(item.getQuantity());
+                existing.setClientCollateralManagement(item.getClientCollateralManagement());
+                merged.add(existing);
+            }
+        }
+        this.loanCollateralManagements.removeIf(existing -> !merged.contains(existing));
+        this.loanCollateralManagements.addAll(merged);
     }
 
     public void updateLoanRates(final List<Rate> loanRates) {

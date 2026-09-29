@@ -231,22 +231,20 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
     // only reduced by the requested amount, exactly once.
     @Test
     public void checkClientCollateralQuantityIsDecrementedExactlyOnceOnLoanSubmission() {
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(REQUEST_SPEC, RESPONSE_SPEC);
-        final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
-        ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        final Long clientID = createClient();
+        verifyClientCreatedOnServer(clientID);
 
-        // CollateralManagementHelper always seeds a client collateral with quantity 100
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(REQUEST_SPEC, RESPONSE_SPEC,
-                String.valueOf(clientID), collateralId);
+        // FeignCollateralHelper always seeds a client collateral with quantity 100
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientID, collateralId).getResourceId();
         final BigDecimal initialClientCollateralQuantity = getClientCollateralQuantity(clientID, clientCollateralId);
         assertEquals(0, BigDecimal.valueOf(100).compareTo(initialClientCollateralQuantity));
 
-        List<HashMap> collaterals = new ArrayList<>();
         final BigDecimal loanCollateralQuantity = BigDecimal.valueOf(10);
-        addCollaterals(collaterals, clientCollateralId, loanCollateralQuantity);
+        final List<PostLoansRequestCollateralData> collaterals = List.of(collateral(clientCollateralId, loanCollateralQuantity));
 
-        final Integer loanProductID = createLoanProduct(false, NONE);
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
+        final Long loanProductID = createLoanProduct(false, NONE);
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
         assertNotNull(loanID);
 
         final BigDecimal remainingClientCollateralQuantity = getClientCollateralQuantity(clientID, clientCollateralId);
@@ -259,39 +257,29 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
     // FINERACT-2721: modifying a pending loan's collateral used to check
     // `possiblyModifedLoanCollateralItems.equals(loan.getLoanCollateralManagements())` (inverted) to decide whether
     // to persist the change, so a genuine collateral quantity change on modify-loan was silently dropped. Verify the
-    // change is now both reported in the "changes" response and actually persisted against the loan.
+    // change is now actually persisted against the loan and the client collateral balance follows it.
     @Test
     public void checkModifyLoanApplicationPersistsGenuineCollateralQuantityChange() {
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(REQUEST_SPEC, RESPONSE_SPEC);
-        final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
-        ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        final Long clientID = createClient();
+        verifyClientCreatedOnServer(clientID);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientID, collateralId).getResourceId();
 
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(REQUEST_SPEC, RESPONSE_SPEC,
-                String.valueOf(clientID), collateralId);
+        final List<PostLoansRequestCollateralData> collaterals = List.of(collateral(clientCollateralId, BigDecimal.valueOf(10)));
+        final Long loanProductID = createLoanProduct(false, NONE);
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
+        final Long loanCollateralId = getLoanDetails(loanID).getCollateral().get(0).getId();
 
-        List<HashMap> collaterals = new ArrayList<>();
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(10));
-        final Integer loanProductID = createLoanProduct(false, NONE);
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
+        final PutLoansLoanIdRequest request = updateLoanRequest(clientID, loanProductID, null, null, List.of())
+                .collateral(List.of(existingCollateral(loanCollateralId, clientCollateralId, BigDecimal.valueOf(20))));
+        modifyLoanApplication(loanID, null, request);
 
-        final String loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
-        final Object loanCollateralManagementId = JsonPath.from(loanDetails).get("collateral[0].id");
-
-        List<HashMap> updatedCollaterals = new ArrayList<>();
-        HashMap<String, String> updatedCollateral = collaterals(clientCollateralId, BigDecimal.valueOf(20));
-        updatedCollateral.put("id", loanCollateralManagementId.toString());
-        updatedCollaterals.add(updatedCollateral);
-
-        final String updateJson = updateLoanJson(clientID, loanProductID, null, null, updatedCollaterals);
-        final String changesJson = Utils.performServerPut(REQUEST_SPEC, RESPONSE_SPEC,
-                "/fineract-provider/api/v1/loans/" + loanID + "?" + Utils.TENANT_IDENTIFIER, updateJson, null);
-        final Object collateralChange = JsonPath.from(changesJson).get("changes.collateral");
-        assertNotNull(collateralChange, "A genuine collateral quantity change must be reported in the update response");
-
-        final String updatedLoanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
-        final Object persistedQuantity = JsonPath.from(updatedLoanDetails).get("collateral[0].quantity");
-        assertEquals(0, BigDecimal.valueOf(20).compareTo(new BigDecimal(String.valueOf(persistedQuantity))),
+        final List<GetLoansLoanIdCollateralData> loanCollateral = getLoanDetails(loanID).getCollateral();
+        assertEquals(1, loanCollateral.size());
+        assertEquals(0, BigDecimal.valueOf(20).compareTo(loanCollateral.get(0).getQuantity()),
                 "The new collateral quantity must actually be persisted against the loan");
+        assertEquals(0, BigDecimal.valueOf(80).compareTo(getClientCollateralQuantity(clientID, clientCollateralId)),
+                "The client collateral must be reduced by the new loan quantity, not the old one");
     }
 
     // FINERACT-2721: resubmitting the same collateral quantity on modify-loan takes the "unchanged" branch in
@@ -299,42 +287,36 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
     // must still read back as the original value, not be corrupted by the restore-quantity bookkeeping.
     @Test
     public void checkModifyLoanApplicationWithUnchangedCollateralQuantityStaysConsistent() {
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(REQUEST_SPEC, RESPONSE_SPEC);
-        final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
-        ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        final Long clientID = createClient();
+        verifyClientCreatedOnServer(clientID);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientID, collateralId).getResourceId();
 
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(REQUEST_SPEC, RESPONSE_SPEC,
-                String.valueOf(clientID), collateralId);
-
-        List<HashMap> collaterals = new ArrayList<>();
         final BigDecimal loanCollateralQuantity = BigDecimal.valueOf(10);
-        addCollaterals(collaterals, clientCollateralId, loanCollateralQuantity);
-        final Integer loanProductID = createLoanProduct(false, NONE);
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
+        final List<PostLoansRequestCollateralData> collaterals = List.of(collateral(clientCollateralId, loanCollateralQuantity));
+        final Long loanProductID = createLoanProduct(false, NONE);
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
+        final Long loanCollateralId = getLoanDetails(loanID).getCollateral().get(0).getId();
 
-        final String loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
-        final Object loanCollateralManagementId = JsonPath.from(loanDetails).get("collateral[0].id");
+        final PutLoansLoanIdRequest request = updateLoanRequest(clientID, loanProductID, null, null, List.of())
+                .collateral(List.of(existingCollateral(loanCollateralId, clientCollateralId, loanCollateralQuantity)));
+        modifyLoanApplication(loanID, null, request);
 
-        List<HashMap> unchangedCollaterals = new ArrayList<>();
-        HashMap<String, String> unchangedCollateral = collaterals(clientCollateralId, loanCollateralQuantity);
-        unchangedCollateral.put("id", loanCollateralManagementId.toString());
-        unchangedCollaterals.add(unchangedCollateral);
-
-        final String updateJson = updateLoanJson(clientID, loanProductID, null, null, unchangedCollaterals);
-        Utils.performServerPut(REQUEST_SPEC, RESPONSE_SPEC, "/fineract-provider/api/v1/loans/" + loanID + "?" + Utils.TENANT_IDENTIFIER,
-                updateJson, null);
-
-        final String updatedLoanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
-        final Object persistedQuantity = JsonPath.from(updatedLoanDetails).get("collateral[0].quantity");
-        assertEquals(0, loanCollateralQuantity.compareTo(new BigDecimal(String.valueOf(persistedQuantity))),
+        final List<GetLoansLoanIdCollateralData> loanCollateral = getLoanDetails(loanID).getCollateral();
+        assertEquals(1, loanCollateral.size());
+        assertEquals(0, loanCollateralQuantity.compareTo(loanCollateral.get(0).getQuantity()),
                 "Resubmitting an unchanged collateral quantity must not alter the loan's persisted collateral quantity");
+        assertEquals(0, BigDecimal.valueOf(90).compareTo(getClientCollateralQuantity(clientID, clientCollateralId)),
+                "Resubmitting an unchanged collateral quantity must not alter the client's remaining collateral quantity");
     }
 
-    private BigDecimal getClientCollateralQuantity(final Integer clientId, final Integer clientCollateralId) {
-        final String url = "/fineract-provider/api/v1/clients/" + clientId + "/collaterals/" + clientCollateralId + "?"
-                + Utils.TENANT_IDENTIFIER;
-        final Object quantity = Utils.performServerGet(REQUEST_SPEC, RESPONSE_SPEC, url, "quantity");
-        return new BigDecimal(String.valueOf(quantity));
+    private BigDecimal getClientCollateralQuantity(final Long clientId, final Long clientCollateralId) {
+        return ok(() -> fineractClient().clientCollateralManagement().getClientCollateralData(clientId, clientCollateralId)).getQuantity();
+    }
+
+    private PutLoansLoanIdCollateral existingCollateral(final Long loanCollateralId, final Long clientCollateralId,
+            final BigDecimal quantity) {
+        return new PutLoansLoanIdCollateral().id(loanCollateralId).clientCollateralId(clientCollateralId).quantity(quantity);
     }
 
     @Test

@@ -75,19 +75,13 @@ public class LoanCollateralAssembler {
                     LoanCollateralManagement loanCollateralManagement = this.loanCollateralRepository.findById(id)
                             .orElseThrow(() -> new LoanCollateralManagementNotFoundException(id));
 
-                    if (adjustClientCollateralQuantity) {
-                        if (loanCollateralManagement.getQuantity().compareTo(quantity) != 0) {
-                            updatedClientQuantity = clientCollateral.getQuantity().add(loanCollateralManagement.getQuantity())
-                                    .subtract(quantity);
-                            if (BigDecimal.ZERO.compareTo(updatedClientQuantity) > 0) {
-                                throw new InvalidAmountOfCollateralQuantity(quantity);
-                            }
-                        } else {
-                            // when quantity is unchanged, restore the original client collateral quantity rather than
-                            // setting it to the requested quantity value which may be less than available
-                            updatedClientQuantity = clientCollateral.getQuantity().add(loanCollateralManagement.getQuantity());
+                    // an unchanged quantity leaves the client collateral as it is: the loan still holds the same amount
+                    if (adjustClientCollateralQuantity && loanCollateralManagement.getQuantity().compareTo(quantity) != 0) {
+                        updatedClientQuantity = clientCollateral.getQuantity().add(loanCollateralManagement.getQuantity())
+                                .subtract(quantity);
+                        if (BigDecimal.ZERO.compareTo(updatedClientQuantity) > 0) {
+                            throw new InvalidAmountOfCollateralQuantity(quantity);
                         }
-
                         clientCollateral.updateQuantity(updatedClientQuantity);
                     }
                     collateralItems
