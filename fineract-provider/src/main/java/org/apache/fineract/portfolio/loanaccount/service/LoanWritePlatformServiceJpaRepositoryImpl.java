@@ -3644,7 +3644,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             case WEEKS -> dueRepaymentPeriodDate = startDate.plusWeeks(repaidEvery);
             case MONTHS -> dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
             case YEARS -> dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
-            case INVALID, WHOLE_TERM -> {
+            // This bounds the rescheduling of a loan driven by a meeting calendar, which a semi-monthly loan cannot
+            // be attached to, since CalendarFrequencyType has no semi-monthly equivalent.
+            case SEMI_MONTHLY, INVALID, WHOLE_TERM -> {
             }
         }
         return dueRepaymentPeriodDate.minusDays(1);// get 2n-1 range date from startDate

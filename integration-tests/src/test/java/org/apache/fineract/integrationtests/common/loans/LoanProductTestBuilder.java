@@ -48,6 +48,7 @@ public class LoanProductTestBuilder {
     private static final String DAYS = "0";
     private static final String WEEK = "1";
     private static final String MONTHS = "2";
+    private static final String SEMI_MONTHLY = "6";
     private static final String YEARS = "3";
     private static final String CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD = "1";
     private static final String EQUAL_PRINCIPAL_PAYMENTS = "0";
@@ -96,6 +97,8 @@ public class LoanProductTestBuilder {
     private String principal = "10000.00";
     private String numberOfRepayments = "5";
     private String repaymentFrequency = MONTHS;
+    private Integer firstRepaymentDayOfMonth = null;
+    private Integer secondRepaymentDayOfMonth = null;
     private String repaymentPeriod = "1";
     private String interestRatePerPeriod = "2";
     private String interestRateFrequencyType = MONTHS;
@@ -209,6 +212,12 @@ public class LoanProductTestBuilder {
         map.put("numberOfRepayments", this.numberOfRepayments);
         map.put("repaymentEvery", this.repaymentPeriod);
         map.put("repaymentFrequencyType", this.repaymentFrequency);
+        if (this.firstRepaymentDayOfMonth != null) {
+            map.put("firstRepaymentDayOfMonth", this.firstRepaymentDayOfMonth);
+        }
+        if (this.secondRepaymentDayOfMonth != null) {
+            map.put("secondRepaymentDayOfMonth", this.secondRepaymentDayOfMonth);
+        }
         map.put("interestRatePerPeriod", this.interestRatePerPeriod);
         map.put("interestRateFrequencyType", this.interestRateFrequencyType);
         map.put("amortizationType", this.amortizationType);
@@ -398,6 +407,8 @@ public class LoanProductTestBuilder {
         request.numberOfRepayments(toInteger(this.numberOfRepayments));
         request.repaymentEvery(toInteger(this.repaymentPeriod));
         request.repaymentFrequencyType(toLong(this.repaymentFrequency));
+        request.firstRepaymentDayOfMonth(this.firstRepaymentDayOfMonth);
+        request.secondRepaymentDayOfMonth(this.secondRepaymentDayOfMonth);
         request.interestRatePerPeriod(toDouble(this.interestRatePerPeriod));
         request.interestRateFrequencyType(toInteger(this.interestRateFrequencyType));
         request.amortizationType(toInteger(this.amortizationType));
@@ -697,6 +708,19 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withRepaymentTypeAsMonth() {
         this.repaymentFrequency = MONTHS;
+        return this;
+    }
+
+    /** Twice a month, on the two configured days; a second day of 31 is the last day of every month. */
+    public LoanProductTestBuilder withRepaymentTypeAsSemiMonthly(final Integer firstRepaymentDayOfMonth,
+            final Integer secondRepaymentDayOfMonth) {
+        this.repaymentFrequency = SEMI_MONTHLY;
+        return withSemiMonthlyDueDays(firstRepaymentDayOfMonth, secondRepaymentDayOfMonth);
+    }
+
+    public LoanProductTestBuilder withSemiMonthlyDueDays(final Integer firstRepaymentDayOfMonth, final Integer secondRepaymentDayOfMonth) {
+        this.firstRepaymentDayOfMonth = firstRepaymentDayOfMonth;
+        this.secondRepaymentDayOfMonth = secondRepaymentDayOfMonth;
         return this;
     }
 

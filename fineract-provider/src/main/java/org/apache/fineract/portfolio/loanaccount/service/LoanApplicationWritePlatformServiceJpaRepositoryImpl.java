@@ -85,6 +85,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyScheduleDates;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTransitionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationValidator;
@@ -258,8 +259,19 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
         }
 
-        final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
-                calendarFrequencyType, frequency, updatedRepeatsOnDay, recalculationFrequencyNthDay);
+        final Calendar calendar;
+        if (recalculationFrequencyType == SAME_AS_REPAYMENT_PERIOD
+                && loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType().isSemiMonthly()) {
+            // Calendar frequencies have no semi-monthly value; without this the stored rule would be FREQ=INVALID,
+            // which fails every later read of the calendar.
+            calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
+                    SemiMonthlyScheduleDates.toRecurrence(
+                            SemiMonthlyScheduleDates.requireDueDays(loan.getLoanProductRelatedDetail().getFirstRepaymentDayOfMonth(),
+                                    loan.getLoanProductRelatedDetail().getSecondRepaymentDayOfMonth())));
+        } else {
+            calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(), calendarFrequencyType,
+                    frequency, updatedRepeatsOnDay, recalculationFrequencyNthDay);
+        }
         final CalendarInstance calendarInstance = CalendarInstance.from(calendar, loan.loanInterestRecalculationDetails().getId(),
                 calendarEntityType.getValue());
         this.calendarInstanceRepository.save(calendarInstance);

@@ -58,7 +58,8 @@ public class LoanScheduleGeneratorServiceImpl implements LoanScheduleGeneratorSe
                 loanProductRelatedDetail.isInterestRecognitionOnDisbursementDate(), //
                 loanProductRelatedDetail.getDaysInYearCustomStrategy(), //
                 loanProductRelatedDetail.getInterestMethod(), //
-                loanProductRelatedDetail.isAllowPartialPeriodInterestCalculation(), false);
+                loanProductRelatedDetail.isAllowPartialPeriodInterestCalculation(), false,
+                loanProductRelatedDetail.getFirstRepaymentDayOfMonth(), loanProductRelatedDetail.getSecondRepaymentDayOfMonth());
 
         return scheduleGenerator.generate(mc, modelData).getTotalInterestAmount();
     }

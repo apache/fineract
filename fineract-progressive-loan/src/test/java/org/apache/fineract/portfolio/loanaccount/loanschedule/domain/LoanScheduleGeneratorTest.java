@@ -98,6 +98,40 @@ class LoanScheduleGeneratorTest {
                 LocalDate.of(2024, 7, 1), BigDecimal.valueOf(32.60), BigDecimal.valueOf(0.27), BigDecimal.valueOf(32.87), BigDecimal.ZERO);
     }
 
+    /**
+     * The model data carries the semi-monthly due days, which multi-disbursement loans rely on when a charge is
+     * calculated on the interest of the first disbursement. 30-day months make every period 15 days, so 24% a year is
+     * 1% per period.
+     */
+    @Test
+    void testGenerateSemiMonthlyLoanSchedule() {
+        final LocalDate disbursementDate = LocalDate.of(2023, 1, 15);
+        LoanRepaymentScheduleModelData modelData = new LoanRepaymentScheduleModelData(disbursementDate, CURRENCY, BigDecimal.valueOf(1000),
+                disbursementDate, 4, REPAYMENT_FREQUENCY, "SEMI_MONTHLY", BigDecimal.valueOf(24), false, DaysInMonthType.DAYS_30,
+                DaysInYearType.DAYS_360, null, null, null, false, null, InterestMethod.DECLINING_BALANCE, true, false, 15, 31);
+
+        ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
+        ProgressiveLoanScheduleGenerator generator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator,
+                new ProgressiveEMICalculator(scheduledDateGenerator), interestScheduleModelRepositoryWrapperMock);
+        generator.setLoanTransactionProcessingService(loanTransactionProcessingService);
+
+        LoanSchedulePlan loanSchedule = generator.generate(mc, modelData);
+
+        assertEquals(5, loanSchedule.getPeriods().size(), "Expected the disbursement and 4 repayment periods.");
+        checkRepaymentPeriod((LoanSchedulePlanRepaymentPeriod) loanSchedule.getPeriods().get(1), 1, LocalDate.of(2023, 1, 15),
+                LocalDate.of(2023, 1, 31), BigDecimal.valueOf(246.28), BigDecimal.valueOf(10.00), BigDecimal.valueOf(256.28),
+                BigDecimal.valueOf(753.72));
+        checkRepaymentPeriod((LoanSchedulePlanRepaymentPeriod) loanSchedule.getPeriods().get(2), 2, LocalDate.of(2023, 1, 31),
+                LocalDate.of(2023, 2, 15), BigDecimal.valueOf(248.74), BigDecimal.valueOf(7.54), BigDecimal.valueOf(256.28),
+                BigDecimal.valueOf(504.98));
+        checkRepaymentPeriod((LoanSchedulePlanRepaymentPeriod) loanSchedule.getPeriods().get(3), 3, LocalDate.of(2023, 2, 15),
+                LocalDate.of(2023, 2, 28), BigDecimal.valueOf(251.23), BigDecimal.valueOf(5.05), BigDecimal.valueOf(256.28),
+                BigDecimal.valueOf(253.75));
+        checkRepaymentPeriod((LoanSchedulePlanRepaymentPeriod) loanSchedule.getPeriods().get(4), 4, LocalDate.of(2023, 2, 28),
+                LocalDate.of(2023, 3, 15), BigDecimal.valueOf(253.75), BigDecimal.valueOf(2.54), BigDecimal.valueOf(256.29),
+                BigDecimal.ZERO);
+    }
+
     @Test
     void testGenerateLoanScheduleWithDownPayment() {
         LoanRepaymentScheduleModelData modelData = new LoanRepaymentScheduleModelData(LocalDate.of(2024, 1, 1), CURRENCY,
