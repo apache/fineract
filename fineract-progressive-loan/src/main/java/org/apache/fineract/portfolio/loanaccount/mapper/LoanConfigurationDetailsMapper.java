@@ -54,6 +54,7 @@ public final class LoanConfigurationDetailsMapper {
                 DaysInYearType.fromInt(loanProductRelatedDetail.getDaysInYearType()),
                 DaysInMonthType.fromInt(loanProductRelatedDetail.getDaysInMonthType()), loanProductRelatedDetail.getAmortizationMethod(),
                 loanProductRelatedDetail.getRepaymentPeriodFrequencyType(), loanProductRelatedDetail.getRepayEvery(),
+                loanProductRelatedDetail.getFirstRepaymentDayOfMonth(), loanProductRelatedDetail.getSecondRepaymentDayOfMonth(),
                 loanProductRelatedDetail.getNumberOfRepayments(), loanProductRelatedDetail.isInterestRecognitionOnDisbursementDate(),
                 loanProductRelatedDetail.getDaysInYearCustomStrategy(), loanProductRelatedDetail.isAllowPartialPeriodInterestCalculation(),
                 loan.isInterestRecalculationEnabled(), getRestFrequencyType(loan), getPreCloseInterestCalculationStrategy(loan),
