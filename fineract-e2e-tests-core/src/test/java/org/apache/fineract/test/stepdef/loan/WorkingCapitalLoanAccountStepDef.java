@@ -2125,6 +2125,11 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         eventCheckHelper.workingCapitalLoanBreachChangeEventCheck(getCreatedLoanId(), Boolean.valueOf(breachFlag));
     }
 
+    @Then("a Working Capital Loan Breach Change business event is raised with breach data:")
+    public void aWorkingCapitalLoanBreachChangeBusinessEventIsRaisedWithBreachData(final DataTable table) {
+        eventCheckHelper.workingCapitalLoanBreachChangeEventWithBreachDataCheck(getCreatedLoanId(), table.asMaps().get(0));
+    }
+
     @Then("a Working Capital Loan Near Breach Change business event is raised with near breach flag {string}")
     public void aWorkingCapitalLoanNearBreachChangeBusinessEventIsRaised(final String nearBreachFlag) {
         eventCheckHelper.workingCapitalLoanNearBreachChangeEventCheck(getCreatedLoanId(), Boolean.valueOf(nearBreachFlag));
@@ -3695,6 +3700,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                             : new Utils.DoubleFormatter(response.getBalance().getTotalDiscountFee().doubleValue()).format());
                 case "breachStartDate" ->
                     actualValues.add(response.getBreachStartDate() == null ? "null" : response.getBreachStartDate().toString());
+                case "breachEffectiveStartDate" -> actualValues
+                        .add(response.getBreachEffectiveStartDate() == null ? "null" : response.getBreachEffectiveStartDate().toString());
                 case "delinquencyStartDate" ->
                     actualValues.add(response.getDelinquencyStartDate() == null ? "null" : response.getDelinquencyStartDate().toString());
                 case "delinquencyEffectiveStartDate" -> actualValues.add(response.getDelinquencyEffectiveStartDate() == null ? "null"
