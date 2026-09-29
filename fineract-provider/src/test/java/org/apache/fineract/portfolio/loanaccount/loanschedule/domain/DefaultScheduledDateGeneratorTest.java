@@ -85,7 +85,7 @@ public class DefaultScheduledDateGeneratorTest {
 
         LocalDate submittedOnDate = LocalDate.of(2024, 1, 1);
         LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(dollarCurrency.toData(), 1, MONTHS, 4, 1, MONTHS,
-                null, INVALID, EQUAL_PRINCIPAL, FLAT, ZERO, MONTHS, ZERO, SAME_AS_REPAYMENT_PERIOD, false, principalAmount,
+                null, null, null, INVALID, EQUAL_PRINCIPAL, FLAT, ZERO, MONTHS, ZERO, SAME_AS_REPAYMENT_PERIOD, false, principalAmount,
                 expectedDisbursementDate, null, dueRepaymentPeriodDate, null, null, null, null, null,
                 Money.of(fromApplicationCurrency(dollarCurrency), ZERO), false, null, EMPTY_LIST, BigDecimal.valueOf(36_000L), null,
                 DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null, null, null, ZERO, null, NONE, null, ZERO,
@@ -166,8 +166,8 @@ public class DefaultScheduledDateGeneratorTest {
         LocalDate expectedDisbursementDate = LocalDate.of(2023, 10, 26);
 
         LocalDate submittedOnDate = LocalDate.of(2023, 10, 24);
-        return LoanApplicationTerms.assembleFrom(dollarCurrency.toData(), 1, MONTHS, 1, 1, MONTHS, null, INVALID, EQUAL_PRINCIPAL, FLAT,
-                ZERO, MONTHS, ZERO, SAME_AS_REPAYMENT_PERIOD, false, principalAmount, expectedDisbursementDate, null,
+        return LoanApplicationTerms.assembleFrom(dollarCurrency.toData(), 1, MONTHS, 1, 1, MONTHS, null, null, null, INVALID,
+                EQUAL_PRINCIPAL, FLAT, ZERO, MONTHS, ZERO, SAME_AS_REPAYMENT_PERIOD, false, principalAmount, expectedDisbursementDate, null,
                 dueRepaymentPeriodDate, null, null, null, null, null, Money.of(fromApplicationCurrency(dollarCurrency), ZERO), false, null,
                 EMPTY_LIST, BigDecimal.valueOf(36_000L), null, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null, null,
                 null, ZERO, null, NONE, null, ZERO, EMPTY_LIST, true, 0, false, holidayDetailDTO, false, false, false, null, false, false,
