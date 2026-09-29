@@ -43,6 +43,7 @@ import org.apache.fineract.commands.exception.CommandNotFoundException;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -497,7 +498,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
                         SQLBuilder.WhereLogicalOperator.OR);
             });
         }
-        extraCriteria.addNonNullCriteria("aud.status = ", auditRequest.getStatus());
+        extraCriteria.addNonNullCriteria("aud.status = ", parseStatus(auditRequest.getStatus()));
         extraCriteria.addNonNullCriteria("aud.office_id = ", auditRequest.getOfficeId());
         extraCriteria.addNonNullCriteria("aud.group_id = ", auditRequest.getGroupId());
         extraCriteria.addNonNullCriteria("aud.client_id = ", auditRequest.getClientId());
@@ -505,6 +506,18 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         extraCriteria.addNonNullCriteria("aud.savings_account_id = ", auditRequest.getSavingsAccountId());
 
         return extraCriteria;
+    }
+
+    private static Integer parseStatus(final String status) {
+        if (StringUtils.isBlank(status)) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(status.trim());
+        } catch (NumberFormatException e) {
+            throw new PlatformApiDataValidationException("validation.msg.audit.status.not.integer",
+                    "The parameter `status` must be an integer.", "status", e, status);
+        }
     }
 
     private String makercheckerCapabilityOnly(final String useType, final AppUser currentUser) {
