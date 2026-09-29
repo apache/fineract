@@ -22,6 +22,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.Gson;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
@@ -54,6 +55,8 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
+import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.test.data.TransactionType;
 import org.apache.fineract.test.data.workingcapitalproduct.DefaultWorkingCapitalLoanProduct;
 import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalLoanProductResolver;
@@ -84,10 +87,14 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
     private static final String COMMAND_DISCOUNT = "?command=discountFee";
     private static final String COMMAND_DISCOUNT_ADJUSTMENT = "?command=discountFeeAdjustment";
     private static final String WCL_TRANSACTIONS_PATH = "/transactions";
+    private static final String WCL_DELINQUENCY_RANGE_SCHEDULE_PATH = "/delinquency-range-schedule";
+    private static final String WCL_BREACH_SCHEDULE_PATH = "/breach-schedule";
 
     private final FineractFeignClient fineractFeignClient;
     private final WorkingCapitalLoanProductResolver workingCapitalLoanProductResolver;
     private final WorkingCapitalLoanRequestFactory workingCapitalLoanRequestFactory;
+    private final WorkingCapitalDelinquencyStepDef workingCapitalDelinquencyStepDef;
+    private final WorkingCapitalBreachScheduleStepDef workingCapitalBreachScheduleStepDef;
 
     // Individual operation steps implementation
 
@@ -718,6 +725,42 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
             } catch (Exception e) {
                 log.info("Loan does not exist as expected after rollback");
             }
+        }
+    }
+
+    @Then("Working Capital loan delinquency range schedule has the following data via batch api:")
+    public void verifyDelinquencyRangeScheduleViaBatchApi(final DataTable dataTable) {
+        Long loanId = workingCapitalDelinquencyStepDef.extractLoanId();
+        String url = WCL_BASE_URL + "/" + loanId + WCL_DELINQUENCY_RANGE_SCHEDULE_PATH;
+        BatchRequest request = buildBatchRequest(1L, null, url, BATCH_API_METHOD_GET, null);
+
+        List<BatchResponse> ok = ok(() -> fineractFeignClient.batch().handleBatchRequests(List.of(request), false));
+        assertThat(ok).isNotNull();
+        assertThat(ok.get(0).getStatusCode()).isEqualTo(200);
+        List<WorkingCapitalLoanDelinquencyRangeScheduleData> actualRangeSchedule = parseBatchResponse(ok, new TypeReference<>() {});
+
+        workingCapitalDelinquencyStepDef.verifyDelinquencyRangeSchedule(actualRangeSchedule, dataTable);
+    }
+
+    @Then("Working Capital loan breach schedule has the following data via batch api:")
+    public void verifyBreachScheduleViaBatchApi(final DataTable dataTable) {
+        Long loanId = workingCapitalDelinquencyStepDef.extractLoanId();
+        String url = WCL_BASE_URL + "/" + loanId + WCL_BREACH_SCHEDULE_PATH;
+        BatchRequest request = buildBatchRequest(1L, null, url, BATCH_API_METHOD_GET, null);
+
+        List<BatchResponse> ok = ok(() -> fineractFeignClient.batch().handleBatchRequests(List.of(request), false));
+        assertThat(ok).isNotNull();
+        assertThat(ok.get(0).getStatusCode()).isEqualTo(200);
+        List<WorkingCapitalLoanBreachScheduleData> actualRangeSchedule = parseBatchResponse(ok, new TypeReference<>() {});
+
+        workingCapitalBreachScheduleStepDef.verifyBreachScheduleData(actualRangeSchedule, dataTable);
+    }
+
+    private <T> T parseBatchResponse(List<BatchResponse> ok, TypeReference<T> typeReference) {
+        try {
+            return OBJECT_MAPPER.readValue(ok.getFirst().getBody(), typeReference);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new RuntimeException("Error deserializing JSON to object", e);
         }
     }
 
