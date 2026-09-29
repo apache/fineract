@@ -37,5 +37,23 @@ public record LoanRepaymentScheduleModelData(@NotNull LocalDate scheduleGenerati
         BigDecimal downPaymentPercentage, Integer installmentAmountInMultiplesOf, Integer fixedLength,
         @NotNull Boolean interestRecognitionOnDisbursementDate, @Nullable DaysInYearCustomStrategyType daysInYearCustomStrategy,
         @NotNull InterestMethod interestMethod, @NotNull boolean allowPartialPeriodInterestCalculation,
-        @NotNull boolean allowFullTermForTranche, @Nullable MonthEndDueDateStrategy monthEndDueDateStrategy) {
+        @NotNull boolean allowFullTermForTranche, @Nullable MonthEndDueDateStrategy monthEndDueDateStrategy,
+        @Nullable Integer firstRepaymentDayOfMonth, @Nullable Integer secondRepaymentDayOfMonth) {
+
+    /**
+     * The shape the record had before the semi-monthly due days were added, kept because the record is the public input
+     * of the embeddable schedule generator. Only a {@code SEMI_MONTHLY} schedule needs the days.
+     */
+    public LoanRepaymentScheduleModelData(LocalDate scheduleGenerationStartDate, CurrencyData currency, BigDecimal disbursementAmount,
+            LocalDate disbursementDate, int numberOfRepayments, int repaymentFrequency, String repaymentFrequencyType,
+            BigDecimal annualNominalInterestRate, boolean downPaymentEnabled, DaysInMonthType daysInMonth, DaysInYearType daysInYear,
+            BigDecimal downPaymentPercentage, Integer installmentAmountInMultiplesOf, Integer fixedLength,
+            Boolean interestRecognitionOnDisbursementDate, DaysInYearCustomStrategyType daysInYearCustomStrategy,
+            InterestMethod interestMethod, boolean allowPartialPeriodInterestCalculation, boolean allowFullTermForTranche,
+            MonthEndDueDateStrategy monthEndDueDateStrategy) {
+        this(scheduleGenerationStartDate, currency, disbursementAmount, disbursementDate, numberOfRepayments, repaymentFrequency,
+                repaymentFrequencyType, annualNominalInterestRate, downPaymentEnabled, daysInMonth, daysInYear, downPaymentPercentage,
+                installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy,
+                interestMethod, allowPartialPeriodInterestCalculation, allowFullTermForTranche, monthEndDueDateStrategy, null, null);
+    }
 }

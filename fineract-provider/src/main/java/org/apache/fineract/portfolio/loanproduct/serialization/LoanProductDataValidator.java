@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -65,6 +66,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTra
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyDueDaysValidator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.AdvancedPaymentAllocationsJsonParser;
 import org.apache.fineract.portfolio.loanproduct.domain.AdvancedPaymentAllocationsValidator;
@@ -101,6 +103,10 @@ public final class LoanProductDataValidator {
     public static final String MAX_NUMBER_OF_REPAYMENTS = "maxNumberOfRepayments";
     public static final String REPAYMENT_EVERY = "repaymentEvery";
     public static final String REPAYMENT_FREQUENCY_TYPE = "repaymentFrequencyType";
+    /** WHOLE_TERM and INVALID are not repayment frequencies a product can be created with. */
+    private static final Object[] SUPPORTED_REPAYMENT_FREQUENCY_TYPES = { PeriodFrequencyType.DAYS.getValue(),
+            PeriodFrequencyType.WEEKS.getValue(), PeriodFrequencyType.MONTHS.getValue(), PeriodFrequencyType.YEARS.getValue(),
+            PeriodFrequencyType.SEMI_MONTHLY.getValue() };
     public static final String AMORTIZATION_TYPE = "amortizationType";
     public static final String INTEREST_TYPE = "interestType";
     public static final String INTEREST_CALCULATION_PERIOD_TYPE = "interestCalculationPeriodType";
@@ -131,7 +137,8 @@ public final class LoanProductDataValidator {
      */
     private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat", NAME, DESCRIPTION, FUND_ID,
             CURRENCY_CODE, DIGITS_AFTER_DECIMAL, IN_MULTIPLES_OF, PRINCIPAL, MIN_PRINCIPAL, MAX_PRINCIPAL, REPAYMENT_EVERY,
-            NUMBER_OF_REPAYMENTS, MIN_NUMBER_OF_REPAYMENTS, MAX_NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY_TYPE, INTEREST_RATE_PER_PERIOD,
+            NUMBER_OF_REPAYMENTS, MIN_NUMBER_OF_REPAYMENTS, MAX_NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY_TYPE,
+            LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH, LoanProductConstants.SECOND_REPAYMENT_DAY_OF_MONTH, INTEREST_RATE_PER_PERIOD,
             MIN_INTEREST_RATE_PER_PERIOD, MAX_INTEREST_RATE_PER_PERIOD, INTEREST_RATE_FREQUENCY_TYPE, AMORTIZATION_TYPE, INTEREST_TYPE,
             INTEREST_CALCULATION_PERIOD_TYPE, LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
             IN_ARREARS_TOLERANCE, TRANSACTION_PROCESSING_STRATEGY_CODE, ADVANCED_PAYMENT_ALLOCATIONS, CREDIT_ALLOCATIONS,
@@ -364,7 +371,9 @@ public final class LoanProductDataValidator {
 
         final Integer repaymentFrequencyType = this.fromApiJsonHelper.extractIntegerNamed(REPAYMENT_FREQUENCY_TYPE, element,
                 Locale.getDefault());
-        baseDataValidator.reset().parameter(REPAYMENT_FREQUENCY_TYPE).value(repaymentFrequencyType).notNull().inMinMaxRange(0, 3);
+        baseDataValidator.reset().parameter(REPAYMENT_FREQUENCY_TYPE).value(repaymentFrequencyType).notNull()
+                .isOneOfTheseValues(SUPPORTED_REPAYMENT_FREQUENCY_TYPES);
+        validateSemiMonthlyRepayment(element, baseDataValidator, repaymentFrequencyType, repaymentEvery, true);
 
         // settings
         final Integer amortizationType = this.fromApiJsonHelper.extractIntegerNamed(AMORTIZATION_TYPE, element, Locale.getDefault());
@@ -1458,11 +1467,19 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(REPAYMENT_EVERY).value(repaymentEvery).notNull().integerGreaterThanZero();
         }
 
+        final Integer storedRepaymentFrequencyType = loanProduct.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType() == null
+                ? null
+                : loanProduct.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType().getValue();
+        Integer repaymentFrequencyType = storedRepaymentFrequencyType;
         if (this.fromApiJsonHelper.parameterExists(REPAYMENT_FREQUENCY_TYPE, element)) {
-            final Integer repaymentFrequencyType = this.fromApiJsonHelper.extractIntegerNamed(REPAYMENT_FREQUENCY_TYPE, element,
-                    Locale.getDefault());
-            baseDataValidator.reset().parameter(REPAYMENT_FREQUENCY_TYPE).value(repaymentFrequencyType).notNull().inMinMaxRange(0, 3);
+            repaymentFrequencyType = this.fromApiJsonHelper.extractIntegerNamed(REPAYMENT_FREQUENCY_TYPE, element, Locale.getDefault());
+            baseDataValidator.reset().parameter(REPAYMENT_FREQUENCY_TYPE).value(repaymentFrequencyType).notNull()
+                    .isOneOfTheseValues(SUPPORTED_REPAYMENT_FREQUENCY_TYPES);
         }
+        // A product that is already semi-monthly keeps its stored days, so a request that resends the same frequency
+        // without the days is fine; only a change of frequency has to bring both days along.
+        validateSemiMonthlyRepayment(element, baseDataValidator, repaymentFrequencyType, repaymentEvery,
+                !Objects.equals(repaymentFrequencyType, storedRepaymentFrequencyType));
 
         String transactionProcessingStrategyCode = loanProduct.getTransactionProcessingStrategyCode();
         if (this.fromApiJsonHelper.parameterExists(TRANSACTION_PROCESSING_STRATEGY_CODE, element)) {
@@ -3034,5 +3051,41 @@ public final class LoanProductDataValidator {
 
     private Integer defaultToZeroIfNull(Integer value) {
         return value != null ? value : 0;
+    }
+
+    /**
+     * A semi-monthly loan is repaid on two fixed days of every calendar month, so it needs both of those days and it
+     * cannot repeat on a multiple of its period. The days are set as a pair, so that a product never ends up with one
+     * new day next to an old one that no longer fits it.
+     */
+    private void validateSemiMonthlyRepayment(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            final Integer repaymentFrequencyType, final Integer repaymentEvery, final boolean frequencyIsChanging) {
+        final boolean isSemiMonthly = PeriodFrequencyType.SEMI_MONTHLY.getValue().equals(repaymentFrequencyType);
+        final boolean firstDayIsBeingSet = this.fromApiJsonHelper.parameterExists(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH,
+                element);
+        final boolean secondDayIsBeingSet = this.fromApiJsonHelper.parameterExists(LoanProductConstants.SECOND_REPAYMENT_DAY_OF_MONTH,
+                element);
+
+        if (firstDayIsBeingSet || secondDayIsBeingSet) {
+            final Integer firstRepaymentDayOfMonth = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH, element);
+            final Integer secondRepaymentDayOfMonth = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(LoanProductConstants.SECOND_REPAYMENT_DAY_OF_MONTH, element);
+            SemiMonthlyDueDaysValidator.validate(baseDataValidator, firstRepaymentDayOfMonth, secondRepaymentDayOfMonth);
+            if (!isSemiMonthly) {
+                baseDataValidator.reset()
+                        .parameter(firstDayIsBeingSet ? LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH
+                                : LoanProductConstants.SECOND_REPAYMENT_DAY_OF_MONTH)
+                        .failWithCode("supported.only.for.semi.monthly.repayment.frequency");
+            }
+        } else if (isSemiMonthly && frequencyIsChanging) {
+            baseDataValidator.reset().parameter(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH).value(null).notNull();
+            baseDataValidator.reset().parameter(LoanProductConstants.SECOND_REPAYMENT_DAY_OF_MONTH).value(null).notNull();
+        }
+
+        if (isSemiMonthly && repaymentEvery != null && repaymentEvery != 1) {
+            baseDataValidator.reset().parameter(REPAYMENT_EVERY).value(repaymentEvery)
+                    .failWithCode("must.be.one.for.semi.monthly.repayment.frequency");
+        }
     }
 }

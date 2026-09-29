@@ -108,6 +108,10 @@ public class LoanProductData implements Serializable {
     private final Integer maxNumberOfRepayments;
     private final Integer repaymentEvery;
     private final EnumOptionData repaymentFrequencyType;
+    /** First due day of the month of a semi-monthly product. */
+    private final Integer firstRepaymentDayOfMonth;
+    /** Second due day of the month of a semi-monthly product; 31 is the last day of the month. */
+    private final Integer secondRepaymentDayOfMonth;
     private final Integer fixedLength;
     private final BigDecimal interestRatePerPeriod;
     private final BigDecimal minInterestRatePerPeriod;
@@ -395,14 +399,14 @@ public class LoanProductData implements Serializable {
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
-                minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
-                amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalculation, fundId, fundName,
-                transactionProcessingStrategyCode, transactionProcessingStrategyName, graceOnPrincipalPayment,
-                recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, charges, accountingType,
-                includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations,
-                interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
-                disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
-                allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
+                minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, null, null,
+                interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType,
+                allowPartialPeriodInterestCalculation, fundId, fundName, transactionProcessingStrategyCode,
+                transactionProcessingStrategyName, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment,
+                graceOnInterestCharged, charges, accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status,
+                externalId, principalVariations, interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount,
+                outstandingLoanBalance, disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType,
+                overAppliedNumber, allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds,
                 productGuaranteeData, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
                 canDefineInstallmentAmount, installmentAmountInMultiplesOf, loanProductConfigurableAttributes,
@@ -536,14 +540,14 @@ public class LoanProductData implements Serializable {
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
-                minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
-                amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalculation, fundId, fundName,
-                transactionProcessingStrategyCode, transactionProcessingStrategyName, graceOnPrincipalPayment,
-                recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, charges, accountingType,
-                includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations,
-                interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
-                disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
-                allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
+                minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, null, null,
+                interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType,
+                allowPartialPeriodInterestCalculation, fundId, fundName, transactionProcessingStrategyCode,
+                transactionProcessingStrategyName, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment,
+                graceOnInterestCharged, charges, accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status,
+                externalId, principalVariations, interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount,
+                outstandingLoanBalance, disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType,
+                overAppliedNumber, allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds,
                 productGuaranteeData, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
                 canDefineInstallmentAmount, installmentAmountInMultiplesOf, loanProductConfigurableAttributes,
@@ -684,14 +688,15 @@ public class LoanProductData implements Serializable {
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
-                minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
-                amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalculation, fundId, fundName,
-                transactionProcessingStrategyCode, transactionProcessingStrategyName, graceOnPrincipalPayment,
-                recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, charges, accountingType,
-                includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariationsForBorrowerCycle,
-                interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount,
-                outstandingLoanBalance, disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType,
-                overAppliedNumber, allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
+                minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, null, null,
+                interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType,
+                allowPartialPeriodInterestCalculation, fundId, fundName, transactionProcessingStrategyCode,
+                transactionProcessingStrategyName, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment,
+                graceOnInterestCharged, charges, accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status,
+                externalId, principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
+                numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
+                disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
+                allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds,
                 productGuaranteeData, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
                 canDefineInstallmentAmount, installmentAmountInMultiplesOf, loanProductConfigurableAttributes,
@@ -826,14 +831,15 @@ public class LoanProductData implements Serializable {
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
-                minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
-                amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalculation, fundId, fundName,
-                transactionProcessingStrategyCode, transactionProcessingStrategyName, graceOnPrincipalPayment,
-                recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, charges, accountingType,
-                includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariationsForBorrowerCycle,
-                interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount,
-                outstandingLoanBalance, disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType,
-                overAppliedNumber, allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
+                minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, null, null,
+                interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType,
+                allowPartialPeriodInterestCalculation, fundId, fundName, transactionProcessingStrategyCode,
+                transactionProcessingStrategyName, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment,
+                graceOnInterestCharged, charges, accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status,
+                externalId, principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
+                numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
+                disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
+                allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds,
                 productGuaranteeData, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
                 canDefineInstallmentAmount, installmentAmountInMultiplesOf, loanProductConfigurableAttributes,
@@ -874,9 +880,10 @@ public class LoanProductData implements Serializable {
             final Integer numberOfRepayments, final Integer minNumberOfRepayments, final Integer maxNumberOfRepayments,
             final Integer repaymentEvery, final BigDecimal interestRatePerPeriod, final BigDecimal minInterestRatePerPeriod,
             final BigDecimal maxInterestRatePerPeriod, final BigDecimal annualInterestRate, final EnumOptionData repaymentFrequencyType,
-            final EnumOptionData interestRateFrequencyType, final EnumOptionData amortizationType, final EnumOptionData interestType,
-            final EnumOptionData interestCalculationPeriodType, final Boolean allowPartialPeriodInterestCalculation, final Long fundId,
-            final String fundName, final String transactionProcessingStrategyCode, final String transactionProcessingStrategyName,
+            final Integer firstRepaymentDayOfMonth, final Integer secondRepaymentDayOfMonth, final EnumOptionData interestRateFrequencyType,
+            final EnumOptionData amortizationType, final EnumOptionData interestType, final EnumOptionData interestCalculationPeriodType,
+            final Boolean allowPartialPeriodInterestCalculation, final Long fundId, final String fundName,
+            final String transactionProcessingStrategyCode, final String transactionProcessingStrategyName,
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final Collection<ChargeData> charges,
             final EnumOptionData accountingType, final boolean includeInBorrowerCycle, boolean useBorrowerCycle, final LocalDate startDate,
@@ -949,6 +956,8 @@ public class LoanProductData implements Serializable {
         this.minimumGap = minimumGapBetweenInstallments;
         this.maximumGap = maximumGapBetweenInstallments;
         this.repaymentFrequencyType = repaymentFrequencyType;
+        this.firstRepaymentDayOfMonth = firstRepaymentDayOfMonth;
+        this.secondRepaymentDayOfMonth = secondRepaymentDayOfMonth;
         this.interestRateFrequencyType = interestRateFrequencyType;
         this.amortizationType = amortizationType;
         this.interestType = interestType;
@@ -1151,6 +1160,8 @@ public class LoanProductData implements Serializable {
         this.minimumGap = productData.minimumGap;
         this.maximumGap = productData.maximumGap;
         this.repaymentFrequencyType = productData.repaymentFrequencyType;
+        this.firstRepaymentDayOfMonth = productData.firstRepaymentDayOfMonth;
+        this.secondRepaymentDayOfMonth = productData.secondRepaymentDayOfMonth;
         this.interestRateFrequencyType = productData.interestRateFrequencyType;
         this.amortizationType = productData.amortizationType;
         this.interestType = productData.interestType;
