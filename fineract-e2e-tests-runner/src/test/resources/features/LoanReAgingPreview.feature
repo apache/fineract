@@ -2902,15 +2902,15 @@ Feature: LoanReAgingPreview
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 28 January 2026   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 0    | 28 January 2026   | 28 January 2026  | 100.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
-      | 2  | 31   | 28 February 2026  |                  | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 3  | 28   | 28 March 2026     |                  | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 4  | 31   | 28 April 2026     |                  | 50.43           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 5  | 30   | 28 May 2026       |                  | 33.71           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 6  | 31   | 28 June 2026      |                  | 16.9            | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 7  | 30   | 28 July 2026      |                  | 0.0             | 16.9          | 0.1      | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      | 2  | 31   | 28 February 2026  |                  | 83.56           | 16.44         | 0.58     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 3  | 31   | 31 March 2026     |                  | 67.07           | 16.49         | 0.53     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 4  | 30   | 30 April 2026     |                  | 50.44           | 16.63         | 0.39     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 5  | 31   | 31 May 2026       |                  | 33.72           | 16.72         | 0.3      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 6  | 30   | 30 June 2026      |                  | 16.9            | 16.82         | 0.2      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 7  | 31   | 31 July 2026      |                  | 0.0             | 16.9          | 0.1      | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 100.0         | 2.05     | 0.0  | 0.0       | 102.05 | 0.0  | 0.0        | 0.0  | 102.05      |
+      | 100.0         | 2.1      | 0.0  | 0.0       | 102.1  | 0.0  | 0.0        | 0.0  | 102.1       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 28 January 2026  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -2924,15 +2924,15 @@ Feature: LoanReAgingPreview
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 28 January 2026   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 1    | 29 January 2026   | 28 January 2026  | 100.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
-      | 2  | 30   | 28 February 2026  |                  | 83.59           | 16.41         | 0.6      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 3  | 28   | 28 March 2026     |                  | 67.07           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 4  | 31   | 28 April 2026     |                  | 50.45           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 5  | 30   | 28 May 2026       |                  | 33.73           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 6  | 31   | 28 June 2026      |                  | 16.92           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 7  | 30   | 28 July 2026      |                  | 0.0             | 16.92         | 0.1      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 2  | 30   | 28 February 2026  |                  | 83.58           | 16.42         | 0.6      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 3  | 31   | 31 March 2026     |                  | 67.09           | 16.49         | 0.53     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 4  | 30   | 30 April 2026     |                  | 50.46           | 16.63         | 0.39     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 5  | 31   | 31 May 2026       |                  | 33.74           | 16.72         | 0.3      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 6  | 30   | 30 June 2026      |                  | 16.92           | 16.82         | 0.2      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 7  | 31   | 31 July 2026      |                  | 0.0             | 16.92         | 0.1      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 100.0         | 2.07     | 0.0  | 0.0       | 102.07 | 0.0  | 0.0        | 0.0  | 102.07      |
+      | 100.0         | 2.12     | 0.0  | 0.0       | 102.12 | 0.0  | 0.0        | 0.0  | 102.12      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 28 January 2026  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -2947,15 +2947,15 @@ Feature: LoanReAgingPreview
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 28 January 2026   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 2    | 30 January 2026   | 28 January 2026  | 100.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
-      | 2  | 29   | 28 February 2026  |                  | 83.61           | 16.39         | 0.62     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 3  | 28   | 28 March 2026     |                  | 67.09           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 4  | 31   | 28 April 2026     |                  | 50.47           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 5  | 30   | 28 May 2026       |                  | 33.75           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 6  | 31   | 28 June 2026      |                  | 16.94           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 7  | 30   | 28 July 2026      |                  | 0.0             | 16.94         | 0.1      | 0.0  | 0.0       | 17.04 | 0.0  | 0.0        | 0.0  | 17.04       |
+      | 2  | 29   | 28 February 2026  |                  | 83.6            | 16.4          | 0.62     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 3  | 31   | 31 March 2026     |                  | 67.11           | 16.49         | 0.53     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 4  | 30   | 30 April 2026     |                  | 50.48           | 16.63         | 0.39     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 5  | 31   | 31 May 2026       |                  | 33.76           | 16.72         | 0.3      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 6  | 30   | 30 June 2026      |                  | 16.94           | 16.82         | 0.2      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 7  | 31   | 31 July 2026      |                  | 0.0             | 16.94         | 0.1      | 0.0  | 0.0       | 17.04 | 0.0  | 0.0        | 0.0  | 17.04       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 100.0         | 2.09     | 0.0  | 0.0       | 102.09 | 0.0  | 0.0        | 0.0  | 102.09      |
+      | 100.0         | 2.14     | 0.0  | 0.0       | 102.14 | 0.0  | 0.0        | 0.0  | 102.14      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 28 January 2026  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -2971,15 +2971,15 @@ Feature: LoanReAgingPreview
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 28 January 2026   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 3    | 31 January 2026   | 28 January 2026  | 100.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
-      | 2  | 28   | 28 February 2026  |                  | 83.62           | 16.38         | 0.64     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
-      | 3  | 28   | 28 March 2026     |                  | 67.09           | 16.53         | 0.49     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
-      | 4  | 31   | 28 April 2026     |                  | 50.46           | 16.63         | 0.39     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
-      | 5  | 30   | 28 May 2026       |                  | 33.73           | 16.73         | 0.29     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
-      | 6  | 31   | 28 June 2026      |                  | 16.91           | 16.82         | 0.2      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
-      | 7  | 30   | 28 July 2026      |                  | 0.0             | 16.91         | 0.1      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 2  | 28   | 28 February 2026  |                  | 83.61           | 16.39         | 0.64     | 0.0  | 0.0       | 17.03 | 0.0  | 0.0        | 0.0  | 17.03       |
+      | 3  | 31   | 31 March 2026     |                  | 67.11           | 16.5          | 0.53     | 0.0  | 0.0       | 17.03 | 0.0  | 0.0        | 0.0  | 17.03       |
+      | 4  | 30   | 30 April 2026     |                  | 50.47           | 16.64         | 0.39     | 0.0  | 0.0       | 17.03 | 0.0  | 0.0        | 0.0  | 17.03       |
+      | 5  | 31   | 31 May 2026       |                  | 33.74           | 16.73         | 0.3      | 0.0  | 0.0       | 17.03 | 0.0  | 0.0        | 0.0  | 17.03       |
+      | 6  | 30   | 30 June 2026      |                  | 16.91           | 16.83         | 0.2      | 0.0  | 0.0       | 17.03 | 0.0  | 0.0        | 0.0  | 17.03       |
+      | 7  | 31   | 31 July 2026      |                  | 0.0             | 16.91         | 0.1      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 100.0         | 2.11     | 0.0  | 0.0       | 102.11 | 0.0  | 0.0        | 0.0  | 102.11      |
+      | 100.0         | 2.16     | 0.0  | 0.0       | 102.16 | 0.0  | 0.0        | 0.0  | 102.16      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 28 January 2026  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -2996,14 +2996,14 @@ Feature: LoanReAgingPreview
       | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 28 January 2026   |                 | 100.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  |            |      |             |
       | 1  | 4    | 01 February 2026  | 28 January 2026 | 100.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
-      | 2  | 27   | 28 February 2026  |                 | 83.62           | 16.38         | 0.64     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
-      | 3  | 28   | 28 March 2026     |                 | 67.09           | 16.53         | 0.49     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
-      | 4  | 31   | 28 April 2026     |                 | 50.46           | 16.63         | 0.39     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
-      | 5  | 30   | 28 May 2026       |                 | 33.73           | 16.73         | 0.29     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
-      | 6  | 31   | 28 June 2026      |                 | 16.91           | 16.82         | 0.2      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
-      | 7  | 30   | 28 July 2026      |                 | 0.0             | 16.91         | 0.1      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 2  | 27   | 28 February 2026  |                 | 83.61           | 16.39         | 0.64     | 0.0  | 0.0       | 17.03 | 0.0  | 0.0        | 0.0  | 17.03       |
+      | 3  | 31   | 31 March 2026     |                 | 67.11           | 16.5          | 0.53     | 0.0  | 0.0       | 17.03 | 0.0  | 0.0        | 0.0  | 17.03       |
+      | 4  | 30   | 30 April 2026     |                 | 50.47           | 16.64         | 0.39     | 0.0  | 0.0       | 17.03 | 0.0  | 0.0        | 0.0  | 17.03       |
+      | 5  | 31   | 31 May 2026       |                 | 33.74           | 16.73         | 0.3      | 0.0  | 0.0       | 17.03 | 0.0  | 0.0        | 0.0  | 17.03       |
+      | 6  | 30   | 30 June 2026      |                 | 16.91           | 16.83         | 0.2      | 0.0  | 0.0       | 17.03 | 0.0  | 0.0        | 0.0  | 17.03       |
+      | 7  | 31   | 31 July 2026      |                 | 0.0             | 16.91         | 0.1      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
     Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 100.0         | 2.11     | 0.0  | 0.0       | 102.11 | 0.0  | 0.0        | 0.0  | 102.11      |
+      | 100.0         | 2.16     | 0.0  | 0.0       | 102.16 | 0.0  | 0.0        | 0.0  | 102.16      |
     When Loan Pay-off is made on "01 February 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met

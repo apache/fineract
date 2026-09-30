@@ -47,6 +47,8 @@ public interface ScheduledDateGenerator {
 
     LocalDate getRepaymentPeriodDate(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate);
 
+    LocalDate alignToMonthEnd(PeriodFrequencyType frequency, LocalDate anchorDate, LocalDate date);
+
     Boolean isDateFallsInSchedule(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate, LocalDate date);
 
     LocalDate generateNextScheduleDateStartingFromDisburseDate(LocalDate lastRepaymentDate, LoanApplicationTerms loanApplicationTerms,

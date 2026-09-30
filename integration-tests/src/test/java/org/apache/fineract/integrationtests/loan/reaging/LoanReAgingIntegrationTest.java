@@ -1057,13 +1057,13 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             assertEquals(LocalDate.of(2026, 1, 28), periods.get(0).getDueDate()); // disbursement
             assertEquals(LocalDate.of(2026, 1, 31), periods.get(1).getDueDate()); // stub
             assertEquals(LocalDate.of(2026, 2, 28), periods.get(2).getDueDate()); // 1st re-aged
-            assertEquals(LocalDate.of(2026, 3, 28), periods.get(3).getDueDate()); // 2nd re-aged
-            assertEquals(LocalDate.of(2026, 4, 28), periods.get(4).getDueDate()); // 3rd re-aged
-            assertEquals(LocalDate.of(2026, 5, 28), periods.get(5).getDueDate()); // 4th re-aged
-            assertEquals(LocalDate.of(2026, 6, 28), periods.get(6).getDueDate()); // 5th re-aged
-            assertEquals(LocalDate.of(2026, 7, 28), periods.get(7).getDueDate()); // 6th re-aged
+            assertEquals(LocalDate.of(2026, 3, 31), periods.get(3).getDueDate()); // 2nd re-aged
+            assertEquals(LocalDate.of(2026, 4, 30), periods.get(4).getDueDate()); // 3rd re-aged
+            assertEquals(LocalDate.of(2026, 5, 31), periods.get(5).getDueDate()); // 4th re-aged
+            assertEquals(LocalDate.of(2026, 6, 30), periods.get(6).getDueDate()); // 5th re-aged
+            assertEquals(LocalDate.of(2026, 7, 31), periods.get(7).getDueDate()); // 6th re-aged
 
-            checkMaturityDates(loanId, LocalDate.of(2026, 7, 28), LocalDate.of(2026, 7, 28));
+            checkMaturityDates(loanId, LocalDate.of(2026, 7, 31), LocalDate.of(2026, 7, 31));
         });
     }
 
