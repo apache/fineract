@@ -360,7 +360,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         final LocalDate transactionDate = ThreadLocalContextUtil.getBusinessDate();
         final ExternalId externalId = externalIdFactory.createFromCommand(command, WorkingCapitalLoanChargeConstants.externalIdParamName);
 
-        chargeAdjustmentEntranceValidation(loan, wcCharge, amount);
+        chargeAdjustmentEntranceValidation(loan, wcCharge, amount, null);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(WorkingCapitalLoanChargeConstants.amountParamName, amount);
@@ -562,8 +562,14 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         checkClientActive(loan);
     }
 
+    @Override
+    public void validateChargeAdjustmentEntrance(final WorkingCapitalLoan loan, final WorkingCapitalLoanCharge wcCharge,
+            final BigDecimal amount, final Long excludeTransactionId) {
+        chargeAdjustmentEntranceValidation(loan, wcCharge, amount, excludeTransactionId);
+    }
+
     private void chargeAdjustmentEntranceValidation(final WorkingCapitalLoan loan, final WorkingCapitalLoanCharge wcCharge,
-            final BigDecimal amount) {
+            final BigDecimal amount, final Long excludeTransactionId) {
         if (!loan.isOpen() && !loan.isClosedObligationsMet() && !loan.isOverpaid()) {
             throw new WorkingCapitalLoanChargeAdjustmentException("wc.loan.charge.adjustment.invalid.status",
                     "Adjustment is not supported for the status of " + loan.getLoanStatus());
@@ -579,7 +585,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
                     "Transaction amount cannot be higher than the charge amount: " + wcCharge.getAmount());
         }
 
-        final BigDecimal available = calculateAvailableAmountForChargeAdjustment(wcCharge);
+        final BigDecimal available = calculateAvailableAmountForChargeAdjustment(wcCharge, excludeTransactionId);
         if (amount.compareTo(available) > 0) {
             throw new WorkingCapitalLoanChargeAdjustmentException("wc.loan.charge.adjustment.invalid.amount",
                     "Transaction amount cannot be higher than the available charge amount for adjustment: " + available);
@@ -588,11 +594,13 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         checkClientActive(loan);
     }
 
-    private BigDecimal calculateAvailableAmountForChargeAdjustment(final WorkingCapitalLoanCharge wcCharge) {
+    private BigDecimal calculateAvailableAmountForChargeAdjustment(final WorkingCapitalLoanCharge wcCharge,
+            final Long excludeTransactionId) {
         final BigDecimal previouslyAdjusted = relationRepository
                 .findAllByToChargeAndFromTransactionReversedAndFromTransactionTransactionType(wcCharge, false,
                         LoanTransactionType.CHARGE_ADJUSTMENT)
-                .stream().map(rel -> rel.getFromTransaction().getTransactionAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                .stream().filter(rel -> excludeTransactionId == null || !excludeTransactionId.equals(rel.getFromTransaction().getId()))
+                .map(rel -> rel.getFromTransaction().getTransactionAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
         // Waived and adjusted relief together cannot exceed the charge: without the waived part here, an adjustment on
         // a fully waived charge would credit the borrower for a fee they never paid and no longer owe. The paid part
         // stays adjustable on purpose - relief beyond the outstanding lands on principal or overpayment, as on any

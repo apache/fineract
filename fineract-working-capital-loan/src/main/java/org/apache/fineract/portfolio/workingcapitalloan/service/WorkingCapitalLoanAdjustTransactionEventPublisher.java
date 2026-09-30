@@ -71,6 +71,19 @@ public class WorkingCapitalLoanAdjustTransactionEventPublisher {
                         wcLoanId))));
     }
 
+    public void publishAdjustment(final Long wcLoanId, final WorkingCapitalLoanTransaction reversedTransaction,
+            final WorkingCapitalLoanTransaction newTransaction) {
+        if (!isPostingEnabled()) {
+            return;
+        }
+        businessEventNotifierService
+                .notifyPostBusinessEvent(
+                        new WorkingCapitalLoanAdjustTransactionBusinessEvent(
+                                new WorkingCapitalLoanAdjustTransactionBusinessEvent.Data(
+                                        transactionDataFactory.create(reversedTransaction), transactionDataFactory.create(newTransaction)),
+                                wcLoanId));
+    }
+
     public record WorkingCapitalLoanTransactionAdjustment(WorkingCapitalLoanTransactionData previousState,
             WorkingCapitalLoanTransactionData currentState) {
     }
