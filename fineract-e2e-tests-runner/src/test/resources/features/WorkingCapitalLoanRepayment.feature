@@ -1381,7 +1381,6 @@ Feature: Working Capital Loan Repayment
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment    | 270.0             | 270.0            | 0.0               | 0.0                   | false    |
-
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
 
   @TestRailId:C85167
@@ -1744,7 +1743,6 @@ Feature: Working Capital Loan Repayment
       | 01 January 2026 | Repayment    | 20.0              | 20.0             | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment    | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment    | 30.0              | 30.0             | 0.0               | 0.0                   | false    |
-
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
 
   @TestRailId:C85171
@@ -2207,31 +2205,32 @@ Feature: Working Capital Loan Repayment
       | Type      | Account code | Account name              | Debit | Credit |
       | INCOME    | 404000       | Interest Income           |       | 17.26  |
       | LIABILITY | 240005       | Deferred Interest Revenue | 17.26 |        |
-
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 January 2026"
 
   @TestRailId:C76623
   Scenario: Verify working capital loan repayment - UC7: full minimum payment after disbursement day
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+      | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
+      | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Full expectedAmount paid ---
@@ -2239,755 +2238,677 @@ Feature: Working Capital Loan Repayment
     And Customer makes repayment on "02 January 2026" with 270.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-    When Admin sets the business date to "31 January 2026"
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-    Then Working Capital loan amortization schedule has 205 periods, with the following data for periods:
+    Then Working Capital loan amortization schedule has 178 periods, with the following data for periods:
       | paymentNo | paymentDate      | expectedPaymentAmount | actualPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
       | 0         | 01 January 2026  | -9000.00              |                     | 9000.00         | 9000.00       |                            |                          | 0.00                       |
       | 1         | 02 January 2026  | 50.00                 | 270.00              | 8950.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
       | 2         | 03 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 3         | 04 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 4         | 05 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 5         | 06 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 6         | 07 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 7         | 08 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 8         | 09 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 9         | 10 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 10        | 11 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 11        | 12 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 12        | 13 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 13        | 14 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 14        | 15 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 15        | 16 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 16        | 17 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 17        | 18 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 18        | 19 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 19        | 20 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 20        | 21 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 21        | 22 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 22        | 23 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 23        | 24 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 24        | 25 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 25        | 26 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 26        | 27 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 27        | 28 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 28        | 29 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 29        | 30 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 30        | 31 January 2026  | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
-      | 31        | 01 February 2026 | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
-      | 32        | 02 February 2026 | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
-      | 33        | 03 February 2026 | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
-      | 34        | 04 February 2026 | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
-      | 35        | 05 February 2026 | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
-      | 36        | 06 February 2026 | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
-      | 37        | 07 February 2026 | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
-      | 38        | 08 February 2026 | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
-      | 39        | 09 February 2026 | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
-      | 40        | 10 February 2026 | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
-      | 41        | 11 February 2026 | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
-      | 42        | 12 February 2026 | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
-      | 43        | 13 February 2026 | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
-      | 44        | 14 February 2026 | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
-      | 45        | 15 February 2026 | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
-      | 46        | 16 February 2026 | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
-      | 47        | 17 February 2026 | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
-      | 48        | 18 February 2026 | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
-      | 49        | 19 February 2026 | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
-      | 50        | 20 February 2026 | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
-      | 51        | 21 February 2026 | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
-      | 52        | 22 February 2026 | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
-      | 53        | 23 February 2026 | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
-      | 54        | 24 February 2026 | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
-      | 55        | 25 February 2026 | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
-      | 56        | 26 February 2026 | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
-      | 57        | 27 February 2026 | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
-      | 58        | 28 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
-      | 59        | 01 March 2026    | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
-      | 60        | 02 March 2026    | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
-      | 61        | 03 March 2026    | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
-      | 62        | 04 March 2026    | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
-      | 63        | 05 March 2026    | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
-      | 64        | 06 March 2026    | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
-      | 65        | 07 March 2026    | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
-      | 66        | 08 March 2026    | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
-      | 67        | 09 March 2026    | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
-      | 68        | 10 March 2026    | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
-      | 69        | 11 March 2026    | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
-      | 70        | 12 March 2026    | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
-      | 71        | 13 March 2026    | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
-      | 72        | 14 March 2026    | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
-      | 73        | 15 March 2026    | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
-      | 74        | 16 March 2026    | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
-      | 75        | 17 March 2026    | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
-      | 76        | 18 March 2026    | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
-      | 77        | 19 March 2026    | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
-      | 78        | 20 March 2026    | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
-      | 79        | 21 March 2026    | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
-      | 80        | 22 March 2026    | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
-      | 81        | 23 March 2026    | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
-      | 82        | 24 March 2026    | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
-      | 83        | 25 March 2026    | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
-      | 84        | 26 March 2026    | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
-      | 85        | 27 March 2026    | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
-      | 86        | 28 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
-      | 87        | 29 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
-      | 88        | 30 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
-      | 89        | 31 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
-      | 90        | 01 April 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
-      | 91        | 02 April 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
-      | 92        | 03 April 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
-      | 93        | 04 April 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
-      | 94        | 05 April 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
-      | 95        | 06 April 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
-      | 96        | 07 April 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
-      | 97        | 08 April 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
-      | 98        | 09 April 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
-      | 99        | 10 April 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
-      | 100       | 11 April 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
-      | 101       | 12 April 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
-      | 102       | 13 April 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
-      | 103       | 14 April 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
-      | 104       | 15 April 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
-      | 105       | 16 April 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
-      | 106       | 17 April 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
-      | 107       | 18 April 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
-      | 108       | 19 April 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
-      | 109       | 20 April 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
-      | 110       | 21 April 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
-      | 111       | 22 April 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
-      | 112       | 23 April 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
-      | 113       | 24 April 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
-      | 114       | 25 April 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
-      | 115       | 26 April 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
-      | 116       | 27 April 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
-      | 117       | 28 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
-      | 118       | 29 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
-      | 119       | 30 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
-      | 120       | 01 May 2026      | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
-      | 121       | 02 May 2026      | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
-      | 122       | 03 May 2026      | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
-      | 123       | 04 May 2026      | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
-      | 124       | 05 May 2026      | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
-      | 125       | 06 May 2026      | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
-      | 126       | 07 May 2026      | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
-      | 127       | 08 May 2026      | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
-      | 128       | 09 May 2026      | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
-      | 129       | 10 May 2026      | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
-      | 130       | 11 May 2026      | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
-      | 131       | 12 May 2026      | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
-      | 132       | 13 May 2026      | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
-      | 133       | 14 May 2026      | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
-      | 134       | 15 May 2026      | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
-      | 135       | 16 May 2026      | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
-      | 136       | 17 May 2026      | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
-      | 137       | 18 May 2026      | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
-      | 138       | 19 May 2026      | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
-      | 139       | 20 May 2026      | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
-      | 140       | 21 May 2026      | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
-      | 141       | 22 May 2026      | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
-      | 142       | 23 May 2026      | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
-      | 143       | 24 May 2026      | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
-      | 144       | 25 May 2026      | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
-      | 145       | 26 May 2026      | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
-      | 146       | 27 May 2026      | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
-      | 147       | 28 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
-      | 148       | 29 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
-      | 149       | 30 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
-      | 150       | 31 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
-      | 151       | 01 June 2026     | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
-      | 152       | 02 June 2026     | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
-      | 153       | 03 June 2026     | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
-      | 154       | 04 June 2026     | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
-      | 155       | 05 June 2026     | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
-      | 156       | 06 June 2026     | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
-      | 157       | 07 June 2026     | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
-      | 158       | 08 June 2026     | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
-      | 159       | 09 June 2026     | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
-      | 160       | 10 June 2026     | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
-      | 161       | 11 June 2026     | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
-      | 162       | 12 June 2026     | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
-      | 163       | 13 June 2026     | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
-      | 164       | 14 June 2026     | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
-      | 165       | 15 June 2026     | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
-      | 166       | 16 June 2026     | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
-      | 167       | 17 June 2026     | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
-      | 168       | 18 June 2026     | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
-      | 169       | 19 June 2026     | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
-      | 170       | 20 June 2026     | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
-      | 171       | 21 June 2026     | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
-      | 172       | 22 June 2026     | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
-      | 173       | 23 June 2026     | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
-      | 174       | 24 June 2026     | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
-      | 175       | 25 June 2026     | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
-      | 176       | 26 June 2026     | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
-      | 177       | 27 June 2026     | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
-      | 178       | 28 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
-      | 179       | 29 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
-      | 180       | 30 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
-      | 181       | 01 July 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
-      | 182       | 02 July 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
-      | 183       | 03 July 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
-      | 184       | 04 July 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
-      | 185       | 05 July 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
-      | 186       | 06 July 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
-      | 187       | 07 July 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
-      | 188       | 08 July 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
-      | 189       | 09 July 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
-      | 190       | 10 July 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
-      | 191       | 11 July 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
-      | 192       | 12 July 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
-      | 193       | 13 July 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
-      | 194       | 14 July 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
-      | 195       | 15 July 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
-      | 196       | 16 July 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
-      | 197       | 17 July 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
-      | 198       | 18 July 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
-      | 199       | 19 July 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
-      | 200       | 20 July 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
-      | 201       | 21 July 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
-      | 202       | 22 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
-      | 203       | 23 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
-      | 204       | 24 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
-
-    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
+      | 3         | 04 January 2026  | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
+      | 4         | 05 January 2026  | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
+      | 5         | 06 January 2026  | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
+      | 6         | 07 January 2026  | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
+      | 7         | 08 January 2026  | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
+      | 8         | 09 January 2026  | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
+      | 9         | 10 January 2026  | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
+      | 10        | 11 January 2026  | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
+      | 11        | 12 January 2026  | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
+      | 12        | 13 January 2026  | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
+      | 13        | 14 January 2026  | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
+      | 14        | 15 January 2026  | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
+      | 15        | 16 January 2026  | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
+      | 16        | 17 January 2026  | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
+      | 17        | 18 January 2026  | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
+      | 18        | 19 January 2026  | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
+      | 19        | 20 January 2026  | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
+      | 20        | 21 January 2026  | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
+      | 21        | 22 January 2026  | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
+      | 22        | 23 January 2026  | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
+      | 23        | 24 January 2026  | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
+      | 24        | 25 January 2026  | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
+      | 25        | 26 January 2026  | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
+      | 26        | 27 January 2026  | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
+      | 27        | 28 January 2026  | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
+      | 28        | 29 January 2026  | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
+      | 29        | 30 January 2026  | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
+      | 30        | 31 January 2026  | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
+      | 31        | 01 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
+      | 32        | 02 February 2026 | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
+      | 33        | 03 February 2026 | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
+      | 34        | 04 February 2026 | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
+      | 35        | 05 February 2026 | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
+      | 36        | 06 February 2026 | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
+      | 37        | 07 February 2026 | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
+      | 38        | 08 February 2026 | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
+      | 39        | 09 February 2026 | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
+      | 40        | 10 February 2026 | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
+      | 41        | 11 February 2026 | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
+      | 42        | 12 February 2026 | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
+      | 43        | 13 February 2026 | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
+      | 44        | 14 February 2026 | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
+      | 45        | 15 February 2026 | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
+      | 46        | 16 February 2026 | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
+      | 47        | 17 February 2026 | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
+      | 48        | 18 February 2026 | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
+      | 49        | 19 February 2026 | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
+      | 50        | 20 February 2026 | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
+      | 51        | 21 February 2026 | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
+      | 52        | 22 February 2026 | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
+      | 53        | 23 February 2026 | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
+      | 54        | 24 February 2026 | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
+      | 55        | 25 February 2026 | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
+      | 56        | 26 February 2026 | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
+      | 57        | 27 February 2026 | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
+      | 58        | 28 February 2026 | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
+      | 59        | 01 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
+      | 60        | 02 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
+      | 61        | 03 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
+      | 62        | 04 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
+      | 63        | 05 March 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
+      | 64        | 06 March 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
+      | 65        | 07 March 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
+      | 66        | 08 March 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
+      | 67        | 09 March 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
+      | 68        | 10 March 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
+      | 69        | 11 March 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
+      | 70        | 12 March 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
+      | 71        | 13 March 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
+      | 72        | 14 March 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
+      | 73        | 15 March 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
+      | 74        | 16 March 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
+      | 75        | 17 March 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
+      | 76        | 18 March 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
+      | 77        | 19 March 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
+      | 78        | 20 March 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
+      | 79        | 21 March 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
+      | 80        | 22 March 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
+      | 81        | 23 March 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
+      | 82        | 24 March 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
+      | 83        | 25 March 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
+      | 84        | 26 March 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
+      | 85        | 27 March 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
+      | 86        | 28 March 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
+      | 87        | 29 March 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
+      | 88        | 30 March 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
+      | 89        | 31 March 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
+      | 90        | 01 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
+      | 91        | 02 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
+      | 92        | 03 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
+      | 93        | 04 April 2026    | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
+      | 94        | 05 April 2026    | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
+      | 95        | 06 April 2026    | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
+      | 96        | 07 April 2026    | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
+      | 97        | 08 April 2026    | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
+      | 98        | 09 April 2026    | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
+      | 99        | 10 April 2026    | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
+      | 100       | 11 April 2026    | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
+      | 101       | 12 April 2026    | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
+      | 102       | 13 April 2026    | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
+      | 103       | 14 April 2026    | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
+      | 104       | 15 April 2026    | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
+      | 105       | 16 April 2026    | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
+      | 106       | 17 April 2026    | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
+      | 107       | 18 April 2026    | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
+      | 108       | 19 April 2026    | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
+      | 109       | 20 April 2026    | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
+      | 110       | 21 April 2026    | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
+      | 111       | 22 April 2026    | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
+      | 112       | 23 April 2026    | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
+      | 113       | 24 April 2026    | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
+      | 114       | 25 April 2026    | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
+      | 115       | 26 April 2026    | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
+      | 116       | 27 April 2026    | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
+      | 117       | 28 April 2026    | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
+      | 118       | 29 April 2026    | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
+      | 119       | 30 April 2026    | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
+      | 120       | 01 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
+      | 121       | 02 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
+      | 122       | 03 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
+      | 123       | 04 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
+      | 124       | 05 May 2026      | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
+      | 125       | 06 May 2026      | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
+      | 126       | 07 May 2026      | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
+      | 127       | 08 May 2026      | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
+      | 128       | 09 May 2026      | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
+      | 129       | 10 May 2026      | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
+      | 130       | 11 May 2026      | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
+      | 131       | 12 May 2026      | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
+      | 132       | 13 May 2026      | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
+      | 133       | 14 May 2026      | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
+      | 134       | 15 May 2026      | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
+      | 135       | 16 May 2026      | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
+      | 136       | 17 May 2026      | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
+      | 137       | 18 May 2026      | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
+      | 138       | 19 May 2026      | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
+      | 139       | 20 May 2026      | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
+      | 140       | 21 May 2026      | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
+      | 141       | 22 May 2026      | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
+      | 142       | 23 May 2026      | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
+      | 143       | 24 May 2026      | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
+      | 144       | 25 May 2026      | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
+      | 145       | 26 May 2026      | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
+      | 146       | 27 May 2026      | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
+      | 147       | 28 May 2026      | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
+      | 148       | 29 May 2026      | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
+      | 149       | 30 May 2026      | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
+      | 150       | 31 May 2026      | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
+      | 151       | 01 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
+      | 152       | 02 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
+      | 153       | 03 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
+      | 154       | 04 June 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
+      | 155       | 05 June 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
+      | 156       | 06 June 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
+      | 157       | 07 June 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
+      | 158       | 08 June 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
+      | 159       | 09 June 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
+      | 160       | 10 June 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
+      | 161       | 11 June 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
+      | 162       | 12 June 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
+      | 163       | 13 June 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
+      | 164       | 14 June 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
+      | 165       | 15 June 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
+      | 166       | 16 June 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
+      | 167       | 17 June 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
+      | 168       | 18 June 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
+      | 169       | 19 June 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
+      | 170       | 20 June 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
+      | 171       | 21 June 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
+      | 172       | 22 June 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
+      | 173       | 23 June 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
+      | 174       | 24 June 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
+      | 175       | 25 June 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
+      | 176       | 26 June 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
+      | 177       | 27 June 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C76624
   Scenario: Verify working capital loan repayment - UC8: full expectedAmount repaid on last day of 1st period
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+      | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
+      | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Full expectedAmount paid ---
-    When Admin sets the business date to "30 January 2026"
-    And Customer makes repayment on "30 January 2026" with 270.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "03 January 2026"
+    And Customer makes repayment on "03 January 2026" with 270.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-    When Admin sets the business date to "31 January 2026"
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-    Then Working Capital loan amortization schedule has 205 periods, with the following data for periods:
+    Then Working Capital loan amortization schedule has 178 periods, with the following data for periods:
       | paymentNo | paymentDate      | expectedPaymentAmount | actualPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
       | 0         | 01 January 2026  | -9000.00              |                     | 9000.00         | 9000.00       |                            |                          | 0.00                       |
       | 1         | 02 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 2         | 03 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 3         | 04 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 4         | 05 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 5         | 06 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 6         | 07 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 7         | 08 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 8         | 09 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 9         | 10 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 10        | 11 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 11        | 12 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 12        | 13 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 13        | 14 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 14        | 15 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 15        | 16 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 16        | 17 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 17        | 18 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 18        | 19 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 19        | 20 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 20        | 21 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 21        | 22 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 22        | 23 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 23        | 24 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 24        | 25 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 25        | 26 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 26        | 27 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 27        | 28 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 28        | 29 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 29        | 30 January 2026  | 50.00                 | 270.00              | 8950.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 30        | 31 January 2026  | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
-      | 31        | 01 February 2026 | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
-      | 32        | 02 February 2026 | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
-      | 33        | 03 February 2026 | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
-      | 34        | 04 February 2026 | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
-      | 35        | 05 February 2026 | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
-      | 36        | 06 February 2026 | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
-      | 37        | 07 February 2026 | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
-      | 38        | 08 February 2026 | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
-      | 39        | 09 February 2026 | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
-      | 40        | 10 February 2026 | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
-      | 41        | 11 February 2026 | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
-      | 42        | 12 February 2026 | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
-      | 43        | 13 February 2026 | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
-      | 44        | 14 February 2026 | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
-      | 45        | 15 February 2026 | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
-      | 46        | 16 February 2026 | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
-      | 47        | 17 February 2026 | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
-      | 48        | 18 February 2026 | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
-      | 49        | 19 February 2026 | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
-      | 50        | 20 February 2026 | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
-      | 51        | 21 February 2026 | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
-      | 52        | 22 February 2026 | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
-      | 53        | 23 February 2026 | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
-      | 54        | 24 February 2026 | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
-      | 55        | 25 February 2026 | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
-      | 56        | 26 February 2026 | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
-      | 57        | 27 February 2026 | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
-      | 58        | 28 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
-      | 59        | 01 March 2026    | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
-      | 60        | 02 March 2026    | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
-      | 61        | 03 March 2026    | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
-      | 62        | 04 March 2026    | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
-      | 63        | 05 March 2026    | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
-      | 64        | 06 March 2026    | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
-      | 65        | 07 March 2026    | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
-      | 66        | 08 March 2026    | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
-      | 67        | 09 March 2026    | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
-      | 68        | 10 March 2026    | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
-      | 69        | 11 March 2026    | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
-      | 70        | 12 March 2026    | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
-      | 71        | 13 March 2026    | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
-      | 72        | 14 March 2026    | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
-      | 73        | 15 March 2026    | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
-      | 74        | 16 March 2026    | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
-      | 75        | 17 March 2026    | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
-      | 76        | 18 March 2026    | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
-      | 77        | 19 March 2026    | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
-      | 78        | 20 March 2026    | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
-      | 79        | 21 March 2026    | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
-      | 80        | 22 March 2026    | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
-      | 81        | 23 March 2026    | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
-      | 82        | 24 March 2026    | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
-      | 83        | 25 March 2026    | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
-      | 84        | 26 March 2026    | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
-      | 85        | 27 March 2026    | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
-      | 86        | 28 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
-      | 87        | 29 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
-      | 88        | 30 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
-      | 89        | 31 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
-      | 90        | 01 April 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
-      | 91        | 02 April 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
-      | 92        | 03 April 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
-      | 93        | 04 April 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
-      | 94        | 05 April 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
-      | 95        | 06 April 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
-      | 96        | 07 April 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
-      | 97        | 08 April 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
-      | 98        | 09 April 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
-      | 99        | 10 April 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
-      | 100       | 11 April 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
-      | 101       | 12 April 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
-      | 102       | 13 April 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
-      | 103       | 14 April 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
-      | 104       | 15 April 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
-      | 105       | 16 April 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
-      | 106       | 17 April 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
-      | 107       | 18 April 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
-      | 108       | 19 April 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
-      | 109       | 20 April 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
-      | 110       | 21 April 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
-      | 111       | 22 April 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
-      | 112       | 23 April 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
-      | 113       | 24 April 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
-      | 114       | 25 April 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
-      | 115       | 26 April 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
-      | 116       | 27 April 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
-      | 117       | 28 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
-      | 118       | 29 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
-      | 119       | 30 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
-      | 120       | 01 May 2026      | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
-      | 121       | 02 May 2026      | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
-      | 122       | 03 May 2026      | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
-      | 123       | 04 May 2026      | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
-      | 124       | 05 May 2026      | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
-      | 125       | 06 May 2026      | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
-      | 126       | 07 May 2026      | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
-      | 127       | 08 May 2026      | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
-      | 128       | 09 May 2026      | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
-      | 129       | 10 May 2026      | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
-      | 130       | 11 May 2026      | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
-      | 131       | 12 May 2026      | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
-      | 132       | 13 May 2026      | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
-      | 133       | 14 May 2026      | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
-      | 134       | 15 May 2026      | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
-      | 135       | 16 May 2026      | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
-      | 136       | 17 May 2026      | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
-      | 137       | 18 May 2026      | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
-      | 138       | 19 May 2026      | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
-      | 139       | 20 May 2026      | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
-      | 140       | 21 May 2026      | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
-      | 141       | 22 May 2026      | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
-      | 142       | 23 May 2026      | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
-      | 143       | 24 May 2026      | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
-      | 144       | 25 May 2026      | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
-      | 145       | 26 May 2026      | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
-      | 146       | 27 May 2026      | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
-      | 147       | 28 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
-      | 148       | 29 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
-      | 149       | 30 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
-      | 150       | 31 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
-      | 151       | 01 June 2026     | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
-      | 152       | 02 June 2026     | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
-      | 153       | 03 June 2026     | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
-      | 154       | 04 June 2026     | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
-      | 155       | 05 June 2026     | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
-      | 156       | 06 June 2026     | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
-      | 157       | 07 June 2026     | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
-      | 158       | 08 June 2026     | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
-      | 159       | 09 June 2026     | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
-      | 160       | 10 June 2026     | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
-      | 161       | 11 June 2026     | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
-      | 162       | 12 June 2026     | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
-      | 163       | 13 June 2026     | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
-      | 164       | 14 June 2026     | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
-      | 165       | 15 June 2026     | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
-      | 166       | 16 June 2026     | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
-      | 167       | 17 June 2026     | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
-      | 168       | 18 June 2026     | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
-      | 169       | 19 June 2026     | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
-      | 170       | 20 June 2026     | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
-      | 171       | 21 June 2026     | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
-      | 172       | 22 June 2026     | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
-      | 173       | 23 June 2026     | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
-      | 174       | 24 June 2026     | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
-      | 175       | 25 June 2026     | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
-      | 176       | 26 June 2026     | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
-      | 177       | 27 June 2026     | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
-      | 178       | 28 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
-      | 179       | 29 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
-      | 180       | 30 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
-      | 181       | 01 July 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
-      | 182       | 02 July 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
-      | 183       | 03 July 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
-      | 184       | 04 July 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
-      | 185       | 05 July 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
-      | 186       | 06 July 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
-      | 187       | 07 July 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
-      | 188       | 08 July 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
-      | 189       | 09 July 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
-      | 190       | 10 July 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
-      | 191       | 11 July 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
-      | 192       | 12 July 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
-      | 193       | 13 July 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
-      | 194       | 14 July 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
-      | 195       | 15 July 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
-      | 196       | 16 July 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
-      | 197       | 17 July 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
-      | 198       | 18 July 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
-      | 199       | 19 July 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
-      | 200       | 20 July 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
-      | 201       | 21 July 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
-      | 202       | 22 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
-      | 203       | 23 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
-      | 204       | 24 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
-
-    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
+      | 2         | 03 January 2026  | 50.00                 | 270.00              | 8950.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
+      | 3         | 04 January 2026  | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
+      | 4         | 05 January 2026  | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
+      | 5         | 06 January 2026  | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
+      | 6         | 07 January 2026  | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
+      | 7         | 08 January 2026  | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
+      | 8         | 09 January 2026  | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
+      | 9         | 10 January 2026  | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
+      | 10        | 11 January 2026  | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
+      | 11        | 12 January 2026  | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
+      | 12        | 13 January 2026  | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
+      | 13        | 14 January 2026  | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
+      | 14        | 15 January 2026  | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
+      | 15        | 16 January 2026  | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
+      | 16        | 17 January 2026  | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
+      | 17        | 18 January 2026  | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
+      | 18        | 19 January 2026  | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
+      | 19        | 20 January 2026  | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
+      | 20        | 21 January 2026  | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
+      | 21        | 22 January 2026  | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
+      | 22        | 23 January 2026  | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
+      | 23        | 24 January 2026  | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
+      | 24        | 25 January 2026  | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
+      | 25        | 26 January 2026  | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
+      | 26        | 27 January 2026  | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
+      | 27        | 28 January 2026  | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
+      | 28        | 29 January 2026  | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
+      | 29        | 30 January 2026  | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
+      | 30        | 31 January 2026  | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
+      | 31        | 01 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
+      | 32        | 02 February 2026 | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
+      | 33        | 03 February 2026 | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
+      | 34        | 04 February 2026 | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
+      | 35        | 05 February 2026 | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
+      | 36        | 06 February 2026 | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
+      | 37        | 07 February 2026 | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
+      | 38        | 08 February 2026 | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
+      | 39        | 09 February 2026 | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
+      | 40        | 10 February 2026 | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
+      | 41        | 11 February 2026 | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
+      | 42        | 12 February 2026 | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
+      | 43        | 13 February 2026 | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
+      | 44        | 14 February 2026 | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
+      | 45        | 15 February 2026 | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
+      | 46        | 16 February 2026 | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
+      | 47        | 17 February 2026 | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
+      | 48        | 18 February 2026 | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
+      | 49        | 19 February 2026 | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
+      | 50        | 20 February 2026 | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
+      | 51        | 21 February 2026 | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
+      | 52        | 22 February 2026 | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
+      | 53        | 23 February 2026 | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
+      | 54        | 24 February 2026 | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
+      | 55        | 25 February 2026 | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
+      | 56        | 26 February 2026 | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
+      | 57        | 27 February 2026 | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
+      | 58        | 28 February 2026 | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
+      | 59        | 01 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
+      | 60        | 02 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
+      | 61        | 03 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
+      | 62        | 04 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
+      | 63        | 05 March 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
+      | 64        | 06 March 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
+      | 65        | 07 March 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
+      | 66        | 08 March 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
+      | 67        | 09 March 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
+      | 68        | 10 March 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
+      | 69        | 11 March 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
+      | 70        | 12 March 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
+      | 71        | 13 March 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
+      | 72        | 14 March 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
+      | 73        | 15 March 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
+      | 74        | 16 March 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
+      | 75        | 17 March 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
+      | 76        | 18 March 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
+      | 77        | 19 March 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
+      | 78        | 20 March 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
+      | 79        | 21 March 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
+      | 80        | 22 March 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
+      | 81        | 23 March 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
+      | 82        | 24 March 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
+      | 83        | 25 March 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
+      | 84        | 26 March 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
+      | 85        | 27 March 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
+      | 86        | 28 March 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
+      | 87        | 29 March 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
+      | 88        | 30 March 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
+      | 89        | 31 March 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
+      | 90        | 01 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
+      | 91        | 02 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
+      | 92        | 03 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
+      | 93        | 04 April 2026    | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
+      | 94        | 05 April 2026    | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
+      | 95        | 06 April 2026    | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
+      | 96        | 07 April 2026    | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
+      | 97        | 08 April 2026    | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
+      | 98        | 09 April 2026    | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
+      | 99        | 10 April 2026    | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
+      | 100       | 11 April 2026    | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
+      | 101       | 12 April 2026    | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
+      | 102       | 13 April 2026    | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
+      | 103       | 14 April 2026    | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
+      | 104       | 15 April 2026    | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
+      | 105       | 16 April 2026    | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
+      | 106       | 17 April 2026    | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
+      | 107       | 18 April 2026    | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
+      | 108       | 19 April 2026    | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
+      | 109       | 20 April 2026    | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
+      | 110       | 21 April 2026    | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
+      | 111       | 22 April 2026    | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
+      | 112       | 23 April 2026    | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
+      | 113       | 24 April 2026    | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
+      | 114       | 25 April 2026    | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
+      | 115       | 26 April 2026    | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
+      | 116       | 27 April 2026    | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
+      | 117       | 28 April 2026    | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
+      | 118       | 29 April 2026    | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
+      | 119       | 30 April 2026    | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
+      | 120       | 01 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
+      | 121       | 02 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
+      | 122       | 03 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
+      | 123       | 04 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
+      | 124       | 05 May 2026      | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
+      | 125       | 06 May 2026      | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
+      | 126       | 07 May 2026      | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
+      | 127       | 08 May 2026      | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
+      | 128       | 09 May 2026      | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
+      | 129       | 10 May 2026      | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
+      | 130       | 11 May 2026      | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
+      | 131       | 12 May 2026      | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
+      | 132       | 13 May 2026      | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
+      | 133       | 14 May 2026      | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
+      | 134       | 15 May 2026      | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
+      | 135       | 16 May 2026      | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
+      | 136       | 17 May 2026      | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
+      | 137       | 18 May 2026      | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
+      | 138       | 19 May 2026      | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
+      | 139       | 20 May 2026      | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
+      | 140       | 21 May 2026      | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
+      | 141       | 22 May 2026      | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
+      | 142       | 23 May 2026      | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
+      | 143       | 24 May 2026      | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
+      | 144       | 25 May 2026      | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
+      | 145       | 26 May 2026      | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
+      | 146       | 27 May 2026      | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
+      | 147       | 28 May 2026      | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
+      | 148       | 29 May 2026      | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
+      | 149       | 30 May 2026      | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
+      | 150       | 31 May 2026      | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
+      | 151       | 01 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
+      | 152       | 02 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
+      | 153       | 03 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
+      | 154       | 04 June 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
+      | 155       | 05 June 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
+      | 156       | 06 June 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
+      | 157       | 07 June 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
+      | 158       | 08 June 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
+      | 159       | 09 June 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
+      | 160       | 10 June 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
+      | 161       | 11 June 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
+      | 162       | 12 June 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
+      | 163       | 13 June 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
+      | 164       | 14 June 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
+      | 165       | 15 June 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
+      | 166       | 16 June 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
+      | 167       | 17 June 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
+      | 168       | 18 June 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
+      | 169       | 19 June 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
+      | 170       | 20 June 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
+      | 171       | 21 June 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
+      | 172       | 22 June 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
+      | 173       | 23 June 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
+      | 174       | 24 June 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
+      | 175       | 25 June 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
+      | 176       | 26 June 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
+      | 177       | 27 June 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C76625
   Scenario: Verify working capital loan repayment - UC9: full expectedAmount repaid on first day of 2nd period
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+      | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
+      | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Full expectedAmount paid ---
-    When Admin sets the business date to "31 January 2026"
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-01-31  |              | D00            | 1              | 30             |
-    And Customer makes repayment on "31 January 2026" with 270.0 transaction amount on Working Capital loan
+      | 1            | 2026-01-04  |              | D00            | 1              | 30             |
+    And Customer makes repayment on "04 January 2026" with 270.0 transaction amount on Working Capital loan
 #   --- Check ---
-    When Admin sets the business date to "01 February 2026"
+    When Admin sets the business date to "05 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-01-31  | 2026-01-31   | D00            | 1              | 30             |
-    Then Working Capital loan amortization schedule has 206 periods, with the following data for periods:
+      | 1            | 2026-01-04  | 2026-01-04   | D00            | 1              | 30             |
+    Then Working Capital loan amortization schedule has 179 periods, with the following data for periods:
       | paymentNo | paymentDate      | expectedPaymentAmount | actualPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
       | 0         | 01 January 2026  | -9000.00              |                     | 9000.00         | 9000.00       |                            |                          | 0.00                       |
       | 1         | 02 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
       | 2         | 03 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 3         | 04 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 4         | 05 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 5         | 06 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 6         | 07 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 7         | 08 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 8         | 09 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 9         | 10 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 10        | 11 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 11        | 12 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 12        | 13 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 13        | 14 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 14        | 15 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 15        | 16 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 16        | 17 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 17        | 18 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 18        | 19 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 19        | 20 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 20        | 21 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 21        | 22 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 22        | 23 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 23        | 24 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 24        | 25 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 25        | 26 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 26        | 27 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 27        | 28 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 28        | 29 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 29        | 30 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 30        | 31 January 2026  | 50.00                 | 270.00              | 8950.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 31        | 01 February 2026 | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
-      | 32        | 02 February 2026 | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
-      | 33        | 03 February 2026 | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
-      | 34        | 04 February 2026 | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
-      | 35        | 05 February 2026 | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
-      | 36        | 06 February 2026 | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
-      | 37        | 07 February 2026 | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
-      | 38        | 08 February 2026 | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
-      | 39        | 09 February 2026 | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
-      | 40        | 10 February 2026 | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
-      | 41        | 11 February 2026 | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
-      | 42        | 12 February 2026 | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
-      | 43        | 13 February 2026 | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
-      | 44        | 14 February 2026 | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
-      | 45        | 15 February 2026 | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
-      | 46        | 16 February 2026 | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
-      | 47        | 17 February 2026 | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
-      | 48        | 18 February 2026 | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
-      | 49        | 19 February 2026 | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
-      | 50        | 20 February 2026 | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
-      | 51        | 21 February 2026 | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
-      | 52        | 22 February 2026 | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
-      | 53        | 23 February 2026 | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
-      | 54        | 24 February 2026 | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
-      | 55        | 25 February 2026 | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
-      | 56        | 26 February 2026 | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
-      | 57        | 27 February 2026 | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
-      | 58        | 28 February 2026 | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
-      | 59        | 01 March 2026    | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
-      | 60        | 02 March 2026    | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
-      | 61        | 03 March 2026    | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
-      | 62        | 04 March 2026    | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
-      | 63        | 05 March 2026    | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
-      | 64        | 06 March 2026    | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
-      | 65        | 07 March 2026    | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
-      | 66        | 08 March 2026    | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
-      | 67        | 09 March 2026    | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
-      | 68        | 10 March 2026    | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
-      | 69        | 11 March 2026    | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
-      | 70        | 12 March 2026    | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
-      | 71        | 13 March 2026    | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
-      | 72        | 14 March 2026    | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
-      | 73        | 15 March 2026    | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
-      | 74        | 16 March 2026    | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
-      | 75        | 17 March 2026    | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
-      | 76        | 18 March 2026    | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
-      | 77        | 19 March 2026    | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
-      | 78        | 20 March 2026    | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
-      | 79        | 21 March 2026    | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
-      | 80        | 22 March 2026    | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
-      | 81        | 23 March 2026    | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
-      | 82        | 24 March 2026    | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
-      | 83        | 25 March 2026    | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
-      | 84        | 26 March 2026    | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
-      | 85        | 27 March 2026    | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
-      | 86        | 28 March 2026    | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
-      | 87        | 29 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
-      | 88        | 30 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
-      | 89        | 31 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
-      | 90        | 01 April 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
-      | 91        | 02 April 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
-      | 92        | 03 April 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
-      | 93        | 04 April 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
-      | 94        | 05 April 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
-      | 95        | 06 April 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
-      | 96        | 07 April 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
-      | 97        | 08 April 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
-      | 98        | 09 April 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
-      | 99        | 10 April 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
-      | 100       | 11 April 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
-      | 101       | 12 April 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
-      | 102       | 13 April 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
-      | 103       | 14 April 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
-      | 104       | 15 April 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
-      | 105       | 16 April 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
-      | 106       | 17 April 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
-      | 107       | 18 April 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
-      | 108       | 19 April 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
-      | 109       | 20 April 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
-      | 110       | 21 April 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
-      | 111       | 22 April 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
-      | 112       | 23 April 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
-      | 113       | 24 April 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
-      | 114       | 25 April 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
-      | 115       | 26 April 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
-      | 116       | 27 April 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
-      | 117       | 28 April 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
-      | 118       | 29 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
-      | 119       | 30 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
-      | 120       | 01 May 2026      | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
-      | 121       | 02 May 2026      | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
-      | 122       | 03 May 2026      | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
-      | 123       | 04 May 2026      | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
-      | 124       | 05 May 2026      | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
-      | 125       | 06 May 2026      | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
-      | 126       | 07 May 2026      | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
-      | 127       | 08 May 2026      | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
-      | 128       | 09 May 2026      | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
-      | 129       | 10 May 2026      | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
-      | 130       | 11 May 2026      | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
-      | 131       | 12 May 2026      | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
-      | 132       | 13 May 2026      | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
-      | 133       | 14 May 2026      | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
-      | 134       | 15 May 2026      | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
-      | 135       | 16 May 2026      | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
-      | 136       | 17 May 2026      | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
-      | 137       | 18 May 2026      | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
-      | 138       | 19 May 2026      | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
-      | 139       | 20 May 2026      | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
-      | 140       | 21 May 2026      | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
-      | 141       | 22 May 2026      | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
-      | 142       | 23 May 2026      | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
-      | 143       | 24 May 2026      | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
-      | 144       | 25 May 2026      | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
-      | 145       | 26 May 2026      | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
-      | 146       | 27 May 2026      | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
-      | 147       | 28 May 2026      | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
-      | 148       | 29 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
-      | 149       | 30 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
-      | 150       | 31 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
-      | 151       | 01 June 2026     | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
-      | 152       | 02 June 2026     | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
-      | 153       | 03 June 2026     | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
-      | 154       | 04 June 2026     | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
-      | 155       | 05 June 2026     | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
-      | 156       | 06 June 2026     | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
-      | 157       | 07 June 2026     | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
-      | 158       | 08 June 2026     | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
-      | 159       | 09 June 2026     | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
-      | 160       | 10 June 2026     | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
-      | 161       | 11 June 2026     | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
-      | 162       | 12 June 2026     | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
-      | 163       | 13 June 2026     | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
-      | 164       | 14 June 2026     | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
-      | 165       | 15 June 2026     | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
-      | 166       | 16 June 2026     | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
-      | 167       | 17 June 2026     | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
-      | 168       | 18 June 2026     | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
-      | 169       | 19 June 2026     | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
-      | 170       | 20 June 2026     | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
-      | 171       | 21 June 2026     | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
-      | 172       | 22 June 2026     | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
-      | 173       | 23 June 2026     | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
-      | 174       | 24 June 2026     | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
-      | 175       | 25 June 2026     | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
-      | 176       | 26 June 2026     | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
-      | 177       | 27 June 2026     | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
-      | 178       | 28 June 2026     | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
-      | 179       | 29 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
-      | 180       | 30 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
-      | 181       | 01 July 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
-      | 182       | 02 July 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
-      | 183       | 03 July 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
-      | 184       | 04 July 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
-      | 185       | 05 July 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
-      | 186       | 06 July 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
-      | 187       | 07 July 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
-      | 188       | 08 July 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
-      | 189       | 09 July 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
-      | 190       | 10 July 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
-      | 191       | 11 July 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
-      | 192       | 12 July 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
-      | 193       | 13 July 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
-      | 194       | 14 July 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
-      | 195       | 15 July 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
-      | 196       | 16 July 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
-      | 197       | 17 July 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
-      | 198       | 18 July 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
-      | 199       | 19 July 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
-      | 200       | 20 July 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
-      | 201       | 21 July 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
-      | 202       | 22 July 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
-      | 203       | 23 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
-      | 204       | 24 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
-      | 205       | 25 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
-
-    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 February 2026"
+      | 3         | 04 January 2026  | 50.00                 | 270.00              | 8950.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
+      | 4         | 05 January 2026  | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
+      | 5         | 06 January 2026  | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
+      | 6         | 07 January 2026  | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
+      | 7         | 08 January 2026  | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
+      | 8         | 09 January 2026  | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
+      | 9         | 10 January 2026  | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
+      | 10        | 11 January 2026  | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
+      | 11        | 12 January 2026  | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
+      | 12        | 13 January 2026  | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
+      | 13        | 14 January 2026  | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
+      | 14        | 15 January 2026  | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
+      | 15        | 16 January 2026  | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
+      | 16        | 17 January 2026  | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
+      | 17        | 18 January 2026  | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
+      | 18        | 19 January 2026  | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
+      | 19        | 20 January 2026  | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
+      | 20        | 21 January 2026  | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
+      | 21        | 22 January 2026  | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
+      | 22        | 23 January 2026  | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
+      | 23        | 24 January 2026  | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
+      | 24        | 25 January 2026  | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
+      | 25        | 26 January 2026  | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
+      | 26        | 27 January 2026  | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
+      | 27        | 28 January 2026  | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
+      | 28        | 29 January 2026  | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
+      | 29        | 30 January 2026  | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
+      | 30        | 31 January 2026  | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
+      | 31        | 01 February 2026 | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
+      | 32        | 02 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
+      | 33        | 03 February 2026 | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
+      | 34        | 04 February 2026 | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
+      | 35        | 05 February 2026 | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
+      | 36        | 06 February 2026 | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
+      | 37        | 07 February 2026 | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
+      | 38        | 08 February 2026 | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
+      | 39        | 09 February 2026 | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
+      | 40        | 10 February 2026 | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
+      | 41        | 11 February 2026 | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
+      | 42        | 12 February 2026 | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
+      | 43        | 13 February 2026 | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
+      | 44        | 14 February 2026 | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
+      | 45        | 15 February 2026 | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
+      | 46        | 16 February 2026 | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
+      | 47        | 17 February 2026 | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
+      | 48        | 18 February 2026 | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
+      | 49        | 19 February 2026 | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
+      | 50        | 20 February 2026 | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
+      | 51        | 21 February 2026 | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
+      | 52        | 22 February 2026 | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
+      | 53        | 23 February 2026 | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
+      | 54        | 24 February 2026 | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
+      | 55        | 25 February 2026 | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
+      | 56        | 26 February 2026 | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
+      | 57        | 27 February 2026 | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
+      | 58        | 28 February 2026 | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
+      | 59        | 01 March 2026    | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
+      | 60        | 02 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
+      | 61        | 03 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
+      | 62        | 04 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
+      | 63        | 05 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
+      | 64        | 06 March 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
+      | 65        | 07 March 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
+      | 66        | 08 March 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
+      | 67        | 09 March 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
+      | 68        | 10 March 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
+      | 69        | 11 March 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
+      | 70        | 12 March 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
+      | 71        | 13 March 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
+      | 72        | 14 March 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
+      | 73        | 15 March 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
+      | 74        | 16 March 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
+      | 75        | 17 March 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
+      | 76        | 18 March 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
+      | 77        | 19 March 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
+      | 78        | 20 March 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
+      | 79        | 21 March 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
+      | 80        | 22 March 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
+      | 81        | 23 March 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
+      | 82        | 24 March 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
+      | 83        | 25 March 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
+      | 84        | 26 March 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
+      | 85        | 27 March 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
+      | 86        | 28 March 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
+      | 87        | 29 March 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
+      | 88        | 30 March 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
+      | 89        | 31 March 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
+      | 90        | 01 April 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
+      | 91        | 02 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
+      | 92        | 03 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
+      | 93        | 04 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
+      | 94        | 05 April 2026    | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
+      | 95        | 06 April 2026    | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
+      | 96        | 07 April 2026    | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
+      | 97        | 08 April 2026    | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
+      | 98        | 09 April 2026    | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
+      | 99        | 10 April 2026    | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
+      | 100       | 11 April 2026    | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
+      | 101       | 12 April 2026    | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
+      | 102       | 13 April 2026    | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
+      | 103       | 14 April 2026    | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
+      | 104       | 15 April 2026    | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
+      | 105       | 16 April 2026    | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
+      | 106       | 17 April 2026    | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
+      | 107       | 18 April 2026    | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
+      | 108       | 19 April 2026    | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
+      | 109       | 20 April 2026    | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
+      | 110       | 21 April 2026    | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
+      | 111       | 22 April 2026    | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
+      | 112       | 23 April 2026    | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
+      | 113       | 24 April 2026    | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
+      | 114       | 25 April 2026    | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
+      | 115       | 26 April 2026    | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
+      | 116       | 27 April 2026    | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
+      | 117       | 28 April 2026    | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
+      | 118       | 29 April 2026    | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
+      | 119       | 30 April 2026    | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
+      | 120       | 01 May 2026      | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
+      | 121       | 02 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
+      | 122       | 03 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
+      | 123       | 04 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
+      | 124       | 05 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
+      | 125       | 06 May 2026      | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
+      | 126       | 07 May 2026      | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
+      | 127       | 08 May 2026      | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
+      | 128       | 09 May 2026      | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
+      | 129       | 10 May 2026      | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
+      | 130       | 11 May 2026      | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
+      | 131       | 12 May 2026      | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
+      | 132       | 13 May 2026      | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
+      | 133       | 14 May 2026      | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
+      | 134       | 15 May 2026      | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
+      | 135       | 16 May 2026      | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
+      | 136       | 17 May 2026      | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
+      | 137       | 18 May 2026      | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
+      | 138       | 19 May 2026      | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
+      | 139       | 20 May 2026      | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
+      | 140       | 21 May 2026      | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
+      | 141       | 22 May 2026      | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
+      | 142       | 23 May 2026      | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
+      | 143       | 24 May 2026      | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
+      | 144       | 25 May 2026      | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
+      | 145       | 26 May 2026      | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
+      | 146       | 27 May 2026      | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
+      | 147       | 28 May 2026      | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
+      | 148       | 29 May 2026      | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
+      | 149       | 30 May 2026      | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
+      | 150       | 31 May 2026      | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
+      | 151       | 01 June 2026     | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
+      | 152       | 02 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
+      | 153       | 03 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
+      | 154       | 04 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
+      | 155       | 05 June 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
+      | 156       | 06 June 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
+      | 157       | 07 June 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
+      | 158       | 08 June 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
+      | 159       | 09 June 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
+      | 160       | 10 June 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
+      | 161       | 11 June 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
+      | 162       | 12 June 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
+      | 163       | 13 June 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
+      | 164       | 14 June 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
+      | 165       | 15 June 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
+      | 166       | 16 June 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
+      | 167       | 17 June 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
+      | 168       | 18 June 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
+      | 169       | 19 June 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
+      | 170       | 20 June 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
+      | 171       | 21 June 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
+      | 172       | 22 June 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
+      | 173       | 23 June 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
+      | 174       | 24 June 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
+      | 175       | 25 June 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
+      | 176       | 26 June 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
+      | 177       | 27 June 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
+      | 178       | 28 June 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "05 January 2026"
 
   @TestRailId:C76626
   Scenario: Verify working capital loan repayment - UC10: full expectedAmount repaid in 1st period with multiple payments on same day
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+      | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
+      | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Full expectedAmount paid in 2 payments on the same day---
@@ -2996,249 +2917,223 @@ Feature: Working Capital Loan Repayment
     And Customer makes repayment on "02 January 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-    When Admin sets the business date to "31 January 2026"
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-    Then Working Capital loan amortization schedule has 205 periods, with the following data for periods:
+    Then Working Capital loan amortization schedule has 178 periods, with the following data for periods:
       | paymentNo | paymentDate      | expectedPaymentAmount | actualPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
       | 0         | 01 January 2026  | -9000.00              |                     | 9000.00         | 9000.00       |                            |                          | 0.00                       |
       | 1         | 02 January 2026  | 50.00                 | 270.00              | 8950.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
       | 2         | 03 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 3         | 04 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 4         | 05 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 5         | 06 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 6         | 07 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 7         | 08 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 8         | 09 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 9         | 10 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 10        | 11 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 11        | 12 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 12        | 13 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 13        | 14 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 14        | 15 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 15        | 16 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 16        | 17 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 17        | 18 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 18        | 19 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 19        | 20 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 20        | 21 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 21        | 22 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 22        | 23 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 23        | 24 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 24        | 25 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 25        | 26 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 26        | 27 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 27        | 28 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 28        | 29 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 29        | 30 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 30        | 31 January 2026  | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
-      | 31        | 01 February 2026 | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
-      | 32        | 02 February 2026 | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
-      | 33        | 03 February 2026 | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
-      | 34        | 04 February 2026 | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
-      | 35        | 05 February 2026 | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
-      | 36        | 06 February 2026 | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
-      | 37        | 07 February 2026 | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
-      | 38        | 08 February 2026 | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
-      | 39        | 09 February 2026 | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
-      | 40        | 10 February 2026 | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
-      | 41        | 11 February 2026 | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
-      | 42        | 12 February 2026 | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
-      | 43        | 13 February 2026 | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
-      | 44        | 14 February 2026 | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
-      | 45        | 15 February 2026 | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
-      | 46        | 16 February 2026 | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
-      | 47        | 17 February 2026 | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
-      | 48        | 18 February 2026 | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
-      | 49        | 19 February 2026 | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
-      | 50        | 20 February 2026 | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
-      | 51        | 21 February 2026 | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
-      | 52        | 22 February 2026 | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
-      | 53        | 23 February 2026 | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
-      | 54        | 24 February 2026 | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
-      | 55        | 25 February 2026 | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
-      | 56        | 26 February 2026 | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
-      | 57        | 27 February 2026 | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
-      | 58        | 28 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
-      | 59        | 01 March 2026    | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
-      | 60        | 02 March 2026    | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
-      | 61        | 03 March 2026    | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
-      | 62        | 04 March 2026    | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
-      | 63        | 05 March 2026    | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
-      | 64        | 06 March 2026    | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
-      | 65        | 07 March 2026    | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
-      | 66        | 08 March 2026    | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
-      | 67        | 09 March 2026    | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
-      | 68        | 10 March 2026    | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
-      | 69        | 11 March 2026    | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
-      | 70        | 12 March 2026    | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
-      | 71        | 13 March 2026    | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
-      | 72        | 14 March 2026    | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
-      | 73        | 15 March 2026    | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
-      | 74        | 16 March 2026    | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
-      | 75        | 17 March 2026    | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
-      | 76        | 18 March 2026    | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
-      | 77        | 19 March 2026    | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
-      | 78        | 20 March 2026    | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
-      | 79        | 21 March 2026    | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
-      | 80        | 22 March 2026    | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
-      | 81        | 23 March 2026    | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
-      | 82        | 24 March 2026    | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
-      | 83        | 25 March 2026    | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
-      | 84        | 26 March 2026    | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
-      | 85        | 27 March 2026    | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
-      | 86        | 28 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
-      | 87        | 29 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
-      | 88        | 30 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
-      | 89        | 31 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
-      | 90        | 01 April 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
-      | 91        | 02 April 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
-      | 92        | 03 April 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
-      | 93        | 04 April 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
-      | 94        | 05 April 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
-      | 95        | 06 April 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
-      | 96        | 07 April 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
-      | 97        | 08 April 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
-      | 98        | 09 April 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
-      | 99        | 10 April 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
-      | 100       | 11 April 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
-      | 101       | 12 April 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
-      | 102       | 13 April 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
-      | 103       | 14 April 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
-      | 104       | 15 April 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
-      | 105       | 16 April 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
-      | 106       | 17 April 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
-      | 107       | 18 April 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
-      | 108       | 19 April 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
-      | 109       | 20 April 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
-      | 110       | 21 April 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
-      | 111       | 22 April 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
-      | 112       | 23 April 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
-      | 113       | 24 April 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
-      | 114       | 25 April 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
-      | 115       | 26 April 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
-      | 116       | 27 April 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
-      | 117       | 28 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
-      | 118       | 29 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
-      | 119       | 30 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
-      | 120       | 01 May 2026      | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
-      | 121       | 02 May 2026      | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
-      | 122       | 03 May 2026      | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
-      | 123       | 04 May 2026      | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
-      | 124       | 05 May 2026      | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
-      | 125       | 06 May 2026      | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
-      | 126       | 07 May 2026      | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
-      | 127       | 08 May 2026      | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
-      | 128       | 09 May 2026      | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
-      | 129       | 10 May 2026      | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
-      | 130       | 11 May 2026      | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
-      | 131       | 12 May 2026      | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
-      | 132       | 13 May 2026      | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
-      | 133       | 14 May 2026      | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
-      | 134       | 15 May 2026      | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
-      | 135       | 16 May 2026      | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
-      | 136       | 17 May 2026      | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
-      | 137       | 18 May 2026      | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
-      | 138       | 19 May 2026      | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
-      | 139       | 20 May 2026      | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
-      | 140       | 21 May 2026      | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
-      | 141       | 22 May 2026      | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
-      | 142       | 23 May 2026      | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
-      | 143       | 24 May 2026      | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
-      | 144       | 25 May 2026      | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
-      | 145       | 26 May 2026      | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
-      | 146       | 27 May 2026      | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
-      | 147       | 28 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
-      | 148       | 29 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
-      | 149       | 30 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
-      | 150       | 31 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
-      | 151       | 01 June 2026     | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
-      | 152       | 02 June 2026     | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
-      | 153       | 03 June 2026     | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
-      | 154       | 04 June 2026     | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
-      | 155       | 05 June 2026     | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
-      | 156       | 06 June 2026     | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
-      | 157       | 07 June 2026     | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
-      | 158       | 08 June 2026     | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
-      | 159       | 09 June 2026     | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
-      | 160       | 10 June 2026     | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
-      | 161       | 11 June 2026     | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
-      | 162       | 12 June 2026     | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
-      | 163       | 13 June 2026     | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
-      | 164       | 14 June 2026     | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
-      | 165       | 15 June 2026     | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
-      | 166       | 16 June 2026     | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
-      | 167       | 17 June 2026     | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
-      | 168       | 18 June 2026     | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
-      | 169       | 19 June 2026     | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
-      | 170       | 20 June 2026     | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
-      | 171       | 21 June 2026     | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
-      | 172       | 22 June 2026     | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
-      | 173       | 23 June 2026     | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
-      | 174       | 24 June 2026     | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
-      | 175       | 25 June 2026     | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
-      | 176       | 26 June 2026     | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
-      | 177       | 27 June 2026     | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
-      | 178       | 28 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
-      | 179       | 29 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
-      | 180       | 30 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
-      | 181       | 01 July 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
-      | 182       | 02 July 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
-      | 183       | 03 July 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
-      | 184       | 04 July 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
-      | 185       | 05 July 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
-      | 186       | 06 July 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
-      | 187       | 07 July 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
-      | 188       | 08 July 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
-      | 189       | 09 July 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
-      | 190       | 10 July 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
-      | 191       | 11 July 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
-      | 192       | 12 July 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
-      | 193       | 13 July 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
-      | 194       | 14 July 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
-      | 195       | 15 July 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
-      | 196       | 16 July 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
-      | 197       | 17 July 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
-      | 198       | 18 July 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
-      | 199       | 19 July 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
-      | 200       | 20 July 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
-      | 201       | 21 July 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
-      | 202       | 22 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
-      | 203       | 23 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
-      | 204       | 24 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
-
-    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
+      | 3         | 04 January 2026  | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
+      | 4         | 05 January 2026  | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
+      | 5         | 06 January 2026  | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
+      | 6         | 07 January 2026  | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
+      | 7         | 08 January 2026  | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
+      | 8         | 09 January 2026  | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
+      | 9         | 10 January 2026  | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
+      | 10        | 11 January 2026  | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
+      | 11        | 12 January 2026  | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
+      | 12        | 13 January 2026  | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
+      | 13        | 14 January 2026  | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
+      | 14        | 15 January 2026  | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
+      | 15        | 16 January 2026  | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
+      | 16        | 17 January 2026  | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
+      | 17        | 18 January 2026  | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
+      | 18        | 19 January 2026  | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
+      | 19        | 20 January 2026  | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
+      | 20        | 21 January 2026  | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
+      | 21        | 22 January 2026  | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
+      | 22        | 23 January 2026  | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
+      | 23        | 24 January 2026  | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
+      | 24        | 25 January 2026  | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
+      | 25        | 26 January 2026  | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
+      | 26        | 27 January 2026  | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
+      | 27        | 28 January 2026  | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
+      | 28        | 29 January 2026  | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
+      | 29        | 30 January 2026  | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
+      | 30        | 31 January 2026  | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
+      | 31        | 01 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
+      | 32        | 02 February 2026 | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
+      | 33        | 03 February 2026 | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
+      | 34        | 04 February 2026 | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
+      | 35        | 05 February 2026 | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
+      | 36        | 06 February 2026 | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
+      | 37        | 07 February 2026 | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
+      | 38        | 08 February 2026 | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
+      | 39        | 09 February 2026 | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
+      | 40        | 10 February 2026 | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
+      | 41        | 11 February 2026 | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
+      | 42        | 12 February 2026 | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
+      | 43        | 13 February 2026 | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
+      | 44        | 14 February 2026 | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
+      | 45        | 15 February 2026 | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
+      | 46        | 16 February 2026 | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
+      | 47        | 17 February 2026 | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
+      | 48        | 18 February 2026 | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
+      | 49        | 19 February 2026 | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
+      | 50        | 20 February 2026 | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
+      | 51        | 21 February 2026 | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
+      | 52        | 22 February 2026 | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
+      | 53        | 23 February 2026 | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
+      | 54        | 24 February 2026 | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
+      | 55        | 25 February 2026 | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
+      | 56        | 26 February 2026 | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
+      | 57        | 27 February 2026 | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
+      | 58        | 28 February 2026 | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
+      | 59        | 01 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
+      | 60        | 02 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
+      | 61        | 03 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
+      | 62        | 04 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
+      | 63        | 05 March 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
+      | 64        | 06 March 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
+      | 65        | 07 March 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
+      | 66        | 08 March 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
+      | 67        | 09 March 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
+      | 68        | 10 March 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
+      | 69        | 11 March 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
+      | 70        | 12 March 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
+      | 71        | 13 March 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
+      | 72        | 14 March 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
+      | 73        | 15 March 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
+      | 74        | 16 March 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
+      | 75        | 17 March 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
+      | 76        | 18 March 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
+      | 77        | 19 March 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
+      | 78        | 20 March 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
+      | 79        | 21 March 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
+      | 80        | 22 March 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
+      | 81        | 23 March 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
+      | 82        | 24 March 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
+      | 83        | 25 March 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
+      | 84        | 26 March 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
+      | 85        | 27 March 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
+      | 86        | 28 March 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
+      | 87        | 29 March 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
+      | 88        | 30 March 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
+      | 89        | 31 March 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
+      | 90        | 01 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
+      | 91        | 02 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
+      | 92        | 03 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
+      | 93        | 04 April 2026    | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
+      | 94        | 05 April 2026    | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
+      | 95        | 06 April 2026    | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
+      | 96        | 07 April 2026    | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
+      | 97        | 08 April 2026    | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
+      | 98        | 09 April 2026    | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
+      | 99        | 10 April 2026    | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
+      | 100       | 11 April 2026    | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
+      | 101       | 12 April 2026    | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
+      | 102       | 13 April 2026    | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
+      | 103       | 14 April 2026    | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
+      | 104       | 15 April 2026    | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
+      | 105       | 16 April 2026    | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
+      | 106       | 17 April 2026    | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
+      | 107       | 18 April 2026    | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
+      | 108       | 19 April 2026    | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
+      | 109       | 20 April 2026    | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
+      | 110       | 21 April 2026    | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
+      | 111       | 22 April 2026    | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
+      | 112       | 23 April 2026    | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
+      | 113       | 24 April 2026    | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
+      | 114       | 25 April 2026    | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
+      | 115       | 26 April 2026    | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
+      | 116       | 27 April 2026    | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
+      | 117       | 28 April 2026    | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
+      | 118       | 29 April 2026    | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
+      | 119       | 30 April 2026    | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
+      | 120       | 01 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
+      | 121       | 02 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
+      | 122       | 03 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
+      | 123       | 04 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
+      | 124       | 05 May 2026      | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
+      | 125       | 06 May 2026      | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
+      | 126       | 07 May 2026      | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
+      | 127       | 08 May 2026      | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
+      | 128       | 09 May 2026      | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
+      | 129       | 10 May 2026      | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
+      | 130       | 11 May 2026      | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
+      | 131       | 12 May 2026      | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
+      | 132       | 13 May 2026      | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
+      | 133       | 14 May 2026      | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
+      | 134       | 15 May 2026      | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
+      | 135       | 16 May 2026      | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
+      | 136       | 17 May 2026      | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
+      | 137       | 18 May 2026      | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
+      | 138       | 19 May 2026      | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
+      | 139       | 20 May 2026      | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
+      | 140       | 21 May 2026      | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
+      | 141       | 22 May 2026      | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
+      | 142       | 23 May 2026      | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
+      | 143       | 24 May 2026      | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
+      | 144       | 25 May 2026      | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
+      | 145       | 26 May 2026      | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
+      | 146       | 27 May 2026      | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
+      | 147       | 28 May 2026      | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
+      | 148       | 29 May 2026      | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
+      | 149       | 30 May 2026      | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
+      | 150       | 31 May 2026      | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
+      | 151       | 01 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
+      | 152       | 02 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
+      | 153       | 03 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
+      | 154       | 04 June 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
+      | 155       | 05 June 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
+      | 156       | 06 June 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
+      | 157       | 07 June 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
+      | 158       | 08 June 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
+      | 159       | 09 June 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
+      | 160       | 10 June 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
+      | 161       | 11 June 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
+      | 162       | 12 June 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
+      | 163       | 13 June 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
+      | 164       | 14 June 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
+      | 165       | 15 June 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
+      | 166       | 16 June 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
+      | 167       | 17 June 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
+      | 168       | 18 June 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
+      | 169       | 19 June 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
+      | 170       | 20 June 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
+      | 171       | 21 June 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
+      | 172       | 22 June 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
+      | 173       | 23 June 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
+      | 174       | 24 June 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
+      | 175       | 25 June 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
+      | 176       | 26 June 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
+      | 177       | 27 June 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C76627
   Scenario: Verify working capital loan repayment - UC11: full expectedAmount repaid in 1st period with multiple payments on different days
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+      | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
+      | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Full expectedAmount paid in 2 payments on different days---
@@ -3246,256 +3141,230 @@ Feature: Working Capital Loan Repayment
     And Customer makes repayment on "02 January 2026" with 170.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 170.0      | 100.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 170.0      | 100.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
     When Admin sets the business date to "03 January 2026"
     And Customer makes repayment on "03 January 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-    When Admin sets the business date to "31 January 2026"
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-    Then Working Capital loan amortization schedule has 205 periods, with the following data for periods:
+    Then Working Capital loan amortization schedule has 178 periods, with the following data for periods:
       | paymentNo | paymentDate      | expectedPaymentAmount | actualPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
       | 0         | 01 January 2026  | -9000.00              |                     | 9000.00         | 9000.00       |                            |                          | 0.00                       |
       | 1         | 02 January 2026  | 50.00                 | 170.00              | 8950.00         | 8830.00       | 0.00                       | 0.00                     | 0.00                       |
       | 2         | 03 January 2026  | 50.00                 | 100.00              | 8780.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 3         | 04 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 4         | 05 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 5         | 06 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 6         | 07 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 7         | 08 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 8         | 09 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 9         | 10 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 10        | 11 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 11        | 12 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 12        | 13 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 13        | 14 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 14        | 15 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 15        | 16 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 16        | 17 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 17        | 18 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 18        | 19 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 19        | 20 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 20        | 21 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 21        | 22 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 22        | 23 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 23        | 24 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 24        | 25 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 25        | 26 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 26        | 27 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 27        | 28 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 28        | 29 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 29        | 30 January 2026  | 50.00                 | 0.00                | 8680.00         | 8730.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 30        | 31 January 2026  | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
-      | 31        | 01 February 2026 | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
-      | 32        | 02 February 2026 | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
-      | 33        | 03 February 2026 | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
-      | 34        | 04 February 2026 | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
-      | 35        | 05 February 2026 | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
-      | 36        | 06 February 2026 | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
-      | 37        | 07 February 2026 | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
-      | 38        | 08 February 2026 | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
-      | 39        | 09 February 2026 | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
-      | 40        | 10 February 2026 | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
-      | 41        | 11 February 2026 | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
-      | 42        | 12 February 2026 | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
-      | 43        | 13 February 2026 | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
-      | 44        | 14 February 2026 | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
-      | 45        | 15 February 2026 | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
-      | 46        | 16 February 2026 | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
-      | 47        | 17 February 2026 | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
-      | 48        | 18 February 2026 | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
-      | 49        | 19 February 2026 | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
-      | 50        | 20 February 2026 | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
-      | 51        | 21 February 2026 | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
-      | 52        | 22 February 2026 | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
-      | 53        | 23 February 2026 | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
-      | 54        | 24 February 2026 | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
-      | 55        | 25 February 2026 | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
-      | 56        | 26 February 2026 | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
-      | 57        | 27 February 2026 | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
-      | 58        | 28 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
-      | 59        | 01 March 2026    | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
-      | 60        | 02 March 2026    | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
-      | 61        | 03 March 2026    | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
-      | 62        | 04 March 2026    | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
-      | 63        | 05 March 2026    | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
-      | 64        | 06 March 2026    | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
-      | 65        | 07 March 2026    | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
-      | 66        | 08 March 2026    | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
-      | 67        | 09 March 2026    | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
-      | 68        | 10 March 2026    | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
-      | 69        | 11 March 2026    | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
-      | 70        | 12 March 2026    | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
-      | 71        | 13 March 2026    | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
-      | 72        | 14 March 2026    | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
-      | 73        | 15 March 2026    | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
-      | 74        | 16 March 2026    | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
-      | 75        | 17 March 2026    | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
-      | 76        | 18 March 2026    | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
-      | 77        | 19 March 2026    | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
-      | 78        | 20 March 2026    | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
-      | 79        | 21 March 2026    | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
-      | 80        | 22 March 2026    | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
-      | 81        | 23 March 2026    | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
-      | 82        | 24 March 2026    | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
-      | 83        | 25 March 2026    | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
-      | 84        | 26 March 2026    | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
-      | 85        | 27 March 2026    | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
-      | 86        | 28 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
-      | 87        | 29 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
-      | 88        | 30 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
-      | 89        | 31 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
-      | 90        | 01 April 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
-      | 91        | 02 April 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
-      | 92        | 03 April 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
-      | 93        | 04 April 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
-      | 94        | 05 April 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
-      | 95        | 06 April 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
-      | 96        | 07 April 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
-      | 97        | 08 April 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
-      | 98        | 09 April 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
-      | 99        | 10 April 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
-      | 100       | 11 April 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
-      | 101       | 12 April 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
-      | 102       | 13 April 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
-      | 103       | 14 April 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
-      | 104       | 15 April 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
-      | 105       | 16 April 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
-      | 106       | 17 April 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
-      | 107       | 18 April 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
-      | 108       | 19 April 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
-      | 109       | 20 April 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
-      | 110       | 21 April 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
-      | 111       | 22 April 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
-      | 112       | 23 April 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
-      | 113       | 24 April 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
-      | 114       | 25 April 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
-      | 115       | 26 April 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
-      | 116       | 27 April 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
-      | 117       | 28 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
-      | 118       | 29 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
-      | 119       | 30 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
-      | 120       | 01 May 2026      | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
-      | 121       | 02 May 2026      | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
-      | 122       | 03 May 2026      | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
-      | 123       | 04 May 2026      | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
-      | 124       | 05 May 2026      | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
-      | 125       | 06 May 2026      | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
-      | 126       | 07 May 2026      | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
-      | 127       | 08 May 2026      | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
-      | 128       | 09 May 2026      | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
-      | 129       | 10 May 2026      | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
-      | 130       | 11 May 2026      | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
-      | 131       | 12 May 2026      | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
-      | 132       | 13 May 2026      | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
-      | 133       | 14 May 2026      | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
-      | 134       | 15 May 2026      | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
-      | 135       | 16 May 2026      | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
-      | 136       | 17 May 2026      | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
-      | 137       | 18 May 2026      | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
-      | 138       | 19 May 2026      | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
-      | 139       | 20 May 2026      | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
-      | 140       | 21 May 2026      | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
-      | 141       | 22 May 2026      | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
-      | 142       | 23 May 2026      | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
-      | 143       | 24 May 2026      | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
-      | 144       | 25 May 2026      | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
-      | 145       | 26 May 2026      | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
-      | 146       | 27 May 2026      | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
-      | 147       | 28 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
-      | 148       | 29 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
-      | 149       | 30 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
-      | 150       | 31 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
-      | 151       | 01 June 2026     | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
-      | 152       | 02 June 2026     | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
-      | 153       | 03 June 2026     | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
-      | 154       | 04 June 2026     | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
-      | 155       | 05 June 2026     | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
-      | 156       | 06 June 2026     | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
-      | 157       | 07 June 2026     | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
-      | 158       | 08 June 2026     | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
-      | 159       | 09 June 2026     | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
-      | 160       | 10 June 2026     | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
-      | 161       | 11 June 2026     | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
-      | 162       | 12 June 2026     | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
-      | 163       | 13 June 2026     | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
-      | 164       | 14 June 2026     | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
-      | 165       | 15 June 2026     | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
-      | 166       | 16 June 2026     | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
-      | 167       | 17 June 2026     | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
-      | 168       | 18 June 2026     | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
-      | 169       | 19 June 2026     | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
-      | 170       | 20 June 2026     | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
-      | 171       | 21 June 2026     | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
-      | 172       | 22 June 2026     | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
-      | 173       | 23 June 2026     | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
-      | 174       | 24 June 2026     | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
-      | 175       | 25 June 2026     | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
-      | 176       | 26 June 2026     | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
-      | 177       | 27 June 2026     | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
-      | 178       | 28 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
-      | 179       | 29 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
-      | 180       | 30 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
-      | 181       | 01 July 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
-      | 182       | 02 July 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
-      | 183       | 03 July 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
-      | 184       | 04 July 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
-      | 185       | 05 July 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
-      | 186       | 06 July 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
-      | 187       | 07 July 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
-      | 188       | 08 July 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
-      | 189       | 09 July 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
-      | 190       | 10 July 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
-      | 191       | 11 July 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
-      | 192       | 12 July 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
-      | 193       | 13 July 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
-      | 194       | 14 July 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
-      | 195       | 15 July 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
-      | 196       | 16 July 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
-      | 197       | 17 July 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
-      | 198       | 18 July 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
-      | 199       | 19 July 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
-      | 200       | 20 July 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
-      | 201       | 21 July 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
-      | 202       | 22 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
-      | 203       | 23 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
-      | 204       | 24 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
-
-    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
+      | 3         | 04 January 2026  | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
+      | 4         | 05 January 2026  | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
+      | 5         | 06 January 2026  | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
+      | 6         | 07 January 2026  | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
+      | 7         | 08 January 2026  | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
+      | 8         | 09 January 2026  | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
+      | 9         | 10 January 2026  | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
+      | 10        | 11 January 2026  | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
+      | 11        | 12 January 2026  | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
+      | 12        | 13 January 2026  | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
+      | 13        | 14 January 2026  | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
+      | 14        | 15 January 2026  | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
+      | 15        | 16 January 2026  | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
+      | 16        | 17 January 2026  | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
+      | 17        | 18 January 2026  | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
+      | 18        | 19 January 2026  | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
+      | 19        | 20 January 2026  | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
+      | 20        | 21 January 2026  | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
+      | 21        | 22 January 2026  | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
+      | 22        | 23 January 2026  | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
+      | 23        | 24 January 2026  | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
+      | 24        | 25 January 2026  | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
+      | 25        | 26 January 2026  | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
+      | 26        | 27 January 2026  | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
+      | 27        | 28 January 2026  | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
+      | 28        | 29 January 2026  | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
+      | 29        | 30 January 2026  | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
+      | 30        | 31 January 2026  | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
+      | 31        | 01 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
+      | 32        | 02 February 2026 | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
+      | 33        | 03 February 2026 | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
+      | 34        | 04 February 2026 | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
+      | 35        | 05 February 2026 | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
+      | 36        | 06 February 2026 | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
+      | 37        | 07 February 2026 | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
+      | 38        | 08 February 2026 | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
+      | 39        | 09 February 2026 | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
+      | 40        | 10 February 2026 | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
+      | 41        | 11 February 2026 | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
+      | 42        | 12 February 2026 | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
+      | 43        | 13 February 2026 | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
+      | 44        | 14 February 2026 | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
+      | 45        | 15 February 2026 | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
+      | 46        | 16 February 2026 | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
+      | 47        | 17 February 2026 | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
+      | 48        | 18 February 2026 | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
+      | 49        | 19 February 2026 | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
+      | 50        | 20 February 2026 | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
+      | 51        | 21 February 2026 | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
+      | 52        | 22 February 2026 | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
+      | 53        | 23 February 2026 | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
+      | 54        | 24 February 2026 | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
+      | 55        | 25 February 2026 | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
+      | 56        | 26 February 2026 | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
+      | 57        | 27 February 2026 | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
+      | 58        | 28 February 2026 | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
+      | 59        | 01 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
+      | 60        | 02 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
+      | 61        | 03 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
+      | 62        | 04 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
+      | 63        | 05 March 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
+      | 64        | 06 March 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
+      | 65        | 07 March 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
+      | 66        | 08 March 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
+      | 67        | 09 March 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
+      | 68        | 10 March 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
+      | 69        | 11 March 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
+      | 70        | 12 March 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
+      | 71        | 13 March 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
+      | 72        | 14 March 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
+      | 73        | 15 March 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
+      | 74        | 16 March 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
+      | 75        | 17 March 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
+      | 76        | 18 March 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
+      | 77        | 19 March 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
+      | 78        | 20 March 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
+      | 79        | 21 March 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
+      | 80        | 22 March 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
+      | 81        | 23 March 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
+      | 82        | 24 March 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
+      | 83        | 25 March 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
+      | 84        | 26 March 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
+      | 85        | 27 March 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
+      | 86        | 28 March 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
+      | 87        | 29 March 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
+      | 88        | 30 March 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
+      | 89        | 31 March 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
+      | 90        | 01 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
+      | 91        | 02 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
+      | 92        | 03 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
+      | 93        | 04 April 2026    | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
+      | 94        | 05 April 2026    | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
+      | 95        | 06 April 2026    | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
+      | 96        | 07 April 2026    | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
+      | 97        | 08 April 2026    | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
+      | 98        | 09 April 2026    | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
+      | 99        | 10 April 2026    | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
+      | 100       | 11 April 2026    | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
+      | 101       | 12 April 2026    | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
+      | 102       | 13 April 2026    | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
+      | 103       | 14 April 2026    | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
+      | 104       | 15 April 2026    | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
+      | 105       | 16 April 2026    | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
+      | 106       | 17 April 2026    | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
+      | 107       | 18 April 2026    | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
+      | 108       | 19 April 2026    | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
+      | 109       | 20 April 2026    | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
+      | 110       | 21 April 2026    | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
+      | 111       | 22 April 2026    | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
+      | 112       | 23 April 2026    | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
+      | 113       | 24 April 2026    | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
+      | 114       | 25 April 2026    | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
+      | 115       | 26 April 2026    | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
+      | 116       | 27 April 2026    | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
+      | 117       | 28 April 2026    | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
+      | 118       | 29 April 2026    | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
+      | 119       | 30 April 2026    | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
+      | 120       | 01 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
+      | 121       | 02 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
+      | 122       | 03 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
+      | 123       | 04 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
+      | 124       | 05 May 2026      | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
+      | 125       | 06 May 2026      | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
+      | 126       | 07 May 2026      | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
+      | 127       | 08 May 2026      | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
+      | 128       | 09 May 2026      | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
+      | 129       | 10 May 2026      | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
+      | 130       | 11 May 2026      | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
+      | 131       | 12 May 2026      | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
+      | 132       | 13 May 2026      | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
+      | 133       | 14 May 2026      | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
+      | 134       | 15 May 2026      | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
+      | 135       | 16 May 2026      | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
+      | 136       | 17 May 2026      | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
+      | 137       | 18 May 2026      | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
+      | 138       | 19 May 2026      | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
+      | 139       | 20 May 2026      | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
+      | 140       | 21 May 2026      | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
+      | 141       | 22 May 2026      | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
+      | 142       | 23 May 2026      | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
+      | 143       | 24 May 2026      | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
+      | 144       | 25 May 2026      | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
+      | 145       | 26 May 2026      | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
+      | 146       | 27 May 2026      | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
+      | 147       | 28 May 2026      | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
+      | 148       | 29 May 2026      | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
+      | 149       | 30 May 2026      | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
+      | 150       | 31 May 2026      | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
+      | 151       | 01 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
+      | 152       | 02 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
+      | 153       | 03 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
+      | 154       | 04 June 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
+      | 155       | 05 June 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
+      | 156       | 06 June 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
+      | 157       | 07 June 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
+      | 158       | 08 June 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
+      | 159       | 09 June 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
+      | 160       | 10 June 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
+      | 161       | 11 June 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
+      | 162       | 12 June 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
+      | 163       | 13 June 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
+      | 164       | 14 June 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
+      | 165       | 15 June 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
+      | 166       | 16 June 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
+      | 167       | 17 June 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
+      | 168       | 18 June 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
+      | 169       | 19 June 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
+      | 170       | 20 June 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
+      | 171       | 21 June 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
+      | 172       | 22 June 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
+      | 173       | 23 June 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
+      | 174       | 24 June 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
+      | 175       | 25 June 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
+      | 176       | 26 June 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
+      | 177       | 27 June 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C76628
   Scenario: Verify working capital loan repayment - UC12: partial expectedAmount repaid in 1st period
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+      | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
+      | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Partial expectedAmount paid ---
@@ -3503,873 +3372,783 @@ Feature: Working Capital Loan Repayment
     And Customer makes repayment on "02 January 2026" with 170.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 170.0      | 100.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 170.0      | 100.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-    When Admin sets the business date to "31 January 2026"
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 170.0      | 100.0             | false                 | 100.0            | 1              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 170.0      | 100.0             | false                 | 100.0            | 1              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-01-31  |              | D00            | 1              | 30             |
-
-    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
+      | 1            | 2026-01-04  |              | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C76629
   Scenario: Verify working capital loan repayment - UC13: partial expectedAmount repaid in 2nd period
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+      | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
+      | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Start of 2nd period ---
-    When Admin sets the business date to "31 January 2026"
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-01-31  |              | D00            | 1              | 30             |
+      | 1            | 2026-01-04  |              | D00            | 1              | 30             |
     #   --- Partial expectedAmount paid ---
-    When Admin sets the business date to "10 February 2026"
-    And Customer makes repayment on "10 February 2026" with 170.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "05 January 2026"
+    And Customer makes repayment on "05 January 2026" with 170.0 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 170.0      | 100.0             | false                 | 100.0            | 11             |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 170.0      | 100.0             | false                 | 100.0            | 2              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-01-31  |              | D00            | 1              | 30             |
-    Then Working Capital loan amortization schedule has 218 periods, with the following data for periods:
+      | 1            | 2026-01-04  |              | D00            | 1              | 30             |
+    Then Working Capital loan amortization schedule has 182 periods, with the following data for periods:
       | paymentNo | paymentDate      | expectedPaymentAmount | actualPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
       | 0         | 01 January 2026  | -9000.00              |                     | 9000.00         | 9000.00       |                            |                          | 0.00                       |
       | 1         | 02 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
       | 2         | 03 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
       | 3         | 04 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 4         | 05 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 5         | 06 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 6         | 07 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 7         | 08 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 8         | 09 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 9         | 10 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 10        | 11 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 11        | 12 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 12        | 13 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 13        | 14 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 14        | 15 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 15        | 16 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 16        | 17 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 17        | 18 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 18        | 19 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 19        | 20 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 20        | 21 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 21        | 22 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 22        | 23 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 23        | 24 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 24        | 25 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 25        | 26 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 26        | 27 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 27        | 28 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 28        | 29 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 29        | 30 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 30        | 31 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 31        | 01 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 32        | 02 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 33        | 03 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 34        | 04 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 35        | 05 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 36        | 06 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 37        | 07 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 38        | 08 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 39        | 09 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 40        | 10 February 2026 | 50.00                 | 170.00              | 8950.00         | 8830.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 41        | 11 February 2026 | 50.00                 |                     | 8780.00         |               | 0.00                       |                          | 0.00                       |
-      | 42        | 12 February 2026 | 50.00                 |                     | 8730.00         |               | 0.00                       |                          | 0.00                       |
-      | 43        | 13 February 2026 | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
-      | 44        | 14 February 2026 | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
-      | 45        | 15 February 2026 | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
-      | 46        | 16 February 2026 | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
-      | 47        | 17 February 2026 | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
-      | 48        | 18 February 2026 | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
-      | 49        | 19 February 2026 | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
-      | 50        | 20 February 2026 | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
-      | 51        | 21 February 2026 | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
-      | 52        | 22 February 2026 | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
-      | 53        | 23 February 2026 | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
-      | 54        | 24 February 2026 | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
-      | 55        | 25 February 2026 | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
-      | 56        | 26 February 2026 | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
-      | 57        | 27 February 2026 | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
-      | 58        | 28 February 2026 | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
-      | 59        | 01 March 2026    | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
-      | 60        | 02 March 2026    | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
-      | 61        | 03 March 2026    | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
-      | 62        | 04 March 2026    | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
-      | 63        | 05 March 2026    | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
-      | 64        | 06 March 2026    | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
-      | 65        | 07 March 2026    | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
-      | 66        | 08 March 2026    | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
-      | 67        | 09 March 2026    | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
-      | 68        | 10 March 2026    | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
-      | 69        | 11 March 2026    | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
-      | 70        | 12 March 2026    | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
-      | 71        | 13 March 2026    | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
-      | 72        | 14 March 2026    | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
-      | 73        | 15 March 2026    | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
-      | 74        | 16 March 2026    | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
-      | 75        | 17 March 2026    | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
-      | 76        | 18 March 2026    | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
-      | 77        | 19 March 2026    | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
-      | 78        | 20 March 2026    | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
-      | 79        | 21 March 2026    | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
-      | 80        | 22 March 2026    | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
-      | 81        | 23 March 2026    | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
-      | 82        | 24 March 2026    | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
-      | 83        | 25 March 2026    | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
-      | 84        | 26 March 2026    | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
-      | 85        | 27 March 2026    | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
-      | 86        | 28 March 2026    | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
-      | 87        | 29 March 2026    | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
-      | 88        | 30 March 2026    | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
-      | 89        | 31 March 2026    | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
-      | 90        | 01 April 2026    | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
-      | 91        | 02 April 2026    | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
-      | 92        | 03 April 2026    | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
-      | 93        | 04 April 2026    | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
-      | 94        | 05 April 2026    | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
-      | 95        | 06 April 2026    | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
-      | 96        | 07 April 2026    | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
-      | 97        | 08 April 2026    | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
-      | 98        | 09 April 2026    | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
-      | 99        | 10 April 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
-      | 100       | 11 April 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
-      | 101       | 12 April 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
-      | 102       | 13 April 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
-      | 103       | 14 April 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
-      | 104       | 15 April 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
-      | 105       | 16 April 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
-      | 106       | 17 April 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
-      | 107       | 18 April 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
-      | 108       | 19 April 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
-      | 109       | 20 April 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
-      | 110       | 21 April 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
-      | 111       | 22 April 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
-      | 112       | 23 April 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
-      | 113       | 24 April 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
-      | 114       | 25 April 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
-      | 115       | 26 April 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
-      | 116       | 27 April 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
-      | 117       | 28 April 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
-      | 118       | 29 April 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
-      | 119       | 30 April 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
-      | 120       | 01 May 2026      | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
-      | 121       | 02 May 2026      | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
-      | 122       | 03 May 2026      | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
-      | 123       | 04 May 2026      | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
-      | 124       | 05 May 2026      | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
-      | 125       | 06 May 2026      | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
-      | 126       | 07 May 2026      | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
-      | 127       | 08 May 2026      | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
-      | 128       | 09 May 2026      | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
-      | 129       | 10 May 2026      | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
-      | 130       | 11 May 2026      | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
-      | 131       | 12 May 2026      | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
-      | 132       | 13 May 2026      | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
-      | 133       | 14 May 2026      | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
-      | 134       | 15 May 2026      | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
-      | 135       | 16 May 2026      | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
-      | 136       | 17 May 2026      | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
-      | 137       | 18 May 2026      | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
-      | 138       | 19 May 2026      | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
-      | 139       | 20 May 2026      | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
-      | 140       | 21 May 2026      | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
-      | 141       | 22 May 2026      | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
-      | 142       | 23 May 2026      | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
-      | 143       | 24 May 2026      | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
-      | 144       | 25 May 2026      | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
-      | 145       | 26 May 2026      | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
-      | 146       | 27 May 2026      | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
-      | 147       | 28 May 2026      | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
-      | 148       | 29 May 2026      | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
-      | 149       | 30 May 2026      | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
-      | 150       | 31 May 2026      | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
-      | 151       | 01 June 2026     | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
-      | 152       | 02 June 2026     | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
-      | 153       | 03 June 2026     | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
-      | 154       | 04 June 2026     | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
-      | 155       | 05 June 2026     | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
-      | 156       | 06 June 2026     | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
-      | 157       | 07 June 2026     | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
-      | 158       | 08 June 2026     | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
-      | 159       | 09 June 2026     | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
-      | 160       | 10 June 2026     | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
-      | 161       | 11 June 2026     | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
-      | 162       | 12 June 2026     | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
-      | 163       | 13 June 2026     | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
-      | 164       | 14 June 2026     | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
-      | 165       | 15 June 2026     | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
-      | 166       | 16 June 2026     | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
-      | 167       | 17 June 2026     | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
-      | 168       | 18 June 2026     | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
-      | 169       | 19 June 2026     | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
-      | 170       | 20 June 2026     | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
-      | 171       | 21 June 2026     | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
-      | 172       | 22 June 2026     | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
-      | 173       | 23 June 2026     | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
-      | 174       | 24 June 2026     | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
-      | 175       | 25 June 2026     | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
-      | 176       | 26 June 2026     | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
-      | 177       | 27 June 2026     | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
-      | 178       | 28 June 2026     | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
-      | 179       | 29 June 2026     | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
-      | 180       | 30 June 2026     | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
-      | 181       | 01 July 2026     | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
-      | 182       | 02 July 2026     | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
-      | 183       | 03 July 2026     | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
-      | 184       | 04 July 2026     | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
-      | 185       | 05 July 2026     | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
-      | 186       | 06 July 2026     | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
-      | 187       | 07 July 2026     | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
-      | 188       | 08 July 2026     | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
-      | 189       | 09 July 2026     | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
-      | 190       | 10 July 2026     | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
-      | 191       | 11 July 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
-      | 192       | 12 July 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
-      | 193       | 13 July 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
-      | 194       | 14 July 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
-      | 195       | 15 July 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
-      | 196       | 16 July 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
-      | 197       | 17 July 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
-      | 198       | 18 July 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
-      | 199       | 19 July 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
-      | 200       | 20 July 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
-      | 201       | 21 July 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
-      | 202       | 22 July 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
-      | 203       | 23 July 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
-      | 204       | 24 July 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
-      | 205       | 25 July 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
-      | 206       | 26 July 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
-      | 207       | 27 July 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
-      | 208       | 28 July 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
-      | 209       | 29 July 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
-      | 210       | 30 July 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
-      | 211       | 31 July 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
-      | 212       | 01 August 2026   | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
-      | 213       | 02 August 2026   | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
-      | 214       | 03 August 2026   | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
-      | 215       | 04 August 2026   | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
-      | 216       | 05 August 2026   | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
-      | 217       | 06 August 2026   | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
-
-    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 February 2026"
+      | 4         | 05 January 2026  | 50.00                 | 170.00              | 8950.00         | 8830.00       | 0.00                       | 0.00                     | 0.00                       |
+      | 5         | 06 January 2026  | 50.00                 |                     | 8780.00         |               | 0.00                       |                          | 0.00                       |
+      | 6         | 07 January 2026  | 50.00                 |                     | 8730.00         |               | 0.00                       |                          | 0.00                       |
+      | 7         | 08 January 2026  | 50.00                 |                     | 8680.00         |               | 0.00                       |                          | 0.00                       |
+      | 8         | 09 January 2026  | 50.00                 |                     | 8630.00         |               | 0.00                       |                          | 0.00                       |
+      | 9         | 10 January 2026  | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
+      | 10        | 11 January 2026  | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
+      | 11        | 12 January 2026  | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
+      | 12        | 13 January 2026  | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
+      | 13        | 14 January 2026  | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
+      | 14        | 15 January 2026  | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
+      | 15        | 16 January 2026  | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
+      | 16        | 17 January 2026  | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
+      | 17        | 18 January 2026  | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
+      | 18        | 19 January 2026  | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
+      | 19        | 20 January 2026  | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
+      | 20        | 21 January 2026  | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
+      | 21        | 22 January 2026  | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
+      | 22        | 23 January 2026  | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
+      | 23        | 24 January 2026  | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
+      | 24        | 25 January 2026  | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
+      | 25        | 26 January 2026  | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
+      | 26        | 27 January 2026  | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
+      | 27        | 28 January 2026  | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
+      | 28        | 29 January 2026  | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
+      | 29        | 30 January 2026  | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
+      | 30        | 31 January 2026  | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
+      | 31        | 01 February 2026 | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
+      | 32        | 02 February 2026 | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
+      | 33        | 03 February 2026 | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
+      | 34        | 04 February 2026 | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
+      | 35        | 05 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
+      | 36        | 06 February 2026 | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
+      | 37        | 07 February 2026 | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
+      | 38        | 08 February 2026 | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
+      | 39        | 09 February 2026 | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
+      | 40        | 10 February 2026 | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
+      | 41        | 11 February 2026 | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
+      | 42        | 12 February 2026 | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
+      | 43        | 13 February 2026 | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
+      | 44        | 14 February 2026 | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
+      | 45        | 15 February 2026 | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
+      | 46        | 16 February 2026 | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
+      | 47        | 17 February 2026 | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
+      | 48        | 18 February 2026 | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
+      | 49        | 19 February 2026 | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
+      | 50        | 20 February 2026 | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
+      | 51        | 21 February 2026 | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
+      | 52        | 22 February 2026 | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
+      | 53        | 23 February 2026 | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
+      | 54        | 24 February 2026 | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
+      | 55        | 25 February 2026 | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
+      | 56        | 26 February 2026 | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
+      | 57        | 27 February 2026 | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
+      | 58        | 28 February 2026 | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
+      | 59        | 01 March 2026    | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
+      | 60        | 02 March 2026    | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
+      | 61        | 03 March 2026    | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
+      | 62        | 04 March 2026    | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
+      | 63        | 05 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
+      | 64        | 06 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
+      | 65        | 07 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
+      | 66        | 08 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
+      | 67        | 09 March 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
+      | 68        | 10 March 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
+      | 69        | 11 March 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
+      | 70        | 12 March 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
+      | 71        | 13 March 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
+      | 72        | 14 March 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
+      | 73        | 15 March 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
+      | 74        | 16 March 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
+      | 75        | 17 March 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
+      | 76        | 18 March 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
+      | 77        | 19 March 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
+      | 78        | 20 March 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
+      | 79        | 21 March 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
+      | 80        | 22 March 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
+      | 81        | 23 March 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
+      | 82        | 24 March 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
+      | 83        | 25 March 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
+      | 84        | 26 March 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
+      | 85        | 27 March 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
+      | 86        | 28 March 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
+      | 87        | 29 March 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
+      | 88        | 30 March 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
+      | 89        | 31 March 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
+      | 90        | 01 April 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
+      | 91        | 02 April 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
+      | 92        | 03 April 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
+      | 93        | 04 April 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
+      | 94        | 05 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
+      | 95        | 06 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
+      | 96        | 07 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
+      | 97        | 08 April 2026    | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
+      | 98        | 09 April 2026    | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
+      | 99        | 10 April 2026    | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
+      | 100       | 11 April 2026    | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
+      | 101       | 12 April 2026    | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
+      | 102       | 13 April 2026    | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
+      | 103       | 14 April 2026    | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
+      | 104       | 15 April 2026    | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
+      | 105       | 16 April 2026    | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
+      | 106       | 17 April 2026    | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
+      | 107       | 18 April 2026    | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
+      | 108       | 19 April 2026    | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
+      | 109       | 20 April 2026    | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
+      | 110       | 21 April 2026    | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
+      | 111       | 22 April 2026    | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
+      | 112       | 23 April 2026    | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
+      | 113       | 24 April 2026    | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
+      | 114       | 25 April 2026    | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
+      | 115       | 26 April 2026    | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
+      | 116       | 27 April 2026    | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
+      | 117       | 28 April 2026    | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
+      | 118       | 29 April 2026    | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
+      | 119       | 30 April 2026    | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
+      | 120       | 01 May 2026      | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
+      | 121       | 02 May 2026      | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
+      | 122       | 03 May 2026      | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
+      | 123       | 04 May 2026      | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
+      | 124       | 05 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
+      | 125       | 06 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
+      | 126       | 07 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
+      | 127       | 08 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
+      | 128       | 09 May 2026      | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
+      | 129       | 10 May 2026      | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
+      | 130       | 11 May 2026      | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
+      | 131       | 12 May 2026      | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
+      | 132       | 13 May 2026      | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
+      | 133       | 14 May 2026      | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
+      | 134       | 15 May 2026      | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
+      | 135       | 16 May 2026      | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
+      | 136       | 17 May 2026      | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
+      | 137       | 18 May 2026      | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
+      | 138       | 19 May 2026      | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
+      | 139       | 20 May 2026      | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
+      | 140       | 21 May 2026      | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
+      | 141       | 22 May 2026      | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
+      | 142       | 23 May 2026      | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
+      | 143       | 24 May 2026      | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
+      | 144       | 25 May 2026      | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
+      | 145       | 26 May 2026      | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
+      | 146       | 27 May 2026      | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
+      | 147       | 28 May 2026      | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
+      | 148       | 29 May 2026      | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
+      | 149       | 30 May 2026      | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
+      | 150       | 31 May 2026      | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
+      | 151       | 01 June 2026     | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
+      | 152       | 02 June 2026     | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
+      | 153       | 03 June 2026     | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
+      | 154       | 04 June 2026     | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
+      | 155       | 05 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
+      | 156       | 06 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
+      | 157       | 07 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
+      | 158       | 08 June 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
+      | 159       | 09 June 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
+      | 160       | 10 June 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
+      | 161       | 11 June 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
+      | 162       | 12 June 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
+      | 163       | 13 June 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
+      | 164       | 14 June 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
+      | 165       | 15 June 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
+      | 166       | 16 June 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
+      | 167       | 17 June 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
+      | 168       | 18 June 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
+      | 169       | 19 June 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
+      | 170       | 20 June 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
+      | 171       | 21 June 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
+      | 172       | 22 June 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
+      | 173       | 23 June 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
+      | 174       | 24 June 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
+      | 175       | 25 June 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
+      | 176       | 26 June 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
+      | 177       | 27 June 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
+      | 178       | 28 June 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
+      | 179       | 29 June 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
+      | 180       | 30 June 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
+      | 181       | 01 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "05 January 2026"
 
   @TestRailId:C76630
   Scenario: Verify working capital loan repayment - UC14: expectedAmount overpaid in 1st period
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+      | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
+      | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
     #   --- expectedAmount overpaid ---
-    When Admin sets the business date to "10 January 2026"
-    And Customer makes repayment on "10 January 2026" with 370.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 370.0 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 370.0      | 0.0               | true                  | 0.0              | 0              |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 370.0      | 0.0               | true                  | 0.0              | 0              |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
     #   --- Start of 2nd period ---
-    When Admin sets the business date to "31 January 2026"
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 370.0      | 0.0               | true                  | 0.0              | 0              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 370.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-    Then Working Capital loan amortization schedule has 203 periods, with the following data for periods:
+    Then Working Capital loan amortization schedule has 176 periods, with the following data for periods:
       | paymentNo | paymentDate      | expectedPaymentAmount | actualPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
       | 0         | 01 January 2026  | -9000.00              |                     | 9000.00         | 9000.00       |                            |                          | 0.00                       |
-      | 1         | 02 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 2         | 03 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 3         | 04 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 4         | 05 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 5         | 06 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 6         | 07 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 7         | 08 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 8         | 09 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 9         | 10 January 2026  | 50.00                 | 370.00              | 8950.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 10        | 11 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 11        | 12 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 12        | 13 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 13        | 14 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 14        | 15 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 15        | 16 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 16        | 17 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 17        | 18 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 18        | 19 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 19        | 20 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 20        | 21 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 21        | 22 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 22        | 23 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 23        | 24 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 24        | 25 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 25        | 26 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 26        | 27 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 27        | 28 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 28        | 29 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 29        | 30 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 30        | 31 January 2026  | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
-      | 31        | 01 February 2026 | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
-      | 32        | 02 February 2026 | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
-      | 33        | 03 February 2026 | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
-      | 34        | 04 February 2026 | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
-      | 35        | 05 February 2026 | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
-      | 36        | 06 February 2026 | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
-      | 37        | 07 February 2026 | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
-      | 38        | 08 February 2026 | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
-      | 39        | 09 February 2026 | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
-      | 40        | 10 February 2026 | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
-      | 41        | 11 February 2026 | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
-      | 42        | 12 February 2026 | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
-      | 43        | 13 February 2026 | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
-      | 44        | 14 February 2026 | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
-      | 45        | 15 February 2026 | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
-      | 46        | 16 February 2026 | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
-      | 47        | 17 February 2026 | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
-      | 48        | 18 February 2026 | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
-      | 49        | 19 February 2026 | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
-      | 50        | 20 February 2026 | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
-      | 51        | 21 February 2026 | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
-      | 52        | 22 February 2026 | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
-      | 53        | 23 February 2026 | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
-      | 54        | 24 February 2026 | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
-      | 55        | 25 February 2026 | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
-      | 56        | 26 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
-      | 57        | 27 February 2026 | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
-      | 58        | 28 February 2026 | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
-      | 59        | 01 March 2026    | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
-      | 60        | 02 March 2026    | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
-      | 61        | 03 March 2026    | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
-      | 62        | 04 March 2026    | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
-      | 63        | 05 March 2026    | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
-      | 64        | 06 March 2026    | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
-      | 65        | 07 March 2026    | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
-      | 66        | 08 March 2026    | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
-      | 67        | 09 March 2026    | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
-      | 68        | 10 March 2026    | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
-      | 69        | 11 March 2026    | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
-      | 70        | 12 March 2026    | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
-      | 71        | 13 March 2026    | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
-      | 72        | 14 March 2026    | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
-      | 73        | 15 March 2026    | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
-      | 74        | 16 March 2026    | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
-      | 75        | 17 March 2026    | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
-      | 76        | 18 March 2026    | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
-      | 77        | 19 March 2026    | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
-      | 78        | 20 March 2026    | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
-      | 79        | 21 March 2026    | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
-      | 80        | 22 March 2026    | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
-      | 81        | 23 March 2026    | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
-      | 82        | 24 March 2026    | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
-      | 83        | 25 March 2026    | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
-      | 84        | 26 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
-      | 85        | 27 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
-      | 86        | 28 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
-      | 87        | 29 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
-      | 88        | 30 March 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
-      | 89        | 31 March 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
-      | 90        | 01 April 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
-      | 91        | 02 April 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
-      | 92        | 03 April 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
-      | 93        | 04 April 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
-      | 94        | 05 April 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
-      | 95        | 06 April 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
-      | 96        | 07 April 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
-      | 97        | 08 April 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
-      | 98        | 09 April 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
-      | 99        | 10 April 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
-      | 100       | 11 April 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
-      | 101       | 12 April 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
-      | 102       | 13 April 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
-      | 103       | 14 April 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
-      | 104       | 15 April 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
-      | 105       | 16 April 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
-      | 106       | 17 April 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
-      | 107       | 18 April 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
-      | 108       | 19 April 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
-      | 109       | 20 April 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
-      | 110       | 21 April 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
-      | 111       | 22 April 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
-      | 112       | 23 April 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
-      | 113       | 24 April 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
-      | 114       | 25 April 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
-      | 115       | 26 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
-      | 116       | 27 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
-      | 117       | 28 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
-      | 118       | 29 April 2026    | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
-      | 119       | 30 April 2026    | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
-      | 120       | 01 May 2026      | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
-      | 121       | 02 May 2026      | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
-      | 122       | 03 May 2026      | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
-      | 123       | 04 May 2026      | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
-      | 124       | 05 May 2026      | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
-      | 125       | 06 May 2026      | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
-      | 126       | 07 May 2026      | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
-      | 127       | 08 May 2026      | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
-      | 128       | 09 May 2026      | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
-      | 129       | 10 May 2026      | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
-      | 130       | 11 May 2026      | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
-      | 131       | 12 May 2026      | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
-      | 132       | 13 May 2026      | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
-      | 133       | 14 May 2026      | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
-      | 134       | 15 May 2026      | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
-      | 135       | 16 May 2026      | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
-      | 136       | 17 May 2026      | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
-      | 137       | 18 May 2026      | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
-      | 138       | 19 May 2026      | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
-      | 139       | 20 May 2026      | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
-      | 140       | 21 May 2026      | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
-      | 141       | 22 May 2026      | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
-      | 142       | 23 May 2026      | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
-      | 143       | 24 May 2026      | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
-      | 144       | 25 May 2026      | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
-      | 145       | 26 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
-      | 146       | 27 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
-      | 147       | 28 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
-      | 148       | 29 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
-      | 149       | 30 May 2026      | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
-      | 150       | 31 May 2026      | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
-      | 151       | 01 June 2026     | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
-      | 152       | 02 June 2026     | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
-      | 153       | 03 June 2026     | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
-      | 154       | 04 June 2026     | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
-      | 155       | 05 June 2026     | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
-      | 156       | 06 June 2026     | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
-      | 157       | 07 June 2026     | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
-      | 158       | 08 June 2026     | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
-      | 159       | 09 June 2026     | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
-      | 160       | 10 June 2026     | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
-      | 161       | 11 June 2026     | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
-      | 162       | 12 June 2026     | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
-      | 163       | 13 June 2026     | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
-      | 164       | 14 June 2026     | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
-      | 165       | 15 June 2026     | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
-      | 166       | 16 June 2026     | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
-      | 167       | 17 June 2026     | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
-      | 168       | 18 June 2026     | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
-      | 169       | 19 June 2026     | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
-      | 170       | 20 June 2026     | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
-      | 171       | 21 June 2026     | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
-      | 172       | 22 June 2026     | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
-      | 173       | 23 June 2026     | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
-      | 174       | 24 June 2026     | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
-      | 175       | 25 June 2026     | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
-      | 176       | 26 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
-      | 177       | 27 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
-      | 178       | 28 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
-      | 179       | 29 June 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
-      | 180       | 30 June 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
-      | 181       | 01 July 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
-      | 182       | 02 July 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
-      | 183       | 03 July 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
-      | 184       | 04 July 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
-      | 185       | 05 July 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
-      | 186       | 06 July 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
-      | 187       | 07 July 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
-      | 188       | 08 July 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
-      | 189       | 09 July 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
-      | 190       | 10 July 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
-      | 191       | 11 July 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
-      | 192       | 12 July 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
-      | 193       | 13 July 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
-      | 194       | 14 July 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
-      | 195       | 15 July 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
-      | 196       | 16 July 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
-      | 197       | 17 July 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
-      | 198       | 18 July 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
-      | 199       | 19 July 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
-      | 200       | 20 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
-      | 201       | 21 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
-      | 202       | 22 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
-
-    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
+      | 1         | 02 January 2026  | 50.00                 | 370.00              | 8950.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
+      | 2         | 03 January 2026  | 50.00                 | 0.00                | 8580.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
+      | 3         | 04 January 2026  | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
+      | 4         | 05 January 2026  | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
+      | 5         | 06 January 2026  | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
+      | 6         | 07 January 2026  | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
+      | 7         | 08 January 2026  | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
+      | 8         | 09 January 2026  | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
+      | 9         | 10 January 2026  | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
+      | 10        | 11 January 2026  | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
+      | 11        | 12 January 2026  | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
+      | 12        | 13 January 2026  | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
+      | 13        | 14 January 2026  | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
+      | 14        | 15 January 2026  | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
+      | 15        | 16 January 2026  | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
+      | 16        | 17 January 2026  | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
+      | 17        | 18 January 2026  | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
+      | 18        | 19 January 2026  | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
+      | 19        | 20 January 2026  | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
+      | 20        | 21 January 2026  | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
+      | 21        | 22 January 2026  | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
+      | 22        | 23 January 2026  | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
+      | 23        | 24 January 2026  | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
+      | 24        | 25 January 2026  | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
+      | 25        | 26 January 2026  | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
+      | 26        | 27 January 2026  | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
+      | 27        | 28 January 2026  | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
+      | 28        | 29 January 2026  | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
+      | 29        | 30 January 2026  | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
+      | 30        | 31 January 2026  | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
+      | 31        | 01 February 2026 | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
+      | 32        | 02 February 2026 | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
+      | 33        | 03 February 2026 | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
+      | 34        | 04 February 2026 | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
+      | 35        | 05 February 2026 | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
+      | 36        | 06 February 2026 | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
+      | 37        | 07 February 2026 | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
+      | 38        | 08 February 2026 | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
+      | 39        | 09 February 2026 | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
+      | 40        | 10 February 2026 | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
+      | 41        | 11 February 2026 | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
+      | 42        | 12 February 2026 | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
+      | 43        | 13 February 2026 | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
+      | 44        | 14 February 2026 | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
+      | 45        | 15 February 2026 | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
+      | 46        | 16 February 2026 | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
+      | 47        | 17 February 2026 | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
+      | 48        | 18 February 2026 | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
+      | 49        | 19 February 2026 | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
+      | 50        | 20 February 2026 | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
+      | 51        | 21 February 2026 | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
+      | 52        | 22 February 2026 | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
+      | 53        | 23 February 2026 | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
+      | 54        | 24 February 2026 | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
+      | 55        | 25 February 2026 | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
+      | 56        | 26 February 2026 | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
+      | 57        | 27 February 2026 | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
+      | 58        | 28 February 2026 | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
+      | 59        | 01 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
+      | 60        | 02 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
+      | 61        | 03 March 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
+      | 62        | 04 March 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
+      | 63        | 05 March 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
+      | 64        | 06 March 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
+      | 65        | 07 March 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
+      | 66        | 08 March 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
+      | 67        | 09 March 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
+      | 68        | 10 March 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
+      | 69        | 11 March 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
+      | 70        | 12 March 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
+      | 71        | 13 March 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
+      | 72        | 14 March 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
+      | 73        | 15 March 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
+      | 74        | 16 March 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
+      | 75        | 17 March 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
+      | 76        | 18 March 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
+      | 77        | 19 March 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
+      | 78        | 20 March 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
+      | 79        | 21 March 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
+      | 80        | 22 March 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
+      | 81        | 23 March 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
+      | 82        | 24 March 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
+      | 83        | 25 March 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
+      | 84        | 26 March 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
+      | 85        | 27 March 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
+      | 86        | 28 March 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
+      | 87        | 29 March 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
+      | 88        | 30 March 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
+      | 89        | 31 March 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
+      | 90        | 01 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
+      | 91        | 02 April 2026    | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
+      | 92        | 03 April 2026    | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
+      | 93        | 04 April 2026    | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
+      | 94        | 05 April 2026    | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
+      | 95        | 06 April 2026    | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
+      | 96        | 07 April 2026    | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
+      | 97        | 08 April 2026    | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
+      | 98        | 09 April 2026    | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
+      | 99        | 10 April 2026    | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
+      | 100       | 11 April 2026    | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
+      | 101       | 12 April 2026    | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
+      | 102       | 13 April 2026    | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
+      | 103       | 14 April 2026    | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
+      | 104       | 15 April 2026    | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
+      | 105       | 16 April 2026    | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
+      | 106       | 17 April 2026    | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
+      | 107       | 18 April 2026    | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
+      | 108       | 19 April 2026    | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
+      | 109       | 20 April 2026    | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
+      | 110       | 21 April 2026    | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
+      | 111       | 22 April 2026    | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
+      | 112       | 23 April 2026    | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
+      | 113       | 24 April 2026    | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
+      | 114       | 25 April 2026    | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
+      | 115       | 26 April 2026    | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
+      | 116       | 27 April 2026    | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
+      | 117       | 28 April 2026    | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
+      | 118       | 29 April 2026    | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
+      | 119       | 30 April 2026    | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
+      | 120       | 01 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
+      | 121       | 02 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
+      | 122       | 03 May 2026      | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
+      | 123       | 04 May 2026      | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
+      | 124       | 05 May 2026      | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
+      | 125       | 06 May 2026      | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
+      | 126       | 07 May 2026      | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
+      | 127       | 08 May 2026      | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
+      | 128       | 09 May 2026      | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
+      | 129       | 10 May 2026      | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
+      | 130       | 11 May 2026      | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
+      | 131       | 12 May 2026      | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
+      | 132       | 13 May 2026      | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
+      | 133       | 14 May 2026      | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
+      | 134       | 15 May 2026      | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
+      | 135       | 16 May 2026      | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
+      | 136       | 17 May 2026      | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
+      | 137       | 18 May 2026      | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
+      | 138       | 19 May 2026      | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
+      | 139       | 20 May 2026      | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
+      | 140       | 21 May 2026      | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
+      | 141       | 22 May 2026      | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
+      | 142       | 23 May 2026      | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
+      | 143       | 24 May 2026      | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
+      | 144       | 25 May 2026      | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
+      | 145       | 26 May 2026      | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
+      | 146       | 27 May 2026      | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
+      | 147       | 28 May 2026      | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
+      | 148       | 29 May 2026      | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
+      | 149       | 30 May 2026      | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
+      | 150       | 31 May 2026      | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
+      | 151       | 01 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
+      | 152       | 02 June 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
+      | 153       | 03 June 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
+      | 154       | 04 June 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
+      | 155       | 05 June 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
+      | 156       | 06 June 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
+      | 157       | 07 June 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
+      | 158       | 08 June 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
+      | 159       | 09 June 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
+      | 160       | 10 June 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
+      | 161       | 11 June 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
+      | 162       | 12 June 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
+      | 163       | 13 June 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
+      | 164       | 14 June 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
+      | 165       | 15 June 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
+      | 166       | 16 June 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
+      | 167       | 17 June 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
+      | 168       | 18 June 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
+      | 169       | 19 June 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
+      | 170       | 20 June 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
+      | 171       | 21 June 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
+      | 172       | 22 June 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
+      | 173       | 23 June 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
+      | 174       | 24 June 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
+      | 175       | 25 June 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C76631
   Scenario: Verify working capital loan repayment - UC15: expectedAmount overpaid in 2nd period
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+      | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
+      | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Start of 2nd period ---
-    When Admin sets the business date to "31 January 2026"
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-01-31  |              | D00            | 1              | 30             |
+      | 1            | 2026-01-04  |              | D00            | 1              | 30             |
     #   --- expectedAmount overpaid ---
-    When Admin sets the business date to "10 February 2026"
-    And Customer makes repayment on "10 February 2026" with 370.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "05 January 2026"
+    And Customer makes repayment on "05 January 2026" with 370.0 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 100.0      | 170.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 100.0      | 170.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-01-31  | 2026-02-10   | D00            | 1              | 30             |
-    Then Working Capital loan amortization schedule has 214 periods, with the following data for periods:
+      | 1            | 2026-01-04  | 2026-01-05   | D00            | 1              | 30             |
+    Then Working Capital loan amortization schedule has 178 periods, with the following data for periods:
       | paymentNo | paymentDate      | expectedPaymentAmount | actualPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
       | 0         | 01 January 2026  | -9000.00              |                     | 9000.00         | 9000.00       |                            |                          | 0.00                       |
       | 1         | 02 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
       | 2         | 03 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
       | 3         | 04 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 4         | 05 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 5         | 06 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 6         | 07 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 7         | 08 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 8         | 09 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 9         | 10 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 10        | 11 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 11        | 12 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 12        | 13 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 13        | 14 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 14        | 15 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 15        | 16 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 16        | 17 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 17        | 18 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 18        | 19 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 19        | 20 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 20        | 21 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 21        | 22 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 22        | 23 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 23        | 24 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 24        | 25 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 25        | 26 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 26        | 27 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 27        | 28 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 28        | 29 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 29        | 30 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 30        | 31 January 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 31        | 01 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 32        | 02 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 33        | 03 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 34        | 04 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 35        | 05 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 36        | 06 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 37        | 07 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 38        | 08 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 39        | 09 February 2026 | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 40        | 10 February 2026 | 50.00                 | 370.00              | 8950.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 41        | 11 February 2026 | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
-      | 42        | 12 February 2026 | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
-      | 43        | 13 February 2026 | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
-      | 44        | 14 February 2026 | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
-      | 45        | 15 February 2026 | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
-      | 46        | 16 February 2026 | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
-      | 47        | 17 February 2026 | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
-      | 48        | 18 February 2026 | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
-      | 49        | 19 February 2026 | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
-      | 50        | 20 February 2026 | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
-      | 51        | 21 February 2026 | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
-      | 52        | 22 February 2026 | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
-      | 53        | 23 February 2026 | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
-      | 54        | 24 February 2026 | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
-      | 55        | 25 February 2026 | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
-      | 56        | 26 February 2026 | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
-      | 57        | 27 February 2026 | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
-      | 58        | 28 February 2026 | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
-      | 59        | 01 March 2026    | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
-      | 60        | 02 March 2026    | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
-      | 61        | 03 March 2026    | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
-      | 62        | 04 March 2026    | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
-      | 63        | 05 March 2026    | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
-      | 64        | 06 March 2026    | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
-      | 65        | 07 March 2026    | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
-      | 66        | 08 March 2026    | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
-      | 67        | 09 March 2026    | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
-      | 68        | 10 March 2026    | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
-      | 69        | 11 March 2026    | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
-      | 70        | 12 March 2026    | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
-      | 71        | 13 March 2026    | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
-      | 72        | 14 March 2026    | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
-      | 73        | 15 March 2026    | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
-      | 74        | 16 March 2026    | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
-      | 75        | 17 March 2026    | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
-      | 76        | 18 March 2026    | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
-      | 77        | 19 March 2026    | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
-      | 78        | 20 March 2026    | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
-      | 79        | 21 March 2026    | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
-      | 80        | 22 March 2026    | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
-      | 81        | 23 March 2026    | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
-      | 82        | 24 March 2026    | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
-      | 83        | 25 March 2026    | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
-      | 84        | 26 March 2026    | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
-      | 85        | 27 March 2026    | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
-      | 86        | 28 March 2026    | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
-      | 87        | 29 March 2026    | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
-      | 88        | 30 March 2026    | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
-      | 89        | 31 March 2026    | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
-      | 90        | 01 April 2026    | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
-      | 91        | 02 April 2026    | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
-      | 92        | 03 April 2026    | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
-      | 93        | 04 April 2026    | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
-      | 94        | 05 April 2026    | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
-      | 95        | 06 April 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
-      | 96        | 07 April 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
-      | 97        | 08 April 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
-      | 98        | 09 April 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
-      | 99        | 10 April 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
-      | 100       | 11 April 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
-      | 101       | 12 April 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
-      | 102       | 13 April 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
-      | 103       | 14 April 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
-      | 104       | 15 April 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
-      | 105       | 16 April 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
-      | 106       | 17 April 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
-      | 107       | 18 April 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
-      | 108       | 19 April 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
-      | 109       | 20 April 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
-      | 110       | 21 April 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
-      | 111       | 22 April 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
-      | 112       | 23 April 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
-      | 113       | 24 April 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
-      | 114       | 25 April 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
-      | 115       | 26 April 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
-      | 116       | 27 April 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
-      | 117       | 28 April 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
-      | 118       | 29 April 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
-      | 119       | 30 April 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
-      | 120       | 01 May 2026      | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
-      | 121       | 02 May 2026      | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
-      | 122       | 03 May 2026      | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
-      | 123       | 04 May 2026      | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
-      | 124       | 05 May 2026      | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
-      | 125       | 06 May 2026      | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
-      | 126       | 07 May 2026      | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
-      | 127       | 08 May 2026      | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
-      | 128       | 09 May 2026      | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
-      | 129       | 10 May 2026      | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
-      | 130       | 11 May 2026      | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
-      | 131       | 12 May 2026      | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
-      | 132       | 13 May 2026      | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
-      | 133       | 14 May 2026      | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
-      | 134       | 15 May 2026      | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
-      | 135       | 16 May 2026      | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
-      | 136       | 17 May 2026      | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
-      | 137       | 18 May 2026      | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
-      | 138       | 19 May 2026      | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
-      | 139       | 20 May 2026      | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
-      | 140       | 21 May 2026      | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
-      | 141       | 22 May 2026      | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
-      | 142       | 23 May 2026      | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
-      | 143       | 24 May 2026      | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
-      | 144       | 25 May 2026      | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
-      | 145       | 26 May 2026      | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
-      | 146       | 27 May 2026      | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
-      | 147       | 28 May 2026      | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
-      | 148       | 29 May 2026      | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
-      | 149       | 30 May 2026      | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
-      | 150       | 31 May 2026      | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
-      | 151       | 01 June 2026     | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
-      | 152       | 02 June 2026     | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
-      | 153       | 03 June 2026     | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
-      | 154       | 04 June 2026     | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
-      | 155       | 05 June 2026     | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
-      | 156       | 06 June 2026     | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
-      | 157       | 07 June 2026     | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
-      | 158       | 08 June 2026     | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
-      | 159       | 09 June 2026     | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
-      | 160       | 10 June 2026     | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
-      | 161       | 11 June 2026     | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
-      | 162       | 12 June 2026     | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
-      | 163       | 13 June 2026     | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
-      | 164       | 14 June 2026     | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
-      | 165       | 15 June 2026     | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
-      | 166       | 16 June 2026     | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
-      | 167       | 17 June 2026     | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
-      | 168       | 18 June 2026     | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
-      | 169       | 19 June 2026     | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
-      | 170       | 20 June 2026     | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
-      | 171       | 21 June 2026     | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
-      | 172       | 22 June 2026     | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
-      | 173       | 23 June 2026     | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
-      | 174       | 24 June 2026     | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
-      | 175       | 25 June 2026     | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
-      | 176       | 26 June 2026     | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
-      | 177       | 27 June 2026     | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
-      | 178       | 28 June 2026     | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
-      | 179       | 29 June 2026     | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
-      | 180       | 30 June 2026     | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
-      | 181       | 01 July 2026     | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
-      | 182       | 02 July 2026     | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
-      | 183       | 03 July 2026     | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
-      | 184       | 04 July 2026     | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
-      | 185       | 05 July 2026     | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
-      | 186       | 06 July 2026     | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
-      | 187       | 07 July 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
-      | 188       | 08 July 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
-      | 189       | 09 July 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
-      | 190       | 10 July 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
-      | 191       | 11 July 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
-      | 192       | 12 July 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
-      | 193       | 13 July 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
-      | 194       | 14 July 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
-      | 195       | 15 July 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
-      | 196       | 16 July 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
-      | 197       | 17 July 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
-      | 198       | 18 July 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
-      | 199       | 19 July 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
-      | 200       | 20 July 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
-      | 201       | 21 July 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
-      | 202       | 22 July 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
-      | 203       | 23 July 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
-      | 204       | 24 July 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
-      | 205       | 25 July 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
-      | 206       | 26 July 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
-      | 207       | 27 July 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
-      | 208       | 28 July 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
-      | 209       | 29 July 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
-      | 210       | 30 July 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
-      | 211       | 31 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
-      | 212       | 01 August 2026   | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
-      | 213       | 02 August 2026   | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
-
-    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 February 2026"
+      | 4         | 05 January 2026  | 50.00                 | 370.00              | 8950.00         | 8630.00       | 0.00                       | 0.00                     | 0.00                       |
+      | 5         | 06 January 2026  | 50.00                 |                     | 8580.00         |               | 0.00                       |                          | 0.00                       |
+      | 6         | 07 January 2026  | 50.00                 |                     | 8530.00         |               | 0.00                       |                          | 0.00                       |
+      | 7         | 08 January 2026  | 50.00                 |                     | 8480.00         |               | 0.00                       |                          | 0.00                       |
+      | 8         | 09 January 2026  | 50.00                 |                     | 8430.00         |               | 0.00                       |                          | 0.00                       |
+      | 9         | 10 January 2026  | 50.00                 |                     | 8380.00         |               | 0.00                       |                          | 0.00                       |
+      | 10        | 11 January 2026  | 50.00                 |                     | 8330.00         |               | 0.00                       |                          | 0.00                       |
+      | 11        | 12 January 2026  | 50.00                 |                     | 8280.00         |               | 0.00                       |                          | 0.00                       |
+      | 12        | 13 January 2026  | 50.00                 |                     | 8230.00         |               | 0.00                       |                          | 0.00                       |
+      | 13        | 14 January 2026  | 50.00                 |                     | 8180.00         |               | 0.00                       |                          | 0.00                       |
+      | 14        | 15 January 2026  | 50.00                 |                     | 8130.00         |               | 0.00                       |                          | 0.00                       |
+      | 15        | 16 January 2026  | 50.00                 |                     | 8080.00         |               | 0.00                       |                          | 0.00                       |
+      | 16        | 17 January 2026  | 50.00                 |                     | 8030.00         |               | 0.00                       |                          | 0.00                       |
+      | 17        | 18 January 2026  | 50.00                 |                     | 7980.00         |               | 0.00                       |                          | 0.00                       |
+      | 18        | 19 January 2026  | 50.00                 |                     | 7930.00         |               | 0.00                       |                          | 0.00                       |
+      | 19        | 20 January 2026  | 50.00                 |                     | 7880.00         |               | 0.00                       |                          | 0.00                       |
+      | 20        | 21 January 2026  | 50.00                 |                     | 7830.00         |               | 0.00                       |                          | 0.00                       |
+      | 21        | 22 January 2026  | 50.00                 |                     | 7780.00         |               | 0.00                       |                          | 0.00                       |
+      | 22        | 23 January 2026  | 50.00                 |                     | 7730.00         |               | 0.00                       |                          | 0.00                       |
+      | 23        | 24 January 2026  | 50.00                 |                     | 7680.00         |               | 0.00                       |                          | 0.00                       |
+      | 24        | 25 January 2026  | 50.00                 |                     | 7630.00         |               | 0.00                       |                          | 0.00                       |
+      | 25        | 26 January 2026  | 50.00                 |                     | 7580.00         |               | 0.00                       |                          | 0.00                       |
+      | 26        | 27 January 2026  | 50.00                 |                     | 7530.00         |               | 0.00                       |                          | 0.00                       |
+      | 27        | 28 January 2026  | 50.00                 |                     | 7480.00         |               | 0.00                       |                          | 0.00                       |
+      | 28        | 29 January 2026  | 50.00                 |                     | 7430.00         |               | 0.00                       |                          | 0.00                       |
+      | 29        | 30 January 2026  | 50.00                 |                     | 7380.00         |               | 0.00                       |                          | 0.00                       |
+      | 30        | 31 January 2026  | 50.00                 |                     | 7330.00         |               | 0.00                       |                          | 0.00                       |
+      | 31        | 01 February 2026 | 50.00                 |                     | 7280.00         |               | 0.00                       |                          | 0.00                       |
+      | 32        | 02 February 2026 | 50.00                 |                     | 7230.00         |               | 0.00                       |                          | 0.00                       |
+      | 33        | 03 February 2026 | 50.00                 |                     | 7180.00         |               | 0.00                       |                          | 0.00                       |
+      | 34        | 04 February 2026 | 50.00                 |                     | 7130.00         |               | 0.00                       |                          | 0.00                       |
+      | 35        | 05 February 2026 | 50.00                 |                     | 7080.00         |               | 0.00                       |                          | 0.00                       |
+      | 36        | 06 February 2026 | 50.00                 |                     | 7030.00         |               | 0.00                       |                          | 0.00                       |
+      | 37        | 07 February 2026 | 50.00                 |                     | 6980.00         |               | 0.00                       |                          | 0.00                       |
+      | 38        | 08 February 2026 | 50.00                 |                     | 6930.00         |               | 0.00                       |                          | 0.00                       |
+      | 39        | 09 February 2026 | 50.00                 |                     | 6880.00         |               | 0.00                       |                          | 0.00                       |
+      | 40        | 10 February 2026 | 50.00                 |                     | 6830.00         |               | 0.00                       |                          | 0.00                       |
+      | 41        | 11 February 2026 | 50.00                 |                     | 6780.00         |               | 0.00                       |                          | 0.00                       |
+      | 42        | 12 February 2026 | 50.00                 |                     | 6730.00         |               | 0.00                       |                          | 0.00                       |
+      | 43        | 13 February 2026 | 50.00                 |                     | 6680.00         |               | 0.00                       |                          | 0.00                       |
+      | 44        | 14 February 2026 | 50.00                 |                     | 6630.00         |               | 0.00                       |                          | 0.00                       |
+      | 45        | 15 February 2026 | 50.00                 |                     | 6580.00         |               | 0.00                       |                          | 0.00                       |
+      | 46        | 16 February 2026 | 50.00                 |                     | 6530.00         |               | 0.00                       |                          | 0.00                       |
+      | 47        | 17 February 2026 | 50.00                 |                     | 6480.00         |               | 0.00                       |                          | 0.00                       |
+      | 48        | 18 February 2026 | 50.00                 |                     | 6430.00         |               | 0.00                       |                          | 0.00                       |
+      | 49        | 19 February 2026 | 50.00                 |                     | 6380.00         |               | 0.00                       |                          | 0.00                       |
+      | 50        | 20 February 2026 | 50.00                 |                     | 6330.00         |               | 0.00                       |                          | 0.00                       |
+      | 51        | 21 February 2026 | 50.00                 |                     | 6280.00         |               | 0.00                       |                          | 0.00                       |
+      | 52        | 22 February 2026 | 50.00                 |                     | 6230.00         |               | 0.00                       |                          | 0.00                       |
+      | 53        | 23 February 2026 | 50.00                 |                     | 6180.00         |               | 0.00                       |                          | 0.00                       |
+      | 54        | 24 February 2026 | 50.00                 |                     | 6130.00         |               | 0.00                       |                          | 0.00                       |
+      | 55        | 25 February 2026 | 50.00                 |                     | 6080.00         |               | 0.00                       |                          | 0.00                       |
+      | 56        | 26 February 2026 | 50.00                 |                     | 6030.00         |               | 0.00                       |                          | 0.00                       |
+      | 57        | 27 February 2026 | 50.00                 |                     | 5980.00         |               | 0.00                       |                          | 0.00                       |
+      | 58        | 28 February 2026 | 50.00                 |                     | 5930.00         |               | 0.00                       |                          | 0.00                       |
+      | 59        | 01 March 2026    | 50.00                 |                     | 5880.00         |               | 0.00                       |                          | 0.00                       |
+      | 60        | 02 March 2026    | 50.00                 |                     | 5830.00         |               | 0.00                       |                          | 0.00                       |
+      | 61        | 03 March 2026    | 50.00                 |                     | 5780.00         |               | 0.00                       |                          | 0.00                       |
+      | 62        | 04 March 2026    | 50.00                 |                     | 5730.00         |               | 0.00                       |                          | 0.00                       |
+      | 63        | 05 March 2026    | 50.00                 |                     | 5680.00         |               | 0.00                       |                          | 0.00                       |
+      | 64        | 06 March 2026    | 50.00                 |                     | 5630.00         |               | 0.00                       |                          | 0.00                       |
+      | 65        | 07 March 2026    | 50.00                 |                     | 5580.00         |               | 0.00                       |                          | 0.00                       |
+      | 66        | 08 March 2026    | 50.00                 |                     | 5530.00         |               | 0.00                       |                          | 0.00                       |
+      | 67        | 09 March 2026    | 50.00                 |                     | 5480.00         |               | 0.00                       |                          | 0.00                       |
+      | 68        | 10 March 2026    | 50.00                 |                     | 5430.00         |               | 0.00                       |                          | 0.00                       |
+      | 69        | 11 March 2026    | 50.00                 |                     | 5380.00         |               | 0.00                       |                          | 0.00                       |
+      | 70        | 12 March 2026    | 50.00                 |                     | 5330.00         |               | 0.00                       |                          | 0.00                       |
+      | 71        | 13 March 2026    | 50.00                 |                     | 5280.00         |               | 0.00                       |                          | 0.00                       |
+      | 72        | 14 March 2026    | 50.00                 |                     | 5230.00         |               | 0.00                       |                          | 0.00                       |
+      | 73        | 15 March 2026    | 50.00                 |                     | 5180.00         |               | 0.00                       |                          | 0.00                       |
+      | 74        | 16 March 2026    | 50.00                 |                     | 5130.00         |               | 0.00                       |                          | 0.00                       |
+      | 75        | 17 March 2026    | 50.00                 |                     | 5080.00         |               | 0.00                       |                          | 0.00                       |
+      | 76        | 18 March 2026    | 50.00                 |                     | 5030.00         |               | 0.00                       |                          | 0.00                       |
+      | 77        | 19 March 2026    | 50.00                 |                     | 4980.00         |               | 0.00                       |                          | 0.00                       |
+      | 78        | 20 March 2026    | 50.00                 |                     | 4930.00         |               | 0.00                       |                          | 0.00                       |
+      | 79        | 21 March 2026    | 50.00                 |                     | 4880.00         |               | 0.00                       |                          | 0.00                       |
+      | 80        | 22 March 2026    | 50.00                 |                     | 4830.00         |               | 0.00                       |                          | 0.00                       |
+      | 81        | 23 March 2026    | 50.00                 |                     | 4780.00         |               | 0.00                       |                          | 0.00                       |
+      | 82        | 24 March 2026    | 50.00                 |                     | 4730.00         |               | 0.00                       |                          | 0.00                       |
+      | 83        | 25 March 2026    | 50.00                 |                     | 4680.00         |               | 0.00                       |                          | 0.00                       |
+      | 84        | 26 March 2026    | 50.00                 |                     | 4630.00         |               | 0.00                       |                          | 0.00                       |
+      | 85        | 27 March 2026    | 50.00                 |                     | 4580.00         |               | 0.00                       |                          | 0.00                       |
+      | 86        | 28 March 2026    | 50.00                 |                     | 4530.00         |               | 0.00                       |                          | 0.00                       |
+      | 87        | 29 March 2026    | 50.00                 |                     | 4480.00         |               | 0.00                       |                          | 0.00                       |
+      | 88        | 30 March 2026    | 50.00                 |                     | 4430.00         |               | 0.00                       |                          | 0.00                       |
+      | 89        | 31 March 2026    | 50.00                 |                     | 4380.00         |               | 0.00                       |                          | 0.00                       |
+      | 90        | 01 April 2026    | 50.00                 |                     | 4330.00         |               | 0.00                       |                          | 0.00                       |
+      | 91        | 02 April 2026    | 50.00                 |                     | 4280.00         |               | 0.00                       |                          | 0.00                       |
+      | 92        | 03 April 2026    | 50.00                 |                     | 4230.00         |               | 0.00                       |                          | 0.00                       |
+      | 93        | 04 April 2026    | 50.00                 |                     | 4180.00         |               | 0.00                       |                          | 0.00                       |
+      | 94        | 05 April 2026    | 50.00                 |                     | 4130.00         |               | 0.00                       |                          | 0.00                       |
+      | 95        | 06 April 2026    | 50.00                 |                     | 4080.00         |               | 0.00                       |                          | 0.00                       |
+      | 96        | 07 April 2026    | 50.00                 |                     | 4030.00         |               | 0.00                       |                          | 0.00                       |
+      | 97        | 08 April 2026    | 50.00                 |                     | 3980.00         |               | 0.00                       |                          | 0.00                       |
+      | 98        | 09 April 2026    | 50.00                 |                     | 3930.00         |               | 0.00                       |                          | 0.00                       |
+      | 99        | 10 April 2026    | 50.00                 |                     | 3880.00         |               | 0.00                       |                          | 0.00                       |
+      | 100       | 11 April 2026    | 50.00                 |                     | 3830.00         |               | 0.00                       |                          | 0.00                       |
+      | 101       | 12 April 2026    | 50.00                 |                     | 3780.00         |               | 0.00                       |                          | 0.00                       |
+      | 102       | 13 April 2026    | 50.00                 |                     | 3730.00         |               | 0.00                       |                          | 0.00                       |
+      | 103       | 14 April 2026    | 50.00                 |                     | 3680.00         |               | 0.00                       |                          | 0.00                       |
+      | 104       | 15 April 2026    | 50.00                 |                     | 3630.00         |               | 0.00                       |                          | 0.00                       |
+      | 105       | 16 April 2026    | 50.00                 |                     | 3580.00         |               | 0.00                       |                          | 0.00                       |
+      | 106       | 17 April 2026    | 50.00                 |                     | 3530.00         |               | 0.00                       |                          | 0.00                       |
+      | 107       | 18 April 2026    | 50.00                 |                     | 3480.00         |               | 0.00                       |                          | 0.00                       |
+      | 108       | 19 April 2026    | 50.00                 |                     | 3430.00         |               | 0.00                       |                          | 0.00                       |
+      | 109       | 20 April 2026    | 50.00                 |                     | 3380.00         |               | 0.00                       |                          | 0.00                       |
+      | 110       | 21 April 2026    | 50.00                 |                     | 3330.00         |               | 0.00                       |                          | 0.00                       |
+      | 111       | 22 April 2026    | 50.00                 |                     | 3280.00         |               | 0.00                       |                          | 0.00                       |
+      | 112       | 23 April 2026    | 50.00                 |                     | 3230.00         |               | 0.00                       |                          | 0.00                       |
+      | 113       | 24 April 2026    | 50.00                 |                     | 3180.00         |               | 0.00                       |                          | 0.00                       |
+      | 114       | 25 April 2026    | 50.00                 |                     | 3130.00         |               | 0.00                       |                          | 0.00                       |
+      | 115       | 26 April 2026    | 50.00                 |                     | 3080.00         |               | 0.00                       |                          | 0.00                       |
+      | 116       | 27 April 2026    | 50.00                 |                     | 3030.00         |               | 0.00                       |                          | 0.00                       |
+      | 117       | 28 April 2026    | 50.00                 |                     | 2980.00         |               | 0.00                       |                          | 0.00                       |
+      | 118       | 29 April 2026    | 50.00                 |                     | 2930.00         |               | 0.00                       |                          | 0.00                       |
+      | 119       | 30 April 2026    | 50.00                 |                     | 2880.00         |               | 0.00                       |                          | 0.00                       |
+      | 120       | 01 May 2026      | 50.00                 |                     | 2830.00         |               | 0.00                       |                          | 0.00                       |
+      | 121       | 02 May 2026      | 50.00                 |                     | 2780.00         |               | 0.00                       |                          | 0.00                       |
+      | 122       | 03 May 2026      | 50.00                 |                     | 2730.00         |               | 0.00                       |                          | 0.00                       |
+      | 123       | 04 May 2026      | 50.00                 |                     | 2680.00         |               | 0.00                       |                          | 0.00                       |
+      | 124       | 05 May 2026      | 50.00                 |                     | 2630.00         |               | 0.00                       |                          | 0.00                       |
+      | 125       | 06 May 2026      | 50.00                 |                     | 2580.00         |               | 0.00                       |                          | 0.00                       |
+      | 126       | 07 May 2026      | 50.00                 |                     | 2530.00         |               | 0.00                       |                          | 0.00                       |
+      | 127       | 08 May 2026      | 50.00                 |                     | 2480.00         |               | 0.00                       |                          | 0.00                       |
+      | 128       | 09 May 2026      | 50.00                 |                     | 2430.00         |               | 0.00                       |                          | 0.00                       |
+      | 129       | 10 May 2026      | 50.00                 |                     | 2380.00         |               | 0.00                       |                          | 0.00                       |
+      | 130       | 11 May 2026      | 50.00                 |                     | 2330.00         |               | 0.00                       |                          | 0.00                       |
+      | 131       | 12 May 2026      | 50.00                 |                     | 2280.00         |               | 0.00                       |                          | 0.00                       |
+      | 132       | 13 May 2026      | 50.00                 |                     | 2230.00         |               | 0.00                       |                          | 0.00                       |
+      | 133       | 14 May 2026      | 50.00                 |                     | 2180.00         |               | 0.00                       |                          | 0.00                       |
+      | 134       | 15 May 2026      | 50.00                 |                     | 2130.00         |               | 0.00                       |                          | 0.00                       |
+      | 135       | 16 May 2026      | 50.00                 |                     | 2080.00         |               | 0.00                       |                          | 0.00                       |
+      | 136       | 17 May 2026      | 50.00                 |                     | 2030.00         |               | 0.00                       |                          | 0.00                       |
+      | 137       | 18 May 2026      | 50.00                 |                     | 1980.00         |               | 0.00                       |                          | 0.00                       |
+      | 138       | 19 May 2026      | 50.00                 |                     | 1930.00         |               | 0.00                       |                          | 0.00                       |
+      | 139       | 20 May 2026      | 50.00                 |                     | 1880.00         |               | 0.00                       |                          | 0.00                       |
+      | 140       | 21 May 2026      | 50.00                 |                     | 1830.00         |               | 0.00                       |                          | 0.00                       |
+      | 141       | 22 May 2026      | 50.00                 |                     | 1780.00         |               | 0.00                       |                          | 0.00                       |
+      | 142       | 23 May 2026      | 50.00                 |                     | 1730.00         |               | 0.00                       |                          | 0.00                       |
+      | 143       | 24 May 2026      | 50.00                 |                     | 1680.00         |               | 0.00                       |                          | 0.00                       |
+      | 144       | 25 May 2026      | 50.00                 |                     | 1630.00         |               | 0.00                       |                          | 0.00                       |
+      | 145       | 26 May 2026      | 50.00                 |                     | 1580.00         |               | 0.00                       |                          | 0.00                       |
+      | 146       | 27 May 2026      | 50.00                 |                     | 1530.00         |               | 0.00                       |                          | 0.00                       |
+      | 147       | 28 May 2026      | 50.00                 |                     | 1480.00         |               | 0.00                       |                          | 0.00                       |
+      | 148       | 29 May 2026      | 50.00                 |                     | 1430.00         |               | 0.00                       |                          | 0.00                       |
+      | 149       | 30 May 2026      | 50.00                 |                     | 1380.00         |               | 0.00                       |                          | 0.00                       |
+      | 150       | 31 May 2026      | 50.00                 |                     | 1330.00         |               | 0.00                       |                          | 0.00                       |
+      | 151       | 01 June 2026     | 50.00                 |                     | 1280.00         |               | 0.00                       |                          | 0.00                       |
+      | 152       | 02 June 2026     | 50.00                 |                     | 1230.00         |               | 0.00                       |                          | 0.00                       |
+      | 153       | 03 June 2026     | 50.00                 |                     | 1180.00         |               | 0.00                       |                          | 0.00                       |
+      | 154       | 04 June 2026     | 50.00                 |                     | 1130.00         |               | 0.00                       |                          | 0.00                       |
+      | 155       | 05 June 2026     | 50.00                 |                     | 1080.00         |               | 0.00                       |                          | 0.00                       |
+      | 156       | 06 June 2026     | 50.00                 |                     | 1030.00         |               | 0.00                       |                          | 0.00                       |
+      | 157       | 07 June 2026     | 50.00                 |                     | 980.00          |               | 0.00                       |                          | 0.00                       |
+      | 158       | 08 June 2026     | 50.00                 |                     | 930.00          |               | 0.00                       |                          | 0.00                       |
+      | 159       | 09 June 2026     | 50.00                 |                     | 880.00          |               | 0.00                       |                          | 0.00                       |
+      | 160       | 10 June 2026     | 50.00                 |                     | 830.00          |               | 0.00                       |                          | 0.00                       |
+      | 161       | 11 June 2026     | 50.00                 |                     | 780.00          |               | 0.00                       |                          | 0.00                       |
+      | 162       | 12 June 2026     | 50.00                 |                     | 730.00          |               | 0.00                       |                          | 0.00                       |
+      | 163       | 13 June 2026     | 50.00                 |                     | 680.00          |               | 0.00                       |                          | 0.00                       |
+      | 164       | 14 June 2026     | 50.00                 |                     | 630.00          |               | 0.00                       |                          | 0.00                       |
+      | 165       | 15 June 2026     | 50.00                 |                     | 580.00          |               | 0.00                       |                          | 0.00                       |
+      | 166       | 16 June 2026     | 50.00                 |                     | 530.00          |               | 0.00                       |                          | 0.00                       |
+      | 167       | 17 June 2026     | 50.00                 |                     | 480.00          |               | 0.00                       |                          | 0.00                       |
+      | 168       | 18 June 2026     | 50.00                 |                     | 430.00          |               | 0.00                       |                          | 0.00                       |
+      | 169       | 19 June 2026     | 50.00                 |                     | 380.00          |               | 0.00                       |                          | 0.00                       |
+      | 170       | 20 June 2026     | 50.00                 |                     | 330.00          |               | 0.00                       |                          | 0.00                       |
+      | 171       | 21 June 2026     | 50.00                 |                     | 280.00          |               | 0.00                       |                          | 0.00                       |
+      | 172       | 22 June 2026     | 50.00                 |                     | 230.00          |               | 0.00                       |                          | 0.00                       |
+      | 173       | 23 June 2026     | 50.00                 |                     | 180.00          |               | 0.00                       |                          | 0.00                       |
+      | 174       | 24 June 2026     | 50.00                 |                     | 130.00          |               | 0.00                       |                          | 0.00                       |
+      | 175       | 25 June 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
+      | 176       | 26 June 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
+      | 177       | 27 June 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "05 January 2026"
 
   @TestRailId:C76632
   Scenario: Verify working capital loan repayment - UC16: expectedAmount overpaid in late period
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS, minimumPayment 3 PERCENTAGE and the following ranges:
+      | classification | minimumAgeDays | maximumAgeDays |
+      | S00            | 1              | 3              |
+      | S03            | 4              | 6              |
+      | S06            | 7              | 9              |
+      | S09            | 10             | 12             |
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+      | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
     And Working capital loan account has the correct data:
-      | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
+      | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-#   --- Late period ---
-    When Admin sets the business date to "01 May 2026"
+#   --- Late period: the bucket's own ranges age in 3-day bands, so period 1 reaches the fourth band on 13 January ---
+    When Admin sets the business date to "13 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 91             |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 61             |
-      | 3            | 2026-03-02 | 2026-03-31 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 31             |
-      | 4            | 2026-04-01 | 2026-04-30 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
-      | 5            | 2026-05-01 | 2026-05-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 10             |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 7              |
+      | 3            | 2026-01-07 | 2026-01-09 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 4              |
+      | 4            | 2026-01-10 | 2026-01-12 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 5            | 2026-01-13 | 2026-01-15 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 4            | 2026-05-01  |              | D00            | 1              | 30             |
-      | 3            | 2026-05-01  |              | D30            | 31             | 60             |
-      | 2            | 2026-05-01  |              | D60            | 61             | 90             |
-      | 1            | 2026-05-01  |              | D90            | 91             | 120            |
-      | 3            | 2026-04-01  |              | D00            | 1              | 30             |
-      | 2            | 2026-04-01  |              | D30            | 31             | 60             |
-      | 1            | 2026-04-01  |              | D60            | 61             | 90             |
-      | 2            | 2026-03-02  |              | D00            | 1              | 30             |
-      | 1            | 2026-03-02  |              | D30            | 31             | 60             |
-      | 1            | 2026-01-31  |              | D00            | 1              | 30             |
+      | 4            | 2026-01-13  |              | S00            | 1              | 3              |
+      | 3            | 2026-01-13  |              | S03            | 4              | 6              |
+      | 2            | 2026-01-13  |              | S06            | 7              | 9              |
+      | 1            | 2026-01-13  |              | S09            | 10             | 12             |
+      | 3            | 2026-01-10  |              | S00            | 1              | 3              |
+      | 2            | 2026-01-10  |              | S03            | 4              | 6              |
+      | 1            | 2026-01-10  |              | S06            | 7              | 9              |
+      | 2            | 2026-01-07  |              | S00            | 1              | 3              |
+      | 1            | 2026-01-07  |              | S03            | 4              | 6              |
+      | 1            | 2026-01-04  |              | S00            | 1              | 3              |
     #   --- expectedAmount overpaid ---
-    When Admin sets the business date to "10 May 2026"
-    And Customer makes repayment on "10 May 2026" with 1500.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "14 January 2026"
+    And Customer makes repayment on "14 January 2026" with 1500.0 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
-      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
-      | 3            | 2026-03-02 | 2026-03-31 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
-      | 4            | 2026-04-01 | 2026-04-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
-      | 5            | 2026-05-01 | 2026-05-30 | 270.0          | 420.0      | 0.0               | true                  | 0.0              | 0              |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 3            | 2026-01-07 | 2026-01-09 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 4            | 2026-01-10 | 2026-01-12 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 5            | 2026-01-13 | 2026-01-15 | 270.0          | 420.0      | 0.0               | true                  | 0.0              | 0              |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 4            | 2026-05-01  | 2026-05-10   | D00            | 1              | 30             |
-      | 3            | 2026-05-01  | 2026-05-10   | D30            | 31             | 60             |
-      | 2            | 2026-05-01  | 2026-05-10   | D60            | 61             | 90             |
-      | 1            | 2026-05-01  | 2026-05-10   | D90            | 91             | 120            |
-      | 3            | 2026-04-01  | 2026-05-10   | D00            | 1              | 30             |
-      | 2            | 2026-04-01  | 2026-05-10   | D30            | 31             | 60             |
-      | 1            | 2026-04-01  | 2026-05-10   | D60            | 61             | 90             |
-      | 2            | 2026-03-02  | 2026-05-10   | D00            | 1              | 30             |
-      | 1            | 2026-03-02  | 2026-05-10   | D30            | 31             | 60             |
-      | 1            | 2026-01-31  | 2026-05-10   | D00            | 1              | 30             |
-    Then Working Capital loan amortization schedule has 280 periods, with the following data for periods:
+      | 4            | 2026-01-13  | 2026-01-14   | S00            | 1              | 3              |
+      | 3            | 2026-01-13  | 2026-01-14   | S03            | 4              | 6              |
+      | 2            | 2026-01-13  | 2026-01-14   | S06            | 7              | 9              |
+      | 1            | 2026-01-13  | 2026-01-14   | S09            | 10             | 12             |
+      | 3            | 2026-01-10  | 2026-01-14   | S00            | 1              | 3              |
+      | 2            | 2026-01-10  | 2026-01-14   | S03            | 4              | 6              |
+      | 1            | 2026-01-10  | 2026-01-14   | S06            | 7              | 9              |
+      | 2            | 2026-01-07  | 2026-01-14   | S00            | 1              | 3              |
+      | 1            | 2026-01-07  | 2026-01-14   | S03            | 4              | 6              |
+      | 1            | 2026-01-04  | 2026-01-14   | S00            | 1              | 3              |
+    Then Working Capital loan amortization schedule has 164 periods, with the following data for periods:
       | paymentNo | paymentDate       | expectedPaymentAmount | actualPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
       | 0         | 01 January 2026   | -9000.00              |                     | 9000.00         | 9000.00       |                            |                          | 0.00                       |
       | 1         | 02 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
@@ -4384,275 +4163,158 @@ Feature: Working Capital Loan Repayment
       | 10        | 11 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
       | 11        | 12 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
       | 12        | 13 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 13        | 14 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 14        | 15 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 15        | 16 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 16        | 17 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 17        | 18 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 18        | 19 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 19        | 20 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 20        | 21 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 21        | 22 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 22        | 23 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 23        | 24 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 24        | 25 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 25        | 26 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 26        | 27 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 27        | 28 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 28        | 29 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 29        | 30 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 30        | 31 January 2026   | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 31        | 01 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 32        | 02 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 33        | 03 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 34        | 04 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 35        | 05 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 36        | 06 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 37        | 07 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 38        | 08 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 39        | 09 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 40        | 10 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 41        | 11 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 42        | 12 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 43        | 13 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 44        | 14 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 45        | 15 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 46        | 16 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 47        | 17 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 48        | 18 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 49        | 19 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 50        | 20 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 51        | 21 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 52        | 22 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 53        | 23 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 54        | 24 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 55        | 25 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 56        | 26 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 57        | 27 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 58        | 28 February 2026  | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 59        | 01 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 60        | 02 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 61        | 03 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 62        | 04 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 63        | 05 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 64        | 06 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 65        | 07 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 66        | 08 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 67        | 09 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 68        | 10 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 69        | 11 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 70        | 12 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 71        | 13 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 72        | 14 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 73        | 15 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 74        | 16 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 75        | 17 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 76        | 18 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 77        | 19 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 78        | 20 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 79        | 21 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 80        | 22 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 81        | 23 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 82        | 24 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 83        | 25 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 84        | 26 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 85        | 27 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 86        | 28 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 87        | 29 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 88        | 30 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 89        | 31 March 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 90        | 01 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 91        | 02 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 92        | 03 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 93        | 04 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 94        | 05 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 95        | 06 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 96        | 07 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 97        | 08 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 98        | 09 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 99        | 10 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 100       | 11 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 101       | 12 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 102       | 13 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 103       | 14 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 104       | 15 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 105       | 16 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 106       | 17 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 107       | 18 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 108       | 19 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 109       | 20 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 110       | 21 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 111       | 22 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 112       | 23 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 113       | 24 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 114       | 25 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 115       | 26 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 116       | 27 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 117       | 28 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 118       | 29 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 119       | 30 April 2026     | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 120       | 01 May 2026       | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 121       | 02 May 2026       | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 122       | 03 May 2026       | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 123       | 04 May 2026       | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 124       | 05 May 2026       | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 125       | 06 May 2026       | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 126       | 07 May 2026       | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 127       | 08 May 2026       | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 128       | 09 May 2026       | 50.00                 | 0.00                | 8950.00         | 9000.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 129       | 10 May 2026       | 50.00                 | 1500.00             | 8950.00         | 7500.00       | 0.00                       | 0.00                     | 0.00                       |
-      | 130       | 11 May 2026       | 50.00                 |                     | 7450.00         |               | 0.00                       |                          | 0.00                       |
-      | 131       | 12 May 2026       | 50.00                 |                     | 7400.00         |               | 0.00                       |                          | 0.00                       |
-      | 132       | 13 May 2026       | 50.00                 |                     | 7350.00         |               | 0.00                       |                          | 0.00                       |
-      | 133       | 14 May 2026       | 50.00                 |                     | 7300.00         |               | 0.00                       |                          | 0.00                       |
-      | 134       | 15 May 2026       | 50.00                 |                     | 7250.00         |               | 0.00                       |                          | 0.00                       |
-      | 135       | 16 May 2026       | 50.00                 |                     | 7200.00         |               | 0.00                       |                          | 0.00                       |
-      | 136       | 17 May 2026       | 50.00                 |                     | 7150.00         |               | 0.00                       |                          | 0.00                       |
-      | 137       | 18 May 2026       | 50.00                 |                     | 7100.00         |               | 0.00                       |                          | 0.00                       |
-      | 138       | 19 May 2026       | 50.00                 |                     | 7050.00         |               | 0.00                       |                          | 0.00                       |
-      | 139       | 20 May 2026       | 50.00                 |                     | 7000.00         |               | 0.00                       |                          | 0.00                       |
-      | 140       | 21 May 2026       | 50.00                 |                     | 6950.00         |               | 0.00                       |                          | 0.00                       |
-      | 141       | 22 May 2026       | 50.00                 |                     | 6900.00         |               | 0.00                       |                          | 0.00                       |
-      | 142       | 23 May 2026       | 50.00                 |                     | 6850.00         |               | 0.00                       |                          | 0.00                       |
-      | 143       | 24 May 2026       | 50.00                 |                     | 6800.00         |               | 0.00                       |                          | 0.00                       |
-      | 144       | 25 May 2026       | 50.00                 |                     | 6750.00         |               | 0.00                       |                          | 0.00                       |
-      | 145       | 26 May 2026       | 50.00                 |                     | 6700.00         |               | 0.00                       |                          | 0.00                       |
-      | 146       | 27 May 2026       | 50.00                 |                     | 6650.00         |               | 0.00                       |                          | 0.00                       |
-      | 147       | 28 May 2026       | 50.00                 |                     | 6600.00         |               | 0.00                       |                          | 0.00                       |
-      | 148       | 29 May 2026       | 50.00                 |                     | 6550.00         |               | 0.00                       |                          | 0.00                       |
-      | 149       | 30 May 2026       | 50.00                 |                     | 6500.00         |               | 0.00                       |                          | 0.00                       |
-      | 150       | 31 May 2026       | 50.00                 |                     | 6450.00         |               | 0.00                       |                          | 0.00                       |
-      | 151       | 01 June 2026      | 50.00                 |                     | 6400.00         |               | 0.00                       |                          | 0.00                       |
-      | 152       | 02 June 2026      | 50.00                 |                     | 6350.00         |               | 0.00                       |                          | 0.00                       |
-      | 153       | 03 June 2026      | 50.00                 |                     | 6300.00         |               | 0.00                       |                          | 0.00                       |
-      | 154       | 04 June 2026      | 50.00                 |                     | 6250.00         |               | 0.00                       |                          | 0.00                       |
-      | 155       | 05 June 2026      | 50.00                 |                     | 6200.00         |               | 0.00                       |                          | 0.00                       |
-      | 156       | 06 June 2026      | 50.00                 |                     | 6150.00         |               | 0.00                       |                          | 0.00                       |
-      | 157       | 07 June 2026      | 50.00                 |                     | 6100.00         |               | 0.00                       |                          | 0.00                       |
-      | 158       | 08 June 2026      | 50.00                 |                     | 6050.00         |               | 0.00                       |                          | 0.00                       |
-      | 159       | 09 June 2026      | 50.00                 |                     | 6000.00         |               | 0.00                       |                          | 0.00                       |
-      | 160       | 10 June 2026      | 50.00                 |                     | 5950.00         |               | 0.00                       |                          | 0.00                       |
-      | 161       | 11 June 2026      | 50.00                 |                     | 5900.00         |               | 0.00                       |                          | 0.00                       |
-      | 162       | 12 June 2026      | 50.00                 |                     | 5850.00         |               | 0.00                       |                          | 0.00                       |
-      | 163       | 13 June 2026      | 50.00                 |                     | 5800.00         |               | 0.00                       |                          | 0.00                       |
-      | 164       | 14 June 2026      | 50.00                 |                     | 5750.00         |               | 0.00                       |                          | 0.00                       |
-      | 165       | 15 June 2026      | 50.00                 |                     | 5700.00         |               | 0.00                       |                          | 0.00                       |
-      | 166       | 16 June 2026      | 50.00                 |                     | 5650.00         |               | 0.00                       |                          | 0.00                       |
-      | 167       | 17 June 2026      | 50.00                 |                     | 5600.00         |               | 0.00                       |                          | 0.00                       |
-      | 168       | 18 June 2026      | 50.00                 |                     | 5550.00         |               | 0.00                       |                          | 0.00                       |
-      | 169       | 19 June 2026      | 50.00                 |                     | 5500.00         |               | 0.00                       |                          | 0.00                       |
-      | 170       | 20 June 2026      | 50.00                 |                     | 5450.00         |               | 0.00                       |                          | 0.00                       |
-      | 171       | 21 June 2026      | 50.00                 |                     | 5400.00         |               | 0.00                       |                          | 0.00                       |
-      | 172       | 22 June 2026      | 50.00                 |                     | 5350.00         |               | 0.00                       |                          | 0.00                       |
-      | 173       | 23 June 2026      | 50.00                 |                     | 5300.00         |               | 0.00                       |                          | 0.00                       |
-      | 174       | 24 June 2026      | 50.00                 |                     | 5250.00         |               | 0.00                       |                          | 0.00                       |
-      | 175       | 25 June 2026      | 50.00                 |                     | 5200.00         |               | 0.00                       |                          | 0.00                       |
-      | 176       | 26 June 2026      | 50.00                 |                     | 5150.00         |               | 0.00                       |                          | 0.00                       |
-      | 177       | 27 June 2026      | 50.00                 |                     | 5100.00         |               | 0.00                       |                          | 0.00                       |
-      | 178       | 28 June 2026      | 50.00                 |                     | 5050.00         |               | 0.00                       |                          | 0.00                       |
-      | 179       | 29 June 2026      | 50.00                 |                     | 5000.00         |               | 0.00                       |                          | 0.00                       |
-      | 180       | 30 June 2026      | 50.00                 |                     | 4950.00         |               | 0.00                       |                          | 0.00                       |
-      | 181       | 01 July 2026      | 50.00                 |                     | 4900.00         |               | 0.00                       |                          | 0.00                       |
-      | 182       | 02 July 2026      | 50.00                 |                     | 4850.00         |               | 0.00                       |                          | 0.00                       |
-      | 183       | 03 July 2026      | 50.00                 |                     | 4800.00         |               | 0.00                       |                          | 0.00                       |
-      | 184       | 04 July 2026      | 50.00                 |                     | 4750.00         |               | 0.00                       |                          | 0.00                       |
-      | 185       | 05 July 2026      | 50.00                 |                     | 4700.00         |               | 0.00                       |                          | 0.00                       |
-      | 186       | 06 July 2026      | 50.00                 |                     | 4650.00         |               | 0.00                       |                          | 0.00                       |
-      | 187       | 07 July 2026      | 50.00                 |                     | 4600.00         |               | 0.00                       |                          | 0.00                       |
-      | 188       | 08 July 2026      | 50.00                 |                     | 4550.00         |               | 0.00                       |                          | 0.00                       |
-      | 189       | 09 July 2026      | 50.00                 |                     | 4500.00         |               | 0.00                       |                          | 0.00                       |
-      | 190       | 10 July 2026      | 50.00                 |                     | 4450.00         |               | 0.00                       |                          | 0.00                       |
-      | 191       | 11 July 2026      | 50.00                 |                     | 4400.00         |               | 0.00                       |                          | 0.00                       |
-      | 192       | 12 July 2026      | 50.00                 |                     | 4350.00         |               | 0.00                       |                          | 0.00                       |
-      | 193       | 13 July 2026      | 50.00                 |                     | 4300.00         |               | 0.00                       |                          | 0.00                       |
-      | 194       | 14 July 2026      | 50.00                 |                     | 4250.00         |               | 0.00                       |                          | 0.00                       |
-      | 195       | 15 July 2026      | 50.00                 |                     | 4200.00         |               | 0.00                       |                          | 0.00                       |
-      | 196       | 16 July 2026      | 50.00                 |                     | 4150.00         |               | 0.00                       |                          | 0.00                       |
-      | 197       | 17 July 2026      | 50.00                 |                     | 4100.00         |               | 0.00                       |                          | 0.00                       |
-      | 198       | 18 July 2026      | 50.00                 |                     | 4050.00         |               | 0.00                       |                          | 0.00                       |
-      | 199       | 19 July 2026      | 50.00                 |                     | 4000.00         |               | 0.00                       |                          | 0.00                       |
-      | 200       | 20 July 2026      | 50.00                 |                     | 3950.00         |               | 0.00                       |                          | 0.00                       |
-      | 201       | 21 July 2026      | 50.00                 |                     | 3900.00         |               | 0.00                       |                          | 0.00                       |
-      | 202       | 22 July 2026      | 50.00                 |                     | 3850.00         |               | 0.00                       |                          | 0.00                       |
-      | 203       | 23 July 2026      | 50.00                 |                     | 3800.00         |               | 0.00                       |                          | 0.00                       |
-      | 204       | 24 July 2026      | 50.00                 |                     | 3750.00         |               | 0.00                       |                          | 0.00                       |
-      | 205       | 25 July 2026      | 50.00                 |                     | 3700.00         |               | 0.00                       |                          | 0.00                       |
-      | 206       | 26 July 2026      | 50.00                 |                     | 3650.00         |               | 0.00                       |                          | 0.00                       |
-      | 207       | 27 July 2026      | 50.00                 |                     | 3600.00         |               | 0.00                       |                          | 0.00                       |
-      | 208       | 28 July 2026      | 50.00                 |                     | 3550.00         |               | 0.00                       |                          | 0.00                       |
-      | 209       | 29 July 2026      | 50.00                 |                     | 3500.00         |               | 0.00                       |                          | 0.00                       |
-      | 210       | 30 July 2026      | 50.00                 |                     | 3450.00         |               | 0.00                       |                          | 0.00                       |
-      | 211       | 31 July 2026      | 50.00                 |                     | 3400.00         |               | 0.00                       |                          | 0.00                       |
-      | 212       | 01 August 2026    | 50.00                 |                     | 3350.00         |               | 0.00                       |                          | 0.00                       |
-      | 213       | 02 August 2026    | 50.00                 |                     | 3300.00         |               | 0.00                       |                          | 0.00                       |
-      | 214       | 03 August 2026    | 50.00                 |                     | 3250.00         |               | 0.00                       |                          | 0.00                       |
-      | 215       | 04 August 2026    | 50.00                 |                     | 3200.00         |               | 0.00                       |                          | 0.00                       |
-      | 216       | 05 August 2026    | 50.00                 |                     | 3150.00         |               | 0.00                       |                          | 0.00                       |
-      | 217       | 06 August 2026    | 50.00                 |                     | 3100.00         |               | 0.00                       |                          | 0.00                       |
-      | 218       | 07 August 2026    | 50.00                 |                     | 3050.00         |               | 0.00                       |                          | 0.00                       |
-      | 219       | 08 August 2026    | 50.00                 |                     | 3000.00         |               | 0.00                       |                          | 0.00                       |
-      | 220       | 09 August 2026    | 50.00                 |                     | 2950.00         |               | 0.00                       |                          | 0.00                       |
-      | 221       | 10 August 2026    | 50.00                 |                     | 2900.00         |               | 0.00                       |                          | 0.00                       |
-      | 222       | 11 August 2026    | 50.00                 |                     | 2850.00         |               | 0.00                       |                          | 0.00                       |
-      | 223       | 12 August 2026    | 50.00                 |                     | 2800.00         |               | 0.00                       |                          | 0.00                       |
-      | 224       | 13 August 2026    | 50.00                 |                     | 2750.00         |               | 0.00                       |                          | 0.00                       |
-      | 225       | 14 August 2026    | 50.00                 |                     | 2700.00         |               | 0.00                       |                          | 0.00                       |
-      | 226       | 15 August 2026    | 50.00                 |                     | 2650.00         |               | 0.00                       |                          | 0.00                       |
-      | 227       | 16 August 2026    | 50.00                 |                     | 2600.00         |               | 0.00                       |                          | 0.00                       |
-      | 228       | 17 August 2026    | 50.00                 |                     | 2550.00         |               | 0.00                       |                          | 0.00                       |
-      | 229       | 18 August 2026    | 50.00                 |                     | 2500.00         |               | 0.00                       |                          | 0.00                       |
-      | 230       | 19 August 2026    | 50.00                 |                     | 2450.00         |               | 0.00                       |                          | 0.00                       |
-      | 231       | 20 August 2026    | 50.00                 |                     | 2400.00         |               | 0.00                       |                          | 0.00                       |
-      | 232       | 21 August 2026    | 50.00                 |                     | 2350.00         |               | 0.00                       |                          | 0.00                       |
-      | 233       | 22 August 2026    | 50.00                 |                     | 2300.00         |               | 0.00                       |                          | 0.00                       |
-      | 234       | 23 August 2026    | 50.00                 |                     | 2250.00         |               | 0.00                       |                          | 0.00                       |
-      | 235       | 24 August 2026    | 50.00                 |                     | 2200.00         |               | 0.00                       |                          | 0.00                       |
-      | 236       | 25 August 2026    | 50.00                 |                     | 2150.00         |               | 0.00                       |                          | 0.00                       |
-      | 237       | 26 August 2026    | 50.00                 |                     | 2100.00         |               | 0.00                       |                          | 0.00                       |
-      | 238       | 27 August 2026    | 50.00                 |                     | 2050.00         |               | 0.00                       |                          | 0.00                       |
-      | 239       | 28 August 2026    | 50.00                 |                     | 2000.00         |               | 0.00                       |                          | 0.00                       |
-      | 240       | 29 August 2026    | 50.00                 |                     | 1950.00         |               | 0.00                       |                          | 0.00                       |
-      | 241       | 30 August 2026    | 50.00                 |                     | 1900.00         |               | 0.00                       |                          | 0.00                       |
-      | 242       | 31 August 2026    | 50.00                 |                     | 1850.00         |               | 0.00                       |                          | 0.00                       |
-      | 243       | 01 September 2026 | 50.00                 |                     | 1800.00         |               | 0.00                       |                          | 0.00                       |
-      | 244       | 02 September 2026 | 50.00                 |                     | 1750.00         |               | 0.00                       |                          | 0.00                       |
-      | 245       | 03 September 2026 | 50.00                 |                     | 1700.00         |               | 0.00                       |                          | 0.00                       |
-      | 246       | 04 September 2026 | 50.00                 |                     | 1650.00         |               | 0.00                       |                          | 0.00                       |
-      | 247       | 05 September 2026 | 50.00                 |                     | 1600.00         |               | 0.00                       |                          | 0.00                       |
-      | 248       | 06 September 2026 | 50.00                 |                     | 1550.00         |               | 0.00                       |                          | 0.00                       |
-      | 249       | 07 September 2026 | 50.00                 |                     | 1500.00         |               | 0.00                       |                          | 0.00                       |
-      | 250       | 08 September 2026 | 50.00                 |                     | 1450.00         |               | 0.00                       |                          | 0.00                       |
-      | 251       | 09 September 2026 | 50.00                 |                     | 1400.00         |               | 0.00                       |                          | 0.00                       |
-      | 252       | 10 September 2026 | 50.00                 |                     | 1350.00         |               | 0.00                       |                          | 0.00                       |
-      | 253       | 11 September 2026 | 50.00                 |                     | 1300.00         |               | 0.00                       |                          | 0.00                       |
-      | 254       | 12 September 2026 | 50.00                 |                     | 1250.00         |               | 0.00                       |                          | 0.00                       |
-      | 255       | 13 September 2026 | 50.00                 |                     | 1200.00         |               | 0.00                       |                          | 0.00                       |
-      | 256       | 14 September 2026 | 50.00                 |                     | 1150.00         |               | 0.00                       |                          | 0.00                       |
-      | 257       | 15 September 2026 | 50.00                 |                     | 1100.00         |               | 0.00                       |                          | 0.00                       |
-      | 258       | 16 September 2026 | 50.00                 |                     | 1050.00         |               | 0.00                       |                          | 0.00                       |
-      | 259       | 17 September 2026 | 50.00                 |                     | 1000.00         |               | 0.00                       |                          | 0.00                       |
-      | 260       | 18 September 2026 | 50.00                 |                     | 950.00          |               | 0.00                       |                          | 0.00                       |
-      | 261       | 19 September 2026 | 50.00                 |                     | 900.00          |               | 0.00                       |                          | 0.00                       |
-      | 262       | 20 September 2026 | 50.00                 |                     | 850.00          |               | 0.00                       |                          | 0.00                       |
-      | 263       | 21 September 2026 | 50.00                 |                     | 800.00          |               | 0.00                       |                          | 0.00                       |
-      | 264       | 22 September 2026 | 50.00                 |                     | 750.00          |               | 0.00                       |                          | 0.00                       |
-      | 265       | 23 September 2026 | 50.00                 |                     | 700.00          |               | 0.00                       |                          | 0.00                       |
-      | 266       | 24 September 2026 | 50.00                 |                     | 650.00          |               | 0.00                       |                          | 0.00                       |
-      | 267       | 25 September 2026 | 50.00                 |                     | 600.00          |               | 0.00                       |                          | 0.00                       |
-      | 268       | 26 September 2026 | 50.00                 |                     | 550.00          |               | 0.00                       |                          | 0.00                       |
-      | 269       | 27 September 2026 | 50.00                 |                     | 500.00          |               | 0.00                       |                          | 0.00                       |
-      | 270       | 28 September 2026 | 50.00                 |                     | 450.00          |               | 0.00                       |                          | 0.00                       |
-      | 271       | 29 September 2026 | 50.00                 |                     | 400.00          |               | 0.00                       |                          | 0.00                       |
-      | 272       | 30 September 2026 | 50.00                 |                     | 350.00          |               | 0.00                       |                          | 0.00                       |
-      | 273       | 01 October 2026   | 50.00                 |                     | 300.00          |               | 0.00                       |                          | 0.00                       |
-      | 274       | 02 October 2026   | 50.00                 |                     | 250.00          |               | 0.00                       |                          | 0.00                       |
-      | 275       | 03 October 2026   | 50.00                 |                     | 200.00          |               | 0.00                       |                          | 0.00                       |
-      | 276       | 04 October 2026   | 50.00                 |                     | 150.00          |               | 0.00                       |                          | 0.00                       |
-      | 277       | 05 October 2026   | 50.00                 |                     | 100.00          |               | 0.00                       |                          | 0.00                       |
-      | 278       | 06 October 2026   | 50.00                 |                     | 50.00           |               | 0.00                       |                          | 0.00                       |
-      | 279       | 07 October 2026   | 50.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
-
-    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 May 2026"
+      | 13        | 14 January 2026   | 50.00                 | 1500.00             | 8950.00         | 7500.00       | 0.00                       | 0.00                     | 0.00                       |
+      | 14        | 15 January 2026   | 50.00                 |                     | 7450.00         |               | 0.00                       |                          | 0.00                       |
+      | 15        | 16 January 2026   | 50.00                 |                     | 7400.00         |               | 0.00                       |                          | 0.00                       |
+      | 16        | 17 January 2026   | 50.00                 |                     | 7350.00         |               | 0.00                       |                          | 0.00                       |
+      | 17        | 18 January 2026   | 50.00                 |                     | 7300.00         |               | 0.00                       |                          | 0.00                       |
+      | 18        | 19 January 2026   | 50.00                 |                     | 7250.00         |               | 0.00                       |                          | 0.00                       |
+      | 19        | 20 January 2026   | 50.00                 |                     | 7200.00         |               | 0.00                       |                          | 0.00                       |
+      | 20        | 21 January 2026   | 50.00                 |                     | 7150.00         |               | 0.00                       |                          | 0.00                       |
+      | 21        | 22 January 2026   | 50.00                 |                     | 7100.00         |               | 0.00                       |                          | 0.00                       |
+      | 22        | 23 January 2026   | 50.00                 |                     | 7050.00         |               | 0.00                       |                          | 0.00                       |
+      | 23        | 24 January 2026   | 50.00                 |                     | 7000.00         |               | 0.00                       |                          | 0.00                       |
+      | 24        | 25 January 2026   | 50.00                 |                     | 6950.00         |               | 0.00                       |                          | 0.00                       |
+      | 25        | 26 January 2026   | 50.00                 |                     | 6900.00         |               | 0.00                       |                          | 0.00                       |
+      | 26        | 27 January 2026   | 50.00                 |                     | 6850.00         |               | 0.00                       |                          | 0.00                       |
+      | 27        | 28 January 2026   | 50.00                 |                     | 6800.00         |               | 0.00                       |                          | 0.00                       |
+      | 28        | 29 January 2026   | 50.00                 |                     | 6750.00         |               | 0.00                       |                          | 0.00                       |
+      | 29        | 30 January 2026   | 50.00                 |                     | 6700.00         |               | 0.00                       |                          | 0.00                       |
+      | 30        | 31 January 2026   | 50.00                 |                     | 6650.00         |               | 0.00                       |                          | 0.00                       |
+      | 31        | 01 February 2026  | 50.00                 |                     | 6600.00         |               | 0.00                       |                          | 0.00                       |
+      | 32        | 02 February 2026  | 50.00                 |                     | 6550.00         |               | 0.00                       |                          | 0.00                       |
+      | 33        | 03 February 2026  | 50.00                 |                     | 6500.00         |               | 0.00                       |                          | 0.00                       |
+      | 34        | 04 February 2026  | 50.00                 |                     | 6450.00         |               | 0.00                       |                          | 0.00                       |
+      | 35        | 05 February 2026  | 50.00                 |                     | 6400.00         |               | 0.00                       |                          | 0.00                       |
+      | 36        | 06 February 2026  | 50.00                 |                     | 6350.00         |               | 0.00                       |                          | 0.00                       |
+      | 37        | 07 February 2026  | 50.00                 |                     | 6300.00         |               | 0.00                       |                          | 0.00                       |
+      | 38        | 08 February 2026  | 50.00                 |                     | 6250.00         |               | 0.00                       |                          | 0.00                       |
+      | 39        | 09 February 2026  | 50.00                 |                     | 6200.00         |               | 0.00                       |                          | 0.00                       |
+      | 40        | 10 February 2026  | 50.00                 |                     | 6150.00         |               | 0.00                       |                          | 0.00                       |
+      | 41        | 11 February 2026  | 50.00                 |                     | 6100.00         |               | 0.00                       |                          | 0.00                       |
+      | 42        | 12 February 2026  | 50.00                 |                     | 6050.00         |               | 0.00                       |                          | 0.00                       |
+      | 43        | 13 February 2026  | 50.00                 |                     | 6000.00         |               | 0.00                       |                          | 0.00                       |
+      | 44        | 14 February 2026  | 50.00                 |                     | 5950.00         |               | 0.00                       |                          | 0.00                       |
+      | 45        | 15 February 2026  | 50.00                 |                     | 5900.00         |               | 0.00                       |                          | 0.00                       |
+      | 46        | 16 February 2026  | 50.00                 |                     | 5850.00         |               | 0.00                       |                          | 0.00                       |
+      | 47        | 17 February 2026  | 50.00                 |                     | 5800.00         |               | 0.00                       |                          | 0.00                       |
+      | 48        | 18 February 2026  | 50.00                 |                     | 5750.00         |               | 0.00                       |                          | 0.00                       |
+      | 49        | 19 February 2026  | 50.00                 |                     | 5700.00         |               | 0.00                       |                          | 0.00                       |
+      | 50        | 20 February 2026  | 50.00                 |                     | 5650.00         |               | 0.00                       |                          | 0.00                       |
+      | 51        | 21 February 2026  | 50.00                 |                     | 5600.00         |               | 0.00                       |                          | 0.00                       |
+      | 52        | 22 February 2026  | 50.00                 |                     | 5550.00         |               | 0.00                       |                          | 0.00                       |
+      | 53        | 23 February 2026  | 50.00                 |                     | 5500.00         |               | 0.00                       |                          | 0.00                       |
+      | 54        | 24 February 2026  | 50.00                 |                     | 5450.00         |               | 0.00                       |                          | 0.00                       |
+      | 55        | 25 February 2026  | 50.00                 |                     | 5400.00         |               | 0.00                       |                          | 0.00                       |
+      | 56        | 26 February 2026  | 50.00                 |                     | 5350.00         |               | 0.00                       |                          | 0.00                       |
+      | 57        | 27 February 2026  | 50.00                 |                     | 5300.00         |               | 0.00                       |                          | 0.00                       |
+      | 58        | 28 February 2026  | 50.00                 |                     | 5250.00         |               | 0.00                       |                          | 0.00                       |
+      | 59        | 01 March 2026     | 50.00                 |                     | 5200.00         |               | 0.00                       |                          | 0.00                       |
+      | 60        | 02 March 2026     | 50.00                 |                     | 5150.00         |               | 0.00                       |                          | 0.00                       |
+      | 61        | 03 March 2026     | 50.00                 |                     | 5100.00         |               | 0.00                       |                          | 0.00                       |
+      | 62        | 04 March 2026     | 50.00                 |                     | 5050.00         |               | 0.00                       |                          | 0.00                       |
+      | 63        | 05 March 2026     | 50.00                 |                     | 5000.00         |               | 0.00                       |                          | 0.00                       |
+      | 64        | 06 March 2026     | 50.00                 |                     | 4950.00         |               | 0.00                       |                          | 0.00                       |
+      | 65        | 07 March 2026     | 50.00                 |                     | 4900.00         |               | 0.00                       |                          | 0.00                       |
+      | 66        | 08 March 2026     | 50.00                 |                     | 4850.00         |               | 0.00                       |                          | 0.00                       |
+      | 67        | 09 March 2026     | 50.00                 |                     | 4800.00         |               | 0.00                       |                          | 0.00                       |
+      | 68        | 10 March 2026     | 50.00                 |                     | 4750.00         |               | 0.00                       |                          | 0.00                       |
+      | 69        | 11 March 2026     | 50.00                 |                     | 4700.00         |               | 0.00                       |                          | 0.00                       |
+      | 70        | 12 March 2026     | 50.00                 |                     | 4650.00         |               | 0.00                       |                          | 0.00                       |
+      | 71        | 13 March 2026     | 50.00                 |                     | 4600.00         |               | 0.00                       |                          | 0.00                       |
+      | 72        | 14 March 2026     | 50.00                 |                     | 4550.00         |               | 0.00                       |                          | 0.00                       |
+      | 73        | 15 March 2026     | 50.00                 |                     | 4500.00         |               | 0.00                       |                          | 0.00                       |
+      | 74        | 16 March 2026     | 50.00                 |                     | 4450.00         |               | 0.00                       |                          | 0.00                       |
+      | 75        | 17 March 2026     | 50.00                 |                     | 4400.00         |               | 0.00                       |                          | 0.00                       |
+      | 76        | 18 March 2026     | 50.00                 |                     | 4350.00         |               | 0.00                       |                          | 0.00                       |
+      | 77        | 19 March 2026     | 50.00                 |                     | 4300.00         |               | 0.00                       |                          | 0.00                       |
+      | 78        | 20 March 2026     | 50.00                 |                     | 4250.00         |               | 0.00                       |                          | 0.00                       |
+      | 79        | 21 March 2026     | 50.00                 |                     | 4200.00         |               | 0.00                       |                          | 0.00                       |
+      | 80        | 22 March 2026     | 50.00                 |                     | 4150.00         |               | 0.00                       |                          | 0.00                       |
+      | 81        | 23 March 2026     | 50.00                 |                     | 4100.00         |               | 0.00                       |                          | 0.00                       |
+      | 82        | 24 March 2026     | 50.00                 |                     | 4050.00         |               | 0.00                       |                          | 0.00                       |
+      | 83        | 25 March 2026     | 50.00                 |                     | 4000.00         |               | 0.00                       |                          | 0.00                       |
+      | 84        | 26 March 2026     | 50.00                 |                     | 3950.00         |               | 0.00                       |                          | 0.00                       |
+      | 85        | 27 March 2026     | 50.00                 |                     | 3900.00         |               | 0.00                       |                          | 0.00                       |
+      | 86        | 28 March 2026     | 50.00                 |                     | 3850.00         |               | 0.00                       |                          | 0.00                       |
+      | 87        | 29 March 2026     | 50.00                 |                     | 3800.00         |               | 0.00                       |                          | 0.00                       |
+      | 88        | 30 March 2026     | 50.00                 |                     | 3750.00         |               | 0.00                       |                          | 0.00                       |
+      | 89        | 31 March 2026     | 50.00                 |                     | 3700.00         |               | 0.00                       |                          | 0.00                       |
+      | 90        | 01 April 2026     | 50.00                 |                     | 3650.00         |               | 0.00                       |                          | 0.00                       |
+      | 91        | 02 April 2026     | 50.00                 |                     | 3600.00         |               | 0.00                       |                          | 0.00                       |
+      | 92        | 03 April 2026     | 50.00                 |                     | 3550.00         |               | 0.00                       |                          | 0.00                       |
+      | 93        | 04 April 2026     | 50.00                 |                     | 3500.00         |               | 0.00                       |                          | 0.00                       |
+      | 94        | 05 April 2026     | 50.00                 |                     | 3450.00         |               | 0.00                       |                          | 0.00                       |
+      | 95        | 06 April 2026     | 50.00                 |                     | 3400.00         |               | 0.00                       |                          | 0.00                       |
+      | 96        | 07 April 2026     | 50.00                 |                     | 3350.00         |               | 0.00                       |                          | 0.00                       |
+      | 97        | 08 April 2026     | 50.00                 |                     | 3300.00         |               | 0.00                       |                          | 0.00                       |
+      | 98        | 09 April 2026     | 50.00                 |                     | 3250.00         |               | 0.00                       |                          | 0.00                       |
+      | 99        | 10 April 2026     | 50.00                 |                     | 3200.00         |               | 0.00                       |                          | 0.00                       |
+      | 100       | 11 April 2026     | 50.00                 |                     | 3150.00         |               | 0.00                       |                          | 0.00                       |
+      | 101       | 12 April 2026     | 50.00                 |                     | 3100.00         |               | 0.00                       |                          | 0.00                       |
+      | 102       | 13 April 2026     | 50.00                 |                     | 3050.00         |               | 0.00                       |                          | 0.00                       |
+      | 103       | 14 April 2026     | 50.00                 |                     | 3000.00         |               | 0.00                       |                          | 0.00                       |
+      | 104       | 15 April 2026     | 50.00                 |                     | 2950.00         |               | 0.00                       |                          | 0.00                       |
+      | 105       | 16 April 2026     | 50.00                 |                     | 2900.00         |               | 0.00                       |                          | 0.00                       |
+      | 106       | 17 April 2026     | 50.00                 |                     | 2850.00         |               | 0.00                       |                          | 0.00                       |
+      | 107       | 18 April 2026     | 50.00                 |                     | 2800.00         |               | 0.00                       |                          | 0.00                       |
+      | 108       | 19 April 2026     | 50.00                 |                     | 2750.00         |               | 0.00                       |                          | 0.00                       |
+      | 109       | 20 April 2026     | 50.00                 |                     | 2700.00         |               | 0.00                       |                          | 0.00                       |
+      | 110       | 21 April 2026     | 50.00                 |                     | 2650.00         |               | 0.00                       |                          | 0.00                       |
+      | 111       | 22 April 2026     | 50.00                 |                     | 2600.00         |               | 0.00                       |                          | 0.00                       |
+      | 112       | 23 April 2026     | 50.00                 |                     | 2550.00         |               | 0.00                       |                          | 0.00                       |
+      | 113       | 24 April 2026     | 50.00                 |                     | 2500.00         |               | 0.00                       |                          | 0.00                       |
+      | 114       | 25 April 2026     | 50.00                 |                     | 2450.00         |               | 0.00                       |                          | 0.00                       |
+      | 115       | 26 April 2026     | 50.00                 |                     | 2400.00         |               | 0.00                       |                          | 0.00                       |
+      | 116       | 27 April 2026     | 50.00                 |                     | 2350.00         |               | 0.00                       |                          | 0.00                       |
+      | 117       | 28 April 2026     | 50.00                 |                     | 2300.00         |               | 0.00                       |                          | 0.00                       |
+      | 118       | 29 April 2026     | 50.00                 |                     | 2250.00         |               | 0.00                       |                          | 0.00                       |
+      | 119       | 30 April 2026     | 50.00                 |                     | 2200.00         |               | 0.00                       |                          | 0.00                       |
+      | 120       | 01 May 2026       | 50.00                 |                     | 2150.00         |               | 0.00                       |                          | 0.00                       |
+      | 121       | 02 May 2026       | 50.00                 |                     | 2100.00         |               | 0.00                       |                          | 0.00                       |
+      | 122       | 03 May 2026       | 50.00                 |                     | 2050.00         |               | 0.00                       |                          | 0.00                       |
+      | 123       | 04 May 2026       | 50.00                 |                     | 2000.00         |               | 0.00                       |                          | 0.00                       |
+      | 124       | 05 May 2026       | 50.00                 |                     | 1950.00         |               | 0.00                       |                          | 0.00                       |
+      | 125       | 06 May 2026       | 50.00                 |                     | 1900.00         |               | 0.00                       |                          | 0.00                       |
+      | 126       | 07 May 2026       | 50.00                 |                     | 1850.00         |               | 0.00                       |                          | 0.00                       |
+      | 127       | 08 May 2026       | 50.00                 |                     | 1800.00         |               | 0.00                       |                          | 0.00                       |
+      | 128       | 09 May 2026       | 50.00                 |                     | 1750.00         |               | 0.00                       |                          | 0.00                       |
+      | 129       | 10 May 2026       | 50.00                 |                     | 1700.00         |               | 0.00                       |                          | 0.00                       |
+      | 130       | 11 May 2026       | 50.00                 |                     | 1650.00         |               | 0.00                       |                          | 0.00                       |
+      | 131       | 12 May 2026       | 50.00                 |                     | 1600.00         |               | 0.00                       |                          | 0.00                       |
+      | 132       | 13 May 2026       | 50.00                 |                     | 1550.00         |               | 0.00                       |                          | 0.00                       |
+      | 133       | 14 May 2026       | 50.00                 |                     | 1500.00         |               | 0.00                       |                          | 0.00                       |
+      | 134       | 15 May 2026       | 50.00                 |                     | 1450.00         |               | 0.00                       |                          | 0.00                       |
+      | 135       | 16 May 2026       | 50.00                 |                     | 1400.00         |               | 0.00                       |                          | 0.00                       |
+      | 136       | 17 May 2026       | 50.00                 |                     | 1350.00         |               | 0.00                       |                          | 0.00                       |
+      | 137       | 18 May 2026       | 50.00                 |                     | 1300.00         |               | 0.00                       |                          | 0.00                       |
+      | 138       | 19 May 2026       | 50.00                 |                     | 1250.00         |               | 0.00                       |                          | 0.00                       |
+      | 139       | 20 May 2026       | 50.00                 |                     | 1200.00         |               | 0.00                       |                          | 0.00                       |
+      | 140       | 21 May 2026       | 50.00                 |                     | 1150.00         |               | 0.00                       |                          | 0.00                       |
+      | 141       | 22 May 2026       | 50.00                 |                     | 1100.00         |               | 0.00                       |                          | 0.00                       |
+      | 142       | 23 May 2026       | 50.00                 |                     | 1050.00         |               | 0.00                       |                          | 0.00                       |
+      | 143       | 24 May 2026       | 50.00                 |                     | 1000.00         |               | 0.00                       |                          | 0.00                       |
+      | 144       | 25 May 2026       | 50.00                 |                     | 950.00          |               | 0.00                       |                          | 0.00                       |
+      | 145       | 26 May 2026       | 50.00                 |                     | 900.00          |               | 0.00                       |                          | 0.00                       |
+      | 146       | 27 May 2026       | 50.00                 |                     | 850.00          |               | 0.00                       |                          | 0.00                       |
+      | 147       | 28 May 2026       | 50.00                 |                     | 800.00          |               | 0.00                       |                          | 0.00                       |
+      | 148       | 29 May 2026       | 50.00                 |                     | 750.00          |               | 0.00                       |                          | 0.00                       |
+      | 149       | 30 May 2026       | 50.00                 |                     | 700.00          |               | 0.00                       |                          | 0.00                       |
+      | 150       | 31 May 2026       | 50.00                 |                     | 650.00          |               | 0.00                       |                          | 0.00                       |
+      | 151       | 01 June 2026      | 50.00                 |                     | 600.00          |               | 0.00                       |                          | 0.00                       |
+      | 152       | 02 June 2026      | 50.00                 |                     | 550.00          |               | 0.00                       |                          | 0.00                       |
+      | 153       | 03 June 2026      | 50.00                 |                     | 500.00          |               | 0.00                       |                          | 0.00                       |
+      | 154       | 04 June 2026      | 50.00                 |                     | 450.00          |               | 0.00                       |                          | 0.00                       |
+      | 155       | 05 June 2026      | 50.00                 |                     | 400.00          |               | 0.00                       |                          | 0.00                       |
+      | 156       | 06 June 2026      | 50.00                 |                     | 350.00          |               | 0.00                       |                          | 0.00                       |
+      | 157       | 07 June 2026      | 50.00                 |                     | 300.00          |               | 0.00                       |                          | 0.00                       |
+      | 158       | 08 June 2026      | 50.00                 |                     | 250.00          |               | 0.00                       |                          | 0.00                       |
+      | 159       | 09 June 2026      | 50.00                 |                     | 200.00          |               | 0.00                       |                          | 0.00                       |
+      | 160       | 10 June 2026      | 50.00                 |                     | 150.00          |               | 0.00                       |                          | 0.00                       |
+      | 161       | 11 June 2026      | 50.00                 |                     | 100.00          |               | 0.00                       |                          | 0.00                       |
+      | 162       | 12 June 2026      | 50.00                 |                     | 50.00           |               | 0.00                       |                          | 0.00                       |
+      | 163       | 13 June 2026      | 50.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "14 January 2026"
 
   @TestRailId:C76633
   Scenario: Verify working capital loan repayment - UC17: simple repayment with payment details
@@ -4868,7 +4530,6 @@ Feature: Working Capital Loan Repayment
       | 182       | 02 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
       | 183       | 03 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
       | 184       | 04 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
-
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C76634
@@ -5292,7 +4953,6 @@ Feature: Working Capital Loan Repayment
       | 198       | 18 July 2019     | 50.00                 |                     | 99.84           |               | 0.16                       |                          | 0.16                       |
       | 199       | 19 July 2019     | 50.00                 |                     | 49.95           |               | 0.11                       |                          | 0.05                       |
       | 200       | 20 July 2019     | 50.00                 |                     | 0.00            |               | 0.05                       |                          | 0.00                       |
-
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2019"
 
   @TestRailId:C83023
@@ -5319,5 +4979,4 @@ Feature: Working Capital Loan Repayment
       | 4         | 05 January 2019 | 50.00                 |                     | 8838.18         |               | 9.48                       |                          | 961.82                     |                          |
       | 5         | 06 January 2019 | 50.00                 |                     | 8797.62         |               | 9.44                       |                          | 952.38                     |                          |
       | 200       | 20 July 2019    | 50.00                 |                     | 0.00            |               | 0.05                       |                          | 0.00                       |                          |
-
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2019"
