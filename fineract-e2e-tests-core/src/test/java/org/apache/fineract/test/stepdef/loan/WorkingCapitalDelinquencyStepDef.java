@@ -49,6 +49,8 @@ public class WorkingCapitalDelinquencyStepDef extends AbstractStepDef {
     private final FineractFeignClient fineractClient;
     private final WorkingCapitalLoanRequestFactory workingCapitalLoanRequestFactory;
     private final FineractClientConfiguration fineractClientConfiguration;
+    private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER = org.apache.fineract.client.feign.ObjectMapperFactory
+            .getShared();
 
     @When("Admin initiate a Working Capital loan delinquency pause with startDate {string} and endDate {string}")
     public void initiateDelinquencyPause(String startDate, String endDate) {
@@ -179,10 +181,14 @@ public class WorkingCapitalDelinquencyStepDef extends AbstractStepDef {
     public void verifyRangeSchedule(DataTable dataTable) {
         Long loanId = extractLoanId();
         List<WorkingCapitalLoanDelinquencyRangeScheduleData> actualRangeSchedule = retrieveRangeSchedule(loanId);
+        verifyDelinquencyRangeSchedule(actualRangeSchedule, dataTable);
+    }
 
+    public void verifyDelinquencyRangeSchedule(List<WorkingCapitalLoanDelinquencyRangeScheduleData> actualRangeSchedule,
+            DataTable dataTable) {
         // If no data rows provided (only header), just log and return
         if (dataTable.height() <= 1) {
-            log.info("No expected data provided for verification, skipping validation");
+            log.info("No expected data provided for verification of delinquency range schedule, skipping validation");
             return;
         }
 
@@ -193,10 +199,10 @@ public class WorkingCapitalDelinquencyStepDef extends AbstractStepDef {
         verifyRangeScheduleSize(actualRangeSchedule, expectedData.size());
         verifyAllRangeScheduleFields(actualRangeSchedule, headers, expectedData);
 
-        log.info("Successfully verified {} range schedule entries", actualRangeSchedule.size());
+        log.info("Successfully verified  actual delinquency range schedule {} range schedule entries", actualRangeSchedule.size());
     }
 
-    private Long extractLoanId() {
+    public Long extractLoanId() {
         final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         return loanResponse.getLoanId();
     }

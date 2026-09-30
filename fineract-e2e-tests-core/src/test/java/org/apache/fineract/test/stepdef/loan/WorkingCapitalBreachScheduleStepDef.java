@@ -81,6 +81,10 @@ public class WorkingCapitalBreachScheduleStepDef extends AbstractStepDef {
         final Long loanId = extractLoanId();
         final List<WorkingCapitalLoanBreachScheduleData> schedule = retrieveBreachSchedule(loanId);
 
+        verifyBreachScheduleData(schedule, dataTable);
+    }
+
+    public void verifyBreachScheduleData(final List<WorkingCapitalLoanBreachScheduleData> schedule, final DataTable dataTable) {
         final List<List<String>> rows = dataTable.asLists();
         final List<String> headers = rows.getFirst();
         final List<List<String>> expectedData = rows.subList(1, rows.size());
@@ -98,7 +102,7 @@ public class WorkingCapitalBreachScheduleStepDef extends AbstractStepDef {
             }
         }
 
-        log.info("Successfully verified {} breach schedule entries for loan {}", schedule.size(), loanId);
+        log.info("Successfully verified {} breach schedule entries for loan account", schedule.size());
     }
 
     @Then("Working Capital loan balance has breach past due amount {string}")
