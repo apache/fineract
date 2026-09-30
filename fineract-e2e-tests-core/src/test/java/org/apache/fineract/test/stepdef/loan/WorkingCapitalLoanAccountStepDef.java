@@ -5185,6 +5185,26 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         Assertions.assertNotNull(undo);
     }
 
+    @When("Customer adjust by delta {string}th working capital transaction made on {string} by {string}")
+    public void adjustByDeltaNthTransaction(String nthItemStr, String transactionDate, String delta) throws IOException {
+        final GetWorkingCapitalLoanTransactionsResponse getWorkingCapitalLoansLoanIdResponse = retrieveLoanTransactions(getCreatedLoanId());
+        final List<GetWorkingCapitalLoanTransactionIdResponse> actualTransactions = getWorkingCapitalLoansLoanIdResponse.getContent();
+
+        int nthItem = Integer.parseInt(nthItemStr) - 1;
+
+        GetWorkingCapitalLoanTransactionIdResponse transactionIdResponse = actualTransactions.stream()
+                .filter(t -> transactionDate.equals(FORMATTER.format(t.getTransactionDate()))).toList().get(nthItem);
+
+        String reversalExternalId = Utils.randomStringGenerator("wcl-reversal-ext-id", 8);
+        ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest()
+                .transactionAmount(BigDecimal.valueOf(Double.parseDouble(delta))).reversalExternalId(reversalExternalId);
+
+        ExecuteWorkingCapitalLoanTransactionCommandResponse undo = ok(
+                () -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(
+                        getCreatedLoanId(), transactionIdResponse.getId(), "adjust-by-delta", request));
+        Assertions.assertNotNull(undo);
+    }
+
     private void verifyTransactionsJournalEntries(final String transactionType, final String transactionDate, final boolean reversed,
             final Integer expectedCount, final DataTable table) {
         final Long loanId = getCreatedLoanId();
@@ -5252,6 +5272,22 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
         ExecuteWorkingCapitalLoanTransactionCommandResponse undo = ok(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, target.getId(), "undo", request));
+        Assertions.assertNotNull(undo);
+    }
+
+    @When("Customer adjust by delta {string}th {string} transaction made on {string} on Working Capital loan by {string}")
+    public void adjustByDeltaWorkingCapitalLoanTransaction(String nthItemStr, String transactionType, String transactionDate, String delta)
+            throws IOException {
+        final Long loanId = getCreatedLoanId();
+        final GetWorkingCapitalLoanTransactionIdResponse target = findNthActiveTransaction(loanId, nthItemStr, transactionType,
+                transactionDate);
+
+        String reversalExternalId = Utils.randomStringGenerator("wcl-reversal-ext-id", 8);
+        ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest()
+                .transactionAmount(BigDecimal.valueOf(Double.parseDouble(delta))).reversalExternalId(reversalExternalId);
+
+        ExecuteWorkingCapitalLoanTransactionCommandResponse undo = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, target.getId(), "adjust-by-delta", request));
         Assertions.assertNotNull(undo);
     }
 
