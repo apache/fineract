@@ -1181,9 +1181,29 @@ public class EventCheckHelper {
     public void workingCapitalLoanBreachChangeEventCheck(final Long loanId, final Boolean expectedBreach) {
         workingCapitalLoanEventPayloadCheck(WorkingCapitalLoanBreachChangeEvent.class, loanId, event -> {
             assertThat(event.getBreach()).isNotNull();
-            assertThat(event.getBreach().getBreachSchedule()).isNotNull().isNotEmpty();
-            assertThat(event.getBreach().getBreachSchedule()).as("breach.breachSchedule has a period with breach=%s", expectedBreach)
-                    .anyMatch(period -> expectedBreach.equals(period.getBreach()));
+            assertBreachScheduleHasPeriodWithBreach(event.getBreach(), expectedBreach);
+        });
+    }
+
+    private static void assertBreachScheduleHasPeriodWithBreach(final WorkingCapitalBreachDataV1 breach, final Boolean expectedBreach) {
+        assertThat(breach.getBreachSchedule()).as("breach.breachSchedule").isNotNull().isNotEmpty();
+        assertThat(breach.getBreachSchedule()).as("breach.breachSchedule has a period with breach=%s", expectedBreach)
+                .anyMatch(period -> expectedBreach.equals(period.getBreach()));
+    }
+
+    public void workingCapitalLoanBreachChangeEventWithBreachDataCheck(final Long loanId, final Map<String, String> expected) {
+        workingCapitalLoanEventPayloadCheck(WorkingCapitalLoanBreachChangeEvent.class, loanId, event -> {
+            final WorkingCapitalBreachDataV1 breach = event.getBreach();
+            assertThat(breach).as("breach").isNotNull();
+            Optional.ofNullable(expected.get("breachFlag"))
+                    .ifPresent(flag -> assertBreachScheduleHasPeriodWithBreach(breach, Boolean.valueOf(flag)));
+            assertEventDateEquals("breach.breachStartDate", breach.getBreachStartDate(), expected.get("breachStartDate"));
+            assertEventDateEquals("breach.breachEffectiveStartDate", breach.getBreachEffectiveStartDate(),
+                    expected.get("breachEffectiveStartDate"));
+            Optional.ofNullable(expected.get("breachAmount"))
+                    .ifPresent(amount -> assertAmountEquals("breach.breachAmount", breach.getBreachAmount(), new BigDecimal(amount)));
+            Optional.ofNullable(expected.get("breachPastDueAmount")).ifPresent(
+                    amount -> assertAmountEquals("breach.breachPastDueAmount", breach.getBreachPastDueAmount(), new BigDecimal(amount)));
         });
     }
 
@@ -1454,8 +1474,13 @@ public class EventCheckHelper {
     }
 
     private static void assertEventDateEquals(final String description, final String eventDate, final String expectedDate) {
-        Optional.ofNullable(expectedDate).filter(s -> !s.isEmpty())
-                .ifPresent(expected -> assertThat(eventDate).as(description).isEqualTo(expected));
+        Optional.ofNullable(expectedDate).filter(s -> !s.isEmpty()).ifPresent(expected -> {
+            if ("null".equals(expected)) {
+                assertThat(eventDate).as(description).isNull();
+            } else {
+                assertThat(eventDate).as(description).isEqualTo(expected);
+            }
+        });
     }
 
     private void workingCapitalLoanAccountDataV1Check(final Class<? extends AbstractWorkingCapitalLoanEvent> eventClazz,

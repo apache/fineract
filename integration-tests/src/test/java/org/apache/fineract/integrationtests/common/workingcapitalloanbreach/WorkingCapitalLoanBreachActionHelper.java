@@ -24,6 +24,7 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansBreachActionRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachActionData;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 
 public class WorkingCapitalLoanBreachActionHelper {
@@ -46,6 +47,38 @@ public class WorkingCapitalLoanBreachActionHelper {
 
     public List<WorkingCapitalLoanBreachActionData> retrieveBreachActions(final Long loanId) {
         return FeignCalls.ok(() -> api().retrieveBreachActions(loanId));
+    }
+
+    /** Resets the schedule, restarting the period geometry from the reset date. */
+    public void resetRestartingFromResetDate(final Long loanId, final String startDate) {
+        final PostWorkingCapitalLoansBreachActionRequest request = baseRequest("reset", startDate);
+        request.setRestartPeriodFromResetDate(Boolean.TRUE);
+        FeignCalls.ok(() -> api().createBreachAction(loanId, request));
+    }
+
+    public void undoReset(final Long loanId, final String startDate) {
+        FeignCalls.ok(() -> api().createBreachAction(loanId, baseRequest("undo_reset", startDate)));
+    }
+
+    public void rescheduleFrequency(final Long loanId, final String startDate, final int frequency, final String frequencyType) {
+        final PostWorkingCapitalLoansBreachActionRequest request = baseRequest("reschedule", startDate);
+        request.setFrequency(frequency);
+        request.setFrequencyType(frequencyType);
+        FeignCalls.ok(() -> api().createBreachAction(loanId, request));
+    }
+
+    public List<WorkingCapitalLoanBreachScheduleData> retrieveBreachSchedule(final Long loanId) {
+        return FeignCalls.ok(
+                () -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanBreachSchedule().retrieveBreachSchedule(loanId));
+    }
+
+    private PostWorkingCapitalLoansBreachActionRequest baseRequest(final String action, final String startDate) {
+        final PostWorkingCapitalLoansBreachActionRequest request = new PostWorkingCapitalLoansBreachActionRequest();
+        request.setAction(action);
+        request.setStartDate(startDate);
+        request.setDateFormat("yyyy-MM-dd");
+        request.setLocale("en");
+        return request;
     }
 
     private PostWorkingCapitalLoansBreachActionRequest pauseRequest(final String startDate, final String endDate) {

@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -46,6 +47,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanC
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTemplateData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
@@ -232,11 +234,12 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
     }
 
     private void enrichWithStartDates(final WorkingCapitalLoan loan, final WorkingCapitalLoanData data) {
-        // breachStartDate: fromDate of the earliest breached period. The breach schedule already offsets its first
-        // period
-        // by breachGraceDays, so the grace period is implicitly reflected in the fromDate.
-        breachScheduleRepository.findTopByLoanIdAndBreachTrueOrderByFromDateAsc(loan.getId())
-                .ifPresent(period -> data.setBreachStartDate(period.getFromDate()));
+        // breachStartDate: fromDate of the earliest breached period. The breach schedule bakes the breach grace days
+        // into the toDate of its first period, so the fromDate is the raw anchor date.
+        breachScheduleRepository.findTopByLoanIdAndBreachTrueOrderByFromDateAsc(loan.getId()).ifPresent(period -> {
+            data.setBreachStartDate(period.getFromDate());
+            data.setBreachEffectiveStartDate(resolveBreachEffectiveStartDate(period, data.getBreachGraceDays()));
+        });
 
         // delinquencyStartDate: fromDate of the earliest delinquent period. The delinquency range schedule bakes the
         // delinquency grace days into the toDate of its first period, so the fromDate is the raw anchor date.
@@ -263,10 +266,38 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
      */
     private LocalDate resolveDelinquencyEffectiveStartDate(final WorkingCapitalLoanDelinquencyRangeSchedule period,
             final Integer delinquencyGraceDays) {
-        if (!Integer.valueOf(1).equals(period.getPeriodNumber()) || delinquencyGraceDays == null || delinquencyGraceDays <= 0) {
+        return resolveEffectiveStartDate(period.getPeriodNumber(), period.getFromDate(), period.getToDate(), delinquencyGraceDays);
+    }
+
+    /**
+     * Resolves the "effective" start of the breach, i.e. the date the breach clock starts ticking once the configured
+     * cool off period is taken into account.
+     *
+     * Only the first breach schedule period carries the breach grace days: the schedule generator extends that period's
+     * toDate by the grace days and every subsequent period is chained from it, so the grace is equivalent to shifting
+     * the first period forward. The effective start date makes that shift explicit for API consumers.
+     */
+    private LocalDate resolveBreachEffectiveStartDate(final WorkingCapitalLoanBreachSchedule period, final Integer breachGraceDays) {
+        return resolveEffectiveStartDate(period.getPeriodNumber(), period.getFromDate(), period.getToDate(), breachGraceDays);
+    }
+
+    /**
+     * The date the cool off period configured as grace days ends inside a schedule period, or {@code null} when the
+     * period has no cool off period to report.
+     *
+     * There is none for any period other than the first one, which is the only one the grace days extend, and none when
+     * no grace days are configured. There is none either when the cool off period would end after the period does: an
+     * operation that cuts the first period short, such as a reset that restarts the schedule from its own date, leaves
+     * a period the grace days never finished running through, so reporting a date past its end would describe a cool
+     * off period that never took place.
+     */
+    private LocalDate resolveEffectiveStartDate(final Integer periodNumber, final LocalDate fromDate, final LocalDate toDate,
+            final Integer graceDays) {
+        if (!Integer.valueOf(1).equals(periodNumber) || graceDays == null || graceDays <= 0) {
             return null;
         }
-        return period.getFromDate().plusDays(delinquencyGraceDays);
+        final LocalDate effectiveStartDate = fromDate.plusDays(graceDays);
+        return DateUtils.isAfter(effectiveStartDate, toDate) ? null : effectiveStartDate;
     }
 
     private void enrichWithOriginators(final Long loanId, final WorkingCapitalLoanData data) {
