@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,6 +46,7 @@ import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData
 import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachActionData;
 import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.batch.BatchServiceHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
@@ -82,6 +84,8 @@ public class BatchWorkingCapitalLoanIntegrationTest {
     private final List<Long> createdProductIds = new ArrayList<>();
     private final List<Long> createdBreachIds = new ArrayList<>();
     private final List<Long> createdNearBreachIds = new ArrayList<>();
+    private final List<Long> createdDelinquencyBucketIds = new ArrayList<>();
+    private final List<Long> createdDelinquencyRangeIds = new ArrayList<>();
 
     @AfterEach
     void cleanupEntities() {
@@ -136,6 +140,24 @@ public class BatchWorkingCapitalLoanIntegrationTest {
             }
         }
         createdNearBreachIds.clear();
+
+        for (final Long bucketId : createdDelinquencyBucketIds) {
+            try {
+                WorkingCapitalLoanDelinquencyRangeScheduleHelper.deleteBucket(bucketId);
+            } catch (final CallFailedRuntimeException ignored) {
+                // best-effort cleanup
+            }
+        }
+        createdDelinquencyBucketIds.clear();
+
+        for (final Long rangeId : createdDelinquencyRangeIds) {
+            try {
+                ok(() -> FineractFeignClientHelper.getFineractFeignClient().delinquencyRangeAndBucketsManagement().deleteRange(rangeId));
+            } catch (final CallFailedRuntimeException ignored) {
+                // best-effort cleanup
+            }
+        }
+        createdDelinquencyRangeIds.clear();
     }
 
     /**
@@ -874,9 +896,11 @@ public class BatchWorkingCapitalLoanIntegrationTest {
         final PostDelinquencyRangeResponse range = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest()
                 .classification(Utils.randomStringGenerator("DLQ_R_", 10)).minimumAgeDays(1).maximumAgeDays(30).locale("en"));
         assertNotNull(range);
+        createdDelinquencyRangeIds.add(range.getResourceId());
         final PostDelinquencyBucketResponse bucket = WorkingCapitalLoanDelinquencyRangeScheduleHelper
                 .createWorkingCapitalLoanDelinquencyBucket(List.of(range.getResourceId()), 30, 0, new BigDecimal("3"), 1);
         assertNotNull(bucket);
+        createdDelinquencyBucketIds.add(bucket.getResourceId());
         final String uniqueName = "WCL Batch Product " + UUID.randomUUID().toString().substring(0, 8);
         final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)

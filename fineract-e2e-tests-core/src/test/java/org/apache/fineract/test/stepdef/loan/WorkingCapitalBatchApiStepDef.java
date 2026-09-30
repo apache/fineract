@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,9 @@ import org.apache.fineract.client.models.Header;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsResponse;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansBreachActionRequest;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionRequest;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdNearBreachActionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
@@ -89,6 +93,9 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
     private static final String WCL_TRANSACTIONS_PATH = "/transactions";
     private static final String WCL_DELINQUENCY_RANGE_SCHEDULE_PATH = "/delinquency-range-schedule";
     private static final String WCL_BREACH_SCHEDULE_PATH = "/breach-schedule";
+    private static final String WCL_BREACH_ACTIONS_PATH = "/breach-actions";
+    private static final String WCL_DELINQUENCY_ACTIONS_PATH = "/delinquency-actions";
+    private static final String WCL_NEAR_BREACH_ACTIONS_PATH = "/near-breach-actions";
 
     private final FineractFeignClient fineractFeignClient;
     private final WorkingCapitalLoanProductResolver workingCapitalLoanProductResolver;
@@ -327,6 +334,225 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
     }
 
+    @When("Batch API creates WC breach reset action with restart period from reset date {string} on the working capital loan by external ID")
+    public void batchApiCreateWCBreachResetAction(String restartPeriodFromResetDate) throws IOException {
+        final String loanExternalId = getActionLoanExternalId();
+        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansBreachActionRequest("reset")
+                .restartPeriodFromResetDate(Boolean.parseBoolean(restartPeriodFromResetDate));
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_BREACH_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API creates WC breach reschedule action with the following parameters on the working capital loan by external ID:")
+    public void batchApiCreateWCBreachRescheduleAction(DataTable table) throws IOException {
+        final String loanExternalId = getActionLoanExternalId();
+        final Map<String, String> params = table.asMaps().getFirst();
+        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansBreachActionRequest("reschedule");
+        Optional.ofNullable(params.get("minimumPayment")).ifPresent(v -> request.setMinimumPayment(new BigDecimal(v)));
+        Optional.ofNullable(params.get("minimumPaymentType")).ifPresent(request::setMinimumPaymentType);
+        Optional.ofNullable(params.get("frequency")).ifPresent(v -> request.setFrequency(Integer.parseInt(v)));
+        Optional.ofNullable(params.get("frequencyType")).ifPresent(request::setFrequencyType);
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_BREACH_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API creates WC breach action with action {string} on the working capital loan by external ID")
+    public void batchApiCreateWCBreachAction(String action) throws IOException {
+        final String loanExternalId = getActionLoanExternalId();
+        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansBreachActionRequest(action);
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_BREACH_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API creates WC breach pause action from {string} to {string} on the working capital loan by external ID")
+    public void batchApiCreateWCBreachPauseAction(String startDate, String endDate) throws IOException {
+        final String loanExternalId = getActionLoanExternalId();
+        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansBreachActionRequest("pause").startDate(startDate).endDate(endDate);
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_BREACH_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API creates WC delinquency pause action from {string} to {string} on the working capital loan by external ID")
+    public void batchApiCreateWCDelinquencyPauseAction(String startDate, String endDate) throws IOException {
+        final String loanExternalId = getActionLoanExternalId();
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansDelinquencyActionRequest("pause").startDate(startDate).endDate(endDate);
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_DELINQUENCY_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API creates WC delinquency resume action from {string} on the working capital loan by external ID")
+    public void batchApiCreateWCDelinquencyResumeAction(String startDate) throws IOException {
+        final String loanExternalId = getActionLoanExternalId();
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansDelinquencyActionRequest("resume").startDate(startDate).endDate(null);
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_DELINQUENCY_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API creates WC delinquency pause action from {string} with no end date on the working capital loan by external ID")
+    public void batchApiCreateWCDelinquencyPauseActionNoEndDate(String startDate) throws IOException {
+        final String loanExternalId = getActionLoanExternalId();
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansDelinquencyActionRequest("pause").startDate(startDate).endDate(null);
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_DELINQUENCY_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API creates WC delinquency reschedule action with the following parameters on the working capital loan by external ID:")
+    public void batchApiCreateWCDelinquencyRescheduleAction(DataTable table) throws IOException {
+        final String loanExternalId = getActionLoanExternalId();
+        final Map<String, String> params = table.asMaps().getFirst();
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansDelinquencyActionRequest("reschedule");
+        Optional.ofNullable(params.get("minimumPayment")).ifPresent(v -> request.setMinimumPayment(new BigDecimal(v)));
+        Optional.ofNullable(params.get("minimumPaymentType")).ifPresent(request::setMinimumPaymentType);
+        Optional.ofNullable(params.get("frequency")).ifPresent(v -> request.setFrequency(Integer.parseInt(v)));
+        Optional.ofNullable(params.get("frequencyType")).ifPresent(request::setFrequencyType);
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_DELINQUENCY_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API creates WC delinquency reset action with start new period {string} on the working capital loan by external ID")
+    public void batchApiCreateWCDelinquencyResetAction(String startNewPeriod) throws IOException {
+        final String loanExternalId = getActionLoanExternalId();
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansDelinquencyActionRequest("reset").startDate(null).endDate(null)
+                .startNewPeriod(Boolean.parseBoolean(startNewPeriod));
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_DELINQUENCY_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API creates WC delinquency undo reset action on the working capital loan by external ID")
+    public void batchApiCreateWCDelinquencyUndoResetAction() throws IOException {
+        final String loanExternalId = getActionLoanExternalId();
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansDelinquencyActionRequest("undo_reset").startDate(null).endDate(null);
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_DELINQUENCY_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API creates WC breach pause action from {string} to {string} on the working capital loan by loan ID")
+    public void batchApiCreateWCBreachPauseActionByLoanId(String startDate, String endDate) throws IOException {
+        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansBreachActionRequest("pause").startDate(startDate).endDate(endDate);
+        final String url = WCL_BASE_URL + "/" + getCreatedWCLoanId() + WCL_BREACH_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API creates WC near breach reschedule action with threshold {string} frequency {int} frequencyType {string} on the working capital loan by external ID")
+    public void batchApiCreateWCNearBreachActionByExternalId(String threshold, int frequency, String frequencyType) throws IOException {
+        final String url = WCL_EXTERNAL_ID_URL + getActionLoanExternalId() + WCL_NEAR_BREACH_ACTIONS_PATH;
+        batchApiCreateWCNearBreachActionInternal(threshold, frequency, frequencyType, url);
+    }
+
+    @When("Batch API creates WC near breach reschedule action with threshold {string} frequency {int} frequencyType {string} on the working capital loan by loan ID")
+    public void batchApiCreateWCNearBreachActionByLoanId(String threshold, int frequency, String frequencyType) throws IOException {
+        final String url = WCL_BASE_URL + "/" + getCreatedWCLoanId() + WCL_NEAR_BREACH_ACTIONS_PATH;
+        batchApiCreateWCNearBreachActionInternal(threshold, frequency, frequencyType, url);
+    }
+
+    private void batchApiCreateWCNearBreachActionInternal(String threshold, int frequency, String frequencyType, String url)
+            throws IOException {
+        final PostWorkingCapitalLoansLoanIdNearBreachActionsRequest request = new PostWorkingCapitalLoansLoanIdNearBreachActionsRequest()
+                .action(PostWorkingCapitalLoansLoanIdNearBreachActionsRequest.ActionEnum.RESCHEDULE)
+                .nearBreachThreshold(new BigDecimal(threshold)).nearBreachFrequency(frequency).nearBreachFrequencyType(
+                        PostWorkingCapitalLoansLoanIdNearBreachActionsRequest.NearBreachFrequencyTypeEnum.fromValue(frequencyType));
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API call with working capital steps by internal reference: {string} runs with enclosingTransaction: {string} and loan data:")
+    public void batchApiWCCallWithStepsByInternalReferenceAndLoanData(String steps, String enclosingTransaction, DataTable loanData)
+            throws IOException {
+        final String[] stepArray = steps.split(", ", -1);
+        final List<BatchRequest> requestList = new ArrayList<>();
+        final String idempotencyKey = UUID.randomUUID().toString();
+        final Map<String, String> loanDataMap = loanData.asMaps().get(0);
+
+        long requestId = 1L;
+        Long previousRequestId = null;
+        Long wcLoanRequestId = null;
+
+        for (final String step : stepArray) {
+            final String trimmedStep = step.trim();
+            final BatchRequest request = createWCStepRequestByInternalReference(requestId, previousRequestId, wcLoanRequestId, trimmedStep,
+                    idempotencyKey, loanDataMap);
+            if (request != null) {
+                requestList.add(request);
+                if ("createWCLoan".equals(trimmedStep)) {
+                    wcLoanRequestId = requestId;
+                }
+                previousRequestId = requestId;
+                requestId++;
+            }
+        }
+
+        final Boolean isEnclosingTransaction = Boolean.valueOf(enclosingTransaction);
+        final List<BatchResponse> responses = handleBatchRequests(requestList, isEnclosingTransaction);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+
+        storeLoanIdFromBatchResponse(stepArray, responses);
+    }
+
+    private BatchRequest createWCStepRequestByInternalReference(Long requestId, Long reference, Long wcLoanRequestId, String step,
+            String idempotencyKey, Map<String, String> loanData) {
+        return switch (step) {
+            case "createClient" -> createClientBatchRequest(requestId, idempotencyKey, UUID.randomUUID().toString());
+            case "createWCLoan" -> createWCLoanBatchRequest(requestId, reference, null, loanData);
+            case "approveWCLoan" ->
+                createApproveWCLoanBatchRequest(requestId, reference, "v1/working-capital-loans/$.resourceId?command=approve");
+            case "disburseWCLoan" ->
+                createDisburseWCLoanBatchRequest(requestId, reference, "v1/working-capital-loans/$.resourceId?command=disburse");
+            case "createWCDelinquencyPauseAction" -> {
+                final PostWorkingCapitalLoansDelinquencyActionRequest actionRequest = workingCapitalLoanRequestFactory
+                        .defaultWorkingCapitalLoansDelinquencyActionRequest("pause").startDate("01 January 2026")
+                        .endDate("15 January 2026");
+                yield buildBatchRequest(requestId, wcLoanRequestId, "v1/working-capital-loans/$.resourceId" + WCL_DELINQUENCY_ACTIONS_PATH,
+                        BATCH_API_METHOD_POST, GSON.toJson(actionRequest));
+            }
+            default -> null;
+        };
+    }
+
+    @When("Batch API creates WC breach undo reset action on the working capital loan by external ID")
+    public void batchApiCreateWCBreachUndoResetAction() throws IOException {
+        final String loanExternalId = getActionLoanExternalId();
+        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansBreachActionRequest("undo_reset");
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_BREACH_ACTIONS_PATH;
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
     private Long getDisburseTransactionId() {
         final PostWorkingCapitalLoansLoanIdResponse disburseResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
         return disburseResponse != null ? disburseResponse.getResourceId() : null;
@@ -401,6 +627,11 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
     private String resolveTransactionUrlByExternalId(Long transactionId) {
         final String externalId = testContext().get(TestContextKey.WORKING_CAPITAL_LOAN_EXTERNAL_ID);
         return WCL_EXTERNAL_ID_URL + externalId + WCL_TRANSACTIONS_PATH + "/" + transactionId;
+    }
+
+    private String getActionLoanExternalId() {
+        final String externalId = testContext().get(TestContextKey.WORKING_CAPITAL_LOAN_EXTERNAL_ID);
+        return externalId != null ? externalId : testContext().get(TestContextKey.BATCH_API_CALL_LOAN_EXTERNAL_ID);
     }
 
     // Combined workflow steps
@@ -798,6 +1029,7 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
                     BATCH_API_METHOD_GET, BODY_GET_REQUEST);
             case "getDisbursementTransaction" -> buildBatchRequest(requestId, reference,
                     "v1/working-capital-loans/$.loanId/transactions/$.resourceId", BATCH_API_METHOD_GET, BODY_GET_REQUEST);
+            case "createWCDelinquencyPauseAction" -> createDelinquencyPauseBatchRequest(requestId, reference, loanExternalId);
             default -> null;
         };
     }
@@ -870,6 +1102,13 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
                 .transactionAmount(new BigDecimal("999999999"));
         return buildBatchRequest(requestId, reference, "v1/working-capital-loans/$.resourceId?command=disburse", BATCH_API_METHOD_POST,
                 GSON.toJson(disburseRequest));
+    }
+
+    private BatchRequest createDelinquencyPauseBatchRequest(Long requestId, Long reference, String loanExternalId) {
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansDelinquencyActionRequest("pause").startDate("01 January 2026").endDate("15 January 2026");
+        final String url = WCL_EXTERNAL_ID_URL + loanExternalId + WCL_DELINQUENCY_ACTIONS_PATH;
+        return buildBatchRequest(requestId, reference, url, BATCH_API_METHOD_POST, GSON.toJson(request));
     }
 
     private BatchRequest buildBatchRequest(Long requestId, Long reference, String relativeUrl, String method, String body) {
