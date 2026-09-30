@@ -69,6 +69,13 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
 
     @Override
     @Transactional
+    public void processCapitalizedIncomeAmortizationImmediate(@NonNull final Loan loan, @NonNull final LocalDate transactionDate,
+            final boolean addJournal) {
+        processRemainingCapitalizedIncomeAmortization(loan, transactionDate, addJournal);
+    }
+
+    @Override
+    @Transactional
     public void processCapitalizedIncomeAmortizationOnLoanSale(@NonNull final Loan loan, @NonNull final LocalDate transactionDate,
             final boolean addJournal) {
         processRemainingCapitalizedIncomeAmortization(loan, transactionDate, addJournal);
