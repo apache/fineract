@@ -35,4 +35,5 @@ public interface WorkingCapitalLoanChargeWritePlatformService {
 
     void validateChargeAdjustmentEntrance(WorkingCapitalLoan loan, WorkingCapitalLoanCharge charge, BigDecimal amount,
             Long excludeTransactionId);
+
 }

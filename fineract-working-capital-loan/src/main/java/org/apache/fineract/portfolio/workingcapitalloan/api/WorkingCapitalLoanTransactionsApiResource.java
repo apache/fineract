@@ -392,6 +392,8 @@ public class WorkingCapitalLoanTransactionsApiResource {
             commandRequest = builder.discountFeeAdjustmentWorkingCapitalLoanTransaction(resolvedLoanId, resolvedTransactionId).build();
         } else if (CommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.ADJUST_COMMAND)) {
             commandRequest = builder.adjustWorkingCapitalLoanTransaction(resolvedLoanId, resolvedTransactionId).build();
+        } else if (CommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.ADJUST_BY_DELTA_COMMAND)) {
+            commandRequest = builder.adjustByDeltaWorkingCapitalLoanTransaction(resolvedLoanId, resolvedTransactionId).build();
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
