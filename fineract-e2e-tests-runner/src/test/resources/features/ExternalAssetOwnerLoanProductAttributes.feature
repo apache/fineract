@@ -94,11 +94,12 @@ Feature: External Asset Owner Loan Product Attributes
 
   @TestRailId:C106797
   Scenario: Verify external asset owner loan product attributes template lists every attribute once and keeps excluded transaction types unchanged
-    Then External asset owner loan product attributes template contains exactly the attribute keys "SETTLEMENT_MODEL,EXCLUDED_TRANSACTION_TYPES,BUY_DOWN_FEE_AMORTIZATION_STRATEGY"
+    Then External asset owner loan product attributes template contains exactly the attribute keys "SETTLEMENT_MODEL,EXCLUDED_TRANSACTION_TYPES,BUY_DOWN_FEE_AMORTIZATION_STRATEGY,CAPITALIZED_INCOME_AMORTIZATION_STRATEGY"
     Then External asset owner loan product attributes template contains the following attributes:
-      | attributeKey                       | attributeValues                       | multiValue |
-      | SETTLEMENT_MODEL                   | DEFAULT_SETTLEMENT,DELAYED_SETTLEMENT | false      |
-      | BUY_DOWN_FEE_AMORTIZATION_STRATEGY | DEFERRED,IMMEDIATE                    | false      |
+      | attributeKey                             | attributeValues                       | multiValue |
+      | SETTLEMENT_MODEL                         | DEFAULT_SETTLEMENT,DELAYED_SETTLEMENT | false      |
+      | CAPITALIZED_INCOME_AMORTIZATION_STRATEGY | DEFERRED,IMMEDIATE                    | false      |
+      | BUY_DOWN_FEE_AMORTIZATION_STRATEGY       | DEFERRED,IMMEDIATE                    | false      |
     Then External asset owner loan product attributes template attribute "EXCLUDED_TRANSACTION_TYPES" has multiValue "true", contains "BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT,BUY_DOWN_FEE_AMORTIZATION,BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT" and does not contain "INVALID,DEFERRED,IMMEDIATE"
 
   @TestRailId:C106798
