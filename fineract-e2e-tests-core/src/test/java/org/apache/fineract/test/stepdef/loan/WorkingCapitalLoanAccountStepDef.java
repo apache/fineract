@@ -800,6 +800,11 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 ErrorMessageHelper.workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure(), table);
     }
 
+    @Then("Creating a working capital loan using created product with discount that exceeds principal amount will result into an error:")
+    public void creatingAWorkingCapitalLoanWithDiscountExceedsPrincipalAmountResultAnError(final DataTable table) {
+        creatingAWorkingCapitalLoanUsingLpWillResultAnError(ErrorMessageHelper.workingCapitalInputDiscountExceedsPrincipalFailure(), table);
+    }
+
     @Then("Creating a working capital loan using created product will result an error {string}:")
     public void creatingAWorkingCapitalLoanUsingLpWillResultAnError(final String errorMessage, final DataTable table) {
         final List<List<String>> data = table.asLists();
@@ -834,6 +839,25 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertValidationError(exception, errorMessage);
 
         log.info("Verified working capital loan creation failed with error message '{}'", errorMessage);
+    }
+
+    @Then("Creating a working capital loan with discount that exceeds principal and the following data will result into an error:")
+    public void creatingAWorkingCapitalLoanWithDiscountExceedsPrincipalResultAnError(final DataTable table) {
+        final List<List<String>> data = table.asLists();
+        List<String> loanData = data.get(1);
+
+        final String loanProduct = loanData.getFirst();
+        final Long clientId = extractClientId();
+        final Long loanProductId = resolveLoanProductId(loanProduct);
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequest(clientId, loanProductId, loanData);
+        testContext().set(TestContextKey.LOAN_CREATE_REQUEST, loansRequest);
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
+
+        assertHttpStatus(exception, 400);
+        assertValidationError(exception, ErrorMessageHelper.workingCapitalInputDiscountExceedsPrincipalFailure());
     }
 
     @Then("Creating a working capital loan with missing mandatory fields will result an error:")
@@ -3529,7 +3553,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertHttpStatus(exception, 400);
         assertValidationError(exception, errorMessage);
 
-        log.info("Verified working capital loan creation failed with error message '{}'", errorMessage);
+        log.info("Verified working capital loan creation with invalid data failed with error message '{}'", errorMessage);
     }
 
     private void modifyWorkingCapitalLoanAccount(final List<String> loanData) {

@@ -165,7 +165,7 @@ final class AmortizationParams {
         final BigDecimal calculatedAnnualEir = calculatedAnnualEir(solvedEir, npvDayCount, mc);
         // Checked here rather than at the entry points so every way into the solver - original schedule, rate change,
         // and all three payment amount strategies - is guarded by the same rule.
-        if (calculatedAnnualEir.abs().compareTo(ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR) >= 0) {
+        if (calculatedAnnualEir.abs().compareTo(ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR) > 0) {
             throw new IllegalStateException("schedule solves to an annual EIR of " + calculatedAnnualEir
                     + " %, above the calculable cap of " + ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR + " %");
         }

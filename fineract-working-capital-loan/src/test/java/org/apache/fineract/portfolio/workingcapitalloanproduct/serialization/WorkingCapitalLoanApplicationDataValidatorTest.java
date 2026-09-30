@@ -53,6 +53,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.ExpectedDisbursementDateValidator;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
+import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanApplicationDataValidator;
@@ -322,6 +323,25 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
         final JsonObject json = updateJsonObject();
         json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountParamName, 0);
         assertUpdateCodes(json, WCL + "paymentAmount.not.greater.than.zero", WCL + "paymentAmount.not.allowed.for.annual.eir.strategy");
+    }
+
+    /** An annual EIR above the calculable cap can never produce a schedule, so the loan refuses it as entered. */
+    @Test
+    void annualEirLoan_WithAnnualEirAboveTheEirCap_ShouldReportGreaterThanMax() {
+        stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, null, null, null);
+        final JsonObject json = paymentAmountJsonObject(null);
+        json.addProperty(WorkingCapitalLoanConstants.annualEirParamName,
+                ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR.add(BigDecimal.ONE));
+        assertCreateCodes(json, WCL + "annualEir.is.greater.than.max");
+    }
+
+    @Test
+    void annualEirLoanUpdate_WithAnnualEirAboveTheEirCap_ShouldReportGreaterThanMax() {
+        stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, null, null, null);
+        final JsonObject json = updateJsonObject();
+        json.addProperty(WorkingCapitalLoanConstants.annualEirParamName,
+                ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR.add(BigDecimal.ONE));
+        assertUpdateCodes(json, WCL + "annualEir.is.greater.than.max");
     }
 
     @Test

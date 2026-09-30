@@ -1201,6 +1201,10 @@ public final class ErrorMessageHelper {
         return "validation.msg.WORKINGCAPITALLOAN.principalAmount.unable.to.calculate.valid.eir";
     }
 
+    public static String workingCapitalInputDiscountExceedsPrincipalFailure() {
+        return "validation.msg.WORKINGCAPITALLOAN.discount.amount.cannot.exceed.principal";
+    }
+
     public static String workingCapitalPeriodPaymentRateAfterMaturityDateFailure() {
         return "[effectiveDate] Failed data validation due to: cannot.be.after.maturity.date.";
     }

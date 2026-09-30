@@ -1368,15 +1368,6 @@ Feature: WorkingCapitalLoanAccount
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
       | 01 January 2026 | 01 January 2026          | 5000            | 55           | 18                |          |
 
-  @TestRailId:CTBD
-  Scenario: Verify loan creation with non-overridable pre-defined discount above the principal leads to error - UC6
-    When Admin sets the business date to "01 January 2026"
-    And Admin creates a client with random data
-    And Admin creates a new Working Capital Loan Product with discount value "300000" that is forbidden to be overridden
-    Then Creating a working capital loan using created product will result an error "validation.msg.WORKINGCAPITALLOAN.discount.amount.cannot.exceed.principal":
-      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 5000            | 5500         | 18                |          |
-
   @TestRailId:C89790
   Scenario: Verify loan creation with input values with overridden discount to none value that allows to calculate a valid EIR leads creating Working Capital loan account- UC7
     When Admin sets the business date to "01 January 2026"
@@ -1387,6 +1378,24 @@ Feature: WorkingCapitalLoanAccount
     Then Working capital loan account has the correct data:
       | product.name  | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
       | WCLP_DISCOUNT | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 9000.0            | 0.0               | 100000.0           | 18.0              | 0.0              |
+
+
+  @TestRailId:C110979
+  Scenario: Verify loan creation with non-overridable pre-defined discount above the principal leads to error - UC8
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new Working Capital Loan Product with discount value "300000" that is forbidden to be overridden
+    Then Creating a working capital loan using created product with discount that exceeds principal amount will result into an error:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 5000            | 5500         | 18                |          |
+
+  @TestRailId:C110980
+  Scenario: Create WC loan account with discount amount that exceeds principal amount results into an error - UC9
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Creating a working capital loan with discount that exceeds principal and the following data will result into an error:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 100             | 100000       | 18                | 150      |
 
   @TestRailId:C106685
   Scenario: Verify journal entries are not created for Disbursement & undo when accounting is disabled

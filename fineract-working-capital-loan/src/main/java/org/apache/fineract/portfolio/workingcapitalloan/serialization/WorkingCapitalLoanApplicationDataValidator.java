@@ -213,7 +213,7 @@ public class WorkingCapitalLoanApplicationDataValidator {
             final BigDecimal resolvedAnnualEir = annualEir != null ? annualEir
                     : (product != null && product.getRelatedDetail() != null ? product.getRelatedDetail().getAnnualEir() : null);
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.annualEirParamName).value(resolvedAnnualEir).notNull()
-                    .positiveAmount();
+                    .positiveAmount().notGreaterThanMax(ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR);
             if (periodPaymentRate != null) {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.periodPaymentRateParamName)
                         .failWithCode("not.allowed.for.annual.eir.strategy");
@@ -692,7 +692,8 @@ public class WorkingCapitalLoanApplicationDataValidator {
             atLeastOneParameterPassedForUpdate = true;
             final BigDecimal annualEir = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.annualEirParamName,
                     element, new HashSet<>());
-            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.annualEirParamName).value(annualEir).notNull().positiveAmount();
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.annualEirParamName).value(annualEir).notNull().positiveAmount()
+                    .notGreaterThanMax(ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR);
             if (paymentStrategy != null && paymentStrategy.isTpv()) {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.annualEirParamName)
                         .failWithCode("not.allowed.for.tpv.strategy");

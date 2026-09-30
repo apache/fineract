@@ -73,11 +73,11 @@ class ProjectedAmortizationScheduleNormalizationTest {
     }
 
     /**
-     * The sweeps below keep the discount fee at or below the net disbursement, which the domain now requires of every
-     * loan that can reach a schedule: a fee worth more than the principal solves to an annual EIR too wide to publish,
-     * so it is rejected at submission, approval and disbursement rather than amortized. The smallest net in each sweep
-     * still sits just above the largest fee, so the shape the sweeps exist to exercise - a fee nearly as large as the
-     * principal, repaid over few days - is unchanged.
+     * The sweeps below keep every loan inside what the domain accepts: the discount fee never exceeds the net
+     * disbursement, and the schedule never solves above
+     * {@link ProjectedAmortizationScheduleModel#MAX_CALCULABLE_ANNUAL_EIR}. The smallest net in each sweep is sized so
+     * that even the largest fee at the steepest rate stays well under that cap, while keeping the shape the sweeps
+     * exist to exercise: a fee worth a large share of the principal, repaid over few weeks.
      */
     private ProjectedAmortizationScheduleModel model(final String netDisbursement, final String discountFee, final String rate) {
         return ProjectedAmortizationScheduleModel.generateEir(new BigDecimal(discountFee), new BigDecimal(netDisbursement), TPV,
@@ -705,7 +705,7 @@ class ProjectedAmortizationScheduleNormalizationTest {
     @Test
     void aDayBillsTheWholeInstalmentUnlessItIsClosingTheLoan() {
         for (final String rate : new String[] { "18", "17", "13" }) {
-            for (final String netDisbursement : new String[] { "9000", "5000", "1100" }) {
+            for (final String netDisbursement : new String[] { "9000", "5000", "2000" }) {
                 for (final String discountFee : new String[] { "1000", "500", "0" }) {
                     for (final Divergence divergence : divergencesLeavingTheRateAlone()) {
                         final ProjectedAmortizationScheduleModel model = model(netDisbursement, discountFee, rate);
@@ -793,7 +793,7 @@ class ProjectedAmortizationScheduleNormalizationTest {
     @Test
     void whatIsOwedIsWhatTheDaysStillToComeWillBill() {
         for (final String rate : new String[] { "22", "18", "13" }) {
-            for (final String netDisbursement : new String[] { "9000", "3030", "1100" }) {
+            for (final String netDisbursement : new String[] { "9000", "3030", "2000" }) {
                 for (final String discountFee : new String[] { "1000", "970", "50" }) {
                     for (final Divergence divergence : divergencesIncludingNone()) {
                         final ProjectedAmortizationScheduleModel model = model(netDisbursement, discountFee, rate);
@@ -833,7 +833,7 @@ class ProjectedAmortizationScheduleNormalizationTest {
     @Test
     void everyShapeOfLoanRunsUntilItIsSquare() {
         for (final String rate : new String[] { "24", "18", "17", "13", "9", "1" }) {
-            for (final String netDisbursement : new String[] { "9000", "5000", "1100" }) {
+            for (final String netDisbursement : new String[] { "9000", "5000", "2000" }) {
                 for (final String discountFee : new String[] { "1000", "500", "50", "0" }) {
                     for (final Divergence divergence : DELINQUENCIES) {
                         final ProjectedAmortizationScheduleModel model = model(netDisbursement, discountFee, rate);
