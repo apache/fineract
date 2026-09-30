@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -218,7 +219,10 @@ public class HolidaysApiResource {
     @Path("/template")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Holiday Template / Repayment Schedule Updation Type Options", operationId = "retrieveRepaymentScheduleUpdationTypeOptions", description = "Retrieves repayment schedule updation type options for holiday creation")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnumOptionData.class))))
+    @AlternativeOperationId("retrieveRepaymentScheduleUpdationTyeOptions")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnumOptionData.class)))),
+            @ApiResponse(responseCode = "default", description = "default response") })
     public String retrieveRepaymentScheduleUpdationTyeOptions(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(HOLIDAY_RESOURCE_NAME);
         return this.toApiJsonSerializer.serialize(this.holidayReadPlatformService.retrieveRepaymentScheduleUpdationTyeOptions());

@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -59,7 +60,9 @@ public class CurrenciesApiResource {
             currencies
             currencies?fields=selectedCurrencyOptions
             """)
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CurrencyConfigurationData.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CurrencyConfigurationData.class))),
+            @ApiResponse(responseCode = "default", description = "default response", content = @Content(schema = @Schema(implementation = CurrencyConfigurationData.class))) })
     public CurrencyConfigurationData retrieveCurrencies() {
         return readPlatformService.retrieveCurrencyConfiguration();
     }
