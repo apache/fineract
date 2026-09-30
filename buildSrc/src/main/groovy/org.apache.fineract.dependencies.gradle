@@ -21,7 +21,7 @@ apply plugin: 'io.spring.dependency-management'
 // Override Spring Boot BOM managed versions to pick up security fixes. Set as project properties so they also
 // apply to the BOM that the Spring Boot Gradle plugin imports on its own.
 ext['tomcat.version'] = '11.0.26'
-ext['jackson-2-bom.version'] = '2.22.1'
+ext['jackson-2-bom.version'] = '2.22.2'
 ext['jackson-bom.version'] = '3.1.7'
 ext['log4j2.version'] = '2.25.5'
 ext['httpclient5.version'] = '5.6.4'
@@ -38,7 +38,7 @@ dependencyManagement {
         mavenBom 'io.opentelemetry:opentelemetry-bom:1.62.0'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.3.21'
         mavenBom 'org.junit:junit-bom:6.0.3'
-        mavenBom 'com.fasterxml.jackson:jackson-bom:2.22.1'
+        mavenBom 'com.fasterxml.jackson:jackson-bom:2.22.2'
         mavenBom 'io.cucumber:cucumber-bom:7.34.3'
         mavenBom 'org.mockito:mockito-bom:5.23.0'
         mavenBom 'software.amazon.awssdk:bom:2.44.4'
