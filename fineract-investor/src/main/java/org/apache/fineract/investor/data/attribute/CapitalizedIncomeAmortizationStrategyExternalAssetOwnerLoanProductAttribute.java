@@ -16,18 +16,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.investor.data.attribute;
 
-public enum CapitalizedIncomeAmortizationStrategyExternalAssetOwnerLoanProductAttribute implements
-        CaseInsensitiveEnumExternalAssetOwnerLoanProductAttribute<CapitalizedIncomeAmortizationStrategyExternalAssetOwnerLoanProductAttribute> {
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+public enum CapitalizedIncomeAmortizationStrategyExternalAssetOwnerLoanProductAttribute implements ExternalAssetOwnerLoanProductAttribute {
 
     DEFERRED, //
     IMMEDIATE; //
 
     public static final String ATTRIBUTE_KEY = "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY";
 
+    CapitalizedIncomeAmortizationStrategyExternalAssetOwnerLoanProductAttribute() {}
+
     @Override
     public String getAttributeKey() {
         return ATTRIBUTE_KEY;
     }
+
+    @Override
+    public String getAttributeValue() {
+        return name();
+    }
+
+    @Override
+    public List<String> getAttributeValues() {
+        return Arrays.stream(values()).map(Enum::name).toList();
+    }
+
+    @Override
+    public boolean validate(String attributeValue) {
+        return attributeValue != null && this.getAttributeValue().equals(normalize(attributeValue));
+    }
+
+    @Override
+    public boolean isMultiValue() {
+        return false;
+    }
+
+    @Override
+    public String normalize(String token) {
+        return token.trim().toUpperCase(Locale.ROOT);
+    }
+
 }
