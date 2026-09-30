@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.portfolio.client.service.search;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.PagedRequest;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.domain.ClientRepository;
+import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.service.search.domain.ClientSearchData;
 import org.apache.fineract.portfolio.client.service.search.domain.ClientTextSearch;
 import org.apache.fineract.portfolio.client.service.search.mapper.ClientSearchDataMapper;
@@ -58,9 +60,10 @@ public class ClientSearchService {
         Optional<ClientTextSearch> request = searchRequest.getRequest();
         String requestSearchText = request.map(ClientTextSearch::getText).orElse(null);
         String searchText = Objects.toString(requestSearchText, "");
+        List<ClientStatus> statuses = request.map(ClientTextSearch::getStatus).orElse(List.of());
 
         Pageable pageable = searchRequest.toPageable();
 
-        return clientRepository.searchByText(searchText, pageable, hierarchy).map(clientSearchDataMapper::map);
+        return clientRepository.searchByText(searchText, pageable, hierarchy, statuses).map(clientSearchDataMapper::map);
     }
 }

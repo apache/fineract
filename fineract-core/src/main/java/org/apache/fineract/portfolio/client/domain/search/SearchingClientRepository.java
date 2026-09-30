@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.portfolio.client.domain.search;
 
+import java.util.Collection;
+import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface SearchingClientRepository {
 
-    Page<SearchedClient> searchByText(String searchText, Pageable pageable, String officeHierarchy);
+    Page<SearchedClient> searchByText(String searchText, Pageable pageable, String officeHierarchy, Collection<ClientStatus> statuses);
 }
