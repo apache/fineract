@@ -18,6 +18,14 @@
  */
 apply plugin: 'io.spring.dependency-management'
 
+// Override Spring Boot BOM managed versions to pick up security fixes. Set as project properties so they also
+// apply to the BOM that the Spring Boot Gradle plugin imports on its own.
+ext['tomcat.version'] = '11.0.26'
+ext['jackson-2-bom.version'] = '2.22.1'
+ext['jackson-bom.version'] = '3.1.7'
+ext['log4j2.version'] = '2.25.5'
+ext['httpclient5.version'] = '5.6.4'
+
 // Configuration for the dependency management plugin
 // https://github.com/spring-gradle-plugins/dependency-management-plugin
 dependencyManagement {
@@ -50,7 +58,7 @@ dependencyManagement {
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.12'
 
-        dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:5.0.1'
+        dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:5.0.2'
         dependency 'com.google.guava:guava:33.6.0-jre'
         dependency 'com.google.code.gson:gson:2.14.0'
         dependency 'com.google.googlejavaformat:google-java-format:1.35.0'
@@ -131,8 +139,8 @@ dependencyManagement {
         dependency ('org.apache.httpcomponents:httpclient:4.5.14') {
             exclude 'commons-logging:commons-logging:'
         }
-        dependency 'org.apache.httpcomponents.core5:httpcore5:5.4'
-        dependency 'org.apache.httpcomponents.core5:httpcore5-h2:5.4'
+        dependency 'org.apache.httpcomponents.core5:httpcore5:5.4.4'
+        dependency 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.4'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:3.1.0'
         dependency 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
@@ -242,7 +250,7 @@ dependencyManagement {
             exclude 'org.slf4j:jcl-over-slf4j'
             exclude 'org.slf4j:slf4j-api'
         }
-        dependency 'org.postgresql:postgresql:42.7.11'
+        dependency 'org.postgresql:postgresql:42.7.13'
 
         dependency 'com.mysql:mysql-connector-j:9.7.0'
 
@@ -283,23 +291,25 @@ dependencyManagement {
         // resilience4j-bom does not manage the spring-boot4 starter variant — pin it explicitly:
         dependency 'io.github.resilience4j:resilience4j-spring-boot4:2.4.0'
         // Keep Netty on the 4.1 line for MockServer compatibility.
-        dependency 'io.netty:netty-buffer:4.1.135.Final'
-        dependency 'io.netty:netty-common:4.1.135.Final'
-        dependency 'io.netty:netty-codec:4.1.135.Final'
-        dependency 'io.netty:netty-codec-base:4.1.135.Final'
-        dependency 'io.netty:netty-codec-compression:4.1.135.Final'
-        dependency 'io.netty:netty-codec-http:4.1.135.Final'
-        dependency 'io.netty:netty-codec-http2:4.1.135.Final'
-        dependency 'io.netty:netty-codec-marshalling:4.1.135.Final'
-        dependency 'io.netty:netty-codec-protobuf:4.1.135.Final'
-        dependency 'io.netty:netty-codec-socks:4.1.135.Final'
-        dependency 'io.netty:netty-handler:4.1.135.Final'
-        dependency 'io.netty:netty-handler-proxy:4.1.135.Final'
-        dependency 'io.netty:netty-resolver:4.1.135.Final'
-        dependency 'io.netty:netty-transport:4.1.135.Final'
-        dependency 'io.netty:netty-transport-classes-epoll:4.1.135.Final'
-        dependency 'io.netty:netty-transport-native-unix-common:4.1.135.Final'
-        dependency 'at.yawk.lz4:lz4-java:1.11.0'
+        dependency 'io.netty:netty-buffer:4.1.138.Final'
+        dependency 'io.netty:netty-common:4.1.138.Final'
+        dependency 'io.netty:netty-codec:4.1.138.Final'
+        dependency 'io.netty:netty-codec-base:4.1.138.Final'
+        dependency 'io.netty:netty-codec-compression:4.1.138.Final'
+        dependency 'io.netty:netty-codec-http:4.1.138.Final'
+        dependency 'io.netty:netty-codec-http2:4.1.138.Final'
+        dependency 'io.netty:netty-codec-marshalling:4.1.138.Final'
+        dependency 'io.netty:netty-codec-protobuf:4.1.138.Final'
+        dependency 'io.netty:netty-codec-socks:4.1.138.Final'
+        dependency 'io.netty:netty-handler:4.1.138.Final'
+        dependency 'io.netty:netty-handler-proxy:4.1.138.Final'
+        dependency 'io.netty:netty-resolver:4.1.138.Final'
+        dependency 'io.netty:netty-transport:4.1.138.Final'
+        dependency 'io.netty:netty-transport-classes-epoll:4.1.138.Final'
+        dependency 'io.netty:netty-transport-native-unix-common:4.1.138.Final'
+        dependency 'at.yawk.lz4:lz4-java:1.11.4'
+        dependency 'org.springframework.retry:spring-retry:2.0.13'
+        dependency 'org.jsoup:jsoup:1.23.2'
         // thymeleaf + thymeleaf-spring7 and Tomcat 11 embed now come from the Spring Boot 4 BOM
     }
 }
