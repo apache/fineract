@@ -179,6 +179,12 @@ public class FeignClientHelper {
         return ok(() -> fineractClient.clientSearchV2().searchClientsByText(request));
     }
 
+    public PageClientSearchData searchClients(String text, List<ClientTextSearch.StatusEnum> statuses) {
+        PagedRequestClientTextSearch request = new PagedRequestClientTextSearch()
+                .request(new ClientTextSearch().text(text).status(statuses));
+        return ok(() -> fineractClient.clientSearchV2().searchClientsByText(request));
+    }
+
     public PageClientSearchData searchClients(String text, SortOrder sortOrder) {
         PagedRequestClientTextSearch request = new PagedRequestClientTextSearch().request(new ClientTextSearch().text(text))
                 .sorts(List.of(sortOrder));
