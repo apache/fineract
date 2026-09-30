@@ -819,6 +819,36 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         };
     }
 
+    @Override
+    public CommandProcessingResult adjustByDeltaTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
+        final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        final WorkingCapitalLoanTransaction transaction = transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
+                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
+                        "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
+
+        return switch (transaction.getTypeOf()) {
+            case REPAYMENT, GOODWILL_CREDIT, CHARGE_ADJUSTMENT, PAYOUT_REFUND ->
+                adjustByDeltaRepaymentLikeTransaction(loan, transaction, command);
+            default -> throw new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.adjust.not.supported",
+                    "Adjust is not supported for transaction type " + transaction.getTypeOf(),
+                    WorkingCapitalLoanConstants.transactionTypeParamName);
+        };
+    }
+
+    private CommandProcessingResult adjustByDeltaRepaymentLikeTransaction(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transactionToAdjust, final JsonCommand command) {
+        this.validator.validateAdjustByDelta(command, loan, transactionToAdjust);
+
+        final BigDecimal deltaAmount = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
+                command.parsedJson(), new HashSet<>());
+        final BigDecimal newTransactionAmount = transactionToAdjust.getTransactionAmount().add(deltaAmount);
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put("adjustByDelta", true);
+
+        return adjustRepaymentLikeTransaction(loan, transactionToAdjust, newTransactionAmount, command, changes);
+    }
+
     /**
      * Deliberately not routed through the generic {@code undoTransaction}: none of its branches gives the waived bucket
      * back, and the two that rewind a balance reach {@code updateBalanceAfterUndo}, which throws on any type outside
@@ -930,6 +960,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             changes.put("reversed", true);
             changes.put("reversalExternalId", reversalExternalId);
             changes.put("reversedOnDate", businessLocalDate);
+            propagateChangesByTransaction(transactionToAdjust, changes);
         }
 
         transactionToAdjust.setReversed(true);
@@ -949,6 +980,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                     newTransaction.getTransactionDate()) ? transactionToAdjust : newTransaction;
             transactionProcessor.recalculateOverpaidOnDate(loan, overpaidOnDateProbe);
             transactionProcessor.recalculateSettlementDates(loan);
+
+            propagateChangesByTransaction(newTransaction, changes);
+            changes.put("adjustedTransaction", propagateChangesByTransaction(transactionToAdjust, new HashMap<>()));
         }
 
         changes.put("status", loan.getLoanStatus());
@@ -984,6 +1018,21 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 .build();
     }
 
+    private Map<String, Object> propagateChangesByTransaction(final WorkingCapitalLoanTransaction transaction,
+            final Map<String, Object> changes) {
+        if (transaction.getExternalId() != null) {
+            changes.put(WorkingCapitalLoanConstants.externalIdParameterName, transaction.getExternalId().getValue());
+        }
+        if (transaction.getReversalExternalId() != null) {
+            changes.put(WorkingCapitalLoanConstants.reversalExternalIdParamName, transaction.getReversalExternalId().getValue());
+        }
+        changes.put(WorkingCapitalLoanConstants.transactionAmountParamName, transaction.getTransactionAmount());
+        if (transaction.getClassification() != null) {
+            changes.put(WorkingCapitalLoanConstants.classificationIdParamName, transaction.getClassification().getId());
+        }
+        return changes;
+    }
+
     private WorkingCapitalLoanTransaction resolveNewTransaction(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction transactionToAdjust,
             BigDecimal adjustedTransactionAmount, JsonCommand command, Map<String, Object> changes) {
         final ExternalId txnExternalId = this.externalIdFactory.createFromCommand(command,
@@ -991,7 +1040,6 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         PaymentDetail paymentDetail = createAndPersistPaymentDetailFromCommand(command, changes);
         final PaymentDetail newPaymentDetail = paymentDetail == null ? transactionToAdjust.getPaymentDetail() : paymentDetail;
-        changes.put("paymentDetail", paymentDetail);
 
         final Long classificationId = command.longValueOfParameterNamed(WorkingCapitalLoanConstants.classificationIdParamName);
         final CodeValue newClassification = classificationId != null
