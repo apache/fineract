@@ -288,7 +288,7 @@ final class AccountsApiResourceSwagger {
         @Schema(example = "2")
         public Long id;
         @Schema(example = "000000002")
-        public Long accountNo;
+        public String accountNo;
         @Schema(example = "000000013")
         public Long savingsAccountNumber;
         @Schema(example = "7")

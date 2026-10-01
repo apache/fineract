@@ -43,7 +43,8 @@ final class FundsApiResourceSwagger {
 
         @Schema(example = "EU Agri Fund (2010-2020)")
         public String name;
-        private String externalId;
+        @Schema(example = "eu-agri-fund-2010")
+        public String externalId;
     }
 
     @Schema(description = "PutFundsFundIdResponse")

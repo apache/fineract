@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -189,6 +190,8 @@ final class GroupsApiResourceSwagger {
 
         @Schema(example = "1")
         public Long id;
+        @Schema(example = "000000001")
+        public String accountNo;
         @Schema(example = "First Group")
         public String name;
         @Schema(example = "000-1A")
@@ -213,6 +216,16 @@ final class GroupsApiResourceSwagger {
 
         private PostGroupsRequest() {}
 
+        static final class PostGroupsDatatable {
+
+            private PostGroupsDatatable() {}
+
+            @Schema(example = "dt_registered_table")
+            public String registeredTableName;
+            @Schema(description = "The datatable columns and their values")
+            public Map<String, Object> data;
+        }
+
         @Schema(example = "1")
         public Long officeId;
         @Schema(example = "Pending Group")
@@ -229,6 +242,8 @@ final class GroupsApiResourceSwagger {
         public String activationDate;
         @Schema(example = "04 March 2011")
         public String submittedOnDate;
+        @Schema(description = "Entries for the datatables registered against this entity")
+        public List<PostGroupsDatatable> datatables;
     }
 
     @Schema(description = "PostGroupsResponse")

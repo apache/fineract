@@ -139,6 +139,8 @@ final class DatatablesApiResourceSwagger {
             public String name;
             @Schema(example = "Question 2")
             public String newName;
+            @Schema(example = "100", description = "Only for String columns")
+            public Long length;
             @Schema(example = "Gender")
             public String code;
             @Schema(example = "Gender2")
@@ -153,6 +155,8 @@ final class DatatablesApiResourceSwagger {
 
         @Schema(example = "m_client")
         public String apptableName;
+        @Schema(example = "PERSON", description = "Mandatory when apptableName is m_client")
+        public String entitySubType;
         public List<PutDataTablesRequestDropColumns> dropColumns;
         public List<PutDataTablesRequestAddColumns> addColumns;
         public List<PutDataTablesRequestChangeColumns> changeColumns;
