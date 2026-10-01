@@ -102,6 +102,9 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
             final Charge charge = Charge.fromJson(command, glAccount, taxGroup, paymentType);
             this.chargeRepository.saveAndFlush(charge);
+            if (glAccount != null) {
+                log.debug("Created charge {} with income account ID: {}", charge.getId(), glAccount.getId());
+            }
 
             // check if the office specific products are enabled. If yes, then
             // save this savings product against a specific office
@@ -197,7 +200,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             }
 
             if (!changes.isEmpty()) {
-                this.chargeRepository.save(chargeForUpdate);
+                this.chargeRepository.saveAndFlush(chargeForUpdate);
             }
 
             return new CommandProcessingResultBuilder() //
