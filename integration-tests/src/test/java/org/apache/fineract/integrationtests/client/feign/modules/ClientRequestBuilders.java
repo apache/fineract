@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.integrationtests.client.feign.modules;
 
+import java.util.UUID;
 import org.apache.fineract.client.models.PostClientsClientIdRequest;
+import org.apache.fineract.client.models.PostClientsNonPersonDetails;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PutClientsClientIdRequest;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -50,6 +52,32 @@ public final class ClientRequestBuilders {
                 .activationDate(activationDate)//
                 .dateFormat(LoanTestData.DATETIME_PATTERN)//
                 .locale(LoanTestData.LOCALE);
+    }
+
+    public static PostClientsRequest defaultClient() {
+        return new PostClientsRequest()//
+                .officeId(ClientTestData.DEFAULT_OFFICE_ID)//
+                .legalFormId(ClientTestData.LEGAL_FORM_PERSON)//
+                .firstname(Utils.randomFirstNameGenerator())//
+                .lastname(Utils.randomLastNameGenerator())//
+                .externalId(UUID.randomUUID().toString())//
+                .active(true)//
+                .activationDate(ClientTestData.DEFAULT_ACTIVATION_DATE)//
+                .dateFormat(ClientTestData.DATETIME_PATTERN)//
+                .locale(ClientTestData.LOCALE);
+    }
+
+    public static PostClientsRequest activeEntityClient(Long constitutionId) {
+        return new PostClientsRequest()//
+                .officeId(ClientTestData.DEFAULT_OFFICE_ID)//
+                .legalFormId(ClientTestData.LEGAL_FORM_ENTITY)//
+                .fullname(Utils.randomStringGenerator("Client_FullName_", 5))//
+                .externalId(UUID.randomUUID().toString())//
+                .active(true)//
+                .activationDate(ClientTestData.DEFAULT_ACTIVATION_DATE)//
+                .clientNonPersonDetails(new PostClientsNonPersonDetails().constitutionId(constitutionId))//
+                .dateFormat(ClientTestData.DATETIME_PATTERN)//
+                .locale(ClientTestData.LOCALE);
     }
 
     public static PostClientsClientIdRequest activateClient(String activationDate) {

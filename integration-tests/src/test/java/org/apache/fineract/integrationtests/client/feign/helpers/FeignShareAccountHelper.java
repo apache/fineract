@@ -49,6 +49,12 @@ public class FeignShareAccountHelper {
         command(shareAccountId, new PostAccountsTypeAccountIdRequest(), "approve");
     }
 
+    public void approve(Long shareAccountId, String approvedDate, String note, String dateFormat, String locale) {
+        command(shareAccountId,
+                new PostAccountsTypeAccountIdRequest().approvedDate(approvedDate).note(note).dateFormat(dateFormat).locale(locale),
+                "approve");
+    }
+
     public void activate(Long shareAccountId, String activatedDate, String dateFormat, String locale) {
         command(shareAccountId, new PostAccountsTypeAccountIdRequest().activatedDate(activatedDate).dateFormat(dateFormat).locale(locale),
                 "activate");

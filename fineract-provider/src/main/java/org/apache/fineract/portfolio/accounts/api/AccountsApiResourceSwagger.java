@@ -480,6 +480,10 @@ final class AccountsApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "01 January 2026", description = "command=activate")
         public String activatedDate;
+        @Schema(example = "01 January 2026", description = "command=approve")
+        public String approvedDate;
+        @Schema(example = "Share Account Approval Note", description = "command=approve")
+        public String note;
     }
 
     @Schema(description = "PostAccountsTypeAccountIdResponse")

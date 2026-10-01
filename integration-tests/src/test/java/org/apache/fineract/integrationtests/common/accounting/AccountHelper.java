@@ -69,10 +69,6 @@ public class AccountHelper {
         return this.createLiabilityAccount(null);
     }
 
-    public Account createEquityAccount() {
-        return this.createEquityAccount(null);
-    }
-
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
@@ -115,17 +111,6 @@ public class AccountHelper {
         final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_GL_ACCOUNT_URL, liabilityAccountJSON,
                 GL_ACCOUNT_ID_RESPONSE);
         return new Account(accountID, Account.AccountType.LIABILITY);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Account createEquityAccount(String accountName) {
-        final String equityAccountJSON = new GLAccountBuilder().withName(accountName).withAccountTypeAsAsEquity().build();
-        final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_GL_ACCOUNT_URL, equityAccountJSON,
-                GL_ACCOUNT_ID_RESPONSE);
-        return new Account(accountID, Account.AccountType.EQUITY);
     }
 
     // TODO: Rewrite to use fineract-client instead!

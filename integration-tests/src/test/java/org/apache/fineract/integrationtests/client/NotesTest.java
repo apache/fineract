@@ -18,76 +18,72 @@
  */
 package org.apache.fineract.integrationtests.client;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import static org.apache.fineract.integrationtests.client.feign.modules.ClientTestData.DEFAULT_ACTIVATION_DATE;
+
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.client.models.NoteCreateRequest;
 import org.apache.fineract.client.models.NoteCreateResponse;
 import org.apache.fineract.client.models.NoteData;
 import org.apache.fineract.client.models.NoteDeleteResponse;
-import org.apache.fineract.client.models.NoteUpdateRequest;
 import org.apache.fineract.client.models.NoteUpdateResponse;
-import org.apache.fineract.client.util.Calls;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.GroupHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansRequestCollateralData;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignNoteHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import retrofit2.Response;
 
-@SuppressWarnings({ "rawtypes" })
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class NotesTest extends IntegrationTest {
+public class NotesTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec404;
-    private LoanTransactionHelper loanTransactionHelper;
-    private SavingsProductHelper savingsProductHelper;
-    private SavingsAccountHelper savingsAccountHelper;
+    private static final int NOT_FOUND = 404;
+    private static final String CLIENTS = "clients";
+    private static final String GROUPS = "groups";
+    private static final String LOANS = "loans";
+    private static final String SAVINGS = "savings";
+    private static final String LOAN_TRANSACTIONS = "loanTransactions";
+    private static final String LOAN_CLIENT_ACTIVATION_DATE = "01 January 2012";
+    private static final String LOAN_TRANSACTION_DATE = "02 April 2012";
+    private static final String DISBURSE_NOTE = "DISBURSE NOTE";
 
-    @BeforeEach
+    private FeignNoteHelper noteHelper;
+    private FeignGroupHelper groupHelper;
+    private FeignCollateralHelper collateralHelper;
+    private FeignSavingsProductHelper savingsProductHelper;
+    private FeignSavingsHelper savingsHelper;
+
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpec404 = new ResponseSpecBuilder().expectStatusCode(404).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.savingsProductHelper = new SavingsProductHelper();
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        noteHelper = new FeignNoteHelper(fineractClient());
+        groupHelper = new FeignGroupHelper(fineractClient());
+        collateralHelper = new FeignCollateralHelper(fineractClient());
+        savingsProductHelper = new FeignSavingsProductHelper(fineractClient());
+        savingsHelper = new FeignSavingsHelper(fineractClient());
     }
 
     @Test
     public void testCreateClientNote() {
         String noteText = "this is a test note";
 
-        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        Long clientId = createClient(DEFAULT_ACTIVATION_DATE);
         Assertions.assertNotNull(clientId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("clients", Long.valueOf(clientId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(CLIENTS, clientId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("clients", Long.valueOf(clientId), noteId));
+        NoteData noteData = noteHelper.getNote(CLIENTS, clientId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
     }
 
@@ -95,26 +91,23 @@ public class NotesTest extends IntegrationTest {
     public void testUpdateClientNote() {
         String noteText = "this is a test note";
 
-        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        Long clientId = createClient(DEFAULT_ACTIVATION_DATE);
         Assertions.assertNotNull(clientId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("clients", Long.valueOf(clientId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(CLIENTS, clientId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("clients", Long.valueOf(clientId), noteId));
+        NoteData noteData = noteHelper.getNote(CLIENTS, clientId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
 
         String updatedNoteText = "this is an updated test note";
 
-        NoteUpdateRequest updateRequest = new NoteUpdateRequest().note(updatedNoteText);
-        NoteUpdateResponse noteUpdateResponse = ok(
-                fineractClient().notes.updateNote("clients", Long.valueOf(clientId), noteId, updateRequest));
+        NoteUpdateResponse noteUpdateResponse = noteHelper.updateNote(CLIENTS, clientId, noteId, updatedNoteText);
         Assertions.assertNotNull(noteUpdateResponse);
 
-        noteData = ok(fineractClient().notes.retrieveNote("clients", Long.valueOf(clientId), noteId));
+        noteData = noteHelper.getNote(CLIENTS, clientId, noteId);
         Assertions.assertEquals(updatedNoteText, noteData.getNote());
     }
 
@@ -122,39 +115,36 @@ public class NotesTest extends IntegrationTest {
     public void testDeleteClientNote() {
         String noteText = "this is a test note";
 
-        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        Long clientId = createClient(DEFAULT_ACTIVATION_DATE);
         Assertions.assertNotNull(clientId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("clients", Long.valueOf(clientId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(CLIENTS, clientId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("clients", Long.valueOf(clientId), noteId));
+        NoteData noteData = noteHelper.getNote(CLIENTS, clientId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
 
-        NoteDeleteResponse noteDeleteResponse = ok(fineractClient().notes.deleteNote("clients", Long.valueOf(clientId), noteId));
+        NoteDeleteResponse noteDeleteResponse = noteHelper.deleteNote(CLIENTS, clientId, noteId);
         Assertions.assertNotNull(noteDeleteResponse);
 
-        Response<NoteData> response = Calls.executeU(fineractClient().notes.retrieveNote("clients", Long.valueOf(clientId), noteId));
-        Assertions.assertEquals(404, response.code());
+        Assertions.assertEquals(NOT_FOUND, noteHelper.getNoteExpectingError(CLIENTS, clientId, noteId).getStatus());
     }
 
     @Test
     public void testCreateGroupNote() {
         String noteText = "this is a test group note";
 
-        Integer groupId = GroupHelper.createGroup(requestSpec, responseSpec);
+        Long groupId = groupHelper.createGroup().getGroupId();
         Assertions.assertNotNull(groupId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("groups", Long.valueOf(groupId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(GROUPS, groupId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("groups", Long.valueOf(groupId), noteId));
+        NoteData noteData = noteHelper.getNote(GROUPS, groupId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
     }
 
@@ -162,26 +152,23 @@ public class NotesTest extends IntegrationTest {
     public void testUpdateGroupNote() {
         String noteText = "this is a test group note";
 
-        Integer groupId = GroupHelper.createGroup(requestSpec, responseSpec);
+        Long groupId = groupHelper.createGroup().getGroupId();
         Assertions.assertNotNull(groupId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("groups", Long.valueOf(groupId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(GROUPS, groupId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("groups", Long.valueOf(groupId), noteId));
+        NoteData noteData = noteHelper.getNote(GROUPS, groupId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
 
         String updatedNoteText = "this is an updated test group note";
 
-        NoteUpdateRequest updateRequest = new NoteUpdateRequest().note(updatedNoteText);
-        NoteUpdateResponse noteUpdateResponse = ok(
-                fineractClient().notes.updateNote("groups", Long.valueOf(groupId), noteId, updateRequest));
+        NoteUpdateResponse noteUpdateResponse = noteHelper.updateNote(GROUPS, groupId, noteId, updatedNoteText);
         Assertions.assertNotNull(noteUpdateResponse);
 
-        noteData = ok(fineractClient().notes.retrieveNote("groups", Long.valueOf(groupId), noteId));
+        noteData = noteHelper.getNote(GROUPS, groupId, noteId);
         Assertions.assertEquals(updatedNoteText, noteData.getNote());
     }
 
@@ -189,41 +176,38 @@ public class NotesTest extends IntegrationTest {
     public void testDeleteGroupNote() {
         String noteText = "this is a test group note";
 
-        Integer groupId = GroupHelper.createGroup(requestSpec, responseSpec);
+        Long groupId = groupHelper.createGroup().getGroupId();
         Assertions.assertNotNull(groupId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("groups", Long.valueOf(groupId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(GROUPS, groupId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("groups", Long.valueOf(groupId), noteId));
+        NoteData noteData = noteHelper.getNote(GROUPS, groupId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
 
-        NoteDeleteResponse noteDeleteResponse = ok(fineractClient().notes.deleteNote("groups", Long.valueOf(groupId), noteId));
+        NoteDeleteResponse noteDeleteResponse = noteHelper.deleteNote(GROUPS, groupId, noteId);
         Assertions.assertNotNull(noteDeleteResponse);
 
-        Response<NoteData> response = Calls.executeU(fineractClient().notes.retrieveNote("groups", Long.valueOf(groupId), noteId));
-        Assertions.assertEquals(404, response.code());
+        Assertions.assertEquals(NOT_FOUND, noteHelper.getNoteExpectingError(GROUPS, groupId, noteId).getStatus());
     }
 
     @Test
     public void testCreateLoanNote() {
         String noteText = "this is a test loan note";
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
-        final Integer loanId = applyForLoanApplication(clientID, loanProductID);
+        final Long clientID = createClient(LOAN_CLIENT_ACTIVATION_DATE);
+        final Long loanProductID = createLoanProduct(new LoanProductTestBuilder().buildRequest());
+        final Long loanId = applyForLoanApplication(clientID, loanProductID);
         Assertions.assertNotNull(loanId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("loans", Long.valueOf(loanId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(LOANS, loanId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("loans", Long.valueOf(loanId), noteId));
+        NoteData noteData = noteHelper.getNote(LOANS, loanId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
     }
 
@@ -232,79 +216,73 @@ public class NotesTest extends IntegrationTest {
         final String noteText = "this is a test Savings note";
         final String testDate = "01 January 2012";
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, testDate);
+        final Long clientID = createClient(testDate);
         // Savings Account
-        final String savingsProductJSON = this.savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
-        final Integer savingsProductId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductId, "INDIVIDUAL",
-                testDate);
+        final Long savingsProductId = savingsProductHelper
+                .createSavingsProduct(SavingsRequestBuilders.savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY,
+                        SavingsTestData.InterestPostingPeriodType.DAILY, SavingsTestData.InterestCalculationType.DAILY_BALANCE))
+                .getResourceId();
+        final Long savingsId = savingsHelper.submitApplication(clientID, savingsProductId, testDate).getSavingsId();
         Assertions.assertNotNull(savingsId);
 
         // Notes
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("savings", Long.valueOf(savingsId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(SAVINGS, savingsId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("savings", Long.valueOf(savingsId), noteId));
+        NoteData noteData = noteHelper.getNote(SAVINGS, savingsId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+    private Long applyForLoanApplication(final Long clientID, final Long loanProductID) {
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientID, collateralId).getResourceId();
         Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 
-        final String loanApplication = new LoanApplicationTestBuilder().withPrincipal("5000").withLoanTermFrequency("5")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate("04 April 2012")
-                .withCollaterals(collaterals).withSubmittedOnDate("02 April 2012")
-                .build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplication);
+        final PostLoansRequest loanApplication = LoanRequestBuilders
+                .legacyIndividualApplication(clientID, loanProductID, "5000", 5, BigDecimal.valueOf(2), "04 April 2012")//
+                .submittedOnDate("02 April 2012")//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .collateral(List.of(new PostLoansRequestCollateralData().clientCollateralId(clientCollateralId).quantity(BigDecimal.ONE)));
+        return applyForLoan(loanApplication);
     }
 
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
-        collaterals.add(collaterals(collateralId, quantity));
-    }
-
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
-        HashMap<String, String> collateral = new HashMap<String, String>(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("quantity", quantity.toString());
-        return collateral;
+    private Long createActiveLoanTransaction(final Long loanId) {
+        approveLoan(loanId, new PostLoansLoanIdRequest().approvedOnDate(LOAN_TRANSACTION_DATE).locale(LoanTestData.LOCALE)
+                .dateFormat(LoanTestData.DATETIME_PATTERN));
+        disburseLoan(loanId,
+                LoanRequestBuilders
+                        .disburseLoanWithNetDisbursalAmount(LOAN_TRANSACTION_DATE, getLoanDetails(loanId).getNetDisbursalAmount())
+                        .note(DISBURSE_NOTE));
+        return makeLoanRepayment(loanId, "repayment", LOAN_TRANSACTION_DATE, 100.0).getResourceId();
     }
 
     @Test
     public void testUpdateLoanNote() {
         String noteText = "this is a test loan note";
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
-        final Integer loanId = applyForLoanApplication(clientID, loanProductID);
+        final Long clientID = createClient(LOAN_CLIENT_ACTIVATION_DATE);
+        final Long loanProductID = createLoanProduct(new LoanProductTestBuilder().buildRequest());
+        final Long loanId = applyForLoanApplication(clientID, loanProductID);
         Assertions.assertNotNull(loanId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("loans", Long.valueOf(loanId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(LOANS, loanId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("loans", Long.valueOf(loanId), noteId));
+        NoteData noteData = noteHelper.getNote(LOANS, loanId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
 
         String updatedNoteText = "this is an updated test loan note";
 
-        NoteUpdateRequest updateRequest = new NoteUpdateRequest().note(updatedNoteText);
-        NoteUpdateResponse noteUpdateResponse = ok(fineractClient().notes.updateNote("loans", Long.valueOf(loanId), noteId, updateRequest));
+        NoteUpdateResponse noteUpdateResponse = noteHelper.updateNote(LOANS, loanId, noteId, updatedNoteText);
         Assertions.assertNotNull(noteUpdateResponse);
 
-        noteData = ok(fineractClient().notes.retrieveNote("loans", Long.valueOf(loanId), noteId));
+        noteData = noteHelper.getNote(LOANS, loanId, noteId);
         Assertions.assertEquals(updatedNoteText, noteData.getNote());
     }
 
@@ -312,52 +290,43 @@ public class NotesTest extends IntegrationTest {
     public void testDeleteLoanNote() {
         String noteText = "this is a test loan note";
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
-        final Integer loanId = applyForLoanApplication(clientID, loanProductID);
+        final Long clientID = createClient(LOAN_CLIENT_ACTIVATION_DATE);
+        final Long loanProductID = createLoanProduct(new LoanProductTestBuilder().buildRequest());
+        final Long loanId = applyForLoanApplication(clientID, loanProductID);
         Assertions.assertNotNull(loanId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("loans", Long.valueOf(loanId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(LOANS, loanId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("loans", Long.valueOf(loanId), noteId));
+        NoteData noteData = noteHelper.getNote(LOANS, loanId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
 
-        NoteDeleteResponse noteDeleteResponse = ok(fineractClient().notes.deleteNote("loans", Long.valueOf(loanId), noteId));
+        NoteDeleteResponse noteDeleteResponse = noteHelper.deleteNote(LOANS, loanId, noteId);
         Assertions.assertNotNull(noteDeleteResponse);
 
-        Response<NoteData> response = Calls.executeU(fineractClient().notes.retrieveNote("loans", Long.valueOf(loanId), noteId));
-        Assertions.assertEquals(404, response.code());
+        Assertions.assertEquals(NOT_FOUND, noteHelper.getNoteExpectingError(LOANS, loanId, noteId).getStatus());
     }
 
     @Test
     public void testCreateLoanTransactionNote() {
         String noteText = "this is a test loan transaction note";
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
-        final Integer loanId = applyForLoanApplication(clientID, loanProductID);
+        final Long clientID = createClient(LOAN_CLIENT_ACTIVATION_DATE);
+        final Long loanProductID = createLoanProduct(new LoanProductTestBuilder().buildRequest());
+        final Long loanId = applyForLoanApplication(clientID, loanProductID);
         Assertions.assertNotNull(loanId);
 
-        this.loanTransactionHelper.approveLoan("02 April 2012", loanId);
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 April 2012", loanId,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        HashMap repayment = this.loanTransactionHelper.makeRepayment("02 April 2012", 100.0f, loanId);
-        Integer loanTransactionId = (Integer) repayment.get("resourceId");
+        Long loanTransactionId = createActiveLoanTransaction(loanId);
         Assertions.assertNotNull(loanTransactionId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(
-                fineractClient().notes.addNewNote("loanTransactions", Long.valueOf(loanTransactionId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(LOAN_TRANSACTIONS, loanTransactionId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
+        NoteData noteData = noteHelper.getNote(LOAN_TRANSACTIONS, loanTransactionId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
     }
 
@@ -365,37 +334,28 @@ public class NotesTest extends IntegrationTest {
     public void testUpdateLoanTransactionNote() {
         String noteText = "this is a test loan transaction note";
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
-        final Integer loanId = applyForLoanApplication(clientID, loanProductID);
+        final Long clientID = createClient(LOAN_CLIENT_ACTIVATION_DATE);
+        final Long loanProductID = createLoanProduct(new LoanProductTestBuilder().buildRequest());
+        final Long loanId = applyForLoanApplication(clientID, loanProductID);
         Assertions.assertNotNull(loanId);
 
-        this.loanTransactionHelper.approveLoan("02 April 2012", loanId);
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 April 2012", loanId,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        HashMap repayment = this.loanTransactionHelper.makeRepayment("02 April 2012", 100.0f, loanId);
-        Integer loanTransactionId = (Integer) repayment.get("resourceId");
+        Long loanTransactionId = createActiveLoanTransaction(loanId);
         Assertions.assertNotNull(loanTransactionId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(
-                fineractClient().notes.addNewNote("loanTransactions", Long.valueOf(loanTransactionId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(LOAN_TRANSACTIONS, loanTransactionId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
+        NoteData noteData = noteHelper.getNote(LOAN_TRANSACTIONS, loanTransactionId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
 
         String updatedNoteText = "this is an updated test loan transaction note";
 
-        NoteUpdateRequest updateRequest = new NoteUpdateRequest().note(updatedNoteText);
-        NoteUpdateResponse noteUpdateResponse = ok(
-                fineractClient().notes.updateNote("loanTransactions", Long.valueOf(loanTransactionId), noteId, updateRequest));
+        NoteUpdateResponse noteUpdateResponse = noteHelper.updateNote(LOAN_TRANSACTIONS, loanTransactionId, noteId, updatedNoteText);
         Assertions.assertNotNull(noteUpdateResponse);
 
-        noteData = ok(fineractClient().notes.retrieveNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
+        noteData = noteHelper.getNote(LOAN_TRANSACTIONS, loanTransactionId, noteId);
         Assertions.assertEquals(updatedNoteText, noteData.getNote());
     }
 
@@ -403,36 +363,26 @@ public class NotesTest extends IntegrationTest {
     public void testDeleteLoanTransactionNote() {
         String noteText = "this is a test loan transaction note";
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
-        final Integer loanId = applyForLoanApplication(clientID, loanProductID);
+        final Long clientID = createClient(LOAN_CLIENT_ACTIVATION_DATE);
+        final Long loanProductID = createLoanProduct(new LoanProductTestBuilder().buildRequest());
+        final Long loanId = applyForLoanApplication(clientID, loanProductID);
         Assertions.assertNotNull(loanId);
 
-        this.loanTransactionHelper.approveLoan("02 April 2012", loanId);
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 April 2012", loanId,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        HashMap repayment = this.loanTransactionHelper.makeRepayment("02 April 2012", 100.0f, loanId);
-        Integer loanTransactionId = (Integer) repayment.get("resourceId");
+        Long loanTransactionId = createActiveLoanTransaction(loanId);
         Assertions.assertNotNull(loanTransactionId);
 
-        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
-        NoteCreateResponse noteCreateResponse = ok(
-                fineractClient().notes.addNewNote("loanTransactions", Long.valueOf(loanTransactionId), request));
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(LOAN_TRANSACTIONS, loanTransactionId, noteText);
         Assertions.assertNotNull(noteCreateResponse);
         Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        NoteData noteData = ok(fineractClient().notes.retrieveNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
+        NoteData noteData = noteHelper.getNote(LOAN_TRANSACTIONS, loanTransactionId, noteId);
         Assertions.assertEquals(noteText, noteData.getNote());
 
-        NoteDeleteResponse noteDeleteResponse = ok(
-                fineractClient().notes.deleteNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
+        NoteDeleteResponse noteDeleteResponse = noteHelper.deleteNote(LOAN_TRANSACTIONS, loanTransactionId, noteId);
         Assertions.assertNotNull(noteDeleteResponse);
 
-        Response<NoteData> response = Calls
-                .executeU(fineractClient().notes.retrieveNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
-        Assertions.assertEquals(404, response.code());
+        Assertions.assertEquals(NOT_FOUND, noteHelper.getNoteExpectingError(LOAN_TRANSACTIONS, loanTransactionId, noteId).getStatus());
     }
 
 }

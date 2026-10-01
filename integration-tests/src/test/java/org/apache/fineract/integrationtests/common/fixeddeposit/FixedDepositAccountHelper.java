@@ -186,14 +186,6 @@ public class FixedDepositAccountHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public HashMap getFixedDepositSummary(final Integer accountID) {
-        return getFixedDepositDetails(accountID, "summary");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public HashMap getFixedDepositDetails(final Integer accountID) {
         return getFixedDepositDetails(accountID, "");
     }

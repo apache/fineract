@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.integrationtests.client.feign.modules;
 
+import java.math.BigDecimal;
 import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.PostClientsClientIdChargesChargeIdRequest;
+import org.apache.fineract.client.models.PostClientsClientIdChargesRequest;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
@@ -29,6 +32,7 @@ public final class ChargeRequestBuilders {
 
     private static final String DEFAULT_CURRENCY = "USD";
     private static final String DEFAULT_LOCALE = "en";
+    private static final String CLIENT_CHARGE_LOCALE = "en_GB";
 
     private ChargeRequestBuilders() {}
 
@@ -143,6 +147,33 @@ public final class ChargeRequestBuilders {
                 .amount(amount)//
                 .active(true)//
                 .locale(DEFAULT_LOCALE);
+    }
+
+    public static PostClientsClientIdChargesRequest clientCharge(Long chargeId, String dueDate, BigDecimal amount) {
+        return new PostClientsClientIdChargesRequest()//
+                .chargeId(chargeId)//
+                .dueDate(dueDate)//
+                .amount(amount)//
+                .dateFormat(FeignTestConstants.DATETIME_PATTERN)//
+                .locale(CLIENT_CHARGE_LOCALE);
+    }
+
+    public static PostClientsClientIdChargesChargeIdRequest payClientCharge(String transactionDate, Integer amount) {
+        return new PostClientsClientIdChargesChargeIdRequest()//
+                .transactionDate(transactionDate)//
+                .amount(amount)//
+                .dateFormat(FeignTestConstants.DATETIME_PATTERN)//
+                .locale(CLIENT_CHARGE_LOCALE);
+    }
+
+    /**
+     * The waive command ignores the body and waives whatever is outstanding; the amount mirrors what the legacy test
+     * sent.
+     */
+    public static PostClientsClientIdChargesChargeIdRequest waiveClientCharge(Integer amount) {
+        return new PostClientsClientIdChargesChargeIdRequest()//
+                .amount(amount)//
+                .locale(CLIENT_CHARGE_LOCALE);
     }
 
     private static ChargeRequest baseLoanCharge(double amount, String currencyCode) {
