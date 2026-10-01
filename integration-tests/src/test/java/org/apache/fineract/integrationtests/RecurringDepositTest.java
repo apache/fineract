@@ -1035,13 +1035,19 @@ public class RecurringDepositTest extends FeignDepositTestBase {
         final String VALID_FROM = dateFormat.format(chartDate);
         final String VALID_TO = dateFormat.format(chartDate.plusYears(10));
 
-        LocalDate activationDate = Utils.getLocalDateOfTenant().minusMonths(1).minusDays(1);
+        LocalDate closingDate = Utils.getLocalDateOfTenant();
+        final String CLOSED_ON_DATE = dateFormat.format(closingDate);
+
+        // Interest on a premature closure is calculated up to the day before the closing date, and the months held
+        // that select the chart slab are counted to that same day (RecurringDepositAccount#postPreMaturityInterest).
+        LocalDate interestCalculatedUpTo = closingDate.minusDays(1);
+
+        // Anchored on that day rather than on the closing date, so the deposit is held for exactly one month by the
+        // server's count on every calendar day - including the 1st of a month that follows a shorter one.
+        LocalDate activationDate = interestCalculatedUpTo.minusMonths(1).minusDays(1);
         final String SUBMITTED_ON_DATE = dateFormat.format(activationDate);
         final String APPROVED_ON_DATE = dateFormat.format(activationDate);
         final String ACTIVATION_DATE = dateFormat.format(activationDate);
-
-        LocalDate closingDate = Utils.getLocalDateOfTenant();
-        final String CLOSED_ON_DATE = dateFormat.format(closingDate);
 
         Long clientId = clientHelper.createClient();
         Assertions.assertNotNull(clientId);
@@ -1075,7 +1081,7 @@ public class RecurringDepositTest extends FeignDepositTestBase {
         BigDecimal principal = recurringDepositHelper.getSummary(recurringDepositAccountId).getTotalDeposits();
 
         Set<GetInterestRateChartsChartSlabs> chartSlabs = interestRateChartHelper.getChartSlabsByProduct(recurringDepositProductId);
-        int monthsHeld = Math.toIntExact(ChronoUnit.MONTHS.between(activationDate, closingDate));
+        int monthsHeld = Math.toIntExact(ChronoUnit.MONTHS.between(activationDate, interestCalculatedUpTo));
         BigDecimal interestRate = DepositInterestCalculator.interestRateFor(chartSlabs, monthsHeld).subtract(preClosurePenalInterestRate);
         double interestPerDay = interestRate.doubleValue() / 100 / daysInYear;
 
