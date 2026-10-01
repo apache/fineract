@@ -19,15 +19,12 @@
 
 package org.apache.fineract.integrationtests;
 
-import com.google.gson.JsonObject;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import feign.FeignException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdRequest;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
@@ -36,44 +33,38 @@ import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.client.models.PutUsersUserIdRequest;
 import org.apache.fineract.client.models.PutUsersUserIdResponse;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRoleHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.FeignErrors;
+import org.apache.fineract.integrationtests.client.feign.modules.FeignErrors.ReportedError;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.fineract.useradministration.service.AppUserConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UserAdministrationTest extends IntegrationTest {
+public class UserAdministrationTest extends FeignIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserAdministrationTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private List<Integer> transientUsers = new ArrayList<>();
+    private final List<Long> transientUsers = new ArrayList<>();
+    private FeignStaffHelper staffHelper;
 
-    private ResponseSpecification expectStatusCode(int code) {
-        return new ResponseSpecBuilder().expectStatusCode(code).build();
-    }
-
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = expectStatusCode(200);
+        staffHelper = new FeignStaffHelper(fineractClient());
     }
 
     @AfterEach
     public void tearDown() {
-        for (Integer userId : this.transientUsers) {
-            UserHelper.deleteUser(this.requestSpec, this.responseSpec, userId);
+        for (Long userId : this.transientUsers) {
+            FeignUserHelper.deleteUser(userId);
         }
         this.transientUsers.clear();
     }
@@ -81,169 +72,158 @@ public class UserAdministrationTest extends IntegrationTest {
     @Test
     public void testCreateNewUserBlocksDuplicateUsername() {
 
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = FeignRoleHelper.createRole();
         Assertions.assertNotNull(roleId);
 
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Long staffId = staffHelper.createStaff().getResourceId();
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
-                "resourceId");
+        final Long userId = FeignUserHelper.createUser(roleId, staffId, "alphabet").getResourceId();
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final List errors = (List) UserHelper.createUser(this.requestSpec, expectStatusCode(403), roleId, staffId, "alphabet", "errors");
-        Map reason = (Map) errors.get(0);
-        LOG.info("Reason: {}", reason.get("defaultUserMessage"));
-        LOG.info("Code: {}", reason.get("userMessageGlobalisationCode"));
-        Assertions.assertEquals("User with username alphabet already exists.", reason.get("defaultUserMessage"));
-        Assertions.assertEquals("error.msg.user.duplicate.username", reason.get("userMessageGlobalisationCode"));
+        final ReportedError reason = FeignErrors.firstError(FeignUserHelper.createUserExpectingError(roleId, staffId, "alphabet"));
+        LOG.info("Reason: {}", reason.defaultUserMessage());
+        LOG.info("Code: {}", reason.userMessageGlobalisationCode());
+        Assertions.assertEquals("User with username alphabet already exists.", reason.defaultUserMessage());
+        Assertions.assertEquals("error.msg.user.duplicate.username", reason.userMessageGlobalisationCode());
     }
 
     @Test
     public void testUpdateUserAcceptsNewOrSameUsername() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = FeignRoleHelper.createRole();
         Assertions.assertNotNull(roleId);
 
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Long staffId = staffHelper.createStaff().getResourceId();
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
-                "resourceId");
+        final Long userId = FeignUserHelper.createUser(roleId, staffId, "alphabet").getResourceId();
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final Integer userId2 = (Integer) UserHelper.updateUser(this.requestSpec, this.responseSpec, userId, "renegade", "resourceId");
+        final Long userId2 = FeignUserHelper.updateUsername(userId, "renegade").getResourceId();
         Assertions.assertNotNull(userId2);
 
-        final Integer userId3 = (Integer) UserHelper.updateUser(this.requestSpec, this.responseSpec, userId, "renegade", "resourceId");
+        final Long userId3 = FeignUserHelper.updateUsername(userId, "renegade").getResourceId();
         Assertions.assertNotNull(userId3);
     }
 
     @Test
     public void testUpdateUserBlockDuplicateUsername() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = FeignRoleHelper.createRole();
         Assertions.assertNotNull(roleId);
 
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Long staffId = staffHelper.createStaff().getResourceId();
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
-                "resourceId");
+        final Long userId = FeignUserHelper.createUser(roleId, staffId, "alphabet").getResourceId();
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final Integer userId2 = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "bilingual",
-                "resourceId");
+        final Long userId2 = FeignUserHelper.createUser(roleId, staffId, "bilingual").getResourceId();
         Assertions.assertNotNull(userId2);
         this.transientUsers.add(userId2);
 
-        final List errors = (List) UserHelper.updateUser(this.requestSpec, expectStatusCode(403), userId2, "alphabet", "errors");
-        Map reason = (Map) errors.get(0);
-        Assertions.assertEquals("User with username alphabet already exists.", reason.get("defaultUserMessage"));
-        Assertions.assertEquals("error.msg.user.duplicate.username", reason.get("userMessageGlobalisationCode"));
+        final CallFailedRuntimeException exception = FeignUserHelper.updateUsernameExpectingError(userId2, "alphabet");
+        Assertions.assertEquals(403, exception.getStatus());
+        final ReportedError reason = FeignErrors.firstError(exception);
+        Assertions.assertEquals("User with username alphabet already exists.", reason.defaultUserMessage());
+        Assertions.assertEquals("error.msg.user.duplicate.username", reason.userMessageGlobalisationCode());
     }
 
     @Test
     public void testModifySystemUser() {
-        final Integer userId = UserHelper.getUserId(requestSpec, responseSpec, AppUserConstants.SYSTEM_USER_NAME);
+        final Long userId = FeignUserHelper.getUserIdByUsername(AppUserConstants.SYSTEM_USER_NAME);
         Assertions.assertNotNull(userId);
 
-        final List errors = (List) UserHelper.updateUser(this.requestSpec, expectStatusCode(403), userId, "systemtest", "errors");
+        Assertions.assertEquals(403, FeignUserHelper.updateUsernameExpectingError(userId, "systemtest").getStatus());
     }
 
     @Test
     public void testApplicationUserCanUpdateOwnPassword() {
         // Admin creates a new user with an empty role
-        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        Long roleId = FeignRoleHelper.createRole();
         String originalPassword = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
         PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername).firstname(Utils.randomFirstNameGenerator())
                 .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(originalPassword)
-                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId())
-                .roles(List.of(Long.valueOf(roleId)));
+                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(roleId));
 
-        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        PostUsersResponse userCreationResponse = FeignUserHelper.createUser(createUserRequest);
         Long userId = userCreationResponse.getResourceId();
         Assertions.assertNotNull(userId);
 
         // User updates its own password
         String updatedPassword = "QwE!5rTy#9uP0u";
-        PutUsersUserIdResponse putUsersUserIdResponse = ok(newFineractClient(simpleUsername, originalPassword).users.updateUser(userId,
+        PutUsersUserIdResponse putUsersUserIdResponse = ok(() -> clientFor(simpleUsername, originalPassword).users().updateUser(userId,
                 new PutUsersUserIdRequest().password(updatedPassword).repeatPassword(updatedPassword)));
         Assertions.assertNotNull(putUsersUserIdResponse.getResourceId());
 
         // From then on the originalPassword is not working anymore
-        CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
-            ok(newFineractClient(simpleUsername, originalPassword).users.retrieveOneUser(userId));
-        });
-        Assertions.assertEquals(401, callFailedRuntimeException.getResponse().raw().code());
-        Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("Unauthorized"));
+        FeignException.Unauthorized unauthorized = Assertions.assertThrows(FeignException.Unauthorized.class,
+                () -> clientFor(simpleUsername, originalPassword).users().retrieveOneUser(userId));
+        Assertions.assertEquals(401, unauthorized.status());
 
         // The update password is still working perfectly
-        GetUsersUserIdResponse ok = ok(newFineractClient(simpleUsername, updatedPassword).users.retrieveOneUser(userId));
+        GetUsersUserIdResponse ok = ok(() -> clientFor(simpleUsername, updatedPassword).users().retrieveOneUser(userId));
     }
 
     @Test
     public void testApplicationUserCanChangeOwnPassword() {
         // Admin creates a new user with an empty role
-        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        Long roleId = FeignRoleHelper.createRole();
         String originalPassword = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
         PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername).firstname(Utils.randomFirstNameGenerator())
                 .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(originalPassword)
-                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId())
-                .roles(List.of(Long.valueOf(roleId)));
+                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(roleId));
 
-        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        PostUsersResponse userCreationResponse = FeignUserHelper.createUser(createUserRequest);
         Long userId = userCreationResponse.getResourceId();
         Assertions.assertNotNull(userId);
 
         // User changes its own password
 
         String updatedPassword = "pX268-4Pfv|kF6";
-        ChangePwdUsersUserIdResponse changePwdUsersUserIdResponse = ok(newFineractClient(simpleUsername, originalPassword).users
+        ChangePwdUsersUserIdResponse changePwdUsersUserIdResponse = ok(() -> clientFor(simpleUsername, originalPassword).users()
                 .changePasswordUser(userId, new ChangePwdUsersUserIdRequest().password(updatedPassword).repeatPassword(updatedPassword)));
         Assertions.assertNotNull(changePwdUsersUserIdResponse.getResourceId());
 
         // From then on the originalPassword is not working anymore
-        CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
-            ok(newFineractClient(simpleUsername, originalPassword).users.retrieveOneUser(userId));
-        });
-        Assertions.assertEquals(401, callFailedRuntimeException.getResponse().raw().code());
-        Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("Unauthorized"));
+        FeignException.Unauthorized unauthorized = Assertions.assertThrows(FeignException.Unauthorized.class,
+                () -> clientFor(simpleUsername, originalPassword).users().retrieveOneUser(userId));
+        Assertions.assertEquals(401, unauthorized.status());
 
         // The update password is still working perfectly
-        GetUsersUserIdResponse ok = ok(newFineractClient(simpleUsername, updatedPassword).users.retrieveOneUser(userId));
+        GetUsersUserIdResponse ok = ok(() -> clientFor(simpleUsername, updatedPassword).users().retrieveOneUser(userId));
     }
 
     @Test
     public void testApplicationUserShallNotBeAbleToChangeItsOwnRoles() {
         // Admin creates a new user with one role assigned
-        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        Long roleId = FeignRoleHelper.createRole();
         String password = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
         PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername).firstname(Utils.randomFirstNameGenerator())
                 .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(password).repeatPassword(password)
-                .sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
+                .sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(roleId));
 
-        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        PostUsersResponse userCreationResponse = FeignUserHelper.createUser(createUserRequest);
         Long userId = userCreationResponse.getResourceId();
         Assertions.assertNotNull(userId);
 
         // Admin creates a second role
-        Integer roleId2 = RolesHelper.createRole(requestSpec, responseSpec);
+        Long roleId2 = FeignRoleHelper.createRole();
 
         // User tries to update it's own roles
         CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
-            ok(newFineractClient(simpleUsername, password).users.updateUser(userId,
-                    new PutUsersUserIdRequest().roles(List.of(Long.valueOf(roleId2)))));
+            ok(() -> clientFor(simpleUsername, password).users().updateUser(userId, new PutUsersUserIdRequest().roles(List.of(roleId2))));
         });
 
-        Assertions.assertEquals(400, callFailedRuntimeException.getResponse().raw().code());
+        Assertions.assertEquals(400, callFailedRuntimeException.getStatus());
         Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("not.enough.permission.to.update.fields"));
     }
 
@@ -251,8 +231,8 @@ public class UserAdministrationTest extends IntegrationTest {
     public void testUserCreationWithValidPassword() {
         String validPassword = "Abcdef1#2$3%XYZ";
 
-        PostUsersRequest createUserRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, validPassword);
-        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        PostUsersRequest createUserRequest = FeignUserHelper.buildUserRequest(validPassword);
+        PostUsersResponse userCreationResponse = FeignUserHelper.createUser(createUserRequest);
 
         Assertions.assertNotNull(userCreationResponse.getResourceId());
     }
@@ -268,20 +248,23 @@ public class UserAdministrationTest extends IntegrationTest {
                 Map.entry("ContainsWhitespace", "Abcdefg1# 2$3%"), // Contains whitespace
                 Map.entry("RepeatedCharacters", "AAbbcc11##$$%%YY") // Contains repeated characters
         );
-        this.responseSpec = new ResponseSpecBuilder().build();
 
         invalidPasswords.forEach((description, password) -> {
-            PostUsersRequest createUserRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, password);
-            JsonObject jsonResponse = UserHelper.createUserWithJsonResponse(requestSpec, responseSpec, createUserRequest);
-            Assertions.assertEquals("400", jsonResponse.get("httpStatusCode").getAsString(), "Expected HTTP 400 for: " + description);
-            Assertions.assertEquals("validation.msg.validation.errors.exist",
-                    jsonResponse.get("userMessageGlobalisationCode").getAsString(), "Expected user message code for: " + description);
+            PostUsersRequest createUserRequest = FeignUserHelper.buildUserRequest(password);
+            CallFailedRuntimeException exception = FeignUserHelper.createUserExpectingError(createUserRequest);
+            Assertions.assertEquals(400, exception.getStatus(), "Expected HTTP 400 for: " + description);
+            Assertions.assertEquals("validation.msg.validation.errors.exist", exception.getUserMessageGlobalisationCode(),
+                    "Expected user message code for: " + description);
 
-            JsonObject errorDetails = jsonResponse.getAsJsonArray("errors").get(0).getAsJsonObject();
-            Assertions.assertEquals("password", errorDetails.get("parameterName").getAsString(),
+            ReportedError errorDetails = FeignErrors.firstError(exception);
+            Assertions.assertEquals("password", errorDetails.parameterName(),
                     "Expected validation error parameter name for: " + description);
-            Assertions.assertEquals("validation.msg.user.password.does.not.match.regexp",
-                    errorDetails.get("userMessageGlobalisationCode").getAsString(), "Expected validation code for: " + description);
+            Assertions.assertEquals("validation.msg.user.password.does.not.match.regexp", errorDetails.userMessageGlobalisationCode(),
+                    "Expected validation code for: " + description);
         });
+    }
+
+    private static FineractFeignClient clientFor(String username, String password) {
+        return FineractFeignClientHelper.createNewFineractFeignClient(username, password);
     }
 }

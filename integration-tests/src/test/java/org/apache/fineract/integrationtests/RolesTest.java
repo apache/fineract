@@ -19,150 +19,138 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.HashMap;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetRolesRoleIdResponse;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRoleHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RolesTest {
+public class RolesTest extends FeignIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(RolesTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
 
-    @BeforeEach
+    private FeignStaffHelper staffHelper;
+
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        staffHelper = new FeignStaffHelper(fineractClient());
     }
 
-    @SuppressWarnings("cast")
     @Test
     public void testCreateRolesStatus() {
 
         LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = FeignRoleHelper.createRole();
         Assertions.assertNotNull(roleId);
 
         LOG.info("--------------------------------- Getting ROLE -------------------------------");
-        HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
+        GetRolesRoleIdResponse role = FeignRoleHelper.retrieveRole(roleId);
+        assertEquals(role.getId(), roleId);
 
     }
 
-    @SuppressWarnings("cast")
     @Test
     public void testDisableRolesStatus() {
 
         LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = FeignRoleHelper.createRole();
         Assertions.assertNotNull(roleId);
 
         LOG.info("--------------------------------- Getting ROLE -------------------------------");
-        HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
+        GetRolesRoleIdResponse role = FeignRoleHelper.retrieveRole(roleId);
+        assertEquals(role.getId(), roleId);
 
         LOG.info("--------------------------------- DISABLING ROLE -------------------------------");
-        final Integer disableRoleId = RolesHelper.disableRole(this.requestSpec, this.responseSpec, roleId);
+        final Long disableRoleId = FeignRoleHelper.disableRole(roleId).getResourceId();
         assertEquals(disableRoleId, roleId);
-        role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
-        assertEquals(true, (Boolean) role.get("disabled"));
+        role = FeignRoleHelper.retrieveRole(roleId);
+        assertEquals(role.getId(), roleId);
+        assertEquals(true, role.getDisabled());
 
     }
 
-    @SuppressWarnings("cast")
     @Test
     public void testEnableRolesStatus() {
 
         LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = FeignRoleHelper.createRole();
         Assertions.assertNotNull(roleId);
 
         LOG.info("--------------------------------- Getting ROLE -------------------------------");
-        HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
+        GetRolesRoleIdResponse role = FeignRoleHelper.retrieveRole(roleId);
+        assertEquals(role.getId(), roleId);
 
         LOG.info("--------------------------------- DISABLING ROLE -------------------------------");
-        final Integer disableRoleId = RolesHelper.disableRole(this.requestSpec, this.responseSpec, roleId);
+        final Long disableRoleId = FeignRoleHelper.disableRole(roleId).getResourceId();
         assertEquals(disableRoleId, roleId);
-        role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
-        assertEquals(true, (Boolean) role.get("disabled"));
+        role = FeignRoleHelper.retrieveRole(roleId);
+        assertEquals(role.getId(), roleId);
+        assertEquals(true, role.getDisabled());
 
         LOG.info("--------------------------------- ENABLING ROLE -------------------------------");
-        final Integer enableRoleId = RolesHelper.enableRole(this.requestSpec, this.responseSpec, roleId);
+        final Long enableRoleId = FeignRoleHelper.enableRole(roleId).getResourceId();
         assertEquals(enableRoleId, roleId);
-        role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
-        assertEquals(false, (Boolean) role.get("disabled"));
+        role = FeignRoleHelper.retrieveRole(roleId);
+        assertEquals(role.getId(), roleId);
+        assertEquals(false, role.getDisabled());
 
     }
 
-    @SuppressWarnings("cast")
     @Test
     public void testDeleteRoleStatus() {
 
         LOG.info("-------------------------------- CREATING A ROLE---------------------------------------------");
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = FeignRoleHelper.createRole();
         Assertions.assertNotNull(roleId);
 
         LOG.info("--------------------------------- Getting ROLE -------------------------------");
-        HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
+        GetRolesRoleIdResponse role = FeignRoleHelper.retrieveRole(roleId);
+        assertEquals(role.getId(), roleId);
 
         LOG.info("--------------------------------- DELETE ROLE -------------------------------");
-        final Integer deleteRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);
+        final Long deleteRoleId = FeignRoleHelper.deleteRole(roleId).getResourceId();
         assertEquals(deleteRoleId, roleId);
     }
 
     @Test
     public void testRoleShouldGetDeletedIfNoActiveUserExists() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = FeignRoleHelper.createRole();
         Assertions.assertNotNull(roleId);
 
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Long staffId = staffHelper.createStaff().getResourceId();
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId);
+        final Long userId = FeignUserHelper.createUser(roleId, staffId, Utils.uniqueRandomStringGenerator("User_Name_", 3)).getResourceId();
         Assertions.assertNotNull(userId);
 
-        final Integer deletedUserId = UserHelper.deleteUser(this.requestSpec, this.responseSpec, userId);
+        final Long deletedUserId = FeignUserHelper.deleteUser(userId).getResourceId();
         Assertions.assertEquals(deletedUserId, userId);
 
-        final Integer deletedRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);
+        final Long deletedRoleId = FeignRoleHelper.deleteRole(roleId).getResourceId();
         assertEquals(deletedRoleId, roleId);
     }
 
     @Test
     public void testRoleShouldNotGetDeletedIfActiveUserExists() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = FeignRoleHelper.createRole();
         Assertions.assertNotNull(roleId);
 
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Long staffId = staffHelper.createStaff().getResourceId();
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId);
+        final Long userId = FeignUserHelper.createUser(roleId, staffId, Utils.uniqueRandomStringGenerator("User_Name_", 3)).getResourceId();
         Assertions.assertNotNull(userId);
 
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final Integer deletedRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);
-        assertNotEquals(deletedRoleId, roleId);
+        CallFailedRuntimeException exception = FeignRoleHelper.deleteRoleExpectingError(roleId);
+        assertEquals(403, exception.getStatus());
     }
 
 }

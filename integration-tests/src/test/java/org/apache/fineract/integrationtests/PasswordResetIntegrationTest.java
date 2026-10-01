@@ -18,45 +18,38 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import feign.FeignException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.ChangePwdUsersUserIdRequest;
+import org.apache.fineract.client.models.ChangePwdUsersUserIdResponse;
+import org.apache.fineract.client.models.PostAuthenticationRequest;
+import org.apache.fineract.client.models.PostAuthenticationResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class PasswordResetIntegrationTest extends IntegrationTest {
+public class PasswordResetIntegrationTest extends FeignIntegrationTest {
 
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-    private GlobalConfigurationHelper globalConfigurationHelper;
-    private List<Integer> transientUsers = new ArrayList<>();
+    private FeignGlobalConfigurationHelper globalConfigurationHelper;
+    private final List<Long> transientUsers = new ArrayList<>();
 
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.globalConfigurationHelper = new GlobalConfigurationHelper();
+        this.globalConfigurationHelper = new FeignGlobalConfigurationHelper(fineractClient());
     }
 
     @AfterEach
@@ -64,8 +57,8 @@ public class PasswordResetIntegrationTest extends IntegrationTest {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_PASSWORD_RESET_ON_FIRST_LOGIN,
                 new PutGlobalConfigurationsRequest().value(0L).enabled(false));
 
-        for (Integer userId : this.transientUsers) {
-            UserHelper.deleteUser(this.requestSpec, this.responseSpec, userId);
+        for (Long userId : this.transientUsers) {
+            FeignUserHelper.deleteUser(userId);
         }
         this.transientUsers.clear();
     }
@@ -76,22 +69,20 @@ public class PasswordResetIntegrationTest extends IntegrationTest {
                 new PutGlobalConfigurationsRequest().value(0L).enabled(true));
 
         String password = "Abcdef1#2$3%XYZ";
-        PostUsersRequest userRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, password);
-        PostUsersResponse userResponse = UserHelper.createUser(requestSpec, responseSpec, userRequest);
+        PostUsersRequest userRequest = FeignUserHelper.buildUserRequest(password);
+        PostUsersResponse userResponse = FeignUserHelper.createUser(userRequest);
         Long userId = userResponse.getResourceId();
         assertNotNull(userId, "User creation failed to return an ID!");
-        this.transientUsers.add(userId.intValue());
+        this.transientUsers.add(userId);
         String username = userRequest.getUsername();
 
-        Response loginResponse = attemptLogin(username, password);
-        assertEquals(403, loginResponse.getStatusCode(), "User should be forced to change password");
+        assertEquals(403, assertThrows(FeignException.Forbidden.class, () -> attemptLogin(username, password)).status(),
+                "User should be forced to change password");
 
         String newPassword = "Abcdef1#2$3%XYZ_NEW";
-        Response changePasswordResponse = changePassword(username, password, userId, newPassword);
-        assertEquals(200, changePasswordResponse.getStatusCode(), "Password change should succeed");
+        assertNotNull(ok(() -> changePassword(username, password, userId, newPassword)).getResourceId(), "Password change should succeed");
 
-        loginResponse = attemptLogin(username, newPassword);
-        assertEquals(200, loginResponse.getStatusCode(), "User should be able to login after reset");
+        assertNotNull(ok(() -> attemptLogin(username, newPassword)), "User should be able to login after reset");
     }
 
     @Test
@@ -100,27 +91,23 @@ public class PasswordResetIntegrationTest extends IntegrationTest {
                 new PutGlobalConfigurationsRequest().value(0L).enabled(false));
 
         String password = "Abcdef1#2$3%XYZ";
-        PostUsersRequest userRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, password);
-        PostUsersResponse userResponse = UserHelper.createUser(requestSpec, responseSpec, userRequest);
+        PostUsersRequest userRequest = FeignUserHelper.buildUserRequest(password);
+        PostUsersResponse userResponse = FeignUserHelper.createUser(userRequest);
         assertNotNull(userResponse.getResourceId(), "User creation failed!");
-        this.transientUsers.add(userResponse.getResourceId().intValue());
+        this.transientUsers.add(userResponse.getResourceId());
         String username = userRequest.getUsername();
 
-        Response loginResponse = attemptLogin(username, password);
-        assertEquals(200, loginResponse.getStatusCode(), "User should login normally when feature is disabled");
+        assertNotNull(ok(() -> attemptLogin(username, password)), "User should login normally when feature is disabled");
     }
 
-    private Response attemptLogin(String username, String password) {
-        return RestAssured.given().contentType(ContentType.JSON)
-                .body("{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}")
-                .post("/fineract-provider/api/v1/authentication?" + Utils.TENANT_IDENTIFIER);
+    private PostAuthenticationResponse attemptLogin(String username, String password) {
+        return fineractClient().authenticationHttpBasic()
+                .authenticate(new PostAuthenticationRequest().username(username).password(password));
     }
 
-    private Response changePassword(String username, String password, Long userId, String newPassword) {
-        String authKey = java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes(UTF_8));
-        return RestAssured.given().contentType(ContentType.JSON).header("Authorization", "Basic " + authKey)
-                .header("Fineract-Platform-TenantId", "default")
-                .body("{\"password\":\"" + newPassword + "\", \"repeatPassword\":\"" + newPassword + "\"}")
-                .post("/fineract-provider/api/v1/users/" + userId + "/pwd?" + Utils.TENANT_IDENTIFIER);
+    private static ChangePwdUsersUserIdResponse changePassword(String username, String password, Long userId, String newPassword) {
+        FineractFeignClient userClient = FineractFeignClientHelper.createNewFineractFeignClient(username, password);
+        return userClient.users().changePasswordUser(userId,
+                new ChangePwdUsersUserIdRequest().password(newPassword).repeatPassword(newPassword));
     }
 }
