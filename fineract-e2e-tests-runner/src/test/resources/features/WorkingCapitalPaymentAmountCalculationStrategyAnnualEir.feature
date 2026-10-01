@@ -843,7 +843,7 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
       | 02 January 2026 | Discount Fee      | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+      | 1            | 2026-01-02 | 2026-01-31 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
     When Admin deletes WC Breach override
     When Admin deletes WC Near Breach override
