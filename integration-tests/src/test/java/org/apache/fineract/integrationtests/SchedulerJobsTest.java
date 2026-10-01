@@ -22,9 +22,6 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,35 +30,30 @@ import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.ParallelExecutionHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
-import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 @Order(1)
-public class SchedulerJobsTest {
+public class SchedulerJobsTest extends FeignIntegrationTest {
 
     private final Map<Integer, Boolean> originalJobStatus = new ConcurrentHashMap<>();
-    private RequestSpecification requestSpec;
     private Boolean originalSchedulerStatus;
-    private GlobalConfigurationHelper globalConfigurationHelper;
+    private FeignGlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
-        Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", "default");
         originalSchedulerStatus = SchedulerJobHelper.getSchedulerStatus();
         ParallelExecutionHelper.runInParallel(SchedulerJobHelper.getAllSchedulerJobIds(), (jobId) -> {
             GetJobsResponse schedulerJob = SchedulerJobHelper.getSchedulerJobById(jobId);
             originalJobStatus.put(jobId, schedulerJob.getActive());
         });
-        globalConfigurationHelper = new GlobalConfigurationHelper();
+        globalConfigurationHelper = new FeignGlobalConfigurationHelper(fineractClient());
     }
 
     @AfterEach
