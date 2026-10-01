@@ -124,16 +124,6 @@ public class AccountHelper {
         return accountRunningBalance;
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public HashMap getAccountingWithRunningBalanceById(final String accountId) {
-        final String GET_RUNNING_BALANCE_URL = "/fineract-provider/api/v1/glaccounts/" + accountId + "?fetchRunningBalance=true";
-        final HashMap accountRunningBalance = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_RUNNING_BALANCE_URL, "");
-        return accountRunningBalance;
-    }
-
     public static PostGLAccountsResponse createGLAccount(final PostGLAccountsRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.createGLAccount(request));
     }

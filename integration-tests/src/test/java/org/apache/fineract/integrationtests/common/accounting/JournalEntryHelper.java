@@ -31,7 +31,6 @@ import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.Assertions;
 
 @Slf4j
 @SuppressWarnings("rawtypes")
@@ -48,57 +47,6 @@ public class JournalEntryHelper {
     public JournalEntryHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
-    }
-
-    public void checkJournalEntryForAssetAccount(final Account assetAccount, final String date, final JournalEntry... accountEntries) {
-        checkJournalEntry(null, assetAccount, date, accountEntries);
-    }
-
-    public void checkJournalEntryForLiabilityAccount(final Account liabilityAccount, final String date,
-            final JournalEntry... accountEntries) {
-        checkJournalEntry(null, liabilityAccount, date, accountEntries);
-    }
-
-    public void checkJournalEntryForLiabilityAccount(final Integer officeId, final Account liabilityAccount, final String date,
-            final JournalEntry... accountEntries) {
-        checkJournalEntry(officeId, liabilityAccount, date, accountEntries);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private void checkJournalEntry(final Integer officeId, final Account account, final String date, final JournalEntry... accountEntries) {
-        final String url = createURLForGettingAccountEntries(account, date, officeId);
-        final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
-
-        for (JournalEntry entry : accountEntries) {
-            boolean matchFound = false;
-            for (HashMap map : response) {
-                final HashMap entryType = (HashMap) map.get("entryType");
-                if (entry.getTransactionType().equals(entryType.get("value")) && entry.getTransactionAmount().equals(map.get("amount"))) {
-                    matchFound = true;
-                    break;
-                }
-            }
-            if (entry.getTransactionAmount() > 0) {
-                Assertions.assertTrue(matchFound, "Journal Entry not found");
-            }
-        }
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private String createURLForGettingAccountEntries(final Account account, final String date, final Integer officeId) {
-        String url = new String("/fineract-provider/api/v1/journalentries?glAccountId=" + account.getAccountID() + "&type="
-                + account.getAccountType() + "&fromDate=" + date + "&toDate=" + date + "&tenantIdentifier=default"
-                + "&orderBy=id&sortOrder=desc&locale=en&dateFormat=dd MMMM yyyy");
-        if (officeId != null) {
-            url = url + "&officeId=" + officeId;
-        }
-        return url;
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -118,18 +66,6 @@ public class JournalEntryHelper {
     private String createURLForGettingAccountEntriesByTransactionId(final String transactionId) {
         return new String("/fineract-provider/api/v1/journalentries?transactionId=" + transactionId + "&tenantIdentifier=default"
                 + "&orderBy=id&sortOrder=desc&locale=en&dateFormat=dd MMMM yyyy");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public GetJournalEntriesTransactionIdResponse getJournalEntries(final String transactionId) {
-        log.info("Getting GL Journal entries for transaction id {}", transactionId);
-        final String url = createURLForGettingAccountEntriesByTransactionId(transactionId);
-        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, null);
-        log.info("response {}", response);
-        return GSON.fromJson(response, GetJournalEntriesTransactionIdResponse.class);
     }
 
     // TODO: Rewrite to use fineract-client instead!
