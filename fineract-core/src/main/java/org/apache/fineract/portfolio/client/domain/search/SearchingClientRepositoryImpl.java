@@ -30,12 +30,14 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.jpa.CriteriaQueryFactory;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientIdentifier;
+import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -51,7 +53,8 @@ public class SearchingClientRepositoryImpl implements SearchingClientRepository 
     private final CriteriaQueryFactory criteriaQueryFactory;
 
     @Override
-    public Page<SearchedClient> searchByText(String searchText, Pageable pageable, String officeHierarchy) {
+    public Page<SearchedClient> searchByText(String searchText, Pageable pageable, String officeHierarchy,
+            Collection<ClientStatus> statuses) {
         /*
          * this whole thing can be replaced with Spring Data JPA 3+ with a findBy(Specification, Pageable) call but at
          * this point the upgrade is too costly
@@ -80,6 +83,11 @@ public class SearchingClientRepositoryImpl implements SearchingClientRepository 
                     cb.like(cb.function("LOWER", String.class, r.get("externalId")), searchLikeValue),
                     cb.like(cb.lower(r.get("mobileNo")), searchLikeValue),
                     cb.like(cb.lower(identity.get("documentKey")), searchLikeValue)));
+
+            // no statuses requested means no status filter: every client matching the text is returned
+            if (statuses != null && !statuses.isEmpty()) {
+                predicates.add(r.get("status").in(statuses.stream().map(ClientStatus::getValue).toList()));
+            }
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };

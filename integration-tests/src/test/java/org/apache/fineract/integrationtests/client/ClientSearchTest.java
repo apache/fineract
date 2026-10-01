@@ -24,7 +24,10 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import org.apache.fineract.client.models.ClientTextSearch.StatusEnum;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
@@ -373,6 +376,78 @@ public class ClientSearchTest extends IntegrationTest {
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().size()).isEqualTo(1);
         assertThat(result.getContent().get(0).getExternalId().getValue()).isEqualTo(request.getExternalId());
+    }
+
+    @Test
+    public void testClientSearchWithoutStatusFilterReturnsClientsInEveryStatus() {
+        // given
+        String lastname = Utils.randomStringGenerator("Client_LastName_", 5);
+        createActiveAndClosedClient(lastname);
+
+        // when
+        PageClientSearchData result = clientHelper.searchClients(lastname, List.of());
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(2);
+    }
+
+    @Test
+    public void testClientSearchByActiveStatusExcludesClosedClients() {
+        // given
+        String lastname = Utils.randomStringGenerator("Client_LastName_", 5);
+        String[] externalIds = createActiveAndClosedClient(lastname);
+
+        // when
+        PageClientSearchData result = clientHelper.searchClients(lastname, List.of(StatusEnum.ACTIVE));
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getExternalId().getValue()).isEqualTo(externalIds[0]);
+    }
+
+    @Test
+    public void testClientSearchByClosedStatusReturnsOnlyClosedClients() {
+        // given
+        String lastname = Utils.randomStringGenerator("Client_LastName_", 5);
+        String[] externalIds = createActiveAndClosedClient(lastname);
+
+        // when
+        PageClientSearchData result = clientHelper.searchClients(lastname, List.of(StatusEnum.CLOSED));
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getExternalId().getValue()).isEqualTo(externalIds[1]);
+    }
+
+    @Test
+    public void testClientSearchByMultipleStatusesReturnsClientsInAnyOfThem() {
+        // given
+        String lastname = Utils.randomStringGenerator("Client_LastName_", 5);
+        createActiveAndClosedClient(lastname);
+
+        // when
+        PageClientSearchData result = clientHelper.searchClients(lastname, List.of(StatusEnum.ACTIVE, StatusEnum.CLOSED));
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(2);
+    }
+
+    /**
+     * Creates two clients with the given last name, closes the second, and returns their external ids (active, closed).
+     */
+    private String[] createActiveAndClosedClient(String lastname) {
+        PostClientsRequest activeClientRequest = ClientHelper.defaultClientCreationRequest();
+        activeClientRequest.setLastname(lastname);
+        clientHelper.createClient(activeClientRequest);
+
+        PostClientsRequest closedClientRequest = ClientHelper.defaultClientCreationRequest();
+        closedClientRequest.setLastname(lastname);
+        clientHelper.createClient(closedClientRequest);
+
+        HashMap<String, Object> code = CodeHelper.getCodeByName(requestSpec, responseSpec, "ClientClosureReason");
+        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue((Integer) code.get("id"), requestSpec, responseSpec);
+        ClientHelper.closeClient(closedClientRequest.getExternalId(), (Integer) codeValue.get("id"));
+        return new String[] { activeClientRequest.getExternalId(), closedClientRequest.getExternalId() };
     }
 
     @Test
