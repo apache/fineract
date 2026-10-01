@@ -376,7 +376,7 @@ Feature: WorkingCapitalDiscountFeeAmortization
       | INCOME    | 404000       | Interest Income           |       | 28.7   |
       | LIABILITY | 240005       | Deferred Interest Revenue | 28.7  |        |
 
-  @TestRailId:C8974
+  @TestRailId:C80974
   Scenario: Verify Discount Fee Amortization transaction on Working Capital Loan account triggers on COB run by repayment with amount less then discount amount - UC7
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
