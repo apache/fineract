@@ -47,18 +47,6 @@ public final class CenterHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static CenterDomain retrieveByID(int id, final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String GET_CENTER_BY_ID_URL = CENTERS_URL + "/" + id + "?associations=groupMembers&" + Utils.TENANT_IDENTIFIER;
-        LOG.info("------------------------ RETRIEVING CENTER AT {}-------------------------", id);
-        Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER_BY_ID_URL, "");
-        final String jsonData = new Gson().toJson(get);
-        return new Gson().fromJson(jsonData, new TypeToken<CenterDomain>() {}.getType());
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static ArrayList<CenterDomain> paginatedListCenters(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         final String GET_CENTER = CENTERS_URL + "?paged=true&limit=-1&" + Utils.TENANT_IDENTIFIER;

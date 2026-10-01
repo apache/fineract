@@ -18,10 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common.system;
 
-import static io.restassured.RestAssured.given;
-
 import com.google.gson.Gson;
-import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
@@ -60,29 +57,6 @@ public final class CodeHelper {
 
         return Utils.performServerPost(requestSpec, responseSpec, CODE_URL + "?" + Utils.TENANT_IDENTIFIER, getTestCodeAsJSON(codeName),
                 jsonAttributeToGetback);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object updateCode(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer codeId,
-            final String codeName, final String jsonAttributeToGetback) {
-
-        return Utils.performServerPut(requestSpec, responseSpec, CODE_URL + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
-                getTestCodeAsJSON(codeName), jsonAttributeToGetback);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object getCodeById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer codeId,
-            final String jsonAttributeToGetback) {
-
-        return Utils.performServerGet(requestSpec, responseSpec, CODE_URL + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
-                jsonAttributeToGetback);
-
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -193,22 +167,6 @@ public final class CodeHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static Object getSystemDefinedCodes(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-
-        final String getResponse = given().spec(requestSpec).expect().spec(responseSpec).when()
-                .get(CodeHelper.CODE_URL + "?" + Utils.TENANT_IDENTIFIER).asString();
-
-        final JsonPath getResponseJsonPath = new JsonPath(getResponse);
-
-        // get any systemDefined code
-        return getResponseJsonPath.get("find { e -> e.systemDefined == true }");
-
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static String getTestCodeAsJSON(final String codeName) {
         final HashMap<String, String> map = new HashMap<>();
         map.put(CODE_NAME_ATTRIBUTE_NAME, codeName);
@@ -227,18 +185,6 @@ public final class CodeHelper {
         }
         map.put(CODE_VALUE_POSITION_ATTRIBUTE_NAME, position);
         return new Gson().toJson(map);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object deleteCodeById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final String jsonAttributeToGetback) {
-
-        return Utils.performServerDelete(requestSpec, responseSpec, CODE_URL + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
-                jsonAttributeToGetback);
-
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -294,55 +240,6 @@ public final class CodeHelper {
         return Utils.performServerGet(requestSpec, responseSpec,
                 CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetback);
 
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object getCodeValueById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final Integer codeValueId, final String jsonAttributeToGetback) {
-
-        return Utils.performServerGet(requestSpec, responseSpec,
-                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId.toString() + "?" + Utils.TENANT_IDENTIFIER,
-                jsonAttributeToGetback);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object deleteCodeValueById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final Integer codeValueId, final String jsonAttributeToGetback) {
-
-        return Utils.performServerDelete(requestSpec, responseSpec,
-                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId.toString() + "?" + Utils.TENANT_IDENTIFIER,
-                jsonAttributeToGetback);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object updateCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final Integer codeValueId, final String codeValueName, final Integer position,
-            final String jsonAttributeToGetback) {
-        String description = null;
-        return updateCodeValue(requestSpec, responseSpec, codeId, codeValueId, codeValueName, description, position,
-                jsonAttributeToGetback);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object updateCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final Integer codeValueId, final String codeValueName, final String description, final Integer position,
-            final String jsonAttributeToGetback) {
-
-        return Utils.performServerPut(requestSpec, responseSpec,
-                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId + "?" + Utils.TENANT_IDENTIFIER,
-                getTestCodeValueAsJSON(codeValueName, description, position), jsonAttributeToGetback);
     }
 
     public PostCodeValueDataResponse createCodeValue(Long codeId, PostCodeValuesDataRequest request) {
