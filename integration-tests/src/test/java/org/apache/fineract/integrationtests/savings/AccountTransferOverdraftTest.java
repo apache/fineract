@@ -79,7 +79,7 @@ class AccountTransferOverdraftTest extends FeignSavingsTestBase {
                 final var destinationSavingsId = createApproveActivateSavings(destinationClientId, savingsProductId, ACTIVATION_DATE);
 
                 deposit(sourceSavingsId, OPENING_BALANCE.toPlainString(), ACTIVATION_DATE);
-                final var accountTransferId = transfer(sourceClientId, sourceSavingsId, destinationClientId, destinationSavingsId);
+                transfer(sourceClientId, sourceSavingsId, destinationClientId, destinationSavingsId);
 
                 final var originalWithdrawal = findActiveWithdrawal(sourceSavingsId);
                 assertNotNull(originalWithdrawal.getTransfer());
@@ -99,7 +99,7 @@ class AccountTransferOverdraftTest extends FeignSavingsTestBase {
                 assertBackdatedDepositJournalEntries(backdatedDepositId, accounting);
                 assertNoJournalEntries(auditOnlyReversal.getId());
 
-                accountTransferHelper.undoTransfer(accountTransferId);
+                accountTransferHelper.undoTransfer(transferId);
                 assertBalance(sourceSavingsId, BigDecimal.valueOf(105));
                 assertBalance(destinationSavingsId, BigDecimal.ZERO);
             } finally {
