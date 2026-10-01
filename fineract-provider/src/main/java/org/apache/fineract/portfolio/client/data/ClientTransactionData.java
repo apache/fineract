@@ -40,21 +40,22 @@ public final class ClientTransactionData {
     private final String externalId;
     private final LocalDate submittedOnDate;
     private final boolean reversed;
+    private final Long clientChargeId;
 
     // templates
     final Collection<PaymentTypeData> paymentTypeOptions;
 
     public static ClientTransactionData create(Long id, Long officeId, String officeName, EnumOptionData type, LocalDate date,
             CurrencyData currency, PaymentDetailData paymentDetailData, BigDecimal amount, String externalId, LocalDate submittedOnDate,
-            boolean reversed) {
+            boolean reversed, Long clientChargeId) {
         final Collection<PaymentTypeData> paymentTypeOptions = null;
         return new ClientTransactionData(id, officeId, officeName, type, date, currency, paymentDetailData, amount, externalId,
-                submittedOnDate, reversed, paymentTypeOptions);
+                submittedOnDate, reversed, clientChargeId, paymentTypeOptions);
     }
 
     private ClientTransactionData(Long id, Long officeId, String officeName, EnumOptionData type, LocalDate date, CurrencyData currency,
             PaymentDetailData paymentDetailData, BigDecimal amount, String externalId, LocalDate submittedOnDate, boolean reversed,
-            Collection<PaymentTypeData> paymentTypeOptions) {
+            Long clientChargeId, Collection<PaymentTypeData> paymentTypeOptions) {
 
         this.id = id;
         this.officeId = officeId;
@@ -67,6 +68,7 @@ public final class ClientTransactionData {
         this.externalId = externalId;
         this.submittedOnDate = submittedOnDate;
         this.reversed = reversed;
+        this.clientChargeId = clientChargeId;
         this.paymentTypeOptions = paymentTypeOptions;
     }
 

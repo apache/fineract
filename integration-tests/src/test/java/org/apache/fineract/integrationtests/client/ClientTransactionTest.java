@@ -89,6 +89,7 @@ public class ClientTransactionTest {
         GetClientsClientIdTransactionsTransactionIdResponse clientTransactionByExternalId = clientHelper
                 .getClientTransactionByExternalId(clientExternalId, clientChargePaidTransactionId1);
         assertEquals(Integer.parseInt(clientChargePaidTransactionId1), clientTransactionByExternalId.getId());
+        assertEquals(clientChargeId1.longValue(), clientTransactionByExternalId.getClientChargeId());
 
         GetClientsClientIdTransactionsTransactionIdResponse clientTransactionByTransactionExternalId = clientHelper
                 .getClientTransactionByTransactionExternalId(clientId, clientChargePaidTransactionExternalId);
