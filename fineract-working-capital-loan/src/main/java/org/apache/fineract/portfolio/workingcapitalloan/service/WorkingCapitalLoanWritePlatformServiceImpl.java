@@ -460,6 +460,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // Nothing is disbursed any more, so the active contractual principal falls back to the approved one.
         loan.getLoanProductRelatedDetails().setPrincipal(loan.getApprovedPrincipal());
         amortizationScheduleWriteService.regenerateAmortizationScheduleOnUndoDisbursal(loan);
+        // The delinquency schedule was built from the configuration in force at disbursement; dropping it lets the next
+        // disbursement rebuild it from the loan's current delinquency bucket (which may be modified meanwhile).
+        delinquencyRangeScheduleService.deleteSchedule(loan.getId());
 
         this.loanRepository.saveAndFlush(loan);
 

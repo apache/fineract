@@ -91,6 +91,10 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleRepository
 
     boolean existsByLoanId(Long loanId);
 
+    @Modifying(flushAutomatically = true)
+    @Query("delete from WorkingCapitalLoanDelinquencyRangeSchedule s where s.loan.id = :loanId")
+    void deleteByLoanId(@Param("loanId") Long loanId);
+
     List<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndToDateLessThanEqualAndMinPaymentCriteriaMetIsNull(Long loanId,
             LocalDate businessDate);
 
