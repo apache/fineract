@@ -18,34 +18,33 @@
  */
 package org.apache.fineract.integrationtests;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.apache.fineract.integrationtests.common.CreditBureauConfigurationHelper;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.PostCreditBureauConfigurationRequest;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCreditBureauHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CreditBureauConfigurationTest {
+public class CreditBureauConfigurationTest extends FeignIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(CreditBureauConfigurationTest.class);
 
     @Test
     public void creditBureauConfigurationTest() {
+        final FeignCreditBureauHelper creditBureauHelper = new FeignCreditBureauHelper(fineractClient());
 
         // create creditBureauConfiguration
-        String createResponse = CreditBureauConfigurationHelper.createCreditBureauConfiguration(1L,
-                Utils.randomStringGenerator("testConfigKey_", 5), "testConfigKeyValue", "description");
-        JsonObject createJson = JsonParser.parseString(createResponse).getAsJsonObject();
-        Long configurationId = createJson.get("resourceId").getAsLong();
+        CommandProcessingResult createResponse = creditBureauHelper.createConfiguration(1L, new PostCreditBureauConfigurationRequest()
+                .configkey(Utils.randomStringGenerator("testConfigKey_", 5)).value("testConfigKeyValue").description("description"));
+        Long configurationId = createResponse.getResourceId();
         Assertions.assertNotNull(configurationId);
 
         // update creditBureauConfiguration
-        String updateResponse = CreditBureauConfigurationHelper.updateCreditBureauConfiguration(configurationId, null,
-                "updateConfigKeyValue");
-        String updateconfiguration = JsonParser.parseString(updateResponse).getAsJsonObject().get("changes").getAsJsonObject().get("value")
-                .getAsString();
+        CommandProcessingResult updateResponse = creditBureauHelper.updateConfiguration(configurationId, null, "updateConfigKeyValue");
+        Object updateconfiguration = updateResponse.getChanges().get("value");
 
         Assertions.assertEquals("updateConfigKeyValue", updateconfiguration);
     }
