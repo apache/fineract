@@ -1274,6 +1274,8 @@ final class LoansApiResourceSwagger {
         @Schema(example = "250.000000")
         public BigDecimal totalOverpaid;
         public LocalDate lastClosedBusinessDate;
+        @Schema(example = "false", description = "Whether the loan is a non-performing asset")
+        public Boolean isNPA;
         @Schema(example = "[2013, 11, 1]")
         public LocalDate overpaidOnDate;
         @Schema(example = "false")
