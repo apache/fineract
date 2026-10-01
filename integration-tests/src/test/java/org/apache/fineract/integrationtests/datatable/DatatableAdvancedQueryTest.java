@@ -29,23 +29,12 @@ import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiCon
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_NUMBER;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_STRING;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_TEXT;
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_PARAM_APPTABLE_NAME;
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_PARAM_COLUMNS;
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_PARAM_DATATABLE_NAME;
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_PARAM_MULTIROW;
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_PARAM_SUBTYPE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -60,6 +49,8 @@ import org.apache.fineract.client.models.FilterData;
 import org.apache.fineract.client.models.GetDataTablesResponse;
 import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryData;
 import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryRequest;
+import org.apache.fineract.client.models.PostColumnHeaderData;
+import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PostDataTablesResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.ResultsetColumnHeaderData;
@@ -69,27 +60,27 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDatatableHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
-import org.apache.fineract.integrationtests.common.system.DatatableHelper;
-import org.jspecify.annotations.NonNull;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatatableAdvancedQueryTest {
+public class DatatableAdvancedQueryTest extends FeignIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatatableAdvancedQueryTest.class);
 
     private static final String SAVINGS_TRANSACTION_APP_TABLE_NAME = EntityTables.SAVINGS_TRANSACTION.getName();
-    public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     public static final String SAVINGS_DATE_FORMAT = Utils.DATE_FORMAT;
 
     private static final String COLUMN_STRING = "aString";
@@ -103,23 +94,21 @@ public class DatatableAdvancedQueryTest {
     private static final String COLUMN_SUBMITTED_DATE = "submitted_on_date";
     private static final String COLUMN_AMOUNT = "amount";
 
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-    private DatatableHelper datatableHelper;
-    private SavingsProductHelper savingsProductHelper;
-    private SavingsAccountHelper savingsAccountHelper;
-    private GlobalConfigurationHelper globalConfigurationHelper;
+    private FeignDatatableHelper datatableHelper;
+    private FeignClientHelper clientHelper;
+    private FeignSavingsProductHelper savingsProductHelper;
+    private FeignSavingsHelper savingsHelper;
+    private FeignSavingsTransactionHelper savingsTransactionHelper;
+    private FeignGlobalConfigurationHelper globalConfigurationHelper;
 
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        datatableHelper = new DatatableHelper(requestSpec, responseSpec);
-        savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-        savingsProductHelper = new SavingsProductHelper();
-        globalConfigurationHelper = new GlobalConfigurationHelper();
+        datatableHelper = new FeignDatatableHelper(fineractClient());
+        clientHelper = new FeignClientHelper(fineractClient());
+        savingsProductHelper = new FeignSavingsProductHelper(fineractClient());
+        savingsHelper = new FeignSavingsHelper(fineractClient());
+        savingsTransactionHelper = new FeignSavingsTransactionHelper(fineractClient());
+        globalConfigurationHelper = new FeignGlobalConfigurationHelper(fineractClient());
     }
 
     @Test
@@ -134,22 +123,19 @@ public class DatatableAdvancedQueryTest {
                     new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, today);
 
-            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, yesterdayS);
+            final Long clientId = clientHelper.createClient(yesterdayS);
             assertNotNull(clientId);
-            final Integer savingsId = createSavingsAccountDailyPosting(clientId, yesterdayS);
+            final Long savingsId = createSavingsAccountDailyPosting(clientId, yesterdayS);
             assertNotNull(savingsId);
 
-            final Integer transactionIdD1 = (Integer) savingsAccountHelper.depositToSavingsAccount(savingsId, "100", yesterdayS,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
+            final Long transactionIdD1 = savingsTransactionHelper.deposit(savingsId, "100", yesterdayS).getResourceId();
             assertNotNull(transactionIdD1);
             BigDecimal decValue1 = new BigDecimal("1.111");
             createDatatableEntry(datatable, transactionIdD1, yesterday, true, 1, decValue1);
-            final Integer transactionIdD2 = (Integer) savingsAccountHelper.depositToSavingsAccount(savingsId, "300", yesterdayS,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
+            final Long transactionIdD2 = savingsTransactionHelper.deposit(savingsId, "300", yesterdayS).getResourceId();
             assertNotNull(transactionIdD2);
             createDatatableEntry(datatable, transactionIdD2, yesterday, false, 2, new BigDecimal("2.2"));
-            final Integer transactionIdW1 = (Integer) savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", todayS,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
+            final Long transactionIdW1 = savingsTransactionHelper.withdraw(savingsId, "100", todayS).getResourceId();
             assertNotNull(transactionIdW1);
             createDatatableEntry(datatable, transactionIdW1, today, true, 3, new BigDecimal("3"));
 
@@ -165,19 +151,19 @@ public class DatatableAdvancedQueryTest {
             PagedLocalRequestAdvancedQueryData pagedQuery = new PagedLocalRequestAdvancedQueryData().page(0).size(3)
                     .addSortsItem(new SortOrder().property("created_at").direction(SortOrder.DirectionEnum.DESC))
                     .addSortsItem(new SortOrder().property(COLUMN_TRANSACTION_ID).direction(SortOrder.DirectionEnum.DESC)).request(query);
-            Map<String, Object> response = datatableHelper.queryDatatable(datatable, pagedQuery);
+            JsonNode response = datatableHelper.queryDatatable(datatable, pagedQuery);
 
-            assertEquals(1, response.get("total"));
-            List content = (List) response.get("content");
+            assertEquals(1, response.path("total").asInt());
+            JsonNode content = response.path("content");
             assertNotNull(content);
             assertEquals(1, content.size());
-            Map<String, Object> first = (Map<String, Object>) content.get(0);
-            assertEquals(transactionIdD1, first.get(COLUMN_TRANSACTION_ID));
-            assertEquals(transactionIdD1.toString(), first.get(COLUMN_TEXT));
-            assertEquals(yesterdayIsoS, first.get(COLUMN_DATE));
-            assertTrue((Boolean) first.get(COLUMN_BOOLEAN));
-            assertEquals(1, first.get(COLUMN_INTEGER));
-            assertEquals(decValue1.floatValue(), first.get(COLUMN_DECIMAL));
+            JsonNode first = content.get(0);
+            assertEquals(transactionIdD1, first.path(COLUMN_TRANSACTION_ID).asLong());
+            assertEquals(transactionIdD1.toString(), first.path(COLUMN_TEXT).asText());
+            assertEquals(yesterdayIsoS, first.path(COLUMN_DATE).asText());
+            assertTrue(first.path(COLUMN_BOOLEAN).asBoolean());
+            assertEquals(1, first.path(COLUMN_INTEGER).asInt());
+            assertEquals(0, decValue1.compareTo(first.path(COLUMN_DECIMAL).decimalValue()));
 
             query.resultColumns(List.of(COLUMN_TRANSACTION_ID));
             query.columnFilters(List.of(
@@ -186,18 +172,18 @@ public class DatatableAdvancedQueryTest {
                             .addFiltersItem(new FilterData().operator(BTW).values(List.of(yesterdayIsoS, todayIsoS)))));
             response = datatableHelper.queryDatatable(datatable, pagedQuery);
 
-            assertEquals(3, response.get("total"));
-            content = (List) response.get("content");
+            assertEquals(3, response.path("total").asInt());
+            content = response.path("content");
             assertNotNull(content);
             assertEquals(3, content.size());
-            first = (Map) content.get(0);
-            assertEquals(transactionIdW1, first.get(COLUMN_TRANSACTION_ID));
-            assertNull(first.get(COLUMN_TEXT));
-            assertNull(first.get(COLUMN_DATE));
-            assertNull(first.get(COLUMN_BOOLEAN));
-            assertNull(first.get(COLUMN_INTEGER));
-            assertNull(first.get(COLUMN_DECIMAL));
-            assertEquals(transactionIdD2, ((Map) content.get(1)).get(COLUMN_TRANSACTION_ID));
+            first = content.get(0);
+            assertEquals(transactionIdW1, first.path(COLUMN_TRANSACTION_ID).asLong());
+            assertFalse(first.hasNonNull(COLUMN_TEXT));
+            assertFalse(first.hasNonNull(COLUMN_DATE));
+            assertFalse(first.hasNonNull(COLUMN_BOOLEAN));
+            assertFalse(first.hasNonNull(COLUMN_INTEGER));
+            assertFalse(first.hasNonNull(COLUMN_DECIMAL));
+            assertEquals(transactionIdD2, content.get(1).path(COLUMN_TRANSACTION_ID).asLong());
 
             deleteDatatable(datatable, transactionIdD1, transactionIdD2, transactionIdW1);
 
@@ -220,23 +206,20 @@ public class DatatableAdvancedQueryTest {
                     new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, today);
 
-            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, yesterdayS);
+            final Long clientId = clientHelper.createClient(yesterdayS);
             assertNotNull(clientId);
-            final Integer savingsId = createSavingsAccountDailyPosting(clientId, yesterdayS);
+            final Long savingsId = createSavingsAccountDailyPosting(clientId, yesterdayS);
             assertNotNull(savingsId);
 
-            final Integer transactionIdD1 = (Integer) savingsAccountHelper.depositToSavingsAccount(savingsId, "100", yesterdayS,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
+            final Long transactionIdD1 = savingsTransactionHelper.deposit(savingsId, "100", yesterdayS).getResourceId();
             assertNotNull(transactionIdD1);
             BigDecimal decValue1 = new BigDecimal("1.111");
             createDatatableEntry(datatable, transactionIdD1, yesterday, true, 1, decValue1);
-            final Integer transactionIdD2 = (Integer) savingsAccountHelper.depositToSavingsAccount(savingsId, "300", yesterdayS,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
+            final Long transactionIdD2 = savingsTransactionHelper.deposit(savingsId, "300", yesterdayS).getResourceId();
             assertNotNull(transactionIdD2);
             BigDecimal decValue2 = new BigDecimal("2.2");
             createDatatableEntry(datatable, transactionIdD2, yesterday, false, 2, decValue2);
-            final Integer transactionIdW1 = (Integer) savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", todayS,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
+            final Long transactionIdW1 = savingsTransactionHelper.withdraw(savingsId, "100", todayS).getResourceId();
             assertNotNull(transactionIdW1);
             createDatatableEntry(datatable, transactionIdW1, today, true, 3, new BigDecimal("3"));
 
@@ -260,21 +243,21 @@ public class DatatableAdvancedQueryTest {
             PagedLocalRequestAdvancedQueryRequest pagedRequest = new PagedLocalRequestAdvancedQueryRequest().page(0).size(2)
                     .addSortsItem(new SortOrder().property(COLUMN_SUBMITTED_DATE).direction(SortOrder.DirectionEnum.DESC))
                     .addSortsItem(new SortOrder().property(COLUMN_ID).direction(SortOrder.DirectionEnum.DESC)).request(queryRequest);
-            Map<String, Object> response = savingsAccountHelper.querySavingsTransactions(savingsId, pagedRequest);
+            JsonNode response = savingsTransactionHelper.querySavingsTransactions(savingsId, pagedRequest);
 
-            assertEquals(1, response.get("total"));
-            List content = (List) response.get("content");
+            assertEquals(1, response.path("total").asInt());
+            JsonNode content = response.path("content");
             assertNotNull(content);
             assertEquals(1, content.size());
-            Map<String, Object> first = (Map<String, Object>) content.get(0);
-            assertEquals(transactionIdD2, first.get(COLUMN_ID));
-            assertEquals(todayIsoS, first.get(COLUMN_SUBMITTED_DATE));
-            assertEquals(transactionIdD2, first.get(COLUMN_TRANSACTION_ID));
-            assertEquals(transactionIdD2.toString(), first.get(COLUMN_TEXT));
-            assertEquals(yesterdayIsoS, first.get(COLUMN_DATE));
-            assertFalse((Boolean) first.get(COLUMN_BOOLEAN));
-            assertEquals(2, first.get(COLUMN_INTEGER));
-            assertEquals(decValue2.floatValue(), first.get(COLUMN_DECIMAL));
+            JsonNode first = content.get(0);
+            assertEquals(transactionIdD2, first.path(COLUMN_ID).asLong());
+            assertEquals(todayIsoS, first.path(COLUMN_SUBMITTED_DATE).asText());
+            assertEquals(transactionIdD2, first.path(COLUMN_TRANSACTION_ID).asLong());
+            assertEquals(transactionIdD2.toString(), first.path(COLUMN_TEXT).asText());
+            assertEquals(yesterdayIsoS, first.path(COLUMN_DATE).asText());
+            assertFalse(first.path(COLUMN_BOOLEAN).asBoolean());
+            assertEquals(2, first.path(COLUMN_INTEGER).asInt());
+            assertEquals(0, decValue2.compareTo(first.path(COLUMN_DECIMAL).decimalValue()));
 
             baseQuery.columnFilters(List.of(
                     new ColumnFilterData().column(COLUMN_AMOUNT).addFiltersItem(new FilterData().operator(GTE).values(List.of("100"))),
@@ -285,22 +268,22 @@ public class DatatableAdvancedQueryTest {
                     new ColumnFilterData().column(COLUMN_INTEGER).addFiltersItem(new FilterData().operator(GTE).values(List.of("1"))),
                     new ColumnFilterData().column(COLUMN_DATE)
                             .addFiltersItem(new FilterData().operator(BTW).values(List.of(yesterdayIsoS, todayIsoS)))));
-            response = savingsAccountHelper.querySavingsTransactions(savingsId, pagedRequest);
+            response = savingsTransactionHelper.querySavingsTransactions(savingsId, pagedRequest);
 
-            assertEquals(3, response.get("total"));
-            content = (List) response.get("content");
+            assertEquals(3, response.path("total").asInt());
+            content = response.path("content");
             assertNotNull(content);
             assertEquals(2, content.size()); // page size 2
-            first = (Map) content.get(0);
-            assertEquals(transactionIdW1, first.get(COLUMN_ID));
-            assertEquals(todayIsoS, first.get(COLUMN_SUBMITTED_DATE));
-            assertEquals(transactionIdW1, first.get(COLUMN_TRANSACTION_ID));
-            assertNull(first.get(COLUMN_TEXT));
-            assertNull(first.get(COLUMN_DATE));
-            assertNull(first.get(COLUMN_BOOLEAN));
-            assertNull(first.get(COLUMN_INTEGER));
-            assertNull(first.get(COLUMN_DECIMAL));
-            assertEquals(transactionIdD2, ((Map) content.get(1)).get(COLUMN_TRANSACTION_ID));
+            first = content.get(0);
+            assertEquals(transactionIdW1, first.path(COLUMN_ID).asLong());
+            assertEquals(todayIsoS, first.path(COLUMN_SUBMITTED_DATE).asText());
+            assertEquals(transactionIdW1, first.path(COLUMN_TRANSACTION_ID).asLong());
+            assertFalse(first.hasNonNull(COLUMN_TEXT));
+            assertFalse(first.hasNonNull(COLUMN_DATE));
+            assertFalse(first.hasNonNull(COLUMN_BOOLEAN));
+            assertFalse(first.hasNonNull(COLUMN_INTEGER));
+            assertFalse(first.hasNonNull(COLUMN_DECIMAL));
+            assertEquals(transactionIdD2, content.get(1).path(COLUMN_TRANSACTION_ID).asLong());
 
             deleteDatatable(datatable, transactionIdD1, transactionIdD2, transactionIdW1);
 
@@ -312,31 +295,23 @@ public class DatatableAdvancedQueryTest {
 
     private String createAndVerifyDatatable(String apptable, String subType, boolean multiRow) {
         // creating datatable for apptable entity
-        final HashMap<String, Object> request = new HashMap<>();
-        request.put(API_PARAM_DATATABLE_NAME, Utils.uniqueRandomStringGenerator("dt_" + apptable + "_", 5));
-        request.put(API_PARAM_APPTABLE_NAME, apptable);
-        if (subType != null) {
-            request.put(API_PARAM_SUBTYPE, subType);
-        }
-        request.put(API_PARAM_MULTIROW, multiRow);
+        final List<PostColumnHeaderData> datatableColumns = new ArrayList<>();
+        datatableColumns.add(column(COLUMN_STRING, API_FIELD_TYPE_STRING, true, 50L).unique(!multiRow).indexed(true));
+        datatableColumns.add(column(COLUMN_TEXT, API_FIELD_TYPE_TEXT, false, null));
+        datatableColumns.add(column(COLUMN_DATE, API_FIELD_TYPE_DATE, true, null));
+        datatableColumns.add(column(COLUMN_BOOLEAN, API_FIELD_TYPE_BOOLEAN, false, null));
+        datatableColumns.add(column(COLUMN_INTEGER, API_FIELD_TYPE_NUMBER, false, null));
+        datatableColumns.add(column(COLUMN_DECIMAL, API_FIELD_TYPE_DECIMAL, false, null));
 
-        final List<HashMap<String, Object>> datatableColumns = new ArrayList<>();
-        DatatableHelper.addDatatableColumnWithUniqueAndIndex(datatableColumns, COLUMN_STRING, API_FIELD_TYPE_STRING, true, 50, null,
-                !multiRow, true);
-        DatatableHelper.addDatatableColumn(datatableColumns, COLUMN_TEXT, API_FIELD_TYPE_TEXT, false, null, null);
-        DatatableHelper.addDatatableColumn(datatableColumns, COLUMN_DATE, API_FIELD_TYPE_DATE, true, null, null);
-        DatatableHelper.addDatatableColumn(datatableColumns, COLUMN_BOOLEAN, API_FIELD_TYPE_BOOLEAN, false, null, null);
-        DatatableHelper.addDatatableColumn(datatableColumns, COLUMN_INTEGER, API_FIELD_TYPE_NUMBER, false, null, null);
-        DatatableHelper.addDatatableColumn(datatableColumns, COLUMN_DECIMAL, API_FIELD_TYPE_DECIMAL, false, null, null);
-        request.put(API_PARAM_COLUMNS, datatableColumns);
+        final PostDataTablesRequest request = new PostDataTablesRequest()
+                .datatableName(Utils.uniqueRandomStringGenerator("dt_" + apptable + "_", 5)).apptableName(apptable).entitySubType(subType)
+                .multiRow(multiRow).columns(datatableColumns);
+        LOG.info("request : {}", request);
 
-        String requestJson = new Gson().toJson(request);
-        LOG.info("map : {}", requestJson);
-
-        PostDataTablesResponse response = datatableHelper.createDatatable(requestJson);
+        PostDataTablesResponse response = datatableHelper.createDatatable(request);
         String datatable = response.getResourceIdentifier();
         assertNotNull(datatable);
-        GetDataTablesResponse dataTable = datatableHelper.getDataTableDetails(datatable);
+        GetDataTablesResponse dataTable = datatableHelper.getDatatable(datatable);
         List<ResultsetColumnHeaderData> columnHeaderData = dataTable.getColumnHeaderData();
         assertNotNull(columnHeaderData);
         // pk column and 2 audit columns were added automatically
@@ -344,10 +319,13 @@ public class DatatableAdvancedQueryTest {
         return datatable;
     }
 
-    @NonNull
-    private HashMap<String, Object> createDatatableEntry(String datatable, Integer apptableId, LocalDate dateValue, Boolean boolValue,
-            Integer intValue, BigDecimal decValue) {
-        final HashMap<String, Object> request = new HashMap<>();
+    private static PostColumnHeaderData column(String name, String type, boolean mandatory, Long length) {
+        return new PostColumnHeaderData().name(name).type(type).mandatory(mandatory).length(length);
+    }
+
+    private void createDatatableEntry(String datatable, Long apptableId, LocalDate dateValue, Boolean boolValue, Integer intValue,
+            BigDecimal decValue) {
+        final Map<String, Object> request = new HashMap<>();
         request.put(COLUMN_STRING, Utils.uniqueRandomStringGenerator(apptableId.toString() + "_", 5));
         request.put(COLUMN_TEXT, apptableId);
         request.put(COLUMN_DATE, DateUtils.format(dateValue, SAVINGS_DATE_FORMAT));
@@ -357,37 +335,34 @@ public class DatatableAdvancedQueryTest {
         request.put("locale", "en");
         request.put("dateFormat", SAVINGS_DATE_FORMAT);
 
-        String requestJson = new Gson().toJson(request);
-        HashMap<String, Object> response = datatableHelper.createDatatableEntry(datatable, apptableId, true, requestJson);
-        assertNotNull(response.get("resourceId"));
-        return response;
+        assertNotNull(datatableHelper.createDatatableEntry(datatable, apptableId, request).getResourceId());
     }
 
-    private void deleteDatatable(String datatable, Integer... apptableIds) {
-        for (Integer apptableId : apptableIds) {
-            String deletedId = (String) this.datatableHelper.deleteDatatableEntries(datatable, apptableId, "transactionId");
-            assertEquals(apptableId, Integer.valueOf(deletedId), "ERROR IN DELETING THE DATATABLE ENTRY");
+    private void deleteDatatable(String datatable, Long... apptableIds) {
+        for (Long apptableId : apptableIds) {
+            String deletedId = this.datatableHelper.deleteDatatableEntries(datatable, apptableId).getTransactionId();
+            assertEquals(apptableId, Long.valueOf(deletedId), "ERROR IN DELETING THE DATATABLE ENTRY");
         }
-        String deletedDatatable = this.datatableHelper.deleteDatatable(datatable);
+        String deletedDatatable = this.datatableHelper.deleteDatatable(datatable).getResourceIdentifier();
         assertEquals(datatable, deletedDatatable, "ERROR IN DELETING THE DATATABLE");
     }
 
-    private Integer createSavingsProductDailyPosting() {
-        final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private Long createSavingsProductDailyPosting() {
+        return savingsProductHelper
+                .createSavingsProduct(SavingsRequestBuilders.savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY,
+                        SavingsTestData.InterestPostingPeriodType.DAILY, SavingsTestData.InterestCalculationType.DAILY_BALANCE))
+                .getResourceId();
     }
 
-    private Integer createSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
-        final Integer savingsProductID = createSavingsProductDailyPosting();
+    private Long createSavingsAccountDailyPosting(final Long clientID, final String startDate) {
+        final Long savingsProductID = createSavingsProductDailyPosting();
         assertNotNull(savingsProductID);
-        final Integer savingsId = savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL,
-                startDate);
+        final Long savingsId = savingsHelper.submitApplication(clientID, savingsProductID, startDate).getSavingsId();
         assertNotNull(savingsId);
-        HashMap savingsStatusHashMap = savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        savingsHelper.approveSavings(savingsId, startDate);
+        assertTrue(savingsHelper.getSavingsStatus(savingsId).getApproved());
+        savingsHelper.activateSavings(savingsId, startDate);
+        assertTrue(savingsHelper.getSavingsStatus(savingsId).getActive());
         return savingsId;
     }
 }
