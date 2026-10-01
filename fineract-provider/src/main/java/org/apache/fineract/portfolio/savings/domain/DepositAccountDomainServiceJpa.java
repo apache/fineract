@@ -198,10 +198,14 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
         Long savingsTransactionId = null;
-        account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
-        account.setClosedOnDate(closedDate);
         final Integer onAccountClosureId = command.integerValueOfParameterNamed(onAccountClosureIdParamName);
         final DepositAccountOnClosureType onClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
+        if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
+                || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
+            this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
+        }
+        account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+        account.setClosedOnDate(closedDate);
         if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             ExternalId externalId = this.externalIdFactory.create();
@@ -261,9 +265,13 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
 
         final MathContext mc = MathContext.DECIMAL64;
         Long savingsTransactionId = null;
+        final DepositAccountOnClosureType onClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
+        if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
+                || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
+            this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
+        }
         account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         account.setClosedOnDate(closedDate);
-        final DepositAccountOnClosureType onClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
         if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             BigDecimal reInvestAmount;
@@ -343,10 +351,14 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
         Long savingsTransactionId = null;
-        account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, closedDate, postReversals);
-        final BigDecimal transactionAmount = account.getAccountBalance();
         final Integer onAccountClosureId = command.integerValueOfParameterNamed(onAccountClosureIdParamName);
         final DepositAccountOnClosureType onClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
+        if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
+                || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
+            this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
+        }
+        account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, closedDate, postReversals);
+        final BigDecimal transactionAmount = account.getAccountBalance();
         if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             BigDecimal reInvestAmount;
