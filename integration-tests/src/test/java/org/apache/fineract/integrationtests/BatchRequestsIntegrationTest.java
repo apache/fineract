@@ -18,29 +18,26 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
-import org.apache.fineract.batch.domain.BatchRequest;
-import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.batch.domain.Header;
+import org.apache.fineract.client.models.BatchRequest;
+import org.apache.fineract.client.models.BatchResponse;
+import org.apache.fineract.client.models.Header;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.infrastructure.core.exception.AbstractIdempotentCommandException;
-import org.apache.fineract.integrationtests.common.BatchHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.GroupHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBatchHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.BatchRequestBuilders;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,28 +48,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author Rishabh Shukla
  */
-public class BatchRequestsIntegrationTest {
+public class BatchRequestsIntegrationTest extends FeignIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(BatchRequestsIntegrationTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
     private static final SecureRandom secureRandom = new SecureRandom();
 
-    public BatchRequestsIntegrationTest() {
+    private FeignClientHelper clientHelper;
+    private FeignGroupHelper groupHelper;
+    private FeignLoanHelper loanHelper;
+    private FeignCollateralHelper collateralHelper;
+    private FeignBatchHelper batchHelper;
 
-    }
-
-    /**
-     * Sets up the essential settings for the TEST like contentType, expectedStatusCode. It uses the '@BeforeEach'
-     * annotation provided by jUnit.
-     */
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.clientHelper = new FeignClientHelper(fineractClient());
+        this.groupHelper = new FeignGroupHelper(fineractClient());
+        this.loanHelper = new FeignLoanHelper(fineractClient());
+        this.collateralHelper = new FeignCollateralHelper(fineractClient());
+        this.batchHelper = new FeignBatchHelper(fineractClient());
     }
 
     @Test
@@ -86,25 +79,25 @@ public class BatchRequestsIntegrationTest {
 
         // Generate a random count of number of clients to be created
         final Integer clientsCount = (int) Math.ceil(secureRandom.nextDouble() * 7) + 3;
-        final Integer[] clientIDs = new Integer[clientsCount];
+        final Long[] clientIDs = new Long[clientsCount];
 
         // Create a new group and get its groupId
-        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        final Long groupID = groupHelper.createActiveGroup().getGroupId();
 
         // Create new clients and add those to this group
         for (Integer i = 0; i < clientsCount; i++) {
-            clientIDs[i] = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-            groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientIDs[i].toString());
+            clientIDs[i] = clientHelper.createClient();
+            groupHelper.associateClient(groupID, clientIDs[i]);
             LOG.info("client {} has been added to the group {}", clientIDs[i], groupID);
         }
 
         // Generate a random count of number of new loan products to be created
         final Integer loansCount = (int) Math.ceil(secureRandom.nextDouble() * 4) + 1;
-        final Integer[] loanProducts = new Integer[loansCount];
+        final Long[] loanProducts = new Long[loansCount];
 
         // Create new loan Products
         for (Integer i = 0; i < loansCount; i++) {
-            final String loanProductJSON = new LoanProductTestBuilder() //
+            final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder() //
                     .withPrincipal(String.valueOf(10000.00 + Math.ceil(secureRandom.nextDouble() * 1000000.00))) //
                     .withNumberOfRepayments(String.valueOf(2 + (int) Math.ceil(secureRandom.nextDouble() * 36))) //
                     .withRepaymentAfterEvery(String.valueOf(1 + (int) Math.ceil(secureRandom.nextDouble() * 3))) //
@@ -113,13 +106,13 @@ public class BatchRequestsIntegrationTest {
                     .withInterestRateFrequencyTypeAsMonths() //
                     .withAmortizationTypeAsEqualPrincipalPayment() //
                     .withInterestTypeAsDecliningBalance() //
-                    .currencyDetails("0", "100").build(null);
+                    .currencyDetails("0", "100").buildRequest();
 
-            loanProducts[i] = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+            loanProducts[i] = loanHelper.createLoanProduct(loanProductRequest).getResourceId();
         }
 
         // Select anyone of the loan products at random
-        final Integer loanProductID = loanProducts[(int) Math.floor(secureRandom.nextDouble() * (loansCount - 1))];
+        final Long loanProductID = loanProducts[(int) Math.floor(secureRandom.nextDouble() * (loansCount - 1))];
 
         final List<BatchRequest> batchRequests = new ArrayList<>();
 
@@ -127,23 +120,21 @@ public class BatchRequestsIntegrationTest {
         Integer selClientsCount = (int) Math.ceil(secureRandom.nextDouble() * clientsCount) + 2;
         for (int i = 0; i < selClientsCount; i++) {
 
-            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+            final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
             Assertions.assertNotNull(collateralId);
-            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                    String.valueOf(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))]), collateralId);
+            final Long clientCollateralId = collateralHelper
+                    .createClientCollateral(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))], collateralId)
+                    .getResourceId();
             Assertions.assertNotNull(clientCollateralId);
 
-            BatchRequest br = BatchHelper.applyLoanRequest((long) selClientsCount, null, loanProductID, clientCollateralId);
+            BatchRequest br = BatchRequestBuilders.applyLoan((long) selClientsCount, null, loanProductID, clientCollateralId);
             br.setBody(br.getBody().replace("$.clientId",
                     String.valueOf(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))])));
             batchRequests.add(br);
         }
 
         // Send the request to Batch - API
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
         // Verify that each loan has been applied successfully
         for (BatchResponse res : response) {
@@ -156,26 +147,25 @@ public class BatchRequestsIntegrationTest {
 
         // Generate a random count of number of clients to be created
         final Integer clientsCount = (int) Math.ceil(secureRandom.nextDouble() * 7) + 3;
-        final Integer[] clientIDs = new Integer[clientsCount];
+        final Long[] clientIDs = new Long[clientsCount];
 
         // Create a new group and get its groupId
-        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        final Long groupID = groupHelper.createActiveGroup().getGroupId();
 
         // Create new clients and add those to this group
         for (Integer i = 0; i < clientsCount; i++) {
-            clientIDs[i] = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-            groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientIDs[i].toString());
+            clientIDs[i] = clientHelper.createClient();
+            groupHelper.associateClient(groupID, clientIDs[i]);
             LOG.info("client {} has been added to the group {}", clientIDs[i], groupID);
         }
 
         // Generate a random count of number of new loan products to be created
         final Integer loansCount = (int) Math.ceil(secureRandom.nextDouble() * 4) + 1;
-        final Integer[] loanProducts = new Integer[loansCount];
+        final Long[] loanProducts = new Long[loansCount];
 
         // Create new loan Products
-        LoanTransactionHelper helper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         for (Integer i = 0; i < loansCount; i++) {
-            final String loanProductJSON = new LoanProductTestBuilder() //
+            final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder() //
                     .withPrincipal(String.valueOf(10000.00 + Math.ceil(secureRandom.nextDouble() * 1000000.00))) //
                     .withNumberOfRepayments(String.valueOf(2 + (int) Math.ceil(secureRandom.nextDouble() * 36))) //
                     .withRepaymentAfterEvery(String.valueOf(1 + (int) Math.ceil(secureRandom.nextDouble() * 3))) //
@@ -184,13 +174,13 @@ public class BatchRequestsIntegrationTest {
                     .withInterestRateFrequencyTypeAsMonths() //
                     .withAmortizationTypeAsEqualPrincipalPayment() //
                     .withInterestTypeAsDecliningBalance() //
-                    .currencyDetails("0", "100").build(null);
+                    .currencyDetails("0", "100").buildRequest();
 
-            loanProducts[i] = helper.getLoanProductId(loanProductJSON);
+            loanProducts[i] = loanHelper.createLoanProduct(loanProductRequest).getResourceId();
         }
 
         // Select anyone of the loan products at random
-        final Integer loanProductID = loanProducts[(int) Math.floor(secureRandom.nextDouble() * (loansCount - 1))];
+        final Long loanProductID = loanProducts[(int) Math.floor(secureRandom.nextDouble() * (loansCount - 1))];
 
         final List<BatchRequest> batchRequests = new ArrayList<>();
 
@@ -198,25 +188,23 @@ public class BatchRequestsIntegrationTest {
         Integer selClientsCount = (int) Math.ceil(secureRandom.nextDouble() * clientsCount) + 2;
         for (int i = 0; i < selClientsCount; i++) {
 
-            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+            final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
             Assertions.assertNotNull(collateralId);
-            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                    String.valueOf(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))]), collateralId);
+            final Long clientCollateralId = collateralHelper
+                    .createClientCollateral(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))], collateralId)
+                    .getResourceId();
             Assertions.assertNotNull(clientCollateralId);
 
-            BatchRequest br = BatchHelper.applyLoanRequest((long) selClientsCount, null, loanProductID, clientCollateralId);
+            BatchRequest br = BatchRequestBuilders.applyLoan((long) selClientsCount, null, loanProductID, clientCollateralId);
             br.setBody(br.getBody().replace("$.clientId",
                     String.valueOf(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))])));
             br.setHeaders(new HashSet<>());
-            br.getHeaders().add(new Header("Idempotency-Key", UUID.randomUUID().toString()));
+            br.getHeaders().add(new Header().name("Idempotency-Key").value(UUID.randomUUID().toString()));
             batchRequests.add(br);
         }
 
         // Send the request to Batch - API
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
         // Verify that each loan has been applied successfully
         for (BatchResponse res : response) {
@@ -227,8 +215,7 @@ public class BatchRequestsIntegrationTest {
             Assertions.assertEquals(200L, (long) res.getStatusCode(), "Verify Status Code 200");
         }
 
-        final List<BatchResponse> secondResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
-                this.responseSpec, jsonifiedRequest);
+        final List<BatchResponse> secondResponse = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
         // Verify that each loan has been applied successfully
         for (BatchResponse res : secondResponse) {
