@@ -36,6 +36,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -43,6 +44,9 @@ import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.address.command.AddressCreateCommand;
+import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
+import org.apache.fineract.portfolio.address.data.AddressCreateResponse;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.address.filter.ClientAddressSearchParam;
 import org.apache.fineract.portfolio.address.service.AddressReadPlatformServiceImpl;
@@ -60,6 +64,7 @@ public class ClientAddressApiResource {
     private final AddressReadPlatformServiceImpl readPlatformService;
     private final DefaultToApiJsonSerializer<AddressData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CommandDispatcher dispatcher;
 
     @GET
     @Path("addresses/template")
@@ -79,15 +84,15 @@ public class ClientAddressApiResource {
     @Operation(summary = "Create an address for a Client", operationId = "createClientAddress", description = "Mandatory Fields : \n"
             + "type and clientId")
     @AlternativeOperationId("addClientAddress")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientAddressRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientAddressApiResourcesSwagger.PostClientClientIdAddressesResponse.class)))
-    public CommandProcessingResult addClientAddress(@QueryParam("type") @Parameter(description = "type") final long addressTypeId,
-            @PathParam("clientid") @Parameter(description = "clientId") final long clientid,
-            @Parameter(hidden = true) ClientAddressRequest clientAddressRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().addClientAddress(clientid, addressTypeId)
-                .withJson(toApiJsonSerializer.serialize(clientAddressRequest)).build();
-
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AddressCreateRequest.class)))
+    public AddressCreateResponse addClientAddress(@QueryParam("type") @Parameter(description = "type") final Long addressTypeId,
+            @PathParam("clientid") @Parameter(description = "clientId") final Long clientId,
+            @Parameter(hidden = true) AddressCreateRequest request) {
+        request.setClientId(clientId);
+        request.setAddressTypeId(addressTypeId);
+        final var command = new AddressCreateCommand();
+        command.setPayload(request);
+        return dispatcher.<AddressCreateRequest, AddressCreateResponse>dispatch(command).get();
     }
 
     @GET
