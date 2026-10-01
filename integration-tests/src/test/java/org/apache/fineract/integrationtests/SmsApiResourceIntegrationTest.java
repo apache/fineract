@@ -18,18 +18,19 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import java.util.List;
 import java.util.Locale;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.organisation.CampaignsHelper;
+import org.apache.fineract.client.feign.services.SmsApi.RetrieveAllSmsByStatusQueryParams;
+import org.apache.fineract.client.models.PageSmsData;
+import org.apache.fineract.client.models.SmsCreationRequest;
+import org.apache.fineract.client.models.SmsData;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSmsCampaignHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,28 +47,18 @@ import org.mockserver.model.MediaType;
  */
 @ExtendWith(MockServerExtension.class)
 @MockServerSettings(ports = { 9191 })
-public class SmsApiResourceIntegrationTest {
+public class SmsApiResourceIntegrationTest extends FeignIntegrationTest {
 
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-    private CampaignsHelper campaignsHelper;
-    private final ClientAndServer client;
-
-    public SmsApiResourceIntegrationTest(ClientAndServer client) {
-        this.client = client;
-        this.client.when(HttpRequest.request().withMethod("GET").withPath("/smsbridges"))
-                .respond(HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(
-                        "[{\"id\":1,\"tenantId\":1,\"phoneNo\":\"+1234567890\",\"providerName\":\"Dummy SMS Provider - Testing\",\"providerDescription\":\"Dummy, just for testing\"}]"));
-    }
+    private FeignSmsCampaignHelper campaignsHelper;
+    private FeignClientHelper clientHelper;
 
     @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.campaignsHelper = new CampaignsHelper(this.requestSpec, this.responseSpec);
+    public void setup(ClientAndServer client) {
+        client.when(HttpRequest.request().withMethod("GET").withPath("/smsbridges"))
+                .respond(HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(
+                        "[{\"id\":1,\"tenantId\":1,\"phoneNo\":\"+1234567890\",\"providerName\":\"Dummy SMS Provider - Testing\",\"providerDescription\":\"Dummy, just for testing\"}]"));
+        this.campaignsHelper = new FeignSmsCampaignHelper(fineractClient());
+        this.clientHelper = new FeignClientHelper(fineractClient());
     }
 
     /**
@@ -76,42 +67,35 @@ public class SmsApiResourceIntegrationTest {
     @Test
     public void testRetrieveAllSmsByStatus_validStatus() {
         String reportName = "Prospective Clients";
-        int triggerType = 1;
-        Integer campaignId = campaignsHelper.createCampaign(reportName, triggerType);
-        campaignsHelper.verifyCampaignCreatedOnServer(requestSpec, responseSpec, campaignId);
-        campaignsHelper.performActionsOnCampaign(requestSpec, responseSpec, campaignId, "activate");
+        long triggerType = 1L;
+        Long campaignId = campaignsHelper.createCampaign(reportName, triggerType);
+        assertEquals(campaignId, campaignsHelper.retrieveCampaign(campaignId).getId(), "ERROR IN CREATING THE CAMPAIGN");
+        campaignsHelper.performAction(campaignId, "activate");
 
-        Integer clientId = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
+        Long clientId = clientHelper.createClient();
 
-        String smsJson = String.format(
-                "{\"groupId\":null,\"clientId\":%d,\"staffId\":null,\"message\":\"Integration test message\",\"campaignId\":%d}", clientId,
-                campaignId);
-        io.restassured.RestAssured.given().spec(requestSpec).body(smsJson).when().post("/fineract-provider/api/v1/sms").then()
-                .statusCode(200).body("resourceId", notNullValue());
+        assertNotNull(ok(() -> fineractClient().sms()
+                .createSms(new SmsCreationRequest().clientId(clientId).message("Integration test message").campaignId(campaignId)))
+                .getResourceId());
 
-        io.restassured.response.Response allSmsResponse = io.restassured.RestAssured.given().spec(requestSpec).when()
-                .get("/fineract-provider/api/v1/sms");
-        java.util.List<java.util.Map<String, Object>> allSms = allSmsResponse.jsonPath().getList("");
-        Integer status = null;
-        for (java.util.Map<String, Object> sms : allSms) {
-            Object smsClientId = sms.get("clientId");
-            Object smsCampaignName = sms.get("campaignName");
-            if (smsClientId != null && smsCampaignName != null && smsClientId.equals(clientId)
-                    && smsCampaignName.equals("Campaign_Name_" + Integer.toHexString(campaignId).toUpperCase(Locale.ROOT))) {
-                java.util.Map<String, Object> statusObj = (java.util.Map<String, Object>) sms.get("status");
-                if (statusObj != null) {
-                    status = ((Number) statusObj.get("id")).intValue();
+        List<SmsData> allSms = ok(() -> fineractClient().sms().retrieveAllSms());
+        Long status = null;
+        for (SmsData sms : allSms) {
+            if (sms.getClientId() != null && sms.getCampaignName() != null && sms.getClientId().equals(clientId)
+                    && sms.getCampaignName().equals("Campaign_Name_" + Long.toHexString(campaignId).toUpperCase(Locale.ROOT))) {
+                if (sms.getStatus() != null) {
+                    status = sms.getStatus().getId();
                     break;
                 }
             }
         }
         if (status == null) {
-            status = 100;
+            status = 100L;
         }
         int limit = 10;
-        io.restassured.RestAssured.given().spec(requestSpec).queryParam("status", status).queryParam("limit", limit).when()
-                .get("/fineract-provider/api/v1/sms/" + campaignId + "/messageByStatus").then().spec(responseSpec)
-                .body("pageItems", notNullValue()).body("pageItems.clientId", hasItem(clientId));
+        PageSmsData page = retrieveAllSmsByStatus(campaignId, status, limit);
+        assertNotNull(page.getPageItems());
+        assertTrue(page.getPageItems().stream().anyMatch(sms -> clientId.equals(sms.getClientId())));
     }
 
     /**
@@ -120,15 +104,18 @@ public class SmsApiResourceIntegrationTest {
     @Test
     public void testRetrieveAllSmsByStatus_invalidStatus() {
         String reportName = "Prospective Clients";
-        int triggerType = 1;
-        Integer campaignId = campaignsHelper.createCampaign(reportName, triggerType);
-        campaignsHelper.verifyCampaignCreatedOnServer(requestSpec, responseSpec, campaignId);
-        campaignsHelper.performActionsOnCampaign(requestSpec, responseSpec, campaignId, "activate");
+        long triggerType = 1L;
+        Long campaignId = campaignsHelper.createCampaign(reportName, triggerType);
+        assertEquals(campaignId, campaignsHelper.retrieveCampaign(campaignId).getId(), "ERROR IN CREATING THE CAMPAIGN");
+        campaignsHelper.performAction(campaignId, "activate");
 
-        int invalidStatus = 9999;
+        long invalidStatus = 9999L;
         int limit = 10;
-        io.restassured.RestAssured.given().spec(requestSpec).queryParam("status", invalidStatus).queryParam("limit", limit).when()
-                .get("/fineract-provider/api/v1/sms/" + campaignId + "/messageByStatus").then().spec(responseSpec)
-                .body("pageItems", notNullValue());
+        assertNotNull(retrieveAllSmsByStatus(campaignId, invalidStatus, limit).getPageItems());
+    }
+
+    private PageSmsData retrieveAllSmsByStatus(Long campaignId, Long status, int limit) {
+        return ok(() -> fineractClient().sms().retrieveAllSmsByStatus(campaignId,
+                new RetrieveAllSmsByStatusQueryParams().status(status).limit(limit)));
     }
 }
