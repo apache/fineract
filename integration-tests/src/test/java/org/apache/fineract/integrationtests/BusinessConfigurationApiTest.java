@@ -21,46 +21,37 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.fineract.cob.data.BusinessStep;
-import org.apache.fineract.cob.data.JobBusinessStepConfigData;
-import org.apache.fineract.cob.data.JobBusinessStepDetail;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.integrationtests.common.BusinessStepConfigurationHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.BusinessStep;
+import org.apache.fineract.client.models.JobBusinessStepConfigData;
+import org.apache.fineract.client.models.JobBusinessStepDetail;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class BusinessConfigurationApiTest {
+public class BusinessConfigurationApiTest extends FeignIntegrationTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
     public static final String LOAN_JOB_NAME = "LOAN_CLOSE_OF_BUSINESS";
     public static final String LOAN_CATEGORY_NAME = "loan";
     public static final String APPLY_CHARGE_TO_OVERDUE_LOANS = "APPLY_CHARGE_TO_OVERDUE_LOANS";
     public static final String NOT_BELONGING_BUSINESS_STEP_NAME = "APPLY_CHARGE_TO_OVERDUE_LOANS_2";
     public static final String LOAN_DELINQUENCY_CLASSIFICATION = "LOAN_DELINQUENCY_CLASSIFICATION";
 
-    @BeforeEach
+    private FeignBusinessStepHelper businessStepHelper;
+
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        businessStepHelper = new FeignBusinessStepHelper(fineractClient());
     }
 
     @Test
     public void shouldReturnApplyChargeToOverdueLoanStepConfig() {
-        JobBusinessStepConfigData response = BusinessStepConfigurationHelper.getConfiguredBusinessStepsByJobName(requestSpec, responseSpec,
-                LOAN_JOB_NAME);
+        JobBusinessStepConfigData response = businessStepHelper.getConfiguredBusinessStepsByJobName(LOAN_JOB_NAME);
 
         Assertions.assertNotNull(response);
         assertEquals(LOAN_JOB_NAME, response.getJobName());
@@ -71,8 +62,7 @@ public class BusinessConfigurationApiTest {
 
     @Test
     public void shouldReturnApplyChargeToOverdueLoanStepConfigByJobCategory() {
-        JobBusinessStepDetail response = BusinessStepConfigurationHelper.getAvailableBusinessStepsByJobName(requestSpec, responseSpec,
-                LOAN_CATEGORY_NAME);
+        JobBusinessStepDetail response = businessStepHelper.getAvailableBusinessStepsByJobName(LOAN_CATEGORY_NAME);
 
         Assertions.assertNotNull(response);
         assertEquals(LOAN_CATEGORY_NAME, response.getJobName());
@@ -83,17 +73,13 @@ public class BusinessConfigurationApiTest {
 
     @Test
     public void shouldUpdateStepOrder() {
-        ResponseSpecification updateResponseSpec = new ResponseSpecBuilder().expectStatusCode(204).build();
-        JobBusinessStepConfigData originalStepConfig = BusinessStepConfigurationHelper.getConfiguredBusinessStepsByJobName(requestSpec,
-                responseSpec, LOAN_JOB_NAME);
+        JobBusinessStepConfigData originalStepConfig = businessStepHelper.getConfiguredBusinessStepsByJobName(LOAN_JOB_NAME);
 
         List<BusinessStep> requestBody = new ArrayList<>();
         requestBody.add(getBusinessSteps(1L, APPLY_CHARGE_TO_OVERDUE_LOANS));
-        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
-                BusinessStepConfigurationHelper.toJsonString(requestBody));
+        businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, requestBody);
 
-        JobBusinessStepConfigData newStepConfig = BusinessStepConfigurationHelper.getConfiguredBusinessStepsByJobName(requestSpec,
-                responseSpec, LOAN_JOB_NAME);
+        JobBusinessStepConfigData newStepConfig = businessStepHelper.getConfiguredBusinessStepsByJobName(LOAN_JOB_NAME);
         BusinessStep applyChargeStep = newStepConfig.getBusinessSteps().stream()
                 .filter(businessStep -> APPLY_CHARGE_TO_OVERDUE_LOANS.equals(businessStep.getStepName())).findFirst().get();
         assertEquals(1, newStepConfig.getBusinessSteps().size());
@@ -101,9 +87,8 @@ public class BusinessConfigurationApiTest {
 
         requestBody.add(getBusinessSteps(2L, LOAN_DELINQUENCY_CLASSIFICATION));
 
-        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
-                BusinessStepConfigurationHelper.toJsonString(requestBody));
-        newStepConfig = BusinessStepConfigurationHelper.getConfiguredBusinessStepsByJobName(requestSpec, responseSpec, LOAN_JOB_NAME);
+        businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, requestBody);
+        newStepConfig = businessStepHelper.getConfiguredBusinessStepsByJobName(LOAN_JOB_NAME);
         applyChargeStep = newStepConfig.getBusinessSteps().stream()
                 .filter(businessStep -> APPLY_CHARGE_TO_OVERDUE_LOANS.equals(businessStep.getStepName())).findFirst().get();
         BusinessStep loanDelinquencyStep = newStepConfig.getBusinessSteps().stream()
@@ -113,42 +98,35 @@ public class BusinessConfigurationApiTest {
         assertEquals(2L, loanDelinquencyStep.getOrder());
 
         requestBody.remove(1);
-        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
-                BusinessStepConfigurationHelper.toJsonString(requestBody));
+        businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, requestBody);
 
-        newStepConfig = BusinessStepConfigurationHelper.getConfiguredBusinessStepsByJobName(requestSpec, responseSpec, LOAN_JOB_NAME);
+        newStepConfig = businessStepHelper.getConfiguredBusinessStepsByJobName(LOAN_JOB_NAME);
         applyChargeStep = newStepConfig.getBusinessSteps().stream()
                 .filter(businessStep -> APPLY_CHARGE_TO_OVERDUE_LOANS.equals(businessStep.getStepName())).findFirst().get();
         assertEquals(1, newStepConfig.getBusinessSteps().size());
         assertEquals(1L, applyChargeStep.getOrder());
 
-        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
-                BusinessStepConfigurationHelper.toJsonString(originalStepConfig.getBusinessSteps()));
+        businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, originalStepConfig.getBusinessSteps());
     }
 
     @Test
     public void shouldThrowErrorWhenABusinessStepDoesNotBelongToTheGivenJob() {
-        ResponseSpecification responseSpecForError = new ResponseSpecBuilder().expectStatusCode(400).build();
         List<BusinessStep> requestBody = new ArrayList<>();
         requestBody.add(getBusinessSteps(1L, NOT_BELONGING_BUSINESS_STEP_NAME));
-        ApiParameterError response = BusinessStepConfigurationHelper.updateBusinessStepOrderWithError(requestSpec, responseSpecForError,
-                LOAN_JOB_NAME, BusinessStepConfigurationHelper.toJsonString(requestBody));
+        CallFailedRuntimeException response = businessStepHelper.updateBusinessStepsExpectingError(LOAN_JOB_NAME, requestBody);
+        assertEquals(400, response.getStatus());
         assertEquals("[APPLY_CHARGE_TO_OVERDUE_LOANS_2] Business steps are not configurable for this job.", response.getDeveloperMessage());
     }
 
     @Test
     public void shouldThrowErrorWhenBusinessStepListIsEmpty() {
-        ResponseSpecification responseSpecForError = new ResponseSpecBuilder().expectStatusCode(400).build();
         List<BusinessStep> requestBody = Collections.emptyList();
-        ApiParameterError response = BusinessStepConfigurationHelper.updateBusinessStepOrderWithError(requestSpec, responseSpecForError,
-                LOAN_JOB_NAME, BusinessStepConfigurationHelper.toJsonString(requestBody));
+        CallFailedRuntimeException response = businessStepHelper.updateBusinessStepsExpectingError(LOAN_JOB_NAME, requestBody);
+        assertEquals(400, response.getStatus());
         assertEquals("A job needs to have 1 business step at least.", response.getDeveloperMessage());
     }
 
     private BusinessStep getBusinessSteps(Long order, String stepName) {
-        BusinessStep businessStep = new BusinessStep();
-        businessStep.setStepName(stepName);
-        businessStep.setOrder(order);
-        return businessStep;
+        return new BusinessStep().stepName(stepName).order(order);
     }
 }
