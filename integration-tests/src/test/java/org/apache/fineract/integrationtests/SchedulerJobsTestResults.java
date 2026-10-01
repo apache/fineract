@@ -22,12 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -42,55 +36,65 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
+import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetHolidaysResponse;
 import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdStatus;
+import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetStandingInstructionHistoryPageItemsResponse;
 import org.apache.fineract.client.models.GetStandingInstructionsStandingInstructionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
-import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostFixedDepositAccountsRequest;
+import org.apache.fineract.client.models.PostFixedDepositProductsRequest;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansRequestCollateralData;
+import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
+import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFixedDepositHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFixedDepositProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsChargeHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.DepositRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.DepositTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.BusinessStepHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.HolidayHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.StandingInstructionsHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
-import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountHelper;
-import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountStatusChecker;
-import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProductHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
+import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -99,13 +103,10 @@ import org.junit.jupiter.api.MethodOrderer.MethodName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 @Order(1)
 @TestMethodOrder(MethodName.class)
-@ExtendWith(LoanTestLifecycleExtension.class)
-@SuppressWarnings({ "unchecked", "rawtypes" })
-public class SchedulerJobsTestResults extends IntegrationTest {
+public class SchedulerJobsTestResults extends FeignLoanTestBase {
 
     private static final String FROM_ACCOUNT_TYPE_SAVINGS = "2";
     private static final String TO_ACCOUNT_TYPE_SAVINGS = "2";
@@ -114,45 +115,41 @@ public class SchedulerJobsTestResults extends IntegrationTest {
     public static final String LOAN_APPROVAL_DATE = "01 March 2013";
     public static final String LOAN_APPROVAL_DATE_PLUS_ONE = "02 March 2013";
     public static final String LOAN_DISBURSAL_DATE = "01 March 2013";
-    private static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     private static final String MINIMUM_OPENING_BALANCE = "1000";
-    private static final Float SP_BALANCE = Float.valueOf(MINIMUM_OPENING_BALANCE);
+    private static final BigDecimal SP_BALANCE = new BigDecimal(MINIMUM_OPENING_BALANCE);
+    private static final String SAVINGS_SUBMITTED_DATE = "08 January 2013";
+    private static final String SAVINGS_APPROVED_DATE = "09 January 2013";
+    private static final String SAVINGS_ACTIVATED_DATE = "01 March 2013";
+    private static final String LOAN_LOCALE = "en_GB";
+    private static final String LOAN_MAX_OUTSTANDING_BALANCE = "36000";
+    private static final double CHARGE_AMOUNT = 100;
+    private static final String FEE_ON_MONTH_DAY = "04 March";
+    private static final String FEE_FREQUENCY_MONTHS = "2";
+    private static final String FEE_INTERVAL = "2";
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private SavingsAccountHelper savingsAccountHelper;
-    private LoanTransactionHelper loanTransactionHelper;
-    private AccountHelper accountHelper;
-    private JournalEntryHelper journalEntryHelper;
-    private ClientHelper clientHelper;
     private TimeZone systemTimeZone;
     private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
-    private BusinessDateHelper businessDateHelper;
-    private static BusinessStepHelper businessStepHelper;
-    private GlobalConfigurationHelper globalConfigurationHelper;
+    private FeignSavingsHelper savingsHelper;
+    private FeignSavingsProductHelper savingsProductHelper;
+    private FeignSavingsChargeHelper savingsChargeHelper;
+    private FeignCollateralHelper collateralHelper;
 
     @BeforeAll
-    public static void beforeAll() {
-        businessStepHelper = new BusinessStepHelper();
+    public void beforeAll() {
         // setup COB Business Steps to prevent test failing due other integration test configurations
-        businessStepHelper.updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
-                "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
-                "EXTERNAL_ASSET_OWNER_TRANSFER", "CHECK_DUE_INSTALLMENTS", "ACCRUAL_ACTIVITY_POSTING", "LOAN_INTEREST_RECALCULATION");
+        new FeignBusinessStepHelper(fineractClient()).updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS",
+                "LOAN_DELINQUENCY_CLASSIFICATION", "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING",
+                "ADD_PERIODIC_ACCRUAL_ENTRIES", "EXTERNAL_ASSET_OWNER_TRANSFER", "CHECK_DUE_INSTALLMENTS", "ACCRUAL_ACTIVITY_POSTING",
+                "LOAN_INTEREST_RECALCULATION");
     }
 
     @BeforeEach
     public void setup() {
-        Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", "default");
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
-        this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
-        clientHelper = new ClientHelper(requestSpec, responseSpec);
-        this.businessDateHelper = new BusinessDateHelper();
         this.systemTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
-        globalConfigurationHelper = new GlobalConfigurationHelper();
+        this.savingsHelper = new FeignSavingsHelper(fineractClient());
+        this.savingsProductHelper = new FeignSavingsProductHelper(fineractClient());
+        this.savingsChargeHelper = new FeignSavingsChargeHelper(fineractClient());
+        this.collateralHelper = new FeignCollateralHelper(fineractClient());
     }
 
     @AfterEach
@@ -163,7 +160,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
     @Test
     public void testApplyAnnualFeeForSavingsJobOutcome() throws InterruptedException {
-        Integer savingsId = null;
+        Long savingsId = null;
         try {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
@@ -171,51 +168,41 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             LocalDate submittedDate = LocalDate.of(2022, 9, 28);
             String submittedDateString = "28 September 2022";
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, submittedDate);
-            this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
 
-            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+            final Long clientID = clientHelper.createClient();
             Assertions.assertNotNull(clientID);
 
-            final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE);
+            final Long savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
             Assertions.assertNotNull(savingsProductID);
 
-            savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL,
-                    submittedDateString);
+            savingsId = savingsHelper.submitApplication(clientID, savingsProductID, submittedDateString).getSavingsId();
             Assertions.assertNotNull(savingsProductID);
 
-            HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
-            SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+            SavingsTestValidators.verifySavingsIsPending(savingsHelper.getSavingsStatus(savingsId));
 
-            final Integer annualFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getSavingsAnnualFeeJSON());
+            final Long annualFeeChargeId = chargesHelper.createCharge(SavingsRequestBuilders.savingsAnnualFeeCharge()).getResourceId();
             Assertions.assertNotNull(annualFeeChargeId);
 
-            this.savingsAccountHelper.addChargesForSavingsWithDueDateAndFeeOnMonthDay(savingsId, annualFeeChargeId, "10 January 2023", 100,
-                    "15 January");
-            ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
-            Assertions.assertEquals(1, chargesPendingState.size());
+            savingsChargeHelper.addChargeWithDueDateAndFeeOnMonthDay(savingsId, annualFeeChargeId, "10 January 2023", "100", "15 January");
+            Assertions.assertEquals(1, savingsHelper.getSavingsCharges(savingsId).size());
 
-            savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, submittedDateString);
-            SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+            savingsHelper.approveSavings(savingsId, submittedDateString);
+            SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsId));
 
-            savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId, submittedDateString);
-            SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+            savingsHelper.activateSavings(savingsId, submittedDateString);
+            SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2022, 11, 11));
             String JobName = "Apply Annual Fee For Savings";
 
             SchedulerJobHelper.executeAndAwaitJob(JobName);
 
-            final HashMap savingsDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
-            final HashMap annualFeeDetails = (HashMap) savingsDetails.get("annualFee");
-            ArrayList<Integer> annualFeeDueDateAsArrayList = (ArrayList<Integer>) annualFeeDetails.get("dueDate");
-            LocalDate nextDueDateForAnnualFee = LocalDate.of(annualFeeDueDateAsArrayList.get(0), annualFeeDueDateAsArrayList.get(1),
-                    annualFeeDueDateAsArrayList.get(2));
+            LocalDate nextDueDateForAnnualFee = savingsHelper.getSavingsDetails(savingsId).getAnnualFee().getDueDate();
             LocalDate expectedDueDate = LocalDate.of(2023, 1, 15);
 
             assertThat(nextDueDateForAnnualFee).isEqualTo(expectedDueDate);
         } finally {
-            savingsAccountHelper.closeSavingsAccountOnDate(savingsId, "true", "11 November 2022");
+            savingsHelper.closeSavings(savingsId, "11 November 2022", true);
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
         }
@@ -223,127 +210,88 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
     @Test
     public void testInterestPostingForSavingsJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE);
+        final Long savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
         Assertions.assertNotNull(savingsProductID);
 
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(savingsProductID);
+        final Long savingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
-        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
-
-        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
-
-        final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        final BigDecimal balanceBefore = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
 
         String JobName = "Post Interest For Savings";
 
         SchedulerJobHelper.executeAndAwaitJob(JobName);
-        final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        final BigDecimal balanceAfter = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
 
-        Assertions.assertNotSame(summaryBefore.get("accountBalance"), summaryAfter.get("accountBalance"),
-                "Verifying the Balance after running Post Interest for Savings Job");
+        Assertions.assertNotSame(balanceBefore, balanceAfter, "Verifying the Balance after running Post Interest for Savings Job");
     }
 
     @Test
     public void testTransferFeeForLoansFromSavingsJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE);
+        final Long savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
         Assertions.assertNotNull(savingsProductID);
 
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(savingsProductID);
+        final Long savingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
-        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
-
-        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
-
-        final Integer loanProductID = createLoanProduct(null);
+        final Long loanProductID = createLoanProductWithCharge(null);
         Assertions.assertNotNull(loanProductID);
 
-        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), savingsId.toString(), "1 March 2013");
+        final Long loanID = applyForLoanWithCollateral(clientID, loanProductID, savingsId, "1 March 2013");
         Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        approveLoan(loanID, LOAN_APPROVAL_DATE);
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-        Integer specifiedDueDateChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateWithAccountTransferJSON());
+        Long specifiedDueDateChargeId = chargesHelper
+                .createCharge(ChargeRequestBuilders.loanSpecifiedDueDateAccountTransferFee(CHARGE_AMOUNT, true)).getResourceId();
         Assertions.assertNotNull(specifiedDueDateChargeId);
 
-        this.loanTransactionHelper.addChargesForLoan(loanID,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(specifiedDueDateChargeId.toString(), "12 March 2013", "100"));
-        ArrayList<HashMap> chargesPendingState = this.loanTransactionHelper.getLoanCharges(loanID);
-        Assertions.assertEquals(1, chargesPendingState.size());
+        addSpecifiedDueDateCharge(loanID, specifiedDueDateChargeId, "12 March 2013", "100");
+        Assertions.assertEquals(1, loanHelper.getLoanCharges(loanID).size());
 
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        disburseLoanWithNetDisbursalAmount(loanID, LOAN_DISBURSAL_DATE);
+        verifyLoanStatus(loanID, LoanStatus.ACTIVE);
+        final BigDecimal balanceBefore = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
 
         String JobName = "Transfer Fee For Loans From Savings";
         SchedulerJobHelper.executeAndAwaitJob(JobName);
-        final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        final BigDecimal balanceAfter = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
 
-        final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, specifiedDueDateChargeId);
+        final BigDecimal chargeAmount = BigDecimal.valueOf(chargesHelper.getCharge(specifiedDueDateChargeId).getAmount());
 
-        Float chargeAmount = (Float) chargeData.get("amount");
+        final BigDecimal balance = balanceBefore.subtract(chargeAmount);
 
-        final Float balance = (Float) summaryBefore.get("accountBalance") - chargeAmount;
-
-        Assertions.assertEquals(balance, (Float) summaryAfter.get("accountBalance"),
-                "Verifying the Balance after running Transfer Fee for Loans from Savings");
+        assertAmount(balance, balanceAfter, "Verifying the Balance after running Transfer Fee for Loans from Savings");
     }
 
     @Test
     public void testApplyHolidaysToLoansJobOutcome() throws InterruptedException {
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);
 
         Long holidayId = HolidayHelper.createHolidays();
         Assertions.assertNotNull(holidayId);
 
-        final Integer loanProductID = createLoanProduct(null);
+        final Long loanProductID = createLoanProductWithCharge(null);
         Assertions.assertNotNull(loanProductID);
 
-        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "01 March 2013");
+        final Long loanID = applyForLoanWithCollateral(clientID, loanProductID, null, "01 March 2013");
         Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        approveLoan(loanID, LOAN_APPROVAL_DATE);
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        GetLoansLoanIdResponse loanDetails = disburseLoanWithNetDisbursalAmount(loanID, LOAN_DISBURSAL_DATE);
+        verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
         // Updating Value for reschedule-repayments-on-holidays Global
         // Configuration
@@ -358,18 +306,16 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         Assertions.assertNotNull(repaymentsRescheduledDate);
 
         // Loan Repayment Schedule Before Apply Holidays To Loans
-        final LinkedHashMap repaymentScheduleHashMapBeforeHolidaysApply = JsonPath.from(loanDetails).get("repaymentSchedule");
-        final ArrayList<LinkedHashMap> periodsBeforeHolidaysApply = (ArrayList<LinkedHashMap>) repaymentScheduleHashMapBeforeHolidaysApply
-                .get("periods");
+        final List<GetLoansLoanIdRepaymentPeriod> periodsBeforeHolidaysApply = loanDetails.getRepaymentSchedule().getPeriods();
 
-        for (LinkedHashMap period : periodsBeforeHolidaysApply) {
-            final ArrayList<Integer> fromDate = (ArrayList<Integer>) period.get("fromDate");
+        for (GetLoansLoanIdRepaymentPeriod period : periodsBeforeHolidaysApply) {
+            final LocalDate fromDate = period.getFromDate();
             if (fromDate != null) {
-                final Integer fromDateMonth = fromDate.get(1);
+                final Integer fromDateMonth = fromDate.getMonthValue();
                 final Integer repaymentsRescheduledDateMonth = repaymentsRescheduledDate.getMonthValue();
                 if (Objects.equals(fromDateMonth, repaymentsRescheduledDateMonth)) {
                     final Integer repaymentsRescheduledDateDay = repaymentsRescheduledDate.getDayOfMonth();
-                    final Integer fromDateDay = fromDate.get(2);
+                    final Integer fromDateDay = fromDate.getDayOfMonth();
                     Assertions.assertNotEquals(repaymentsRescheduledDateDay, fromDateDay,
                             "Verifying Repayment Rescheduled Day before Running Apply Holidays to Loans Scheduler Job");
                 }
@@ -381,20 +327,17 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         SchedulerJobHelper.executeAndAwaitJob(jobName);
 
         // Loan Repayment Schedule After Apply Holidays To Loans
-        loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        final LinkedHashMap repaymentScheduleHashMapAfterHolidaysApply = JsonPath.from(loanDetails).get("repaymentSchedule");
-        final ArrayList<LinkedHashMap> periodsAfterHolidaysApply = (ArrayList<LinkedHashMap>) repaymentScheduleHashMapAfterHolidaysApply
-                .get("periods");
-        ArrayList<Integer> dateToApplyHolidays = null;
+        final List<GetLoansLoanIdRepaymentPeriod> periodsAfterHolidaysApply = repaymentPeriods(loanID);
+        LocalDate dateToApplyHolidays = null;
 
-        for (LinkedHashMap periodBefore : periodsBeforeHolidaysApply) {
-            for (LinkedHashMap periodAfter : periodsAfterHolidaysApply) {
-                final ArrayList<Integer> fromDateBefore = (ArrayList<Integer>) periodBefore.get("fromDate");
-                final ArrayList<Integer> fromDateAfter = (ArrayList<Integer>) periodAfter.get("fromDate");
+        for (GetLoansLoanIdRepaymentPeriod periodBefore : periodsBeforeHolidaysApply) {
+            for (GetLoansLoanIdRepaymentPeriod periodAfter : periodsAfterHolidaysApply) {
+                final LocalDate fromDateBefore = periodBefore.getFromDate();
+                final LocalDate fromDateAfter = periodAfter.getFromDate();
 
                 if (fromDateBefore != null && fromDateAfter != null) {
-                    final Integer fromDateMonthBefore = fromDateBefore.get(1);
-                    final Integer fromDateMonthAfter = fromDateAfter.get(1);
+                    final Integer fromDateMonthBefore = fromDateBefore.getMonthValue();
+                    final Integer fromDateMonthAfter = fromDateAfter.getMonthValue();
                     final Integer repaymentsRescheduledDateMonth = repaymentsRescheduledDate.getMonthValue();
 
                     if (Objects.equals(fromDateMonthAfter, repaymentsRescheduledDateMonth)) {
@@ -408,42 +351,37 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         }
 
         Assertions.assertNotNull(dateToApplyHolidays);
-        Assertions.assertEquals(repaymentsRescheduledDate.getDayOfMonth(), dateToApplyHolidays.get(2),
+        Assertions.assertEquals(repaymentsRescheduledDate.getDayOfMonth(), dateToApplyHolidays.getDayOfMonth(),
                 "Verifying Repayment Rescheduled Day after Running Apply Holidays to Loans Scheduler Job");
     }
 
-    private void assertEqualDay(ArrayList<Integer> fromDateBefore, ArrayList<Integer> fromDateAfter, String message) {
-        Integer fromDateDayBefore = fromDateBefore.get(2);
-        Integer fromDateDayAfter = fromDateAfter.get(2);
+    private void assertEqualDay(LocalDate fromDateBefore, LocalDate fromDateAfter, String message) {
+        Integer fromDateDayBefore = fromDateBefore.getDayOfMonth();
+        Integer fromDateDayAfter = fromDateAfter.getDayOfMonth();
         Assertions.assertEquals(fromDateDayBefore, fromDateDayAfter, message);
     }
 
     @Test
     public void testApplyType1HolidaysToLoansJobOutcome() throws InterruptedException {
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);
 
         Long holidayId = HolidayHelper.createTyoe1Holidays();
         Assertions.assertNotNull(holidayId);
 
-        final Integer loanProductID = createLoanProduct(null);
+        final Long loanProductID = createLoanProductWithCharge(null);
         Assertions.assertNotNull(loanProductID);
 
-        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "04 January 2024");
+        final Long loanID = applyForLoanWithCollateral(clientID, loanProductID, null, "04 January 2024");
         Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("04 January 2024", loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        approveLoan(loanID, "04 January 2024");
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("04 January 2024", loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        GetLoansLoanIdResponse loanDetails = disburseLoanWithNetDisbursalAmount(loanID, "04 January 2024");
+        verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
         String configName = GlobalConfigurationConstants.RESCHEDULE_REPAYMENTS_ON_HOLIDAYS;
         globalConfigurationHelper.updateGlobalConfiguration(configName, new PutGlobalConfigurationsRequest().enabled(true));
@@ -453,84 +391,65 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
         GetHolidaysResponse holidayData = HolidayHelper.getHolidayById(holidayId);
 
-        LinkedHashMap repaymentScheduleHashMap = JsonPath.from(loanDetails).get("repaymentSchedule");
-        ArrayList<LinkedHashMap> periods = (ArrayList<LinkedHashMap>) repaymentScheduleHashMap.get("periods");
+        List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
         String JobName = "Apply Holidays To Loans";
 
         SchedulerJobHelper.executeAndAwaitJob(JobName);
 
         // Loan Repayment Schedule After Apply Holidays To Loans
-        loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        repaymentScheduleHashMap = JsonPath.from(loanDetails).get("repaymentSchedule");
-        ArrayList<LinkedHashMap> periodsAfterRescheduleApplied = (ArrayList<LinkedHashMap>) repaymentScheduleHashMap.get("periods");
+        List<GetLoansLoanIdRepaymentPeriod> periodsAfterRescheduleApplied = repaymentPeriods(loanID);
 
-        ArrayList<Integer> fromDateValues = (ArrayList<Integer>) periods.get(1).get("fromDate");
-        LocalDate fromDate = LocalDate.of(fromDateValues.get(0), fromDateValues.get(1), fromDateValues.get(2));
-        ArrayList<Integer> dueDateValues = (ArrayList<Integer>) periods.get(1).get("dueDate");
-        LocalDate dueDate = LocalDate.of(dueDateValues.get(0), dueDateValues.get(1), dueDateValues.get(2));
+        LocalDate fromDate = periods.get(1).getFromDate();
+        LocalDate dueDate = periods.get(1).getDueDate();
         Assertions.assertEquals(LocalDate.of(2024, 1, 4), fromDate,
                 "Verifying Repayment Rescheduled Date before Running Apply Holidays to Loans Scheduler Job");
         Assertions.assertEquals(LocalDate.of(2024, 2, 4), dueDate,
                 "Verifying Repayment Rescheduled Date before Running Apply Holidays to Loans Scheduler Job");
 
-        fromDateValues = (ArrayList<Integer>) periods.get(2).get("fromDate");
-        fromDate = LocalDate.of(fromDateValues.get(0), fromDateValues.get(1), fromDateValues.get(2));
-        dueDateValues = (ArrayList<Integer>) periods.get(2).get("dueDate");
-        dueDate = LocalDate.of(dueDateValues.get(0), dueDateValues.get(1), dueDateValues.get(2));
+        fromDate = periods.get(2).getFromDate();
+        dueDate = periods.get(2).getDueDate();
         Assertions.assertEquals(LocalDate.of(2024, 2, 4), fromDate,
                 "Verifying Repayment Rescheduled Date before Running Apply Holidays to Loans Scheduler Job");
         Assertions.assertEquals(LocalDate.of(2024, 3, 4), dueDate,
                 "Verifying Repayment Rescheduled Date before Running Apply Holidays to Loans Scheduler Job");
 
-        fromDateValues = (ArrayList<Integer>) periods.get(3).get("fromDate");
-        fromDate = LocalDate.of(fromDateValues.get(0), fromDateValues.get(1), fromDateValues.get(2));
-        dueDateValues = (ArrayList<Integer>) periods.get(3).get("dueDate");
-        dueDate = LocalDate.of(dueDateValues.get(0), dueDateValues.get(1), dueDateValues.get(2));
+        fromDate = periods.get(3).getFromDate();
+        dueDate = periods.get(3).getDueDate();
         Assertions.assertEquals(LocalDate.of(2024, 3, 4), fromDate,
                 "Verifying Repayment Rescheduled Date before Running Apply Holidays to Loans Scheduler Job");
         Assertions.assertEquals(LocalDate.of(2024, 4, 4), dueDate,
                 "Verifying Repayment Rescheduled Date before Running Apply Holidays to Loans Scheduler Job");
 
-        fromDateValues = (ArrayList<Integer>) periods.get(4).get("fromDate");
-        fromDate = LocalDate.of(fromDateValues.get(0), fromDateValues.get(1), fromDateValues.get(2));
-        dueDateValues = (ArrayList<Integer>) periods.get(4).get("dueDate");
-        dueDate = LocalDate.of(dueDateValues.get(0), dueDateValues.get(1), dueDateValues.get(2));
+        fromDate = periods.get(4).getFromDate();
+        dueDate = periods.get(4).getDueDate();
         Assertions.assertEquals(LocalDate.of(2024, 4, 4), fromDate,
                 "Verifying Repayment Rescheduled Date before Running Apply Holidays to Loans Scheduler Job");
         Assertions.assertEquals(LocalDate.of(2024, 5, 4), dueDate,
                 "Verifying Repayment Rescheduled Date before Running Apply Holidays to Loans Scheduler Job");
 
-        fromDateValues = (ArrayList<Integer>) periodsAfterRescheduleApplied.get(1).get("fromDate");
-        fromDate = LocalDate.of(fromDateValues.get(0), fromDateValues.get(1), fromDateValues.get(2));
-        dueDateValues = (ArrayList<Integer>) periodsAfterRescheduleApplied.get(1).get("dueDate");
-        dueDate = LocalDate.of(dueDateValues.get(0), dueDateValues.get(1), dueDateValues.get(2));
+        fromDate = periodsAfterRescheduleApplied.get(1).getFromDate();
+        dueDate = periodsAfterRescheduleApplied.get(1).getDueDate();
         Assertions.assertEquals(LocalDate.of(2024, 1, 4), fromDate,
                 "Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job");
         Assertions.assertEquals(LocalDate.of(2024, 2, 4), dueDate,
                 "Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job");
 
-        fromDateValues = (ArrayList<Integer>) periodsAfterRescheduleApplied.get(2).get("fromDate");
-        fromDate = LocalDate.of(fromDateValues.get(0), fromDateValues.get(1), fromDateValues.get(2));
-        dueDateValues = (ArrayList<Integer>) periodsAfterRescheduleApplied.get(2).get("dueDate");
-        dueDate = LocalDate.of(dueDateValues.get(0), dueDateValues.get(1), dueDateValues.get(2));
+        fromDate = periodsAfterRescheduleApplied.get(2).getFromDate();
+        dueDate = periodsAfterRescheduleApplied.get(2).getDueDate();
         Assertions.assertEquals(LocalDate.of(2024, 2, 4), fromDate,
                 "Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job");
         Assertions.assertEquals(LocalDate.of(2024, 3, 4), dueDate,
                 "Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job");
 
-        fromDateValues = (ArrayList<Integer>) periodsAfterRescheduleApplied.get(3).get("fromDate");
-        fromDate = LocalDate.of(fromDateValues.get(0), fromDateValues.get(1), fromDateValues.get(2));
-        dueDateValues = (ArrayList<Integer>) periodsAfterRescheduleApplied.get(3).get("dueDate");
-        dueDate = LocalDate.of(dueDateValues.get(0), dueDateValues.get(1), dueDateValues.get(2));
+        fromDate = periodsAfterRescheduleApplied.get(3).getFromDate();
+        dueDate = periodsAfterRescheduleApplied.get(3).getDueDate();
         Assertions.assertEquals(LocalDate.of(2024, 3, 4), fromDate,
                 "Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job");
         Assertions.assertEquals(LocalDate.of(2024, 5, 4), dueDate,
                 "Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job");
 
-        fromDateValues = (ArrayList<Integer>) periodsAfterRescheduleApplied.get(4).get("fromDate");
-        fromDate = LocalDate.of(fromDateValues.get(0), fromDateValues.get(1), fromDateValues.get(2));
-        dueDateValues = (ArrayList<Integer>) periodsAfterRescheduleApplied.get(4).get("dueDate");
-        dueDate = LocalDate.of(dueDateValues.get(0), dueDateValues.get(1), dueDateValues.get(2));
+        fromDate = periodsAfterRescheduleApplied.get(4).getFromDate();
+        dueDate = periodsAfterRescheduleApplied.get(4).getDueDate();
         Assertions.assertEquals(LocalDate.of(2024, 5, 4), fromDate,
                 "Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job");
         Assertions.assertEquals(LocalDate.of(2024, 6, 4), dueDate,
@@ -542,133 +461,111 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
     @Test
     public void testApplyDueFeeChargesForSavingsJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE);
+        final Long savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
         Assertions.assertNotNull(savingsProductID);
 
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        final Long savingsId = savingsHelper.submitApplication(clientID, savingsProductID, SAVINGS_SUBMITTED_DATE).getSavingsId();
         Assertions.assertNotNull(savingsProductID);
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
-        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+        SavingsTestValidators.verifySavingsIsPending(savingsHelper.getSavingsStatus(savingsId));
 
-        final Integer specifiedDueDateChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getSavingsSpecifiedDueDateJSON());
+        final Long specifiedDueDateChargeId = chargesHelper.createCharge(SavingsRequestBuilders.savingsSpecifiedDueDateCharge())
+                .getResourceId();
         Assertions.assertNotNull(specifiedDueDateChargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, specifiedDueDateChargeId, true);
-        ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assertions.assertEquals(1, chargesPendingState.size());
+        savingsChargeHelper.addChargeToSavings(savingsId, savingsChargeWithDueDate(specifiedDueDateChargeId));
+        Assertions.assertEquals(1, savingsHelper.getSavingsCharges(savingsId).size());
 
-        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+        savingsHelper.approveSavings(savingsId, SAVINGS_APPROVED_DATE);
+        SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsId));
 
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        savingsHelper.activateSavings(savingsId, SAVINGS_ACTIVATED_DATE);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
 
-        HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        BigDecimal balanceBefore = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
 
         String JobName = "Pay Due Savings Charges";
 
         SchedulerJobHelper.executeAndAwaitJob(JobName);
-        HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        BigDecimal balanceAfter = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
 
-        final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, specifiedDueDateChargeId);
+        final BigDecimal chargeAmount = BigDecimal.valueOf(chargesHelper.getCharge(specifiedDueDateChargeId).getAmount());
 
-        Float chargeAmount = (Float) chargeData.get("amount");
+        final BigDecimal balance = balanceBefore.subtract(chargeAmount);
 
-        final Float balance = (Float) summaryBefore.get("accountBalance") - chargeAmount;
-
-        Assertions.assertEquals(balance, (Float) summaryAfter.get("accountBalance"),
-                "Verifying the Balance after running Pay due Savings Charges");
+        assertAmount(balance, balanceAfter, "Verifying the Balance after running Pay due Savings Charges");
     }
 
     @Test
     public void testUpdateAccountingRunningBalancesJobOutcome() {
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account liabilityAccount = accountHelper.createLiabilityAccount();
 
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Long accountID = assetAccount.getAccountID().longValue();
 
-        final Integer accountID = assetAccount.getAccountID();
+        final Long savingsProductID = savingsProductHelper.createSavingsProduct(SavingsRequestBuilders.withCashBasedAccounting(
+                savingsProduct(SavingsTestData.InterestPostingPeriodType.QUARTERLY, MINIMUM_OPENING_BALANCE), assetAccount,
+                liabilityAccount, incomeAccount, expenseAccount)).getResourceId();
 
-        final Integer savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount, expenseAccount,
-                liabilityAccount);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
-        final Integer savingsID = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsID);
-        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
-
-        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsID);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        final Long clientID = clientHelper.createClient(DATE_OF_JOINING);
+        final Long savingsID = applyApproveAndActivateSavings(clientID, savingsProductID);
 
         // Checking initial Account entries.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liabilityAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountInitialEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, liabilityAccountInitialEntry);
+        journalHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE,
+                LoanTestData.Journal.debit(accountID, SP_BALANCE.doubleValue()));
+        journalHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
+                LoanTestData.Journal.credit(liabilityAccount.getAccountID().longValue(), SP_BALANCE.doubleValue()));
 
         String JobName = "Update Accounting Running Balances";
 
         SchedulerJobHelper.executeAndAwaitJob(JobName);
-        final HashMap runningBalanceAfter = this.accountHelper.getAccountingWithRunningBalanceById(accountID.toString());
+        final Long runningBalanceAfter = fineractClient().generalLedgerAccount().retreiveAccount(accountID, true)
+                .getOrganizationRunningBalance();
 
-        final Integer INT_BALANCE = Integer.valueOf(MINIMUM_OPENING_BALANCE);
+        final Long INT_BALANCE = Long.valueOf(MINIMUM_OPENING_BALANCE);
 
-        Assertions.assertEquals(INT_BALANCE, runningBalanceAfter.get("organizationRunningBalance"),
+        Assertions.assertEquals(INT_BALANCE, runningBalanceAfter,
                 "Verifying Account Running Balance after running Update Accounting Running Balances Scheduler Job");
     }
 
     @Test
     public void testUpdateLoanArrearsAgingJobOutcome() {
-        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);
 
-        final Integer loanProductID = createLoanProduct(null);
+        final Long loanProductID = createLoanProductWithCharge(null);
         Assertions.assertNotNull(loanProductID);
 
-        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "1 March 2013");
+        final Long loanID = applyForLoanWithCollateral(clientID, loanProductID, null, "1 March 2013");
         Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        loanStatusHashMap = loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        approveLoan(loanID, LOAN_APPROVAL_DATE);
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-        String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        disburseLoanWithNetDisbursalAmount(loanID, LOAN_DISBURSAL_DATE);
+        verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
         String JobName = "Update Loan Arrears Ageing";
 
         SchedulerJobHelper.executeAndAwaitJob(JobName);
-        HashMap loanSummaryData = loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
+        GetLoansLoanIdSummary loanSummaryData = loanHelper.getLoanDetails(loanID).getSummary();
 
-        Float totalLoanArrearsAging = (Float) loanSummaryData.get("principalOverdue") + (Float) loanSummaryData.get("interestOverdue");
+        BigDecimal totalLoanArrearsAging = loanSummaryData.getPrincipalOverdue().add(loanSummaryData.getInterestOverdue());
 
-        Assertions.assertEquals(totalLoanArrearsAging, loanSummaryData.get("totalOverdue"),
+        assertAmount(totalLoanArrearsAging, loanSummaryData.getTotalOverdue(),
                 "Verifying Arrears Aging after Running Update Loan Arrears Aging Scheduler Job");
     }
 
     @Test
     public void testExecuteStandingInstructionsJobOutcome() throws InterruptedException {
-        savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-        StandingInstructionsHelper standingInstructionsHelper = new StandingInstructionsHelper(requestSpec, responseSpec);
+        StandingInstructionsHelper standingInstructionsHelper = new StandingInstructionsHelper();
 
         final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
         final DateTimeFormatter monthDayFormat = DateTimeFormatter.ofPattern("dd MMMM", Locale.US);
@@ -685,43 +582,19 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         currentDate = currentDate.plus(1, ChronoUnit.YEARS);
         final String VALID_TO = dateFormat.format(currentDate);
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE);
+        final Long savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
         Assertions.assertNotNull(savingsProductID);
 
-        final Integer fromSavingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(savingsProductID);
+        final Long fromSavingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
 
-        HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, fromSavingsId);
-        SavingsStatusChecker.verifySavingsIsPending(fromSavingsStatusHashMap);
+        final Long toSavingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
 
-        fromSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(fromSavingsId);
-        SavingsStatusChecker.verifySavingsIsApproved(fromSavingsStatusHashMap);
+        BigDecimal fromSavingsBalanceBefore = savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance();
 
-        fromSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(fromSavingsId);
-        SavingsStatusChecker.verifySavingsIsActive(fromSavingsStatusHashMap);
-
-        final Integer toSavingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(savingsProductID);
-
-        HashMap toSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, toSavingsId);
-        SavingsStatusChecker.verifySavingsIsPending(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(toSavingsId);
-        SavingsStatusChecker.verifySavingsIsApproved(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsId);
-        SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
-
-        HashMap fromSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(fromSavingsId);
-        Float fromSavingsBalanceBefore = (Float) fromSavingsSummaryBefore.get("accountBalance");
-
-        HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsId);
-        Float toSavingsBalanceBefore = (Float) toSavingsSummaryBefore.get("accountBalance");
+        BigDecimal toSavingsBalanceBefore = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
 
         Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
                 toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY);
@@ -729,25 +602,24 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
         String JobName = "Execute Standing Instruction";
         SchedulerJobHelper.executeAndAwaitJob(JobName);
-        HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsId);
-        Float fromSavingsBalanceAfter = (Float) fromSavingsSummaryAfter.get("accountBalance");
+        BigDecimal fromSavingsBalanceAfter = savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance();
 
-        HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(toSavingsId);
-        Float toSavingsBalanceAfter = (Float) toSavingsSummaryAfter.get("accountBalance");
+        BigDecimal toSavingsBalanceAfter = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
 
         final GetStandingInstructionsStandingInstructionIdResponse standingInstructionData = standingInstructionsHelper
                 .getStandingInstructionById(standingInstructionId.longValue());
-        Float expectedFromSavingsBalance = fromSavingsBalanceBefore - standingInstructionData.getAmount();
-        Float expectedToSavingsBalance = toSavingsBalanceBefore + standingInstructionData.getAmount();
+        final BigDecimal instructionAmount = new BigDecimal(String.valueOf(standingInstructionData.getAmount()));
+        BigDecimal expectedFromSavingsBalance = fromSavingsBalanceBefore.subtract(instructionAmount);
+        BigDecimal expectedToSavingsBalance = toSavingsBalanceBefore.add(instructionAmount);
 
-        Assertions.assertEquals(expectedFromSavingsBalance, fromSavingsBalanceAfter,
+        assertAmount(expectedFromSavingsBalance, fromSavingsBalanceAfter,
                 "Verifying From Savings Balance after Successful completion of Scheduler Job");
-        Assertions.assertEquals(expectedToSavingsBalance, toSavingsBalanceAfter,
+        assertAmount(expectedToSavingsBalance, toSavingsBalanceAfter,
                 "Verifying To Savings Balance after Successful completion of Scheduler Job");
         Integer fromAccountType = PortfolioAccountType.SAVINGS.getValue();
         Integer transferType = AccountTransferType.ACCOUNT_TRANSFER.getValue();
         Set<GetStandingInstructionHistoryPageItemsResponse> standingInstructionHistoryData = standingInstructionsHelper
-                .getStandingInstructionHistory(fromSavingsId, fromAccountType, clientID, transferType);
+                .getStandingInstructionHistory(fromSavingsId.intValue(), fromAccountType, clientID.intValue(), transferType);
         Assertions.assertEquals(1, standingInstructionHistoryData.size(),
                 "Verifying the no of standing instruction transactions logged for the client");
         GetStandingInstructionHistoryPageItemsResponse loggedTransaction = standingInstructionHistoryData.iterator().next();
@@ -758,88 +630,72 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
     @Test
     public void testApplyPenaltyForOverdueLoansJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);
 
-        Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanOverdueFeeJSON());
+        Long overdueFeeChargeId = chargesHelper.createCharge(loanOverdueFee()).getResourceId();
         Assertions.assertNotNull(overdueFeeChargeId);
 
-        final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
+        final Long loanProductID = createLoanProductWithCharge(overdueFeeChargeId.toString());
         Assertions.assertNotNull(loanProductID);
 
-        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "1 March 2020");
+        final Long loanID = applyForLoanWithCollateral(clientID, loanProductID, null, "1 March 2020");
         Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 March 2020", loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        approveLoan(loanID, "01 March 2020");
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 March 2020", loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        disburseLoanWithNetDisbursalAmount(loanID, "02 March 2020");
+        verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
         String JobName = "Apply penalty to overdue loans";
         SchedulerJobHelper.executeAndAwaitJob(JobName);
 
-        final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, overdueFeeChargeId);
+        final BigDecimal chargeAmount = BigDecimal.valueOf(chargesHelper.getCharge(overdueFeeChargeId).getAmount());
 
-        Float chargeAmount = (Float) chargeData.get("amount");
+        List<GetLoansLoanIdRepaymentPeriod> repaymentScheduleDataAfter = repaymentPeriods(loanID);
 
-        ArrayList<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
-                loanID);
-
-        Assertions.assertEquals(chargeAmount, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+        assertAmount(chargeAmount, repaymentScheduleDataAfter.get(1).getPenaltyChargesDue(),
                 "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
-        loanStatusHashMap = this.loanTransactionHelper.undoDisbursal(loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+        loanHelper.undoDisbursement(loanID);
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
+        verifyLoanStatus(loanHelper.getLoanDetails(loanID), GetLoansLoanIdStatus::getWaitingForDisbursal);
     }
 
     @Test
     public void testApplyPenaltyForOverdueLoansJobOutcomeIfLoanChargedOff() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);
 
-        Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanOverdueFeeJSON());
+        Long overdueFeeChargeId = chargesHelper.createCharge(loanOverdueFee()).getResourceId();
         Assertions.assertNotNull(overdueFeeChargeId);
 
-        final Integer loanProductID = createLoanProductNoInterest(overdueFeeChargeId.toString());
+        final Long loanProductID = createLoanProductNoInterest(overdueFeeChargeId.toString());
         Assertions.assertNotNull(loanProductID);
 
-        final Integer loanID = applyForLoanApplicationNoInterest(clientID.toString(), loanProductID.toString(), null, "01 March 2020");
+        final Long loanID = applyForLoanWithCollateralNoInterest(clientID, loanProductID, null, "01 March 2020");
         Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 March 2020", loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        approveLoan(loanID, "01 March 2020");
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 March 2020", loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        disburseLoanWithNetDisbursalAmount(loanID, "02 March 2020");
+        verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
-        this.loanTransactionHelper.chargeOffLoan((long) loanID,
+        transactionHelper.chargeOffLoan(loanID,
                 new PostLoansLoanIdTransactionsRequest().transactionDate("03 March 2020").locale("en").dateFormat("dd MMMM yyyy"));
 
         String JobName = "Apply penalty to overdue loans";
         SchedulerJobHelper.executeAndAwaitJob(JobName);
 
-        ArrayList<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
-                loanID);
+        List<GetLoansLoanIdRepaymentPeriod> repaymentScheduleDataAfter = repaymentPeriods(loanID);
 
-        Assertions.assertEquals(0, repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+        assertAmount(BigDecimal.ZERO, repaymentScheduleDataAfter.get(1).getPenaltyChargesDue(),
                 "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
     }
@@ -849,61 +705,53 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         try {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-            this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+            final Long clientID = clientHelper.createClient();
             Assertions.assertNotNull(clientID);
 
-            Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));
+            Long overdueFeeChargeId = chargesHelper.createCharge(ChargeRequestBuilders.loanOverdueFeePercentageOfAmountAndInterest(1))
+                    .getResourceId();
             Assertions.assertNotNull(overdueFeeChargeId);
 
-            Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+            Long fee = chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 10, false))
+                    .getResourceId();
             Assertions.assertNotNull(fee);
 
-            final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
+            final Long loanProductID = createLoanProductWithCharge(overdueFeeChargeId.toString());
             Assertions.assertNotNull(loanProductID);
-            List<Integer> loanIDs = new ArrayList<>();
-            HashMap loanStatusHashMap;
+            List<Long> loanIDs = new ArrayList<>();
             for (int i = 0; i < 3; i++) {
-                final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "1 March 2020");
+                final Long loanID = applyForLoanWithCollateral(clientID, loanProductID, null, "1 March 2020");
 
                 Assertions.assertNotNull(loanID);
 
-                loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-                LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+                verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-                loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 March 2020", loanID);
-                LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+                approveLoan(loanID, "01 March 2020");
+                verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-                String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-                loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 March 2020", loanID,
-                        JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-                LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+                disburseLoanWithNetDisbursalAmount(loanID, "02 March 2020");
+                verifyLoanStatus(loanID, LoanStatus.ACTIVE);
                 loanIDs.add(loanID);
 
-                this.loanTransactionHelper.addChargesForLoan(loanID,
-                        LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "02 March 2020", "10", null));
+                addSpecifiedDueDateCharge(loanID, fee, "02 March 2020", "10");
             }
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 9, 2));
             String jobName = "Loan COB";
             SchedulerJobHelper.executeAndAwaitJob(jobName);
-            for (Integer loanId : loanIDs) {
-                List<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
-                        loanId);
+            for (Long loanId : loanIDs) {
+                List<GetLoansLoanIdRepaymentPeriod> repaymentScheduleDataAfter = repaymentPeriods(loanId);
 
-                Assertions.assertEquals(10.00f, (Float) repaymentScheduleDataAfter.get(1).get("feeChargesDue"),
+                assertAmount(new BigDecimal("10.00"), repaymentScheduleDataAfter.get(1).getFeeChargesDue(),
                         "Verifying From Fee Charges due for first Repayment after Successful completion of Scheduler Job");
-                Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+                assertAmount(new BigDecimal("39.39"), repaymentScheduleDataAfter.get(1).getPenaltyChargesDue(),
                         "Verifying From Penalty Charges due for first Repayment after Successful completion of Scheduler Job");
-                Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(2).get("penaltyChargesDue"),
+                assertAmount(new BigDecimal("39.39"), repaymentScheduleDataAfter.get(2).getPenaltyChargesDue(),
                         "Verifying From Penalty Charges due for first Repayment after Successful completion of Scheduler Job");
-                Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(3).get("penaltyChargesDue"),
+                assertAmount(new BigDecimal("39.39"), repaymentScheduleDataAfter.get(3).getPenaltyChargesDue(),
                         "Verifying From Penalty Charges due for first Repayment after Successful completion of Scheduler Job");
-                Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(4).get("penaltyChargesDue"),
+                assertAmount(new BigDecimal("39.39"), repaymentScheduleDataAfter.get(4).getPenaltyChargesDue(),
                         "Verifying From Penalty Charges due for first Repayment after Successful completion of Scheduler Job");
 
             }
@@ -920,54 +768,47 @@ public class SchedulerJobsTestResults extends IntegrationTest {
                     new PutGlobalConfigurationsRequest().enabled(true));
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 6, 2));
-            this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-            this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+            final Long clientID = clientHelper.createClient();
             Assertions.assertNotNull(clientID);
 
-            Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+            Long fee = chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 10, false))
+                    .getResourceId();
             Assertions.assertNotNull(fee);
 
-            final Integer loanProductID = createLoanProductWithPeriodicAccrual(null);
+            final Long loanProductID = createLoanProductWithPeriodicAccrual(null);
             Assertions.assertNotNull(loanProductID);
 
-            final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "1 June 2020");
+            final Long loanID = applyForLoanWithCollateral(clientID, loanProductID, null, "1 June 2020");
 
             Assertions.assertNotNull(loanID);
 
-            HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+            verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-            loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 June 2020", loanID);
-            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+            approveLoan(loanID, "01 June 2020");
+            verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-            String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-            loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 June 2020", loanID,
-                    JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+            disburseLoanWithNetDisbursalAmount(loanID, "02 June 2020");
+            verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
-            this.loanTransactionHelper.addChargesForLoan(loanID,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "02 June 2020", "10", null));
+            addSpecifiedDueDateCharge(loanID, fee, "02 June 2020", "10");
 
             String jobName = "Loan COB";
             SchedulerJobHelper.executeAndAwaitJob(jobName);
 
-            List<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
-                    loanID);
+            List<GetLoansLoanIdRepaymentPeriod> repaymentScheduleDataAfter = repaymentPeriods(loanID);
 
-            Assertions.assertEquals(10.00f, (Float) repaymentScheduleDataAfter.get(1).get("feeChargesDue"),
+            assertAmount(new BigDecimal("10.00"), repaymentScheduleDataAfter.get(1).getFeeChargesDue(),
                     "Verifying From Fee Charges due for first Repayment after Successful completion of Scheduler Job");
 
-            GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
+            GetLoansLoanIdResponse getLoansLoanIdResponse = loanHelper.getLoanDetails(loanID, "transactions");
             // First accrual transaction
             assertTrue(getLoansLoanIdResponse.getTransactions().get(1).getType().getAccrual());
             assertEquals(10.00, Utils.getDoubleValue(getLoansLoanIdResponse.getTransactions().get(1).getFeeChargesPortion()));
             assertEquals(LocalDate.of(2020, 6, 2), getLoansLoanIdResponse.getTransactions().get(1).getDate());
             Long transactionId = getLoansLoanIdResponse.getTransactions().get(1).getId();
 
-            final GetJournalEntriesTransactionIdResponse journalEntriesResponse = journalEntryHelper.getJournalEntries("L" + transactionId);
+            final GetJournalEntriesTransactionIdResponse journalEntriesResponse = journalHelper.getJournalEntries("L" + transactionId);
             assertNotNull(journalEntriesResponse);
             final List<JournalEntryTransactionItem> journalEntries = journalEntriesResponse.getPageItems();
             assertEquals(2, journalEntries.size());
@@ -987,50 +828,44 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
 
-            loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+            final Long clientID = clientHelper.createClient();
             Assertions.assertNotNull(clientID);
 
-            Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));
+            Long overdueFeeChargeId = chargesHelper.createCharge(ChargeRequestBuilders.loanOverdueFeePercentageOfAmountAndInterest(1))
+                    .getResourceId();
             Assertions.assertNotNull(overdueFeeChargeId);
 
-            final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
+            final Long loanProductID = createLoanProductWithCharge(overdueFeeChargeId.toString());
             Assertions.assertNotNull(loanProductID);
-            HashMap loanStatusHashMap;
 
-            final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "1 July 2020");
+            final Long loanID = applyForLoanWithCollateral(clientID, loanProductID, null, "1 July 2020");
 
             Assertions.assertNotNull(loanID);
 
-            loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+            verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-            loanStatusHashMap = loanTransactionHelper.approveLoan("01 July 2020", loanID);
-            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+            approveLoan(loanID, "01 July 2020");
+            verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-            String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-            loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 July 2020", loanID,
-                    JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+            disburseLoanWithNetDisbursalAmount(loanID, "02 July 2020");
+            verifyLoanStatus(loanID, LoanStatus.ACTIVE);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 7, 2));
             String jobName = "Loan COB";
 
             SchedulerJobHelper.executeAndAwaitJob(jobName);
-            GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
+            GetLoansLoanIdResponse loan = loanHelper.getLoanDetails(loanID);
             Assertions.assertEquals(LocalDate.of(2020, 7, 2), loan.getLastClosedBusinessDate());
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 7, 3));
             SchedulerJobHelper.executeAndAwaitJob(jobName);
 
-            loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
+            loan = loanHelper.getLoanDetails(loanID);
             Assertions.assertEquals(LocalDate.of(2020, 7, 3), loan.getLastClosedBusinessDate());
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 7, 5));
             SchedulerJobHelper.executeAndAwaitJob(jobName);
 
-            loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
+            loan = loanHelper.getLoanDetails(loanID);
             Assertions.assertEquals(LocalDate.of(2020, 7, 3), loan.getLastClosedBusinessDate());
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
@@ -1047,47 +882,41 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             // set penalty wait period to 0
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.PENALTY_WAIT_PERIOD,
                     new PutGlobalConfigurationsRequest().value(0L));
-            this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+            final Long clientID = clientHelper.createClient();
             Assertions.assertNotNull(clientID);
 
-            Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));
+            Long overdueFeeChargeId = chargesHelper.createCharge(ChargeRequestBuilders.loanOverdueFeePercentageOfAmountAndInterest(1))
+                    .getResourceId();
             Assertions.assertNotNull(overdueFeeChargeId);
 
-            final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
+            final Long loanProductID = createLoanProductWithCharge(overdueFeeChargeId.toString());
             Assertions.assertNotNull(loanProductID);
-            HashMap loanStatusHashMap;
 
-            final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "1 March 2019");
+            final Long loanID = applyForLoanWithCollateral(clientID, loanProductID, null, "1 March 2019");
 
             Assertions.assertNotNull(loanID);
 
-            loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+            verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-            loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 March 2019", loanID);
-            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+            approveLoan(loanID, "01 March 2019");
+            verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-            String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-            loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 March 2019", loanID,
-                    JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+            disburseLoanWithNetDisbursalAmount(loanID, "02 March 2019");
+            verifyLoanStatus(loanID, LoanStatus.ACTIVE);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2019, 4, 1));
             String jobName = "Loan COB";
 
             SchedulerJobHelper.executeAndAwaitJob(jobName);
-            List<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
-                    loanID);
-            Assertions.assertEquals(0, repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+            List<GetLoansLoanIdRepaymentPeriod> repaymentScheduleDataAfter = repaymentPeriods(loanID);
+            assertAmount(BigDecimal.ZERO, repaymentScheduleDataAfter.get(1).getPenaltyChargesDue(),
                     "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
             LocalDate lastBusinessDateBeforeFastForward = LocalDate.of(2019, 4, 2);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, lastBusinessDateBeforeFastForward);
             SchedulerJobHelper.executeAndAwaitJob(jobName);
-            repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
-            Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+            repaymentScheduleDataAfter = repaymentPeriods(loanID);
+            assertAmount(new BigDecimal("39.39"), repaymentScheduleDataAfter.get(1).getPenaltyChargesDue(),
                     "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
         } finally {
@@ -1107,33 +936,28 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             // set penalty wait period to 0
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.PENALTY_WAIT_PERIOD,
                     new PutGlobalConfigurationsRequest().value(0L));
-            this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+            final Long clientID = clientHelper.createClient();
             Assertions.assertNotNull(clientID);
 
-            Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));
+            Long overdueFeeChargeId = chargesHelper.createCharge(ChargeRequestBuilders.loanOverdueFeePercentageOfAmountAndInterest(1))
+                    .getResourceId();
             Assertions.assertNotNull(overdueFeeChargeId);
 
-            final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
+            final Long loanProductID = createLoanProductWithCharge(overdueFeeChargeId.toString());
             Assertions.assertNotNull(loanProductID);
-            HashMap loanStatusHashMap;
             // Test penalty where there is 1 day grace period
-            final Integer loanID2 = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "1 April 2020");
+            final Long loanID2 = applyForLoanWithCollateral(clientID, loanProductID, null, "1 April 2020");
 
             Assertions.assertNotNull(loanID2);
 
-            loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID2);
-            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+            verifyLoanStatus(loanID2, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-            loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 April 2020", loanID2);
-            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+            approveLoan(loanID2, "01 April 2020");
+            verifyLoanStatus(loanID2, LoanStatus.APPROVED);
 
-            String loanDetails2 = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID2);
-            loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 April 2020", loanID2,
-                    JsonPath.from(loanDetails2).get("netDisbursalAmount").toString());
-            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+            disburseLoanWithNetDisbursalAmount(loanID2, "02 April 2020");
+            verifyLoanStatus(loanID2, LoanStatus.ACTIVE);
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.PENALTY_WAIT_PERIOD,
                     new PutGlobalConfigurationsRequest().value(1L));
@@ -1141,15 +965,14 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             String jobName = "Loan COB";
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, dateToFastForward);
             SchedulerJobHelper.executeAndAwaitJob(jobName);
-            List<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
-                    loanID2);
-            Assertions.assertEquals(0, repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+            List<GetLoansLoanIdRepaymentPeriod> repaymentScheduleDataAfter = repaymentPeriods(loanID2);
+            assertAmount(BigDecimal.ZERO, repaymentScheduleDataAfter.get(1).getPenaltyChargesDue(),
                     "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 5, 3));
             SchedulerJobHelper.executeAndAwaitJob(jobName);
-            repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID2);
-            Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+            repaymentScheduleDataAfter = repaymentPeriods(loanID2);
+            assertAmount(new BigDecimal("39.39"), repaymentScheduleDataAfter.get(1).getPenaltyChargesDue(),
                     "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
         } finally {
@@ -1162,32 +985,26 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
     @Test
     public void testAvoidUnncessaryPenaltyWhenAmountZeroForOverdueLoansJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);
 
-        Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("0.000001"));
+        Long overdueFeeChargeId = chargesHelper.createCharge(ChargeRequestBuilders.loanOverdueFeePercentageOfAmountAndInterest(0.000001))
+                .getResourceId();
         Assertions.assertNotNull(overdueFeeChargeId);
 
-        final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
+        final Long loanProductID = createLoanProductWithCharge(overdueFeeChargeId.toString());
         Assertions.assertNotNull(loanProductID);
 
-        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "1 March 2013");
+        final Long loanID = applyForLoanWithCollateral(clientID, loanProductID, null, "1 March 2013");
         Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        approveLoan(loanID, LOAN_APPROVAL_DATE);
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_APPROVAL_DATE_PLUS_ONE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        disburseLoanWithNetDisbursalAmount(loanID, LOAN_APPROVAL_DATE_PLUS_ONE);
+        verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
         String JobName = "Apply penalty to overdue loans";
         int jobId = 12;
@@ -1203,56 +1020,48 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             Assertions.assertNotNull(schedulerJob);
         }
 
-        ArrayList<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
-                loanID);
+        List<GetLoansLoanIdRepaymentPeriod> repaymentScheduleDataAfter = repaymentPeriods(loanID);
 
-        Assertions.assertEquals(0, repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+        assertAmount(BigDecimal.ZERO, repaymentScheduleDataAfter.get(1).getPenaltyChargesDue(),
                 "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
-        final List<?> loanCharges = this.loanTransactionHelper.getLoanCharges(requestSpec, responseSpec, loanID);
-        Assertions.assertNull(loanCharges, "Verifying that charge isn't created when the amount is 0");
+        Assertions.assertTrue(loanHelper.getLoanCharges(loanID).isEmpty(), "Verifying that charge isn't created when the amount is 0");
 
-        loanStatusHashMap = this.loanTransactionHelper.undoDisbursal(loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+        loanHelper.undoDisbursement(loanID);
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
+        verifyLoanStatus(loanHelper.getLoanDetails(loanID), GetLoansLoanIdStatus::getWaitingForDisbursal);
     }
 
     @Test
     public void testUpdateOverdueDaysForNPA() throws InterruptedException {
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);
 
-        final Integer loanProductID = createLoanProduct(null);
+        final Long loanProductID = createLoanProductWithCharge(null);
         Assertions.assertNotNull(loanProductID);
 
-        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "1 March 2013");
+        final Long loanID = applyForLoanWithCollateral(clientID, loanProductID, null, "1 March 2013");
         Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        approveLoan(loanID, LOAN_APPROVAL_DATE);
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_APPROVAL_DATE_PLUS_ONE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        disburseLoanWithNetDisbursalAmount(loanID, LOAN_APPROVAL_DATE_PLUS_ONE);
+        verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
-        final Boolean isNPABefore = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanID, "isNPA");
+        final Boolean isNPABefore = loanHelper.getLoanDetails(loanID).getIsNPA();
         Assertions.assertFalse(isNPABefore);
         String JobName = "Update Non Performing Assets";
         SchedulerJobHelper.executeAndAwaitJob(JobName);
-        final Boolean isNPAAfter = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanID, "isNPA");
+        final Boolean isNPAAfter = loanHelper.getLoanDetails(loanID).getIsNPA();
         assertTrue(isNPAAfter);
     }
 
     @Test
     public void testInterestTransferForSavings() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-        FixedDepositAccountHelper fixedDepositAccountHelper = new FixedDepositAccountHelper(requestSpec, responseSpec);
+        FeignFixedDepositHelper fixedDepositHelper = new FeignFixedDepositHelper(fineractClient());
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         Calendar todaysDate = Calendar.getInstance();
@@ -1267,112 +1076,95 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
-        final String WHOLE_TERM = "1";
+        final int WHOLE_TERM = 1;
 
-        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        Long clientId = clientHelper.createClient();
         Assertions.assertNotNull(clientId);
-        Float balance = Float.parseFloat(MINIMUM_OPENING_BALANCE) + Float.parseFloat(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
-        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, String.valueOf(balance));
+        BigDecimal balance = new BigDecimal(MINIMUM_OPENING_BALANCE).add(DepositTestData.DEPOSIT_AMOUNT);
+        final Long savingsProductID = createSavingsProduct(balance.toPlainString());
         Assertions.assertNotNull(savingsProductID);
 
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        final Long savingsId = applyApproveAndActivateSavings(clientId, savingsProductID);
         Assertions.assertNotNull(savingsId);
+        assertAmount(balance, savingsHelper.getSavingsSummary(savingsId).getAccountBalance(), "Verifying opening Balance");
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
-        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
-
-        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
-        HashMap summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
-
-        Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
+        Long fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
         Assertions.assertNotNull(fixedDepositProductId);
 
-        Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(),
-                SUBMITTED_ON_DATE, WHOLE_TERM, savingsId.toString());
+        Long fixedDepositAccountId = applyForFixedDepositApplication(clientId, fixedDepositProductId, SUBMITTED_ON_DATE, WHOLE_TERM,
+                savingsId);
         Assertions.assertNotNull(fixedDepositAccountId);
 
-        HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(requestSpec,
-                responseSpec, fixedDepositAccountId.toString());
-        FixedDepositAccountStatusChecker.verifyFixedDepositIsPending(fixedDepositAccountStatusHashMap);
+        Assertions.assertTrue(fixedDepositHelper.getAccount(fixedDepositAccountId).getStatus().getSubmittedAndPendingApproval());
 
-        fixedDepositAccountStatusHashMap = fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
-        FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
+        fixedDepositHelper.approve(fixedDepositAccountId, APPROVED_ON_DATE);
+        Assertions.assertTrue(fixedDepositHelper.getAccount(fixedDepositAccountId).getStatus().getApproved());
 
-        fixedDepositAccountStatusHashMap = fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
-        FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
-        summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        balance = Float.parseFloat(MINIMUM_OPENING_BALANCE);
-        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance");
+        fixedDepositHelper.activate(fixedDepositAccountId, ACTIVATION_DATE);
+        Assertions.assertTrue(fixedDepositHelper.getAccount(fixedDepositAccountId).getStatus().getActive());
+        balance = new BigDecimal(MINIMUM_OPENING_BALANCE);
+        assertAmount(balance, savingsHelper.getSavingsSummary(savingsId).getAccountBalance(), "Verifying Balance");
 
-        fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
+        fixedDepositHelper.postInterest(fixedDepositAccountId);
 
-        HashMap fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
-        float interestPosted = (Float) fixedDepositSummary.get("accountBalance")
-                - Float.parseFloat(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
+        BigDecimal interestPosted = savingsHelper.getSavingsSummary(fixedDepositAccountId).getAccountBalance()
+                .subtract(DepositTestData.DEPOSIT_AMOUNT);
 
         String JobName = "Transfer Interest To Savings";
         SchedulerJobHelper.executeAndAwaitJob(JobName);
-        fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
-        assertEquals(Float.parseFloat(FixedDepositAccountHelper.DEPOSIT_AMOUNT), fixedDepositSummary.get("accountBalance"),
+        assertAmount(DepositTestData.DEPOSIT_AMOUNT, savingsHelper.getSavingsSummary(fixedDepositAccountId).getAccountBalance(),
                 "Verifying opening Balance");
 
-        summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        balance = Float.parseFloat(MINIMUM_OPENING_BALANCE) + interestPosted;
-        validateNumberForEqualExcludePrecision(String.valueOf(balance), String.valueOf(summary.get("accountBalance")));
+        balance = new BigDecimal(MINIMUM_OPENING_BALANCE).add(interestPosted);
+        validateNumberForEqualExcludePrecision(balance.toPlainString(),
+                savingsHelper.getSavingsSummary(savingsId).getAccountBalance().toPlainString());
     }
 
     @Test
     public void businessDateIsCorrectForCronJob() throws InterruptedException {
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
         try {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+            BusinessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                     .date("2022.09.04").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final Account assetAccount = this.accountHelper.createAssetAccount();
-            final Account assetFeeAndPenaltyAccount = this.accountHelper.createAssetAccount();
-            final Account incomeAccount = this.accountHelper.createIncomeAccount();
-            final Account expenseAccount = this.accountHelper.createExpenseAccount();
-            final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account assetFeeAndPenaltyAccount = accountHelper.createAssetAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
 
-            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+            Long penalty = chargesHelper
+                    .createCharge(ChargeRequestBuilders.loanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 10, true)).getResourceId();
 
-            final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+            final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                     .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                     .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
                     .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
                     .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
-                    .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).build(null);
-            final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+                    .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).buildRequest(null);
+            final Long loanProductID = loanHelper.createLoanProduct(loanProductRequest).getResourceId();
 
-            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
-            Integer loanId = applyForLoanApplication(client.getClientId().toString(), loanProductID.toString(), null, "02 September 2022");
+            Long loanId = applyForLoanWithCollateral(clientId, loanProductID, null, "02 September 2022");
 
-            this.loanTransactionHelper.approveLoan("02 September 2022", loanId);
-            this.loanTransactionHelper.disburseLoan("03 September 2022", loanId, "1000", null);
+            approveLoan(loanId, "02 September 2022");
+            loanHelper.disburseLoan("03 September 2022", loanId, "1000");
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+            BusinessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                     .date("2022.09.05").dateFormat("yyyy.MM.dd").locale("en"));
 
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
-                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10", null));
+            addSpecifiedDueDateCharge(loanId, penalty, penaltyCharge1AddedDate, "10");
 
             SchedulerJobHelper.updateSchedulerStatus(true);
             SchedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().active(true).cronExpression("0/1 * * * * ?"));
 
             Thread.sleep(2000);
-            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            GetLoansLoanIdResponse loanDetails = loanHelper.getLoanDetails(loanId, "transactions");
             assertEquals(LocalDate.of(2022, 9, 5), loanDetails.getTransactions().get(1).getDate());
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
@@ -1381,113 +1173,138 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         }
     }
 
-    private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpeningBalance) {
-        SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
-                .withMinimumOpenningBalance(minOpeningBalance).build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private PostSavingsProductsRequest savingsProduct(int interestPostingPeriodType, String minOpeningBalance) {
+        return SavingsRequestBuilders.savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY, interestPostingPeriodType,
+                SavingsTestData.InterestCalculationType.DAILY_BALANCE).minRequiredOpeningBalance(new BigDecimal(minOpeningBalance));
     }
 
-    private Integer createSavingsProduct(final String minOpeningBalance, final Account... accounts) {
-        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsQuarterly().withInterestCalculationPeriodTypeAsDailyBalance()
-                .withMinimumOpenningBalance(minOpeningBalance).withAccountingRuleAsCashBased(accounts).build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private Long createSavingsProduct(final String minOpeningBalance) {
+        return savingsProductHelper
+                .createSavingsProduct(savingsProduct(SavingsTestData.InterestPostingPeriodType.MONTHLY, minOpeningBalance)).getResourceId();
     }
 
-    private Integer createLoanProduct(final String chargeId) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
-                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .build(chargeId);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+    private Long applyApproveAndActivateSavings(Long clientId, Long savingsProductId) {
+        final Long savingsId = savingsHelper.submitApplication(clientId, savingsProductId, SAVINGS_SUBMITTED_DATE).getSavingsId();
+        Assertions.assertNotNull(savingsProductId);
+
+        SavingsTestValidators.verifySavingsIsPending(savingsHelper.getSavingsStatus(savingsId));
+
+        savingsHelper.approveSavings(savingsId, SAVINGS_APPROVED_DATE);
+        SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsId));
+
+        savingsHelper.activateSavings(savingsId, SAVINGS_ACTIVATED_DATE);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
+        return savingsId;
     }
 
-    private Integer createLoanProductNoInterest(final String chargeId) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
+    private static PostSavingsAccountsSavingsAccountIdChargesRequest savingsChargeWithDueDate(Long chargeId) {
+        return new PostSavingsAccountsSavingsAccountIdChargesRequest().chargeId(chargeId).amount(100F).feeOnMonthDay("15 January")
+                .locale("en").monthDayFormat("dd MMMM").dateFormat("dd MMMM yyy").dueDate("10 January 2013");
+    }
+
+    private static ChargeRequest loanOverdueFee() {
+        return ChargeRequestBuilders.loanOverdueFee(CHARGE_AMOUNT).feeFrequency(FEE_FREQUENCY_MONTHS).feeOnMonthDay(FEE_ON_MONTH_DAY)
+                .feeInterval(FEE_INTERVAL).monthDayFormat("dd MMM");
+    }
+
+    private Long createLoanProductWithCharge(final String chargeId) {
+        return loanHelper
+                .createLoanProduct(
+                        new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4").withRepaymentAfterEvery("1")
+                                .withRepaymentTypeAsMonth().withinterestRatePerPeriod("1").withInterestRateFrequencyTypeAsMonths()
+                                .withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance().buildRequest(chargeId))
+                .getResourceId();
+    }
+
+    private Long createLoanProductNoInterest(final String chargeId) {
+        return loanHelper.createLoanProduct(new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
-                .withAmortizationTypeAsEqualInstallments().build(chargeId);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+                .withAmortizationTypeAsEqualInstallments().buildRequest(chargeId)).getResourceId();
     }
 
-    private Integer createLoanProductWithPeriodicAccrual(final String chargeId) {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account assetFeeAndPenaltyAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+    private Long createLoanProductWithPeriodicAccrual(final String chargeId) {
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account assetFeeAndPenaltyAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
 
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
+        return loanHelper.createLoanProduct(new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
                 .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).build(chargeId);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+                .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).buildRequest(chargeId)).getResourceId();
     }
 
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
-        collaterals.add(collaterals(collateralId, quantity));
+    private Long applyForLoanWithCollateral(final Long clientID, final Long loanProductID, final Long savingsID, final String date) {
+        return loanHelper.applyForLoan(loanApplication(clientID, loanProductID, savingsID, date).interestRatePerPeriod(new BigDecimal("2"))
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)).getLoanId();
     }
 
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
-        HashMap<String, String> collateral = new HashMap<>(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("quantity", quantity.toString());
-        return collateral;
-    }
-
-    private Integer applyForLoanApplication(final String clientID, final String loanProductID, final String savingsID, final String date) {
-
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec, clientID,
-                collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("15,000.00").withLoanTermFrequency("4")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments()
-                .withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate(date).withSubmittedOnDate(date).withCollaterals(collaterals)
-                .build(clientID, loanProductID, savingsID);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-    }
-
-    private Integer applyForLoanApplicationNoInterest(final String clientID, final String loanProductID, final String savingsID,
+    private Long applyForLoanWithCollateralNoInterest(final Long clientID, final Long loanProductID, final Long savingsID,
             final String date) {
+        return loanHelper.applyForLoan(loanApplication(clientID, loanProductID, savingsID, date).interestRatePerPeriod(BigDecimal.ZERO)
+                .interestType(LoanTestData.InterestType.FLAT)).getLoanId();
+    }
 
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+    /** Mirrors the payload {@code LoanApplicationTestBuilder.build} sent, with one client collateral attached. */
+    private PostLoansRequest loanApplication(final Long clientID, final Long loanProductID, final Long savingsID, final String date) {
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec, clientID,
-                collateralId);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientID, collateralId).getResourceId();
         Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("15,000.00").withLoanTermFrequency("4")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withAmortizationTypeAsEqualInstallments()
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate(date).withSubmittedOnDate(date)
-                .withCollaterals(collaterals).build(clientID, loanProductID, savingsID);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return new PostLoansRequest().clientId(clientID).productId(loanProductID).loanType("individual").principal(new BigDecimal("15000"))
+                .loanTermFrequency(4).loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS).numberOfRepayments(4)
+                .repaymentEvery(1).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)
+                .transactionProcessingStrategyCode(LoanApplicationTestBuilder.DEFAULT_STRATEGY).expectedDisbursementDate(date)
+                .submittedOnDate(date).linkAccountId(savingsID).maxOutstandingLoanBalance(new BigDecimal(LOAN_MAX_OUTSTANDING_BALANCE))
+                .collateral(List.of(new PostLoansRequestCollateralData().clientCollateralId(clientCollateralId).quantity(BigDecimal.ONE)))
+                .charges(new ArrayList<>()).dateFormat("dd MMMM yyyy").locale(LOAN_LOCALE);
     }
 
-    private Integer createFixedDepositProduct(final String validFrom, final String validTo) {
-        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(requestSpec, responseSpec);
-        final String fixedDepositProductJSON = fixedDepositProductHelper.withPeriodRangeChart().build(validFrom, validTo);
-        return FixedDepositProductHelper.createFixedDepositProduct(fixedDepositProductJSON, requestSpec, responseSpec);
+    private void approveLoan(final Long loanId, final String approvalDate) {
+        loanHelper.approveLoan(loanId,
+                new PostLoansLoanIdRequest().approvedOnDate(approvalDate).note("Approval NOTE").dateFormat("dd MMMM yyyy").locale("en"));
     }
 
-    private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
-            final String penalInterestType, String savingsId) {
-        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(requestSpec, responseSpec)
-                .withSubmittedOnDate(submittedOnDate).withSavings(savingsId).transferInterest(true)
-                .withLockinPeriodFrequency("1", FixedDepositAccountHelper.DAYS).build(clientID, productID, penalInterestType);
-        return FixedDepositAccountHelper.applyFixedDepositApplicationGetId(fixedDepositApplicationJSON, requestSpec, responseSpec);
+    /** Disburses the net disbursal amount and answers the loan as it stood just before. */
+    private GetLoansLoanIdResponse disburseLoanWithNetDisbursalAmount(final Long loanId, final String disbursementDate) {
+        final GetLoansLoanIdResponse loanDetails = loanHelper.getLoanDetails(loanId, "repaymentSchedule");
+        loanHelper.disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate(disbursementDate)
+                .netDisbursalAmount(loanDetails.getNetDisbursalAmount()).note("DISBURSE NOTE").dateFormat("dd MMMM yyyy").locale("en"));
+        return loanDetails;
+    }
+
+    private void addSpecifiedDueDateCharge(final Long loanId, final Long chargeId, final String dueDate, final String amount) {
+        loanHelper.addLoanCharge(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeId).dueDate(dueDate)
+                .amount(Double.valueOf(amount)).dateFormat("dd MMMM yyyy").locale(LOAN_LOCALE));
+    }
+
+    private List<GetLoansLoanIdRepaymentPeriod> repaymentPeriods(final Long loanId) {
+        return loanHelper.getLoanDetails(loanId, "repaymentSchedule").getRepaymentSchedule().getPeriods();
+    }
+
+    private Long createFixedDepositProduct(final String validFrom, final String validTo) {
+        PostFixedDepositProductsRequest request = DepositRequestBuilders.withChart(DepositRequestBuilders.fixedDepositProduct(), validFrom,
+                validTo, DepositTestData.periodRangeChartSlabs());
+        return new FeignFixedDepositProductHelper(fineractClient()).createProduct(request).getResourceId();
+    }
+
+    private Long applyForFixedDepositApplication(final Long clientID, final Long productID, final String submittedOnDate,
+            final int penalInterestType, final Long savingsId) {
+        final PostFixedDepositAccountsRequest request = DepositRequestBuilders
+                .fixedDepositAccount(clientID, productID, submittedOnDate, penalInterestType).linkAccountId(savingsId)
+                .transferInterestToSavings(true).lockinPeriodFrequency(0)
+                .lockinPeriodFrequencyType(SavingsTestData.PeriodFrequencyType.WEEKS);
+        return new FeignFixedDepositHelper(fineractClient()).submitApplication(request).getSavingsId();
+    }
+
+    private static void assertAmount(final BigDecimal expected, final BigDecimal actual, final String message) {
+        assertNotNull(actual, message);
+        assertEquals(0, expected.compareTo(actual), () -> message + ": expected " + expected + " but was " + actual);
     }
 
     private void validateNumberForEqualExcludePrecision(String val, String val2) {
