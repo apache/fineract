@@ -328,11 +328,6 @@ public class LoanApplicationTestBuilder {
         return this;
     }
 
-    public LoanApplicationTestBuilder withInterestCalculationPeriodTypeAsDays() {
-        this.interestCalculationPeriodType = DAYS;
-        return this;
-    }
-
     public LoanApplicationTestBuilder withExpectedDisbursementDate(final String expectedDisbursementDate) {
         this.expectedDisbursmentDate = expectedDisbursementDate;
         return this;
@@ -360,16 +355,6 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withtotalLoan(final String totalLoan) {
         this.totalLoan = totalLoan;
-        return this;
-    }
-
-    public LoanApplicationTestBuilder withPrincipalGrace(final String graceOnPrincipalPayment) {
-        this.graceOnPrincipalPayment = graceOnPrincipalPayment;
-        return this;
-    }
-
-    public LoanApplicationTestBuilder withInterestGrace(final String graceOnInterestPayment) {
-        this.graceOnInterestPayment = graceOnInterestPayment;
         return this;
     }
 
@@ -429,11 +414,6 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withFixedEmiAmount(final String installmentAmount) {
         this.fixedEmiAmount = installmentAmount;
-        return this;
-    }
-
-    public LoanApplicationTestBuilder withDatatables(final List<HashMap<String, Object>> datatables) {
-        this.datatables = datatables;
         return this;
     }
 

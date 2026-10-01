@@ -28,9 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PaymentTypeCreateResponse;
 import org.apache.fineract.client.models.PaymentTypeData;
-import org.apache.fineract.client.models.PaymentTypeDeleteResponse;
-import org.apache.fineract.client.models.PaymentTypeUpdateRequest;
-import org.apache.fineract.client.models.PaymentTypeUpdateResponse;
 import org.apache.fineract.client.util.Calls;
 
 @Slf4j
@@ -63,16 +60,6 @@ public final class PaymentTypeHelper {
 
     public static PaymentTypeData retrieveById(final Long paymentTypeId) {
         return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.retrieveOnePaymentType(paymentTypeId));
-    }
-
-    public static PaymentTypeUpdateResponse updatePaymentType(final Long paymentTypeId, PaymentTypeUpdateRequest request) {
-        log.info("-------------------------------UPDATING PAYMENT TYPE-------------------------------------------");
-        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.updatePaymentType(paymentTypeId, request));
-    }
-
-    public static PaymentTypeDeleteResponse deletePaymentType(final Long paymentTypeId) {
-        log.info("-------------------------------DELETING PAYMENT TYPE-------------------------------------------");
-        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.deleteCodePaymentType(paymentTypeId));
     }
 
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {

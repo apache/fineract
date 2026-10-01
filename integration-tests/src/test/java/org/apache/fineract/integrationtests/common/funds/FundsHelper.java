@@ -72,10 +72,6 @@ public class FundsHelper {
         return new Gson().toJson(this);
     }
 
-    public static FundsHelper fromJSON(final String jsonData) {
-        return new Gson().fromJson(jsonData, FundsHelper.class);
-    }
-
     public static Builder create(final String name) {
         return new Builder(name);
     }

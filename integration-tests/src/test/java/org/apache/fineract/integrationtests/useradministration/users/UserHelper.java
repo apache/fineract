@@ -19,11 +19,8 @@
 package org.apache.fineract.integrationtests.useradministration.users;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
@@ -89,35 +86,6 @@ public final class UserHelper {
         String requestBody = GSON.toJson(request);
         String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, requestBody);
         return GSON.fromJson(response, PostUsersResponse.class);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static JsonObject createUserWithJsonResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            PostUsersRequest request) {
-        String requestBody = GSON.toJson(request);
-        String jsonResponse = Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, requestBody);
-        return JsonParser.parseString(jsonResponse).getAsJsonObject();
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer getUserId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, String userName) {
-        String json = Utils.performServerGet(requestSpec, responseSpec, CREATE_USER_URL, null);
-        Assertions.assertNotNull(json);
-        List<HashMap<String, Object>> userList = JsonPath.from(json).getList("$");
-
-        for (HashMap<String, Object> user : userList) {
-            if (user.get("username").equals(userName)) {
-                return (Integer) user.get("id");
-            }
-        }
-
-        return null;
     }
 
     // TODO: Rewrite to use fineract-client instead!

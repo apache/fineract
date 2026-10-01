@@ -18,12 +18,8 @@
  */
 package org.apache.fineract.integrationtests.common.funds;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.FundRequest;
@@ -55,30 +51,6 @@ public final class FundsResourceHandler {
     public static Integer createFund(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         return createFund(fh.toJSON(), requestSpec, responseSpec);
-    }
-
-    public static List<FundsHelper> retrieveAllFunds(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String URL = FUNDS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        List<HashMap<String, Object>> list = Utils.performServerGet(requestSpec, responseSpec, URL, "");
-        final String jsonData = new Gson().toJson(list);
-        return new Gson().fromJson(jsonData, new TypeToken<List<FundsHelper>>() {}.getType());
-    }
-
-    public static String retrieveFund(final Long fundID, final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String URL = FUNDS_URL + "/" + fundID + "?" + Utils.TENANT_IDENTIFIER;
-        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
-        return new Gson().toJson(response);
-    }
-
-    public static FundsHelper updateFund(final Long fundID, final String newName, final String newExternalId,
-            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        FundsHelper fh = FundsHelper.create(newName).externalId(newExternalId).build();
-        String updateJSON = new Gson().toJson(fh);
-
-        final String URL = FUNDS_URL + "/" + fundID + "?" + Utils.TENANT_IDENTIFIER;
-        final HashMap<String, String> response = Utils.performServerPut(requestSpec, responseSpec, URL, updateJSON, "changes");
-        final String jsonData = new Gson().toJson(response);
-        return new Gson().fromJson(jsonData, FundsHelper.class);
     }
 
 }
