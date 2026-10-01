@@ -84,7 +84,24 @@ public final class FeignErrors {
         return reportedErrors(exception).get(0);
     }
 
+    /**
+     * The rejection an error body reports at its top level. A request body that cannot be read names the offending
+     * field and value there, with no {@code errors} list beneath it.
+     */
+    public static RejectedValue rejectedValue(CallFailedRuntimeException exception) {
+        try {
+            JsonNode body = ObjectMapperFactory.getShared().readTree(exception.getResponseBody());
+            return new RejectedValue(body.path("userMessageGlobalisationCode").asText(null), body.path("parameterName").asText(null),
+                    body.path("value").asText(null));
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Error body is not the standard envelope: " + exception.getResponseBody(), e);
+        }
+    }
+
     public record ReportedError(String userMessageGlobalisationCode, String defaultUserMessage, String developerMessage,
             String parameterName) {
+    }
+
+    public record RejectedValue(String userMessageGlobalisationCode, String parameterName, String value) {
     }
 }
