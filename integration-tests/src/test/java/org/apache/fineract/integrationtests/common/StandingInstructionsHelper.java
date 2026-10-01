@@ -20,8 +20,6 @@ package org.apache.fineract.integrationtests.common;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.Set;
 import org.apache.fineract.client.feign.services.StandingInstructionsHistoryApi.RetrieveAllStandingInstructionHistoryQueryParams;
 import org.apache.fineract.client.models.GetStandingInstructionHistoryPageItemsResponse;
@@ -43,7 +41,7 @@ public class StandingInstructionsHelper {
 
     private String officeId = OFFICE_ID;
 
-    public StandingInstructionsHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {}
+    public StandingInstructionsHelper() {}
 
     public StandingInstructionCreationRequest build(final String clientId, final String fromAccountId, final String toAccountId,
             final String fromAccountType, final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
