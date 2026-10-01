@@ -23,22 +23,20 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.fineract.client.models.AuditData;
 import org.apache.fineract.client.models.AuditSearchData;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCodeHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.AuditHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -46,24 +44,17 @@ import org.junit.jupiter.api.Test;
  * @author Manthan Surkar
  *
  */
-public class AuditIntegrationTest {
+public class AuditIntegrationTest extends FeignIntegrationTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
+    private FeignClientHelper clientHelper;
+    private Long closureReasonId;
     private static final SecureRandom rand = new SecureRandom();
+    private static final String CLOSURE_DATE = Utils.dateFormatter.format(Utils.getLocalDateOfTenant().minusDays(4));
 
-    /**
-     * Sets up the essential settings for the TEST like contentType, expectedStatusCode. It uses the '@BeforeEach'
-     * annotation provided by jUnit.
-     */
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        this.clientHelper = new FeignClientHelper(fineractClient());
+        this.closureReasonId = new FeignCodeHelper(fineractClient()).retrieveOrCreateCodeValueId("ClientClosureReason");
     }
 
     @Test
@@ -105,8 +96,8 @@ public class AuditIntegrationTest {
         List<AuditData> auditsRecievedInitial;
 
         // When Client is created: Count should be "1"
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = this.clientHelper.createClient().intValue();
+        assertEquals(clientId.longValue(), this.clientHelper.getClient(clientId.longValue()).getId());
 
         auditsRecieved = AuditHelper.getAuditDetails(clientId, "CREATE", "CLIENT");
         AuditHelper.verifyOneAuditOnly(auditsRecieved, clientId, "CREATE", "CLIENT");
@@ -116,13 +107,13 @@ public class AuditIntegrationTest {
         for (int i = 0; i < 4; i++) {
             // Close
             auditsRecievedInitial = AuditHelper.getAuditDetails(clientId, "CLOSE", "CLIENT");
-            this.clientHelper.closeClient(clientId);
+            closeClient(clientId);
             auditsRecieved = AuditHelper.getAuditDetails(clientId, "CLOSE", "CLIENT");
             AuditHelper.verifyMultipleAuditsOnserver(auditsRecievedInitial, auditsRecieved, clientId, "CLOSE", "CLIENT");
 
             // Activate
             auditsRecievedInitial = AuditHelper.getAuditDetails(clientId, "REACTIVATE", "CLIENT");
-            this.clientHelper.reactivateClient(clientId);
+            reactivateClient(clientId);
             auditsRecieved = AuditHelper.getAuditDetails(clientId, "REACTIVATE", "CLIENT");
             AuditHelper.verifyMultipleAuditsOnserver(auditsRecievedInitial, auditsRecieved, clientId, "REACTIVATE", "CLIENT");
         }
@@ -139,14 +130,14 @@ public class AuditIntegrationTest {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public void checkAuditsWithLimitParam() {
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        final Integer clientId = this.clientHelper.createClient().intValue();
 
         // The following loop would ensure database have atleast 8 audits.
         for (int i = 0; i < 4; i++) {
             // Close client
-            this.clientHelper.closeClient(clientId);
+            closeClient(clientId);
             // Activate client
-            this.clientHelper.reactivateClient(clientId);
+            reactivateClient(clientId);
         }
 
         for (int i = 0; i < 3; i++) {
@@ -182,4 +173,11 @@ public class AuditIntegrationTest {
         AuditHelper.verifyMultipleAuditsOnserver(auditsRecievedInitial, auditsRecieved, jobId, "EXECUTEJOB", "SCHEDULER");
     }
 
+    private void closeClient(Integer clientId) {
+        this.clientHelper.closeClient(clientId.longValue(), ClientRequestBuilders.closeClient(this.closureReasonId, CLOSURE_DATE));
+    }
+
+    private void reactivateClient(Integer clientId) {
+        this.clientHelper.reactivateClient(clientId.longValue(), ClientRequestBuilders.reactivateClient(CLOSURE_DATE));
+    }
 }
