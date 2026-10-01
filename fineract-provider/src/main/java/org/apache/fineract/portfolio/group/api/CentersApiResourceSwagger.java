@@ -127,6 +127,8 @@ final class CentersApiResourceSwagger {
 
         @Schema(example = "8")
         public Long id;
+        @Schema(example = "000000008")
+        public String accountNo;
         public GetCentersResponse.GetCentersPageItems.GetCentersStatus status;
         @Schema(example = "false")
         public Boolean active;
