@@ -93,8 +93,8 @@ public class RecurringDepositAccountHelper {
     private final String lockingPeriodFrequencyType = MONTHS;
     private final String minDepositTerm = "6";
     private final String minDepositTermTypeId = MONTHS;
-    private final String maxDepositTerm = "10";
-    private final String maxDepositTermTypeId = YEARS;
+    private String maxDepositTerm = "10";
+    private String maxDepositTermTypeId = YEARS;
     private final String inMultiplesOfDepositTerm = "2";
     private final String inMultiplesOfDepositTermTypeId = MONTHS;
     private final String preClosurePenalInterest = "2";
@@ -647,6 +647,12 @@ public class RecurringDepositAccountHelper {
 
     public RecurringDepositAccountHelper withDepositPeriod(final String depositPeriod) {
         this.depositPeriod = depositPeriod;
+        return this;
+    }
+
+    public RecurringDepositAccountHelper withoutMaxDepositTerm() {
+        this.maxDepositTerm = null;
+        this.maxDepositTermTypeId = null;
         return this;
     }
 
