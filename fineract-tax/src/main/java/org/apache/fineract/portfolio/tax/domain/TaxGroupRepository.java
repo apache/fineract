@@ -23,4 +23,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface TaxGroupRepository extends JpaRepository<TaxGroup, Long>, JpaSpecificationExecutor<TaxGroup> {
 
+    // Check if any TaxGroup exists with the given name
+    boolean existsByNameIgnoreCase(String name);
+
+    // Check if any other TaxGroup (excluding the given id) exists with the same name
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
+
 }

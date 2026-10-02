@@ -41,6 +41,12 @@ import org.springframework.context.annotation.Configuration;
 public class TaxConfiguration {
 
     @Bean
+    @ConditionalOnMissingBean(TaxValidator.class)
+    public TaxValidator taxValidator(FromJsonHelper fromApiJsonHelper, TaxComponentRepository taxComponentRepository) {
+        return new TaxValidator(fromApiJsonHelper, taxComponentRepository);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(TaxAssembler.class)
     public TaxAssembler taxAssembler(FromJsonHelper fromApiJsonHelper, GLAccountRepositoryWrapper glAccountRepositoryWrapper,
             TaxComponentRepositoryWrapper taxComponentRepositoryWrapper) {
