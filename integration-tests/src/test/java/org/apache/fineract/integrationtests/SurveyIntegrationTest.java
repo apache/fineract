@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.client.models.SurveyData;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.common.SurveyHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SurveyIntegrationTest extends IntegrationTest {
+public class SurveyIntegrationTest extends FeignIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SurveyIntegrationTest.class);
     private static final int SURVEY_VALIDITY_YEARS = 100;
@@ -51,7 +51,6 @@ public class SurveyIntegrationTest extends IntegrationTest {
 
     @BeforeEach
     void setup() {
-        Utils.initializeRESTAssured();
         this.surveyHelper = new SurveyHelper();
     }
 
