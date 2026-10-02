@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import static org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanDataValidator.ADJUST_BY_DELTA_SUPPORTED_PARAMETERS;
+
 import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -780,6 +784,164 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                     "Undo is not supported for transaction type " + transaction.getTypeOf(),
                     WorkingCapitalLoanConstants.transactionTypeParamName);
         };
+    }
+
+    @Override
+    public CommandProcessingResult adjustByDeltaTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
+        // 18 - permission - handled by command wrapper
+        // 19 - Batch API - handled by command wrapper + batch api.
+
+        final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        final WorkingCapitalLoanTransaction transactionToAdjust = transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
+                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
+                        "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
+        // 1 - done
+
+        // assembly
+        final String json = command.json();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ADJUST_BY_DELTA_SUPPORTED_PARAMETERS);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.transactionDateParamName,
+                element);
+
+        final BigDecimal transactionAmount = fromApiJsonHelper
+                .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, command.parsedJson(), new HashSet<>());
+
+        final Integer classificationId = this.fromApiJsonHelper
+                .extractIntegerSansLocaleNamed(WorkingCapitalLoanConstants.classificationIdParamName, element);
+
+        final String note = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.noteParamName, element);
+
+        // Validators
+
+        // 5 - overshoot - rejected
+        // 6 - zero amount - rejected
+        // 7 - signed transactionAmount expected
+        // 13 - only REPAYMENT, GOODWILL_CREDIT, PAYOUT_REFUND and CHARGE_ADJUSTMENT are adjustable.
+        // 14 - adjustment is permitted on ACTIVE, CLOSED_OBLIGATIONS_MET and OVERPAID only, and refused on an
+        // already-reversed transaction
+        this.validator.validateAdjustByDelta(element, loan, transactionToAdjust, transactionDate, transactionAmount, note,
+                classificationId);
+
+        // 17 - rejects affects nothing
+
+        // transaction handling
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put("adjustByDelta", true);
+
+        final boolean lastMonetaryAction = transactionProcessor.isLastMonetaryAction(transactionToAdjust);
+        final boolean isChargesInvolved = isChargesInvolved(loan);
+        final LoanStatus oldStatus = loan.getStatus();
+
+        transactionToAdjust.setReversed(true);
+
+        // 4 - reverse only
+        final BigDecimal adjustedTransactionAmount = transactionAmount.add(transactionToAdjust.getTransactionAmount());
+
+        if (adjustedTransactionAmount.compareTo(BigDecimal.ZERO) == 0) {
+            changes.put("reversed", true);
+            // 9 - reversal external ID is accepted
+
+            ExternalId reversalExternalId = externalIdFactory
+                    .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.reversalExternalIdParamName));
+            transactionToAdjust.setReversalExternalId(reversalExternalId);
+            changes.put("reversalExternalId", reversalExternalId);
+
+            LocalDate reversedOnDate = ThreadLocalContextUtil.getBusinessDate();
+            transactionToAdjust.setReversedOnDate(reversedOnDate);
+            changes.put("reversedOnDate", reversedOnDate);
+
+            // 11 - Reverse-replay reuses the undo branch selection
+            if (lastMonetaryAction && !isChargesInvolved) {
+                amortizationScheduleWriteService.applyRepaymentUndo(loan, transactionToAdjust.getTransactionDate(),
+                        transactionToAdjust.getAllocation().getPrincipalPortion());
+                updateBalanceAfterUndo(loan, transactionToAdjust);
+            } else if (!isChargesInvolved) {
+                transactionReprocessingService.reprocessChargeFreeSuffix(loan, transactionToAdjust.getTransactionDate(),
+                        transactionToAdjust);
+            } else {
+                transactionReprocessingService.reprocessTransactions(loan);
+            }
+
+            breachScheduleService.applyRepaymentUndo(loan.getId(), transactionToAdjust.getTransactionDate(),
+                    transactionToAdjust.getTransactionAmount());
+            delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+
+            accountingProcessor.postReversalJournalEntries(loan, transactionToAdjust);
+
+            adjustTransactionEventPublisher.publishReversal(loan.getId(), transactionToAdjust);
+        } else {
+
+            // External id moves to the replacement
+            final ExternalId txnExternalId = transactionToAdjust.getExternalId();
+            transactionToAdjust.setExternalId(null);
+
+            // 15a - payment detail, repayment classification and transaction date carry over unless the body overrides
+            // them
+            PaymentDetail paymentDetail = createAndPersistPaymentDetailFromCommand(command, changes);
+
+            final PaymentDetail newPaymentDetail = paymentDetail == null ? transactionToAdjust.getPaymentDetail() : paymentDetail;
+            final CodeValue newClassification = classificationId != null
+                    ? codeValueRepository.findByCodeNameAndId(WorkingCapitalLoanConstants.REPAYMENT_CLASSIFICATION_CODE_NAME,
+                            classificationId.longValue())
+                    : transactionToAdjust.getClassification();
+            changes.put(WorkingCapitalLoanConstants.classificationIdParamName, classificationId);
+
+            // 15b - A transactionDate
+            // in the body moves the replacement, and the replay boundary is then the earlier of the two
+            // dates.
+            final LocalDate newTransactionDate = transactionDate == null ? transactionToAdjust.getTransactionDate() : transactionDate;
+
+            WorkingCapitalLoanTransaction newTransaction = resolveNewTransaction(transactionToAdjust.getTransactionType(), loan,
+                    adjustedTransactionAmount, newPaymentDetail, newTransactionDate, newClassification, txnExternalId);
+
+            // 2 - increase
+            // 3 - decrease
+
+            // 11 - Reverse-replay reuses the undo branch selection
+            if (lastMonetaryAction && !isChargesInvolved) {
+                amortizationScheduleWriteService.applyRepaymentUndo(loan, transactionToAdjust.getTransactionDate(),
+                        transactionToAdjust.getAllocation().getPrincipalPortion());
+                updateBalanceAfterUndo(loan, transactionToAdjust);
+            } else if (!isChargesInvolved) {
+                transactionReprocessingService.reprocessChargeFreeSuffix(loan, transactionToAdjust.getTransactionDate(),
+                        transactionToAdjust);
+            } else {
+                transactionReprocessingService.reprocessTransactions(loan);
+            }
+            breachScheduleService.applyRepaymentUndo(loan.getId(), transactionToAdjust.getTransactionDate(),
+                    transactionToAdjust.getTransactionAmount());
+
+            delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+
+            accountingProcessor.postReversalJournalEntries(loan, transactionToAdjust);
+
+            transactionRepository.saveAndFlush(newTransaction);
+
+            transactionProcessor.processRepaymentLikeTransaction(loan, newTransaction, newTransactionDate, adjustedTransactionAmount);
+
+            // 16 - Downstream effects fire once each — reversal journal entries for the original plus journal
+            // entries for the replacement; breach schedule and delinquency range schedule re-derived
+
+            // 12 - The adjustment business event carries both states
+        }
+        stateMachine.determineAndTransition(loan, DateUtils.getBusinessLocalDate());
+        transactionProcessor.recalculateOverpaidOnDate(loan, transactionToAdjust);
+        transactionProcessor.recalculateSettlementDates(loan);
+
+        changes.put("status", loan.getLoanStatus());
+
+        handleNote(loan, command, changes);
+
+        this.loanRepository.saveAndFlush(loan);
+        notifyBalanceChanged(loan);
+        notifyStatusChanged(loan, oldStatus);
+
+        return new CommandProcessingResultBuilder().withLoanId(loan.getId()).withLoanExternalId(loan.getExternalId())
+                .withEntityId(transactionToAdjust.getId()).withEntityExternalId(transactionToAdjust.getExternalId()).with(changes).build();
     }
 
     /**

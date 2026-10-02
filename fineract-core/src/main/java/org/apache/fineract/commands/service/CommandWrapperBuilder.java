@@ -23,6 +23,7 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ADJUST;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ADJUSTMENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ADJUSTTRANSACTION;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ADJUST_BY_DELTA;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ALLOCATECASHIER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ALLOCATECASHTOCASHIER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_APPLYANNUALFEE;
@@ -890,6 +891,15 @@ public class CommandWrapperBuilder {
         this.entityId = transactionId;
         this.loanId = loanId;
         this.href = "/working-capital-loans/" + loanId + "/transactions/" + transactionId + "?command=undo";
+        return this;
+    }
+
+    public CommandWrapperBuilder adjustByDeltaWorkingCapitalLoanTransaction(final Long loanId, final Long transactionId) {
+        this.actionName = ACTION_ADJUST_BY_DELTA;
+        this.entityName = ENTITY_WORKINGCAPITALLOANTRANSACTION;
+        this.entityId = transactionId;
+        this.loanId = loanId;
+        this.href = "/working-capital-loans/" + loanId + "/transactions/" + transactionId + "?command=adjust_by_delta";
         return this;
     }
 
