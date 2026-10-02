@@ -25,10 +25,12 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanCapitalizedIncomeTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoChargeOffBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.investor.data.attribute.CapitalizedIncomeAmortizationStrategyExternalAssetOwnerLoanProductAttribute;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -39,6 +41,7 @@ public class LoanCapitalizedIncomeAmortizationEventService {
 
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanCapitalizedIncomeAmortizationProcessingService loanCapitalizedIncomeAmortizationProcessingService;
+    private final LoanCapitalizedIncomeAmortizationStrategyService loanCapitalizedIncomeAmortizationStrategyService;
 
     @PostConstruct
     public void addListeners() {
@@ -48,6 +51,8 @@ public class LoanCapitalizedIncomeAmortizationEventService {
         businessEventNotifierService.addPostBusinessEventListener(LoanUndoChargeOffBusinessEvent.class,
                 new LoanUndoChargeOffEventListener());
         businessEventNotifierService.addPreBusinessEventListener(LoanChargeOffPreBusinessEvent.class, new LoanChargeOffPreEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanCapitalizedIncomeTransactionCreatedBusinessEvent.class,
+                new AmortizeImmediatelyListener());
     }
 
     private final class LoanCloseListener implements BusinessEventListener<LoanCloseBusinessEvent> {
@@ -60,6 +65,22 @@ public class LoanCapitalizedIncomeAmortizationEventService {
                     && (status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid())) {
                 log.debug("Loan closure on capitalized income amortization for loan {}", loan.getId());
                 loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanClosure(loan, false);
+            }
+        }
+    }
+
+    private final class AmortizeImmediatelyListener implements BusinessEventListener<LoanCapitalizedIncomeTransactionCreatedBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(final LoanCapitalizedIncomeTransactionCreatedBusinessEvent event) {
+            final Loan loan = event.get().getLoan();
+            final LoanStatus status = loan.getStatus();
+            if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization() && status.isActive()
+                    && loanCapitalizedIncomeAmortizationStrategyService.getStrategy(loan.getLoanProduct().getId())
+                            .equals(CapitalizedIncomeAmortizationStrategyExternalAssetOwnerLoanProductAttribute.IMMEDIATE)) {
+                log.debug("Loan immediate amortization on capitalized income for loan {}", loan.getId());
+                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationImmediate(loan,
+                        event.get().getTransactionDate(), false);
             }
         }
     }
