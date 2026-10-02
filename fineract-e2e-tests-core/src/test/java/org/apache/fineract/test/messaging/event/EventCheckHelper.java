@@ -1055,8 +1055,10 @@ public class EventCheckHelper {
     }
 
     public void workingCapitalLoanPeriodPaymentRateChangedEventCheck(final Long loanId) {
-        workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanPeriodPaymentRateChangedEvent.class, loanId,
-                (event, body) -> assertAmountEquals("paymentRate", event.getPaymentRate(), body.getPaymentRate()));
+        workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanPeriodPaymentRateChangedEvent.class, loanId, (event, body) -> {
+            assertAmountEquals("paymentRate", event.getPaymentRate(), body.getPaymentRate());
+            assertAmountEquals("effectivePaymentRate", event.getEffectivePaymentRate(), body.getEffectivePaymentRate());
+        });
     }
 
     public void workingCapitalLoanDelinquencyScheduleChangedEventCheck(final Long loanId) {
