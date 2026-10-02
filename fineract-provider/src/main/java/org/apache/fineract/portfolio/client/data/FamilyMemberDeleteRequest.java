@@ -16,15 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.portfolio.client.data;
 
-package org.apache.fineract.portfolio.client.service;
+import io.swagger.v3.oas.annotations.Hidden;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.client.domain.Client;
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class FamilyMemberDeleteRequest implements Serializable {
 
-public interface ClientFamilyMembersWritePlatformService {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    CommandProcessingResult addClientFamilyMember(Client client, JsonCommand command);
+    @Hidden
+    private Long id;
 
+    @Hidden
+    private Long clientId;
 }
