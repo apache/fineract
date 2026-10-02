@@ -34,22 +34,6 @@ public final class LoanStatusChecker {
 
     }
 
-    public static void verifyLoanIsApproved(final HashMap loanStatusHashMap) {
-        assertFalse(getStatus(loanStatusHashMap, "pendingApproval"));
-    }
-
-    public static void verifyLoanIsWaitingForDisbursal(final HashMap loanStatusHashMap) {
-        assertTrue(getStatus(loanStatusHashMap, "waitingForDisbursal"));
-    }
-
-    public static void verifyLoanIsPending(final HashMap loanStatusHashMap) {
-        assertTrue(getStatus(loanStatusHashMap, "pendingApproval"));
-    }
-
-    public static void verifyLoanIsActive(final HashMap loanStatusHashMap) {
-        assertTrue(getStatus(loanStatusHashMap, "active"));
-    }
-
     public static void verifyLoanAccountIsClosed(final HashMap loanStatusHashMap) {
         assertTrue(getStatus(loanStatusHashMap, "closed"));
     }
@@ -68,12 +52,6 @@ public final class LoanStatusChecker {
 
     public static void verifyLoanAccountRejected(final HashMap loanSubStatusHashMap) {
         assertEquals("Rejected", getSubStatus(loanSubStatusHashMap, "value"));
-    }
-
-    public static HashMap<String, Object> getStatusOfLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer loanID) {
-        final String url = "/fineract-provider/api/v1/loans/" + loanID + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, url, "status");
     }
 
     public static HashMap<String, Object> getSubStatusOfLoan(final RequestSpecification requestSpec,

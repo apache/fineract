@@ -20,11 +20,9 @@ package org.apache.fineract.integrationtests.common.savings;
 
 import static org.apache.fineract.integrationtests.common.Utils.DEFAULT_TENANT;
 import static org.apache.fineract.integrationtests.common.Utils.TENANT_PARAM_NAME;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -43,7 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
@@ -190,49 +187,6 @@ public class SavingsAccountHelper {
         LOG.info("--------------------------------APPLYING FOR SAVINGS APPLICATION--------------------------------");
         return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
                 savingsApplicationJson, "savingsId");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Integer applyForSavingsApplicationWithDatatables(final Integer id, final Integer savingsProductID, final String accountType,
-            final String submittedOnDate, final String datatableName) {
-        LOG.info("----------------------------APPLYING FOR SAVINGS APPLICATION WITH DATATABLES----------------------------");
-        final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
-                .withSubmittedOnDate(submittedOnDate) //
-                .withDatatables(getTestDatatableAsJson(datatableName)) //
-                .build(id.toString(), savingsProductID.toString(), accountType);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
-                savingsApplicationJSON, "savingsId");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Object applyForSavingsApplicationWithFailure(final Integer id, final Integer savingsProductID, final String accountType,
-            final String submittedOnDate, final String responseAttribute) {
-        LOG.info("----------------------------APPLYING FOR SAVINGS APPLICATION WITH ERROR----------------------------");
-        final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
-                .withSubmittedOnDate(submittedOnDate) //
-                .build(id.toString(), savingsProductID.toString(), accountType);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
-                savingsApplicationJSON, responseAttribute);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Integer createApproveActivateSavingsAccount(final Integer clientId, Integer savingsProductId, final String startDate) {
-        final Integer savingsId = applyForSavingsApplicationOnDate(clientId, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL, startDate);
-        assertNotNull(savingsId);
-        HashMap savingsStatusHashMap = approveSavingsOnDate(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = activateSavingsAccount(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
-        return savingsId;
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -574,17 +528,6 @@ public class SavingsAccountHelper {
     public Integer addChargesForSavingsWithDueDate(final Integer savingsId, final Integer chargeId, String addDueDate, Integer amount) {
         return (Integer) performSavingActions(SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
                 getPeriodChargeRequestJSONWithDueDate(chargeId, addDueDate, amount), CommonConstants.RESPONSE_RESOURCE_ID);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Integer addChargesForSavingsWithDueDateAndFeeOnMonthDay(final Integer savingsId, final Integer chargeId, String addDueDate,
-            Integer amount, String feeOnMonthDay) {
-        return (Integer) performSavingActions(SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
-                getPeriodChargeRequestJSONWithDueDateAndFeeOnMonthDay(chargeId, addDueDate, amount, feeOnMonthDay),
-                CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public Integer payCharge(final Integer chargeId, final Integer savingsId, String amount, LocalDate dueDate) {
@@ -1041,15 +984,6 @@ public class SavingsAccountHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public ArrayList getSavingsCharges(final Integer savingsID) {
-        final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/charges?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, URL, "");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public HashMap getSavingsTransaction(final Integer savingsID, final Integer savingsTransactionId) {
         final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions/" + savingsTransactionId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
@@ -1065,12 +999,6 @@ public class SavingsAccountHelper {
         requestSpec.queryParams(queryParams);
         String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url);
         return GSON.fromJson(response, SavingsAccountTransactionsSearchResponse.class);
-    }
-
-    public Map<String, Object> querySavingsTransactions(Integer savingsId, PagedLocalRequestAdvancedQueryRequest request) {
-        String response = Calls.ok(FineractClientHelper.getFineractClient().savingsTransactions
-                .advancedQuerySavingsAccountTransactions(savingsId.longValue(), request));
-        return JsonPath.from(response).get("");
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -1211,46 +1139,6 @@ public class SavingsAccountHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    private String getPeriodChargeRequestJSONWithDueDateAndFeeOnMonthDay(Integer chargeId, String addDueDate, Integer amount,
-            String feeOnMonthDay) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("chargeId", chargeId);
-        map.put("amount", amount);
-        map.put("feeOnMonthDay", feeOnMonthDay);
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("monthDayFormat", "dd MMMM");
-        map.put("dateFormat", "dd MMMM yyy");
-        map.put("dueDate", addDueDate);
-        String json = new Gson().toJson(map);
-        return json;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private String getAccountActivationJSON(final String activationDate) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.LOCALE);
-        map.put("dateFormat", CommonConstants.DATE_FORMAT);
-        map.put("activatedOnDate", activationDate);
-        String savingsAccountActivateJson = new Gson().toJson(map);
-        return savingsAccountActivateJson;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public HashMap activateSavingsAccount(Integer savingsID, String activationDate) {
-        return performSavingApplicationActions(createSavingsOperationURL(ACTIVATE_SAVINGS_COMMAND, savingsID),
-                getAccountActivationJSON(activationDate), IS_BLOCK);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public Object inactivateCharge(final Integer chargeId, final Integer savingsId, final String jsonAttributeToGetBack) {
         return performSavingActions(createChargesURL("inactivate", savingsId, chargeId), getSavingsInactivateChargeJSON(),
                 jsonAttributeToGetBack);
@@ -1307,26 +1195,6 @@ public class SavingsAccountHelper {
                 .withInterestCalculationPeriodTypeAsDailyBalance() //
                 .withMinimumOpenningBalance(minOpenningBalance).build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static List<HashMap<String, Object>> getTestDatatableAsJson(final String registeredTableName) {
-        List<HashMap<String, Object>> datatablesListMap = new ArrayList<>();
-        HashMap<String, Object> datatableMap = new HashMap<>();
-        HashMap<String, Object> dataMap = new HashMap<>();
-        dataMap.put("locale", "en");
-        dataMap.put("Spouse Name", Utils.randomStringGenerator("Spouse_name", 4));
-        dataMap.put("Number of Dependents", 5);
-        dataMap.put("Time of Visit", "01 December 2016 04:03");
-        dataMap.put("dateFormat", DATE_TIME_FORMAT);
-        dataMap.put("Date of Approval", "02 December 2016 00:00");
-        datatableMap.put("registeredTableName", registeredTableName);
-        datatableMap.put("data", dataMap);
-        datatablesListMap.add(datatableMap);
-        return datatablesListMap;
     }
 
     // TODO: Rewrite to use fineract-client instead!

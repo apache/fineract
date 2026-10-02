@@ -225,6 +225,12 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         public String reasonForBlock;
         @Schema(example = "1")
         public Integer paymentTypeId;
+        @Schema(example = "CHQ-001")
+        public String checkNumber;
+        @Schema(example = "ROUTE-001")
+        public String routingCode;
+        @Schema(example = "RCPT-001")
+        public String receiptNumber;
         @Schema(example = "A note about this transaction")
         public String note;
     }

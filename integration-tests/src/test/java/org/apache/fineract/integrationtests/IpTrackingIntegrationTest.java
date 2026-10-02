@@ -21,34 +21,22 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.List;
 import org.apache.fineract.client.models.AuditData;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.common.AuditHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class IpTrackingIntegrationTest {
+public class IpTrackingIntegrationTest extends FeignIntegrationTest {
 
     private static final String EXPECTED_LOCAL_IP = "127.0.0.1";
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecForSearch;
+    private FeignClientHelper clientHelper;
 
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.requestSpec.auth().basic("mifos", "password");
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecForSearch = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.clientHelper = new FeignClientHelper(fineractClient());
     }
 
     @Test
@@ -57,8 +45,8 @@ public class IpTrackingIntegrationTest {
                 "Saltando test porque el tracking de IP está deshabilitado");
 
         // given
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = this.clientHelper.createClient().intValue();
+        assertEquals(clientId.longValue(), this.clientHelper.getClient(clientId.longValue()).getId());
         List<AuditData> auditsRecieved = AuditHelper.getAuditDetails(clientId, "CREATE", "CLIENT");
 
         // when

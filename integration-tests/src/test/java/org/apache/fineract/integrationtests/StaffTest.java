@@ -18,171 +18,140 @@
  */
 package org.apache.fineract.integrationtests;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.fineract.client.feign.services.StaffApi.RetrieveAllStaffQueryParams;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.StaffCreateRequest;
+import org.apache.fineract.client.models.StaffCreateResponse;
+import org.apache.fineract.client.models.StaffData;
+import org.apache.fineract.client.models.StaffUpdateRequest;
+import org.apache.fineract.client.models.StaffUpdateResponse;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-@Deprecated // TODO move this into new org.apache.fineract.integrationtests.client.StaffTest
+public class StaffTest extends FeignIntegrationTest {
 
-public class StaffTest {
+    private static final Long HEAD_OFFICE_ID = 1L;
+    private static final Long UNKNOWN_STAFF_ID = (long) Integer.MAX_VALUE;
 
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecForValidationError;
-    private ResponseSpecification responseSpecForNotFoundError;
+    private FeignStaffHelper staffHelper;
 
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        // TODO: fiugre out why Jakarta validation throws 403 instead of 400
-        this.responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.responseSpecForNotFoundError = new ResponseSpecBuilder().expectStatusCode(404).build();
+        staffHelper = new FeignStaffHelper(fineractClient());
     }
 
     @Test
     public void testStaffCreate() {
-        Map<String, Object> response = StaffHelper.createStaffMap(requestSpec, responseSpec);
+        StaffCreateResponse response = staffHelper.createStaff();
 
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(1, response.get("officeId"));
-        Assertions.assertNotNull(response.get("resourceId"));
+        Assertions.assertEquals(HEAD_OFFICE_ID, response.getOfficeId());
+        Assertions.assertNotNull(response.getResourceId());
     }
 
     @Test
     public void testStaffCreateValidationError() {
-        final String noOfficeJson = StaffHelper.createStaffWithJSONFields("firstname", "lastname");
-        final String noFirstnameJson = StaffHelper.createStaffWithJSONFields("officeId", "lastname");
-        final String noLastnameJson = StaffHelper.createStaffWithJSONFields("officeId", "firstname");
+        assertValidationError(staffHelper.createStaffExpectingError(requestWithJoiningDate().firstname(firstname()).lastname(lastname())));
+        assertValidationError(
+                staffHelper.createStaffExpectingError(requestWithJoiningDate().officeId(HEAD_OFFICE_ID).lastname(lastname())));
+        assertValidationError(
+                staffHelper.createStaffExpectingError(requestWithJoiningDate().officeId(HEAD_OFFICE_ID).firstname(firstname())));
 
-        StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, noOfficeJson);
-        StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, noFirstnameJson);
-        StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, noLastnameJson);
-
-        final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
-
-        map.put("officeId", 1);
-        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
-        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 4));
+        final StaffCreateRequest request = requestWithJoiningDate().officeId(HEAD_OFFICE_ID).firstname(firstname()).lastname(lastname());
 
         /** Long firstname test */
-        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 43));
-        StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
-        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
+        request.firstname(Utils.uniqueRandomStringGenerator("michael_", 43));
+        assertValidationError(staffHelper.createStaffExpectingError(request));
+        request.firstname(firstname());
 
         /** Long lastname test */
-        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 47));
-        StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
-        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 4));
+        request.lastname(Utils.uniqueRandomStringGenerator("Doe_", 47));
+        assertValidationError(staffHelper.createStaffExpectingError(request));
+        request.lastname(lastname());
 
         /** Long mobileNo test */
-        map.put("mobileNo", Utils.uniqueRandomStringGenerator("num_", 47));
-        StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
+        request.mobileNo(Utils.uniqueRandomStringGenerator("num_", 47));
+        assertValidationError(staffHelper.createStaffExpectingError(request));
     }
 
     @Test
     public void testStaffCreateMaxNameLength() {
-
-        final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
-
-        map.put("officeId", 1);
-        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 42));
-        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 46));
-
-        StaffHelper.createStaffWithJson(requestSpec, responseSpec, new Gson().toJson(map));
+        staffHelper.createStaff(requestWithJoiningDate().officeId(HEAD_OFFICE_ID)
+                .firstname(Utils.uniqueRandomStringGenerator("michael_", 42)).lastname(Utils.uniqueRandomStringGenerator("Doe_", 46)));
     }
 
     @Test
     public void testStaffCreateExternalIdValidationError() {
-        final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
-
-        map.put("officeId", 1);
-        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
-        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 4));
-
-        map.put("externalId", Utils.randomStringGenerator("EXT", 98));
-        StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
+        final StaffCreateRequest request = requestWithJoiningDate().officeId(HEAD_OFFICE_ID).firstname(firstname()).lastname(lastname())
+                .externalId(Utils.randomStringGenerator("EXT", 98));
+        assertValidationError(staffHelper.createStaffExpectingError(request));
     }
 
     @Test
     public void testStaffFetch() {
-        Map<String, Object> response = StaffHelper.getStaff(requestSpec, responseSpec, 1);
+        StaffData response = staffHelper.retrieveStaff(1L);
         Assertions.assertNotNull(response);
-        Assertions.assertNotNull(response.get("id"));
-        Assertions.assertEquals(1, response.get("id"));
+        Assertions.assertNotNull(response.getId());
+        Assertions.assertEquals(1L, response.getId());
     }
 
     @Test
     public void testStaffListFetch() {
-        StaffHelper.getStaffList(requestSpec, responseSpec);
+        Assertions.assertNotNull(staffHelper.retrieveAllStaff(new RetrieveAllStaffQueryParams()));
     }
 
     @Test
     public void testStaffListStatusAll() {
-        StaffHelper.getStaffListWithState(requestSpec, responseSpec, "all");
+        Assertions.assertNotNull(staffHelper.retrieveAllStaff(new RetrieveAllStaffQueryParams().status("all")));
     }
 
     @Test
     public void testStaffListStatusActive() {
-        List<Map<String, Object>> responseActive = StaffHelper.getStaffListWithState(requestSpec, responseSpec, "active");
-        for (final Map<String, Object> staff : responseActive) {
-            Assertions.assertNotNull(staff.get("id"));
-            Assertions.assertEquals(true, staff.get("isActive"));
+        List<StaffData> responseActive = staffHelper.retrieveAllStaff(new RetrieveAllStaffQueryParams().status("active"));
+        for (final StaffData staff : responseActive) {
+            Assertions.assertNotNull(staff.getId());
+            Assertions.assertEquals(true, staff.getIsActive());
         }
     }
 
     @Test
     public void testStaffListStatusInactive() {
-        List<Map<String, Object>> responseInactive = StaffHelper.getStaffListWithState(requestSpec, responseSpec, "inactive");
-        for (final Map<String, Object> staff : responseInactive) {
-            Assertions.assertNotNull(staff.get("id"));
-            Assertions.assertEquals(false, staff.get("isActive"));
+        List<StaffData> responseInactive = staffHelper.retrieveAllStaff(new RetrieveAllStaffQueryParams().status("inactive"));
+        for (final StaffData staff : responseInactive) {
+            Assertions.assertNotNull(staff.getId());
+            Assertions.assertEquals(false, staff.getIsActive());
         }
     }
 
-    @Test // because "xyz" will return an error, not a List
-    public void testStaffListFetchWrongState() throws ClassCastException {
-        Assertions.assertThrows(ClassCastException.class, () -> {
-            StaffHelper.getStaffListWithState(requestSpec, responseSpecForValidationError, "xyz");
-        });
+    @Test
+    public void testStaffListFetchWrongState() {
+        assertValidationError(staffHelper.retrieveAllStaffExpectingError(new RetrieveAllStaffQueryParams().status("xyz")));
     }
 
     @Test
     public void testStaffFetchNotFound() {
-        StaffHelper.getStaff(requestSpec, responseSpecForNotFoundError, Integer.MAX_VALUE);
+        Assertions.assertEquals(404, staffHelper.retrieveStaffExpectingError(UNKNOWN_STAFF_ID).getStatus());
     }
 
     @Test
     public void testStaffUpdate() {
-        final Map<String, Object> map = new HashMap<>();
         final String firstname = Utils.uniqueRandomStringGenerator("michael_", 10);
         final String lastname = Utils.uniqueRandomStringGenerator("Doe_", 10);
         final String externalId = UUID.randomUUID().toString();
         final String mobileNo = "+14155552671";
-        map.put("firstname", firstname);
-        map.put("lastname", lastname);
-        map.put("externalId", externalId);
-        map.put("mobileNo", mobileNo);
 
-        Map<String, Object> response = StaffHelper.updateStaff(requestSpec, responseSpec, 1, map);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> changes = (Map<String, Object>) response.get("changes");
+        StaffUpdateResponse response = staffHelper.updateStaff(1L,
+                new StaffUpdateRequest().firstname(firstname).lastname(lastname).externalId(externalId).mobileNo(mobileNo));
+        Map<String, Object> changes = response.getChanges();
 
-        Assertions.assertEquals(1, response.get("resourceId"));
+        Assertions.assertEquals(1L, response.getResourceId());
         Assertions.assertEquals(firstname, changes.get("firstname"));
         Assertions.assertEquals(lastname, changes.get("lastname"));
         Assertions.assertEquals(externalId, changes.get("externalId"));
@@ -191,69 +160,70 @@ public class StaffTest {
 
     @Test
     public void testStaffUpdateLongExternalIdError() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("externalId", Utils.randomStringGenerator("EXT", 98));
-
-        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
+        assertValidationError(
+                staffHelper.updateStaffExpectingError(1L, new StaffUpdateRequest().externalId(Utils.randomStringGenerator("EXT", 98))));
     }
 
     @Test
     public void testStaffUpdateWrongActiveState() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("isActive", "xyz");
-
-        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
+        assertValidationError(staffHelper.updateStaffActiveStateExpectingError(1L, "xyz"));
     }
 
     @Test
     public void testStaffUpdateNotFoundError() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
-
-        StaffHelper.updateStaff(requestSpec, responseSpecForNotFoundError, Integer.MAX_VALUE, map);
+        Assertions.assertEquals(404,
+                staffHelper.updateStaffExpectingError(UNKNOWN_STAFF_ID, new StaffUpdateRequest().firstname(firstname())).getStatus());
     }
 
     @Test
     public void testStaffUpdateValidationError() {
-        final HashMap<String, Object> map = new HashMap<>();
         final String firstname = Utils.uniqueRandomStringGenerator("michael_", 5);
         final String lastname = Utils.uniqueRandomStringGenerator("Doe_", 4);
         final String firstnameLong = Utils.uniqueRandomStringGenerator("michael_", 43);
         final String lastnameLong = Utils.uniqueRandomStringGenerator("Doe_", 47);
 
-        map.put("firstname", firstname);
-        map.put("lastname", lastname);
+        final StaffUpdateRequest request = new StaffUpdateRequest().firstname(firstname).lastname(lastname);
 
         /** Test long firstname */
-        map.put("firstname", firstnameLong);
-        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
-        map.put("firstname", firstname);
+        request.firstname(firstnameLong);
+        assertValidationError(staffHelper.updateStaffExpectingError(1L, request));
+        request.firstname(firstname);
 
         /** Test long lastname */
-        map.put("lastname", lastnameLong);
-        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
-        map.put("lastname", lastname);
+        request.lastname(lastnameLong);
+        assertValidationError(staffHelper.updateStaffExpectingError(1L, request));
+        request.lastname(lastname);
 
         /** Long mobileNo test */
-        map.put("mobileNo", Utils.uniqueRandomStringGenerator("num_", 47));
-        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
+        request.mobileNo(Utils.uniqueRandomStringGenerator("num_", 47));
+        assertValidationError(staffHelper.updateStaffExpectingError(1L, request));
     }
 
     @Test
     public void testStaffLoanOfficer() {
-        final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
+        staffHelper.createStaff(requestWithJoiningDate().officeId(HEAD_OFFICE_ID).firstname(firstname())
+                .lastname(Utils.uniqueRandomStringGenerator("Doe_", 5)).isLoanOfficer(true));
 
-        map.put("officeId", 1);
-        map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
-        map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 5));
-        map.put("isLoanOfficer", true);
-
-        StaffHelper.createStaffWithJson(requestSpec, responseSpec, new Gson().toJson(map));
-
-        List<Map<String, Object>> responseActive = StaffHelper.getStaffListWithLoanOfficerStatus(requestSpec, responseSpec, "true");
-        for (final Map<String, Object> staff : responseActive) {
-            Assertions.assertNotNull(staff.get("id"));
-            Assertions.assertEquals(true, staff.get("isLoanOfficer"));
+        List<StaffData> responseActive = staffHelper.retrieveAllStaff(new RetrieveAllStaffQueryParams().loanOfficersOnly(true));
+        for (final StaffData staff : responseActive) {
+            Assertions.assertNotNull(staff.getId());
+            Assertions.assertEquals(true, staff.getIsLoanOfficer());
         }
+    }
+
+    private static StaffCreateRequest requestWithJoiningDate() {
+        return new StaffCreateRequest().locale("en").dateFormat("dd MMMM yyyy").joiningDate("20 September 2011");
+    }
+
+    private static String firstname() {
+        return Utils.uniqueRandomStringGenerator("michael_", 5);
+    }
+
+    private static String lastname() {
+        return Utils.uniqueRandomStringGenerator("Doe_", 4);
+    }
+
+    private static void assertValidationError(CallFailedRuntimeException exception) {
+        Assertions.assertEquals(400, exception.getStatus());
     }
 }

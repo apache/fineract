@@ -18,93 +18,82 @@
  */
 package org.apache.fineract.integrationtests.campaigns;
 
-import static org.apache.fineract.integrationtests.client.IntegrationTest.assertThat;
-
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.EmailData;
 import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.client.models.PostEmailRequest;
+import org.apache.fineract.client.models.PutEmailRequest;
+import org.apache.fineract.client.models.StaffCreateRequest;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignEmailHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.FeignTestConstants;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class EmailTest {
+public class EmailTest extends FeignIntegrationTest {
 
-    private static final Gson GSON = new Gson();
-    private static final String EMAIL_URL = "/fineract-provider/api/v1/email";
+    private static final String STAFF_JOINING_DATE = "20 September 2011";
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+    private FeignEmailHelper emailHelper;
+    private FeignClientHelper clientHelper;
+    private FeignStaffHelper staffHelper;
 
     @BeforeEach
     public void setup() {
-        Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        emailHelper = new FeignEmailHelper(fineractClient());
+        clientHelper = new FeignClientHelper(fineractClient());
+        staffHelper = new FeignStaffHelper(fineractClient());
     }
 
     @Test
     public void testEmailCreateRetrieveUpdateDeleteLifecycle() {
         // Arrange: client must have an emailAddress, since EmailMessageAssembler
         // derives the recipient address from it (no address => data integrity exception).
-        PostClientsRequest clientRequest = ClientHelper.defaultClientCreationRequest();
-        clientRequest.emailAddress(Utils.randomStringGenerator("email_", 6) + "@example.com");
-        PostClientsResponse client = ClientHelper.createClient(clientRequest);
+        PostClientsResponse client = clientHelper.createClient(
+                ClientRequestBuilders.defaultClient().emailAddress(Utils.randomStringGenerator("email_", 6) + "@example.com"));
 
         String initialSubject = Utils.randomStringGenerator("Subject_", 10);
         String initialMessage = Utils.randomStringGenerator("Message_", 20);
 
-        Map<String, Object> createRequest = new LinkedHashMap<>();
-        createRequest.put("clientId", client.getClientId());
-        createRequest.put("emailSubject", initialSubject);
-        createRequest.put("emailMessage", initialMessage);
-        createRequest.put("locale", "en");
+        PostEmailRequest createRequest = new PostEmailRequest().clientId(client.getClientId()).emailSubject(initialSubject)
+                .emailMessage(initialMessage).locale(FeignTestConstants.LOCALE);
 
         // Act: CREATE
-        Long emailId = ((Number) Utils.performServerPost(requestSpec, responseSpec, emailUrl(), GSON.toJson(createRequest), "resourceId"))
-                .longValue();
+        Long emailId = emailHelper.createEmail(createRequest).getResourceId();
 
         // Assert: RETRIEVE after create
-        JsonPath created = retrieveEmail(emailId);
-        assertThat(created.getLong("id")).isEqualTo(emailId);
-        assertThat(created.getLong("clientId")).isEqualTo(client.getClientId().longValue());
-        assertThat(created.getString("emailSubject")).isEqualTo(initialSubject);
-        assertThat(created.getString("emailMessage")).isEqualTo(initialMessage);
+        EmailData created = emailHelper.retrieveEmail(emailId);
+        assertThat(created.getId()).isEqualTo(emailId);
+        assertThat(created.getClientId()).isEqualTo(client.getClientId());
+        assertThat(created.getEmailSubject()).isEqualTo(initialSubject);
+        assertThat(created.getEmailMessage()).isEqualTo(initialMessage);
 
         // Act: UPDATE (only emailMessage is a supported update param)
         String updatedMessage = Utils.randomStringGenerator("UpdatedMessage_", 20);
-        Map<String, Object> updateRequest = new LinkedHashMap<>();
-        updateRequest.put("emailMessage", updatedMessage);
 
-        JsonPath updateResponse = JsonPath
-                .from(Utils.performServerPut(requestSpec, responseSpec, emailUrl(emailId), GSON.toJson(updateRequest)));
-        assertThat(updateResponse.getLong("resourceId")).isEqualTo(emailId);
-        assertThat(updateResponse.getString("changes.emailMessage")).isEqualTo(updatedMessage);
+        CommandProcessingResult updateResponse = emailHelper.updateEmail(emailId, new PutEmailRequest().emailMessage(updatedMessage));
+        assertThat(updateResponse.getResourceId()).isEqualTo(emailId);
+        assertThat(updateResponse.getChanges().get("emailMessage")).isEqualTo(updatedMessage);
 
         // Assert: RETRIEVE after update
-        JsonPath updated = retrieveEmail(emailId);
-        assertThat(updated.getString("emailMessage")).isEqualTo(updatedMessage);
+        EmailData updated = emailHelper.retrieveEmail(emailId);
+        assertThat(updated.getEmailMessage()).isEqualTo(updatedMessage);
         // subject is untouched by update, since UPDATE_REQUEST_DATA_PARAMETERS only allows emailMessage
-        assertThat(updated.getString("emailSubject")).isEqualTo(initialSubject);
+        assertThat(updated.getEmailSubject()).isEqualTo(initialSubject);
 
         // Act: DELETE
-        Long deletedResourceId = ((Number) Utils.performServerDelete(requestSpec, responseSpec, emailUrl(emailId), "resourceId"))
-                .longValue();
+        Long deletedResourceId = emailHelper.deleteEmail(emailId).getResourceId();
         assertThat(deletedResourceId).isEqualTo(emailId);
 
-        // Assert: RETRIEVE after delete should 404 -- use a 404-expecting response spec
-        ResponseSpecification notFoundSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
-        Utils.performServerGet(requestSpec, notFoundSpec, emailUrl(emailId), null);
+        // Assert: RETRIEVE after delete should 404
+        CallFailedRuntimeException notFound = emailHelper.retrieveEmailExpectingError(emailId);
+        assertThat(notFound.getStatus()).isEqualTo(404);
     }
 
     @Test
@@ -113,48 +102,28 @@ public class EmailTest {
         // derives the recipient address from it (no address => data integrity exception,
         // which the platform maps to a 403 -- Postgres enforces the NOT NULL constraint
         // on email_address strictly, unlike MySQL/MariaDB in non-strict mode).
-        Map<String, Object> staffRequest = StaffHelper.getMapWithJoiningDate();
-        staffRequest.put("officeId", 1);
-        staffRequest.put("firstname", Utils.uniqueRandomStringGenerator("staff_", 5));
-        staffRequest.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 4));
-        staffRequest.put("isLoanOfficer", true);
-        staffRequest.put("emailAddress", Utils.randomStringGenerator("staff_email_", 6) + "@example.com");
+        StaffCreateRequest staffRequest = new StaffCreateRequest().joiningDate(STAFF_JOINING_DATE)
+                .dateFormat(FeignTestConstants.DATETIME_PATTERN).locale(FeignTestConstants.LOCALE)
+                .officeId(FeignOfficeHelper.HEAD_OFFICE_ID).firstname(Utils.uniqueRandomStringGenerator("staff_", 5))
+                .lastname(Utils.uniqueRandomStringGenerator("Doe_", 4)).isLoanOfficer(true)
+                .emailAddress(Utils.randomStringGenerator("staff_email_", 6) + "@example.com");
 
-        Integer staffId = (Integer) StaffHelper.createStaffWithJson(requestSpec, responseSpec, GSON.toJson(staffRequest)).get("resourceId");
+        Long staffId = staffHelper.createStaff(staffRequest).getResourceId();
 
-        Map<String, Object> createRequest = new LinkedHashMap<>();
-        createRequest.put("staffId", staffId);
-        createRequest.put("emailSubject", Utils.randomStringGenerator("Subject_", 10));
-        createRequest.put("emailMessage", Utils.randomStringGenerator("Message_", 20));
-        createRequest.put("locale", "en");
+        PostEmailRequest createRequest = new PostEmailRequest().staffId(staffId).emailSubject(Utils.randomStringGenerator("Subject_", 10))
+                .emailMessage(Utils.randomStringGenerator("Message_", 20)).locale(FeignTestConstants.LOCALE);
 
-        Long emailId = ((Number) Utils.performServerPost(requestSpec, responseSpec, emailUrl(), GSON.toJson(createRequest), "resourceId"))
-                .longValue();
+        Long emailId = emailHelper.createEmail(createRequest).getResourceId();
 
-        assertThat(retrieveEmail(emailId).getLong("staffId")).isEqualTo(staffId.longValue());
+        assertThat(emailHelper.retrieveEmail(emailId).getStaffId()).isEqualTo(staffId);
     }
 
     @Test
     public void testEmailCreateWithoutClientOrStaffIdFails() {
-        Map<String, Object> createRequest = new LinkedHashMap<>();
-        createRequest.put("emailSubject", Utils.randomStringGenerator("Subject_", 10));
-        createRequest.put("emailMessage", Utils.randomStringGenerator("Message_", 20));
-        createRequest.put("locale", "en");
+        PostEmailRequest createRequest = new PostEmailRequest().emailSubject(Utils.randomStringGenerator("Subject_", 10))
+                .emailMessage(Utils.randomStringGenerator("Message_", 20)).locale(FeignTestConstants.LOCALE);
 
-        ResponseSpecification badRequestSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
-        Utils.performServerPost(requestSpec, badRequestSpec, emailUrl(), GSON.toJson(createRequest), "");
-    }
-
-    private JsonPath retrieveEmail(final Long emailId) {
-        String response = Utils.performServerGet(requestSpec, responseSpec, emailUrl(emailId), null);
-        return JsonPath.from(response);
-    }
-
-    private String emailUrl() {
-        return EMAIL_URL + "?" + Utils.TENANT_IDENTIFIER;
-    }
-
-    private String emailUrl(final Long emailId) {
-        return EMAIL_URL + "/" + emailId + "?" + Utils.TENANT_IDENTIFIER;
+        CallFailedRuntimeException exception = emailHelper.createEmailExpectingError(createRequest);
+        assertThat(exception.getStatus()).isEqualTo(400);
     }
 }

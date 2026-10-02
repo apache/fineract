@@ -78,8 +78,8 @@ final class TellerApiResourceSwagger {
         public String name;
         @Schema(example = "cash handling")
         public String description;
-        @Schema(example = "ACTIVE")
-        public TellerStatus status;
+        @Schema(example = "300", description = "The status code: 100 pending, 300 active, 400 inactive, 600 closed")
+        public Integer status;
         @Schema(example = "en")
         public String locale;
         @Schema(example = "dd-MM-yyyy")
