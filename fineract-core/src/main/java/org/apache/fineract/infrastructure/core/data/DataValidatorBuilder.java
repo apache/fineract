@@ -953,7 +953,7 @@ public class DataValidatorBuilder {
     }
 
     private DataValidatorBuilder validateStringFor(final String validInputs) {
-        if (this.value == null && this.ignoreNullValue) {
+        if (this.value == null) {
             return this;
         }
         final Iterable<String> inputs = Splitter.onPattern(VALID_INPUT_SEPARATOR).split(validInputs);
