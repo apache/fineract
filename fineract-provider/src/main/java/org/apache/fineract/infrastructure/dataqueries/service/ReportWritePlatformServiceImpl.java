@@ -210,7 +210,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                     ReportParameter reportParameter = null;
                     String reportParameterName = null;
 
-                    if (jsonObject.has("id")) {
+                    if (jsonObject.has("id") && !jsonObject.get("id").isJsonNull()) {
                         final String idStr = jsonObject.get("id").getAsString();
                         if (StringUtils.isNotBlank(idStr)) {
                             id = Long.parseLong(idStr);
@@ -225,7 +225,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                         }
 
                         // check parameter
-                        if (jsonObject.has("parameterId")) {
+                        if (jsonObject.has("parameterId") && !jsonObject.get("parameterId").isJsonNull()) {
                             final Long parameterId = jsonObject.get("parameterId").getAsLong();
                             reportParameter = this.reportParameterRepository.findById(parameterId)
                                     .orElseThrow(() -> new ReportParameterNotFoundException(parameterId));
@@ -235,13 +235,13 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                             }
                         }
 
-                        if (jsonObject.has("reportParameterName")) {
+                        if (jsonObject.has("reportParameterName") && !jsonObject.get("reportParameterName").isJsonNull()) {
                             reportParameterName = jsonObject.get("reportParameterName").getAsString();
                             reportParameterUsageItem.updateParameterName(reportParameterName);
                         }
                     } else {
                         // new report parameter usage
-                        if (jsonObject.has("parameterId")) {
+                        if (jsonObject.has("parameterId") && !jsonObject.get("parameterId").isJsonNull()) {
                             final Long parameterId = jsonObject.get("parameterId").getAsLong();
                             reportParameter = this.reportParameterRepository.findById(parameterId)
                                     .orElseThrow(() -> new ReportParameterNotFoundException(parameterId));
@@ -250,7 +250,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                                     "parameterId column is mandatory in Report Parameter Entry");
                         }
 
-                        if (jsonObject.has("reportParameterName")) {
+                        if (jsonObject.has("reportParameterName") && !jsonObject.get("reportParameterName").isJsonNull()) {
                             reportParameterName = jsonObject.get("reportParameterName").getAsString();
                         }
 
