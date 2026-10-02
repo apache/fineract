@@ -215,7 +215,8 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
             if (!installment.isDownPayment()) { // Exclude downpayment installments
                 feeChargesPortion = MathUtil.add(feeChargesPortion, installment.getFeeChargesCharged());
                 penaltyChargesPortion = MathUtil.add(penaltyChargesPortion, installment.getPenaltyCharges());
-                interestPortion = MathUtil.add(interestPortion, installment.getInterestCharged());
+                interestPortion = MathUtil.add(interestPortion,
+                        MathUtil.subtractToZero(installment.getInterestCharged(), installment.getCreditedInterest()));
             }
         }
 
@@ -328,7 +329,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
                     isReset.set(true);
                 }
                 final Money principalPortion = Money.zero(currency);
-                Money interestPortion = currentInstallment.getInterestCharged(currency);
+                Money interestPortion = currentInstallment.getInterestCharged(currency).minus(currentInstallment.getCreditedInterest());
                 Money feeChargesPortion = currentInstallment.getFeeChargesCharged(currency);
                 Money penaltyChargesPortion = currentInstallment.getPenaltyChargesCharged(currency);
 
@@ -410,7 +411,8 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
     private boolean validateActivityTransaction(final @NonNull LoanRepaymentScheduleInstallment installment,
             final @NonNull LoanTransaction transaction) {
         return DateUtils.isEqual(installment.getDueDate(), transaction.getDateOf())
-                && MathUtil.isEqualTo(transaction.getInterestPortion(), installment.getInterestCharged())
+                && MathUtil.isEqualTo(transaction.getInterestPortion(),
+                        MathUtil.subtractToZero(installment.getInterestCharged(), installment.getCreditedInterest()))
                 && MathUtil.isEqualTo(transaction.getFeeChargesPortion(), installment.getFeeChargesCharged())
                 && MathUtil.isEqualTo(transaction.getPenaltyChargesPortion(), installment.getPenaltyCharges());
     }
