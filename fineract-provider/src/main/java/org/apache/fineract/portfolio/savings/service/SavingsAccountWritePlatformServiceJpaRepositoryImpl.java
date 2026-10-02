@@ -721,14 +721,22 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public void selectAccountId(SavingsAccountTransactionData accountTransaction, SavingsAccountData savingsAccountData) {
         SavingsAccountTransactionType transactionType = SavingsAccountTransactionType
                 .fromInt(accountTransaction.getTransactionType().getId().intValue());
+        // cash-based products have no payable or receivable mappings: mirror CashBasedAccountingProcessorForSavings
+        boolean cashBased = savingsAccountData.isCashBasedAccountingEnabledOnSavingsProduct();
         if (transactionType.isOverDraftInterestPosting()) {
-            if (MathUtil.isGreaterThanZero(accountTransaction.getRunningBalance())) {
+            if (cashBased) {
+                accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForSavingsReference());
+                accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForIncomeFromInterest());
+            } else if (MathUtil.isGreaterThanZero(accountTransaction.getRunningBalance())) {
                 accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForSavingsControl());
                 accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForInterestReceivable());
             } else {
                 accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForOverdraftPorfolio());
                 accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForInterestReceivable());
             }
+        } else if (transactionType.isInterestPosting() && cashBased) {
+            accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForInterestOnSavings());
+            accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForSavingsControl());
         } else {
             accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForInterestPayable());
             accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForSavingsControl());
