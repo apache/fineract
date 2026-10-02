@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -44,6 +43,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -584,19 +584,11 @@ public class LoanChargeRoundingTest extends FeignLoanTestBase {
     }
 
     private PostLoanProductsRequest baseLoanProductRequest() {
-        return new PostLoanProductsRequest().name("LP-" + UUID.randomUUID()).shortName(randomShortName()).currencyCode("USD").locale("en")
-                .dateFormat("dd MMMM yyyy").principal(10000.00).numberOfRepayments(1).repaymentEvery(1).repaymentFrequencyType(1L)
-                .interestRatePerPeriod(1.0).interestRateFrequencyType(1).amortizationType(1).interestType(0)
+        return new PostLoanProductsRequest().name("LP-" + UUID.randomUUID()).shortName(Utils.uniqueRandomStringGenerator("", 4))
+                .currencyCode("USD").locale("en").dateFormat("dd MMMM yyyy").principal(10000.00).numberOfRepayments(1).repaymentEvery(1)
+                .repaymentFrequencyType(1L).interestRatePerPeriod(1.0).interestRateFrequencyType(1).amortizationType(1).interestType(0)
                 .interestCalculationPeriodType(1).transactionProcessingStrategyCode("mifos-standard-strategy").accountingRule(1)
                 .isInterestRecalculationEnabled(false).daysInYearType(1).daysInMonthType(1);
-    }
-
-    private String randomShortName() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-        return "L" + chars.charAt(ThreadLocalRandom.current().nextInt(chars.length()))
-                + chars.charAt(ThreadLocalRandom.current().nextInt(chars.length()))
-                + chars.charAt(ThreadLocalRandom.current().nextInt(chars.length()));
     }
 
     private PostLoanProductsRequest baseLoanProductRequestMultiRepayment() {
