@@ -87,9 +87,9 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
     @ParameterizedTest
     @MethodSource("loanProductFactory")
-    public void applyLoanTransactionChargeback(String strategyCode, boolean advancedAllocation) {
+    public void applyLoanTransactionChargeback(String strategyCode, boolean isProgressive) {
         // Client and Loan account creation
-        final Long loanId = createAccounts(15, 1, true, strategyCode, advancedAllocation);
+        final Long loanId = createAccounts(15, 1, true, strategyCode, isProgressive);
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -124,9 +124,11 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         );
 
         // Try to reverse a Loan Transaction charge back
-        CallFailedRuntimeException reverseChargebackException = assertThrows(CallFailedRuntimeException.class,
-                () -> reverseLoanTransaction(loanId, chargebackTransactionId, operationDate));
-        assertEquals(403, reverseChargebackException.getStatus());
+        if (!isProgressive) {
+            CallFailedRuntimeException reverseChargebackException = assertThrows(CallFailedRuntimeException.class,
+                    () -> reverseLoanTransaction(loanId, chargebackTransactionId, operationDate));
+            assertEquals(403, reverseChargebackException.getStatus());
+        }
 
         // Try to reverse a Loan Transaction repayment with linked transactions
         CallFailedRuntimeException reverseRepaymentException = assertThrows(CallFailedRuntimeException.class,
@@ -149,8 +151,8 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         final Long chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "1000.00", 0);
 
         // Then
-        CallFailedRuntimeException adjustException = assertThrows(CallFailedRuntimeException.class,
-                () -> adjustLoanTransaction(loanId, chargebackTransactionId, operationDate));
+        CallFailedRuntimeException adjustException = adjustLoanTransactionExpectingError(loanId, chargebackTransactionId, operationDate,
+                10.0);
         assertEquals(403, adjustException.getStatus());
     }
 

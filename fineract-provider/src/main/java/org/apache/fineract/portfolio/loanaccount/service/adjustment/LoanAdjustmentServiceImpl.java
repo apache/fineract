@@ -289,10 +289,10 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
         if (!transactionForAdjustment.isAccrualRelated() && transactionForAdjustment.isNotRepaymentLikeType()
                 && transactionForAdjustment.isNotWaiver() && transactionForAdjustment.isNotCreditBalanceRefund()
                 && !transactionForAdjustment.isDeferredIncome() && !transactionForAdjustment.isCapitalizedIncomeAdjustment()
-                && !transactionForAdjustment.isBuyDownFeeAdjustment()) {
-            final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee or buy down fee adjustment can be adjusted.";
+                && !transactionForAdjustment.isBuyDownFeeAdjustment() && !transactionForAdjustment.isChargeback()) {
+            final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee, buy down fee adjustment or chargeback can be adjusted.";
             throw new InvalidLoanTransactionTypeException("transaction",
-                    "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.or.capitalizedIncome.or.capitalizedIncomeAdjustment.or.buyDownFee.or.buyDownFeeAdjustment.transactions",
+                    "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.or.capitalizedIncome.or.capitalizedIncomeAdjustment.or.buyDownFee.or.buyDownFeeAdjustment.or.chargeback.transactions",
                     errorMessage);
         }
 
@@ -334,6 +334,11 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
 
         if (transactionForAdjustment.getTypeOf().equals(LoanTransactionType.CAPITALIZED_INCOME)) {
             loanScheduleService.regenerateScheduleWithReprocessingTransactions(loan);
+        }
+
+        if (transactionForAdjustment.getTypeOf().isChargeback()) {
+            loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
+            reprocessLoanTransactionsService.reprocessTransactions(loan);
         }
     }
 
