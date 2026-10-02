@@ -1,0 +1,75 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= Process flows
+
+== Dividend distribution and posting
+
+A dividend is declared at product level, optionally split across the eligible active accounts,
+approved, and finally posted to each subscriber's linked savings account by a scheduled job.
+
+.Dividend distribution flow
+[plantuml,format=svg]
+----
+include::{diagramsdir}/shares-dividend-flow.puml[]
+----
+
+The posting step is performed by the *Post Dividends For Shares* batch job
+(`fineract-provider/.../shareaccounts/jobs/postdividentsforshares/PostDividentsForSharesTasklet.java`,
+configured by `PostDividentsForSharesConfig`). It reads `APPROVED`
+`ShareProductDividendPayOutDetails`, deposits each `ShareAccountDividendDetails.amount` into the
+account's linked savings account, records the resulting `savingsTransactionId` and flips the
+per-account dividend status to `POSTED`.
+
+== Command-to-handler routing
+
+REST operations are turned into commands routed to dedicated handlers.
+
+.Share account commands
+[cols="2,2,2"]
+|===
+|*Action* |*Handler* |*Write-service call*
+
+|`CREATE` |`CreateShareAccountCommandHandler` |`createShareAccount`
+|`UPDATE` |`UpdateShareAccountCommandHandler` |`updateShareAccount`
+|`APPROVE` |`ApproveShareAccountCommandHandler` |`approveShareAccount`
+|`UNDOAPPROVAL` |`UndoApproveShareAccountCommandHandler` |`undoApproveShareAccount`
+|`REJECT` |`RejectShareAccountCommandHandler` |`rejectShareAccount`
+|`ACTIVATE` |`ActivateShareAccountCommandHandler` |`activateShareAccount`
+|`CLOSE` |`CloseShareAccountCommandHandler` |`closeShareAccount`
+|`APPLYADDITIONALSHARES` |`ApplyAddtionalSharesCommandHandler` |`applyAddtionalShares`
+|`APPROVEADDITIONALSHARES` |`ApproveAddtionalSharesCommandHandler` |`approveAdditionalShares`
+|`REJECTADDITIONALSHARES` |`RejectAddtionalSharesCommandHandler` |`rejectAdditionalShares`
+|`REDEEMSHARES` |`RedeemSharesCommandHandler` |`redeemShares`
+|===
+
+.Share product / dividend commands
+[cols="2,2,2"]
+|===
+|*Action* |*Handler* |*Write-service call*
+
+|`CREATE` |`CreateShareProductCommandHandler` |`createShareProduct`
+|`UPDATE` |`UpdateShareProductCommandHandler` |`updateProduct`
+|`CREATE_DIVIDEND` |`CreateShareProductDividendCommandHandler` |`createShareProductDividend`
+|`APPROVE_DIVIDEND` |`ApproveShareProductDividendCommandHandler` |`approveShareProductDividend`
+|`DELETE_DIVIDEND` |`DeleteShareProductDividendCommandHandler` |`deleteShareProductDividend`
+|===
+
+NOTE: Handlers live under `fineract-provider/.../shareaccounts/handler` and
+`fineract-provider/.../shareproducts/handler`; each is annotated with `@CommandType(entity, action)`.

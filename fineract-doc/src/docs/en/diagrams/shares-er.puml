@@ -1,0 +1,109 @@
+@startuml
+' Entity-Relationship diagram for the Fineract Shares module
+hide circle
+skinparam linetype ortho
+
+entity "m_share_product" as product {
+  * id : BIGINT <<PK>>
+  --
+  name : VARCHAR <<unique>>
+  short_name : VARCHAR <<unique>>
+  total_shares : BIGINT
+  issued_shares : BIGINT
+  subscribed_shares : BIGINT
+  unit_price : DECIMAL
+  share_capital : DECIMAL
+  minimum_client_shares : BIGINT
+  nominal_client_shares : BIGINT
+  maximum_client_shares : BIGINT
+  lockin_period : INT
+  minimum_active_period : INT
+  accounting_type : SMALLINT
+}
+
+entity "m_share_product_market_price" as marketprice {
+  * id : BIGINT <<PK>>
+  --
+  product_id : BIGINT <<FK>>
+  from_date : DATE
+  share_value : DECIMAL
+}
+
+entity "m_share_product_dividend_pay_out" as productdividend {
+  * id : BIGINT <<PK>>
+  --
+  share_product_id : BIGINT
+  amount : DECIMAL
+  dividend_period_start_date : DATE
+  dividend_period_end_date : DATE
+  status : SMALLINT
+}
+
+entity "m_share_account" as account {
+  * id : BIGINT <<PK>>
+  --
+  client_id : BIGINT <<FK>>
+  product_id : BIGINT <<FK>>
+  savings_account_id : BIGINT <<FK>>
+  account_no : VARCHAR <<unique>>
+  status_enum : SMALLINT
+  total_approved_shares : BIGINT
+  total_pending_shares : BIGINT
+  lockin_period_frequency : INT
+  minimum_active_period_frequency : INT
+}
+
+entity "m_share_account_transactions" as txn {
+  * id : BIGINT <<PK>>
+  --
+  account_id : BIGINT <<FK>>
+  transaction_date : DATE
+  total_shares : BIGINT
+  unit_price : DECIMAL
+  amount : DECIMAL
+  charge_amount : DECIMAL
+  status_enum : SMALLINT
+  type_enum : SMALLINT
+  is_active : BOOLEAN
+}
+
+entity "m_share_account_charge" as charge {
+  * id : BIGINT <<PK>>
+  --
+  account_id : BIGINT <<FK>>
+  charge_id : BIGINT <<FK>>
+  charge_time_enum : SMALLINT
+  charge_calculation_enum : SMALLINT
+  amount : DECIMAL
+  amount_paid_derived : DECIMAL
+  amount_outstanding_derived : DECIMAL
+}
+
+entity "m_share_account_charge_paid_by" as chargepaid {
+  * id : BIGINT <<PK>>
+  --
+  share_account_transaction_id : BIGINT <<FK>>
+  share_account_charge_id : BIGINT <<FK>>
+  amount : DECIMAL
+}
+
+entity "m_share_account_dividend_details" as accountdividend {
+  * id : BIGINT <<PK>>
+  --
+  account_id : BIGINT
+  dividend_pay_out_id : BIGINT <<FK>>
+  amount : DECIMAL
+  status : SMALLINT
+  savings_transaction_id : BIGINT
+}
+
+product ||--o{ marketprice
+product ||--o{ productdividend
+product ||--o{ account
+account ||--o{ txn
+account ||--o{ charge
+txn ||--o{ chargepaid
+charge ||--o{ chargepaid
+productdividend ||--o{ accountdividend
+
+@enduml

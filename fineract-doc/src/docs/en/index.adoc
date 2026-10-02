@@ -44,6 +44,8 @@ include::chapters/command/index.adoc[leveloffset=+1]
 
 include::chapters/features/index.adoc[leveloffset=+1]
 
+include::chapters/shares/index.adoc[leveloffset=+1]
+
 include::chapters/development/index.adoc[leveloffset=+1]
 
 include::chapters/custom/index.adoc[leveloffset=+1]

@@ -43,16 +43,19 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
+import org.apache.fineract.portfolio.shareaccounts.config.SharesModuleIsEnabledCondition;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountDividendData;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountDividendReadPlatformService;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductDividendPayOutData;
 import org.apache.fineract.portfolio.shareproducts.service.ShareProductDividendReadPlatformService;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/shareproduct/{productId}/dividend")
 @Component
 @Tag(name = "Self Dividend", description = "")
 @RequiredArgsConstructor
+@Conditional(SharesModuleIsEnabledCondition.class)
 public class ShareDividendApiResource {
 
     public static final String APPROVE = "approve";
