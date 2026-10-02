@@ -79,6 +79,7 @@ public class ClientChargesApiResource {
     private final DefaultToApiJsonSerializer<ClientChargeData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final org.apache.fineract.portfolio.client.service.ClientReadPlatformService clientReadPlatformService;
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
@@ -121,7 +122,8 @@ public class ClientChargesApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
-        final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveAllChargesApplicableToClients();
+        final Long clientOfficeId = this.clientReadPlatformService.retrieveOne(clientId).getOfficeId();
+        final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveAllChargesApplicableToClients(clientOfficeId);
         final ClientChargeData clientChargeData = ClientChargeData.template(chargeOptions);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

@@ -88,11 +88,18 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         String serviceName = "share" + ProductsApiConstants.READPLATFORM_NAME;
         ShareProductReadPlatformService service = (ShareProductReadPlatformService) this.applicationContext.getBean(serviceName);
         ClientData client = this.clientReadPlatformService.retrieveOne(clientId);
+        final Long clientOfficeId = client.getOfficeId();
+
+        if (clientOfficeId == null) {
+            throw new IllegalStateException(
+                    "Cannot resolve office for client [id=" + clientId + "]. Charge visibility cannot be determined.");
+        }
 
         if (productId != null) {
             final ShareProductData productData = (ShareProductData) service.retrieveOne(productId, false);
             final BigDecimal marketPrice = deriveMarketPrice(productData);
-            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveShareProductCharges(productId);
+            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveShareProductCharges(productId,
+                    clientOfficeId);
             final Collection<ShareAccountChargeData> charges = convertChargesToShareAccountCharges(productCharges);
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.shareProductDropdownReadPlatformService
                     .retrieveLockinPeriodFrequencyTypeOptions();
@@ -105,7 +112,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
                     productData.getNominalShares());
         } else {
             Collection<ProductData> productOptions = service.retrieveAllForLookup();
-            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges();
+            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges(clientOfficeId);
             toReturn = new ShareAccountData(client.getId(), client.getDisplayName(), productOptions, chargeOptions);
         }
         return toReturn;
@@ -150,7 +157,17 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final Collection<SavingsAccountData> clientSavingsAccounts = this.savingsAccountReadPlatformService
                     .retrieveActiveForLookup(data.getClientId(), DepositAccountType.SAVINGS_DEPOSIT, productData.getCurrency().getCode());
             Collection<ProductData> productOptions = service.retrieveAllForLookup();
-            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges();
+            final Long shareClientOfficeId = data.getClientId() != null
+                    ? this.clientReadPlatformService.retrieveOne(data.getClientId()).getOfficeId()
+                    : null;
+
+            if (shareClientOfficeId == null) {
+                throw new IllegalStateException(
+                        "Cannot resolve office for share account [id=" + id + "]. Charge visibility cannot be determined.");
+            }
+
+            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
+                    .retrieveSharesApplicableCharges(shareClientOfficeId);
             data = ShareAccountData.template(data, productOptions, chargeOptions, clientSavingsAccounts, lockinPeriodFrequencyTypeOptions,
                     minimumActivePeriodFrequencyTypeOptions);
         }
