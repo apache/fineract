@@ -49,6 +49,8 @@ public class LoanConfigurationDetails implements ILoanConfigurationDetails {
     private final AmortizationMethod amortizationMethod;
     private final PeriodFrequencyType repaymentPeriodFrequencyType;
     private final Integer repaymentEvery;
+    @Getter
+    private final Integer firstRepaymentDayOfMonth;
     private final Integer numberOfRepayments;
     private final boolean interestRecognitionOnDisbursementDate;
     private final DaysInYearCustomStrategyType daysInYearCustomStrategy;
@@ -69,7 +71,7 @@ public class LoanConfigurationDetails implements ILoanConfigurationDetails {
             Integer recurringMoratoriumOnPrincipalPeriods, InterestMethod interestMethod,
             InterestCalculationPeriodMethod interestCalculationPeriodMethod, DaysInYearType daysInYearType, DaysInMonthType daysInMonthType,
             AmortizationMethod amortizationMethod, PeriodFrequencyType repaymentPeriodFrequencyType, Integer repaymentEvery,
-            Integer numberOfRepayments, boolean interestRecognitionOnDisbursementDate,
+            Integer firstRepaymentDayOfMonth, Integer numberOfRepayments, boolean interestRecognitionOnDisbursementDate,
             DaysInYearCustomStrategyType daysInYearCustomStrategy, boolean allowPartialPeriodInterestCalculation,
             boolean isInterestRecalculationEnabled, RecalculationFrequencyType restFrequencyType,
             LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy, boolean allowFullTermForTranche,
@@ -88,6 +90,7 @@ public class LoanConfigurationDetails implements ILoanConfigurationDetails {
         this.amortizationMethod = amortizationMethod;
         this.repaymentPeriodFrequencyType = repaymentPeriodFrequencyType;
         this.repaymentEvery = repaymentEvery;
+        this.firstRepaymentDayOfMonth = firstRepaymentDayOfMonth;
         this.numberOfRepayments = numberOfRepayments;
         this.interestRecognitionOnDisbursementDate = interestRecognitionOnDisbursementDate;
         this.daysInYearCustomStrategy = daysInYearCustomStrategy;

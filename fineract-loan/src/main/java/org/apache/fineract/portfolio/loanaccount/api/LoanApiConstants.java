@@ -75,6 +75,7 @@ public interface LoanApiConstants {
     String amortizationTypeParameterName = "amortizationType";
     String amortizationTypeOptionsParameterName = "amortizationTypeOptions";
     String repaymentFrequencyTypeParameterName = "repaymentFrequencyType";
+    String FIRST_REPAYMENT_DAY_OF_MONTH = "firstRepaymentDayOfMonth";
     String loanTermFrequencyTypeParameterName = "loanTermFrequencyType";
     String loanTermFrequencyParameterName = "loanTermFrequency";
     String numberOfRepaymentsParameterName = "numberOfRepayments";

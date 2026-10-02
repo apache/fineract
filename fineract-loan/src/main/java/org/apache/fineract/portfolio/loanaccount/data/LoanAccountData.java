@@ -107,6 +107,8 @@ public class LoanAccountData {
     private Integer numberOfRepayments;
     private Integer actualNoTerm;
     private Integer repaymentEvery;
+    /** First due day of the month of a semi-monthly loan; the second one is derived from it. */
+    private Integer firstRepaymentDayOfMonth;
     private Integer fixedLength;
     private EnumOptionData repaymentFrequencyType;
     private EnumOptionData repaymentFrequencyNthDayType;
@@ -422,6 +424,7 @@ public class LoanAccountData {
                 .setInArrearsTolerance(product.getInArrearsTolerance()).setTermFrequency(numberOfRepayments * product.getRepaymentEvery())
                 .setTermPeriodFrequencyType(termPeriodFrequencyType).setNumberOfRepayments(numberOfRepayments)
                 .setRepaymentEvery(product.getRepaymentEvery()).setRepaymentFrequencyType(product.getRepaymentFrequencyType())
+                .setFirstRepaymentDayOfMonth(product.getFirstRepaymentDayOfMonth())
                 .setTransactionProcessingStrategyCode(product.getTransactionProcessingStrategyCode())
                 .setAmortizationType(product.getAmortizationType()).setInterestRatePerPeriod(interestRatePerPeriod)
                 .setInterestRateFrequencyType(product.getInterestRateFrequencyType()).setAnnualInterestRate(product.getAnnualInterestRate())

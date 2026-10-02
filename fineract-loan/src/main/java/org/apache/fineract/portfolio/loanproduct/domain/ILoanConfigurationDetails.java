@@ -55,6 +55,9 @@ public interface ILoanConfigurationDetails {
 
     PeriodFrequencyType getRepaymentPeriodFrequencyType();
 
+    /** First due day of the month of a {@code SEMI_MONTHLY} loan; {@code null} for any other frequency. */
+    Integer getFirstRepaymentDayOfMonth();
+
     Integer getNumberOfRepayments();
 
     AmortizationMethod getAmortizationMethod();

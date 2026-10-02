@@ -963,6 +963,8 @@ public class ShareAccountDataSerializer {
         if (periodType != null) {
             switch (periodType) {
                 case INVALID: // It never comes in to this state.
+                    // SEMI_MONTHLY is a loan repayment frequency and is never a share account lock-in period.
+                case SEMI_MONTHLY:
                 break;
                 case DAYS:
                     lockinDate = purchaseDate.plusDays(lockinPeriod);

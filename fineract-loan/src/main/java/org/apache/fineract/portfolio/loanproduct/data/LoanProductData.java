@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -102,6 +103,9 @@ public class LoanProductData implements Serializable {
     private final Integer maxNumberOfRepayments;
     private final Integer repaymentEvery;
     private final EnumOptionData repaymentFrequencyType;
+    /** First due day of the month of a semi-monthly product; the second one is derived from it. */
+    @Setter
+    private Integer firstRepaymentDayOfMonth;
     private final Integer fixedLength;
     private final BigDecimal interestRatePerPeriod;
     private final BigDecimal minInterestRatePerPeriod;

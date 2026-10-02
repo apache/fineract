@@ -1234,6 +1234,10 @@ final class LoansApiResourceSwagger {
         public Integer numberOfRepayments;
         @Schema(example = "1")
         public Integer repaymentEvery;
+        @Schema(example = "15", description = "First due day of the month of a semi-monthly loan, between 1 and 15. "
+                + "The second due day is derived from it: 1 pairs with the 15th, 15 pairs with the last day of the month, "
+                + "and any day in between pairs with itself plus fifteen days.")
+        public Integer firstRepaymentDayOfMonth;
         public GetLoansLoanIdRepaymentFrequencyType repaymentFrequencyType;
         @Schema(example = "1")
         public Integer fixedLength;
@@ -1382,6 +1386,10 @@ final class LoansApiResourceSwagger {
         public Integer numberOfRepayments;
         @Schema(example = "1")
         public Integer repaymentEvery;
+        @Schema(example = "15", description = "First due day of the month of a semi-monthly loan, between 1 and 15. "
+                + "The second due day is derived from it: 1 pairs with the 15th, 15 pairs with the last day of the month, "
+                + "and any day in between pairs with itself plus fifteen days.")
+        public Integer firstRepaymentDayOfMonth;
         @Schema(example = "2")
         public Integer repaymentFrequencyType;
         @Schema(example = "1")
@@ -1638,6 +1646,10 @@ final class LoansApiResourceSwagger {
         public Integer numberOfRepayments;
         @Schema(example = "1")
         public Integer repaymentEvery;
+        @Schema(example = "15", description = "First due day of the month of a semi-monthly loan, between 1 and 15. "
+                + "The second due day is derived from it: 1 pairs with the 15th, 15 pairs with the last day of the month, "
+                + "and any day in between pairs with itself plus fifteen days.")
+        public Integer firstRepaymentDayOfMonth;
         @Schema(example = "0")
         public Integer repaymentFrequencyType;
         @Schema(example = "1")

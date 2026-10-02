@@ -1,0 +1,281 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= Semi-Monthly Repayment Frequency
+
+== Purpose
+
+The semi-monthly (half-monthly) repayment frequency repays a loan twice every calendar month on two fixed days, for
+example the 1st and the 15th, or the 15th and the last day of the month. It targets payroll loans, salary advances and
+consumer loans whose repayments have to follow the borrower's pay cycle.
+
+None of the existing frequencies produces this schedule:
+
+* a 15-day interval drifts through the month over time;
+* a bi-weekly schedule (every 2 weeks) yields 26 repayments a year instead of 24;
+* a monthly schedule has only one due date a month.
+
+A semi-monthly schedule always yields exactly two due dates per calendar month, which is 24 repayments a year.
+
+== Configuration
+
+Semi-monthly is a new value of `repaymentFrequencyType`:
+
+[cols="1,1,3"]
+|===
+| Value | Code | Description
+
+| `6`
+| `periodFrequencyType.semiMonthly`
+| Two repayments every calendar month on two fixed days.
+|===
+
+The value `6` is placed after `INVALID(5)` on purpose. Frequencies are persisted by value, so inserting it before
+`INVALID` would change the meaning of rows that already exist.
+
+Only the *first* due day is configured, through `firstRepaymentDayOfMonth` (1 to 15). The second due day is derived from
+it:
+
+[cols="1,2,3"]
+|===
+| First due day | Second due day | Example
+
+| `1`
+| `15`
+| 1st and 15th
+
+| `2` to `14`
+| first due day + 15, capped at the length of the month
+| `10` gives the 10th and the 25th
+
+| `15`
+| last day of the month
+| 15th and 28th/29th February, 30th April, 31st July
+|===
+
+NOTE: A first due day of `14` gives the 29th as the second day. In a non-leap February that day does not exist and the
+second due date falls on the 28th instead.
+
+=== Why a single configured day
+
+The original specification proposed two independent fields: a first day (1 to 28) and a second day (2 to 28 or "Last
+Day"), validated so that the second is later than the first and the two are different. The implementation uses a single
+field and derives the second day. The reasons are simplicity and control:
+
+* *Two per month by construction.* Capping the first day at 15 and deriving the second one keeps both due dates inside
+the same calendar month and fifteen days apart (or at the end of the month). The ordering and no-duplicate rules of the
+two-field model cannot be broken, so they do not need to be validated or explained to the user.
+* *Periods of similar length.* Every pair splits the month into two periods of about fifteen days. When interest is
+charged on the actual days of each period (see <<Interest>>), the two installments of a month stay balanced; free pairs
+such as the 1st and the 5th would produce one very short and one very long period.
+* *The common payroll pairs are covered.* The pairs used in practice and in the specification examples (1st and 15th,
+15th and last day, 10th and 25th) are all reachable.
+* *Smaller surface.* One column, one validation range and one derivation rule, both on the product and on the loan.
+
+The trade-off is that pairs that are not about fifteen days apart, such as the 1st and the last day, or the 10th and
+the 20th, cannot be configured.
+
+== Rules
+
+=== Product
+
+* `firstRepaymentDayOfMonth` is required when `repaymentFrequencyType` is `6`, and must be between 1 and 15.
+* `firstRepaymentDayOfMonth` is rejected on any other frequency.
+* `repaymentEvery` must be `1`: two repayments a month is the frequency itself, it cannot repeat every two periods.
+* Semi-monthly is available with both loan schedule types, `CUMULATIVE` and `PROGRESSIVE`.
+
+=== Loan
+
+* A loan may override the product's day by sending its own `firstRepaymentDayOfMonth` (1 to 15), for example to follow
+a specific borrower's pay cycle.
+* A loan that becomes semi-monthly must end up with a day: either in the request, already stored on the loan, or on the
+product. Otherwise the request is rejected; the schedule never falls back to a default day silently.
+* A semi-monthly loan cannot be synchronised with a group or center meeting (`calendarId`): meeting calendars have no
+semi-monthly recurrence. A group or JLG loan that needs this frequency is handled like an individual loan.
+* `loanTermFrequencyType` must be equal to `repaymentFrequencyType`, as for every other frequency. A term of six months
+with twelve installments is therefore entered as a term of 12 semi-monthly periods.
+
+==== Which day a loan uses
+
+[cols="1,3"]
+|===
+| Operation | Precedence
+
+| Create
+| The day in the request; otherwise the product's day.
+
+| Modify
+| The day in the request; otherwise the day the loan already has; otherwise, only when the loan has none (for example
+it was monthly until now), the product's day.
+|===
+
+A modification that changes the day regenerates the schedule.
+
+== Schedule generation
+
+=== First due date
+
+When no first repayment date is supplied, the first due date is the first configured due day strictly after the seed
+date (the disbursement date or the submitted-on date, depending on the product's repayment start date type).
+
+* Disbursed on the 12th with days 1 and 15: first due date is the 15th of the same month.
+* Disbursed on the 20th with days 1 and 15: first due date is the 1st of the next month.
+
+When the product defines `minimumDaysBetweenDisbursalAndFirstRepayment` and that gap ends after the date above, the first
+due date moves to the first configured due day on or after the end of the gap, never to an arbitrary day. For example,
+disbursed on 10 January with days 15 and last day and a gap of 10 days: the gap ends on 20 January, so the first due
+date is 31 January.
+
+When the caller supplies `repaymentsStartingFromDate`, it is used as it is, but it has to be one of the configured due
+days. Any other date is rejected with
+`error.msg.loan.application.first.repayment.date.not.a.semi.monthly.due.day`.
+
+=== Following due dates
+
+Each following due date is the next configured due day after the previous one. "Last day" resolves per month: 28th or
+29th of February, 30th of April, 31st of July.
+
+.Days 15 and last day, disbursed 5 January 2023
+[cols="1,1"]
+|===
+| Installment | Due date
+
+| 1 | 15 January 2023
+| 2 | 31 January 2023
+| 3 | 15 February 2023
+| 4 | 28 February 2023
+| 5 | 15 March 2023
+| 6 | 31 March 2023
+| 7 | 15 April 2023
+| 8 | 30 April 2023
+|===
+
+=== Interest
+
+The two periods of a month have different lengths (for example 16 days from the 15th to the 31st of January and 13 days
+from the 15th to the 28th of February). Whether that difference shows in the interest depends on how the product
+calculates it:
+
+[cols="2,2,3"]
+|===
+| Schedule type | Product setting | Interest per semi-monthly period
+
+| Cumulative
+| Interest calculation period *same as repayment period*
+| 1/24 of the annual rate, whatever the length of the period.
+
+| Cumulative
+| Interest calculation period *daily*
+| The actual days of the period, at the daily rate (annual rate / days in year).
+
+| Progressive
+| Interest calculation period *same as repayment period*
+| 1/24 of the annual rate, whatever the length of the period.
+
+| Progressive
+| Days in month *actual*
+| The actual days of the period, at the daily rate (annual rate / days in year).
+
+| Progressive
+| Days in month *30*
+| Half of a 30-day month, i.e. 15 days, whatever the actual length of the period.
+|===
+
+NOTE: Only the settings that work with actual days charge the 13-day and the 16-day period differently. With the other
+settings every regular period costs the same.
+
+An irregular period, such as a first period that is shorter than half a month because the loan was disbursed close to
+the first due date, is prorated when the product calculates partial periods (daily interest, partial period interest
+calculation, or 30-day months on progressive): each half-month the period touches contributes the share of its days
+that the period covers.
+
+24 periods per year are used for the annual percentage rate and the periods-per-year calculations.
+
+== API
+
+=== Loan product
+
+`POST /loanproducts` and `PUT /loanproducts/{productId}`
+
+[source,json]
+----
+{
+  "repaymentFrequencyType": 6,
+  "repaymentEvery": 1,
+  "firstRepaymentDayOfMonth": 15
+}
+----
+
+=== Loan
+
+`POST /loans` and `PUT /loans/{loanId}`
+
+[source,json]
+----
+{
+  "loanTermFrequencyType": 6,
+  "repaymentFrequencyType": 6,
+  "repaymentEvery": 1,
+  "firstRepaymentDayOfMonth": 10
+}
+----
+
+`firstRepaymentDayOfMonth` is optional on the loan; see <<Which day a loan uses>>. Both `GET /loanproducts/{productId}`
+and `GET /loans/{loanId}` return the configured `firstRepaymentDayOfMonth`.
+
+=== Validation errors
+
+[cols="2,3"]
+|===
+| Code | Cause
+
+| `validation.msg.loanproduct.firstRepaymentDayOfMonth.cannot.be.blank`
+| Semi-monthly product without a first due day.
+
+| `validation.msg.loanproduct.firstRepaymentDayOfMonth.is.not.within.expected.range` +
+`validation.msg.loan.firstRepaymentDayOfMonth.is.not.within.expected.range`
+| Day outside 1 to 15.
+
+| `validation.msg.loanproduct.firstRepaymentDayOfMonth.supported.only.for.semi.monthly.repayment.frequency` +
+`validation.msg.loan.firstRepaymentDayOfMonth.supported.only.for.semi.monthly.repayment.frequency`
+| Day sent with a frequency other than semi-monthly.
+
+| `validation.msg.loanproduct.repaymentEvery.must.be.one.for.semi.monthly.repayment.frequency` +
+`validation.msg.loan.repaymentEvery.must.be.one.for.semi.monthly.repayment.frequency`
+| `repaymentEvery` other than 1.
+
+| `validation.msg.loan.calendarId.not.supported.for.semi.monthly.repayment.frequency`
+| Semi-monthly loan synchronised with a meeting calendar.
+
+| `validation.msg.loan.firstRepaymentDayOfMonth.cannot.be.blank`
+| Semi-monthly loan with no day in the request, on the loan or on the product.
+
+| `error.msg.loan.application.first.repayment.date.not.a.semi.monthly.due.day`
+| `repaymentsStartingFromDate` is not one of the configured due days.
+
+| `error.msg.loan.semi.monthly.first.repayment.day.missing`
+| A schedule is generated for a semi-monthly loan that has no first repayment day. The validators prevent this, so it
+signals inconsistent data rather than a user error.
+|===
+
+== Limitations
+
+* Loans synchronised with a group or center meeting calendar are not supported (see <<Loan>>).
+* Semi-monthly is a loan repayment frequency only. It is not offered for savings interest rate charts or standing
+instructions.

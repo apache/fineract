@@ -97,6 +97,10 @@ public class LoanProductRelatedDetail {
     @Column(name = "repayment_period_frequency_enum", nullable = false)
     private PeriodFrequencyType repaymentPeriodFrequencyType;
 
+    /** Only meaningful for a {@code SEMI_MONTHLY} repayment frequency, which derives its second due day from it. */
+    @Column(name = "first_repayment_day_of_month")
+    private Integer firstRepaymentDayOfMonth;
+
     @Column(name = "fixed_length", nullable = false)
     private Integer fixedLength;
 
