@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.deposit
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.expectedFirstDepositOnDateParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isRateChartOverriddenParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.localeParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.maturityInstructionIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
@@ -85,6 +86,9 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<L
     @Column(name = "transfer_interest_to_linked_account", nullable = false)
     private boolean transferInterestToLinkedAccount;
 
+    @Column(name = "is_rate_chart_overridden", nullable = false)
+    private boolean isRateChartOverridden;
+
     @Column(name = "transfer_to_savings_account_id")
     private Long transferToSavingsAccountId;
 
@@ -95,17 +99,19 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<L
     public static DepositAccountTermAndPreClosure createNew(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,
             SavingsAccount account, BigDecimal depositAmount, BigDecimal maturityAmount, final LocalDate maturityDate,
             Integer depositPeriod, final SavingsPeriodFrequencyType depositPeriodFrequency, final LocalDate expectedFirstDepositOnDate,
-            final DepositAccountOnClosureType accountOnClosureType, Boolean trasferInterest, Long transferToSavingsId) {
+            final DepositAccountOnClosureType accountOnClosureType, Boolean trasferInterest, Long transferToSavingsId,
+            Boolean isRateChartOverridden) {
 
         return new DepositAccountTermAndPreClosure(preClosureDetail, depositTermDetail, account, depositAmount, maturityAmount,
                 maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType, trasferInterest,
-                transferToSavingsId);
+                transferToSavingsId, isRateChartOverridden);
     }
 
     private DepositAccountTermAndPreClosure(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,
             SavingsAccount account, BigDecimal depositAmount, BigDecimal maturityAmount, final LocalDate maturityDate,
             Integer depositPeriod, final SavingsPeriodFrequencyType depositPeriodFrequency, final LocalDate expectedFirstDepositOnDate,
-            final DepositAccountOnClosureType accountOnClosureType, Boolean transferInterest, Long transferToSavingsId) {
+            final DepositAccountOnClosureType accountOnClosureType, Boolean transferInterest, Long transferToSavingsId,
+            Boolean isRateChartOverridden) {
         this.depositAmount = depositAmount;
         this.maturityAmount = maturityAmount;
         this.maturityDate = maturityDate;
@@ -118,6 +124,7 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<L
         this.onAccountClosureType = (accountOnClosureType == null) ? null : accountOnClosureType.getValue();
         this.transferInterestToLinkedAccount = transferInterest;
         this.transferToSavingsAccountId = transferToSavingsId;
+        this.isRateChartOverridden = isRateChartOverridden != null ? isRateChartOverridden : false;
     }
 
     public Map<String, Object> update(final JsonCommand command, final DataValidatorBuilder baseDataValidator) {
@@ -178,6 +185,13 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<L
         if (this.depositTermDetail != null) {
             actualChanges.putAll(this.depositTermDetail.update(command, baseDataValidator));
         }
+
+        if (command.isChangeInBooleanParameterNamed(isRateChartOverriddenParamName, this.isRateChartOverridden)) {
+            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isRateChartOverriddenParamName);
+            actualChanges.put(isRateChartOverriddenParamName, newValue);
+            this.isRateChartOverridden = newValue;
+        }
+
         return actualChanges;
     }
 
@@ -301,12 +315,13 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<L
         final DepositTermDetail depositTermDetail = this.depositTermDetail.copy();
         final LocalDate expectedFirstDepositOnDate = null;
         final Boolean transferInterestToLinkedAccount = false;
+        final boolean isRateChartOverridden = this.isRateChartOverridden;
 
         final DepositAccountOnClosureType accountOnClosureType = null;
         final Long transferToSavingsId = null;
         return DepositAccountTermAndPreClosure.createNew(preClosureDetail, depositTermDetail, account, actualDepositAmount, maturityAmount,
                 maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType,
-                transferInterestToLinkedAccount, transferToSavingsId);
+                transferInterestToLinkedAccount, transferToSavingsId, isRateChartOverridden);
     }
 
     public void updateExpectedFirstDepositDate(final LocalDate expectedFirstDepositOnDate) {
@@ -327,5 +342,9 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<L
 
     public Long getTransferToSavingsAccountId() {
         return transferToSavingsAccountId;
+    }
+
+    public boolean isRateChartOverridden() {
+        return isRateChartOverridden;
     }
 }

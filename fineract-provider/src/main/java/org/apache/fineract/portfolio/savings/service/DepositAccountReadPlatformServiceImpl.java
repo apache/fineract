@@ -844,6 +844,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         public static final String ON_ACCOUNT_CLOSURE_ID = "onAccountClosureId";
         public static final String TRANSFER_INTEREST_TO_SAVINGS = "transferInterestToSavings";
         public static final String TRANSFER_TO_SAVINGS_ID = "transferToSavingsId";
+        public static final String IS_RATE_CHART_OVERRIDDEN = "isRateChartOverridden";
         private final String schemaSql;
 
         FixedDepositAccountMapper() {
@@ -866,7 +867,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("datp.deposit_period_frequency_enum as depositPeriodFrequencyTypeId, ");
             sqlBuilder.append("datp.on_account_closure_enum as onAccountClosureId, ");
             sqlBuilder.append("datp.transfer_interest_to_linked_account as transferInterestToSavings, ");
-            sqlBuilder.append("datp.transfer_to_savings_account_id as transferToSavingsId ");
+            sqlBuilder.append("datp.transfer_to_savings_account_id as transferToSavingsId, ");
+            sqlBuilder.append("datp.is_rate_chart_overridden as isRateChartOverridden ");
 
             sqlBuilder.append(super.selectTablesSql());
 
@@ -916,10 +918,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             final Long transferToSavingsId = JdbcSupport.getLong(rs, TRANSFER_TO_SAVINGS_ID);
 
+            final boolean isRateChartOverridden = rs.getBoolean(IS_RATE_CHART_OVERRIDDEN);
+
             return FixedDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, transferToSavingsId);
+                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, transferToSavingsId,
+                    isRateChartOverridden);
         }
     }
 
@@ -948,6 +953,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         public static final String IS_CALENDAR_INHERITED = "isCalendarInherited";
         public static final String ON_ACCOUNT_CLOSURE_ID = "onAccountClosureId";
         public static final String EXPECTED_FIRST_DEPOSIT_ON_DATE = "expectedFirstDepositOnDate";
+        public static final String IS_RATE_CHART_OVERRIDDEN = "isRateChartOverridden";
         private final String schemaSql;
 
         RecurringDepositAccountMapper() {
@@ -976,7 +982,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("datp.maturity_date as maturityDate, ");
             sqlBuilder.append("datp.deposit_period as depositPeriod, ");
             sqlBuilder.append("datp.deposit_period_frequency_enum as depositPeriodFrequencyTypeId, ");
-            sqlBuilder.append("datp.on_account_closure_enum as onAccountClosureId ");
+            sqlBuilder.append("datp.on_account_closure_enum as onAccountClosureId, ");
+            sqlBuilder.append("datp.is_rate_chart_overridden as isRateChartOverridden ");
 
             sqlBuilder.append(this.selectTablesSql());
             sqlBuilder.append("left join m_deposit_account_recurring_detail dard on sa.id = dard.savings_account_id ");
@@ -1033,12 +1040,14 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     : SavingsEnumerations.depositAccountOnClosureType(onAccountClosureId);
             final LocalDate expectedFirstDepositOnDate = JdbcSupport.getLocalDate(rs, EXPECTED_FIRST_DEPOSIT_ON_DATE);
 
+            final boolean isRateChartOverridden = rs.getBoolean(IS_RATE_CHART_OVERRIDDEN);
+
             return RecurringDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
                     depositPeriodFrequencyType, mandatoryRecommendedDepositAmount, onAccountClosureType, expectedFirstDepositOnDate,
                     totalOverdueAmount, noOfOverdueInstallments, isMandatoryDeposit, allowWithdrawal, adjustAdvanceTowardsFuturePayments,
-                    isCalendarInherited);
+                    isCalendarInherited, isRateChartOverridden);
 
         }
     }
@@ -1433,11 +1442,12 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final EnumOptionData depositPeriodFrequencyType = null;
             final EnumOptionData onAccountClosureType = null;
             final Boolean transferInterestToSavings = false;
+            final boolean isRateChartOverridden = false;
 
             return FixedDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, null);
+                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, null, isRateChartOverridden);
         }
     }
 
@@ -1513,6 +1523,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final boolean allowWithdrawal = rs.getBoolean(ALLOW_WITHDRAWAL);
             final boolean adjustAdvanceTowardsFuturePayments = rs.getBoolean(ADJUST_ADVANCE_TOWARDS_FUTURE_PAYMENTS);
             final boolean isCalendarInherited = false;
+            final boolean isRateChartOverridden = false;
 
             final BigDecimal depositAmount = null;
             final BigDecimal maturityAmount = null;
@@ -1530,7 +1541,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
                     depositPeriodFrequencyType, mandatoryRecommendedDepositAmount, onAccountClosureType, expectedFirstDepositOnDate,
                     totalOverdueAmount, noOfOverdueInstallments, isMandatoryDeposit, allowWithdrawal, adjustAdvanceTowardsFuturePayments,
-                    isCalendarInherited);
+                    isCalendarInherited, isRateChartOverridden);
         }
     }
 
