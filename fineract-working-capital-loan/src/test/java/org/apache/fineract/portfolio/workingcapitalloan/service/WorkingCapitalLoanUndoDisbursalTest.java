@@ -87,6 +87,8 @@ public class WorkingCapitalLoanUndoDisbursalTest {
     private WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     @Mock
     private WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
+    @Mock
+    private WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
 
     @Mock
     private WorkingCapitalLoan loan;
@@ -171,6 +173,16 @@ public class WorkingCapitalLoanUndoDisbursalTest {
         }
         verify(accountingProcessor).postReversalJournalEntries(loan, disbursement);
         verify(transactionRepository).saveAll(List.of(disbursement));
+    }
+
+    @Test
+    public void undoDisbursalDropsTheDelinquencyScheduleSoTheNextDisbursementRebuildsIt() {
+        final WorkingCapitalLoanTransaction disbursement = transaction(LoanTransactionType.DISBURSEMENT, false);
+        when(transactionRepository.findByWcLoan_IdOrderByTransactionDateAscIdAsc(LOAN_ID)).thenReturn(List.of(disbursement));
+
+        writePlatformService.undoDisbursal(LOAN_ID, command);
+
+        verify(delinquencyRangeScheduleService).deleteSchedule(LOAN_ID);
     }
 
     private static WorkingCapitalLoanTransaction transaction(final LoanTransactionType type, final boolean reversed) {
