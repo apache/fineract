@@ -16,23 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.calendar.service;
+package org.apache.fineract.portfolio.calendar.command;
 
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
-import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.portfolio.calendar.data.CalendarUpdateRequest;
-import org.apache.fineract.portfolio.calendar.data.CalendarUpdateResponse;
 
-public interface CalendarWritePlatformService {
-
-    CalendarCreateResponse createCalendar(CalendarCreateRequest request);
-
-    CalendarUpdateResponse updateCalendar(CalendarUpdateRequest request);
-
-    CommandProcessingResult deleteCalendar(Long calendarId);
-
-    CommandProcessingResult createCalendarInstance(Long calendarId, Long entityId, Integer entityTypeId);
-
-    CommandProcessingResult updateCalendarInstance(Long calendarId, Long entityId, Integer entityTypeId);
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class CalendarUpdateCommand extends Command<CalendarUpdateRequest> {}
