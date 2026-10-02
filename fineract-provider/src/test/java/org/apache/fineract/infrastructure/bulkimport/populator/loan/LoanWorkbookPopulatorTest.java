@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.bulkimport.populator.GroupSheetPopulat
 import org.apache.fineract.infrastructure.bulkimport.populator.LoanProductSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.OfficeSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.PersonnelSheetPopulator;
+import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -96,6 +97,49 @@ class LoanWorkbookPopulatorTest {
 
             assertEquals(1, definedNamesStartingWith(workbook, "PRINCIPAL_"),
                     "colliding product names must yield a single defined-name set");
+        }
+    }
+
+    // Office names are unique, but Excel defined names are case-insensitive, so "Head Office" and "head office" both
+    // resolve to the defined name "Group_Head_Office". GroupSheetPopulator records a begin/end index for every office,
+    // even one with zero groups, so this collision fires regardless of whether either office has any groups. The
+    // second createName call threw "The workbook already contains this name: Group_head_office" and 500'd the whole
+    // loan bulk-import template download.
+    @Test
+    void officesCollidingOnNameEmitOneDefinedNameSetPerScope() throws Exception {
+        List<OfficeData> offices = List.of(OfficeData.testInstance(1L, "Head Office"), OfficeData.testInstance(2L, "head office"));
+        OfficeSheetPopulator officePopulator = new OfficeSheetPopulator(offices);
+        GroupSheetPopulator groupPopulator = new GroupSheetPopulator(List.of(), offices);
+        ClientSheetPopulator clientPopulator = new ClientSheetPopulator(List.of(), offices);
+        PersonnelSheetPopulator personnelPopulator = new PersonnelSheetPopulator(List.of(), offices);
+
+        try (Workbook workbook = new HSSFWorkbook()) {
+            LoanWorkbookPopulator populator = new LoanWorkbookPopulator(officePopulator, clientPopulator, groupPopulator,
+                    personnelPopulator, new LoanProductSheetPopulator(List.of()), new ChargeSheetPopulator(List.of()),
+                    new ExtrasSheetPopulator(List.of(), List.of(), List.of()));
+
+            assertDoesNotThrow(() -> populator.populate(workbook, DATE_FORMAT));
+
+            assertEquals(1, definedNamesStartingWith(workbook, "Group_"), "colliding office names must yield a single Group_ defined name");
+        }
+    }
+
+    // A charge name containing characters Excel forbids in a defined name (e.g. '%') survived the old "[ )(]"-only
+    // sanitisation, so POI's HSSFName.setNameName rejected it with "Invalid name: ... name must be letter, digit,
+    // period, or underscore" and 500'd the whole template download.
+    @Test
+    void chargeNameWithExcelIllegalCharactersDoesNotCrashTemplateDownload() throws Exception {
+        ChargeData charge = mock(ChargeData.class);
+        when(charge.getName()).thenReturn("Service Fee 5%-10% (VAT)");
+        ChargeSheetPopulator charges = spy(new ChargeSheetPopulator(List.of()));
+        doReturn(List.of(charge)).when(charges).getCharges();
+
+        try (Workbook workbook = new HSSFWorkbook()) {
+            LoanWorkbookPopulator populator = populator(new LoanProductSheetPopulator(List.of()), charges);
+
+            assertDoesNotThrow(() -> populator.populate(workbook, DATE_FORMAT));
+
+            assertEquals(1, definedNamesStartingWith(workbook, "CHARGE_NAME_"));
         }
     }
 }
