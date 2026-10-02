@@ -39,7 +39,7 @@ dependencyManagement {
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.3.21'
         mavenBom 'org.junit:junit-bom:6.0.3'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.22.3'
-        mavenBom 'io.cucumber:cucumber-bom:7.34.3'
+        mavenBom 'io.cucumber:cucumber-bom:8.0.4'
         mavenBom 'org.mockito:mockito-bom:5.23.0'
         mavenBom 'software.amazon.awssdk:bom:2.44.4'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.4.0'
