@@ -42,7 +42,7 @@ public enum EntityTables {
     GROUP("m_group", "Group", "group_id", "id", CREATE, ACTIVATE, CLOSE), //
     CENTER("m_center", "Center", "m_group", "center_id", "id"), //
     OFFICE("m_office", "Office", "office_id", "id"), //
-    LOAN_PRODUCT("m_product_loan", "Loan Product", "product_loan_id", "id"), //
+    LOAN_PRODUCT("m_product_loan", "Loan Product", "product_loan_id", "id", CREATE), //
     LOAN("m_loan", "Loan", "loan_id", "id", CREATE, APPROVE, DISBURSE, WITHDRAWN, REJECTED, WRITE_OFF), //
     SAVINGS_PRODUCT("m_savings_product", "Savings Product", "savings_product_id", "id"), //
     SAVINGS("m_savings_account", "Savings Account", "savings_account_id", "id", CREATE, APPROVE, ACTIVATE, WITHDRAWN, REJECTED, CLOSE), //
