@@ -22,17 +22,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.step.StepExecution;
 
 @Slf4j
 public class LoanItemReader extends AbstractLoanItemReader<Loan> {
 
+    private final LoanRepository loanRepository;
     private final BeforeStepLockingItemReaderHelper beforeStepLockingItemReaderHelper;
 
     public LoanItemReader(LoanRepository loanRepository, BeforeStepLockingItemReaderHelper beforeStepLockingItemReaderHelper) {
         super(loanRepository);
+        this.loanRepository = loanRepository;
         this.beforeStepLockingItemReaderHelper = beforeStepLockingItemReaderHelper;
+    }
+
+    @Override
+    protected Loan loadEntity(final Long id) {
+        return loanRepository.findByIdWithRepaymentSchedule(id).orElseThrow(() -> new LoanNotFoundException(id));
     }
 
     @Override
