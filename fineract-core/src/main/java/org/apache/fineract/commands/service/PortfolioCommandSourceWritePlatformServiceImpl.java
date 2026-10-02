@@ -23,11 +23,14 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.commands.domain.CommandProcessingResultType;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.CommandNotAwaitingApprovalException;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
+import org.apache.fineract.commands.exception.MakerCheckerCheckerOnlyInitiationException;
+import org.apache.fineract.commands.exception.MakerCheckerDuplicatePendingSubmissionException;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -67,7 +70,29 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         } else {
             // if not user changing their own details - check user has
             // permission to perform specific task.
-            this.context.authenticatedUser(wrapper).validateHasPermissionTo(wrapper.getTaskPermissionName());
+            final AppUser currentUser = this.context.authenticatedUser(wrapper);
+            final String taskPermission = wrapper.getTaskPermissionName();
+            final boolean makerCheckerEnabledForTask = configurationService.isMakerCheckerEnabledForTask(taskPermission);
+            final boolean hasBasePermission = !currentUser.hasNotPermissionForAnyOf(taskPermission);
+            final boolean hasCheckerPermission = currentUser.isCheckerSuperUser()
+                    || currentUser.hasSpecificPermissionTo(taskPermission + "_CHECKER");
+
+            if (makerCheckerEnabledForTask && !hasBasePermission && hasCheckerPermission) {
+                // Checker-only user with no base permission: refuse initiation with a clear message
+                // instead of falling through to the generic "not authorized" response below.
+                throw new MakerCheckerCheckerOnlyInitiationException(taskPermission);
+            }
+
+            currentUser.validateHasPermissionTo(taskPermission);
+
+            if (makerCheckerEnabledForTask && !hasCheckerPermission && wrapper.getEntityId() != null) {
+                final List<CommandSource> pendingCommands = this.commandSourceRepository
+                        .findByActionNameAndEntityNameAndResourceIdAndStatus(wrapper.getActionName(), wrapper.getEntityName(),
+                                wrapper.getEntityId(), CommandProcessingResultType.AWAITING_APPROVAL.getValue());
+                if (!pendingCommands.isEmpty()) {
+                    throw new MakerCheckerDuplicatePendingSubmissionException(wrapper.getActionName(), wrapper.getEntityName());
+                }
+            }
         }
         validateIsUpdateAllowed();
 
