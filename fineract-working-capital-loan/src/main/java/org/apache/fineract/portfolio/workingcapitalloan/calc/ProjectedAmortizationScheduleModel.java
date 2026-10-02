@@ -93,6 +93,15 @@ public final class ProjectedAmortizationScheduleModel {
      */
     public static final int MAX_CALCULABLE_TOTAL_DAYS = 100_000;
 
+    /**
+     * Cap on the calculated annual EIR, as a percentage. A schedule whose payments repay the balance in a handful of
+     * days earns its whole discount fee over that handful of days, and compounding that daily return over the day count
+     * produces a rate of astronomical magnitude - 5.8E+55 % for a 100 balance against a 150 fee repaid in five days.
+     * Beyond this cap the rate carries no business meaning, so such a schedule is rejected with the ordinary "not
+     * calculable" error every entry point already handles - both feasibility pre-checks run the same solve.
+     */
+    public static final BigDecimal MAX_CALCULABLE_ANNUAL_EIR = new BigDecimal("999999");
+
     @SerializedName(value = "discountFeeAmount", alternate = "originationFeeAmount")
     private final Money discountFeeAmount;
     private final Money netDisbursementAmount;

@@ -213,7 +213,7 @@ public class WorkingCapitalLoanApplicationDataValidator {
             final BigDecimal resolvedAnnualEir = annualEir != null ? annualEir
                     : (product != null && product.getRelatedDetail() != null ? product.getRelatedDetail().getAnnualEir() : null);
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.annualEirParamName).value(resolvedAnnualEir).notNull()
-                    .positiveAmount();
+                    .positiveAmount().notGreaterThanMax(ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR);
             if (periodPaymentRate != null) {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.periodPaymentRateParamName)
                         .failWithCode("not.allowed.for.annual.eir.strategy");
@@ -381,10 +381,31 @@ public class WorkingCapitalLoanApplicationDataValidator {
                     .failWithCode("must.be.greater.than.zero.for.payment.amount.strategy");
         }
 
+        validateDiscountDoesNotExceedPrincipal(effectiveDiscount, principal, baseDataValidator);
+
         validatePaymentCalculable(dataValidationErrors, product, paymentStrategy, principal, periodPaymentRate, totalPaymentVolume,
                 annualEir, resolvedPaymentAmount, effectiveDiscount);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    /**
+     * The discount fee is charged on top of the principal rather than deducted from it, so a fee worth more than the
+     * principal means the borrower owes more in fee than in money received. The schedule that follows earns the whole
+     * fee over the handful of days the payments take to repay the balance, which solves to an annual EIR of
+     * astronomical magnitude - see {@link ProjectedAmortizationScheduleModel#MAX_CALCULABLE_ANNUAL_EIR}. Applied at
+     * every point the pair can be set, since either side of it moves independently: submission, modification, approval,
+     * disbursement and the discount fee transaction itself.
+     */
+    private void validateDiscountDoesNotExceedPrincipal(final BigDecimal discount, final BigDecimal principal,
+            final DataValidatorBuilder baseDataValidator) {
+        if (discount == null || principal == null || principal.signum() <= 0) {
+            return;
+        }
+        if (discount.compareTo(principal) > 0) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.discountParamName).value(discount)
+                    .failWithCode("amount.cannot.exceed.principal");
+        }
     }
 
     /**
@@ -420,7 +441,21 @@ public class WorkingCapitalLoanApplicationDataValidator {
             throw new WorkingCapitalLoanApplicationDateException("submitted.on.date.cannot.be.after.expected.disbursement.date",
                     "submittedOnDate cannot be after expectedDisbursementDate.", submittedOnDate, expectedDisbursementDate);
         }
+        validateDiscountDoesNotExceedPrincipalForLoan(loan);
         validateScheduleCalculableForLoan(loan);
+    }
+
+    /**
+     * Runs on the assembled loan, so it sees the principal and the discount the modification actually leaves behind.
+     */
+    private void validateDiscountDoesNotExceedPrincipalForLoan(final WorkingCapitalLoan loan) {
+        final var details = loan.getLoanProductRelatedDetails();
+        final BigDecimal discount = details != null ? details.getDiscountProposed() : null;
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.WCL_RESOURCE_NAME);
+        validateDiscountDoesNotExceedPrincipal(discount, loan.getProposedPrincipal(), baseDataValidator);
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     /** Runs only when no prior errors exist so the produced message is a single, unambiguous validation error. */
@@ -657,7 +692,8 @@ public class WorkingCapitalLoanApplicationDataValidator {
             atLeastOneParameterPassedForUpdate = true;
             final BigDecimal annualEir = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.annualEirParamName,
                     element, new HashSet<>());
-            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.annualEirParamName).value(annualEir).notNull().positiveAmount();
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.annualEirParamName).value(annualEir).notNull().positiveAmount()
+                    .notGreaterThanMax(ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR);
             if (paymentStrategy != null && paymentStrategy.isTpv()) {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.annualEirParamName)
                         .failWithCode("not.allowed.for.tpv.strategy");

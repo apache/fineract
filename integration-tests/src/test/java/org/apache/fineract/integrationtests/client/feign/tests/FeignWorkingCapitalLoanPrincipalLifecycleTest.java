@@ -102,6 +102,11 @@ public class FeignWorkingCapitalLoanPrincipalLifecycleTest extends FeignIntegrat
     private static final BigDecimal ZERO = BigDecimal.ZERO;
     /** Product default; percent, not a fraction — see {@code WorkingCapitalLoanProductTestBuilder:47}. */
     private static final BigDecimal PERIOD_PAYMENT_RATE = BigDecimal.valueOf(18);
+    /**
+     * Sized so the daily payment is 5 rather than the 50 the shared builder's default volume yields: at 50 these small
+     * principals repay in 6 to 12 days, which solves to an annual EIR above the calculable cap.
+     */
+    private static final BigDecimal TOTAL_PAYMENT_VOLUME = BigDecimal.valueOf(10000);
 
     private static final String ISO_DATE = "2026-01-01";
     private static final String DATE = "01 January 2026";
@@ -445,8 +450,9 @@ public class FeignWorkingCapitalLoanPrincipalLifecycleTest extends FeignIntegrat
     private Long submitLoan() {
         final Long clientId = clientHelper.createClient(DATE);
         final Long productId = createProduct();
-        final Long loanId = wcLoanHelper.submitApplication(WorkingCapitalLoanRequestBuilders.submitApplicationWithDiscount(clientId,
-                productId, PROPOSED_PRINCIPAL, PERIOD_PAYMENT_RATE, DATE, DATE, PROPOSED_DISCOUNT));
+        final Long loanId = wcLoanHelper.submitApplication(WorkingCapitalLoanRequestBuilders
+                .submitApplicationWithDiscount(clientId, productId, PROPOSED_PRINCIPAL, PERIOD_PAYMENT_RATE, DATE, DATE, PROPOSED_DISCOUNT)
+                .totalPaymentVolume(TOTAL_PAYMENT_VOLUME));
         createdLoanIds.add(loanId);
         return loanId;
     }

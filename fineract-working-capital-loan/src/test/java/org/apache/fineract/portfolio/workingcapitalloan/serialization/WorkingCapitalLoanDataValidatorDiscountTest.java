@@ -137,6 +137,82 @@ public class WorkingCapitalLoanDataValidatorDiscountTest {
         assertDoesNotThrow(() -> validator.validateRelatedResourceIsNotInBody(body));
     }
 
+    @Test
+    public void approvalRejectsADiscountWorthMoreThanTheApprovedPrincipal() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        loan.getLoanProductRelatedDetails().setDiscountProposed(new BigDecimal("150"));
+        loan.setProposedPrincipal(new BigDecimal("100"));
+
+        final String json = "{\"approvedOnDate\":\"" + BUSINESS_DATE + "\",\"expectedDisbursementDate\":\"" + BUSINESS_DATE
+                + "\",\"approvedLoanAmount\":100,\"discountAmount\":150,\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\"}";
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateApproval(json, loan));
+
+        assertThat(exception.getErrors())
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal"));
+    }
+
+    /** Approving less than was asked for inverts the pair without the request mentioning the discount at all. */
+    @Test
+    public void approvalRejectsAnApprovedPrincipalBelowTheDiscountProposedOnSubmission() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        loan.getLoanProductRelatedDetails().setDiscountProposed(new BigDecimal("150"));
+        loan.setProposedPrincipal(new BigDecimal("500"));
+
+        final String json = "{\"approvedOnDate\":\"" + BUSINESS_DATE + "\",\"expectedDisbursementDate\":\"" + BUSINESS_DATE
+                + "\",\"approvedLoanAmount\":100,\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\"}";
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateApproval(json, loan));
+
+        assertThat(exception.getErrors())
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal"));
+    }
+
+    @Test
+    public void approvalAcceptsADiscountEqualToTheApprovedPrincipal() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        loan.getLoanProductRelatedDetails().setDiscountProposed(new BigDecimal("100"));
+        loan.setProposedPrincipal(new BigDecimal("100"));
+
+        final String json = "{\"approvedOnDate\":\"" + BUSINESS_DATE + "\",\"expectedDisbursementDate\":\"" + BUSINESS_DATE
+                + "\",\"approvedLoanAmount\":100,\"discountAmount\":100,\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\"}";
+
+        assertDoesNotThrow(() -> validator.validateApproval(json, loan));
+    }
+
+    /** The disbursed amount, not the approved principal: disbursing less than approved is allowed. */
+    @Test
+    public void disbursementRejectsADiscountWorthMoreThanTheAmountBeingDisbursed() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        loan.getLoanProductRelatedDetails().setDiscountApproved(new BigDecimal("150"));
+        loan.setApprovedPrincipal(new BigDecimal("500"));
+
+        final String json = "{\"actualDisbursementDate\":\"" + BUSINESS_DATE
+                + "\",\"transactionAmount\":100,\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\"}";
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateDisbursement(json, loan));
+
+        assertThat(exception.getErrors())
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal"));
+    }
+
+    @Test
+    public void discountFeeTransactionRejectsAnAmountWorthMoreThanTheDisbursedPrincipal() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        final WorkingCapitalLoanDisbursementDetails detail = disbursementDetail(BUSINESS_DATE);
+        detail.setActualAmount(new BigDecimal("100"));
+        loan.getDisbursementDetails().add(detail);
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateDiscountTransaction(loan, "{}", new BigDecimal("150"), null));
+
+        assertThat(exception.getErrors())
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal"));
+    }
+
     private static JsonElement parsedBody(final String json) {
         return new FromJsonHelper().parse(json);
     }

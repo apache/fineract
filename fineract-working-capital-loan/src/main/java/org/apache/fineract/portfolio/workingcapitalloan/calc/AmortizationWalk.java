@@ -271,7 +271,9 @@ final class AmortizationWalk {
                     } catch (final IllegalArgumentException | IllegalStateException | ArithmeticException e) {
                         // A position no rate can be solved from keeps the one it had. The projection is then the stale
                         // one it would have been anyway, which is worse than re-priced but better than no schedule.
-                        log.debug("Could not re-price the projection from balance {} with {} of fee unearned", balance, unearnedFee, e);
+                        // Logged as a warning: the days ahead now bill slightly off what is owed, which must not go
+                        // unnoticed - the EIR cap makes this reachable for loans solved close to it.
+                        log.warn("Could not re-price the projection from balance {} with {} of fee unearned", balance, unearnedFee, e);
                     }
                 }
                 projectionStale = false;
