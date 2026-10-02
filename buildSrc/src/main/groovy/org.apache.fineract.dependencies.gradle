@@ -263,7 +263,7 @@ dependencyManagement {
         dependency 'org.apache.sshd:sshd-common:2.17.1'
         dependency 'org.apache.sshd:sshd-core:2.17.1'
 
-        dependency 'io.cucumber:cucumber-java:7.34.3'
+        dependency 'io.cucumber:cucumber-java:8.0.4'
         dependency 'io.cucumber:cucumber-java8:7.34.3'
         dependency 'io.cucumber:cucumber-junit-platform-engine:7.34.3'
         dependency 'io.cucumber:cucumber-spring:7.34.3'
