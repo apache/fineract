@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
+import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 
 /**
  * Default implementation of {@link SavingsAccountActivationService}. The bodies of {@code processAccountUponActivation}
@@ -36,6 +37,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 public class SavingsAccountActivationServiceImpl implements SavingsAccountActivationService {
 
     private final SavingsAccountPostInterestService savingsAccountPostInterestService;
+    private final SavingsHelper savingsHelper;
 
     @Override
     public void processAccountUponActivation(final SavingsAccount account, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
@@ -76,7 +78,7 @@ public class SavingsAccountActivationServiceImpl implements SavingsAccountActiva
             } else {
                 final LocalDate today = DateUtils.getBusinessLocalDate();
                 account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                        financialYearBeginningMonth, postInterestAsOnDate, backdatedTxnsAllowedTill, postReversals);
+                        financialYearBeginningMonth, postInterestAsOnDate, backdatedTxnsAllowedTill, postReversals, this.savingsHelper);
             }
         }
     }

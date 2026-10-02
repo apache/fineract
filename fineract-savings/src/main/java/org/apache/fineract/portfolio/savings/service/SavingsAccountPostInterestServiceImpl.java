@@ -27,20 +27,21 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionSummaryWrapper;
+import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 
 /**
  * Default implementation of {@link SavingsAccountPostInterestService}. The body of this {@code postInterest} method was
  * extracted from {@code SavingsAccount.postInterest}; behaviour is intentionally unchanged. Account state is
- * read/written through the public API of the {@link SavingsAccount} entity, while the stateless
- * {@link SavingsAccountTransactionSummaryWrapper} collaborator is injected here (rather than read off the entity's
- * transient field) to keep that dependency out of the domain entity.
+ * read/written through the public API of the {@link SavingsAccount} entity; transaction-summary totals are computed
+ * through the stateless static {@code SavingsAccountTransactionSummaryWrapper} utility, and the thin
+ * {@link SavingsHelper} service supplies the interest-transaction lookups the entity needs, keeping both dependencies
+ * out of the domain entity.
  */
 @RequiredArgsConstructor
 public class SavingsAccountPostInterestServiceImpl implements SavingsAccountPostInterestService {
 
-    private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
+    private final SavingsHelper savingsHelper;
 
     @Override
     public void postInterest(final SavingsAccount account, final MathContext mc, final LocalDate postingDate,
@@ -54,7 +55,7 @@ public class SavingsAccountPostInterestServiceImpl implements SavingsAccountPost
         final LocalDate interestPostingUpToDate = account.interestPostingUpToDate(postingDate);
         final List<PostingPeriod> postingPeriods = account.calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer,
                 isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
-                postReversals);
+                postReversals, this.savingsHelper);
         if (postingPeriods.isEmpty()) {
             return;
         }
@@ -180,10 +181,9 @@ public class SavingsAccountPostInterestServiceImpl implements SavingsAccountPost
         }
 
         if (!backdatedTxnsAllowedTill) {
-            account.getSummary().updateSummary(account.getCurrency(), this.savingsAccountTransactionSummaryWrapper,
-                    account.getTransactions());
+            account.getSummary().updateSummary(account.getCurrency(), account.getTransactions());
         } else {
-            account.getSummary().updateSummaryWithPivotConfig(account.getCurrency(), this.savingsAccountTransactionSummaryWrapper, null,
+            account.getSummary().updateSummaryWithPivotConfig(account.getCurrency(), null,
                     account.getSavingsAccountTransactionsWithPivotConfig());
         }
     }

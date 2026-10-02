@@ -1,0 +1,200 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.fineract.portfolio.savings.domain;
+
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.savings.domain.interest.CompoundInterestHelper;
+import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
+
+/**
+ * Side-effect free interest posting-period computations for a {@link SavingsAccount}. Extracted from the former
+ * {@link SavingsHelper} so the stateless math lives in a static utility while the DB-backed lookups stay on the thin
+ * {@link SavingsHelper} service. This keeps the interest math callable from the domain entity without injecting a
+ * collaborator into it.
+ */
+public final class SavingsInterestCalculationUtil {
+
+    private static final CompoundInterestHelper COMPOUND_INTEREST_HELPER = new CompoundInterestHelper();
+
+    private SavingsInterestCalculationUtil() {}
+
+    public static List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate startInterestCalculationLocalDate,
+            final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType,
+            final Integer financialYearBeginningMonth, List<LocalDate> postInterestAsOn) {
+
+        final List<LocalDateInterval> postingPeriods = new ArrayList<>();
+
+        if (startInterestCalculationLocalDate == null || interestPostingUpToDate == null || postingPeriodType == null) {
+            return postingPeriods;
+        }
+
+        if (postInterestAsOn == null) {
+            postInterestAsOn = Collections.emptyList();
+        }
+        LocalDate periodStartDate = startInterestCalculationLocalDate;
+        LocalDate periodEndDate = periodStartDate;
+        LocalDate actualPeriodStartDate = periodStartDate;
+        final int anniversaryDayOfMonth = startInterestCalculationLocalDate.getDayOfMonth();
+
+        while (!DateUtils.isAfter(periodStartDate, interestPostingUpToDate) && !DateUtils.isAfter(periodEndDate, interestPostingUpToDate)) {
+            final LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType,
+                    interestPostingUpToDate, financialYearBeginningMonth, anniversaryDayOfMonth);
+
+            periodEndDate = interestPostingLocalDate.minusDays(1);
+
+            if (!postInterestAsOn.isEmpty()) {
+                for (LocalDate transactiondate : postInterestAsOn) {
+                    if (DateUtils.isAfter(transactiondate, periodStartDate) && !DateUtils.isAfter(transactiondate, periodEndDate)) {
+                        periodEndDate = transactiondate.minusDays(1);
+                        actualPeriodStartDate = periodEndDate;
+                        break;
+                    }
+                }
+            }
+
+            postingPeriods.add(LocalDateInterval.create(periodStartDate, periodEndDate));
+
+            if (DateUtils.isEqual(actualPeriodStartDate, periodEndDate)) {
+                periodEndDate = actualPeriodStartDate.plusDays(1);
+                periodStartDate = actualPeriodStartDate.plusDays(1);
+            } else {
+                periodEndDate = interestPostingLocalDate;
+                periodStartDate = interestPostingLocalDate;
+            }
+        }
+
+        return postingPeriods;
+    }
+
+    private static LocalDate determineInterestPostingPeriodEndDateFrom(final LocalDate periodStartDate,
+            final SavingsPostingInterestPeriodType interestPostingPeriodType, final LocalDate interestPostingUpToDate,
+            Integer financialYearBeginningMonth, final int anniversaryDayOfMonth) {
+
+        // interest posting always occurs on the next day after the period end date.
+        LocalDate periodEndDate = interestPostingUpToDate.plusDays(1);
+        final Integer monthOfYear = periodStartDate.getMonthValue();
+        financialYearBeginningMonth--;
+        if (financialYearBeginningMonth == 0) {
+            financialYearBeginningMonth = 12;
+        }
+
+        final ArrayList<LocalDate> quarterlyDates = new ArrayList<>();
+        quarterlyDates.add(periodStartDate.withMonth(financialYearBeginningMonth).with(TemporalAdjusters.lastDayOfMonth()));
+        quarterlyDates.add(periodStartDate.withMonth(financialYearBeginningMonth).plusMonths(3).withYear(periodStartDate.getYear())
+                .with(TemporalAdjusters.lastDayOfMonth()));
+        quarterlyDates.add(periodStartDate.withMonth(financialYearBeginningMonth).plusMonths(6).withYear(periodStartDate.getYear())
+                .with(TemporalAdjusters.lastDayOfMonth()));
+        quarterlyDates.add(periodStartDate.withMonth(financialYearBeginningMonth).plusMonths(9).withYear(periodStartDate.getYear())
+                .with(TemporalAdjusters.lastDayOfMonth()));
+        Collections.sort(quarterlyDates);
+
+        final ArrayList<LocalDate> biannualDates = new ArrayList<>();
+        biannualDates.add(periodStartDate.withMonth(financialYearBeginningMonth).with(TemporalAdjusters.lastDayOfMonth()));
+        biannualDates.add(periodStartDate.withMonth(financialYearBeginningMonth).plusMonths(6).withYear(periodStartDate.getYear())
+                .with(TemporalAdjusters.lastDayOfMonth()));
+        Collections.sort(biannualDates);
+        boolean isEndDateSet = false;
+
+        switch (interestPostingPeriodType) {
+            case INVALID:
+            break;
+            case DAILY:
+                // interest posting always occurs on the next day after the period end date.
+                periodEndDate = periodStartDate.plusDays(1);
+            break;
+            case MONTHLY:
+                // interest posting occurs on the first day of the next month and on the next day after the period end
+                // date.
+                periodEndDate = periodStartDate.with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
+            break;
+            case QUATERLY:
+                for (LocalDate quarterlyDate : quarterlyDates) {
+                    if (DateUtils.isAfter(quarterlyDate, periodStartDate)) {
+                        // interest posting always occurs on the next day after the period end date.
+                        periodEndDate = quarterlyDate.plusDays(1);
+                        isEndDateSet = true;
+                        break;
+                    }
+                }
+
+                if (!isEndDateSet) {
+                    // interest posting always occurs on the next day after the period end date.
+                    periodEndDate = quarterlyDates.getFirst().plusYears(1).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
+                }
+            break;
+            case BIANNUAL:
+                for (LocalDate biannualDate : biannualDates) {
+                    if (DateUtils.isAfter(biannualDate, periodStartDate)) {
+                        // interest posting always occurs on the next day after the period end date.
+                        periodEndDate = biannualDate.plusDays(1);
+                        isEndDateSet = true;
+                        break;
+                    }
+                }
+
+                if (!isEndDateSet) {
+                    // interest posting always occurs on the next day after the period end date.
+                    periodEndDate = biannualDates.getFirst().plusYears(1).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
+                }
+            break;
+            case ANNUAL:
+                if (financialYearBeginningMonth < monthOfYear) {
+                    periodEndDate = periodStartDate.withMonth(financialYearBeginningMonth);
+                    periodEndDate = periodEndDate.plusYears(1);
+                } else {
+                    periodEndDate = periodStartDate.withMonth(financialYearBeginningMonth);
+                }
+                // interest posting always occurs on the next day after the period end date.
+                periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
+            break;
+            case ANNIVERSARY_MONTHLY:
+                periodEndDate = adjustToAnniversaryDay(periodStartDate.plusMonths(1), anniversaryDayOfMonth);
+            break;
+            case ANNIVERSARY_QUARTERLY:
+                periodEndDate = adjustToAnniversaryDay(periodStartDate.plusMonths(3), anniversaryDayOfMonth);
+            break;
+            case ANNIVERSARY_BIANNUAL:
+                periodEndDate = adjustToAnniversaryDay(periodStartDate.plusMonths(6), anniversaryDayOfMonth);
+            break;
+            case ANNIVERSARY_ANNUAL:
+                periodEndDate = adjustToAnniversaryDay(periodStartDate.plusMonths(12), anniversaryDayOfMonth);
+            break;
+        }
+        return periodEndDate;
+    }
+
+    private static LocalDate adjustToAnniversaryDay(final LocalDate date, final int anniversaryDay) {
+        return date.withDayOfMonth(Math.min(anniversaryDay, date.lengthOfMonth()));
+    }
+
+    public static Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
+            LocalDate accountLockedUntil, Boolean immediateWithdrawalOfInterest) {
+        return COMPOUND_INTEREST_HELPER.calculateInterestForAllPostingPeriods(currency, allPeriods, accountLockedUntil,
+                immediateWithdrawalOfInterest);
+    }
+}

@@ -113,7 +113,8 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
     }
 
     public Map<String, Object> updateMandatoryRecommendedDepositAmount(BigDecimal newMandatoryRecommendedDepositAmount,
-            LocalDate effectiveDate, Boolean isSavingsInterestPostingAtCurrentPeriodEnd, Integer financialYearBeginningMonth) {
+            LocalDate effectiveDate, Boolean isSavingsInterestPostingAtCurrentPeriodEnd, Integer financialYearBeginningMonth,
+            final SavingsHelper savingsHelper) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
         actualChanges.put(mandatoryRecommendedDepositAmountParamName, newMandatoryRecommendedDepositAmount);
         this.mandatoryRecommendedDepositAmount = newMandatoryRecommendedDepositAmount;
@@ -131,7 +132,7 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
         MathContext mc = MathContext.DECIMAL64;
         Boolean isPreMatureClosure = false;
         depositAccount.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth);
+                financialYearBeginningMonth, savingsHelper);
         return actualChanges;
     }
 
