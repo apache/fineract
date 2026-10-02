@@ -25,6 +25,7 @@ import feign.RequestLine;
 import feign.Response;
 import java.io.File;
 import java.util.Map;
+import org.apache.fineract.client.feign.FineractMultipartEncoder.MultipartData;
 
 /**
  * Client API (Feign) for /images.
@@ -33,7 +34,8 @@ import java.util.Map;
  * in DefaultApi (see <a href="https://issues.apache.org/jira/browse/FINERACT-1222">FINERACT-1222</a>), but fixed for
  * bugs in the code generation (see <a href="https://issues.apache.org/jira/browse/FINERACT-1227">FINERACT-1227</a>).
  *
- * Note: For image uploads, use {@link #prepareFileUpload(File)} to prepare file data as a Data URL.
+ * Note: For image uploads, either send the file as multipart form data ({@link #create(String, Long, MultipartData)}),
+ * or use {@link #prepareFileUpload(File)} to prepare file data as a Data URL.
  */
 public interface ImagesApi {
 
@@ -41,12 +43,18 @@ public interface ImagesApi {
     @Headers("Content-Type: text/html")
     Response create(@Param("entityType") String entityType, @Param("entityId") Long entityId, String dataUrl);
 
+    @RequestLine("POST /v1/{entityType}/{entityId}/images")
+    Response create(@Param("entityType") String entityType, @Param("entityId") Long entityId, MultipartData multipartData);
+
     @RequestLine("GET /v1/{entityType}/{entityId}/images")
     Response get(@Param("entityType") String entityType, @Param("entityId") Long entityId, @QueryMap Map<String, Object> queryParams);
 
     @RequestLine("PUT /v1/{entityType}/{entityId}/images")
     @Headers("Content-Type: text/html")
     Response update(@Param("entityType") String entityType, @Param("entityId") Long entityId, String dataUrl);
+
+    @RequestLine("PUT /v1/{entityType}/{entityId}/images")
+    Response update(@Param("entityType") String entityType, @Param("entityId") Long entityId, MultipartData multipartData);
 
     @RequestLine("DELETE /v1/{entityType}/{entityId}/images")
     Response delete(@Param("entityType") String entityType, @Param("entityId") Long entityId);
