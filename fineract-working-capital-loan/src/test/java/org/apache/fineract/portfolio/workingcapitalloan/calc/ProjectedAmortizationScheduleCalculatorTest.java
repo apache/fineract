@@ -2712,7 +2712,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
         model.applyRateChange(new BigDecimal("9"), changeDate, changeDate);
 
         final ProjectedAmortizationScheduleModel.RateChangeSolve solve = model.rateChangeSolveOn(changeDate);
-        assertMoneyValue(25.00, solve.dailyPayment(), 2, "(100000 x 9 %) / 360");
+        assertMoneyValue(25.00, solve.periodPayment(), 2, "(100000 x 9 %) / 360");
         assertEquals(418, solve.term(), "ceil(10450.00 / 25)");
         assertNull(solve.eir(), "no rate is solved");
 

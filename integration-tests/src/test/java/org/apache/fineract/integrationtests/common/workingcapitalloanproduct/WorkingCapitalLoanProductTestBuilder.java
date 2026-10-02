@@ -47,7 +47,7 @@ public class WorkingCapitalLoanProductTestBuilder {
     public static final BigDecimal DEFAULT_PERIOD_PAYMENT_RATE_PERCENT = BigDecimal.valueOf(18);
     public static final BigDecimal DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT = BigDecimal.valueOf(5);
     public static final BigDecimal DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT = BigDecimal.valueOf(25);
-    private static final Integer DEFAULT_PERIOD_PAYMENT_FREQUENCY = 30;
+    private static final Integer DEFAULT_PERIOD_PAYMENT_FREQUENCY = 1;
     private static final String DEFAULT_PERIOD_PAYMENT_FREQUENCY_TYPE = WorkingCapitalLoanPeriodFrequencyType.DAYS.name();
     private static final List<String> DEFAULT_PAYMENT_ALLOCATION_TYPES = List.of("DUE_PENALTY", "DUE_FEE", "DUE_PRINCIPAL",
             "IN_ADVANCE_PENALTY", "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL");

@@ -31,6 +31,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel.PrincipalAdjustment;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedPayment;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.junit.jupiter.api.Test;
@@ -209,6 +210,38 @@ class ProjectedAmortizationScheduleModelParserServiceGsonImplTest {
                 DISBURSEMENT, DISBURSEMENT);
         assertEquals(WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, regenerated.paymentAmountCalculationStrategy());
         assertEquals(0, annualEirModel.expectedPaymentAmount().getAmount().compareTo(regenerated.expectedPaymentAmount().getAmount()));
+    }
+
+    @Test
+    void roundTripsTheRepaymentFrequency() {
+        final ProjectedAmortizationScheduleModel weekly = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
+                new BigDecimal("1000"), new BigDecimal("9000"), new BigDecimal("100000"), new BigDecimal("18"), 360,
+                WorkingCapitalLoanPeriodFrequencyType.WEEKS, 1, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT);
+
+        final String json = parser.toJson(weekly);
+        assertTrue(json.contains("\"repaymentFrequencyType\":\"WEEKS\",\"repaymentEvery\":1"));
+
+        final ProjectedAmortizationScheduleModel restored = parser.fromJson(json, MC, CURRENCY);
+        assertNotNull(restored);
+        assertEquals(29, restored.projectedPayments().size() - 1);
+        assertEquals(LocalDate.of(2026, 1, 8), restored.projectedPayments().get(1).date());
+        assertEquals(LocalDate.of(2026, 7, 23), restored.scheduledMaturityDate());
+    }
+
+    /** Models persisted before the schedule followed the repayment frequency were all built daily. */
+    @Test
+    void readsAModelPersistedWithoutTheRepaymentFrequencyAsDaily() {
+        final ProjectedAmortizationScheduleModel model = model();
+        final String legacyJson = parser.toJson(model).replace("\"repaymentFrequencyType\":\"DAYS\",\"repaymentEvery\":1,", "");
+        assertFalse(legacyJson.contains("repaymentFrequencyType"), "the legacy fixture must not carry the field");
+        assertFalse(legacyJson.contains("repaymentEvery"), "the legacy fixture must not carry the field");
+
+        final ProjectedAmortizationScheduleModel restored = parser.fromJson(legacyJson, MC, CURRENCY);
+        assertNotNull(restored);
+        assertEquals(model.projectedPayments().size(), restored.projectedPayments().size());
+        assertEquals(LocalDate.of(2026, 1, 2), restored.projectedPayments().get(1).date());
+        assertEquals(model.scheduledMaturityDate(), restored.scheduledMaturityDate());
+        assertEquals(model.calculatedAnnualEir(), restored.calculatedAnnualEir());
     }
 
     private ProjectedAmortizationScheduleModel paymentAmountModel() {

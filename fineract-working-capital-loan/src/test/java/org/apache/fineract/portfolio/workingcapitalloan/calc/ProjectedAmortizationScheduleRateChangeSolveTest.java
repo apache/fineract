@@ -80,7 +80,7 @@ class ProjectedAmortizationScheduleRateChangeSolveTest {
         assertNotNull(solve);
         assertEquals(RATE_CHANGE_DATE, solve.effectiveDate());
         // (100000 x 17) / 360 / 100
-        assertEquals(0, new BigDecimal("47.22").compareTo(solve.dailyPayment().getAmount()));
+        assertEquals(0, new BigDecimal("47.22").compareTo(solve.periodPayment().getAmount()));
         assertTrue(solve.term() > 1);
         assertNotNull(solve.eir());
     }
@@ -110,7 +110,7 @@ class ProjectedAmortizationScheduleRateChangeSolveTest {
         assertNotNull(solve);
         assertEquals(lastScheduledDay, solve.effectiveDate());
         assertEquals(1, solve.term());
-        assertEquals(0, new BigDecimal("55.56").compareTo(solve.dailyPayment().getAmount()));
+        assertEquals(0, new BigDecimal("55.56").compareTo(solve.periodPayment().getAmount()));
         assertNull(model.rateChangeSolveOn(pastTheEnd));
     }
 

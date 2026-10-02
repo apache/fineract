@@ -62,7 +62,7 @@ Feature: Working Capital Loan Details
       | currency.displayLabel                          | Euro (€)                     |
       | fundId                                         | null                         |
       | fundName                                       | null                         |
-      | repaymentEvery                                 | 30                           |
+      | repaymentEvery                                 | 1                            |
       | repaymentFrequencyType.code                    | DAYS                         |
       | repaymentFrequencyType.value                   | present                      |
       | delinquencyGraceDays                           | null                         |
