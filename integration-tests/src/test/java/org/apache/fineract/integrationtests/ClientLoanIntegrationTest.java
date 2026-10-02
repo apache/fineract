@@ -225,6 +225,100 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         verifyLoanRepaymentSchedule(loanSchedule);
     }
 
+    // FINERACT-2721: submitting a loan application used to decrement the linked client collateral quantity twice
+    // (once during submission validation, once during the actual assembly of the loan), because both call sites
+    // shared the same LoanCollateralAssembler#fromParsedJson overload. Verify the client collateral quantity is now
+    // only reduced by the requested amount, exactly once.
+    @Test
+    public void checkClientCollateralQuantityIsDecrementedExactlyOnceOnLoanSubmission() {
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        final Long clientID = createClient();
+        verifyClientCreatedOnServer(clientID);
+
+        // FeignCollateralHelper always seeds a client collateral with quantity 100
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientID, collateralId).getResourceId();
+        final BigDecimal initialClientCollateralQuantity = getClientCollateralQuantity(clientID, clientCollateralId);
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(initialClientCollateralQuantity));
+
+        final BigDecimal loanCollateralQuantity = BigDecimal.valueOf(10);
+        final List<PostLoansRequestCollateralData> collaterals = List.of(collateral(clientCollateralId, loanCollateralQuantity));
+
+        final Long loanProductID = createLoanProduct(false, NONE);
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
+        assertNotNull(loanID);
+
+        final BigDecimal remainingClientCollateralQuantity = getClientCollateralQuantity(clientID, clientCollateralId);
+        assertEquals(0, initialClientCollateralQuantity.subtract(loanCollateralQuantity).compareTo(remainingClientCollateralQuantity),
+                "Client collateral quantity should be reduced by the requested amount exactly once, not twice: expected "
+                        + initialClientCollateralQuantity.subtract(loanCollateralQuantity) + " but was "
+                        + remainingClientCollateralQuantity);
+    }
+
+    // FINERACT-2721: modifying a pending loan's collateral used to check
+    // `possiblyModifedLoanCollateralItems.equals(loan.getLoanCollateralManagements())` (inverted) to decide whether
+    // to persist the change, so a genuine collateral quantity change on modify-loan was silently dropped. Verify the
+    // change is now actually persisted against the loan and the client collateral balance follows it.
+    @Test
+    public void checkModifyLoanApplicationPersistsGenuineCollateralQuantityChange() {
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        final Long clientID = createClient();
+        verifyClientCreatedOnServer(clientID);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientID, collateralId).getResourceId();
+
+        final List<PostLoansRequestCollateralData> collaterals = List.of(collateral(clientCollateralId, BigDecimal.valueOf(10)));
+        final Long loanProductID = createLoanProduct(false, NONE);
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
+        final Long loanCollateralId = getLoanDetails(loanID).getCollateral().get(0).getId();
+
+        final PutLoansLoanIdRequest request = updateLoanRequest(clientID, loanProductID, null, null, List.of())
+                .collateral(List.of(existingCollateral(loanCollateralId, clientCollateralId, BigDecimal.valueOf(20))));
+        modifyLoanApplication(loanID, null, request);
+
+        final List<GetLoansLoanIdCollateralData> loanCollateral = getLoanDetails(loanID).getCollateral();
+        assertEquals(1, loanCollateral.size());
+        assertEquals(0, BigDecimal.valueOf(20).compareTo(loanCollateral.get(0).getQuantity()),
+                "The new collateral quantity must actually be persisted against the loan");
+        assertEquals(0, BigDecimal.valueOf(80).compareTo(getClientCollateralQuantity(clientID, clientCollateralId)),
+                "The client collateral must be reduced by the new loan quantity, not the old one");
+    }
+
+    // FINERACT-2721: resubmitting the same collateral quantity on modify-loan takes the "unchanged" branch in
+    // LoanCollateralAssembler#fromParsedJson. Verify this is idempotent: the loan's persisted collateral quantity
+    // must still read back as the original value, not be corrupted by the restore-quantity bookkeeping.
+    @Test
+    public void checkModifyLoanApplicationWithUnchangedCollateralQuantityStaysConsistent() {
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        final Long clientID = createClient();
+        verifyClientCreatedOnServer(clientID);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientID, collateralId).getResourceId();
+
+        final BigDecimal loanCollateralQuantity = BigDecimal.valueOf(10);
+        final List<PostLoansRequestCollateralData> collaterals = List.of(collateral(clientCollateralId, loanCollateralQuantity));
+        final Long loanProductID = createLoanProduct(false, NONE);
+        final Long loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
+        final Long loanCollateralId = getLoanDetails(loanID).getCollateral().get(0).getId();
+
+        final PutLoansLoanIdRequest request = updateLoanRequest(clientID, loanProductID, null, null, List.of())
+                .collateral(List.of(existingCollateral(loanCollateralId, clientCollateralId, loanCollateralQuantity)));
+        modifyLoanApplication(loanID, null, request);
+
+        final List<GetLoansLoanIdCollateralData> loanCollateral = getLoanDetails(loanID).getCollateral();
+        assertEquals(1, loanCollateral.size());
+        assertEquals(0, loanCollateralQuantity.compareTo(loanCollateral.get(0).getQuantity()),
+                "Resubmitting an unchanged collateral quantity must not alter the loan's persisted collateral quantity");
+        assertEquals(0, BigDecimal.valueOf(90).compareTo(getClientCollateralQuantity(clientID, clientCollateralId)),
+                "Resubmitting an unchanged collateral quantity must not alter the client's remaining collateral quantity");
+    }
+
+    private BigDecimal getClientCollateralQuantity(final Long clientId, final Long clientCollateralId) {
+        return ok(() -> fineractClient().clientCollateralManagement().getClientCollateralData(clientId, clientCollateralId)).getQuantity();
+    }
+
+    private PutLoansLoanIdCollateral existingCollateral(final Long loanCollateralId, final Long clientCollateralId,
+            final BigDecimal quantity) {
+        return new PutLoansLoanIdCollateral().id(loanCollateralId).clientCollateralId(clientCollateralId).quantity(quantity);
+    }
+
     @Test
     public void validateClientLoanWithUniqueExternalId() {
         // Given
