@@ -203,9 +203,9 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @Schema(example = "28 June 2024", description = "Transaction date")
+        @Schema(example = "28 June 2024", description = "Transaction date. For command=discountFee it is optional, defaults to the date of the related disbursement and, when sent, must be equal to it")
         public String transactionDate;
-        @Schema(example = "42", description = "Disbursement transaction id for discountFee; discount fee transaction id for discountFeeAdjustment. Cannot be combined with relatedExternalResourceId. Not accepted on transactions/{transactionId} and transactions/external-id/{transactionExternalId}, where the path names the related transaction")
+        @Schema(example = "42", description = "Disbursement transaction id for discountFee, optional when transactionDate is sent (the active disbursement on that date is used); discount fee transaction id for discountFeeAdjustment. Cannot be combined with relatedExternalResourceId. Not accepted on transactions/{transactionId} and transactions/external-id/{transactionExternalId}, where the path names the related transaction")
         public Long relatedResourceId;
         @Schema(example = "txn-ext-001", description = "External id of the same transaction that relatedResourceId names: the disbursement for discountFee, the discount fee for discountFeeAdjustment. Cannot be combined with relatedResourceId. Not accepted on transactions/{transactionId} and transactions/external-id/{transactionExternalId}, where the path names the related transaction")
         public String relatedExternalResourceId;
@@ -256,7 +256,7 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @Schema(example = "28 June 2024", description = "Transaction date (command=discountFeeAdjustment); command=discountFee uses the date of the related disbursement")
+        @Schema(example = "28 June 2024", description = "Transaction date (command=discountFeeAdjustment); for command=discountFee it defaults to the date of the related disbursement and, when sent, must be equal to it")
         public String transactionDate;
         @Schema(example = "100.0", description = "Transaction amount (command=discountFee, discountFeeAdjustment)")
         public BigDecimal transactionAmount;

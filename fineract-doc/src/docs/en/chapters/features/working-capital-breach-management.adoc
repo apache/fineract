@@ -353,6 +353,7 @@ GET /v1/working-capital-loans/{loanId}/breach-schedule
 * `minPaymentAmount` is calculated from the breach configuration:
 ** `FLAT`: uses `breachAmount` directly.
 ** `PERCENTAGE`: applies `breachAmount%` to `approvedPrincipal + discount` (rounded to currency precision).
+* A Discount Fee added after disbursement recalculates the minimum payment of the period covering the business date and of later periods. Periods that have already ended keep the minimum payment they were evaluated against.
 
 === Breach Evaluation
 

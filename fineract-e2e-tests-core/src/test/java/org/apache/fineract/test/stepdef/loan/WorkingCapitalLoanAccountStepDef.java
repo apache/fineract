@@ -2686,6 +2686,44 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         verifyErrorResponse(exception, table);
     }
 
+    @When("Admin adds Discount fee with {string} amount on transaction date {string} on Working Capital loan account")
+    public void addDiscountFeeWCLoanOnTransactionDate(final String discountAmount, final String transactionDate) {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionAmount(new BigDecimal(discountAmount))
+                .transactionDate(transactionDate);
+
+        final PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFee", request));
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_DISCOUNT_FEE_RESPONSE, response);
+    }
+
+    @Then("Adding Discount fee with {string} amount on transaction date {string} on Working Capital loan account for last disbursement results an error with the following data:")
+    public void addingDiscountFeeWCLoanDisbursementOnTransactionDateResultsAnError(final String discountAmount,
+            final String transactionDate, final DataTable table) {
+        final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
+        Assertions.assertNotNull(lastDisbursementResponse);
+
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().relatedResourceId(lastDisbursementResponse.getResourceId())
+                .transactionAmount(new BigDecimal(discountAmount)).transactionDate(transactionDate);
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFee", request));
+        verifyErrorResponse(exception, table);
+    }
+
+    @Then("Adding Discount fee with {string} amount on transaction date {string} on Working Capital loan account results an error with the following data:")
+    public void addingDiscountFeeWCLoanOnTransactionDateResultsAnError(final String discountAmount, final String transactionDate,
+            final DataTable table) {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionAmount(new BigDecimal(discountAmount))
+                .transactionDate(transactionDate);
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFee", request));
+        verifyErrorResponse(exception, table);
+    }
+
     @And("Admin stores the last Working Capital loan disbursement transaction id for later reference")
     public void storeLastDisbursementTransactionId() {
         final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
@@ -3230,12 +3268,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
             assertThat(txn.getExternalLoanId()).as("WC transaction id=%s type=%s must carry the loan externalId", txn.getId(),
                     txn.getType() == null ? null : txn.getType().getValue()).isEqualTo(loanExternalId);
         }
-    }
-
-    @Then("Add discount with {string} amount on Working Capital loan account failed due to date diff from disbursement date")
-    public void updateDiscountWithAmountOnWorkingCapitalLoanAccountFailedDueToDateDiffFromDisbursementDate(String discountAmount) {
-        String errorMessage = ErrorMessageHelper.discountDiffDateFromDisburseFailure();
-        addDiscountFeeFailedCheck(discountAmount, errorMessage);
     }
 
     @Then("Add discount with {string} amount on Working Capital loan account failed due to already added discount before disbursement")

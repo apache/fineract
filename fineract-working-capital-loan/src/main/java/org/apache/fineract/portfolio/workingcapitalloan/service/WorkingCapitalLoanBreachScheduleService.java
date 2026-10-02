@@ -50,6 +50,8 @@ public interface WorkingCapitalLoanBreachScheduleService {
      */
     void replayForBreachAction(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction action);
 
+    void recalculateMinimumPayment(WorkingCapitalLoan loan);
+
     void splitPeriodAtReset(WorkingCapitalLoan loan, LocalDate resetDate);
 
     void restoreSplitPeriod(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction undoneReset);
