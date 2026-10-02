@@ -1779,7 +1779,7 @@ Feature: LoanRepayment - Part2
     Then Loan Transactions tab has a transaction with date: "02 November 2022", and with the following data:
       | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | Repayment        | 9.0    | 9.0       | 0.0      | 0.0  | 0.0       | 991.0        |
-      | Repayment        | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 990.0        |
+      | Repayment        | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 990.0        |
 
   @TestRailId:C2898
   Scenario: Verify that in case of non/disbursed loan LoanRepaymentDueBusinessEvent is not sent - LP1 product

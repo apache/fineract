@@ -5323,6 +5323,33 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                     loanProductsResponseInterestRecalcChargebackAccrualActivity);
         });
 
+        tasks.add(() -> {
+            // LP2 with disabled interest recalculation + chargeback allocation(INTEREST, PENALTY, FEE, PRINCIPAL)
+            // + accrual activity posting
+            // (LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_INTEREST_FIRST_ACCRUAL_ACTIVITY)
+            final String name182 = DefaultLoanProduct.LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_INTEREST_FIRST_ACCRUAL_ACTIVITY
+                    .getName();
+            final PostLoanProductsRequest loanProductsRequestNoInterestRecalcChargebackAccrualActivity = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2Emi()//
+                    .name(name182)//
+                    .daysInYearType(DaysInYearType.DAYS360.value)//
+                    .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                    .enableAccrualActivityPosting(true)//
+                    .creditAllocation(List.of(//
+                            createCreditAllocation("CHARGEBACK", List.of("INTEREST", "PENALTY", "FEE", "PRINCIPAL"))//
+            ))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse loanProductsResponseNoInterestRecalcChargebackAccrualActivity = createLoanProductIdempotent(
+                    loanProductsRequestNoInterestRecalcChargebackAccrualActivity);
+            TestContext.INSTANCE.set(
+                    TestContextKey.LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_INTEREST_FIRST_ACCRUAL_ACTIVITY_RESPONSE,
+                    loanProductsResponseNoInterestRecalcChargebackAccrualActivity);
+        });
+
         ParallelExecutionHelper.runInParallel(tasks);
     }
 

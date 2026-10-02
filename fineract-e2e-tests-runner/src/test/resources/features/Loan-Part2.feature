@@ -474,7 +474,7 @@ Feature: Loan - Part2
       | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | Repayment        | 9.0    | 0.0       | 0.0      | 0.0  | 9.0       | 1000.0       |
       | Repayment        | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       |
-      | Repayment        | 7.0    | 5.0       | 0.0      | 0.0  | 2.0       | 993.0        |
+      | Repayment        | 7.0    | 5.0       | 0.0      | 0.0  | 2.0       | 995.0        |
     When Customer undo "2"th repayment on "02 November 2022"
     Then Loan Transactions tab has a transaction with date: "02 November 2022", and with the following data:
       | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
