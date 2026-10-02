@@ -33,6 +33,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.ExpiryPolicyBuilder;
@@ -53,7 +54,7 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class CacheConfig {
 
-    public static final String CONFIG_BY_NAME_CACHE_NAME = "configByName";
+    public static final String CONFIG_BY_NAME_CACHE_NAME = GlobalConfigurationRepositoryWrapper.CONFIG_BY_NAME_CACHE_NAME;
     @Autowired
     private FineractProperties fineractProperties;
 

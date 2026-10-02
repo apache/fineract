@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.service;
 import java.time.LocalDate;
 import java.util.HashMap;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.cache.service.ThreadLocalCacheStore;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -124,6 +125,8 @@ public final class ThreadLocalContextUtil {
         authTokenContext.remove();
         businessDateContext.remove();
         actionContext.remove();
+        // Transaction-scoped cache entries must not survive from one request (or job execution) to the next.
+        ThreadLocalCacheStore.remove();
     }
 
 }
