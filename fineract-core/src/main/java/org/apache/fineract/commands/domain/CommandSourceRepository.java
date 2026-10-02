@@ -19,6 +19,7 @@
 package org.apache.fineract.commands.domain;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -28,6 +29,15 @@ import org.springframework.data.repository.query.Param;
 public interface CommandSourceRepository extends JpaRepository<CommandSource, Long>, JpaSpecificationExecutor<CommandSource> {
 
     CommandSource findByActionNameAndEntityNameAndIdempotencyKey(String actionName, String entityName, String idempotencyKey);
+
+    @Query("select distinct c from CommandSource c join fetch c.maker where c.loanId = :loanId and c.status = :status order by c.madeOnDate desc")
+    List<CommandSource> findPendingByLoanId(@Param("loanId") Long loanId, @Param("status") Integer status);
+
+    @Query("select distinct c from CommandSource c join fetch c.maker where c.clientId = :clientId and c.status = :status order by c.madeOnDate desc")
+    List<CommandSource> findPendingByClientId(@Param("clientId") Long clientId, @Param("status") Integer status);
+
+    @Query("select distinct c from CommandSource c join fetch c.maker where c.savingsId = :savingsId and c.status = :status order by c.madeOnDate desc")
+    List<CommandSource> findPendingBySavingsId(@Param("savingsId") Long savingsId, @Param("status") Integer status);
 
     @Modifying(flushAutomatically = true)
     @Query("delete from CommandSource c where c.status = :status and c.madeOnDate is not null and c.madeOnDate <= :dateForPurgeCriteria")

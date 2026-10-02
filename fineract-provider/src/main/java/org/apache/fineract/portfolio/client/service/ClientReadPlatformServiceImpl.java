@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.commands.data.PendingMakerCheckerData;
+import org.apache.fineract.commands.service.MakerCheckerReadService;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -87,6 +89,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final ClientMapper clientMapper;
     private final InputValidator inputValidator;
+    private final MakerCheckerReadService makerCheckerReadService;
 
     @Override
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
@@ -243,7 +246,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper, // NOSONAR
                     clientId);
 
-            return ClientData.setParentGroups(clientData, parentGroups, clientCollateralManagementDataSet);
+            final ClientData result = ClientData.setParentGroups(clientData, parentGroups, clientCollateralManagementDataSet);
+
+            final List<PendingMakerCheckerData> pending = makerCheckerReadService.retrievePendingByClientId(clientId);
+            result.setPendingMakerCheckerApprovals(pending.isEmpty() ? null : pending);
+
+            return result;
 
         } catch (final EmptyResultDataAccessException e) {
             throw new ClientNotFoundException(clientId, e);

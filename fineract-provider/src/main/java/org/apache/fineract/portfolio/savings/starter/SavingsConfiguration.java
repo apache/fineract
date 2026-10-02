@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.starter;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.commands.service.CommandProcessingService;
+import org.apache.fineract.commands.service.MakerCheckerReadService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -213,12 +214,13 @@ public class SavingsConfiguration {
             SavingsDropdownReadPlatformService savingsDropdownReadPlatformService, ChargeReadPlatformService chargeReadPlatformService,
             StaffReadService staffReadPlatformService, DepositsDropdownReadPlatformService depositsDropdownReadPlatformService,
             SavingsAccountReadPlatformService savingsAccountReadPlatformService, DropdownReadPlatformService dropdownReadPlatformService,
-            CalendarReadPlatformService calendarReadPlatformService, PaymentTypeReadService paymentTypeReadPlatformService) {
+            CalendarReadPlatformService calendarReadPlatformService, PaymentTypeReadService paymentTypeReadPlatformService,
+            MakerCheckerReadService makerCheckerReadService) {
         return new DepositAccountReadPlatformServiceImpl(context, jdbcTemplate, chartReadPlatformService, productChartReadPlatformService,
                 paginationParametersDataValidator, sqlGenerator, paginationHelper, clientReadPlatformService, groupReadPlatformService,
                 depositProductReadPlatformService, savingsDropdownReadPlatformService, chargeReadPlatformService, staffReadPlatformService,
                 depositsDropdownReadPlatformService, savingsAccountReadPlatformService, dropdownReadPlatformService,
-                calendarReadPlatformService, paymentTypeReadPlatformService);
+                calendarReadPlatformService, paymentTypeReadPlatformService, makerCheckerReadService);
     }
 
     @Bean
@@ -361,9 +363,9 @@ public class SavingsConfiguration {
     public SavingsAccountReadPlatformService savingsAccountReadPlatformService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate,
             SavingsAccountAssembler savingAccountAssembler, PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
             SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper, ColumnValidator columnValidator,
-            SavingsAccountTransactionRepository savingsAccountTransactionRepository) {
+            SavingsAccountTransactionRepository savingsAccountTransactionRepository, MakerCheckerReadService makerCheckerReadService) {
         return new SavingsAccountReadPlatformServiceImpl(context, jdbcTemplate, savingAccountAssembler, paginationHelper, columnValidator,
-                sqlGenerator, savingsAccountRepositoryWrapper, savingsAccountTransactionRepository);
+                sqlGenerator, savingsAccountRepositoryWrapper, savingsAccountTransactionRepository, makerCheckerReadService);
     }
 
     @Bean
