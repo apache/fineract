@@ -531,10 +531,12 @@ public class WorkingCapitalLoanProductCRUDTest {
                 assertNotNull(retrieved.getDelinquencyBucket().getRanges(), "delinquencyBucket.ranges");
                 assertEquals(expectedBucket.getRanges().size(), retrieved.getDelinquencyBucket().getRanges().size(),
                         "delinquencyBucket.ranges.size");
-                for (int i = 0; i < expectedBucket.getRanges().size(); i++) {
-                    final GetDelinquencyRange expectedRange = expectedBucket.getRanges().get(i);
-                    final GetDelinquencyRange actualRange = retrieved.getDelinquencyBucket().getRanges().get(i);
-                    assertEquals(expectedRange.getId(), actualRange.getId());
+                // The API does not guarantee the order of a bucket's ranges, so each one is matched by id rather than
+                // by position.
+                for (final GetDelinquencyRange expectedRange : expectedBucket.getRanges()) {
+                    final GetDelinquencyRange actualRange = retrieved.getDelinquencyBucket().getRanges().stream()
+                            .filter(range -> Objects.equals(range.getId(), expectedRange.getId())).findFirst().orElse(null);
+                    assertNotNull(actualRange, "delinquencyBucket.ranges is missing range " + expectedRange.getId());
                     assertEquals(expectedRange.getClassification(), actualRange.getClassification());
                     assertEquals(expectedRange.getMinimumAgeDays(), actualRange.getMinimumAgeDays());
                     assertEquals(expectedRange.getMaximumAgeDays(), actualRange.getMaximumAgeDays());
