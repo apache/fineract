@@ -300,6 +300,8 @@ public final class LoanApplicationTerms {
     private boolean merchantBuyDownFee;
     @Getter
     private boolean allowFullTermForTranche = false;
+    @Getter
+    private boolean keepMonthEnd;
 
     private LoanApplicationTerms(Builder builder) {
         this.currency = builder.currency;
@@ -346,6 +348,7 @@ public final class LoanApplicationTerms {
         this.buyDownFeeIncomeType = builder.buyDownFeeIncomeType;
         this.merchantBuyDownFee = builder.merchantBuyDownFee;
         this.allowFullTermForTranche = builder.allowFullTermForTranche;
+        this.keepMonthEnd = builder.keepMonthEnd;
         this.interestMethod = builder.interestMethod;
         this.allowPartialPeriodInterestCalculation = builder.allowPartialPeriodInterestCalculation;
     }
@@ -388,6 +391,7 @@ public final class LoanApplicationTerms {
         private LoanBuyDownFeeIncomeType buyDownFeeIncomeType;
         private boolean merchantBuyDownFee;
         private boolean allowFullTermForTranche;
+        private boolean keepMonthEnd;
         private boolean allowPartialPeriodInterestCalculation;
 
         public Builder interestMethod(InterestMethod interestMethod) {
@@ -557,6 +561,11 @@ public final class LoanApplicationTerms {
 
         public Builder allowFullTermForTranche(boolean value) {
             this.allowFullTermForTranche = value;
+            return this;
+        }
+
+        public Builder keepMonthEnd(final boolean value) {
+            this.keepMonthEnd = value;
             return this;
         }
 

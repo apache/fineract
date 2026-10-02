@@ -3622,21 +3622,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         installments.sort(LoanRepaymentScheduleInstallment::compareToByFromDueDate);
     }
 
-    private LocalDate calculateReAgedInstallmentDueDate(final LoanReAgeParameter reAgeParameter, final LocalDate dueDate) {
-        return calculateReAgedNextDate(reAgeParameter.getFrequencyType(), dueDate, reAgeParameter.getFrequencyNumber());
-    }
-
-    private LocalDate calculateReAgedNextDate(final PeriodFrequencyType frequencyType, final LocalDate dueDate,
-            final Integer frequencyNumber) {
-        return switch (frequencyType) {
-            case DAYS -> dueDate.plusDays(frequencyNumber);
-            case WEEKS -> dueDate.plusWeeks(frequencyNumber);
-            case MONTHS -> dueDate.plusMonths(frequencyNumber);
-            case YEARS -> dueDate.plusYears(frequencyNumber);
-            default -> throw new UnsupportedOperationException();
-        };
-    }
-
     @NotNull
     public static LoanPaymentAllocationRule getAllocationRule(LoanTransaction loanTransaction) {
         Loan loan = loanTransaction.getLoan();
@@ -4170,9 +4155,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         createChargeMappingsForInstallment(reAgedInstallment, calculatedCharges, reAgedInstallmentIndex);
         reAgedInstallmentIndex++;
         for (int i = 1; i < numberOfReAgeInstallments; i++) {
-            LocalDate calculatedDueDate = scheduledDateGenerator.getRepaymentPeriodDate(loanReAgeParameter.getFrequencyType(),
-                    loanReAgeParameter.getFrequencyNumber(), reAgedInstallment.getDueDate());
-            calculateReAgedInstallmentDueDate(loanReAgeParameter, reAgedInstallment.getDueDate());
+            final LocalDate calculatedDueDate = scheduledDateGenerator.alignToMonthEnd(loanReAgeParameter.getFrequencyType(),
+                    loanReAgeParameter.getStartDate(), scheduledDateGenerator.getRepaymentPeriodDate(loanReAgeParameter.getFrequencyType(),
+                            loanReAgeParameter.getFrequencyNumber() * i, loanReAgeParameter.getStartDate()));
             int nextReAgedInstallmentNumber = firstReAgeInstallmentProps.reAgedInstallmentNumber + i;
 
             reAgedInstallment = LoanRepaymentScheduleInstallment.newReAgedInstallment(reAgedInstallment.getLoan(),
@@ -4281,7 +4266,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .interestRatePeriodFrequencyType(loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType())
                 .annualNominalInterestRate(interestRate).daysInMonthType(loan.getLoanProduct().fetchDaysInMonthType())
                 .daysInYearType(loan.getLoanProduct().fetchDaysInYearType()).inArrearsTolerance(Money.zero(currency, mc))
-                .isDownPaymentEnabled(false).downPaymentPercentage(ZERO).seedDate(reAgingStartDate)
+                .isDownPaymentEnabled(false).downPaymentPercentage(ZERO).seedDate(reAgingStartDate).keepMonthEnd(true)
                 .interestRecognitionOnDisbursementDate(
                         loan.getLoanProduct().getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate())
                 .daysInYearCustomStrategy(loan.getLoanProduct().getLoanProductRelatedDetail().getDaysInYearCustomStrategy())

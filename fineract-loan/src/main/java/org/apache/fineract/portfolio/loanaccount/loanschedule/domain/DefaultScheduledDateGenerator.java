@@ -24,6 +24,7 @@ import java.time.YearMonth;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import net.fortuna.ical4j.model.Recur;
@@ -129,6 +130,10 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                     loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate);
             dueRepaymentPeriodDate = (LocalDate) adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
                     loanApplicationTerms.getRepaymentPeriodFrequencyType());
+            if (loanApplicationTerms.isKeepMonthEnd()) {
+                dueRepaymentPeriodDate = alignToMonthEnd(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
+                        loanApplicationTerms.getSeedDate(), dueRepaymentPeriodDate);
+            }
             if (currentCalendar != null) {
                 // If we have currentCalendar object, this means there is a
                 // calendar associated with
@@ -330,6 +335,13 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
         }
         return dueRepaymentPeriodDate;
+    }
+
+    @Override
+    public LocalDate alignToMonthEnd(final PeriodFrequencyType frequency, final LocalDate anchorDate, final LocalDate date) {
+        return frequency.isMonthly() && anchorDate.getDayOfMonth() == anchorDate.lengthOfMonth()
+                ? date.with(TemporalAdjusters.lastDayOfMonth())
+                : date;
     }
 
     @Override
