@@ -65,8 +65,10 @@ public class TaxValidator {
             Arrays.asList(DATE_FORMAT, LOCALE, TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName,
                     TaxApiConstants.startDateParamName, TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAccountIdParamName,
                     TaxApiConstants.creditAccountTypeParamName, TaxApiConstants.creditAccountIdParamName));
-    private static final Set<String> SUPPORTED_TAX_COMPONENT_UPDATE_PARAMETERS = new HashSet<>(Arrays.asList(DATE_FORMAT, LOCALE,
-            TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName, TaxApiConstants.startDateParamName));
+    private static final Set<String> SUPPORTED_TAX_COMPONENT_UPDATE_PARAMETERS = new HashSet<>(
+            Arrays.asList(DATE_FORMAT, LOCALE, TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName,
+                    TaxApiConstants.startDateParamName, TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAccountIdParamName,
+                    TaxApiConstants.creditAccountTypeParamName, TaxApiConstants.creditAccountIdParamName));
     private static final Set<String> SUPPORTED_TAX_GROUP_PARAMETERS = new HashSet<>(
             Arrays.asList(DATE_FORMAT, LOCALE, TaxApiConstants.nameParamName, TaxApiConstants.taxComponentsParamName));
     private static final Set<String> SUPPORTED_TAX_GROUP_TAX_COMPONENTS_CREATE_PARAMETERS = new HashSet<>(
@@ -158,12 +160,6 @@ public class TaxValidator {
                     element);
             baseDataValidator.reset().parameter(TaxApiConstants.percentageParamName).value(percentage).notBlank().positiveAmount()
                     .notGreaterThanMax(BigDecimal.valueOf(100));
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(TaxApiConstants.startDateParamName, element)) {
-            final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.startDateParamName, element);
-            baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate)
-                    .validateDateAfter(DateUtils.getBusinessLocalDate());
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -320,15 +316,33 @@ public class TaxValidator {
     }
 
     public void validateStartDate(final LocalDate existingStartDate, final JsonCommand command) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_COMPONENT);
-        validateStartDate(existingStartDate, command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName), baseDataValidator);
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+        if (command.parameterExists(TaxApiConstants.startDateParamName)) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_COMPONENT);
+            validateStartDate(existingStartDate, command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName),
+                    baseDataValidator);
+            throwExceptionIfValidationWarningsExist(dataValidationErrors);
+        }
     }
 
     private void validateStartDate(final LocalDate existingStartDate, final LocalDate startDate,
             final DataValidatorBuilder baseDataValidator) {
-        baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate).validateDateAfter(existingStartDate);
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+
+        if (existingStartDate != null && !DateUtils.isAfter(existingStartDate, today)) {
+            if (startDate == null || !DateUtils.isEqual(startDate, existingStartDate)) {
+                baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName)
+                        .failWithCode("start.date.cannot.be.modified.after.activation", "Start date cannot be modified after activation.");
+            }
+            return;
+        }
+
+        if (startDate == null) {
+            baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate).notNull();
+        } else if (!DateUtils.isAfter(startDate, today)) {
+            baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate).failWithCode("is.less.than.date",
+                    today);
+        }
     }
 
     private void validateOverlappingComponents(final Set<TaxGroupMappings> taxMappings, final DataValidatorBuilder baseDataValidator) {
