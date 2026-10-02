@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -28,4 +30,9 @@ public interface WorkingCapitalLoanPeriodPaymentRateChangeReadService {
 
     /** Same history for an already-loaded loan, without the existence check. */
     List<WorkingCapitalLoanPeriodPaymentRateChangeData> retrieveRateChangeHistory(WorkingCapitalLoan loan);
+
+    /**
+     * Rate in force on {@code asOf} for TPV loans; {@code null} when the loan does not use TPV.
+     */
+    BigDecimal retrieveEffectivePaymentRate(WorkingCapitalLoan loan, LocalDate asOf);
 }
