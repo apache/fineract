@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
@@ -44,11 +45,14 @@ import org.junit.jupiter.api.Test;
 public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBase {
 
     private static final String ACCRUAL_JOB = "Add Accrual Transactions For Savings";
+    private static final String POST_INTEREST_JOB = "Post Interest For Savings";
     private static final String SAVINGS_TRANSACTION_ID_PREFIX = "S";
     private static final String DEBIT = "DEBIT";
     private static final String CREDIT = "CREDIT";
 
     private static final String BUSINESS_DATE = "2021-08-12";
+    // after the August month end, so an account opened on the start date gets exactly one monthly interest posting
+    private static final String POST_INTEREST_BUSINESS_DATE = "2021-09-02";
     private static final LocalDate TODAY = LocalDate.of(2021, 8, 12);
     private static final int DAYS_TO_SUBTRACT = 10;
     private static final String CLIENT_ACTIVATION_DATE = "01 January 2020";
@@ -124,6 +128,95 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         });
     }
 
+    @Test
+    public void testPostInterestJobPostsCashBasedJournalEntries() {
+        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            final PostSavingsProductsRequest product = withCashMappings(accrualProduct(INTEREST_RATE), accounts);
+
+            final Long savingsProductId = savingsProductHelper.createSavingsProduct(product).getResourceId();
+            assertNotNull(savingsProductId, "Failed to create cash-based savings product.");
+
+            final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
+            deposit(savingsAccountId, AMOUNT, startDateString());
+
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
+
+            final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(interestPostingOf(savingsAccountId));
+            assertHasEntry(journalEntries, DEBIT, accounts.interestOnSavings(),
+                    "DEBIT to Interest on Savings (Expense) Account not found for cash-based interest posting.");
+            assertHasEntry(journalEntries, CREDIT, accounts.savingsControl(),
+                    "CREDIT to Savings Control (Liability) Account not found for cash-based interest posting.");
+        });
+    }
+
+    @Test
+    public void testPostInterestJobPostsCashBasedOverdraftJournalEntries() {
+        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            final PostSavingsProductsRequest product = withCashMappings(accrualProduct(OVERDRAFT_INTEREST_RATE), accounts)//
+                    .allowOverdraft(true)//
+                    .overdraftLimit(OVERDRAFT_LIMIT)//
+                    .nominalAnnualInterestRateOverdraft(BigDecimal.valueOf(OVERDRAFT_INTEREST_RATE));
+
+            final Long savingsProductId = savingsProductHelper.createSavingsProduct(product).getResourceId();
+            assertNotNull(savingsProductId, "Failed to create cash-based savings product with overdraft.");
+
+            final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
+            withdraw(savingsAccountId, AMOUNT, startDateString());
+
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
+
+            // the account is overdrawn, so the interest the client owes is added to the overdraft portfolio
+            final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(overdraftInterestPostingOf(savingsAccountId));
+            assertHasEntry(journalEntries, DEBIT, accounts.overdraftPortfolioControl(),
+                    "DEBIT to Overdraft Portfolio Control (Asset) Account not found for cash-based overdraft interest.");
+            assertHasEntry(journalEntries, CREDIT, accounts.incomeFromInterest(),
+                    "CREDIT to Overdraft Interest Income Account not found for cash-based overdraft interest.");
+        });
+    }
+
+    @Test
+    public void testPostInterestJobPostsAccrualJournalEntries() {
+        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            final PostSavingsProductsRequest product = withMappings(accrualProduct(INTEREST_RATE), accounts);
+
+            final Long savingsProductId = savingsProductHelper.createSavingsProduct(product).getResourceId();
+            assertNotNull(savingsProductId, "Failed to create savings product.");
+
+            final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
+            deposit(savingsAccountId, AMOUNT, startDateString());
+
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
+
+            final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(interestPostingOf(savingsAccountId));
+            assertHasEntry(journalEntries, DEBIT, accounts.interestPayable(),
+                    "DEBIT to Interest Payable (Liability) Account not found for accrual interest posting.");
+            assertHasEntry(journalEntries, CREDIT, accounts.savingsControl(),
+                    "CREDIT to Savings Control (Liability) Account not found for accrual interest posting.");
+        });
+    }
+
+    private SavingsAccountTransactionData interestPostingOf(final Long savingsAccountId) {
+        return firstPostingOf(savingsAccountId, transaction -> Boolean.TRUE.equals(transaction.getTransactionType().getInterestPosting()));
+    }
+
+    private SavingsAccountTransactionData overdraftInterestPostingOf(final Long savingsAccountId) {
+        return firstPostingOf(savingsAccountId,
+                transaction -> Boolean.TRUE.equals(transaction.getTransactionType().getOverDraftInterestPosting()));
+    }
+
+    private SavingsAccountTransactionData firstPostingOf(final Long savingsAccountId, final Predicate<SavingsAccountTransactionData> type) {
+        final List<SavingsAccountTransactionData> postings = savingsTransactionHelper.getTransactions(savingsAccountId).stream()
+                .filter(transaction -> transaction.getTransactionType() != null).filter(type).toList();
+        assertFalse(postings.isEmpty(), "The Post Interest job did not post interest.");
+        return postings.get(0);
+    }
+
     private void verifyEveryAccrualIsOneDayOfInterest(final List<SavingsAccountTransactionData> accrualTransactions,
             final Double interestRate) {
         final BigDecimal expectedDailyInterest = dailyInterest(interestRate);
@@ -179,6 +272,21 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
                 .savingsControlAccountId(SavingsRequestBuilders.accountId(accounts.savingsControl()))//
                 .transfersInSuspenseAccountId(SavingsRequestBuilders.accountId(accounts.transfersInSuspense()))//
                 .interestPayableAccountId(SavingsRequestBuilders.accountId(accounts.interestPayable()))//
+                .incomeFromFeeAccountId(SavingsRequestBuilders.accountId(accounts.incomeFromFee()))//
+                .incomeFromPenaltyAccountId(SavingsRequestBuilders.accountId(accounts.incomeFromPenalty()))//
+                .incomeFromInterestId(SavingsRequestBuilders.accountId(accounts.incomeFromInterest()))//
+                .interestOnSavingsAccountId(SavingsRequestBuilders.accountId(accounts.interestOnSavings()))//
+                .writeOffAccountId(SavingsRequestBuilders.accountId(accounts.writeOff()));
+    }
+
+    /** Switches the product to cash-based accounting, which takes no receivable or payable mappings. */
+    private PostSavingsProductsRequest withCashMappings(final PostSavingsProductsRequest request, final AccrualAccounts accounts) {
+        return request//
+                .accountingRule(SavingsTestData.AccountingRule.CASH_BASED)//
+                .savingsReferenceAccountId(SavingsRequestBuilders.accountId(accounts.savingsReference()))//
+                .overdraftPortfolioControlId(SavingsRequestBuilders.accountId(accounts.overdraftPortfolioControl()))//
+                .savingsControlAccountId(SavingsRequestBuilders.accountId(accounts.savingsControl()))//
+                .transfersInSuspenseAccountId(SavingsRequestBuilders.accountId(accounts.transfersInSuspense()))//
                 .incomeFromFeeAccountId(SavingsRequestBuilders.accountId(accounts.incomeFromFee()))//
                 .incomeFromPenaltyAccountId(SavingsRequestBuilders.accountId(accounts.incomeFromPenalty()))//
                 .incomeFromInterestId(SavingsRequestBuilders.accountId(accounts.incomeFromInterest()))//

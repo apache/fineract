@@ -347,6 +347,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append(
                     "apm2.gl_account_id as glAccountIdForInterestReceivable,apm3.gl_account_id as glAccountIdForOverdraftPorfolio, ");
             sqlBuilder.append("apm4.gl_account_id as glAccountIdForInterestPayable, ");
+            sqlBuilder.append("apm5.gl_account_id as glAccountIdForIncomeFromInterest, ");
             sqlBuilder.append(
                     "mtc.id as taxComponentId, mtc.debit_account_id as debitAccountId, mtc.credit_account_id as creditAccountId, mtc.percentage as taxPercentage ");
             sqlBuilder.append("from m_savings_account sa ");
@@ -366,9 +367,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     "left join acc_product_mapping apm on apm.product_type = 2 and apm.product_id = sp.id and apm.financial_account_type=3 ");
             sqlBuilder.append(
                     "left join acc_product_mapping apm1 on apm1.product_type = 2 and apm1.product_id = sp.id and apm1.financial_account_type=2 ");
-            sqlBuilder.append("left join acc_product_mapping apm2 on apm2.product_id = sp.id and apm2.financial_account_type=18 ");
-            sqlBuilder.append("left join acc_product_mapping apm3 on apm3.product_id = sp.id and apm3.financial_account_type = 11 ");
-            sqlBuilder.append("left join acc_product_mapping apm4 on apm4.product_id = sp.id and apm4.financial_account_type = 17 ");
+            sqlBuilder.append(
+                    "left join acc_product_mapping apm2 on apm2.product_type = 2 and apm2.product_id = sp.id and apm2.financial_account_type=18 ");
+            sqlBuilder.append(
+                    "left join acc_product_mapping apm3 on apm3.product_type = 2 and apm3.product_id = sp.id and apm3.financial_account_type=11 ");
+            sqlBuilder.append(
+                    "left join acc_product_mapping apm4 on apm4.product_type = 2 and apm4.product_id = sp.id and apm4.financial_account_type=17 ");
+            sqlBuilder.append(
+                    "left join acc_product_mapping apm5 on apm5.product_type = 2 and apm5.product_id = sp.id and apm5.financial_account_type=12 ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -426,6 +432,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final Long glAccountIdForInterestReceivable = rs.getLong("glAccountIdForInterestReceivable");
 
                     final Long glAccountIdForInterestPayable = rs.getLong("glAccountIdForInterestPayable");
+
+                    final Long glAccountIdForIncomeFromInterest = rs.getLong("glAccountIdForIncomeFromInterest");
 
                     final Long productId = rs.getLong("productId");
                     final Integer accountType = rs.getInt("accountingType");
@@ -591,6 +599,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
                     savingsAccountData.setGlAccountIdForInterestOnSavings(glAccountIdForInterestOnSavings);
                     savingsAccountData.setGlAccountIdForSavingsControl(glAccountIdForSavingsControl);
+                    savingsAccountData.setGlAccountIdForIncomeFromInterest(glAccountIdForIncomeFromInterest);
                     final Integer version = JdbcSupport.getInteger(rs, "version");
                     savingsAccountData.setVersion(version);
                 }
