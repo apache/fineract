@@ -18,24 +18,23 @@
  */
 package org.apache.fineract.integrationtests.client;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.apache.fineract.client.util.CallFailedRuntimeException;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@code /audits/{auditId}} (FINERACT-2673).
  */
-public class AuditApiTest extends IntegrationTest {
+public class AuditApiTest extends FeignIntegrationTest {
 
     @Test
     public void retrieveAuditEntryReturns404WhenNotExisting() {
-        CallFailedRuntimeException e = assertThrows(CallFailedRuntimeException.class,
-                () -> ok(fineractClient().audits.retrieveAuditEntry(999999L)));
+        CallFailedRuntimeException e = fail(() -> fineractClient().audits().retrieveAuditEntry(999999L));
 
-        assertEquals(404, e.getResponse().code());
+        assertEquals(404, e.getStatus());
         assertTrue(e.getMessage().contains("error.msg.command.id.invalid"));
     }
 }

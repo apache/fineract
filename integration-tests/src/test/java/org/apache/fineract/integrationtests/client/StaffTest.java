@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Michael Vorburger.ch
  */
-class StaffTest extends IntegrationTest {
+class StaffTest extends FeignIntegrationTest {
 
     @Test
     @Order(1)
@@ -53,13 +53,15 @@ class StaffTest extends IntegrationTest {
     }
 
     Long create() {
-        return ok(fineractClient().staff.createStaff(new StaffCreateRequest().officeId(1L).firstname(Utils.randomFirstNameGenerator())
-                .lastname(Utils.randomLastNameGenerator()).externalId(Utils.randomStringGenerator("", 12))
-                .joiningDate(LocalDate.now(ZoneId.of("UTC")).toString()).dateFormat("yyyy-MM-dd").locale("en_US"))).getResourceId();
+        return ok(() -> fineractClient().staff()
+                .createStaff(new StaffCreateRequest().officeId(1L).firstname(Utils.randomFirstNameGenerator())
+                        .lastname(Utils.randomLastNameGenerator()).externalId(Utils.randomStringGenerator("", 12))
+                        .joiningDate(LocalDate.now(ZoneId.of("UTC")).toString()).dateFormat("yyyy-MM-dd").locale("en_US")))
+                .getResourceId();
     }
 
     Optional<Long> retrieveFirst() {
-        var staff = ok(fineractClient().staff.retrieveAllStaff(1L, true, false, "ACTIVE"));
+        var staff = ok(() -> fineractClient().staff().retrieveAllStaff(1L, true, false, "ACTIVE"));
         if (!staff.isEmpty()) {
             return staff.stream().findFirst().map(StaffData::getId);
         }

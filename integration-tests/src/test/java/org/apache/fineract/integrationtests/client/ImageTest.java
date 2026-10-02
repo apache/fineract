@@ -21,25 +21,25 @@ package org.apache.fineract.integrationtests.client;
 import static com.github.romankh3.image.comparison.model.ImageComparisonState.MATCH;
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.romankh3.image.comparison.ImageComparison;
+import feign.Headers;
+import feign.Param;
+import feign.RequestLine;
+import feign.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import javax.imageio.ImageIO;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.fineract.client.services.ImagesApi;
-import org.apache.fineract.client.util.Parts;
+import org.apache.fineract.client.feign.FineractMultipartEncoder.MultipartData;
+import org.apache.fineract.client.util.FeignParts;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Headers;
 
 /**
  * Integration Test for /images API.
@@ -47,12 +47,14 @@ import retrofit2.http.Headers;
  * @author Michael Vorburger.ch
  */
 @Slf4j
-class ImageTest extends IntegrationTest {
+class ImageTest extends FeignIntegrationTest {
 
     static final String TEST_RESOURCE = "michael.vorburger-crepes.jpg";
     static final int TEST_IMAGE_DIFF_PERCENTAGE = 2;
+    static final int REJECTED_UPLOAD_STATUS = 403;
+    static final String REJECTED_UPLOAD_CODE = "error.msg.document.request.invalid";
 
-    final MultipartBody.Part testPart = createPart(TEST_RESOURCE, TEST_RESOURCE, "image/jpeg");
+    final MultipartData testPart = createPart(TEST_RESOURCE, TEST_RESOURCE, "image/jpeg");
 
     Long clientId = new ClientTest().getClientId();
     Long staffId = new StaffTest().getStaffId();
@@ -60,96 +62,103 @@ class ImageTest extends IntegrationTest {
     @Test
     @Order(1)
     void create() {
-        ok(fineractClient().images.create("staff", staffId, testPart));
-        ok(fineractClient().images.create("clients", clientId, testPart));
+        assertSuccess(fineractClient().images().create("staff", staffId, testPart));
+        assertSuccess(fineractClient().images().create("clients", clientId, testPart));
     }
 
     @Test
     @Order(2)
     void getOriginalSize() throws IOException {
-        var r = ok(fineractClient().images.get("staff", staffId, 3505, 1972, null));
-        assertThat(r.contentType()).isEqualTo(MediaType.get("text/plain"));
-        var encodedImage = r.string();
-        assertThat(encodedImage).startsWith("data:image/jpeg;base64,");
-        assertThat(r.contentLength()).isEqualTo(-1);
-        assertImage(encodedImage);
+        try (Response r = getImage(3505, 1972, null)) {
+            assertContentType(r, "text/plain");
+            var encodedImage = bodyAsString(r);
+            assertThat(encodedImage).startsWith("data:image/jpeg;base64,");
+            assertThat(r.body().length()).isNull();
+            assertImage(encodedImage);
+        }
     }
 
     @Test
     @Order(3)
     void getSmallerSize() throws IOException {
-        var r = ok(fineractClient().images.get("staff", staffId, 128, 128, null));
-        assertThat(r.string()).hasSize(7067);
+        try (Response r = getImage(128, 128, null)) {
+            assertThat(bodyAsString(r)).hasSize(7067);
+        }
     }
 
     @Test
     @Order(4)
     void getBiggerSize() throws IOException {
-        var r = ok(fineractClient().images.get("staff", staffId, 9000, 6000, null));
-        assertImage(r.string());
+        try (Response r = getImage(9000, 6000, null)) {
+            assertImage(bodyAsString(r));
+        }
     }
 
     @Test
     @Order(5)
     void getInlineOctetOutput() throws IOException {
         // 3505x1972 is the exact original size of testFile
-        var r = okR(fineractClient().images.get("staff", staffId, 3505, 1972, "inline_octet"));
-        try (var body = r.body()) {
-            assertThat(body.contentType()).isEqualTo(MediaType.get("image/jpeg"));
-            assertImage(body);
-        }
+        try (Response r = getImage(3505, 1972, "inline_octet")) {
+            assertContentType(r, "image/jpeg");
+            assertImage(bodyAsBytes(r));
 
-        var staff = ok(fineractClient().staff.retrieveOneStaff(staffId));
-        assertThat(Parts.fileName(r)).hasValue(staff.getDisplayName());
+            var staff = ok(() -> fineractClient().staff().retrieveOneStaff(staffId));
+            assertThat(FeignParts.fileName(r)).hasValue(staff.getDisplayName());
+        }
     }
 
     @Test
     @Order(6)
     void getOctetOutput() throws IOException {
-        var r = ok(fineractClient().images.get("staff", staffId, 3505, 1972, "octet"));
-        assertThat(r.contentType()).isEqualTo(MediaType.get("image/jpeg"));
-        // NOTE: content length is not a reliable criteria; the server removes metadata (see it as a security feature)
-        // which makes the file immediately only half the size, but pixel wise the images are still the same
-        assertImage(r);
+        try (Response r = getImage(3505, 1972, "octet")) {
+            assertContentType(r, "image/jpeg");
+            // NOTE: content length is not a reliable criteria; the server removes metadata (see it as a security
+            // feature) which makes the file immediately only half the size, but pixel wise the images are still the
+            // same
+            assertImage(bodyAsBytes(r));
+        }
     }
 
     @Test
     @Order(7)
     void getAnotherOutput() throws IOException {
-        var r = ok(fineractClient().images.get("staff", staffId, 3505, 1972, "abcd"));
-        assertThat(r.contentType()).isEqualTo(MediaType.get("text/plain"));
-        var content = r.string();
-        assertThat(content).startsWith("data:image/jpeg;base64,");
-        assertImage(content);
+        try (Response r = getImage(3505, 1972, "abcd")) {
+            assertContentType(r, "text/plain");
+            var content = bodyAsString(r);
+            assertThat(content).startsWith("data:image/jpeg;base64,");
+            assertImage(content);
+        }
     }
 
     @Test
     @Order(8)
     void getText() throws IOException {
-        var r = ok(fineractClient().createService(ImagesApiWithHeadersForTest.class).getText("staff", staffId, 3505, 1972, null));
-        assertThat(r.contentType()).isEqualTo(MediaType.get("text/plain"));
-        assertThat(r.string()).startsWith("data:image/jpeg;base64,");
+        try (Response r = fineractClient().create(ImagesApiWithHeadersForTest.class).getText("staff", staffId, 3505, 1972)) {
+            assertContentType(r, "text/plain");
+            assertThat(bodyAsString(r)).startsWith("data:image/jpeg;base64,");
+        }
     }
 
     @Test
     @Order(9)
     void getBytes() throws IOException {
-        var r = ok(fineractClient().createService(ImagesApiWithHeadersForTest.class).getBytes("staff", staffId, 3505, 1972, null));
-        assertThat(r.contentType()).isEqualTo(MediaType.get("image/jpeg"));
-        assertImage(r.bytes());
+        try (Response r = fineractClient().create(ImagesApiWithHeadersForTest.class).getBytes("staff", staffId, 3505, 1972)) {
+            assertContentType(r, "image/jpeg");
+            assertImage(bodyAsBytes(r));
+        }
     }
 
     @Test
     @Order(50)
     void update() {
-        ok(fineractClient().images.update("staff", staffId, testPart));
+        assertSuccess(fineractClient().images().update("staff", staffId, testPart));
     }
 
     @Test
     @Order(99)
     void delete() {
-        ok(fineractClient().images.delete("staff", staffId));
-        ok(fineractClient().images.delete("clients", clientId));
+        assertSuccess(fineractClient().images().delete("staff", staffId));
+        assertSuccess(fineractClient().images().delete("clients", clientId));
     }
 
     @Test
@@ -160,13 +169,9 @@ class ImageTest extends IntegrationTest {
 
         assertThat(part).isNotNull();
 
-        var exception = assertThrows(Exception.class, () -> {
-            ok(fineractClient().images.create("clients", clientId, part));
-        });
-
-        assertThat(exception).isNotNull();
-
-        log.warn("Should not be able to upload a file that doesn't match the indicated content type: {}", exception.getMessage());
+        try (Response response = fineractClient().images().create("clients", clientId, part)) {
+            assertRejected(response, "Should not be able to upload a file that doesn't match the indicated content type");
+        }
     }
 
     @Test
@@ -176,13 +181,9 @@ class ImageTest extends IntegrationTest {
 
         assertThat(part).isNotNull();
 
-        var exception = assertThrows(Exception.class, () -> {
-            ok(fineractClient().images.create("clients", clientId, part));
-        });
-
-        assertThat(exception).isNotNull();
-
-        log.warn("Should not be able to upload a gif by just renaming the file extension: {}", exception.getMessage());
+        try (Response response = fineractClient().images().create("clients", clientId, part)) {
+            assertRejected(response, "Should not be able to upload a gif by just renaming the file extension");
+        }
     }
 
     @Test
@@ -192,13 +193,9 @@ class ImageTest extends IntegrationTest {
 
         assertThat(part).isNotNull();
 
-        var exception = assertThrows(Exception.class, () -> {
-            ok(fineractClient().images.create("clients", clientId, part));
-        });
-
-        assertThat(exception).isNotNull();
-
-        log.warn("Should not be able to upload a gif it is not whitelisted: {}", exception.getMessage());
+        try (Response response = fineractClient().images().create("clients", clientId, part)) {
+            assertRejected(response, "Should not be able to upload a gif it is not whitelisted");
+        }
     }
 
     @Test
@@ -209,13 +206,9 @@ class ImageTest extends IntegrationTest {
 
         assertThat(part).isNotNull();
 
-        var exception = assertThrows(Exception.class, () -> {
-            ok(fineractClient().images.create("clients", clientId, part));
-        });
-
-        assertThat(exception).isNotNull();
-
-        log.warn("Should not be able to upload a file with a forbidden name pattern: {}", exception.getMessage());
+        try (Response response = fineractClient().images().create("clients", clientId, part)) {
+            assertRejected(response, "Should not be able to upload a file with a forbidden name pattern");
+        }
     }
 
     @Test
@@ -226,13 +219,9 @@ class ImageTest extends IntegrationTest {
 
         assertThat(part).isNotNull();
 
-        var exception = assertThrows(Exception.class, () -> {
-            ok(fineractClient().images.create("clients", clientId, part));
-        });
-
-        assertThat(exception).isNotNull();
-
-        log.warn("Should not be able to upload a file with a forbidden name pattern: {}", exception.getMessage());
+        try (Response response = fineractClient().images().create("clients", clientId, part)) {
+            assertRejected(response, "Should not be able to upload a file with a forbidden name pattern");
+        }
     }
 
     @Test
@@ -242,20 +231,15 @@ class ImageTest extends IntegrationTest {
 
         assertThat(part).isNotNull();
 
-        var exception = assertThrows(Exception.class, () -> {
-            ok(fineractClient().images.create("clients", clientId, part));
-        });
-
-        assertThat(exception).isNotNull();
-
-        log.warn("Should not be able to upload a file with a forbidden name pattern: {}", exception.getMessage());
+        try (Response response = fineractClient().images().create("clients", clientId, part)) {
+            assertRejected(response, "Should not be able to upload a file with a forbidden name pattern");
+        }
     }
 
-    private MultipartBody.Part createPart(String fileResource, String fileName, String mediaType) {
+    private MultipartData createPart(String fileResource, String fileName, String mediaType) {
         try {
             byte[] data = ImageTest.class.getClassLoader().getResourceAsStream(fileResource).readAllBytes();
-            var rb = RequestBody.create(data, MediaType.get(mediaType));
-            return MultipartBody.Part.createFormData("file", fileName, rb);
+            return new MultipartData().addFile("file", fileName, data, mediaType);
         } catch (Exception e) {
             log.error("Error creating file part.", e);
         }
@@ -274,8 +258,41 @@ class ImageTest extends IntegrationTest {
         assertImage(new Base64().decode(content), diffPercent);
     }
 
-    private void assertImage(ResponseBody r) throws IOException {
-        assertImage(r.bytes(), TEST_IMAGE_DIFF_PERCENTAGE);
+    private Response getImage(int maxWidth, int maxHeight, String output) {
+        Map<String, Object> queryParams = output == null ? Map.of("maxWidth", maxWidth, "maxHeight", maxHeight)
+                : Map.of("maxWidth", maxWidth, "maxHeight", maxHeight, "output", output);
+        Response response = fineractClient().images().get("staff", staffId, queryParams);
+        assertThat(response.status()).isEqualTo(200);
+        return response;
+    }
+
+    private static void assertSuccess(Response response) {
+        try (response) {
+            assertThat(response.status()).isEqualTo(200);
+        }
+    }
+
+    private static void assertRejected(Response response, String reason) {
+        String body = bodyAsString(response);
+        assertThat(response.status()).as(reason).isEqualTo(REJECTED_UPLOAD_STATUS);
+        assertThat(body).as(reason).contains(REJECTED_UPLOAD_CODE);
+        log.warn("{}: {}", reason, body);
+    }
+
+    private static void assertContentType(Response response, String expected) {
+        assertThat(String.join(",", response.headers().get("Content-Type"))).isEqualTo(expected);
+    }
+
+    private static String bodyAsString(Response response) {
+        return new String(bodyAsBytes(response), StandardCharsets.UTF_8);
+    }
+
+    private static byte[] bodyAsBytes(Response response) {
+        try (InputStream body = response.body().asInputStream()) {
+            return body.readAllBytes();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private void assertImage(byte[] data) {
@@ -300,18 +317,20 @@ class ImageTest extends IntegrationTest {
         }
     }
 
-    interface ImagesApiWithHeadersForTest extends ImagesApi {
+    /**
+     * The server picks the image representation from the Accept header. {@code ImagesApi.get} lets the client default
+     * it to JSON, so these two pin it explicitly.
+     */
+    interface ImagesApiWithHeadersForTest {
 
         @Headers("Accept: text/plain")
-        @GET("v1/{entityType}/{entityId}/images")
-        Call<ResponseBody> getText(@retrofit2.http.Path("entityType") String entityType, @retrofit2.http.Path("entityId") Long entityId,
-                @retrofit2.http.Query("maxWidth") Integer maxWidth, @retrofit2.http.Query("maxHeight") Integer maxHeight,
-                @retrofit2.http.Query("output") String output);
+        @RequestLine("GET /v1/{entityType}/{entityId}/images?maxWidth={maxWidth}&maxHeight={maxHeight}")
+        Response getText(@Param("entityType") String entityType, @Param("entityId") Long entityId, @Param("maxWidth") Integer maxWidth,
+                @Param("maxHeight") Integer maxHeight);
 
         @Headers("Accept: application/octet-stream")
-        @GET("v1/{entityType}/{entityId}/images")
-        Call<ResponseBody> getBytes(@retrofit2.http.Path("entityType") String entityType, @retrofit2.http.Path("entityId") Long entityId,
-                @retrofit2.http.Query("maxWidth") Integer maxWidth, @retrofit2.http.Query("maxHeight") Integer maxHeight,
-                @retrofit2.http.Query("output") String output);
+        @RequestLine("GET /v1/{entityType}/{entityId}/images?maxWidth={maxWidth}&maxHeight={maxHeight}")
+        Response getBytes(@Param("entityType") String entityType, @Param("entityId") Long entityId, @Param("maxWidth") Integer maxWidth,
+                @Param("maxHeight") Integer maxHeight);
     }
 }

@@ -18,49 +18,37 @@
  */
 package org.apache.fineract.integrationtests.client;
 
+import feign.Response;
 import java.io.IOException;
-import java.time.Duration;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import okhttp3.MediaType;
-import okhttp3.ResponseBody;
-import org.apache.fineract.client.util.FineractClient;
 import org.apache.fineract.integrationtests.CIOnly;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import retrofit2.Response;
 
 /**
  * Integration Test for /runreports/ API.
  *
  * @author Michael Vorburger.ch
  */
-public class ReportExportTest extends IntegrationTest {
-
-    @Override
-    protected void customizeFineractClient(FineractClient.Builder builder) {
-        builder.readTimeout(Duration.ofSeconds(30));
-    }
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-    }
+public class ReportExportTest extends FeignIntegrationTest {
 
     @Test
     void runClientListingTableReportCSV() throws IOException {
-        Response<ResponseBody> result = okR(
-                fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportCSV", "true")));
-        assertThat(result.body().contentType()).isEqualTo(MediaType.parse("text/csv"));
-        assertThat(result.body().string()).contains("Office/Branch");
+        try (Response result = fineractClient().runReports().runReportGetFile("Client Listing",
+                Map.of("R_officeId", "1", "exportCSV", "true")); InputStream body = result.body().asInputStream()) {
+            assertThat(String.join(",", result.headers().get("Content-Type"))).isEqualTo("text/csv");
+            assertThat(new String(body.readAllBytes(), StandardCharsets.UTF_8)).contains("Office/Branch");
+        }
     }
 
     @Test
     @CIOnly
-    void runClientListingTableReportS3() throws IOException {
-        Response<ResponseBody> result = okR(
-                fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportS3", "true")));
-        assertThat(result.code()).isEqualTo(204);
+    void runClientListingTableReportS3() {
+        try (Response result = fineractClient().runReports().runReportGetFile("Client Listing",
+                Map.of("R_officeId", "1", "exportS3", "true"))) {
+            assertThat(result.status()).isEqualTo(204);
+        }
     }
 
 }

@@ -18,48 +18,34 @@
  */
 package org.apache.fineract.integrationtests.client;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.Map;
 import org.apache.fineract.client.models.RunReportsResponse;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import retrofit2.Response;
 
-public class ClientAndLoanTrendsPostgresTest extends IntegrationTest {
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-    }
+public class ClientAndLoanTrendsPostgresTest extends FeignIntegrationTest {
 
     @Test
     void testClientTrendsByWeekReportRunsSuccessfully() {
-        Response<RunReportsResponse> response = okR(
-                fineractClient().reportsRun.runReportGetData("ClientTrendsByWeek", Map.of("R_officeId", "1")));
-        assertEquals(200, response.code());
+        assertReportRuns("ClientTrendsByWeek");
     }
 
     @Test
     void testClientTrendsByMonthReportRunsSuccessfully() {
-        Response<RunReportsResponse> response = okR(
-                fineractClient().reportsRun.runReportGetData("ClientTrendsByMonth", Map.of("R_officeId", "1")));
-        assertEquals(200, response.code());
+        assertReportRuns("ClientTrendsByMonth");
     }
 
     @Test
     void testLoanTrendsByWeekReportRunsSuccessfully() {
-        Response<RunReportsResponse> response = okR(
-                fineractClient().reportsRun.runReportGetData("LoanTrendsByWeek", Map.of("R_officeId", "1")));
-        assertEquals(200, response.code());
+        assertReportRuns("LoanTrendsByWeek");
     }
 
     @Test
     void testLoanTrendsByMonthReportRunsSuccessfully() {
-        Response<RunReportsResponse> response = okR(
-                fineractClient().reportsRun.runReportGetData("LoanTrendsByMonth", Map.of("R_officeId", "1")));
-        assertEquals(200, response.code());
+        assertReportRuns("LoanTrendsByMonth");
     }
 
+    private void assertReportRuns(String reportName) {
+        RunReportsResponse response = ok(() -> fineractClient().runReports().runReportGetData(reportName, Map.of("R_officeId", "1")));
+        assertThat(response.getColumnHeaders()).isNotEmpty();
+    }
 }
