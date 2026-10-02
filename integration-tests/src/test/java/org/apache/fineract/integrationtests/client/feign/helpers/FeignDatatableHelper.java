@@ -22,18 +22,23 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.models.DeleteDataTablesDatatableAppTableIdResponse;
 import org.apache.fineract.client.models.DeleteDataTablesResponse;
 import org.apache.fineract.client.models.GetDataTablesResponse;
+import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryData;
+import org.apache.fineract.client.models.PostColumnHeaderData;
 import org.apache.fineract.client.models.PostDataTablesAppTableIdResponse;
 import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PostDataTablesResponse;
 import org.apache.fineract.client.models.PutDataTablesAppTableIdDatatableIdResponse;
 import org.apache.fineract.client.models.PutDataTablesRequest;
 import org.apache.fineract.client.models.PutDataTablesResponse;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignDatatableHelper {
 
@@ -43,6 +48,28 @@ public class FeignDatatableHelper {
 
     public FeignDatatableHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+    }
+
+    /** A single-row PERSON datatable with a string, a number, a datetime and a date column. */
+    public static PostDataTablesRequest testDatatableRequest(String apptableName) {
+        return new PostDataTablesRequest().datatableName(Utils.uniqueRandomStringGenerator(apptableName + "_", 5))
+                .apptableName(apptableName).entitySubType("PERSON").multiRow(false)
+                .columns(List.of(new PostColumnHeaderData().name("Spouse Name").type("String").mandatory(true).length(25L),
+                        new PostColumnHeaderData().name("Number of Dependents").type("Number").mandatory(true),
+                        new PostColumnHeaderData().name("Time of Visit").type("DateTime").mandatory(false),
+                        new PostColumnHeaderData().name("Date of Approval").type("Date").mandatory(false)));
+    }
+
+    /** An entry for {@link #testDatatableRequest(String)}, in the shape an entity creation request embeds it. */
+    public static Map<String, Object> testDatatableEntry() {
+        Map<String, Object> entry = new HashMap<>();
+        entry.put("locale", "en");
+        entry.put("Spouse Name", Utils.randomStringGenerator("Spouse_name", 4));
+        entry.put("Number of Dependents", 5);
+        entry.put("Time of Visit", "01 December 2016 04:03");
+        entry.put("dateFormat", Utils.DATE_TIME_FORMAT);
+        entry.put("Date of Approval", "02 December 2016 00:00");
+        return entry;
     }
 
     public PostDataTablesResponse createDatatable(PostDataTablesRequest request) {
@@ -96,6 +123,16 @@ public class FeignDatatableHelper {
             return ObjectMapperFactory.getShared().readTree(json);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Failed to parse the entries of datatable " + datatableName, e);
+        }
+    }
+
+    /** The advanced query answers a page of rows whose columns the query itself picks, so it is read as a tree. */
+    public JsonNode queryDatatable(String datatableName, PagedLocalRequestAdvancedQueryData query) {
+        String json = ok(() -> fineractClient.dataTables().advancedQuery(datatableName, query));
+        try {
+            return ObjectMapperFactory.getShared().readTree(json);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to parse the query result of datatable " + datatableName, e);
         }
     }
 
