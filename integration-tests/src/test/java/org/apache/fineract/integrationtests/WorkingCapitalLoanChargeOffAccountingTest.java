@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
@@ -531,6 +532,69 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
         } finally {
             externalEventHelper.disableBusinessEvent(TRANSACTION_REVERSED_EVENT);
         }
+    }
+
+    /**
+     * FINERACT-2684: the adjustment event of a transaction follows the switch of that transaction type's own event.
+     * With the amortization event disabled, the reversal of the final amortization must not surface through the generic
+     * adjustment event either.
+     */
+    @Test
+    public void testFinalDiscountFeeAmortizationReversalSkipsAdjustEventWhenAmortizationEventDisabled() {
+        final Long productId = createAccrualWithDeferredRevenueAmortizationProductWithDiscountOverride();
+        final BigDecimal principal = BigDecimal.valueOf(5000);
+        final BigDecimal discount = BigDecimal.valueOf(500);
+        final Long[] loanIdHolder = new Long[1];
+        final Long[] discountTxnIdHolder = new Long[1];
+        businessDateHelper.runAt(DAY_1.toString(), () -> {
+            loanIdHolder[0] = createApprovedAndDisbursedLoanWithDiscount(productId, principal, discount, DAY_1);
+            discountTxnIdHolder[0] = filterByType(loanHelper.getTransactions(loanIdHolder[0]), DISCOUNT_FEE_CODE).getFirst().getId();
+        });
+
+        businessDateHelper.runAt(DAY_2.toString(),
+                () -> loanHelper.chargeOff(loanIdHolder[0], WorkingCapitalLoanRequestBuilders.chargeOff(DAY_2.format(API_DATE), null)));
+
+        final List<GetWorkingCapitalLoanTransactionIdResponse> amortizations = filterByType(loanHelper.getTransactions(loanIdHolder[0]),
+                DISCOUNT_FEE_AMORTIZATION_CODE);
+        assertEquals(1, amortizations.size(), "Expected exactly 1 discount fee amortization transaction");
+        final Long amortTxnId = amortizations.getFirst().getId();
+
+        externalEventHelper.disableBusinessEvent(DISCOUNT_FEE_AMORTIZATION_EVENT);
+        externalEventHelper.enableBusinessEvent(TRANSACTION_REVERSED_EVENT);
+        try {
+            businessDateHelper.runAt(DAY_3.toString(), () -> {
+                externalEventHelper.deleteAllExternalEvents();
+                loanHelper.makeDiscountFeeAdjustment(loanIdHolder[0],
+                        WorkingCapitalLoanRequestBuilders.discountFeeAdjustment(discountTxnIdHolder[0], discount, DAY_1.format(API_DATE)));
+            });
+
+            final GetWorkingCapitalLoanTransactionIdResponse reversedAmortTxn = loanHelper.getTransaction(loanIdHolder[0], amortTxnId);
+            assertEquals(Boolean.TRUE, reversedAmortTxn.getReversed(),
+                    "Expected the final discount fee amortization to be reversed once the backdated adjustment zeroes the pool");
+
+            final List<Long> adjustedTransactionIds = adjustedTransactionIds();
+            assertTrue(adjustedTransactionIds.stream().noneMatch(amortTxnId::equals),
+                    "Expected no " + TRANSACTION_REVERSED_EVENT + " for amortization " + amortTxnId + " while "
+                            + DISCOUNT_FEE_AMORTIZATION_EVENT + " is disabled, but found adjustments for " + adjustedTransactionIds);
+        } finally {
+            externalEventHelper.disableBusinessEvent(TRANSACTION_REVERSED_EVENT);
+        }
+    }
+
+    /**
+     * Ids of the transactions adjusted by every {@code WorkingCapitalLoanAdjustTransactionBusinessEvent} posted so far,
+     * whether on its own or as an item of a {@code BulkBusinessEvent}.
+     */
+    @SuppressWarnings("unchecked")
+    private List<Long> adjustedTransactionIds() {
+        return externalEventHelper.getAllExternalEvents().stream().flatMap(event -> {
+            if ("BulkBusinessEvent".equals(event.getType())) {
+                final List<Map<String, Object>> items = (List<Map<String, Object>>) event.getPayLoad().get("datas");
+                return items.stream().filter(item -> TRANSACTION_REVERSED_EVENT.equals(item.get("type")))
+                        .map(item -> (Map<String, Object>) item.get("payLoad"));
+            }
+            return TRANSACTION_REVERSED_EVENT.equals(event.getType()) ? Stream.of(event.getPayLoad()) : Stream.<Map<String, Object>>empty();
+        }).map(payload -> toLong(((Map<String, Object>) payload.get("transactionToAdjust")).get("id"))).toList();
     }
 
     @Test
