@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants;
 import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -80,6 +81,21 @@ class AccountTransfersDataValidatorTest {
 
         assertTrue(exception.getErrors().stream()
                 .anyMatch(error -> PaymentDetailConstants.accountNumberParamName.equals(error.getParameterName())));
+    }
+
+    @Test
+    void validateAccumulatesInvalidTransferTimeWithOtherErrors() {
+        PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validate(command(baseTransferJson("""
+                        ,
+                          "transferTime": "invalid",
+                          "transferAmount": null
+                        """))));
+
+        assertTrue(exception.getErrors().stream()
+                .anyMatch(error -> AccountTransfersApiConstants.transferTimeParamName.equals(error.getParameterName())));
+        assertTrue(exception.getErrors().stream()
+                .anyMatch(error -> AccountTransfersApiConstants.transferAmountParamName.equals(error.getParameterName())));
     }
 
     private JsonCommand command(final String json) {
