@@ -18,20 +18,7 @@
  */
 package org.apache.fineract.integrationtests.bulkimport.importhandler.loan;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,27 +28,34 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.FundRequest;
+import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
+import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.bulkimport.importhandler.BulkImportOutputTemplateHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.GroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBulkImportHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFundHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignPaymentTypeHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
-import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
-import org.apache.fineract.integrationtests.common.funds.FundsHelper;
-import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -71,26 +65,14 @@ import org.slf4j.LoggerFactory;
 public class LoanImportHandlerTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanImportHandlerTest.class);
-    private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
     public static final String DATE_FORMAT = "dd MMMM yyyy";
+    private static final double DISBURSEMENT_CHARGE_AMOUNT = 100;
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private PaymentTypeHelper paymentTypeHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.paymentTypeHelper = new PaymentTypeHelper();
-    }
+    private final FineractFeignClient fineractClient = FineractFeignClientHelper.getFineractFeignClient();
+    private final FeignBulkImportHelper bulkImportHelper = new FeignBulkImportHelper(fineractClient);
 
     @Test
     public void testLoanImport() throws InterruptedException, IOException, ParseException {
-        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-
         // in order to populate helper sheets
         OfficeHelper officeHelper = new OfficeHelper();
         Integer outcome_office_creation = officeHelper.createOffice(java.time.LocalDate.of(2000, 5, 2)).getResourceId().intValue();
@@ -103,77 +85,63 @@ public class LoanImportHandlerTest {
         String lastName = Utils.randomStringGenerator("Client_LastName_", 4);
         String externalId = UUID.randomUUID().toString();
 
-        final HashMap<String, Object> clientMap = new HashMap<>();
-        clientMap.put("officeId", outcome_office_creation.toString());
-        clientMap.put("firstname", firstName);
-        clientMap.put("lastname", lastName);
-        clientMap.put("externalId", externalId);
-        clientMap.put("dateFormat", DATE_FORMAT);
-        clientMap.put("legalFormId", 1);
-        clientMap.put("locale", "en");
-        clientMap.put("active", "true");
-        clientMap.put("activationDate", "04 March 2011");
-
-        Integer outcome_client_creation = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
-                new Gson().toJson(clientMap), "clientId");
+        Long outcome_client_creation = new FeignClientHelper(fineractClient).createClient(new PostClientsRequest()
+                .officeId(outcome_office_creation.longValue()).firstname(firstName).lastname(lastName).externalId(externalId)
+                .dateFormat(DATE_FORMAT).legalFormId(1L).locale("en").active(true).activationDate("04 March 2011")).getClientId();
         Assertions.assertNotNull(outcome_client_creation, "Could not create client");
 
         List<HashMap> collaterals = new ArrayList<>();
         HashMap<String, String> collateralHashMap = new HashMap<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        FeignCollateralHelper collateralHelper = new FeignCollateralHelper(fineractClient);
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                String.valueOf(outcome_client_creation), collateralId);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(outcome_client_creation, collateralId).getResourceId();
         Assertions.assertNotNull(clientCollateralId);
-        collateralHashMap.put("clientCollateralId", collateralId.toString());
+        collateralHashMap.put("clientCollateralId", clientCollateralId.toString());
         collateralHashMap.put("quantity", "1");
         collaterals.add(collateralHashMap);
 
-        final String disbursementChargeJsonString = ChargesHelper.getLoanDisbursementJSON();
+        final ChargeRequest disbursementCharge = ChargeRequestBuilders.loanDisbursementFee(DISBURSEMENT_CHARGE_AMOUNT);
 
-        final Integer disbursementChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, disbursementChargeJsonString);
-
-        final JsonPath disbursementChargeJSON = JsonPath.from(disbursementChargeJsonString);
+        final Long disbursementChargeId = new FeignChargesHelper(fineractClient).createCharge(disbursementCharge).getResourceId();
 
         Assertions.assertNotNull(disbursementChargeId, "Could not create charge");
 
         // in order to populate helper sheets
-        Integer outcome_group_creation = GroupHelper.createGroup(requestSpec, responseSpec, true);
+        Long outcome_group_creation = new FeignGroupHelper(fineractClient).createActiveGroup().getGroupId();
         Assertions.assertNotNull(outcome_group_creation, "Could not create group");
 
         // in order to populate helper sheets
-        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec, responseSpec);
+        FeignStaffHelper staffHelper = new FeignStaffHelper(fineractClient);
+        Long outcome_staff_creation = staffHelper.createStaff().getResourceId();
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
-        Map<String, Object> staffMap = StaffHelper.getStaff(requestSpec, responseSpec, outcome_staff_creation);
-        Assertions.assertNotNull(staffMap, "Could not retrieve created staff");
+        String staffDisplayName = staffHelper.retrieveStaff(outcome_staff_creation).getDisplayName();
+        Assertions.assertNotNull(staffDisplayName, "Could not retrieve created staff");
 
-        LoanTransactionHelper ltHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        FeignLoanHelper loanHelper = new FeignLoanHelper(fineractClient);
         LoanProductTestBuilder loanProductTestBuilder = new LoanProductTestBuilder();
-        String jsonLoanProduct = loanProductTestBuilder.build(null);
-        Integer outcome_lp_creation = ltHelper.getLoanProductId(jsonLoanProduct);
+        Long outcome_lp_creation = loanHelper.createLoanProduct(loanProductTestBuilder.buildRequest(null)).getResourceId();
         Assertions.assertNotNull(outcome_lp_creation, "Could not create Loan Product");
 
-        String loanProductStr = ltHelper.getLoanProductDetails(requestSpec, responseSpec, outcome_lp_creation);
-        Assertions.assertNotNull("Could not get created Loan Product", loanProductStr);
-        JsonPath loanProductJson = JsonPath.from(loanProductStr);
+        GetLoanProductsProductIdResponse loanProduct = loanHelper.retrieveLoanProduct(outcome_lp_creation);
+        Assertions.assertNotNull(loanProduct, "Could not get created Loan Product");
 
         String fundName = Utils.uniqueRandomStringGenerator("", 9);
-        FundsHelper fh = FundsHelper.create(fundName).externalId(UUID.randomUUID().toString()).build();
-        Integer outcome_fund_creation = FundsResourceHandler.createFund(new Gson().toJson(fh), requestSpec, responseSpec);
+        Long outcome_fund_creation = new FeignFundHelper(fineractClient)
+                .createFund(new FundRequest().name(fundName).externalId(UUID.randomUUID().toString())).getResourceId();
         Assertions.assertNotNull(outcome_fund_creation, "Could not create Fund");
 
-        String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
-        String paymentTypeDescription = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
+        String paymentTypeName = Utils.randomStringGenerator("P_T", 5);
+        String paymentTypeDescription = Utils.randomStringGenerator("PT_Desc", 15);
 
-        var paymentTypesResponse = paymentTypeHelper.createPaymentType(
+        var paymentTypesResponse = new FeignPaymentTypeHelper(fineractClient).createPaymentType(
                 new PaymentTypeCreateRequest().name(paymentTypeName).description(paymentTypeDescription).isCashPayment(true).position(1L));
         Long outcome_payment_creation = paymentTypesResponse.getResourceId();
 
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 
-        LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        Workbook workbook = loanTransactionHelper.getLoanWorkbook(DATE_FORMAT);
+        Workbook workbook = bulkImportHelper.downloadTemplate("loans", Map.of("dateFormat", DATE_FORMAT));
 
         // insert dummy data into loan Sheet
         Sheet loanSheet = workbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
@@ -183,8 +151,8 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.CLIENT_NAME_COL)
                 .setCellValue(firstName + " " + lastName + "(" + outcome_client_creation + ")");
         firstLoanRow.createCell(LoanConstants.CLIENT_EXTERNAL_ID).setCellValue(externalId);
-        firstLoanRow.createCell(LoanConstants.PRODUCT_COL).setCellValue(loanProductJson.getString("name"));
-        firstLoanRow.createCell(LoanConstants.LOAN_OFFICER_NAME_COL).setCellValue((String) staffMap.get("displayName"));
+        firstLoanRow.createCell(LoanConstants.PRODUCT_COL).setCellValue(loanProduct.getName());
+        firstLoanRow.createCell(LoanConstants.LOAN_OFFICER_NAME_COL).setCellValue(staffDisplayName);
 
         final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern(DATE_FORMAT, Locale.US);
         final LocalDate localDate = LocalDate.parse("17 May 2017", dateFormat);
@@ -194,25 +162,22 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.DISBURSED_DATE_COL).setCellValue(localDate);
         firstLoanRow.createCell(LoanConstants.DISBURSED_PAYMENT_TYPE_COL).setCellValue(paymentTypeName);
         firstLoanRow.createCell(LoanConstants.FUND_NAME_COL).setCellValue(fundName);
-        firstLoanRow.createCell(LoanConstants.PRINCIPAL_COL).setCellValue(loanProductJson.getFloat("principal"));
-        firstLoanRow.createCell(LoanConstants.NO_OF_REPAYMENTS_COL).setCellValue(loanProductJson.getInt("numberOfRepayments"));
-        firstLoanRow.createCell(LoanConstants.REPAID_EVERY_COL).setCellValue(loanProductJson.getInt("repaymentEvery"));
-        firstLoanRow.createCell(LoanConstants.REPAID_EVERY_FREQUENCY_COL)
-                .setCellValue(loanProductJson.getString("repaymentFrequencyType.value"));
+        firstLoanRow.createCell(LoanConstants.PRINCIPAL_COL).setCellValue(loanProduct.getPrincipal());
+        firstLoanRow.createCell(LoanConstants.NO_OF_REPAYMENTS_COL).setCellValue(loanProduct.getNumberOfRepayments());
+        firstLoanRow.createCell(LoanConstants.REPAID_EVERY_COL).setCellValue(loanProduct.getRepaymentEvery());
+        firstLoanRow.createCell(LoanConstants.REPAID_EVERY_FREQUENCY_COL).setCellValue(loanProduct.getRepaymentFrequencyType().getValue());
         firstLoanRow.createCell(LoanConstants.LOAN_TERM_COL)
-                .setCellValue(loanProductJson.getInt("repaymentEvery") * loanProductJson.getInt("numberOfRepayments"));
-        firstLoanRow.createCell(LoanConstants.LOAN_TERM_FREQUENCY_COL)
-                .setCellValue(loanProductJson.getString("repaymentFrequencyType.value"));
-        firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_COL).setCellValue(loanProductJson.getDouble("interestRatePerPeriod"));
+                .setCellValue(loanProduct.getRepaymentEvery() * loanProduct.getNumberOfRepayments());
+        firstLoanRow.createCell(LoanConstants.LOAN_TERM_FREQUENCY_COL).setCellValue(loanProduct.getRepaymentFrequencyType().getValue());
+        firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_COL).setCellValue(loanProduct.getInterestRatePerPeriod());
         firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_FREQUENCY_COL)
-                .setCellValue(loanProductJson.getString("interestRateFrequencyType.value"));
-        firstLoanRow.createCell(LoanConstants.AMORTIZATION_COL).setCellValue(loanProductJson.getString("amortizationType.value"));
-        firstLoanRow.createCell(LoanConstants.INTEREST_METHOD_COL).setCellValue(loanProductJson.getString("interestType.value"));
+                .setCellValue(loanProduct.getInterestRateFrequencyType().getValue());
+        firstLoanRow.createCell(LoanConstants.AMORTIZATION_COL).setCellValue(loanProduct.getAmortizationType().getValue());
+        firstLoanRow.createCell(LoanConstants.INTEREST_METHOD_COL).setCellValue(loanProduct.getInterestType().getValue());
         firstLoanRow.createCell(LoanConstants.INTEREST_CALCULATION_PERIOD_COL)
-                .setCellValue(loanProductJson.getString("interestCalculationPeriodType.value"));
+                .setCellValue(loanProduct.getInterestCalculationPeriodType().getValue());
         firstLoanRow.createCell(LoanConstants.ARREARS_TOLERANCE_COL).setCellValue(0);
-        firstLoanRow.createCell(LoanConstants.REPAYMENT_STRATEGY_COL)
-                .setCellValue(loanProductJson.getString("transactionProcessingStrategyName"));
+        firstLoanRow.createCell(LoanConstants.REPAYMENT_STRATEGY_COL).setCellValue(loanProduct.getTransactionProcessingStrategyName());
         firstLoanRow.createCell(LoanConstants.GRACE_ON_PRINCIPAL_PAYMENT_COL).setCellValue(0);
         firstLoanRow.createCell(LoanConstants.GRACE_ON_INTEREST_PAYMENT_COL).setCellValue(0);
         firstLoanRow.createCell(LoanConstants.GRACE_ON_INTEREST_CHARGED_COL).setCellValue(0);
@@ -222,22 +187,12 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.REPAYMENT_TYPE_COL).setCellValue(paymentTypeName);
         firstLoanRow.createCell(LoanConstants.LOAN_COLLATERAL_ID).setCellValue(collaterals.get(0).get("clientCollateralId").toString());
         firstLoanRow.createCell(LoanConstants.LOAN_COLLATERAL_QUANTITY).setCellValue(collaterals.get(0).get("quantity").toString());
-        firstLoanRow.createCell(LoanConstants.CHARGE_NAME_1).setCellValue(disbursementChargeJSON.getString("name"));
-        firstLoanRow.createCell(LoanConstants.CHARGE_AMOUNT_1).setCellValue(disbursementChargeJSON.getFloat("amount"));
-        firstLoanRow.createCell(LoanConstants.CHARGE_AMOUNT_TYPE_1).setCellValue(disbursementChargeJSON.getString("chargeCalculationType"));
+        firstLoanRow.createCell(LoanConstants.CHARGE_NAME_1).setCellValue(disbursementCharge.getName());
+        firstLoanRow.createCell(LoanConstants.CHARGE_AMOUNT_1).setCellValue(disbursementCharge.getAmount());
+        firstLoanRow.createCell(LoanConstants.CHARGE_AMOUNT_TYPE_1)
+                .setCellValue(String.valueOf(disbursementCharge.getChargeCalculationType()));
 
-        Path directory = Path.of("").toAbsolutePath().resolve("src").resolve("integrationTest").resolve("resources").resolve("bulkimport")
-                .resolve("importhandler").resolve("loan");
-        if (!directory.toFile().exists()) {
-            directory.toFile().mkdirs();
-        }
-        File file = directory.resolve("Loan.xls").toFile();
-        try (OutputStream outputStream = Files.newOutputStream(file.toPath())) {
-            workbook.write(outputStream);
-        }
-
-        String importDocumentId = loanTransactionHelper.importLoanTemplate(file);
-        file.delete();
+        Long importDocumentId = bulkImportHelper.uploadTemplate("loans", Map.of(), workbook, "Loan.xls", "en", DATE_FORMAT);
         Assertions.assertNotNull(importDocumentId);
 
         // Wait for the creation of output excel
@@ -245,7 +200,7 @@ public class LoanImportHandlerTest {
 
         // check status column of output excel
         try (Workbook outputworkbook = BulkImportOutputTemplateHelper.waitForWorkbook(
-                () -> loanTransactionHelper.downloadOutputTemplate(importDocumentId), TemplatePopulateImportConstants.LOANS_SHEET_NAME, 1,
+                () -> bulkImportHelper.downloadOutputTemplate(importDocumentId), TemplatePopulateImportConstants.LOANS_SHEET_NAME, 1,
                 LoanConstants.STATUS_COL)) {
             Sheet outputLoanSheet = outputworkbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
             Row row = outputLoanSheet.getRow(1);

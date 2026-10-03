@@ -84,13 +84,16 @@ public class FeignCodeHelper {
      * such as {@code LoanRescheduleReason} ship without values, so a test that needs a reason id has to seed one.
      */
     public Long retrieveOrCreateCodeValueId(String codeName) {
-        GetCodesResponse code = retrieveCodeByName(codeName);
-        List<GetCodeValuesDataResponse> codeValues = retrieveAllCodeValues(code.getId());
+        return retrieveOrCreateCodeValueId(retrieveCodeByName(codeName).getId());
+    }
+
+    public Long retrieveOrCreateCodeValueId(Long codeId) {
+        List<GetCodeValuesDataResponse> codeValues = retrieveAllCodeValues(codeId);
         if (!codeValues.isEmpty()) {
             return codeValues.get(0).getId();
         }
         String value = Utils.randomStringGenerator("", 3);
-        return createCodeValue(code.getId(), new PostCodeValuesDataRequest().name(value).position(0).description(value).isActive(true))
+        return createCodeValue(codeId, new PostCodeValuesDataRequest().name(value).position(0).description(value).isActive(true))
                 .getSubResourceId();
     }
 }
