@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -42,6 +43,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType;
@@ -1214,6 +1216,106 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             assertEquals(8, preview.getPeriods().size(),
                     "Preview should have 8 periods (1 disbursement + 1 stub + 6 re-aged) but got " + preview.getPeriods().size());
         });
+    }
+
+    /**
+     * FINERACT-2684: disabling a transaction type's event must also silence the generic adjustment event raised for
+     * that transaction type during a reverse-replay, whether the adjustment is posted on its own or inside a bulk
+     * event. The re-age is replayed by a repayment backdated before it.
+     */
+    @Test
+    public void test_LoanReAgeReverseReplay_SkipsAdjustEventWhenReAgeEventIsDisabled() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            Long clientId = createClient();
+
+            int numberOfRepayments = 3;
+            int repaymentEvery = 15;
+
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .installmentAmountInMultiplesOf(null) //
+                    .enableDownPayment(true) //
+                    .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25)) //
+                    .enableAutoRepaymentForDownPayment(true) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue()); //
+
+            Long loanProductId = createLoanProduct(product);
+
+            double amount = 1250.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanTestData.TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments * repaymentEvery)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.DAYS);
+
+            Long loanId = applyForLoan(applicationRequest);
+            approveLoan(loanId, approveLoanRequest(amount, "01 January 2023"));
+            disburseLoan(loanId, BigDecimal.valueOf(500.0), "01 January 2023");
+            createdLoanId.set(loanId);
+        });
+
+        runAt("27 February 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            externalEventHelper.disableBusinessEvent("LoanReAgeTransactionBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanAdjustTransactionBusinessEvent");
+            externalEventHelper.deleteAllExternalEvents();
+
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "01 March 2023", 6, null);
+            assertEquals(0, externalEventHelper.getExternalEventsByType("LoanReAgeTransactionBusinessEvent").size(),
+                    "The disabled re-age event must not be posted");
+
+            // A repayment dated before the re-age replays it: the re-age is reversed and re-created with a new amount.
+            externalEventHelper.deleteAllExternalEvents();
+            makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN)
+                    .transactionDate("01 February 2023").locale("en").transactionAmount(125.0));
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Repayment", "01 February 2023"), //
+                    transaction(250.0, "Re-age", "27 February 2023") //
+            );
+
+            List<String> adjustedTypeCodes = adjustedTransactionTypeCodes();
+            assertTrue(adjustedTypeCodes.stream().noneMatch("loanTransactionType.reAge"::equals),
+                    "The adjustment of the re-age must be suppressed while the re-age event is disabled, but found " + adjustedTypeCodes);
+
+            // Same replay with the re-age event enabled again: the adjustment is posted as usual.
+            externalEventHelper.enableBusinessEvent("LoanReAgeTransactionBusinessEvent");
+            externalEventHelper.deleteAllExternalEvents();
+            makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN)
+                    .transactionDate("15 January 2023").locale("en").transactionAmount(50.0));
+
+            adjustedTypeCodes = adjustedTransactionTypeCodes();
+            assertTrue(adjustedTypeCodes.contains("loanTransactionType.reAge"),
+                    "The adjustment of the re-age must be posted once the re-age event is enabled, but found " + adjustedTypeCodes);
+        });
+    }
+
+    /**
+     * Transaction type codes of every {@code LoanAdjustTransactionBusinessEvent} posted so far, whether on its own or
+     * as an item of a {@code BulkBusinessEvent}.
+     */
+    @SuppressWarnings("unchecked")
+    private List<String> adjustedTransactionTypeCodes() {
+        return externalEventHelper.getAllExternalEvents().stream().flatMap(this::adjustmentPayloads)
+                .map(payload -> (Map<String, Object>) payload.get("transactionToAdjust"))
+                .map(transaction -> (Map<String, Object>) transaction.get("type")).map(type -> String.valueOf(type.get("code"))).toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Stream<Map<String, Object>> adjustmentPayloads(ExternalEventResponse event) {
+        if ("BulkBusinessEvent".equals(event.getType())) {
+            List<Map<String, Object>> items = (List<Map<String, Object>>) event.getPayLoad().get("datas");
+            return items.stream().filter(item -> "LoanAdjustTransactionBusinessEvent".equals(item.get("type")))
+                    .map(item -> (Map<String, Object>) item.get("payLoad"));
+        }
+        return "LoanAdjustTransactionBusinessEvent".equals(event.getType()) ? Stream.of(event.getPayLoad()) : Stream.empty();
     }
 
 }

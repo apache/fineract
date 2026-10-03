@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.DependentExternalEvent;
 import org.apache.fineract.infrastructure.event.business.domain.NoExternalEvent;
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventService;
 import org.jspecify.annotations.NonNull;
@@ -112,7 +113,20 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     @Override
     public boolean isExternalEventPostingEnabled(final BusinessEvent<?> businessEvent) {
         return !(businessEvent instanceof NoExternalEvent) && isExternalEventPostingEnabled()
-                && externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(businessEvent);
+                && externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(businessEvent)
+                && isGoverningExternalEventTypeEnabled(businessEvent);
+    }
+
+    /**
+     * A {@link DependentExternalEvent} is also held back while the event type governing it is disabled, so switching
+     * off one transaction type's event silences the adjustments of that transaction type too.
+     */
+    private boolean isGoverningExternalEventTypeEnabled(final BusinessEvent<?> businessEvent) {
+        if (!(businessEvent instanceof DependentExternalEvent dependentEvent)) {
+            return true;
+        }
+        return dependentEvent.getGoverningExternalEventType()
+                .map(externalBusinessEventConfigurationService::isExternalEventTypeConfiguredForPosting).orElse(true);
     }
 
     @Override

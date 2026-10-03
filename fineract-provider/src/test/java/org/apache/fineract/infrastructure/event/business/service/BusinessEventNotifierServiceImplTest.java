@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.event.business.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -30,12 +31,14 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Optional;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.DependentExternalEvent;
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -436,6 +439,65 @@ class BusinessEventNotifierServiceImplTest {
         verifyNoInteractions(externalEventService);
     }
 
+    @Test
+    public void testNotifyPostBusinessEventShouldNotPostADependentExternalEventWhenItsGoverningEventTypeIsDisabled() {
+        // given
+        configureExternalEventsProperties(true);
+        MockDependentBusinessEvent event = new MockDependentBusinessEvent(Optional.of("GoverningBusinessEvent"));
+        BusinessEventListener<MockDependentBusinessEvent> postListener = (BusinessEventListener<MockDependentBusinessEvent>) mock(
+                BusinessEventListener.class);
+        underTest.addPostBusinessEventListener(MockDependentBusinessEvent.class, postListener);
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(event)).thenReturn(true);
+        when(externalBusinessEventConfigurationService.isExternalEventTypeConfiguredForPosting("GoverningBusinessEvent")).thenReturn(false);
+        // when
+        underTest.notifyPostBusinessEvent(event);
+        // then
+        // internal listeners still run: only the external posting is held back
+        verify(postListener).onBusinessEvent(event);
+        verifyNoInteractions(externalEventService);
+    }
+
+    @Test
+    public void testNotifyPostBusinessEventShouldPostADependentExternalEventWhenItsGoverningEventTypeIsEnabled() {
+        // given
+        configureExternalEventsProperties(true);
+        MockDependentBusinessEvent event = new MockDependentBusinessEvent(Optional.of("GoverningBusinessEvent"));
+        when(transactionHelper.hasTransaction()).thenReturn(false);
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(event)).thenReturn(true);
+        when(externalBusinessEventConfigurationService.isExternalEventTypeConfiguredForPosting("GoverningBusinessEvent")).thenReturn(true);
+        // when
+        underTest.notifyPostBusinessEvent(event);
+        // then
+        verify(externalEventService).postEvent(event);
+    }
+
+    @Test
+    public void testNotifyPostBusinessEventShouldPostADependentExternalEventThatNamesNoGoverningEventType() {
+        // given
+        configureExternalEventsProperties(true);
+        MockDependentBusinessEvent event = new MockDependentBusinessEvent(Optional.empty());
+        when(transactionHelper.hasTransaction()).thenReturn(false);
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(event)).thenReturn(true);
+        // when
+        underTest.notifyPostBusinessEvent(event);
+        // then
+        verify(externalEventService).postEvent(event);
+        verify(externalBusinessEventConfigurationService, Mockito.never()).isExternalEventTypeConfiguredForPosting(Mockito.anyString());
+    }
+
+    @Test
+    public void testIsExternalEventPostingEnabledShouldBeFalseForADependentExternalEventWhoseGoverningEventTypeIsDisabled() {
+        // given
+        configureExternalEventsProperties(true);
+        MockDependentBusinessEvent event = new MockDependentBusinessEvent(Optional.of("GoverningBusinessEvent"));
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(event)).thenReturn(true);
+        when(externalBusinessEventConfigurationService.isExternalEventTypeConfiguredForPosting("GoverningBusinessEvent")).thenReturn(false);
+        // when
+        boolean result = underTest.isExternalEventPostingEnabled(event);
+        // then
+        assertFalse(result);
+    }
+
     private void configureExternalEventsProperties(boolean isExternalEventsEnabled) {
         FineractProperties.FineractEventsProperties eventsProperties = new FineractProperties.FineractEventsProperties();
         FineractProperties.FineractExternalEventsProperties externalProperties = new FineractProperties.FineractExternalEventsProperties();
@@ -471,4 +533,37 @@ class BusinessEventNotifierServiceImplTest {
         }
     }
 
+    private static final class MockDependentBusinessEvent implements BusinessEvent<Object>, DependentExternalEvent {
+
+        private final Optional<String> governingExternalEventType;
+
+        private MockDependentBusinessEvent(Optional<String> governingExternalEventType) {
+            this.governingExternalEventType = governingExternalEventType;
+        }
+
+        @Override
+        public Object get() {
+            return null;
+        }
+
+        @Override
+        public String getType() {
+            return null;
+        }
+
+        @Override
+        public String getCategory() {
+            return null;
+        }
+
+        @Override
+        public Long getAggregateRootId() {
+            return null;
+        }
+
+        @Override
+        public Optional<String> getGoverningExternalEventType() {
+            return governingExternalEventType;
+        }
+    }
 }
