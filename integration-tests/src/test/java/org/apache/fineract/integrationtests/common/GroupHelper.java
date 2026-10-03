@@ -57,16 +57,6 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            @SuppressWarnings("unused") final boolean active) {
-        LOG.info("---------------------------------CREATING A GROUP---------------------------------------------");
-        return createGroup(requestSpec, responseSpec, "04 March 2011");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate) {
         LOG.info("---------------------------------CREATING A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_GROUP_URL, getTestGroupAsJSON(true, activationDate), "groupId");
