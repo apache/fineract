@@ -45,13 +45,26 @@ public final class FineractFeignClientHelper {
         return createNewFineractFeignClient(username, password, builder -> builder.debug(debugEnabled));
     }
 
+    /**
+     * A client rooted at {@code /fineract-provider} rather than at its {@code /api}, for the pages the server publishes
+     * outside the API (actuator, Swagger UI, legacy docs).
+     */
+    public static FineractFeignClient createProviderRootFeignClient() {
+        return createNewFineractFeignClient(ConfigProperties.Backend.USERNAME, ConfigProperties.Backend.PASSWORD,
+                builder -> builder.baseUrl(apiUrl().replaceFirst("/api$", "")));
+    }
+
     public static FineractFeignClient createNewFineractFeignClient(String username, String password,
             Consumer<FineractFeignClient.Builder> customizer) {
-        String url = System.getProperty("fineract.it.url", buildURI());
+        String url = apiUrl();
         FineractFeignClient.Builder builder = FineractFeignClient.builder().baseUrl(url).credentials(username, password)
                 .disableSslVerification(true).readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         customizer.accept(builder);
         return builder.build();
+    }
+
+    private static String apiUrl() {
+        return System.getProperty("fineract.it.url", buildURI());
     }
 
     private static String buildURI() {

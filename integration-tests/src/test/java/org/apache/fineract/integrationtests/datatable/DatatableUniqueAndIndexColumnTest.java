@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests.datatable;
 
-import static org.apache.fineract.integrationtests.common.Utils.initializeRESTAssured;
 import static org.apache.fineract.integrationtests.datatable.DatatableEntity.LOAN;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,8 +33,8 @@ import org.apache.fineract.client.models.PutDataTablesRequestAddColumns;
 import org.apache.fineract.client.models.PutDataTablesRequestChangeColumns;
 import org.apache.fineract.client.models.PutDataTablesResponse;
 import org.apache.fineract.client.models.ResultsetColumnHeaderData;
-import org.apache.fineract.integrationtests.common.system.DatatableHelper;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDatatableHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -43,13 +42,7 @@ import org.mapstruct.factory.Mappers;
 
 public class DatatableUniqueAndIndexColumnTest {
 
-    private DatatableHelper datatableHelper;
-
-    @BeforeEach
-    public void setup() {
-        initializeRESTAssured();
-        this.datatableHelper = new DatatableHelper();
-    }
+    private final FeignDatatableHelper datatableHelper = new FeignDatatableHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void testDatableCreationWithUniqueAndIndexedColumns() {
@@ -91,7 +84,7 @@ public class DatatableUniqueAndIndexColumnTest {
         // then
         assertThat(response.getResourceIdentifier()).isNotBlank();
 
-        GetDataTablesResponse dataTable = datatableHelper.getDataTableDetails(datatableName);
+        GetDataTablesResponse dataTable = datatableHelper.getDatatable(datatableName);
 
         List<ResultsetColumnHeaderData> columnHeaderData = dataTable.getColumnHeaderData();
         assertThat(columnHeaderData).isNotNull().hasSize(5);
@@ -186,7 +179,7 @@ public class DatatableUniqueAndIndexColumnTest {
         PutDataTablesResponse updateResponse = datatableHelper.updateDatatable(datatableName, updateRequest);
 
         // then
-        GetDataTablesResponse dataTable = datatableHelper.getDataTableDetails(datatableName);
+        GetDataTablesResponse dataTable = datatableHelper.getDatatable(datatableName);
 
         List<ResultsetColumnHeaderData> columnHeaderData = dataTable.getColumnHeaderData();
         assertThat(columnHeaderData).isNotNull().hasSize(7);
@@ -228,7 +221,7 @@ public class DatatableUniqueAndIndexColumnTest {
         // then
         assertThat(response.getResourceIdentifier()).isNotBlank();
 
-        GetDataTablesResponse dataTable = datatableHelper.getDataTableDetails(datatableName);
+        GetDataTablesResponse dataTable = datatableHelper.getDatatable(datatableName);
 
         List<ResultsetColumnHeaderData> columnHeaderData = dataTable.getColumnHeaderData();
         assertThat(columnHeaderData).isNotNull().hasSize(5);
@@ -271,7 +264,7 @@ public class DatatableUniqueAndIndexColumnTest {
         // then
         assertThat(response.getResourceIdentifier()).isNotBlank();
 
-        GetDataTablesResponse dataTable = datatableHelper.getDataTableDetails(datatableName);
+        GetDataTablesResponse dataTable = datatableHelper.getDatatable(datatableName);
 
         List<ResultsetColumnHeaderData> columnHeaderData = dataTable.getColumnHeaderData();
         assertThat(columnHeaderData).isNotNull().hasSize(4);
