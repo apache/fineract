@@ -57,6 +57,7 @@ public class SavingsTestLifecycleExtension implements AfterAllCallback {
 
     @Override
     public void afterAll(ExtensionContext context) {
+        Utils.initializeRESTAssured();
         BusinessDateHelper.runAt(DateTimeFormatter.ofPattern(DATE_FORMAT).format(Utils.getLocalDateOfTenant()), () -> {
             RequestSpecification requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
             requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
