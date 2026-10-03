@@ -71,16 +71,6 @@ public final class UserHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static Object createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId,
-            int staffId, String username, String password, String attribute) {
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL,
-                getTestCreateUserAsJSON(roleId, staffId, username, password), attribute);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static PostUsersResponse createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             PostUsersRequest request) {
         String requestBody = GSON.toJson(request);
@@ -107,17 +97,6 @@ public final class UserHelper {
         return "{ \"username\": \"" + username + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
                 + " \"officeId\": \"1\", \"staffId\": " + "\"" + staffId + "\",\"roles\": [\"" + roleId
                 + "\"], \"sendPasswordToEmail\": false}";
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private static String getTestCreateUserAsJSON(int roleId, int staffId, String username, String password) {
-        return "{ \"username\": \"" + username + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
-                + " \"officeId\": \"1\", \"staffId\": " + "\"" + staffId + "\",\"roles\": [\"" + roleId
-                + "\"], \"sendPasswordToEmail\": false,     \"password\": \"" + password + "\"," + "    \"repeatPassword\": \"" + password
-                + "\"}";
     }
 
     // TODO: Rewrite to use fineract-client instead!

@@ -38,7 +38,6 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.SecureRandom;
@@ -352,12 +351,6 @@ public final class Utils {
     }
 
     @Deprecated(forRemoval = true)
-    public static byte[] performGetBinaryResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL) {
-        return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asByteArray();
-    }
-
-    @Deprecated(forRemoval = true)
     public static String performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String postURL, final String jsonBodyToSend) {
         return performServerPost(requestSpec, responseSpec, postURL, jsonBodyToSend, null);
@@ -550,27 +543,10 @@ public final class Utils {
     }
 
     @Deprecated(forRemoval = true)
-    public static String performServerTemplatePost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String postURL, final String legalFormType, final File file, final String locale, final String dateFormat) {
-
-        final String importDocumentId = given().spec(requestSpec).queryParam("legalFormType", legalFormType).multiPart("file", file)
-                .formParam("locale", locale).formParam("dateFormat", dateFormat).expect().spec(responseSpec).log().ifError().when()
-                .post(postURL).andReturn().asString();
-        return importDocumentId;
-    }
-
-    @Deprecated(forRemoval = true)
     public static String performServerOutputTemplateLocationGet(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String getURL, final String importDocumentId) {
         return given().spec(requestSpec).queryParam("importDocumentId", importDocumentId).expect().spec(responseSpec).log().ifError().when()
                 .get(getURL).andReturn().asString();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static byte[] performServerOutputTemplateDownloadGet(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String getURL, final String importDocumentId) {
-        return given().spec(requestSpec).queryParam("importDocumentId", importDocumentId).expect().spec(responseSpec).log().ifError().when()
-                .get(getURL).andReturn().asByteArray();
     }
 
     @Deprecated(forRemoval = true)
