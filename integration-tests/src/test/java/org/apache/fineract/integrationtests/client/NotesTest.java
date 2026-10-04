@@ -235,6 +235,71 @@ public class NotesTest extends FeignLoanTestBase {
         Assertions.assertEquals(noteText, noteData.getNote());
     }
 
+    @Test
+    public void testCreateGroupSavingsNote() {
+        final String noteText = "this is a test group Savings note";
+
+        final Long savingsId = createGroupSavingsApplication();
+
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(SAVINGS, savingsId, noteText);
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
+        Assertions.assertNotNull(noteId);
+
+        NoteData noteData = noteHelper.getNote(SAVINGS, savingsId, noteId);
+        Assertions.assertEquals(noteText, noteData.getNote());
+    }
+
+    @Test
+    public void testUpdateGroupSavingsNote() {
+        final String noteText = "this is a test group Savings note";
+
+        final Long savingsId = createGroupSavingsApplication();
+
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(SAVINGS, savingsId, noteText);
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
+        Assertions.assertNotNull(noteId);
+
+        String updatedNoteText = "this is an updated test group Savings note";
+
+        NoteUpdateResponse noteUpdateResponse = noteHelper.updateNote(SAVINGS, savingsId, noteId, updatedNoteText);
+        Assertions.assertNotNull(noteUpdateResponse);
+
+        NoteData noteData = noteHelper.getNote(SAVINGS, savingsId, noteId);
+        Assertions.assertEquals(updatedNoteText, noteData.getNote());
+    }
+
+    @Test
+    public void testDeleteGroupSavingsNote() {
+        final String noteText = "this is a test group Savings note";
+
+        final Long savingsId = createGroupSavingsApplication();
+
+        NoteCreateResponse noteCreateResponse = noteHelper.addNote(SAVINGS, savingsId, noteText);
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
+        Assertions.assertNotNull(noteId);
+
+        NoteDeleteResponse noteDeleteResponse = noteHelper.deleteNote(SAVINGS, savingsId, noteId);
+        Assertions.assertNotNull(noteDeleteResponse);
+
+        Assertions.assertEquals(NOT_FOUND, noteHelper.getNoteExpectingError(SAVINGS, savingsId, noteId).getStatus());
+    }
+
+    private Long createGroupSavingsApplication() {
+        final Long groupId = groupHelper.createActiveGroup().getResourceId();
+        Assertions.assertNotNull(groupId);
+
+        final Long savingsProductId = savingsProductHelper
+                .createSavingsProduct(SavingsRequestBuilders.savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY,
+                        SavingsTestData.InterestPostingPeriodType.DAILY, SavingsTestData.InterestCalculationType.DAILY_BALANCE))
+                .getResourceId();
+        final Long savingsId = savingsHelper.submitGroupApplication(groupId, savingsProductId, "01 January 2012").getSavingsId();
+        Assertions.assertNotNull(savingsId);
+        return savingsId;
+    }
+
     private Long applyForLoanApplication(final Long clientID, final Long loanProductID) {
         final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
         Assertions.assertNotNull(collateralId);
