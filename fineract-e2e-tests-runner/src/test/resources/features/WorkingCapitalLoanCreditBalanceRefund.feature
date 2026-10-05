@@ -70,7 +70,9 @@ Feature: Working Capital Loan Credit Balance Refund
       | paymentType   | accountNumber | checkNumber | routingCode | receiptNumber | bankNumber |
       | CHECK_PAYMENT | 12345         | 321         | 456         | 789           | 654        |
     Then Working Capital loan status will be "OVERPAID"
-    And Working Capital loan transaction with type "CREDIT_BALANCE_REFUND" has payment type "CHECK_PAYMENT"
+    Then Working Capital loan transaction with type "CREDIT_BALANCE_REFUND" has payment details:
+      | paymentType   | accountNumber | checkNumber | routingCode | receiptNumber | bankNumber |
+      | CHECK_PAYMENT | 12345         | 321         | 456         | 789           | 654        |
     And Customer makes credit balance refund on "03 January 2026" with 25.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
