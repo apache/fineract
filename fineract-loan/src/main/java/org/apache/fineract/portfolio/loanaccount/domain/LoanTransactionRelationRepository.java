@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -32,5 +33,13 @@ public interface LoanTransactionRelationRepository
               AND ltr.fromTransaction.reversed = false
             """)
     boolean hasLoanTransactionRelationsWithType(LoanTransaction toTransaction, LoanTransactionRelationTypeEnum relationType);
+
+    @Query("""
+            SELECT ltr
+            FROM LoanTransactionRelation ltr
+            WHERE ltr.toTransaction = :toTransaction AND ltr.relationType = :relationType
+            """)
+    List<LoanTransactionRelation> findByToTransactionAndRelationType(LoanTransaction toTransaction,
+            LoanTransactionRelationTypeEnum relationType);
 
 }

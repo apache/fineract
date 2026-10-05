@@ -1221,6 +1221,7 @@ Feature: LoanChargeback - Part3
     When Admin sets the business date to "15 February 2024"
     And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 17.01 EUR transaction amount for Payment nr. 1
     When Customer undo "1"th "Chargeback" transaction made on "15 February 2024"
+    Then In Loan Transactions the "1"th Transaction of "Repayment" on "01 February 2024" has "0" relationship with type="CHARGEBACK"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0|           | 0.0 | 0.0   |            |      |             |

@@ -51,6 +51,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachin
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -98,6 +99,7 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
     private final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
     private final LoanScheduleService loanScheduleService;
+    private final LoanTransactionRelationRepository loanTransactionRelationRepository;
 
     @Override
     public CommandProcessingResult adjustLoanTransaction(Loan loan, LoanTransaction transactionToAdjust, LoanAdjustmentParameter parameter,
@@ -337,6 +339,9 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
         }
 
         if (transactionForAdjustment.getTypeOf().isChargeback()) {
+            loanTransactionRelationRepository
+                    .findByToTransactionAndRelationType(transactionForAdjustment, LoanTransactionRelationTypeEnum.CHARGEBACK)
+                    .forEach(relation -> relation.getFromTransaction().getLoanTransactionRelations().remove(relation));
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             reprocessLoanTransactionsService.reprocessTransactions(loan);
         }
