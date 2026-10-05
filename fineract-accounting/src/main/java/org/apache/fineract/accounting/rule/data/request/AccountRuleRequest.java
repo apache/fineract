@@ -20,9 +20,11 @@ package org.apache.fineract.accounting.rule.data.request;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
-public record AccountRuleRequest(String name, Long officeId, Long accountToDebit, Long accountToCredit,
-        String description) implements Serializable {
+public record AccountRuleRequest(String name, Long officeId, Long accountToDebit, Long accountToCredit, String description,
+        List<Long> creditTags, List<Long> debitTags, Boolean allowMultipleCreditEntries,
+        Boolean allowMultipleDebitEntries) implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
