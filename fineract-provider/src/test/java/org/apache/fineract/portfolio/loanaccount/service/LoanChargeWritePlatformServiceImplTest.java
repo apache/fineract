@@ -18,8 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -31,21 +34,26 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.stream.Stream;
 import org.apache.fineract.accounting.journalentry.data.AccountingBridgeDataDTO;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
@@ -61,6 +69,7 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeApiJson
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -168,6 +177,9 @@ class LoanChargeWritePlatformServiceImplTest {
     @Mock
     private LoanScheduleService loanScheduleService;
 
+    @Mock
+    private ScheduleGeneratorDTO scheduleGeneratorDTO;
+
     @BeforeEach
     void setUp() {
         when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
@@ -243,5 +255,45 @@ class LoanChargeWritePlatformServiceImplTest {
         return Stream.of(Arguments.of(true, BUSINESS_DATE_AFTER, MATURITY_DATE, true),
                 Arguments.of(false, BUSINESS_DATE_AFTER, MATURITY_DATE, false), Arguments.of(true, BUSINESS_DATE_ON, MATURITY_DATE, false),
                 Arguments.of(true, BUSINESS_DATE_BEFORE, MATURITY_DATE, false));
+    }
+
+    @Test
+    void waiverUsesRequestedTransactionDateForTransactionRecalculationAndLifecycle() {
+        LocalDate dueDate = LocalDate.of(2024, 2, 10);
+        LocalDate requestedDate = LocalDate.of(2024, 2, 5);
+        LoanTransaction waiver = waiveSpecifiedDueDateCharge(dueDate, BUSINESS_DATE_AFTER, requestedDate);
+
+        assertEquals(requestedDate, waiver.getTransactionDate());
+        verify(scheduleGeneratorDTO).setRecalculateFrom(requestedDate);
+        verify(loanLifecycleStateMachine).determineAndTransition(eq(loan), eq(requestedDate));
+    }
+
+    @Test
+    void waiverWithoutRequestedTransactionDateKeepsDerivedDate() {
+        LocalDate dueDate = LocalDate.of(2024, 2, 10);
+        assertEquals(dueDate, waiveSpecifiedDueDateCharge(dueDate, BUSINESS_DATE_AFTER, null).getTransactionDate());
+        assertEquals(BUSINESS_DATE_BEFORE,
+                waiveSpecifiedDueDateCharge(dueDate.plusDays(30), BUSINESS_DATE_BEFORE, null).getTransactionDate());
+    }
+
+    private LoanTransaction waiveSpecifiedDueDateCharge(LocalDate dueDate, LocalDate businessDate, LocalDate requestedDate) {
+        MonetaryCurrency currency = MonetaryCurrency.fromCurrencyData(new CurrencyData(CURRENCY_CODE));
+        when(loan.getCurrency()).thenReturn(currency);
+        when(loanCharge.isDueDateCharge()).thenReturn(true);
+        when(loanCharge.getDueLocalDate()).thenReturn(dueDate);
+        // takes the (mocked) full replay rather than the in-memory schedule reprocessing, which needs real installments
+        when(loanCharge.isPaidOrPartiallyPaid(currency)).thenReturn(true);
+
+        try (MockedStatic<DateUtils> mockedDateUtils = mockStatic(DateUtils.class, CALLS_REAL_METHODS);
+                MockedStatic<MoneyHelper> mockedMoneyHelper = mockStatic(MoneyHelper.class)) {
+            mockedDateUtils.when(DateUtils::getBusinessLocalDate).thenReturn(businessDate);
+            mockedMoneyHelper.when(MoneyHelper::getMathContext).thenReturn(java.math.MathContext.DECIMAL64);
+            mockedMoneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(java.math.RoundingMode.HALF_EVEN);
+            Money amountWaived = Money.of(currency, BigDecimal.TEN);
+            when(loanCharge.waive(currency, null)).thenReturn(amountWaived);
+
+            return loanChargeWritePlatformService.waiveLoanCharge(loan, loanCharge, new HashMap<>(), null, scheduleGeneratorDTO,
+                    Money.zero(currency), ExternalId.empty(), requestedDate);
+        }
     }
 }

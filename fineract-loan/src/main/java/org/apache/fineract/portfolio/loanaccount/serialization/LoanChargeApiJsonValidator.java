@@ -239,7 +239,7 @@ public final class LoanChargeApiJsonValidator {
             return;
         }
         Set<String> transactionParameters = new HashSet<>(
-                Arrays.asList("dueDate", "locale", "dateFormat", "installmentNumber", "externalId"));
+                Arrays.asList("transactionDate", "dueDate", "locale", "dateFormat", "installmentNumber", "externalId"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {
 

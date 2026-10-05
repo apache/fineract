@@ -104,4 +104,20 @@ public final class LoanChargeValidator {
                     paymentTransaction.getTransactionDate());
         }
     }
+
+    public void validateChargeWaiverDate(final Loan loan, final LocalDate transactionDate) {
+        if (transactionDate == null) {
+            return;
+        }
+        if (DateUtils.isDateInTheFuture(transactionDate)) {
+            final String errorMessage = "The date on which a loan charge is waived cannot be in the future.";
+            throw new InvalidLoanStateTransitionException("charge.waiver", "cannot.be.a.future.date", errorMessage, transactionDate);
+        }
+        if (DateUtils.isBefore(transactionDate, loan.getDisbursementDate())) {
+            final String errorMessage = "The date on which a loan charge is waived cannot be before the loan disbursement date: "
+                    + loan.getDisbursementDate();
+            throw new InvalidLoanStateTransitionException("charge.waiver", "cannot.be.before.disbursement.date", errorMessage,
+                    transactionDate, loan.getDisbursementDate());
+        }
+    }
 }

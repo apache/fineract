@@ -32,12 +32,15 @@ import java.util.stream.Stream;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargePaidByData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.Named;
@@ -305,6 +308,73 @@ public class LoanWaiveChargeTest extends FeignLoanTestBase {
             CallFailedRuntimeException callFailedRuntimeException = assertThrows(CallFailedRuntimeException.class,
                     () -> chargeOffLoan(appliedLoanId.get(), "05 January 2023"));
             assertTrue(callFailedRuntimeException.getMessage().contains("error.msg.loan.monetary.transactions.after.charge.off"));
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("processingStrategy")
+    public void test_BackdatedWaiverClosesLoanOnRequestedTransactionDate(boolean advancedPaymentStrategy) {
+        double amount = 1000.0;
+        AtomicLong appliedLoanId = new AtomicLong();
+        AtomicLong appliedLoanChargeId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = advancedPaymentStrategy
+                    ? createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    : createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
+            Long loanProductId = createLoanProduct(product);
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, 1);
+            if (advancedPaymentStrategy) {
+                applicationRequest = applicationRequest
+                        .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+            }
+            Long loanId = applyForLoan(applicationRequest);
+            approveLoan(loanId, approveLoanRequest(amount, "01 January 2023"));
+            disburseLoan(loanId, BigDecimal.valueOf(amount), "01 January 2023");
+            appliedLoanId.set(loanId);
+        });
+        runAt("05 February 2023", () -> {
+            Long loanId = appliedLoanId.get();
+            double chargeAmount = 100.0;
+            Long chargeId = createCharge(chargeAmount).getResourceId();
+            appliedLoanChargeId.set(addLoanCharge(loanId, chargeId, "03 February 2023", chargeAmount).getResourceId());
+            addRepaymentForLoan(loanId, amount, "20 January 2023");
+
+            // the derived date would be the charge's due date, 03 February 2023
+            waiveLoanCharge(loanId, appliedLoanChargeId.get(), new PostLoansLoanIdChargesChargeIdRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(DATETIME_PATTERN).transactionDate("25 January 2023"));
+
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+            assertTrue(loanDetails.getStatus().getClosedObligationsMet());
+            assertEquals(LocalDate.of(2023, 1, 25), loanDetails.getTimeline().getClosedOnDate());
+            GetLoansLoanIdTransactions waiver = loanDetails.getTransactions().stream()
+                    .filter(t -> Boolean.TRUE.equals(t.getType().getWaiveCharges())).findFirst().orElseThrow();
+            assertEquals(LocalDate.of(2023, 1, 25), waiver.getDate());
+        });
+    }
+
+    @Test
+    public void test_WaiverTransactionDateCannotBeInTheFuture() {
+        double amount = 1000.0;
+        runAt("01 January 2023", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long loanProductId = createLoanProduct(
+                    createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation());
+            Long loanId = applyForLoan(applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, 1)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+            approveLoan(loanId, approveLoanRequest(amount, "01 January 2023"));
+            disburseLoan(loanId, BigDecimal.valueOf(amount), "01 January 2023");
+
+            double chargeAmount = 100.0;
+            Long chargeId = createCharge(chargeAmount).getResourceId();
+            Long loanChargeId = addLoanCharge(loanId, chargeId, "15 January 2023", chargeAmount).getResourceId();
+
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> waiveLoanCharge(loanId, loanChargeId, new PostLoansLoanIdChargesChargeIdRequest().locale(LoanTestData.LOCALE)
+                            .dateFormat(DATETIME_PATTERN).transactionDate("02 January 2023")));
+            assertTrue(exception.getMessage().contains("error.msg.loan.charge.waiver.cannot.be.a.future.date"));
         });
     }
 }
