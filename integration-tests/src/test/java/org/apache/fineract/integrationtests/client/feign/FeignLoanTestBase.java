@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -38,6 +39,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.fineract.client.feign.FeignException;
@@ -398,6 +400,60 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected PostLoansLoanIdResponse undoContractTermination(Long loanId) {
         return moveLoanState(loanId, new PostLoansLoanIdRequest().note("Undo Contract Termination"), "undoContractTermination");
+    }
+
+    protected PostLoansLoanIdResponse applyLoanWithdrawal(Long loanId, String transactionDate) {
+        return moveLoanState(loanId,
+                new PostLoansLoanIdRequest().transactionDate(transactionDate).dateFormat(LoanTestData.DATETIME_PATTERN)
+                        .locale(LoanTestData.LOCALE).note("Loan Withdrawal").externalId(Utils.randomStringGenerator("", 20)),
+                "loanWithdrawal");
+    }
+
+    protected PostLoansLoanIdResponse applyLoanWithdrawal(Long loanId) {
+        return moveLoanState(loanId, new PostLoansLoanIdRequest().note("Loan Withdrawal").externalId(Utils.randomStringGenerator("", 20)),
+                "loanWithdrawal");
+    }
+
+    protected PostLoansLoanIdResponse undoLoanWithdrawal(Long loanId) {
+        return moveLoanState(loanId, new PostLoansLoanIdRequest().note("Undo Loan Withdrawal"), "undoLoanWithdrawal");
+    }
+
+    // Expected values come from the "Contract Termination Examples" sheet 1vFvry9rVEIvHuHvXeQ3zhEIevtLsGWAGUmRxI4cIjpE
+    protected Long disburseSpecSheetLoanAndRepayFirstInstallment(Long clientId, Long loanProductId) {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+
+        runAt("1 January 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 500.0, 7.0, 6, null);
+            loanIdRef.set(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
+        });
+
+        runAt("1 February 2024", () -> makeLoanRepayment(loanIdRef.get(), "repayment", "01 February 2024", 17.01));
+
+        return loanIdRef.get();
+    }
+
+    protected double accruedInterest(Long loanId) {
+        double accrued = getLoanDetails(loanId).getTransactions().stream().filter(tr -> !Boolean.TRUE.equals(tr.getManuallyReversed()))
+                .mapToDouble(tr -> switch (tr.getType().getValue()) {
+                    case "Accrual" -> Utils.getDoubleValue(tr.getAmount());
+                    case "Accrual Adjustment" -> -Utils.getDoubleValue(tr.getAmount());
+                    default -> 0.0;
+                }).sum();
+        return BigDecimal.valueOf(accrued).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    protected void assertNoAccrualAfter(Long loanId, LocalDate date) {
+        assertTrue(getLoanDetails(loanId).getTransactions().stream()
+                .filter(tr -> "Accrual".equals(tr.getType().getValue()) || "Accrual Adjustment".equals(tr.getType().getValue()))
+                .noneMatch(tr -> tr.getDate().isAfter(date)), "Accrual or accrual adjustment dated after " + date);
+    }
+
+    protected double interimJournalBalance(Long loanId, Long glAccountId, LocalDate cutoff, boolean debitNormal) {
+        double debitBalance = journalHelper.getJournalEntriesForLoan(loanId).getPageItems().stream()
+                .filter(entry -> glAccountId.equals(entry.getGlAccountId())).filter(entry -> !entry.getTransactionDate().isAfter(cutoff))
+                .mapToDouble(entry -> "DEBIT".equals(entry.getEntryType().getValue()) ? entry.getAmount() : -entry.getAmount()).sum();
+        return BigDecimal.valueOf(debitNormal ? debitBalance : -debitBalance).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     protected PostLoansLoanIdTransactionsResponse closeLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {

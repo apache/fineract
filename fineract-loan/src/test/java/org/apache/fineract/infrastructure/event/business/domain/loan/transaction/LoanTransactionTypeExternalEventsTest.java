@@ -37,6 +37,8 @@ class LoanTransactionTypeExternalEventsTest {
                 LoanTransactionTypeExternalEvents.externalEventTypeFor(LoanTransactionType.REPAYMENT));
         assertEquals(Optional.of("LoanChargebackTransactionBusinessEvent"),
                 LoanTransactionTypeExternalEvents.externalEventTypeFor(LoanTransactionType.CHARGEBACK));
+        assertEquals(Optional.of("LoanTransactionLoanWithdrawalPostBusinessEvent"),
+                LoanTransactionTypeExternalEvents.externalEventTypeFor(LoanTransactionType.LOAN_WITHDRAWAL));
     }
 
     @Test

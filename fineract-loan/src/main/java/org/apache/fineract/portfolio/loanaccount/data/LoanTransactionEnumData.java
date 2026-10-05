@@ -73,6 +73,7 @@ public class LoanTransactionEnumData implements Serializable, LoanTransactionTyp
     private final boolean capitalizedIncomeAdjustment;
     private final boolean capitalizedIncomeAmortizationAdjustment;
     private final boolean contractTermination;
+    private final boolean loanWithdrawal;
     private final boolean buyDownFee;
     private final boolean buyDownFeeAdjustment;
     private final boolean buyDownFeeAmortization;
@@ -119,6 +120,7 @@ public class LoanTransactionEnumData implements Serializable, LoanTransactionTyp
         this.capitalizedIncomeAmortizationAdjustment = Long
                 .valueOf(LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT.getValue()).equals(this.id);
         this.contractTermination = Long.valueOf(LoanTransactionType.CONTRACT_TERMINATION.getValue()).equals(this.id);
+        this.loanWithdrawal = Long.valueOf(LoanTransactionType.LOAN_WITHDRAWAL.getValue()).equals(this.id);
         this.buyDownFee = Long.valueOf(LoanTransactionType.BUY_DOWN_FEE.getValue()).equals(this.id);
         this.buyDownFeeAdjustment = Long.valueOf(LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT.getValue()).equals(this.id);
         this.buyDownFeeAmortization = Long.valueOf(LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION.getValue()).equals(this.id);

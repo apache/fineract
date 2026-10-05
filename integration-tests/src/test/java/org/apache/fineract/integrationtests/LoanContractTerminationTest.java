@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -551,44 +550,6 @@ public class LoanContractTerminationTest extends FeignLoanTestBase {
             assertEquals(0.71, interimJournalBalance(loanId, getAssetAccountId("interestReceivable"), periodEnd, true),
                     "Interest receivable booked up to 15 March 2024");
         });
-    }
-
-    private double interimJournalBalance(Long loanId, Long glAccountId, LocalDate cutoff, boolean debitNormal) {
-        double debitBalance = journalHelper.getJournalEntriesForLoan(loanId).getPageItems().stream()
-                .filter(entry -> glAccountId.equals(entry.getGlAccountId())).filter(entry -> !entry.getTransactionDate().isAfter(cutoff))
-                .mapToDouble(entry -> "DEBIT".equals(entry.getEntryType().getValue()) ? entry.getAmount() : -entry.getAmount()).sum();
-        return BigDecimal.valueOf(debitNormal ? debitBalance : -debitBalance).setScale(2, RoundingMode.HALF_UP).doubleValue();
-    }
-
-    // Expected values come from the "Contract Termination Examples" sheet 1vFvry9rVEIvHuHvXeQ3zhEIevtLsGWAGUmRxI4cIjpE
-    private Long disburseSpecSheetLoanAndRepayFirstInstallment(Long clientId, Long loanProductId) {
-        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
-
-        runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 500.0, 7.0, 6, null);
-            loanIdRef.set(loanId);
-            disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-        });
-
-        runAt("1 February 2024", () -> makeLoanRepayment(loanIdRef.get(), "repayment", "01 February 2024", 17.01));
-
-        return loanIdRef.get();
-    }
-
-    private double accruedInterest(Long loanId) {
-        double accrued = getLoanDetails(loanId).getTransactions().stream().filter(tr -> !Boolean.TRUE.equals(tr.getManuallyReversed()))
-                .mapToDouble(tr -> switch (tr.getType().getValue()) {
-                    case "Accrual" -> Utils.getDoubleValue(tr.getAmount());
-                    case "Accrual Adjustment" -> -Utils.getDoubleValue(tr.getAmount());
-                    default -> 0.0;
-                }).sum();
-        return BigDecimal.valueOf(accrued).setScale(2, RoundingMode.HALF_UP).doubleValue();
-    }
-
-    private void assertNoAccrualAfter(Long loanId, LocalDate date) {
-        assertTrue(getLoanDetails(loanId).getTransactions().stream()
-                .filter(tr -> "Accrual".equals(tr.getType().getValue()) || "Accrual Adjustment".equals(tr.getType().getValue()))
-                .noneMatch(tr -> tr.getDate().isAfter(date)), "Accrual or accrual adjustment dated after " + date);
     }
 
     private void assertNoContractTermination(Long loanId) {

@@ -777,6 +777,8 @@ final class LoansApiResourceSwagger {
                 @Schema(example = "false")
                 public boolean contractTermination;
                 @Schema(example = "false")
+                public boolean loanWithdrawal;
+                @Schema(example = "false")
                 public boolean buyDownFee;
                 @Schema(example = "false")
                 public boolean buyDownFeeAdjustment;

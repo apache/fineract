@@ -56,6 +56,7 @@ public interface LoanTransactionApiConstants {
         capitalizedIncomeAmortization, //
         capitalizedIncomeAdjustment, //
         contractTermination, //
+        loanWithdrawal, //
         capitalizedIncomeAmortizationAdjustment, //
         buyDownFeeAmortization, //
         buyDownFeeAmortizationAdjustment, //
