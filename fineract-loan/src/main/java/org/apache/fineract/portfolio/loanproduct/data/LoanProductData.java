@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -38,6 +39,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -92,6 +94,9 @@ public class LoanProductData implements Serializable {
     private final LocalDate closeDate;
     private final String status;
     private final String externalId;
+
+    @Setter
+    private List<DatatableData> datatables;
     // terms
     private final CurrencyData currency;
     private final BigDecimal principal;
