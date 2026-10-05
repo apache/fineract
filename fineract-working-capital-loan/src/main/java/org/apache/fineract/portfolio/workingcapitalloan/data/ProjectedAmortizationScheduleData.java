@@ -24,6 +24,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 
 @Getter
 @Builder
@@ -34,6 +35,10 @@ public class ProjectedAmortizationScheduleData {
     private final BigDecimal netDisbursementAmount;
     private final BigDecimal totalPaymentVolume;
     private final BigDecimal periodPaymentRate;
+    /** Which input the plan was solved from; decides which of the three inputs beside it is set. */
+    private final StringEnumOptionData paymentAmountCalculationStrategy;
+    private final BigDecimal annualEir;
+    private final BigDecimal paymentAmount;
     private final int npvDayCount;
     private final LocalDate expectedDisbursementDate;
     private final BigDecimal expectedPaymentAmount;

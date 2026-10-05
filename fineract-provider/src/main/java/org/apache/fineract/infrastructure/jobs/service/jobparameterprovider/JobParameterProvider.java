@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.jobs.service.jobparameterprovider;
 import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
-import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.job.parameters.JobParameter;
 
 public interface JobParameterProvider<T> {
 

@@ -19,8 +19,10 @@
 package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class WorkingCapitalLoanBreachScheduleEvaluationUtils {
@@ -41,6 +43,19 @@ public final class WorkingCapitalLoanBreachScheduleEvaluationUtils {
                 .max(Comparator.comparingInt(period -> period.getPeriodNumber() != null ? period.getPeriodNumber() : Integer.MIN_VALUE));
     }
 
+    public static void applyResetFlags(final List<WorkingCapitalLoanBreachSchedule> periods,
+            final Collection<WorkingCapitalLoanBreachAction> activeResets) {
+        if (periods == null) {
+            return;
+        }
+        periods.forEach(period -> period.setReset(false));
+        if (activeResets == null) {
+            return;
+        }
+        activeResets.stream().filter(Objects::nonNull)
+                .forEach(reset -> resolveEvaluationPeriod(periods, reset.getStartDate()).ifPresent(period -> period.setReset(true)));
+    }
+
     public static LocalDate calculateToDate(final LocalDate fromDate, final Integer frequency,
             final WorkingCapitalLoanPeriodFrequencyType frequencyType) {
         return switch (frequencyType) {
@@ -52,14 +67,28 @@ public final class WorkingCapitalLoanBreachScheduleEvaluationUtils {
     }
 
     /**
-     * End date a period gets when a reschedule re-dates it: the new frequency applied from the period start, extended
-     * by the recorded pauses that overlap it. Shared by the reschedule validator and the schedule service so the check
+     * End date a period gets from its own bounds: the frequency applied from the period start, extended by the breach
+     * grace days when the period is the first one.
+     *
+     * Only the first period carries the breach grace days, and every subsequent period is chained from its end date, so
+     * every path that dates or re-dates a period must agree on this or the whole schedule drifts by the grace days.
+     */
+    public static LocalDate calculateNaturalToDate(final LocalDate fromDate, final Integer periodNumber, final Integer frequency,
+            final WorkingCapitalLoanPeriodFrequencyType frequencyType, final Integer breachGraceDays) {
+        final int graceDays = Integer.valueOf(1).equals(periodNumber) && breachGraceDays != null ? breachGraceDays : 0;
+        return calculateToDate(fromDate, frequency, frequencyType).plusDays(graceDays);
+    }
+
+    /**
+     * End date a period gets when a reschedule re-dates it: its natural end date under the new frequency, extended by
+     * the recorded pauses that overlap it. Shared by the reschedule validator and the schedule service so the check
      * cannot drift from the mutation it guards.
      */
-    public static LocalDate calculateRescheduledToDate(final LocalDate fromDate, final Integer frequency,
-            final WorkingCapitalLoanPeriodFrequencyType frequencyType, final List<WorkingCapitalLoanBreachAction> actions) {
+    public static LocalDate calculateRescheduledToDate(final LocalDate fromDate, final Integer periodNumber, final Integer frequency,
+            final WorkingCapitalLoanPeriodFrequencyType frequencyType, final Integer breachGraceDays,
+            final List<WorkingCapitalLoanBreachAction> actions) {
         return WorkingCapitalLoanBreachPauseUtils.extendToDateByRecordedPauses(fromDate,
-                calculateToDate(fromDate, frequency, frequencyType), actions);
+                calculateNaturalToDate(fromDate, periodNumber, frequency, frequencyType, breachGraceDays), actions);
     }
 
 }

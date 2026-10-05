@@ -155,6 +155,7 @@ import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.W
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanChargeOffTransactionBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanChargeWaiverTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanDisbursalTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent;
@@ -163,6 +164,7 @@ import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.W
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanDiscountFeeTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanGoodwillCreditTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanPayoutRefundTransactionBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanRecoveryPaymentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanRepaymentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent;
@@ -442,8 +444,10 @@ public class EventCheckHelper {
     private void workingCapitalLoanTransactionEventCheck(final Class<? extends AbstractWorkingCapitalLoanTransactionEvent> eventClazz,
             final Long loanId, final GetWorkingCapitalLoanTransactionIdResponse transaction, final BigDecimal expectedAmount,
             final boolean expectedReversed) {
+        final String loanExternalId = fetchWorkingCapitalLoan(loanId).getExternalId();
         eventAssertion.assertEvent(eventClazz, transaction.getId())//
                 .extractingData(WorkingCapitalLoanTransactionDataV1::getWcLoanId).isEqualTo(loanId)//
+                .extractingData(WorkingCapitalLoanTransactionDataV1::getExternalLoanId).isEqualTo(loanExternalId)//
                 .extractingBigDecimal(WorkingCapitalLoanTransactionDataV1::getTransactionAmount)
                 .isEqualTo(expectedAmount == null ? transaction.getTransactionAmount() : expectedAmount)//
                 .extractingData(data -> data.getType().getCode()).isEqualTo(transaction.getType().getCode())//
@@ -476,15 +480,6 @@ public class EventCheckHelper {
             PostLoansLoanIdTransactionsResponse transactionResponse, TransactionType transactionType, String externalOwnerId) {
         Long loanId = transactionResponse.getLoanId();
         Long transactionId = transactionResponse.getResourceId();
-        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
-                Map.of("staffInSelectedOfficeOnly", false, "associations", "transactions", "exclude", "", "fields", "")));
-        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
-        GetLoansLoanIdTransactions transactionFound = transactions//
-                .stream()//
-                .filter(t -> t.getId().equals(transactionId))//
-                .findAny()//
-                .orElseThrow(() -> new IllegalStateException("Transaction cannot be found"));//
-
         Class<? extends AbstractLoanTransactionEvent> eventClass = switch (transactionType) {
             case REPAYMENT -> LoanTransactionMakeRepaymentPostEvent.class;
             case GOODWILL_CREDIT -> LoanTransactionGoodwillCreditPostEvent.class;
@@ -495,12 +490,41 @@ public class EventCheckHelper {
             case INTEREST_REFUND -> LoanTransactionInterestRefundPostEvent.class;
             default -> throw new IllegalStateException(String.format("transaction type %s cannot be found", transactionType.getValue()));
         };
+        return transactionEventCheck(loanId, transactionId, eventClass, externalOwnerId);
+    }
 
-        EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> eventBuilder = eventAssertion.assertEvent(eventClass, transactionId);
+    public EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> transactionEventCheck(Long loanId, Long transactionId,
+            Class<? extends AbstractLoanTransactionEvent> eventClass, String externalOwnerId) {
+        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", false, "associations", "transactions", "exclude", "", "fields", "")));
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
+        GetLoansLoanIdTransactions transactionFound = transactions//
+                .stream()//
+                .filter(t -> t.getId().equals(transactionId))//
+                .findAny()//
+                .orElseThrow(() -> new IllegalStateException("Transaction cannot be found"));//
+
+        // The action step that raised the event may already have verified (and so removed) it
+        EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> eventBuilder = eventAssertion.assertEventReceived(eventClass,
+                transactionId);
         eventBuilder.extractingData(LoanTransactionDataV1::getLoanId).isEqualTo(loanDetailsResponse.getId())//
                 .extractingData(LoanTransactionDataV1::getDate).isEqualTo(FORMATTER_EVENTS.format(transactionFound.getDate()))//
                 .extractingBigDecimal(LoanTransactionDataV1::getAmount).isEqualTo(transactionFound.getAmount())//
                 .extractingData(LoanTransactionDataV1::getExternalOwnerId).isEqualTo(externalOwnerId);//
+        return eventBuilder;
+    }
+
+    public EventAssertion.EventAssertionBuilder<LoanTransactionAdjustmentDataV1> loanAdjustTransactionEventCheck(Long originalTransactionId,
+            String externalOwnerId) {
+        // The undo step already verifies (and so removes) this event
+        EventAssertion.EventAssertionBuilder<LoanTransactionAdjustmentDataV1> eventBuilder = eventAssertion
+                .assertEventReceived(LoanAdjustTransactionBusinessEvent.class, originalTransactionId);
+        eventBuilder.extractingData(data -> data.getTransactionToAdjust().getId()).isEqualTo(originalTransactionId)//
+                .extractingData(data -> data.getTransactionToAdjust().getExternalOwnerId()).isEqualTo(externalOwnerId)//
+                // A plain reversal has no replacement transaction; when there is one it must carry the same owner
+                .extractingData(data -> data.getNewTransactionDetail() == null
+                        || Objects.equals(externalOwnerId, data.getNewTransactionDetail().getExternalOwnerId()))
+                .isEqualTo(true); //
         return eventBuilder;
     }
 
@@ -809,15 +833,27 @@ public class EventCheckHelper {
             final List<WorkingCapitalLoanChargeDataV1> eventCharges = event.getCharges();
             assertThat(eventCharges).isNotNull().hasSize(expectedCharges.size());
             IntStream.range(0, expectedCharges.size()).forEach(i -> {
-                final Map<String, String> expected = expectedCharges.get(i);
                 final WorkingCapitalLoanChargeDataV1 actual = eventCharges.get(i);
-                assertAmountEquals("charges[" + i + "].amount", actual.getAmount(), new BigDecimal(expected.get("amount")));
-                assertAmountEquals("charges[" + i + "].amountAccrued", actual.getAmountAccrued(),
-                        new BigDecimal(expected.get("amountAccrued")));
-                assertAmountEquals("charges[" + i + "].amountUnrecognized", actual.getAmountUnrecognized(),
-                        new BigDecimal(expected.get("amountUnrecognized")));
+                expectedCharges.get(i).forEach((column, expectedValue) -> assertAmountEquals("charges[" + i + "]." + column,
+                        chargeAmountOf(actual, column), new BigDecimal(expectedValue)));
             });
         });
+    }
+
+    private BigDecimal chargeAmountOf(final WorkingCapitalLoanChargeDataV1 charge, final String columnName) {
+        return switch (columnName) {
+            case "amount" -> charge.getAmount();
+            case "amountWaived" -> charge.getAmountWaived();
+            case "amountWrittenOff" -> charge.getAmountWrittenOff();
+            case "amountAccrued" -> charge.getAmountAccrued();
+            case "amountUnrecognized" -> charge.getAmountUnrecognized();
+            default -> throw new IllegalArgumentException("Unsupported charge amount column: " + columnName);
+        };
+    }
+
+    public void workingCapitalLoanBalanceChangedEventAnnualEirCheck(final Long loanId, final String expectedAnnualEir) {
+        workingCapitalLoanEventPayloadCheck(WorkingCapitalLoanBalanceChangedEvent.class, loanId,
+                event -> assertAmountEquals("calculatedAnnualEir", event.getCalculatedAnnualEir(), new BigDecimal(expectedAnnualEir)));
     }
 
     public void workingCapitalLoanDelinquencyRangeChangeEventCheck(final Long loanId) {
@@ -832,6 +868,31 @@ public class EventCheckHelper {
             assertAmountEquals("delinquent.totalDelinquentAmount", eventDelinquent.getTotalDelinquentAmount(),
                     bodyDelinquent.getDelinquentPrincipal());
             assertThat(eventDelinquent.getDelinquencySchedule()).isNotEmpty();
+        });
+    }
+
+    public void workingCapitalLoanDelinquencyRangeChangeEventWithDelinquencyDataCheck(final Long loanId,
+            final Map<String, String> expected) {
+        workingCapitalLoanEventPayloadCheck(WorkingCapitalLoanDelinquencyRangeChangeEvent.class, loanId, event -> {
+            final WorkingCapitalLoanDelinquencyDataV1 delinquency = event.getDelinquency();
+            assertThat(delinquency).as("delinquency").isNotNull();
+            Optional.ofNullable(expected.get("delinquencyStartType")).ifPresent(expectedType -> {
+                assertThat(delinquency.getDelinquencyStartType()).as("delinquency.delinquencyStartType").isNotNull();
+                assertThat(delinquency.getDelinquencyStartType().getCode()).as("delinquency.delinquencyStartType.code")
+                        .isEqualTo(expectedType);
+            });
+            assertEventDateEquals("delinquency.delinquencyStartDate", delinquency.getDelinquencyStartDate(),
+                    expected.get("delinquencyStartDate"));
+            assertEventDateEquals("delinquency.delinquencyEffectiveStartDate", delinquency.getDelinquencyEffectiveStartDate(),
+                    expected.get("delinquencyEffectiveStartDate"));
+
+            final WorkingCapitalLoanCollectionDataV1 delinquent = event.getDelinquent();
+            assertThat(delinquent).as("delinquent").isNotNull();
+            Optional.ofNullable(expected.get("delinquentAmount")).ifPresent(
+                    amount -> assertAmountEquals("delinquent.delinquentAmount", delinquent.getDelinquentAmount(), new BigDecimal(amount)));
+            Optional.ofNullable(expected.get("totalDelinquentAmount"))
+                    .ifPresent(amount -> assertAmountEquals("delinquent.totalDelinquentAmount", delinquent.getTotalDelinquentAmount(),
+                            new BigDecimal(amount)));
         });
     }
 
@@ -1000,6 +1061,11 @@ public class EventCheckHelper {
         });
     }
 
+    public void workingCapitalLoanStatusChangedEventOverpaidOnDateCheck(final Long loanId) {
+        workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanStatusChangedEvent.class, loanId,
+                (event, body) -> assertEventDateEqualsApiDate("overpaidOnDate", event.getOverpaidOnDate(), body.getOverpaidOnDate()));
+    }
+
     public void workingCapitalLoanBalanceChangedEventPausePeriodsCheck(final Long loanId) {
         workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanBalanceChangedEvent.class, loanId, (event, body) -> {
             assertThat(event.getDelinquent()).isNotNull();
@@ -1115,9 +1181,29 @@ public class EventCheckHelper {
     public void workingCapitalLoanBreachChangeEventCheck(final Long loanId, final Boolean expectedBreach) {
         workingCapitalLoanEventPayloadCheck(WorkingCapitalLoanBreachChangeEvent.class, loanId, event -> {
             assertThat(event.getBreach()).isNotNull();
-            assertThat(event.getBreach().getBreachSchedule()).isNotNull().isNotEmpty();
-            assertThat(event.getBreach().getBreachSchedule()).as("breach.breachSchedule has a period with breach=%s", expectedBreach)
-                    .anyMatch(period -> expectedBreach.equals(period.getBreach()));
+            assertBreachScheduleHasPeriodWithBreach(event.getBreach(), expectedBreach);
+        });
+    }
+
+    private static void assertBreachScheduleHasPeriodWithBreach(final WorkingCapitalBreachDataV1 breach, final Boolean expectedBreach) {
+        assertThat(breach.getBreachSchedule()).as("breach.breachSchedule").isNotNull().isNotEmpty();
+        assertThat(breach.getBreachSchedule()).as("breach.breachSchedule has a period with breach=%s", expectedBreach)
+                .anyMatch(period -> expectedBreach.equals(period.getBreach()));
+    }
+
+    public void workingCapitalLoanBreachChangeEventWithBreachDataCheck(final Long loanId, final Map<String, String> expected) {
+        workingCapitalLoanEventPayloadCheck(WorkingCapitalLoanBreachChangeEvent.class, loanId, event -> {
+            final WorkingCapitalBreachDataV1 breach = event.getBreach();
+            assertThat(breach).as("breach").isNotNull();
+            Optional.ofNullable(expected.get("breachFlag"))
+                    .ifPresent(flag -> assertBreachScheduleHasPeriodWithBreach(breach, Boolean.valueOf(flag)));
+            assertEventDateEquals("breach.breachStartDate", breach.getBreachStartDate(), expected.get("breachStartDate"));
+            assertEventDateEquals("breach.breachEffectiveStartDate", breach.getBreachEffectiveStartDate(),
+                    expected.get("breachEffectiveStartDate"));
+            Optional.ofNullable(expected.get("breachAmount"))
+                    .ifPresent(amount -> assertAmountEquals("breach.breachAmount", breach.getBreachAmount(), new BigDecimal(amount)));
+            Optional.ofNullable(expected.get("breachPastDueAmount")).ifPresent(
+                    amount -> assertAmountEquals("breach.breachPastDueAmount", breach.getBreachPastDueAmount(), new BigDecimal(amount)));
         });
     }
 
@@ -1198,8 +1284,10 @@ public class EventCheckHelper {
         waitForTransactionCommit();
         final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, transactionType, true,
                 "Reversed " + transactionType + " transaction not found");
+        final String loanExternalId = fetchWorkingCapitalLoan(loanId).getExternalId();
         eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transaction.getId())//
                 .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
+                .extractingData(data -> data.getTransactionToAdjust().getExternalLoanId()).isEqualTo(loanExternalId)//
                 .extractingBigDecimal(data -> data.getTransactionToAdjust().getTransactionAmount())
                 .isEqualTo(transaction.getTransactionAmount())//
                 .extractingData(data -> data.getTransactionToAdjust().getType().getCode()).isEqualTo(transaction.getType().getCode())//
@@ -1212,8 +1300,11 @@ public class EventCheckHelper {
             final BigDecimal previousFeeChargesPortion, final BigDecimal newFeeChargesPortion) {
         final GetWorkingCapitalLoanTransactionIdResponse transaction = workingCapitalLoanTransactionDetails(loanId, transactionType,
                 transactionDate);
+        final String loanExternalId = fetchWorkingCapitalLoan(loanId).getExternalId();
         eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transaction.getId())//
                 .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
+                .extractingData(data -> data.getTransactionToAdjust().getExternalLoanId()).isEqualTo(loanExternalId)//
+                .extractingData(data -> data.getNewTransactionDetail().getExternalLoanId()).isEqualTo(loanExternalId)//
                 .extractingBigDecimal(data -> data.getTransactionToAdjust().getPrincipalPortion()).isEqualTo(previousPrincipalPortion)//
                 .extractingBigDecimal(data -> data.getTransactionToAdjust().getFeeChargesPortion()).isEqualTo(previousFeeChargesPortion)//
                 .extractingBigDecimal(data -> data.getNewTransactionDetail().getPrincipalPortion()).isEqualTo(newPrincipalPortion)//
@@ -1260,11 +1351,27 @@ public class EventCheckHelper {
                 expectedAmount, false);
     }
 
+    public void workingCapitalLoanChargeWaiverTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "waiveCharges", false,
+                "Charge waiver transaction not found");
+        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanChargeWaiverTransactionBusinessEvent.class, loanId, transaction,
+                expectedAmount, false);
+    }
+
     public void workingCapitalLoanChargeOffTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
         waitForTransactionCommit();
         final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "chargeOff", false,
                 "Charge-off transaction not found");
         workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanChargeOffTransactionBusinessEvent.class, loanId, transaction,
+                expectedAmount, false);
+    }
+
+    public void workingCapitalLoanRecoveryPaymentTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "recoveryRepayment",
+                false, "Recovery payment transaction not found");
+        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanRecoveryPaymentTransactionBusinessEvent.class, loanId, transaction,
                 expectedAmount, false);
     }
 
@@ -1364,6 +1471,16 @@ public class EventCheckHelper {
 
     private static void assertEventDateEqualsApiDate(final String description, final String eventDate, final LocalDate apiDate) {
         assertThat(eventDate).as(description).isEqualTo(apiDate == null ? null : FORMATTER_EVENTS.format(apiDate));
+    }
+
+    private static void assertEventDateEquals(final String description, final String eventDate, final String expectedDate) {
+        Optional.ofNullable(expectedDate).filter(s -> !s.isEmpty()).ifPresent(expected -> {
+            if ("null".equals(expected)) {
+                assertThat(eventDate).as(description).isNull();
+            } else {
+                assertThat(eventDate).as(description).isEqualTo(expected);
+            }
+        });
     }
 
     private void workingCapitalLoanAccountDataV1Check(final Class<? extends AbstractWorkingCapitalLoanEvent> eventClazz,

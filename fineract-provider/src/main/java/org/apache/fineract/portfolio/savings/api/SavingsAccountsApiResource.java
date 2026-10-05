@@ -171,6 +171,9 @@ public class SavingsAccountsApiResource {
     @Path("/gsim")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Submit a group savings (GSIM) application", operationId = "submitGSIMApplication")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsGsimRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsGsimResponse.class)))
     public String submitGSIMApplication(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createGSIMAccount().withJson(apiRequestBodyAsJson).build();
@@ -248,6 +251,9 @@ public class SavingsAccountsApiResource {
     @Path("/gsim/{parentAccountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update a group savings (GSIM) application", operationId = "updateGsim")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsGsimRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsGsimResponse.class)))
     public String updateGsim(@PathParam("parentAccountId") final Long parentAccountId, final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGSIMAccount(parentAccountId).withJson(apiRequestBodyAsJson)
                 .build();
@@ -261,6 +267,9 @@ public class SavingsAccountsApiResource {
     @Path("/gsimcommands/{parentAccountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Act on a group savings (GSIM) application", description = "Commands: reject, withdrawnByApplicant, approve, undoapproval, activate, calculateInterest, postInterest, close", operationId = "handleGSIMCommands")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class)))
     public String handleGSIMCommands(@PathParam("parentAccountId") final Long parentAccountId,
             @QueryParam("command") final String commandParam, final String apiRequestBodyAsJson) {
 

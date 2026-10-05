@@ -95,7 +95,7 @@ buildscript {
 
     dependencies {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.9.0'
-        classpath 'org.eclipse.persistence:eclipselink:4.0.9'
+        classpath 'org.eclipse.persistence:eclipselink:5.0.2'
         classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
         classpath 'org.apache.commons:commons-lang3:3.20.0'
@@ -107,21 +107,19 @@ buildscript {
 }
 
 plugins {
-    id 'me.qoomon.git-versioning' version '6.4.4'
     id "org.barfuin.gradle.taskinfo" version "3.0.2"
     id 'com.adarshr.test-logger' version '4.0.0'
-    id 'com.diffplug.spotless' version '6.25.0' apply false
+    id 'com.diffplug.spotless' version '8.10.2' apply false
     id 'org.nosphere.apache.rat' version '0.8.1' apply false
-    id 'com.github.hierynomus.license' version '0.16.1' apply false
-    id 'com.github.jk1.dependency-license-report' version '2.9' apply false
+    id 'com.github.jk1.dependency-license-report' version '3.1.4' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.2' apply false
-    id 'org.springframework.boot' version '3.5.15' apply false
+    id 'org.springframework.boot' version '4.1.0' apply false
     id 'net.ltgt.errorprone' version '4.4.0' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.49' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.5.7' apply false
     id 'org.asciidoctor.jvm.convert' version '4.0.5' apply false
     id 'org.asciidoctor.jvm.pdf' version '4.0.5' apply false
-    id 'com.google.cloud.tools.jib' version '3.5.3' apply false
+    id 'com.google.cloud.tools.jib' version '3.5.4' apply false
     id 'org.sonarqube' version '6.3.1.5724'
     id 'com.github.andygoossens.modernizer' version '1.13.0' apply false
     id 'com.github.spotbugs' version '6.5.4' apply false
@@ -143,26 +141,26 @@ gradle clean bootRun'''
 
 version = '0.0.0-SNAPSHOT'
 
-gitVersioning.apply {
-    refs {
-        considerTagsOnBranches = true
+// Replaces me.qoomon's git-versioning plugin, which spawns git processes at configuration time and so cannot work with
+// the configuration cache. Same rules: release/maintenance branches and x.y.z tags on HEAD get the nearest tag's
+// version, anything else gets the next minor as a SNAPSHOT.
+def gitVersion = providers.of(org.apache.fineract.gradle.GitVersionValueSource) {
+    parameters {
+        projectDirectory = layout.projectDirectory
         describeTagPattern = '.*(\\d+\\.\\d+\\.\\d+).*'
-        describeTagFirstParent = false
-
-        branch("release\\/\\d+\\.\\d+\\.\\d+") {
-            version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch}'
-        }
-        branch("maintenance\\/\\d+\\.\\d+") {
-            version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch}'
-        }
-        tag("(\\d+\\.\\d+\\.\\d+)") {
-            version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch}'
-        }
+        releaseBranchPatterns = [
+            'release\\/\\d+\\.\\d+\\.\\d+',
+            'maintenance\\/\\d+\\.\\d+'
+        ]
+        releaseTagPattern = '(\\d+\\.\\d+\\.\\d+)'
     }
-    rev {
-        version = '${describe.tag.version.major}.${describe.tag.version.minor.next}.0-SNAPSHOT'
+}.orNull
+if (gitVersion != null) {
+    allprojects {
+        version = gitVersion
     }
 }
+logger.lifecycle("project version: ${version}")
 
 ext['swaggerFile'] = "$rootDir/fineract-provider/build/resources/main/static/fineract.json".toString()
 
@@ -192,15 +190,13 @@ allprojects  {
         }
         resolutionStrategy {
             dependencySubstitution {
-                // Substitution is to resolve CVE-2025-12183
-                substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.11.0')
+                substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.11.4')
             }
         }
     }
 
     apply plugin: 'com.adarshr.test-logger'
     apply plugin: 'com.diffplug.spotless'
-    apply plugin: 'com.github.hierynomus.license'
     apply plugin: 'net.ltgt.errorprone'
 
     tasks.withType(JavaCompile).configureEach {
@@ -227,6 +223,17 @@ allprojects  {
 
     apply plugin: 'org.nosphere.apache.rat'
     apply plugin: 'com.github.jk1.dependency-license-report'
+    tasks.withType(com.github.jk1.license.task.ReportTask).configureEach { task ->
+        notCompatibleWithConfigurationCache('com.github.jk1.dependency-license-report keeps Project references in its tasks')
+        // jk1 opens the jars of project dependencies without depending on the tasks that build them, so a parallel
+        // build could hand it a half-written jar ("zip END header not found").
+        rootProject.ext.LICENSE_REPORT_CONFIGURATIONS.each { name ->
+            def configuration = project.configurations.findByName(name)
+            if (configuration != null) {
+                task.dependsOn(configuration)
+            }
+        }
+    }
 
     // Configuration for the sonarqube plugin is now in GitHub Actions
 
@@ -236,7 +243,7 @@ allprojects  {
         format 'misc', {
             target '**/*.md', '**/*.properties', '**/.gitignore', '**/.openapi-generator-ignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
             targetExclude '**/build/**', '**/bin/**', '**/.settings/**', '**/.idea/**', '**/.gradle/**', '**/gradlew.bat', '**/licenses/**', '**/banner.txt', '.vscode/**', '.profileconfig.json', '**/*.md'
-            indentWithSpaces(4)
+            leadingTabsToSpaces(4)
             endWithNewline()
             trimTrailingWhitespace()
         }
@@ -244,36 +251,14 @@ allprojects  {
         groovyGradle {
             target '*.gradle', '**/*.gradle'
             targetExclude '**/build/**', '/**/build.gradle','**/static-weaving.gradle' // TODO: temporary disabled on build.gradle until someone fix this issue: https://github.com/diffplug/spotless/issues/1807
-            greclipse()
-            indentWithSpaces(4)
+            // Formatter versions pinned to what Spotless 6.25 used by default, so the Spotless upgrade reformats nothing.
+            greclipse('4.29')
+            leadingTabsToSpaces(4)
             endWithNewline()
             trimTrailingWhitespace()
         }
 
         lineEndings = 'UNIX'
-    }
-
-    // Configuration for Gradle license plug-in
-    // https://github.com/hierynomus/license-gradle-plugin
-    license {
-        header = rootProject.file("$rootDir/APACHE_LICENSETEXT.md")
-        excludes([
-            "**/gradlew*",
-            "**/git.properties",
-            "**/*.html",
-            "**/templates/**",
-            "**/features/**",
-            "**/results/**",
-            "**/package-info.java",
-            "**/keystore.jks",
-            "**/legacy-docs/**",
-            "**/banner.txt",
-            "**/build.gradle.mustache",
-            "**/pom.mustache",
-            "**/avro/**/*.java",
-            "**/org/apache/fineract/client/**/*.java"
-        ])
-        strictCheck = true
     }
 
     licenseReport {
@@ -400,6 +385,28 @@ file("${rootDir}/custom").eachDir { companyDir ->
     }
 }
 
+// License headers are enforced by Spotless (spotlessCheck; spotlessApply adds them). The text comes from
+// APACHE_LICENSETEXT.md, wrapped in each file type's comment style. The delimiter only matches straight after an exact
+// header at the top of a file, or at the very start of a file without one: spotlessApply adds a missing header but
+// never rewrites anything below one, and a malformed header fails spotlessCheck until it is fixed by hand.
+def licenseTextLines = file('APACHE_LICENSETEXT.md').readLines()
+def wrapLicenseText = { String open, String linePrefix, String blankLine, String close, String padding = '' ->
+    open + padding + licenseTextLines.collect { (it ? linePrefix + it : blankLine) + '\n' }.join() + padding + close
+}
+def licenseHeaderDelimiter = { String header ->
+    // Spotless rejects delimiters containing a literal newline, hence the '\n' escapes.
+    def escaped = header.collect { it == '\n' ? '\\n' : ('\\^$.|?*+()[]{}'.contains(it) ? '\\' + it : it) }.join()
+    "(?:(?<=\\A${escaped})|\\A(?!${escaped}))".toString()
+}
+def licenseHeaders = [
+    java      : wrapLicenseText('/**\n', ' * ', ' *', ' */\n'),
+    xml       : wrapLicenseText('<!--\n', '    ', '', '-->\n', '\n'),
+    properties: wrapLicenseText('#\n', '# ', '#', '#\n'),
+    vm        : wrapLicenseText('#*\n', ' * ', ' *', ' *#\n'),
+    jsp       : wrapLicenseText('<%--\n', '    ', '', '--%>\n', '\n'),
+]
+def licenseHeaderExcludes = ['**/build/**', '**/bin/**', '**/out/**', '**/templates/**', '**/features/**', '**/results/**', '**/legacy-docs/**']
+
 configure(project.fineractJavaProjects) {
     // NOTE: order matters!
 
@@ -425,7 +432,16 @@ configure(project.fineractJavaProjects) {
     tasks.withType(JavaCompile).configureEach {
         options.incremental = true
         options.fork = true
+        // Forked compiler daemons get no explicit -Xmx, so each one defaults to 25% of the
+        // container's RAM. With parallel builds that tail is unbounded and can outgrow the
+        // build JVM itself, so give the compiler processes an explicit budget.
+        options.forkOptions.memoryMaximumSize = '2g'
         outputs.cacheIf { true }
+        // Lombok reads lombok.config at compile time; without this input, cached or
+        // incremental builds can reuse classes generated under an older config
+        inputs.file(rootProject.file('lombok.config'))
+                .withPropertyName('lombokConfig')
+                .withPathSensitivity(PathSensitivity.NONE)
         options.compilerArgs << '-parameters'
         options.encoding = 'UTF-8'
         options.compilerArgs << '-Xlint:unchecked'
@@ -503,7 +519,7 @@ configure(project.fineractJavaProjects) {
     }
 
     check {
-        dependsOn(rat, licenseMain, licenseTest)
+        dependsOn(rat)
     }
 
     dependencies {
@@ -517,7 +533,7 @@ configure(project.fineractJavaProjects) {
             targetExclude '**/build/**', '**/bin/**', '**/out/**'
             importOrder() //sort imports alphabetically
             removeUnusedImports()
-            eclipse().configFile "$rootDir/config/fineractdev-formatter.xml"
+            eclipse('4.29').configFile "$rootDir/config/fineractdev-formatter.xml"
             endWithNewline()
             trimTrailingWhitespace()
 
@@ -547,6 +563,21 @@ configure(project.fineractJavaProjects) {
                     )
                 }
                 )
+            }
+
+            licenseHeader(licenseHeaders.java, licenseHeaderDelimiter(licenseHeaders.java))
+        }
+
+        format 'licenseXml', {
+            target 'src/**/*.xml'
+            targetExclude(*licenseHeaderExcludes)
+            licenseHeader(licenseHeaders.xml, licenseHeaderDelimiter(licenseHeaders.xml)).skipLinesMatching('^<\\?xml.*\\?>$')
+        }
+        [properties: 'licenseProperties', vm: 'licenseVelocity', jsp: 'licenseJsp'].each { extension, formatName ->
+            format formatName, {
+                target("src/**/*.${extension}".toString())
+                targetExclude(*licenseHeaderExcludes)
+                licenseHeader(licenseHeaders[extension], licenseHeaderDelimiter(licenseHeaders[extension]))
             }
         }
 
@@ -701,7 +732,7 @@ configure(project.fineractJavaProjects) {
     }
 
     check {
-        dependsOn(rat, licenseMain, licenseTest)
+        dependsOn(rat)
     }
 
     dependencies {
@@ -710,6 +741,9 @@ configure(project.fineractJavaProjects) {
                 'org.slf4j:slf4j-api',
                 'org.slf4j:log4j-over-slf4j',
                 'org.slf4j:jul-to-slf4j',
+                // Spring Framework 7 removed spring-jcl (which provided org.apache.commons.logging);
+                // commons-logging itself is excluded globally, so bridge JCL to SLF4J everywhere
+                'org.slf4j:jcl-over-slf4j',
                 )
         implementation ("ch.qos.logback:logback-classic") {
             exclude(module: "slf4j-api")
@@ -737,6 +771,12 @@ configure(project.fineractJavaProjects) {
     test {
         useJUnitPlatform()
 
+        // Forked test JVMs get no explicit -Xmx otherwise, so each one would default to 25%
+        // of the container's RAM -- 4g on a 16 GB CI runner, but 16g on a 64 GB workstation.
+        // Pin it so the figure is the same everywhere. ':fineract-provider' holds its own
+        // suite to 2g and adds a metaspace cap.
+        maxHeapSize = '4g'
+
         // Gradle 9 fails a Test task that has test sources but discovers no tests. Several modules
         // carry test *support* code only -- Spring @TestConfiguration classes, Cucumber step
         // definitions that the 'cucumber' task or ':fineract-e2e-tests-runner' consumes, a JMH
@@ -763,6 +803,8 @@ configure(project.fineractJavaProjects) {
         // reportLevel = com.github.spotbugs.snom.Confidence.DEFAULT
         showProgress = false
         excludeFilter = file("$rootDir/config/spotbugs/exclude.xml")
+        // Without this the SpotBugs worker inherits the JVM default (25% of container RAM).
+        maxHeapSize = '2g'
     }
     // https://github.com/spotbugs/spotbugs-gradle-plugin/issues/242
     spotbugsMain {
@@ -841,7 +883,6 @@ configure(project.fineractCustomProjects) {
             exclude group: 'org.skyscreamer'
         }
         testImplementation( 'org.mockito:mockito-core',
-                'org.mockito:mockito-inline',
                 'org.mockito:mockito-junit-jupiter',
                 'org.junit.jupiter:junit-jupiter-api',
                 'org.junit.jupiter:junit-jupiter-engine',
@@ -990,13 +1031,14 @@ def aggregateLicenseReport = tasks.register('aggregateLicenseReport', Sync) {
     from(aggregateLicenseIndex)
     subprojects.each { subproject ->
         def report = subproject.tasks.named('generateLicenseReport')
+        def indexName = "${subproject.path.substring(1).replace(':', '-')}.html".toString()
         from(report) {
             exclude 'index.html'
         }
         from(report) {
             include 'index.html'
             into 'index'
-            rename { "${subproject.path.substring(1).replace(':', '-')}.html" }
+            rename { indexName }
         }
     }
 }

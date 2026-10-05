@@ -62,12 +62,20 @@ public enum ChargeTimeType {
                 ChargeTimeType.TRANCHE_DISBURSEMENT.getValue() };
     }
 
-    public static List<ChargeTimeType> validWorkingCapitalLoan() {
+    public static List<ChargeTimeType> validWorkingCapitalLoanProduct() {
+        return List.of(ChargeTimeType.DISBURSEMENT, ChargeTimeType.SPECIFIED_DUE_DATE);
+    }
+
+    public static Object[] validWorkingCapitalLoanProductValues() {
+        return validWorkingCapitalLoanProduct().stream().map(ChargeTimeType::getValue).toArray();
+    }
+
+    public static List<ChargeTimeType> validWorkingCapitalLoanAccount() {
         return List.of(ChargeTimeType.SPECIFIED_DUE_DATE);
     }
 
-    public static Object[] validWorkingCapitalLoanValues() {
-        return validWorkingCapitalLoan().stream().map(ChargeTimeType::getValue).toArray();
+    public static List<Integer> validWorkingCapitalLoanAccountValues() {
+        return validWorkingCapitalLoanAccount().stream().map(ChargeTimeType::getValue).toList();
     }
 
     public static Object[] validLoanChargeValues() {

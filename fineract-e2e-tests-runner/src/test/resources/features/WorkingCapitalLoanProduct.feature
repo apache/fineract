@@ -497,3 +497,48 @@ Feature: WorkingCapitalLoanProduct
   @TestRailId:C80966
   Scenario: Verify WC Loan Product create fails when payment allocation rules contain duplicates
     Then Admin failed to create a new Working Capital Loan Product with duplicate payment allocation rules
+
+  @TestRailId:C106771
+  Scenario: Verify WC Loan Product create fails when payment allocation rules contain transaction type duplicates
+    Then Admin failed to create a new Working Capital Loan Product with duplicate transaction type per payment allocation rules
+
+  @TestRailId:C106772
+  Scenario: Verify WC Loan Product update fails when payment allocation rules contain transaction type duplicates
+    When Admin creates a new Working Capital Loan Product
+    Then Admin failed to update a new Working Capital Loan Product with duplicate transaction type per payment allocation rules
+    Then Admin deletes a Working Capital Loan Product
+
+  @TestRailId:C106773
+  Scenario: Verify WC Loan Product template exposes advanced payment allocation defined transaction types
+    When Admin retrieves the Working Capital Loan Product template
+    Then Working Capital Loan Product template advancedPaymentAllocation Transaction Types contains:
+      | DEFAULT           |
+      | REPAYMENT         |
+      | PAYOUT_REFUND     |
+      | GOODWILL_CREDIT   |
+      | CHARGE_ADJUSTMENT |
+
+  @TestRailId:C106742
+  Scenario: Verify WC Loan Product template delinquencyBucketOptions are WORKING_CAPITAL only
+    When Admin retrieves the Working Capital Loan Product template
+    Then Working Capital Loan Product template delinquencyBucketOptions all have bucketType "WORKING_CAPITAL"
+    And Working Capital Loan Product template delinquencyBucketOptions do not contain:
+      | BASIC_DELINQUENCY_BUCKET |
+
+  @TestRailId:C106743
+  Scenario Outline: Verify WC Loan Product create rejects non-WORKING_CAPITAL delinquency bucket
+    Then Admin failed to create a new Working Capital Loan Product with field "<wcp_field_name>" invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+
+    Examples:
+      | wcp_field_name      | wcp_invalid_field_value    | wcp_error_message                                                                           |
+      | delinquencyBucketId | "BASIC_DELINQUENCY_BUCKET" | "The parameter `delinquencyBucketId` must reference a WORKING_CAPITAL delinquency bucket." |
+
+  @TestRailId:C106744
+  Scenario Outline: Verify WC Loan Product update rejects non-WORKING_CAPITAL delinquency bucket
+    When Admin creates a new Working Capital Loan Product
+    Then Admin failed to update a new Working Capital Loan Product field "<wcp_field_name>" with invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+    Then Admin deletes a Working Capital Loan Product
+
+    Examples:
+      | wcp_field_name      | wcp_invalid_field_value    | wcp_error_message                                                                          |
+      | delinquencyBucketId | "BASIC_DELINQUENCY_BUCKET" | "The parameter `delinquencyBucketId` must reference a WORKING_CAPITAL delinquency bucket." |

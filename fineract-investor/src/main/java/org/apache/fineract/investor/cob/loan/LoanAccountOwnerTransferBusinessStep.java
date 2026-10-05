@@ -47,8 +47,8 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanBuyDownFeeAmortizat
 import org.apache.fineract.portfolio.loanaccount.service.LoanCapitalizedIncomeAmortizationProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.annotation.Conditional;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 @Component

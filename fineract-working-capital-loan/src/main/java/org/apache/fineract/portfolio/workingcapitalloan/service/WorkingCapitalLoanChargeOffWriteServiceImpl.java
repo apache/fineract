@@ -127,11 +127,9 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
 
         // Post charge-off journal entries: write off the outstanding receivables against charge-off expense / income
         // reversal. No portfolio or schedule impact -- pure accounting tag.
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            this.accountingProcessor.postJournalEntries(loan, chargeOffTransaction, allocation, loan.isChargedOff());
-        }
+        this.accountingProcessor.postJournalEntries(loan, chargeOffTransaction, allocation, loan.isChargedOff());
 
-        this.discountFeeAmortizationService.processFinalDiscountFeeAmortizationOnChargeOff(loan, chargeOffTransaction);
+        this.discountFeeAmortizationService.processFinalDiscountFeeAmortization(loan, chargeOffTransaction);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(WorkingCapitalLoanConstants.transactionDateParamName, transactionDate);
@@ -164,7 +162,7 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
                 .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.charge.off.transaction.not.found",
                         "No active charge-off transaction found for loan " + loanId, loanId));
 
-        this.discountFeeAmortizationService.undoDiscountFeeAmortizationOnChargeOff(loan, chargeOffTransaction);
+        this.discountFeeAmortizationService.undoFinalDiscountFeeAmortization(loan, chargeOffTransaction);
 
         final ExternalId reversalExternalId = this.externalIdFactory
                 .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.reversalExternalIdParamName));
@@ -180,9 +178,7 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
         this.adjustTransactionEventPublisher.publishReversal(loan.getId(), chargeOffTransaction);
 
         // Reverse the charge-off journal entries. No schedule reprocessing -- pure tag.
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            this.accountingProcessor.postReversalJournalEntries(loan, chargeOffTransaction);
-        }
+        this.accountingProcessor.postReversalJournalEntries(loan, chargeOffTransaction);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put("reversalExternalId", reversalExternalId);

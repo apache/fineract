@@ -25,6 +25,11 @@ import org.springframework.util.StringUtils;
 
 /**
  * Amortization types for Working Capital Loan Product.
+ *
+ * <p>
+ * The constant names are persisted as-is in the working capital amortization model JSON
+ * ({@code m_wc_loan_amortization_model.json_model}); an absent name reads back as EIR and an unknown one fails to
+ * parse, so a constant must not be renamed without an alternate mapping.
  */
 @Getter
 @RequiredArgsConstructor
@@ -56,8 +61,8 @@ public enum WorkingCapitalAmortizationType implements ApiFacingEnum<WorkingCapit
         return null;
     }
 
-    public boolean isEIR() {
-        return this.equals(WorkingCapitalAmortizationType.EIR);
+    public boolean isFlat() {
+        return this.equals(WorkingCapitalAmortizationType.FLAT);
     }
 
 }

@@ -23,11 +23,11 @@ import static org.apache.fineract.cob.COBConstant.IS_CATCH_UP_PARAMETER_NAME;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
-import org.springframework.batch.core.StepContribution;
+import org.jspecify.annotations.Nullable;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.lang.Nullable;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 
 @RequiredArgsConstructor
 public class WorkingCapitalLoanCOBCustomJobParametersResolverTasklet implements Tasklet {

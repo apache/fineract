@@ -40,6 +40,7 @@ import org.mapstruct.Named;
 public interface WorkingCapitalLoanTransactionMapper {
 
     @Mapping(target = "wcLoanId", source = "wcLoan.id")
+    @Mapping(target = "externalLoanId", source = "wcLoan.externalId")
     @Mapping(target = "type", source = "transactionType", qualifiedByName = "loanTransactionTypeToEnumData")
     @Mapping(target = "paymentDetailData", source = "paymentDetail", qualifiedByName = "paymentDetailToData")
     @Mapping(target = "classification", source = "classification", qualifiedByName = "codeValueToData")

@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service.contracttermination;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -81,12 +83,15 @@ public class LoanContractTerminationServiceImpl {
         loanUtilService.checkClientOrGroupActive(loan);
 
         // validate Contract Termination
-        validateContractTermination(loan);
+        validateTerminationEligibility(loan);
+        loanTransactionValidator.validateContractTermination(command, loan.getId());
 
         final ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
         final Map<String, Object> changes = new LinkedHashMap<>();
 
-        final LoanTransaction contractTermination = LoanTransaction.contractTermination(loan, DateUtils.getBusinessLocalDate(), externalId);
+        final LocalDate transactionDate = Objects.requireNonNullElseGet(
+                command.localDateValueOfParameterNamed(LoanApiConstants.transactionDateParamName), DateUtils::getBusinessLocalDate);
+        final LoanTransaction contractTermination = LoanTransaction.contractTermination(loan, transactionDate, externalId);
 
         // Mark Contract Termination, Update Loan SubStatus
         loan.setLoanSubStatus(LoanSubStatus.CONTRACT_TERMINATION);
@@ -184,7 +189,7 @@ public class LoanContractTerminationServiceImpl {
                 .build();
     }
 
-    public void validateContractTermination(final Loan loan) {
+    public void validateTerminationEligibility(final Loan loan) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         if (!loan.isOpen()) {

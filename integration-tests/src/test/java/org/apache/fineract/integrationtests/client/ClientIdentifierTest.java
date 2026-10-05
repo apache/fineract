@@ -18,135 +18,88 @@
  */
 package org.apache.fineract.integrationtests.client;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import org.apache.fineract.client.models.ClientIdentifierRequest;
+import org.apache.fineract.client.models.GetClientsClientIdIdentifiersResponse;
+import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.client.models.PutClientsClientIdIdentifiersIdentifierIdResponse;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class ClientIdentifierTest extends IntegrationTest {
+public class ClientIdentifierTest extends FeignIntegrationTest {
 
-    private static final Gson GSON = new Gson();
-    private static final Gson GSON_WITH_NULLS = new GsonBuilder().serializeNulls().create();
     private static final Long DOCUMENT_TYPE_ID = 1L;
     private static final String DATE_FORMAT = "dd MMMM yyyy";
     private static final String LOCALE = "en";
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
+    private FeignClientHelper clientHelper;
 
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        clientHelper = new ClientHelper(requestSpec, responseSpec);
+        clientHelper = new FeignClientHelper(fineractClient());
     }
 
     @Test
     public void testClientIdentifierIssuanceAndExpiryDatesCrudFlow() {
-        PostClientsResponse client = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        PostClientsResponse client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
 
         String documentKey = Utils.randomStringGenerator("ID_DATES_", 10);
-        Map<String, Object> createRequest = identifierRequest(documentKey, "01 January 2024", "01 January 2034", true);
-        Long identifierId = ((Number) Utils.performServerPost(requestSpec, responseSpec, identifierUrl(client.getClientId()),
-                GSON.toJson(createRequest), "resourceId")).longValue();
+        PostClientsClientIdIdentifiersRequest createRequest = new PostClientsClientIdIdentifiersRequest().documentTypeId(DOCUMENT_TYPE_ID)
+                .documentKey(documentKey).description(Utils.randomStringGenerator("Identifier Description ", 10)).status("Active")
+                .issuanceDate("01 January 2024").expiryDate("01 January 2034").dateFormat(DATE_FORMAT).locale(LOCALE);
+        Long identifierId = clientHelper.createClientIdentifier(client.getClientId(), createRequest).getResourceId();
 
-        JsonPath createdIdentifier = retrieveIdentifier(client.getClientId(), identifierId);
-        assertThat(createdIdentifier.getLong("id")).isEqualTo(identifierId);
-        assertThat(createdIdentifier.getLong("clientId")).isEqualTo(client.getClientId());
-        assertThat(createdIdentifier.getString("documentKey")).isEqualTo(documentKey);
-        assertThat(createdIdentifier.getString("description")).isEqualTo(createRequest.get("description"));
-        assertThat(createdIdentifier.getList("issuanceDate", Integer.class)).isEqualTo(List.of(2024, 1, 1));
-        assertThat(createdIdentifier.getList("expiryDate", Integer.class)).isEqualTo(List.of(2034, 1, 1));
+        GetClientsClientIdIdentifiersResponse createdIdentifier = clientHelper.getClientIdentifier(client.getClientId(), identifierId);
+        assertThat(createdIdentifier.getId()).isEqualTo(identifierId);
+        assertThat(createdIdentifier.getClientId()).isEqualTo(client.getClientId());
+        assertThat(createdIdentifier.getDocumentKey()).isEqualTo(documentKey);
+        assertThat(createdIdentifier.getDescription()).isEqualTo(createRequest.getDescription());
+        assertThat(createdIdentifier.getIssuanceDate()).isEqualTo(LocalDate.of(2024, 1, 1));
+        assertThat(createdIdentifier.getExpiryDate()).isEqualTo(LocalDate.of(2034, 1, 1));
 
-        Map<String, Object> updateRequest = identifierRequest(documentKey, "01 February 2024", "01 February 2034", false);
-        JsonPath updateResponse = JsonPath.from(Utils.performServerPut(requestSpec, responseSpec,
-                identifierUrl(client.getClientId(), identifierId), GSON.toJson(updateRequest)));
-        assertThat(updateResponse.getLong("resourceId")).isEqualTo(identifierId);
-        assertThat(updateResponse.getList("changes.issuanceDate", Integer.class)).isEqualTo(List.of(2024, 2, 1));
-        assertThat(updateResponse.getList("changes.expiryDate", Integer.class)).isEqualTo(List.of(2034, 2, 1));
+        ClientIdentifierRequest updateRequest = new ClientIdentifierRequest().documentTypeId(DOCUMENT_TYPE_ID).documentKey(documentKey)
+                .description(Utils.randomStringGenerator("Identifier Description ", 10)).issuanceDate("01 February 2024")
+                .expiryDate("01 February 2034").dateFormat(DATE_FORMAT).locale(LOCALE);
+        PutClientsClientIdIdentifiersIdentifierIdResponse updateResponse = clientHelper.updateClientIdentifier(client.getClientId(),
+                identifierId, updateRequest);
+        assertThat(updateResponse.getResourceId()).isEqualTo(identifierId);
+        assertThat(updateResponse.getChanges().getIssuanceDate()).isEqualTo(LocalDate.of(2024, 2, 1));
+        assertThat(updateResponse.getChanges().getExpiryDate()).isEqualTo(LocalDate.of(2034, 2, 1));
 
-        JsonPath updatedIdentifier = retrieveIdentifier(client.getClientId(), identifierId);
-        assertThat(updatedIdentifier.getString("documentKey")).isEqualTo(documentKey);
-        assertThat(updatedIdentifier.getString("description")).isEqualTo(updateRequest.get("description"));
-        assertThat(updatedIdentifier.getList("issuanceDate", Integer.class)).isEqualTo(List.of(2024, 2, 1));
-        assertThat(updatedIdentifier.getList("expiryDate", Integer.class)).isEqualTo(List.of(2034, 2, 1));
+        GetClientsClientIdIdentifiersResponse updatedIdentifier = clientHelper.getClientIdentifier(client.getClientId(), identifierId);
+        assertThat(updatedIdentifier.getDocumentKey()).isEqualTo(documentKey);
+        assertThat(updatedIdentifier.getDescription()).isEqualTo(updateRequest.getDescription());
+        assertThat(updatedIdentifier.getIssuanceDate()).isEqualTo(LocalDate.of(2024, 2, 1));
+        assertThat(updatedIdentifier.getExpiryDate()).isEqualTo(LocalDate.of(2034, 2, 1));
 
-        Map<String, Object> clearDatesRequest = new LinkedHashMap<>();
-        clearDatesRequest.put("issuanceDate", null);
-        clearDatesRequest.put("expiryDate", null);
-        JsonPath clearDatesResponse = JsonPath.from(Utils.performServerPut(requestSpec, responseSpec,
-                identifierUrl(client.getClientId(), identifierId), GSON_WITH_NULLS.toJson(clearDatesRequest)));
-        assertThat(clearDatesResponse.getLong("resourceId")).isEqualTo(identifierId);
+        PutClientsClientIdIdentifiersIdentifierIdResponse clearDatesResponse = clientHelper.clearClientIdentifierDates(client.getClientId(),
+                identifierId);
+        assertThat(clearDatesResponse.getResourceId()).isEqualTo(identifierId);
 
-        JsonPath clearedIdentifier = retrieveIdentifier(client.getClientId(), identifierId);
-        assertThat(clearedIdentifier.getString("documentKey")).isEqualTo(documentKey);
-        Assertions.assertThat((Object) clearedIdentifier.get("issuanceDate")).isNull();
-        Assertions.assertThat((Object) clearedIdentifier.get("expiryDate")).isNull();
+        GetClientsClientIdIdentifiersResponse clearedIdentifier = clientHelper.getClientIdentifier(client.getClientId(), identifierId);
+        assertThat(clearedIdentifier.getDocumentKey()).isEqualTo(documentKey);
+        assertThat(clearedIdentifier.getIssuanceDate()).isNull();
+        assertThat(clearedIdentifier.getExpiryDate()).isNull();
     }
 
     @Test
     public void testClientIdentifierWithoutIssuanceAndExpiryDatesRemainsValid() {
-        PostClientsResponse client = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        PostClientsResponse client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
 
         String documentKey = Utils.randomStringGenerator("ID_NO_DATES_", 10);
-        Map<String, Object> createRequest = new LinkedHashMap<>();
-        createRequest.put("documentTypeId", DOCUMENT_TYPE_ID);
-        createRequest.put("documentKey", documentKey);
-        createRequest.put("description", "Document without date fields");
-        createRequest.put("status", "Active");
+        PostClientsClientIdIdentifiersRequest createRequest = new PostClientsClientIdIdentifiersRequest().documentTypeId(DOCUMENT_TYPE_ID)
+                .documentKey(documentKey).description("Document without date fields").status("Active");
 
-        Long identifierId = ((Number) Utils.performServerPost(requestSpec, responseSpec, identifierUrl(client.getClientId()),
-                GSON.toJson(createRequest), "resourceId")).longValue();
+        Long identifierId = clientHelper.createClientIdentifier(client.getClientId(), createRequest).getResourceId();
 
-        JsonPath identifier = retrieveIdentifier(client.getClientId(), identifierId);
-        assertThat(identifier.getString("documentKey")).isEqualTo(documentKey);
-        assertThat(identifier.getString("description")).isEqualTo(createRequest.get("description"));
-        Assertions.assertThat((Object) identifier.get("issuanceDate")).isNull();
-        Assertions.assertThat((Object) identifier.get("expiryDate")).isNull();
-    }
-
-    private Map<String, Object> identifierRequest(final String documentKey, final String issuanceDate, final String expiryDate,
-            final boolean includeStatus) {
-        Map<String, Object> request = new LinkedHashMap<>();
-        request.put("documentTypeId", DOCUMENT_TYPE_ID);
-        request.put("documentKey", documentKey);
-        request.put("description", Utils.randomStringGenerator("Identifier Description ", 10));
-        if (includeStatus) {
-            request.put("status", "Active");
-        }
-        request.put("issuanceDate", issuanceDate);
-        request.put("expiryDate", expiryDate);
-        request.put("dateFormat", DATE_FORMAT);
-        request.put("locale", LOCALE);
-        return request;
-    }
-
-    private JsonPath retrieveIdentifier(final Long clientId, final Long identifierId) {
-        String response = Utils.performServerGet(requestSpec, responseSpec, identifierUrl(clientId, identifierId), null);
-        return JsonPath.from(response);
-    }
-
-    private String identifierUrl(final Long clientId) {
-        return "/fineract-provider/api/v1/clients/" + clientId + "/identifiers?" + Utils.TENANT_IDENTIFIER;
-    }
-
-    private String identifierUrl(final Long clientId, final Long identifierId) {
-        return "/fineract-provider/api/v1/clients/" + clientId + "/identifiers/" + identifierId + "?" + Utils.TENANT_IDENTIFIER;
+        GetClientsClientIdIdentifiersResponse identifier = clientHelper.getClientIdentifier(client.getClientId(), identifierId);
+        assertThat(identifier.getDocumentKey()).isEqualTo(documentKey);
+        assertThat(identifier.getDescription()).isEqualTo(createRequest.getDescription());
+        assertThat(identifier.getIssuanceDate()).isNull();
+        assertThat(identifier.getExpiryDate()).isNull();
     }
 }

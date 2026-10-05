@@ -59,15 +59,16 @@ import org.apache.fineract.infrastructure.core.filters.BatchCallHandler;
 import org.apache.fineract.infrastructure.core.filters.BatchFilter;
 import org.apache.fineract.infrastructure.core.filters.BatchRequestPreprocessor;
 import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactionManager;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.NonTransientDataAccessException;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionExecution;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
@@ -349,14 +350,33 @@ public class BatchApiServiceImpl implements BatchApiService {
         return response;
     }
 
+    /**
+     * Tells a failed commit apart from a transaction that was deliberately marked rollback-only, both of which reach
+     * this method with every sub-response reporting 200.
+     * <p>
+     * Only a failed commit is a concurrency failure worth reporting as such - it is the outcome a caller can retry. A
+     * rollback-only transaction is not: maker-checker reaches exactly this point, because
+     * {@code RollbackTransactionNotApprovedExceptionMapper} answers 200 while the participating transaction that threw
+     * has marked the enclosing one rollback-only. Rewriting that into a retryable conflict would make callers retry a
+     * command that is waiting for a checker and can never succeed on its own.
+     * <p>
+     * The two are told apart by the cause, not the type: {@code AbstractPlatformTransactionManager} raises its
+     * rollback-only {@link UnexpectedRollbackException} with no cause, whereas a commit failure always carries the
+     * {@link TransactionSystemException} the JPA transaction manager reports (see
+     * {@code ExtendedJpaTransactionManager#doCommit}).
+     */
+    private boolean isCommitFailure(Throwable ex) {
+        return ex instanceof TransactionSystemException || ex.getCause() instanceof TransactionSystemException;
+    }
+
     @NonNull
     private List<BatchResponse> buildErrorResponses(Throwable ex, @NonNull List<BatchResponse> responseList) {
         BatchResponse response = responseList.isEmpty() ? null
                 : responseList.stream().filter(e -> e.getStatusCode() == null || e.getStatusCode() != SC_OK).findFirst()
                         .orElse(responseList.get(responseList.size() - 1));
 
-        if (response != null && response.getStatusCode() == SC_OK && ex instanceof TransactionSystemException tse) {
-            ex = new ConcurrencyFailureException(tse.getMessage(), tse.getCause());
+        if (response != null && response.getStatusCode() == SC_OK && isCommitFailure(ex)) {
+            ex = new ConcurrencyFailureException(ex.getMessage(), ex.getCause());
         }
 
         Long requestId = null;

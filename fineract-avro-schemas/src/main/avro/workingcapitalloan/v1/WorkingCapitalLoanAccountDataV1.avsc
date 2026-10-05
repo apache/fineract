@@ -299,6 +299,7 @@
         {
             "default": null,
             "name": "paymentRate",
+            "doc": "The loan's own period payment rate. A rate change does not move it - the rate in force on a given date comes from the rate-change history.",
             "type": [
                 "null",
                 "bigdecimal"
@@ -332,15 +333,7 @@
         {
             "default": null,
             "name": "periodPaymentAmount",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "default": null,
-            "name": "dailyEir",
-            "doc": "Daily effective interest rate derived from discount-fee pricing, not a lending interest rate.",
+            "doc": "Daily payment amount the loan was priced at, following paymentAmountCalculationStrategy: totalPaymentVolume x paymentRate / 100 / npvDayCount rounded to the currency under TPV, solved from annualEir under ANNUAL_EIR, and paymentAmount itself under PAYMENT_AMOUNT. A rate change does not restate it - what is billed from the day a change takes effect follows the rate then in force.",
             "type": [
                 "null",
                 "bigdecimal"
@@ -349,7 +342,7 @@
         {
             "default": null,
             "name": "calculatedAnnualEir",
-            "doc": "Annualised dailyEir.",
+            "doc": "Annual effective rate the loan was priced at, as a percentage: compounded over the product's NPV day count, not a calendar year, and rounded to six decimals. The base schedule's daily discounting derives from it. A rate change does not restate it - the schedule re-solves its own rate from the day the change takes effect. Comes from discount-fee pricing, not a lending interest rate.",
             "type": [
                 "null",
                 "bigdecimal"
@@ -367,6 +360,34 @@
         {
             "default": null,
             "name": "totalPaymentVolume",
+            "doc": "Total payment volume the daily payment is sized from. Only for the TPV payment amount calculation strategy.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "paymentAmountCalculationStrategy",
+            "doc": "How the daily payment is calculated, copied from the product when the loan is created: TPV (from totalPaymentVolume and paymentRate), ANNUAL_EIR (from annualEir) or PAYMENT_AMOUNT (paymentAmount as given).",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.StringEnumOptionDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "annualEir",
+            "doc": "Contractual annual EIR percentage the daily payment is solved from. Only for the ANNUAL_EIR payment amount calculation strategy.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "paymentAmount",
+            "doc": "Fixed daily payment amount the schedule is built from. Only for the PAYMENT_AMOUNT payment amount calculation strategy.",
             "type": [
                 "null",
                 "bigdecimal"
@@ -404,6 +425,18 @@
                 {
                     "values": "bytes",
                     "type": "map"
+                }
+            ]
+        },
+        {
+            "default": null,
+            "name": "periodPaymentRateHistory",
+            "doc": "Period payment rate changes with the annual EIR, daily payment amount and segment term snapshotted when each change was booked, most recently booked first - which for a backdated change is not the same as effective-date order. Appended at the end of the record so consumers decoding positionally keep working.",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanPeriodPaymentRateChangeDataV1"
                 }
             ]
         }

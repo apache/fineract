@@ -52,7 +52,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
-    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C89821
   Scenario: Verify Working Capital penalty charge adjustment accounting entries - UC2: full penalty charge adjustment has correct journal entries
@@ -104,7 +104,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 0.0        | 0.0             | 0.0      | 50.0           | 50.0                | 0.0          |
-    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C89822
   Scenario: Verify Working Capital fee charge adjustment accounting entries - UC3: partially paid fee - full fee charge adjustment has correct journal entries
@@ -178,7 +178,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 50.0            | 50.0     | 0.0            | 0.0                 | 0.0          |
-    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C89823
   Scenario: Verify Working Capital penalty charge adjustment accounting entries - UC4: partially paid penalty - full penalty charge adjustment has correct journal entries
@@ -252,7 +252,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 0.0        | 0.0             | 0.0      | 50.0           | 20.0                | 30.0         |
-    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C89824
   Scenario: Verify Working Capital fee charge adjustment accounting entries - UC5: partially paid fee - full fee charge adjustment has correct journal entries
@@ -344,7 +344,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 50.0            | 50.0     | 50.0           | 50.0                | 0.0          |
-    Then Admin closes the Working Capital loan with a full repayment on "11 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "11 January 2026"
 
   @TestRailId:C89825
   Scenario: Verify Working Capital penalty charge adjustment accounting entries - UC6: partially paid penalty - full penalty charge adjustment has correct journal entries
@@ -436,7 +436,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 60.0       | 60.0            | 0.0      | 50.0           | 20.0                | 30.0         |
-    Then Admin closes the Working Capital loan with a full repayment on "11 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "11 January 2026"
 
   @TestRailId:C89826
   Scenario: Verify Working Capital fee charge adjustment accounting entries - UC7: fully repaid loan - partial fee charge adjustment has overpayment journal entries
@@ -527,7 +527,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 45.0       | 45.0            | 0.0      | 0.0            | 0.0                 | 0.0          |
-    Then Admin closes the Working Capital loan with a full repayment on "11 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "11 January 2026"
 
   @TestRailId:C89827
   Scenario: Verify Working Capital penalty charge adjustment accounting entries - UC8: fully repaid loan - partial penalty charge adjustment has overpayment journal entries
@@ -618,4 +618,4 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 0.0        | 0.0             | 0.0      | 77.7           | 77.7                | 0.0          |
-    Then Admin closes the Working Capital loan with a full repayment on "11 January 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "11 January 2026"

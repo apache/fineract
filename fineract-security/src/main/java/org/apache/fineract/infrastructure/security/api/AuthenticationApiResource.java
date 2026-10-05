@@ -89,12 +89,10 @@ public class AuthenticationApiResource {
         // to be done explicitly via GSON here, but implicit by arg
         AuthenticateRequest request = new Gson().fromJson(apiRequestBodyAsJson, AuthenticateRequest.class);
         if (request == null) {
-            throw new IllegalArgumentException(
-                    "Invalid JSON in BODY (no longer URL param; see FINERACT-726) of POST to /authentication: " + apiRequestBodyAsJson);
+            throw new IllegalArgumentException("Invalid JSON in BODY (no longer URL param; see FINERACT-726) of POST to /authentication");
         }
         if (request.username == null || request.password == null) {
-            throw new IllegalArgumentException("Username or Password is null in JSON (see FINERACT-726) of POST to /authentication: "
-                    + apiRequestBodyAsJson + "; username=" + request.username + ", password=" + request.password);
+            throw new IllegalArgumentException("Username or Password is null in JSON (see FINERACT-726) of POST to /authentication");
         }
 
         final Authentication authentication = new UsernamePasswordAuthenticationToken(request.username, request.password);

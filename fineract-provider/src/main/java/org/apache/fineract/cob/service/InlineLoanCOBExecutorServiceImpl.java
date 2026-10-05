@@ -24,12 +24,13 @@ import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.commands.configuration.RetryConfigurationAssembler;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.batch.core.configuration.JobLocator;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
@@ -41,12 +42,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class InlineLoanCOBExecutorServiceImpl extends InlineCommonLockableCOBExecutorService<LoanAccountLock> {
 
     public InlineLoanCOBExecutorServiceImpl(LoanAccountLockRepository loanAccountLockRepository,
-            InlineLoanCOBExecutionDataParser dataParser, JobLauncher jobLauncher, JobLocator jobLocator, JobExplorer jobExplorer,
+            InlineLoanCOBExecutionDataParser dataParser, JobOperator jobOperator, JobRegistry jobRegistry, JobRepository jobRepository,
             @Qualifier("requiresNewTransactionTemplate") TransactionTemplate requiresNewTransactionTemplate,
             CustomJobParameterRepository customJobParameterRepository, PlatformSecurityContext context,
-            RetrieveLoanIdService retrieveIdService, FineractProperties fineractProperties) {
-        super(loanAccountLockRepository, dataParser, jobLauncher, jobLocator, jobExplorer, requiresNewTransactionTemplate,
-                customJobParameterRepository, context, retrieveIdService, fineractProperties);
+            RetrieveLoanIdService retrieveIdService, FineractProperties fineractProperties,
+            RetryConfigurationAssembler retryConfigurationAssembler) {
+        super(loanAccountLockRepository, dataParser, jobOperator, jobRegistry, jobRepository, requiresNewTransactionTemplate,
+                customJobParameterRepository, context, retrieveIdService, fineractProperties, retryConfigurationAssembler);
     }
 
     @Override

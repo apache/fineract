@@ -52,6 +52,11 @@ class ReplayedTransactionBusinessEventServiceIntegrationTest {
     @BeforeEach
     public void setUp() {
         underTest = new ReplayedTransactionBusinessEventServiceImpl(businessEventNotifierService, loanTransactionRepository);
+        // The recording window runs its action; the notifier owns opening and closing it.
+        lenient().doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(businessEventNotifierService).withExternalEventRecording(Mockito.any(Runnable.class));
     }
 
     @Test
@@ -61,11 +66,9 @@ class ReplayedTransactionBusinessEventServiceIntegrationTest {
         // when
         underTest.raiseTransactionReplayedEvents(changedTransactionDetail);
         // then
-        verify(businessEventNotifierService, Mockito.times(0)).startExternalEventRecording();
+        verify(businessEventNotifierService, Mockito.times(0)).withExternalEventRecording(Mockito.any(Runnable.class));
         verify(businessEventNotifierService, Mockito.times(0))
                 .notifyPostBusinessEvent(Mockito.any(LoanAdjustTransactionBusinessEvent.class));
-        verify(businessEventNotifierService, Mockito.times(0)).stopExternalEventRecording();
-        verify(businessEventNotifierService, Mockito.times(0)).resetEventRecording();
     }
 
     @Test
@@ -75,11 +78,9 @@ class ReplayedTransactionBusinessEventServiceIntegrationTest {
         // when
         underTest.raiseTransactionReplayedEvents(changedTransactionDetail);
         // then
-        verify(businessEventNotifierService, Mockito.times(0)).startExternalEventRecording();
+        verify(businessEventNotifierService, Mockito.times(0)).withExternalEventRecording(Mockito.any(Runnable.class));
         verify(businessEventNotifierService, Mockito.times(0))
                 .notifyPostBusinessEvent(Mockito.any(LoanAdjustTransactionBusinessEvent.class));
-        verify(businessEventNotifierService, Mockito.times(0)).stopExternalEventRecording();
-        verify(businessEventNotifierService, Mockito.times(0)).resetEventRecording();
     }
 
     @Test
@@ -94,11 +95,9 @@ class ReplayedTransactionBusinessEventServiceIntegrationTest {
         // when
         underTest.raiseTransactionReplayedEvents(changedTransactionDetail);
         // then
-        verify(businessEventNotifierService, Mockito.times(1)).startExternalEventRecording();
+        verify(businessEventNotifierService, Mockito.times(1)).withExternalEventRecording(Mockito.any(Runnable.class));
         verify(businessEventNotifierService, Mockito.times(1))
                 .notifyPostBusinessEvent(Mockito.any(LoanAdjustTransactionBusinessEvent.class));
-        verify(businessEventNotifierService, Mockito.times(1)).stopExternalEventRecording();
-        verify(businessEventNotifierService, Mockito.times(0)).resetEventRecording();
     }
 
     @Test
@@ -117,11 +116,9 @@ class ReplayedTransactionBusinessEventServiceIntegrationTest {
         // when
         underTest.raiseTransactionReplayedEvents(changedTransactionDetail);
         // then
-        verify(businessEventNotifierService, Mockito.times(1)).startExternalEventRecording();
+        verify(businessEventNotifierService, Mockito.times(1)).withExternalEventRecording(Mockito.any(Runnable.class));
         verify(businessEventNotifierService, Mockito.times(2))
                 .notifyPostBusinessEvent(Mockito.any(LoanAdjustTransactionBusinessEvent.class));
-        verify(businessEventNotifierService, Mockito.times(1)).stopExternalEventRecording();
-        verify(businessEventNotifierService, Mockito.times(0)).resetEventRecording();
     }
 
     @Test
@@ -138,10 +135,8 @@ class ReplayedTransactionBusinessEventServiceIntegrationTest {
         // when
         assertThrows(RuntimeException.class, () -> underTest.raiseTransactionReplayedEvents(changedTransactionDetail));
         // then
-        verify(businessEventNotifierService, Mockito.times(1)).startExternalEventRecording();
+        verify(businessEventNotifierService, Mockito.times(1)).withExternalEventRecording(Mockito.any(Runnable.class));
         verify(businessEventNotifierService, Mockito.times(1))
                 .notifyPostBusinessEvent(Mockito.any(LoanAdjustTransactionBusinessEvent.class));
-        verify(businessEventNotifierService, Mockito.times(0)).stopExternalEventRecording();
-        verify(businessEventNotifierService, Mockito.times(1)).resetEventRecording();
     }
 }

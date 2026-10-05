@@ -253,6 +253,41 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     }
 
     @Override
+    public void validateContractTermination(final JsonCommand command, final Long loanId) {
+        final String json = command.json();
+        final JsonElement element = StringUtils.isNotBlank(json) ? this.fromApiJsonHelper.parse(json) : null;
+        if (element != null) {
+            final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+            this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getContractTerminationParameters());
+        }
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed(TRANSACTION_DATE);
+        final boolean transactionDateSent = element != null && this.fromApiJsonHelper.parameterExists(TRANSACTION_DATE, element);
+        if (transactionDate == null && !transactionDateSent) {
+            return;
+        }
+
+        Validator.validateOrThrow("loan.contract.termination", baseDataValidator -> {
+            if (transactionDate == null) {
+                // A sent but unparseable date reads as null too, and must not take the business date default
+                baseDataValidator.reset().parameter(TRANSACTION_DATE).failWithCode("invalid.date.format",
+                        "Contract termination transaction date could not be read as a date");
+            } else if (DateUtils.isBeforeBusinessDate(transactionDate)) {
+                baseDataValidator.reset().parameter(TRANSACTION_DATE).value(transactionDate).failWithCode("cannot.be.before.business.date",
+                        "Contract termination transaction date cannot be before the business date");
+            } else if (DateUtils.isDateInTheFuture(transactionDate)) {
+                // Deliberately future dated only: terminating on the business date after maturity stays allowed
+                final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+                final LocalDate maturityDate = loan.getMaturityDate();
+                if (maturityDate != null && !transactionDate.isBefore(maturityDate)) {
+                    baseDataValidator.reset().parameter(TRANSACTION_DATE).value(transactionDate).failWithCode(
+                            "must.be.before.maturity.date", "Contract termination transaction date must be before the maturity date");
+                }
+            }
+        });
+    }
+
+    @Override
     public void validateContractTerminationUndo(final JsonCommand command, final Long loanId) {
         final String json = command.json();
         if (StringUtils.isBlank(json)) {
@@ -620,6 +655,10 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
 
     private Set<String> getCapitalizedIncomeAdjustmentParameters() {
         return new HashSet<>(Arrays.asList(TRANSACTION_DATE, DATE_FORMAT, LOCALE, TRANSACTION_AMOUNT, PAYMENT_TYPE_ID, NOTE, EXTERNAL_ID));
+    }
+
+    private Set<String> getContractTerminationParameters() {
+        return new HashSet<>(Arrays.asList(TRANSACTION_DATE, DATE_FORMAT, LOCALE, NOTE, EXTERNAL_ID));
     }
 
     private Set<String> getContractTerminationUndoParameters() {

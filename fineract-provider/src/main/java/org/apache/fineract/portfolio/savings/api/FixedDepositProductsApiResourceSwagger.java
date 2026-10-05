@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -52,14 +53,24 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Integer toPeriod;
                 @Schema(example = "4.5")
                 public Double annualInterestRate;
+                @Schema(example = "1000")
+                public BigDecimal amountRangeFrom;
+                @Schema(example = "5000")
+                public BigDecimal amountRangeTo;
+                @Schema(example = "en")
+                public String locale;
             }
 
             @Schema(example = "01 Jan 2014")
             public String fromDate;
+            @Schema(example = "01 Jan 2015")
+            public String endDate;
             @Schema(example = "en")
             public String locale;
             @Schema(example = "dd MMMM yyyy")
             public String dateFormat;
+            @Schema(example = "false")
+            public Boolean isPrimaryGroupingByAmount;
             public Set<PostFixedDepositProductsChartSlabs> chartSlabs;
         }
 
@@ -101,6 +112,38 @@ final class FixedDepositProductsApiResourceSwagger {
         public Integer maxDepositTerm;
         @Schema(example = "3")
         public Integer maxDepositTermTypeId;
+        @Schema(example = "2")
+        public Integer inMultiplesOfDepositTerm;
+        @Schema(example = "2")
+        public Integer inMultiplesOfDepositTermTypeId;
+        @Schema(example = "100000")
+        public BigDecimal depositAmount;
+        @Schema(example = "1")
+        public Integer lockinPeriodFrequency;
+        @Schema(example = "2")
+        public Integer lockinPeriodFrequencyType;
+        @Schema(example = "false")
+        public Boolean withHoldTax;
+        @Schema(example = "1")
+        public Long taxGroupId;
+        @Schema(example = "1")
+        public Long savingsReferenceAccountId;
+        @Schema(example = "2")
+        public Long savingsControlAccountId;
+        @Schema(example = "3")
+        public Long transfersInSuspenseAccountId;
+        @Schema(example = "4")
+        public Long interestOnSavingsAccountId;
+        @Schema(example = "5")
+        public Long incomeFromFeeAccountId;
+        @Schema(example = "6")
+        public Long incomeFromPenaltyAccountId;
+        @Schema(example = "7")
+        public Long feesReceivableAccountId;
+        @Schema(example = "8")
+        public Long penaltiesReceivableAccountId;
+        @Schema(example = "9")
+        public Long interestPayableAccountId;
         public Set<PostFixedDepositProductsCharts> charts;
     }
 

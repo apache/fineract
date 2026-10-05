@@ -24,11 +24,10 @@ import org.apache.fineract.organisation.office.service.OfficeReadPlatformService
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.RecalculateInterestPoster;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -72,8 +71,7 @@ public class RecalculateInterestForLoanConfig {
 
     @Bean
     public Job recalculateInterestForLoanJob() {
-        return new JobBuilder(JobName.RECALCULATE_INTEREST_FOR_LOAN.name(), jobRepository).start(recalculateInterestForLoanStep())
-                .incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.RECALCULATE_INTEREST_FOR_LOAN.name(), jobRepository).start(recalculateInterestForLoanStep()).build();
     }
 
     @Bean

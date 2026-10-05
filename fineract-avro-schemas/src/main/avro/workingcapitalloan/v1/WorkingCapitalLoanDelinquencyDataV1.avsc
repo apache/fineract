@@ -19,6 +19,15 @@
                 "null",
                 "string"
             ]
+        },
+        {
+            "default": null,
+            "name": "delinquencyEffectiveStartDate",
+            "doc": "delinquencyStartDate shifted by the delinquency grace days; only set for the first delinquency period.",
+            "type": [
+                "null",
+                "string"
+            ]
         }
     ]
 }

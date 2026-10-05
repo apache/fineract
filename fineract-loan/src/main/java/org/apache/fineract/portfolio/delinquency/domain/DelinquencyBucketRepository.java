@@ -32,4 +32,7 @@ public interface DelinquencyBucketRepository extends JpaRepository<DelinquencyBu
 
     @Query("SELECT b FROM DelinquencyBucket b")
     List<DelinquencyBucket> findAllBuckets();
+
+    @Query("SELECT b FROM DelinquencyBucket b WHERE b.bucketType = :bucketType")
+    List<DelinquencyBucket> findByBucketType(@Param("bucketType") DelinquencyBucketType bucketType);
 }

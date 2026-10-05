@@ -26,6 +26,7 @@ import org.apache.fineract.client.models.GetCodeValuesDataResponse;
 import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.PostCodeValueDataResponse;
 import org.apache.fineract.client.models.PostCodeValuesDataRequest;
+import org.apache.fineract.client.models.PostCodesRequest;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignCodeHelper {
@@ -55,6 +56,19 @@ public class FeignCodeHelper {
 
     public GetCodesResponse retrieveCodeByName(String codeName) {
         return ok(() -> fineractClient.codes().retrieveOneCodeByName(codeName));
+    }
+
+    public Long createCode(String codeName) {
+        return ok(() -> fineractClient.codes().createCode(new PostCodesRequest().name(codeName))).getResourceId();
+    }
+
+    /** Adds a value to the named code; like the legacy {@code CodeHelper.createCodeValue}, it sets no description. */
+    public Long createCodeValue(String codeName, String value, Integer position) {
+        return createCodeValue(retrieveCodeByName(codeName).getId(), value, position);
+    }
+
+    public Long createCodeValue(Long codeId, String value, Integer position) {
+        return createCodeValue(codeId, new PostCodeValuesDataRequest().name(value).position(position)).getSubResourceId();
     }
 
     public PostCodeValueDataResponse createCodeValue(Long codeId, PostCodeValuesDataRequest request) {

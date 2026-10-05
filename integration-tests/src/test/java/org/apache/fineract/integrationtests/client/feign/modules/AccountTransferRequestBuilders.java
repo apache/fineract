@@ -40,19 +40,41 @@ public final class AccountTransferRequestBuilders {
     public static AccountTransferRequest transfer(String transferDate, Long fromClientId, Long fromAccountId,
             PortfolioAccountType fromAccountType, Long toClientId, Long toAccountId, PortfolioAccountType toAccountType,
             String transferAmount) {
+        return transfer(transferDate, fromClientId, fromAccountId, String.valueOf(fromAccountType.getValue()), toClientId, toAccountId,
+                String.valueOf(toAccountType.getValue()), transferAmount);
+    }
+
+    /**
+     * The same transfer with the account types sent verbatim. A test that drives the server's rejection of an unknown
+     * account type cannot express that type as a {@link PortfolioAccountType}.
+     */
+    public static AccountTransferRequest transfer(String transferDate, Long fromClientId, Long fromAccountId, String fromAccountType,
+            Long toClientId, Long toAccountId, String toAccountType, String transferAmount) {
         return new AccountTransferRequest()//
                 .dateFormat(FeignTestConstants.DATETIME_PATTERN)//
                 .locale(TRANSFER_LOCALE)//
                 .fromClientId(String.valueOf(fromClientId))//
                 .fromAccountId(String.valueOf(fromAccountId))//
-                .fromAccountType(String.valueOf(fromAccountType.getValue()))//
+                .fromAccountType(fromAccountType)//
                 .fromOfficeId(String.valueOf(HEAD_OFFICE_ID))//
                 .toClientId(String.valueOf(toClientId))//
                 .toAccountId(String.valueOf(toAccountId))//
-                .toAccountType(String.valueOf(toAccountType.getValue()))//
+                .toAccountType(toAccountType)//
                 .toOfficeId(String.valueOf(HEAD_OFFICE_ID))//
                 .transferDate(transferDate)//
                 .transferAmount(transferAmount)//
                 .transferDescription(TRANSFER_DESCRIPTION);
+    }
+
+    /** Payment details ride on the transfer body itself; the server rejects any of them without a payment type. */
+    public static AccountTransferRequest withPaymentDetails(AccountTransferRequest request, Long paymentTypeId, String accountNumber,
+            String checkNumber, String routingCode, String receiptNumber, String bankNumber) {
+        return request//
+                .paymentTypeId(paymentTypeId)//
+                .accountNumber(accountNumber)//
+                .checkNumber(checkNumber)//
+                .routingCode(routingCode)//
+                .receiptNumber(receiptNumber)//
+                .bankNumber(bankNumber);
     }
 }

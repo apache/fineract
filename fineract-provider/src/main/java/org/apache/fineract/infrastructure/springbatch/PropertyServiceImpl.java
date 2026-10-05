@@ -46,18 +46,15 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public Integer getThreadPoolCorePoolSize(String jobName) {
-        return getProperty(jobName, FineractProperties.PartitionedJobProperty::getThreadPoolCorePoolSize);
-    }
-
-    @Override
-    public Integer getThreadPoolMaxPoolSize(String jobName) {
-        return getProperty(jobName, FineractProperties.PartitionedJobProperty::getThreadPoolMaxPoolSize);
-    }
-
-    @Override
-    public Integer getThreadPoolQueueCapacity(String jobName) {
-        return getProperty(jobName, FineractProperties.PartitionedJobProperty::getThreadPoolQueueCapacity);
+    public Integer getSkipLimit(String jobName) {
+        // Explicitly null-checked rather than going through getProperty(..), whose orElse(1) fallback would silently
+        // collapse an unset skip limit to 1 instead of preserving the historical chunkSize + 1.
+        Integer configured = fineractProperties.getPartitionedJob().getPartitionedJobProperties().stream() //
+                .filter(jobProperty -> jobName.equals(jobProperty.getJobName())) //
+                .findFirst() //
+                .map(FineractProperties.PartitionedJobProperty::getSkipLimit) //
+                .orElse(null);
+        return configured != null ? configured : getChunkSize(jobName) + 1;
     }
 
     @Override

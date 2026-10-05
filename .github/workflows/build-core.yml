@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   build-core:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
 
     env:
@@ -33,7 +33,7 @@ jobs:
           fetch-tags: true
 
       - name: Build Fineract
-        uses: ./.github/actions/setup-and-build-fineract
+        uses: $/.github/actions/setup-and-build-fineract
         with:
           cache-read-only: false
 
@@ -56,14 +56,5 @@ jobs:
           name: test-results-build-core
           path: '**/build/reports/'
           if-no-files-found: ignore
-          retention-days: 5
-          compression-level: 9
-
-      - name: Archive server logs
-        if: ${{ failure() || inputs.upload_artifacts }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: server-logs-build-core
-          path: '**/build/cargo/'
           retention-days: 5
           compression-level: 9

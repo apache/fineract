@@ -34,14 +34,12 @@ import org.apache.fineract.cob.exceptions.LockCannotBeAppliedException;
 import org.apache.fineract.cob.resolver.CatchUpFlagResolver;
 import org.apache.fineract.cob.service.RetrieveIdService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.springframework.batch.core.StepContribution;
+import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.lang.NonNull;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.batch.infrastructure.item.ExecutionContext;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
@@ -101,13 +99,9 @@ public abstract class ApplyCommonLockTasklet implements Tasklet {
     }
 
     private void applyLocks(List<Long> toBeProcessedLoanIds) {
-        requiresNewTransactionJdbcTemplate.execute(new TransactionCallbackWithoutResult() {
-
-            @Override
-            protected void doInTransactionWithoutResult(@NonNull TransactionStatus status) {
-                log.info("Apply locks for {} by owner {}", toBeProcessedLoanIds, getLockOwner());
-                loanLockingService.applyLock(toBeProcessedLoanIds, getLockOwner());
-            }
+        requiresNewTransactionJdbcTemplate.executeWithoutResult(status -> {
+            log.info("Apply locks for {} by owner {}", toBeProcessedLoanIds, getLockOwner());
+            loanLockingService.applyLock(toBeProcessedLoanIds, getLockOwner());
         });
     }
 

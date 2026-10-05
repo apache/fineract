@@ -38,6 +38,11 @@ plugins {
 apply plugin: 'org.asciidoctor.jvm.convert'
 apply plugin: 'org.asciidoctor.jvm.pdf'
 
+// Tasks marked incompatible make Gradle run that build without the configuration cache instead of failing.
+tasks.withType(org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask).configureEach {
+    notCompatibleWithConfigurationCache('asciidoctor-gradle-jvm 4.0.5 cannot serialize its asciidoctorj configuration')
+}
+
 // Configure resolution strategy for all configurations
 configurations.all {
     resolutionStrategy {
@@ -137,6 +142,7 @@ asciidoctorPdf {
 
 task doc(type: Zip) {
     dependsOn(asciidoctor, asciidoctorPdf)
+    def pdfName = "fineract-${project.version}.pdf".toString()
 
     into("fineract-${project.version}/html") {
         from("$buildDir/docs/html") {
@@ -149,7 +155,7 @@ task doc(type: Zip) {
             include "**/index.pdf"
             exclude "**/.asciidoctor"
             rename {
-                "fineract-${project.version}.pdf"
+                pdfName
             }
         }
     }

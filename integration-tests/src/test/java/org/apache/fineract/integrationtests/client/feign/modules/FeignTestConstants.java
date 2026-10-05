@@ -23,6 +23,7 @@ public final class FeignTestConstants {
     public static final String DATETIME_PATTERN = "dd MMMM yyyy";
     public static final String ISO_DATE_PATTERN = "yyyy-MM-dd";
     public static final String LOCALE = "en";
+    public static final String MONTH_DAY_FORMAT = "dd MMM";
 
     private FeignTestConstants() {}
 }

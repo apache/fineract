@@ -156,7 +156,7 @@ public final class AuditHelper {
     }
 
     public static void verifyLimitParameterfor(final int limit) {
-        assertEquals(limit, getAuditDetails(limit).size(), "Incorrect number of audits recieved for limit: " + Integer.toString(limit));
+        assertEquals(limit, getAuditDetails(limit).size(), "Incorrect number of audits received for limit: " + Integer.toString(limit));
     }
 
     public static void verifyOrderBysupported(final String orderByValue) {

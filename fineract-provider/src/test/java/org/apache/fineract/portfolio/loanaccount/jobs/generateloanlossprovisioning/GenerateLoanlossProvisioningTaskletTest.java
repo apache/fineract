@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.springframework.batch.repeat.RepeatStatus.FINISHED;
+import static org.springframework.batch.infrastructure.repeat.RepeatStatus.FINISHED;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -40,14 +40,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.core.step.StepContribution;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class GenerateLoanlossProvisioningTaskletTest {
 
     public static final LocalDate BUSINESS_DATE = LocalDate.of(2022, 6, 12);

@@ -55,10 +55,10 @@ import org.apache.fineract.infrastructure.reportmailingjob.util.ReportMailingJob
 import org.apache.fineract.infrastructure.reportmailingjob.validation.ReportMailingJobValidator;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
-import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor

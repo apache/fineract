@@ -19,7 +19,9 @@
 package org.apache.fineract.accounting.glaccount.jobs.updatetrialbalancedetails;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +33,10 @@ import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
-import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.CollectionUtils;
 
@@ -78,7 +80,7 @@ public class UpdateTrialBalanceDetailsTasklet implements Tasklet {
             tb.setGlAccountId((Long) row[1]);
             tb.setAmount((BigDecimal) row[2]);
             tb.setEntryDate((LocalDate) row[3]);
-            tb.setTransactionDate(((OffsetDateTime) row[4]).toLocalDate());
+            tb.setTransactionDate(toLocalDate(row[4]));
             tb.setClosingBalance((BigDecimal) row[5]);
             return tb;
         }).toList();
@@ -110,6 +112,25 @@ public class UpdateTrialBalanceDetailsTasklet implements Tasklet {
         List<TrialBalance> tbRows = trialBalanceRepositoryWrapper.findNewByOfficeAndAccount(officeId, accountId);
 
         updateTrialBalanceRows(tbRows, closingBalance);
+    }
+
+    /**
+     * {@code row[4]} is {@code je.createdDate}, the audit field backed by {@code created_on_utc}. EclipseLink 5
+     * materializes it as an {@link OffsetDateTime} where EclipseLink 4 handed back a date-castable value, and the
+     * underlying column type differs by dialect ({@code DATETIME} on MySQL/MariaDB vs {@code TIMESTAMP WITH TIME ZONE}
+     * on PostgreSQL), so accept whichever temporal type the driver returns rather than casting blind.
+     */
+    private LocalDate toLocalDate(Object value) {
+        return switch (value) {
+            case null -> null;
+            case OffsetDateTime offsetDateTime -> offsetDateTime.toLocalDate();
+            case LocalDateTime localDateTime -> localDateTime.toLocalDate();
+            case LocalDate localDate -> localDate;
+            case Timestamp timestamp -> timestamp.toLocalDateTime().toLocalDate();
+            case java.sql.Date date -> date.toLocalDate();
+            default -> throw new IllegalStateException(
+                    "Unsupported transaction date type " + value.getClass().getName() + " in trial balance projection");
+        };
     }
 
     private BigDecimal getPreviousClosingBalance(Long officeId, Long accountId) {

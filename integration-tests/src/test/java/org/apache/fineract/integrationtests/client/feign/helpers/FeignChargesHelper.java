@@ -21,12 +21,15 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.DeleteChargesChargeIdResponse;
 import org.apache.fineract.client.models.DeleteClientsClientIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetChargesResponse;
+import org.apache.fineract.client.models.GetClientsChargesPageItems;
 import org.apache.fineract.client.models.GetClientsClientIdChargesResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostClientsClientIdChargesChargeIdRequest;
@@ -40,15 +43,22 @@ import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 public class FeignChargesHelper {
 
     private static final String PAY_COMMAND = "paycharge";
+    private static final String WAIVE_COMMAND = "waive";
 
     private final FineractFeignClient fineractClient;
+    private final ChargeTemplateApi chargeTemplateApi;
 
     public FeignChargesHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+        this.chargeTemplateApi = fineractClient.create(ChargeTemplateApi.class);
     }
 
     public PostChargesResponse createCharge(ChargeRequest request) {
         return ok(() -> fineractClient.charges().createCharge(request));
+    }
+
+    public List<ChargeData> getAllCharges() {
+        return ok(() -> fineractClient.charges().retrieveAllCharges());
     }
 
     public GetChargesResponse getCharge(Long chargeId) {
@@ -65,6 +75,22 @@ public class FeignChargesHelper {
 
     public CallFailedRuntimeException getChargeExpectingError(Long chargeId) {
         return fail(() -> fineractClient.charges().retrieveOneCharge(chargeId));
+    }
+
+    public CallFailedRuntimeException createChargeExpectingError(ChargeRequest request) {
+        return fail(() -> fineractClient.charges().createCharge(request));
+    }
+
+    public CallFailedRuntimeException updateChargeExpectingError(Long chargeId, ChargeRequest request) {
+        return fail(() -> fineractClient.charges().updateCharge(chargeId, request));
+    }
+
+    public ChargeData getChargeTemplate(Long chargeAppliesTo, Long chargeTimeType) {
+        return ok(() -> fineractClient.charges().retrieveTemplateCharge(chargeAppliesTo, chargeTimeType));
+    }
+
+    public ChargeData getChargeWithTemplate(Long chargeId) {
+        return ok(() -> chargeTemplateApi.retrieveChargeWithTemplate(chargeId));
     }
 
     public PostChargesResponse createLoanSpecifiedDueDateCharge(double amount) {
@@ -125,6 +151,24 @@ public class FeignChargesHelper {
     public PostClientsClientIdChargesChargeIdResponse payClientCharge(Long clientId, Long chargeId,
             PostClientsClientIdChargesChargeIdRequest request) {
         return ok(() -> fineractClient.clientCharges().payOrWaiveClientCharge(clientId, chargeId, request, PAY_COMMAND));
+    }
+
+    public CallFailedRuntimeException addClientChargeExpectingError(Long clientId, PostClientsClientIdChargesRequest request) {
+        return fail(() -> fineractClient.clientCharges().createClientCharge(clientId, request));
+    }
+
+    public CallFailedRuntimeException payClientChargeExpectingError(Long clientId, Long chargeId,
+            PostClientsClientIdChargesChargeIdRequest request) {
+        return fail(() -> fineractClient.clientCharges().payOrWaiveClientCharge(clientId, chargeId, request, PAY_COMMAND));
+    }
+
+    public PostClientsClientIdChargesChargeIdResponse waiveClientCharge(Long clientId, Long chargeId,
+            PostClientsClientIdChargesChargeIdRequest request) {
+        return ok(() -> fineractClient.clientCharges().payOrWaiveClientCharge(clientId, chargeId, request, WAIVE_COMMAND));
+    }
+
+    public GetClientsChargesPageItems getClientCharge(Long clientId, Long chargeId) {
+        return ok(() -> fineractClient.clientCharges().retrieveOneClientCharge(clientId, chargeId));
     }
 
     public GetClientsClientIdChargesResponse getClientCharges(Long clientId) {

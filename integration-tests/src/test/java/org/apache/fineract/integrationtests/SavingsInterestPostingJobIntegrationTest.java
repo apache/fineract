@@ -33,8 +33,10 @@ import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
+@Order(2)
 public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBase {
 
     private static final String POST_INTEREST_JOB_NAME = "Post Interest For Savings";

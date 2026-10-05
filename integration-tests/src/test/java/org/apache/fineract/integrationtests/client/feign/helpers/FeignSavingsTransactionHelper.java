@@ -37,6 +37,7 @@ import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
 
 public class FeignSavingsTransactionHelper {
 
@@ -72,9 +73,18 @@ public class FeignSavingsTransactionHelper {
         return forceWithdraw(savingsId, SavingsRequestBuilders.withdrawal(amount, transactionDate));
     }
 
+    public PostSavingsAccountTransactionsResponse withdraw(Long savingsId, String amount, String transactionDate, Long paymentTypeId) {
+        return withdraw(savingsId, SavingsRequestBuilders.withdrawal(amount, transactionDate, paymentTypeId));
+    }
+
     public CallFailedRuntimeException withdrawExpectingError(Long savingsId, String amount, String transactionDate) {
         PostSavingsAccountTransactionsRequest request = SavingsRequestBuilders.withdrawal(amount, transactionDate);
         return fail(() -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "withdrawal"));
+    }
+
+    public CallFailedRuntimeException depositExpectingError(Long savingsId, String amount, String transactionDate) {
+        PostSavingsAccountTransactionsRequest request = SavingsRequestBuilders.deposit(amount, transactionDate);
+        return fail(() -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "deposit"));
     }
 
     public PostSavingsAccountTransactionsResponse postInterestAsOn(Long savingsId, String transactionDate) {
@@ -88,8 +98,36 @@ public class FeignSavingsTransactionHelper {
         return ok(() -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "holdAmount"));
     }
 
+    public PostSavingsAccountTransactionsResponse holdAmount(Long savingsId, String amount, String transactionDate, String reasonForBlock,
+            boolean lienAllowed) {
+        PostSavingsAccountTransactionsRequest request = SavingsRequestBuilders.holdAmount(amount, transactionDate, reasonForBlock,
+                lienAllowed);
+        return ok(() -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "holdAmount"));
+    }
+
+    public CallFailedRuntimeException holdAmountExpectingError(Long savingsId, String amount, String transactionDate, String reasonForBlock,
+            boolean lienAllowed) {
+        PostSavingsAccountTransactionsRequest request = SavingsRequestBuilders.holdAmount(amount, transactionDate, reasonForBlock,
+                lienAllowed);
+        return fail(() -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "holdAmount"));
+    }
+
+    public CallFailedRuntimeException postInterestAsOnExpectingError(Long savingsId, String transactionDate) {
+        PostSavingsAccountTransactionsRequest request = SavingsRequestBuilders.postInterestAsOn(transactionDate);
+        return fail(
+                () -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "postInterestAsOn"));
+    }
+
     public CommandProcessingResult reverseTransaction(Long savingsId, Long transactionId) {
         return adjustTransaction(savingsId, transactionId, "reverse");
+    }
+
+    /** A bulk reversal reverses the transaction alone; a non-bulk one also reverses the charges it paid. */
+    public CommandProcessingResult reverseTransaction(Long savingsId, Long transactionId, boolean isBulk) {
+        PostSavingsAccountBulkReversalTransactionsRequest request = new PostSavingsAccountBulkReversalTransactionsRequest()
+                .isBulk(String.valueOf(isBulk));
+        return ok(() -> fineractClient.savingsAccountTransactions().adjustSavingsAccountTransaction(savingsId, transactionId, request,
+                "reverse"));
     }
 
     public CommandProcessingResult undoTransaction(Long savingsId, Long transactionId) {
@@ -100,7 +138,19 @@ public class FeignSavingsTransactionHelper {
         return adjustTransaction(savingsId, holdTransactionId, "releaseAmount");
     }
 
-    /** All three commands are driven by the query parameter alone and read no payload, hence the empty body. */
+    /** Replaces the transaction with one for the new amount; the reply carries the id of the replacement. */
+    public CommandProcessingResult modifyTransaction(Long savingsId, Long transactionId, String amount, String transactionDate) {
+        PostSavingsAccountBulkReversalTransactionsRequest request = new PostSavingsAccountBulkReversalTransactionsRequest()//
+                .locale(SavingsTestData.LOCALE)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .transactionDate(transactionDate)//
+                .transactionAmount(new BigDecimal(amount))//
+                .paymentTypeId(1L);
+        return ok(() -> fineractClient.savingsAccountTransactions().adjustSavingsAccountTransaction(savingsId, transactionId, request,
+                "modify"));
+    }
+
+    /** Undo, reverse and release are driven by the query parameter alone and read no payload, hence the empty body. */
     private CommandProcessingResult adjustTransaction(Long savingsId, Long transactionId, String command) {
         PostSavingsAccountBulkReversalTransactionsRequest request = new PostSavingsAccountBulkReversalTransactionsRequest();
         return ok(() -> fineractClient.savingsAccountTransactions().adjustSavingsAccountTransaction(savingsId, transactionId, request,

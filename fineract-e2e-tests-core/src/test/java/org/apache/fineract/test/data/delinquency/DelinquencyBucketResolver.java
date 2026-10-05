@@ -21,20 +21,28 @@ package org.apache.fineract.test.data.delinquency;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.test.data.DelinquencyBucket;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class DelinquencyBucketResolver {
 
     private final FineractFeignClient fineractClient;
+
+    // Injected lazily so resolveBucketId() can call resolve() through the cache-backed Spring proxy instead of
+    // "this" - a direct self-invocation would bypass the @Cacheable interceptor and re-fetch all buckets every time.
+    private final DelinquencyBucketResolver self;
+
+    public DelinquencyBucketResolver(FineractFeignClient fineractClient, @Lazy DelinquencyBucketResolver self) {
+        this.fineractClient = fineractClient;
+        this.self = self;
+    }
 
     @Cacheable(key = "#delinquencyBucket.name()", value = "delinquencyBucketsByName")
     public long resolve(DelinquencyBucket delinquencyBucket) {
@@ -48,5 +56,16 @@ public class DelinquencyBucketResolver {
                 .orElseThrow(() -> new IllegalArgumentException("Delinquency bucket [%s] not found".formatted(delinquencyBucketName)));//
 
         return foundAtr.getId();
+    }
+
+    public Long resolveBucketId(final String value) {
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
+        try {
+            return Long.valueOf(value);
+        } catch (NumberFormatException ex) {
+            return self.resolve(DelinquencyBucket.valueOf(value));
+        }
     }
 }

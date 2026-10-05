@@ -18,18 +18,24 @@
  */
 package org.apache.fineract.portfolio.interestpauses.data;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "Request DTO for creating an interest pause")
 public class InterestPauseRequestDto {
+
+    // Jackson 3 flipped FAIL_ON_UNKNOWN_PROPERTIES to false by default. fromJson() backs four batch-API
+    // command strategies, so keep rejecting unrecognised fields as the Jackson 2 mapper did - relaxing it
+    // would be an undocumented public API behaviour change.
+    private static final JsonMapper MAPPER = JsonMapper.builder().enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
     @Schema(example = "2024-01-01", description = "Start date of the interest pause period")
     private String startDate;
@@ -45,16 +51,16 @@ public class InterestPauseRequestDto {
 
     public String toJson() {
         try {
-            return new ObjectMapper().writeValueAsString(this);
-        } catch (JsonProcessingException e) {
+            return MAPPER.writeValueAsString(this);
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Error serializing request to JSON", e);
         }
     }
 
     public static InterestPauseRequestDto fromJson(String json) {
         try {
-            return new ObjectMapper().readValue(json, InterestPauseRequestDto.class);
-        } catch (JsonProcessingException e) {
+            return MAPPER.readValue(json, InterestPauseRequestDto.class);
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Error deserializing request from JSON", e);
         }
     }

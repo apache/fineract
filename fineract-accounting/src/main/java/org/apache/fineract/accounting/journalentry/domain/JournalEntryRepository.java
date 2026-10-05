@@ -42,6 +42,10 @@ public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long
     @Query("select journalEntry from JournalEntry journalEntry where journalEntry.transactionId= :transactionId and journalEntry.reversed=false and journalEntry.entityType = :entityType order by journalEntry.transactionDate asc, journalEntry.createdDate asc, journalEntry.id asc")
     List<JournalEntry> findJournalEntries(@Param("transactionId") String transactionId, @Param("entityType") Integer entityType);
 
+    @Query("select mirror from JournalEntry original join original.reversalJournalEntry mirror where mirror.transactionId= :transactionId and mirror.reversed=false and mirror.entityType = :entityType and original.reversed=true")
+    List<JournalEntry> findLiveReversalJournalEntries(@Param("transactionId") String transactionId,
+            @Param("entityType") Integer entityType);
+
     @Query("""
             SELECT DISTINCT je.transactionDate
             FROM JournalEntry je

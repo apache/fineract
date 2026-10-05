@@ -85,8 +85,8 @@ public class WorkingCapitalLoanData implements Serializable {
     private BigDecimal approvedDiscountFee;
     private Integer numberOfRepayments;
     private BigDecimal periodPaymentAmount;
-    private BigDecimal dailyEir;
     private BigDecimal calculatedAnnualEir;
+    private List<WorkingCapitalLoanPeriodPaymentRateChangeData> periodPaymentRateHistory;
     private DelinquencyBucketData delinquencyBucket;
     private WorkingCapitalBreachData breach;
     private WorkingCapitalNearBreachData nearBreach;
@@ -100,8 +100,15 @@ public class WorkingCapitalLoanData implements Serializable {
     private Integer breachGraceDays;
     private StringEnumOptionData breachStartType;
     private BigDecimal totalPaymentVolume;
+    private BigDecimal annualEir;
+    private BigDecimal paymentAmount;
+    private StringEnumOptionData paymentAmountCalculationStrategy;
     private LocalDate delinquencyStartDate;
+    // Only set for the first delinquency period, which is the only one the delinquency grace days shift.
+    private LocalDate delinquencyEffectiveStartDate;
     private LocalDate breachStartDate;
+    // Only set for the first breach period, which is the only one the breach grace days shift.
+    private LocalDate breachEffectiveStartDate;
     private WorkingCapitalLoanCollectionData delinquent;
     private Boolean enableInstallmentLevelDelinquency;
     private WorkingCapitalLoanSummaryData summary;
@@ -114,4 +121,5 @@ public class WorkingCapitalLoanData implements Serializable {
     // carried by status == CLOSED_WRITTEN_OFF.
     private LocalDate writtenOffOnDate;
     private CodeValueData writeOffReason;
+    private LocalDate overpaidOnDate;
 }

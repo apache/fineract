@@ -45,16 +45,19 @@ public interface WorkingCapitalLoanBreachScheduleService {
     boolean evaluateBreach(WorkingCapitalLoan loan, LocalDate businessDate);
 
     /**
-     * Recalculates the schedule from the effective reschedule parameters resolved from the persisted RESCHEDULE
-     * actions; a newly created reschedule action must therefore be saved before this is called. When {@code action}
-     * carries a frequency group, the current open period is also re-dated: its toDate is recalculated from its fromDate
-     * and the new frequency, extended by the recorded pauses that overlap the period.
+     * Replays the recorded breach actions over the schedule after {@code action} was recorded, re-dating the periods it
+     * reaches and rewriting their demand.
      */
-    void rescheduleMinimumPayment(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction action);
+    void replayForBreachAction(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction action);
 
-    void recalculatePeriodsForPauses(WorkingCapitalLoan loan);
+    void splitPeriodAtReset(WorkingCapitalLoan loan, LocalDate resetDate);
+
+    void restoreSplitPeriod(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction undoneReset);
 
     void recalculatePastDueAmount(WorkingCapitalLoan loan);
+
+    /** Derives the reset flags from the persisted breach actions, so a new RESET or UNDO_RESET must be saved first. */
+    void applyActiveResetFlags(WorkingCapitalLoan loan);
 
     void reprocessBreachSchedule(WorkingCapitalLoan loan);
 }

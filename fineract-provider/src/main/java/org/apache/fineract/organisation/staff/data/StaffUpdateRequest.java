@@ -20,7 +20,6 @@ package org.apache.fineract.organisation.staff.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.Hidden;
-import jakarta.validation.constraints.Pattern;
 import java.io.Serial;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
@@ -28,6 +27,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
+import org.apache.fineract.infrastructure.core.validator.ValidPhoneNumber;
 import org.apache.fineract.organisation.staff.validation.StaffForceStatus;
 import org.hibernate.validator.constraints.Length;
 
@@ -62,7 +62,7 @@ public class StaffUpdateRequest implements Serializable {
     private String emailAddress;
     @Length(max = 50, message = "{org.apache.fineract.organisation.staff.mobile-no.max}")
     // @NotBlank(message = "{org.apache.fineract.organisation.staff.mobile-no.not-blank}")
-    @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "{org.apache.fineract.organisation.staff.mobile-no.invalid}")
+    @ValidPhoneNumber(message = "{org.apache.fineract.organisation.staff.mobile-no.invalid}")
     private String mobileNo;
     @JsonProperty("isActive")
     private Boolean isActive;

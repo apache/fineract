@@ -24,11 +24,10 @@ import org.apache.fineract.infrastructure.campaigns.email.service.EmailCampaignR
 import org.apache.fineract.infrastructure.campaigns.email.service.EmailCampaignWritePlatformService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -62,7 +61,7 @@ public class UpdateEmailOutboundWithCampaignMessageConfig {
     @Bean
     public Job updateEmailOutboundWithCampaignMessageJob() {
         return new JobBuilder(JobName.UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name(), jobRepository)
-                .start(updateEmailOutboundWithCampaignMessageStep()).incrementer(new RunIdIncrementer()).build();
+                .start(updateEmailOutboundWithCampaignMessageStep()).build();
     }
 
     @Bean

@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper;
 import org.apache.fineract.infrastructure.jobs.filter.ProgressiveLoanModelCheckerFilter;
 import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBFilterHelper;
+import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanModelCheckerFilter;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
@@ -53,7 +54,7 @@ import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.apache.fineract.notification.service.UserNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.boot.web.server.autoconfigure.ServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -120,6 +121,8 @@ public class SecurityConfig {
     private IdempotencyStoreHelper idempotencyStoreHelper;
     @Autowired
     private ProgressiveLoanModelCheckerFilter progressiveLoanModelCheckerFilter;
+    @Autowired
+    private WorkingCapitalLoanModelCheckerFilter workingCapitalLoanModelCheckerFilter;
     @Autowired
     private PlatformUserDetailsChecker platformUserDetailsChecker;
 
@@ -421,7 +424,11 @@ public class SecurityConfig {
         }
         if (workingCapitalLoanCOBFilterHelper != null) {
             http.addFilterAfter(workingCapitalLoanCOBApiFilter(), lastCobFilter);
+            http.addFilterBefore(workingCapitalLoanModelCheckerFilter, WorkingCapitalLoanCOBApiFilter.class);
             lastCobFilter = WorkingCapitalLoanCOBApiFilter.class;
+        } else {
+            http.addFilterAfter(workingCapitalLoanModelCheckerFilter, lastCobFilter);
+            lastCobFilter = WorkingCapitalLoanModelCheckerFilter.class;
         }
         http.addFilterAfter(idempotencyStoreFilter(), lastCobFilter);
         if (fineractProperties.getIpTracking().isEnabled()) {

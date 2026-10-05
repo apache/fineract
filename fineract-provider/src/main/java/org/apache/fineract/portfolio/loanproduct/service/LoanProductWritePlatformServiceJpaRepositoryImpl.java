@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanproduct.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import jakarta.persistence.PersistenceException;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +31,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
@@ -43,8 +46,10 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiConstants;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketType;
 import org.apache.fineract.portfolio.delinquency.exception.DelinquencyBucketNotFoundException;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepositoryWrapper;
@@ -180,6 +185,13 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         if (delinquencyBucketId != null) {
             delinquencyBucket = delinquencyBucketRepository.findById(delinquencyBucketId)
                     .orElseThrow(() -> DelinquencyBucketNotFoundException.notFound(delinquencyBucketId));
+            if (!DelinquencyBucketType.REGULAR.equals(delinquencyBucket.getBucketType())) {
+                final String expectedType = DelinquencyBucketType.REGULAR.name();
+                throw new PlatformApiDataValidationException(List.of(
+                        ApiParameterError.parameterError(DelinquencyApiConstants.LOAN_PRODUCT_DELINQUENCY_BUCKET_ID_MUST_BE_OF_TYPE_CODE,
+                                MessageFormat.format(DelinquencyApiConstants.DELINQUENCY_BUCKET_ID_MUST_BE_OF_TYPE_MESSAGE, expectedType),
+                                LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, new Object[] { expectedType })));
+            }
         }
         return delinquencyBucket;
     }

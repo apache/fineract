@@ -25,7 +25,7 @@ dependencies {
             'io.github.openfeign:feign-hc5:13.12',
             'io.github.openfeign:feign-okhttp:13.12',
             'io.github.openfeign.form:feign-form:3.8.0',
-            'org.apache.httpcomponents.client5:httpclient5:5.6.1',
+            'org.apache.httpcomponents.client5:httpclient5:5.6.4',
             'com.squareup.okhttp3:okhttp',
             'com.fasterxml.jackson.core:jackson-databind',
             'com.fasterxml.jackson.datatype:jackson-datatype-jsr310',

@@ -32,13 +32,16 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.investor.data.ExternalAssetOwnerLoanProductAttributeRequestParameters;
+import org.apache.fineract.investor.data.attribute.ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttributes;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttributesRepository;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeAlreadyExistsException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeInvalidSettlementAttributeException;
+import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeInvalidValueException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeNotFoundException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributesException;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
@@ -48,40 +51,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.cache.annotation.CacheEvict;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
-
-    @Test
-    public void testCreateExternalAssetOwnerLoanProductAttributeHappyPath() {
-        TestContext testContext = new TestContext();
-        ArgumentCaptor<ExternalAssetOwnerLoanProductAttributes> loanProductAttributeArgumentCaptor = ArgumentCaptor
-                .forClass(ExternalAssetOwnerLoanProductAttributes.class);
-
-        // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
-        when(testContext.externalAssetOwnerLoanProductAttributesRepository.existsByLoanProductIdAndKey(testContext.loanProductId,
-                testContext.attributeKey)).thenReturn(false);
-        when(testContext.loanProductRepository.existsById(testContext.loanProductId)).thenReturn(true);
-
-        // when
-        testContext.externalAssetOwnerLoanProductAttributesWriteService.createExternalAssetOwnerLoanProductAttribute(command);
-
-        // then
-        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).existsByLoanProductIdAndKey(any(), any());
-        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).saveAndFlush(loanProductAttributeArgumentCaptor.capture());
-        verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
-        assertLoanProductAttributeValues(testContext, loanProductAttributeArgumentCaptor.getValue());
-    }
 
     @Test
     public void testUpdateExternalAssetOwnerLoanProductAttributeHappyPath() {
@@ -110,16 +93,21 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository).saveAndFlush(loanProductAttributeArgumentCaptor.capture());
     }
 
-    @Test
-    public void testUpdateExternalAssetOwnerLoanProductAttributeUpdateNotRequired() {
-        TestContext testContext = new TestContext();
+    @ParameterizedTest
+    @CsvSource(value = { "SETTLEMENT_MODEL|DELAYED_SETTLEMENT|DELAYED_SETTLEMENT",
+            "EXCLUDED_TRANSACTION_TYPES|BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT|BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|DEFerrED|DEFERRED",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|IMMEDIATE|IMMEDIATE" }, delimiter = '|')
+    public void testUpdateExternalAssetOwnerLoanProductAttributeUpdateNotRequired(String attributeKey, String attributeValue,
+            String currentValue) {
+        TestContext testContext = new TestContext(attributeKey, attributeValue);
         ArgumentCaptor<ExternalAssetOwnerLoanProductAttributes> loanProductAttributeArgumentCaptor = ArgumentCaptor
                 .forClass(ExternalAssetOwnerLoanProductAttributes.class);
 
         ExternalAssetOwnerLoanProductAttributes attributeInDB = new ExternalAssetOwnerLoanProductAttributes();
         attributeInDB.setLoanProductId(testContext.loanProductId);
         attributeInDB.setAttributeKey(testContext.attributeKey);
-        attributeInDB.setAttributeValue(testContext.attributeValue);
+        attributeInDB.setAttributeValue(currentValue);
         attributeInDB.setId(1L);
 
         // given
@@ -136,6 +124,41 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(command.entityId());
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0))
                 .saveAndFlush(loanProductAttributeArgumentCaptor.capture());
+    }
+
+    /**
+     * create test case test case-insensitive validation test case-sensitive validation success
+     */
+    @ParameterizedTest
+    @CsvSource(value = { "SETTLEMENT_MODEL|DELAYED_SETTLEMENT|DELAYED_SETTLEMENT", "SETTLEMENT_MODEL|DEFAULT_SETTLEMENT|DEFAULT_SETTLEMENT",
+            "EXCLUDED_TRANSACTION_TYPES|BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT|BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|DEFERRED|DEFERRED", "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|DEFerrED|DEFERRED",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|IMMEDIATE|IMMEDIATE",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|' immediate '|IMMEDIATE",
+            "BUY_DOWN_FEE_AMORTIZATION_STRATEGY|' Deferred '|DEFERRED" }, delimiter = '|')
+    public void testCreateSuccess(String attributeKey, String attributeValue, String expectedSavedValue) {
+        TestContext testContext = new TestContext(attributeKey, attributeValue);
+
+        ArgumentCaptor<ExternalAssetOwnerLoanProductAttributes> loanProductAttributeArgumentCaptor = ArgumentCaptor
+                .forClass(ExternalAssetOwnerLoanProductAttributes.class);
+
+        // given
+        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
+        when(testContext.externalAssetOwnerLoanProductAttributesRepository.existsByLoanProductIdAndKey(testContext.loanProductId,
+                testContext.attributeKey)).thenReturn(false);
+        when(testContext.loanProductRepository.existsById(testContext.loanProductId)).thenReturn(true);
+
+        // when
+        testContext.externalAssetOwnerLoanProductAttributesWriteService.createExternalAssetOwnerLoanProductAttribute(command);
+
+        // then
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).existsByLoanProductIdAndKey(any(), any());
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).saveAndFlush(loanProductAttributeArgumentCaptor.capture());
+        verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
+        ExternalAssetOwnerLoanProductAttributes savedAttribute = loanProductAttributeArgumentCaptor.getValue();
+        Assertions.assertEquals(testContext.loanProductId, savedAttribute.getLoanProductId());
+        Assertions.assertEquals(attributeKey, savedAttribute.getAttributeKey());
+        Assertions.assertEquals(expectedSavedValue, savedAttribute.getAttributeValue());
     }
 
     @Test
@@ -159,7 +182,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(1L);
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0))
                 .saveAndFlush(loanProductAttributeArgumentCaptor.capture());
-        Assertions.assertEquals(thrownException.getMessage(), "Loan product attribute with id " + 1L + " was not found");
+        Assertions.assertEquals("Loan product attribute with id " + 1L + " was not found", thrownException.getMessage());
     }
 
     @Test
@@ -190,8 +213,40 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(command.entityId());
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0))
                 .saveAndFlush(loanProductAttributeArgumentCaptor.capture());
-        Assertions.assertEquals(thrownException.getMessage(),
-                "The attribute key of requested update attribute does not match the attribute key from database.");
+        Assertions.assertEquals("The attribute key of requested update attribute does not match the attribute key from database.",
+                thrownException.getMessage());
+    }
+
+    @Test
+    public void testUpdateExternalAssetOwnerLoanProductAttributeBelongingToAnotherLoanProduct() {
+        final TestContext testContext = new TestContext();
+        final ArgumentCaptor<ExternalAssetOwnerLoanProductAttributes> loanProductAttributeArgumentCaptor = ArgumentCaptor
+                .forClass(ExternalAssetOwnerLoanProductAttributes.class);
+
+        final ExternalAssetOwnerLoanProductAttributes attributeInDB = new ExternalAssetOwnerLoanProductAttributes();
+        attributeInDB.setLoanProductId(testContext.loanProductId + 1);
+        attributeInDB.setAttributeKey(testContext.attributeKey);
+        attributeInDB.setAttributeValue("DIFFERENT_VALUE");
+        attributeInDB.setId(1L);
+
+        // given
+        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, attributeInDB.getId());
+        when(testContext.loanProductRepository.existsById(testContext.loanProductId)).thenReturn(true);
+        when(testContext.externalAssetOwnerLoanProductAttributesRepository.findById(command.entityId()))
+                .thenReturn(Optional.of(attributeInDB));
+
+        final ExternalAssetOwnerLoanProductAttributesException thrownException = assertThrows(
+                ExternalAssetOwnerLoanProductAttributesException.class,
+                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService.updateExternalAssetOwnerLoanProductAttribute(command,
+                        testContext.attributeKey, testContext.attributeValue));
+
+        // then
+        verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(command.entityId());
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0))
+                .saveAndFlush(loanProductAttributeArgumentCaptor.capture());
+        Assertions.assertEquals("The requested attribute does not belong to the loanProductId: " + testContext.loanProductId + ".",
+                thrownException.getMessage());
     }
 
     @Test
@@ -321,10 +376,252 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
         Assertions.assertEquals(thrownException.getMessage(), "The given attribute key or attribute value is not valid.");
     }
 
+    @ParameterizedTest
+    @CsvSource(value = { "EXCLUDED_TRANSACTION_TYPES|BAD_VALUE", "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|BAD_VALUE",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|DEFERRED,IMMEDIATE", "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|DELAYED_SETTLEMENT",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|CAPITALIZED_INCOME" }, delimiter = '|')
+    public void testCreateExternalAssetOwnerLoanProductAttributeWithInvalidValueIsRejected(String attributeKey, String attributeValue) {
+        TestContext testContext = new TestContext(attributeKey, attributeValue);
+
+        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
+
+        ExternalAssetOwnerLoanProductAttributeInvalidValueException thrownException = assertThrows(
+                ExternalAssetOwnerLoanProductAttributeInvalidValueException.class,
+                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService
+                        .createExternalAssetOwnerLoanProductAttribute(command));
+
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0)).saveAndFlush(any());
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0)).existsByLoanProductIdAndKey(any(), any());
+        verify(testContext.loanProductRepository, times(0)).existsById(testContext.loanProductId);
+        Assertions.assertEquals("The given attribute value is not valid for the attribute key: " + attributeKey + ".",
+                thrownException.getMessage());
+    }
+
+    @Test
+    public void testCreateExcludedTransactionTypesAttributeNormalizesTheStoredValue() {
+        TestContext testContext = new TestContext(ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY,
+                "BUY_DOWN_FEE , BUY_DOWN_FEE_ADJUSTMENT");
+        ArgumentCaptor<ExternalAssetOwnerLoanProductAttributes> loanProductAttributeArgumentCaptor = ArgumentCaptor
+                .forClass(ExternalAssetOwnerLoanProductAttributes.class);
+
+        // given
+        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
+        when(testContext.externalAssetOwnerLoanProductAttributesRepository.existsByLoanProductIdAndKey(testContext.loanProductId,
+                testContext.attributeKey)).thenReturn(false);
+        when(testContext.loanProductRepository.existsById(testContext.loanProductId)).thenReturn(true);
+
+        // when
+        testContext.externalAssetOwnerLoanProductAttributesWriteService.createExternalAssetOwnerLoanProductAttribute(command);
+
+        // then
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).saveAndFlush(loanProductAttributeArgumentCaptor.capture());
+        ExternalAssetOwnerLoanProductAttributes savedAttribute = loanProductAttributeArgumentCaptor.getValue();
+        Assertions.assertEquals(ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY,
+                savedAttribute.getAttributeKey());
+        Assertions.assertEquals("BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT", savedAttribute.getAttributeValue());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = { "SETTLEMENT_MODEL|DELAYED_SETTLEMENT|DEFAULT_SETTLEMENT", "SETTLEMENT_MODEL|DEFAULT_SETTLEMENT|DELAYED_SETTLEMENT",
+            "EXCLUDED_TRANSACTION_TYPES|BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT,BUY_DOWN_FEE_AMORTIZATION,BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT|BUY_DOWN_FEE",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|DEFERRED|IMMEDIATE",
+            "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY|IMMEDIATE|DEFERRED" }, delimiter = '|')
+    public void testUpdateExternalAssetOwnerLoanProductAttributeReplacesTheValue(String attributeKey, String attributeValue,
+            String currentValue) {
+        TestContext testContext = new TestContext(attributeKey, attributeValue);
+        ArgumentCaptor<ExternalAssetOwnerLoanProductAttributes> loanProductAttributeArgumentCaptor = ArgumentCaptor
+                .forClass(ExternalAssetOwnerLoanProductAttributes.class);
+
+        ExternalAssetOwnerLoanProductAttributes attributeInDB = new ExternalAssetOwnerLoanProductAttributes();
+        attributeInDB.setLoanProductId(testContext.loanProductId);
+        attributeInDB.setAttributeKey(testContext.attributeKey);
+        attributeInDB.setAttributeValue(currentValue);
+        attributeInDB.setId(1L);
+
+        // given
+        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, attributeInDB.getId());
+        when(testContext.loanProductRepository.existsById(testContext.loanProductId)).thenReturn(true);
+        when(testContext.externalAssetOwnerLoanProductAttributesRepository.findById(command.entityId()))
+                .thenReturn(Optional.of(attributeInDB));
+
+        // when
+        testContext.externalAssetOwnerLoanProductAttributesWriteService.updateExternalAssetOwnerLoanProductAttribute(command,
+                testContext.attributeKey, testContext.attributeValue);
+
+        // then
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).saveAndFlush(loanProductAttributeArgumentCaptor.capture());
+        Assertions.assertEquals(testContext.attributeValue, loanProductAttributeArgumentCaptor.getValue().getAttributeValue());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "BUY_DOWN_FEE,NOT_A_TYPE", ",", "BUY_DOWN_FEE,", "BUY_DOWN_FEE,BUY_DOWN_FEE", "buy_down_fee" })
+    public void testCreateExcludedTransactionTypesAttributeWithInvalidValuePersistsNothing(String attributeValue) {
+        TestContext testContext = new TestContext(ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY,
+                attributeValue);
+
+        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
+
+        ExternalAssetOwnerLoanProductAttributeInvalidValueException thrownException = assertThrows(
+                ExternalAssetOwnerLoanProductAttributeInvalidValueException.class,
+                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService
+                        .createExternalAssetOwnerLoanProductAttribute(command));
+
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0)).saveAndFlush(any());
+        verify(testContext.loanProductRepository, times(0)).existsById(testContext.loanProductId);
+        Assertions.assertEquals("error.msg.externalAssetOwnerLoanProductAttribute.invalidAttributeValue",
+                thrownException.getGlobalisationMessageCode());
+    }
+
+    @Test
+    public void testCreateSettlementModelAttributeWithLowerCaseValueIsRejected() {
+        TestContext testContext = new TestContext("SETTLEMENT_MODEL", "delayed_settlement");
+
+        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
+
+        assertThrows(ExternalAssetOwnerLoanProductAttributeInvalidSettlementAttributeException.class,
+                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService
+                        .createExternalAssetOwnerLoanProductAttribute(command));
+
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    public void testCreateExcludedTransactionTypesAttributeExceedingTheMaximumLengthIsRejected() {
+        String tooLongValue = "A".repeat(2001);
+        TestContext testContext = new TestContext(ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY,
+                tooLongValue);
+
+        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
+
+        assertThrows(PlatformApiDataValidationException.class, () -> testContext.externalAssetOwnerLoanProductAttributesWriteService
+                .createExternalAssetOwnerLoanProductAttribute(command));
+
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    public void testCreateExcludedTransactionTypesAttributeAcceptsTheFullListOfTransactionTypes() {
+        String allTypes = String.join(",", new ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute().getAttributeValues());
+        TestContext testContext = new TestContext(ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY, allTypes);
+        ArgumentCaptor<ExternalAssetOwnerLoanProductAttributes> loanProductAttributeArgumentCaptor = ArgumentCaptor
+                .forClass(ExternalAssetOwnerLoanProductAttributes.class);
+
+        final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
+        when(testContext.externalAssetOwnerLoanProductAttributesRepository.existsByLoanProductIdAndKey(testContext.loanProductId,
+                testContext.attributeKey)).thenReturn(false);
+        when(testContext.loanProductRepository.existsById(testContext.loanProductId)).thenReturn(true);
+
+        testContext.externalAssetOwnerLoanProductAttributesWriteService.createExternalAssetOwnerLoanProductAttribute(command);
+
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).saveAndFlush(loanProductAttributeArgumentCaptor.capture());
+        Assertions.assertEquals(allTypes, loanProductAttributeArgumentCaptor.getValue().getAttributeValue());
+    }
+
+    @Test
+    public void testDeleteExternalAssetOwnerLoanProductAttributeHappyPath() {
+        TestContext testContext = new TestContext(ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY,
+                "BUY_DOWN_FEE");
+
+        ExternalAssetOwnerLoanProductAttributes attributeInDB = new ExternalAssetOwnerLoanProductAttributes();
+        attributeInDB.setLoanProductId(testContext.loanProductId);
+        attributeInDB.setAttributeKey(testContext.attributeKey);
+        attributeInDB.setAttributeValue(testContext.attributeValue);
+        attributeInDB.setId(1L);
+
+        // given
+        final JsonCommand command = createJsonCommand(null, testContext.loanProductId, attributeInDB.getId());
+        when(testContext.loanProductRepository.existsById(testContext.loanProductId)).thenReturn(true);
+        when(testContext.externalAssetOwnerLoanProductAttributesRepository.findById(command.entityId()))
+                .thenReturn(Optional.of(attributeInDB));
+
+        // when
+        CommandProcessingResult result = testContext.externalAssetOwnerLoanProductAttributesWriteService
+                .deleteExternalAssetOwnerLoanProductAttribute(command);
+
+        // then
+        verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).delete(attributeInDB);
+        Assertions.assertEquals(testContext.loanProductId, result.getResourceId());
+    }
+
+    @Test
+    public void testDeleteExternalAssetOwnerLoanProductAttributeOnAttributeThatDoesNotExist() {
+        TestContext testContext = new TestContext();
+
+        final JsonCommand command = createJsonCommand(null, testContext.loanProductId, 1L);
+        when(testContext.loanProductRepository.existsById(testContext.loanProductId)).thenReturn(true);
+        when(testContext.externalAssetOwnerLoanProductAttributesRepository.findById(command.entityId())).thenReturn(Optional.empty());
+
+        assertThrows(ExternalAssetOwnerLoanProductAttributeNotFoundException.class,
+                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService
+                        .deleteExternalAssetOwnerLoanProductAttribute(command));
+
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0))
+                .delete(any(ExternalAssetOwnerLoanProductAttributes.class));
+    }
+
+    @Test
+    public void testDeleteExternalAssetOwnerLoanProductAttributeOnUnknownLoanProduct() {
+        TestContext testContext = new TestContext();
+
+        final JsonCommand command = createJsonCommand(null, testContext.loanProductId, 1L);
+        when(testContext.loanProductRepository.existsById(testContext.loanProductId)).thenReturn(false);
+
+        assertThrows(LoanProductNotFoundException.class, () -> testContext.externalAssetOwnerLoanProductAttributesWriteService
+                .deleteExternalAssetOwnerLoanProductAttribute(command));
+
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0))
+                .delete(any(ExternalAssetOwnerLoanProductAttributes.class));
+    }
+
+    @Test
+    public void testDeleteExternalAssetOwnerLoanProductAttributeBelongingToAnotherLoanProduct() {
+        TestContext testContext = new TestContext();
+
+        ExternalAssetOwnerLoanProductAttributes attributeInDB = new ExternalAssetOwnerLoanProductAttributes();
+        attributeInDB.setLoanProductId(testContext.loanProductId + 1);
+        attributeInDB.setAttributeKey(testContext.attributeKey);
+        attributeInDB.setAttributeValue(testContext.attributeValue);
+        attributeInDB.setId(1L);
+
+        final JsonCommand command = createJsonCommand(null, testContext.loanProductId, attributeInDB.getId());
+        when(testContext.loanProductRepository.existsById(testContext.loanProductId)).thenReturn(true);
+        when(testContext.externalAssetOwnerLoanProductAttributesRepository.findById(command.entityId()))
+                .thenReturn(Optional.of(attributeInDB));
+
+        ExternalAssetOwnerLoanProductAttributesException thrownException = assertThrows(
+                ExternalAssetOwnerLoanProductAttributesException.class,
+                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService
+                        .deleteExternalAssetOwnerLoanProductAttribute(command));
+
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0))
+                .delete(any(ExternalAssetOwnerLoanProductAttributes.class));
+        Assertions.assertEquals("The requested attribute does not belong to the loanProductId: " + testContext.loanProductId + ".",
+                thrownException.getMessage());
+    }
+
+    /**
+     * Creating an attribute must evict the loan product attribute cache. The attribute key is only present in the
+     * request body, so the per-key cache key that update uses cannot be built here and the whole cache is evicted
+     * instead. Without this, a cached "attribute not configured" result would survive the create and the new
+     * configuration would silently not take effect.
+     */
+    @Test
+    public void testCreateEvictsTheLoanProductAttributeCache() throws NoSuchMethodException {
+        CacheEvict cacheEvict = ExternalAssetOwnerLoanProductAttributesWriteServiceImpl.class
+                .getMethod("createExternalAssetOwnerLoanProductAttribute", JsonCommand.class).getAnnotation(CacheEvict.class);
+
+        Assertions.assertNotNull(cacheEvict, "createExternalAssetOwnerLoanProductAttribute must be annotated with @CacheEvict");
+        Assertions.assertTrue(cacheEvict.allEntries(), "the whole attribute cache must be evicted on create");
+        Assertions.assertArrayEquals(new String[] { "externalAssetOwnerLoanProductAttributes" }, cacheEvict.cacheNames());
+    }
+
     private static Stream<Arguments> externalAssetOwnerLoanProductAttributeApiRequestDataValidationErrors() {
 
         return Stream.of(Arguments.of("blankAttributeValue", "SETTLEMENT_MODEL", "", "Validation errors exist."),
-                Arguments.of("blankAttributeKey", "", "DELAYED_SETTLEMENT", "Validation errors exist."));
+                Arguments.of("blankAttributeKey", "", "DELAYED_SETTLEMENT", "Validation errors exist."),
+                Arguments.of("blankAttributeValue", "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY", "", "Validation errors exist."),
+                Arguments.of("blankAttributeValue", "EXCLUDED_TRANSACTION_TYPES", "", "Validation errors exist."));
     }
 
     private void assertLoanProductAttributeValues(final TestContext testContext,
@@ -360,25 +657,34 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
         @Mock
         private LoanProductRepository loanProductRepository;
 
-        @InjectMocks
         private ExternalAssetOwnerLoanProductAttributesWriteServiceImpl externalAssetOwnerLoanProductAttributesWriteService;
 
         private final FromJsonHelper fromJsonHelper = new FromJsonHelper();
         private final Long loanProductId = ThreadLocalRandom.current().nextLong(10, 100);
         @Setter
-        private String attributeKey = "SETTLEMENT_MODEL";
+        private String attributeKey;
         @Setter
-        private String attributeValue = "DELAYED_SETTLEMENT";
+        private String attributeValue;
 
-        private String jsonCommandString = String.format("""
-                {
-                    "attributeKey": "%s",
-                    "attributeValue": "%s"
-                }
-                """, attributeKey, attributeValue);
+        private String jsonCommandString;
 
         TestContext() {
+            this("SETTLEMENT_MODEL", "DELAYED_SETTLEMENT");
+        }
+
+        TestContext(final String attributeKey, final String attributeValue) {
+            this.attributeKey = attributeKey;
+            this.attributeValue = attributeValue;
+            this.jsonCommandString = String.format("""
+                    {
+                        "attributeKey": "%s",
+                        "attributeValue": "%s"
+                    }
+                    """, attributeKey, attributeValue);
             MockitoAnnotations.openMocks(this);
+            this.externalAssetOwnerLoanProductAttributesWriteService = new ExternalAssetOwnerLoanProductAttributesWriteServiceImpl(
+                    fromApiJsonHelper, externalAssetOwnerLoanProductAttributesRepository, loanProductRepository,
+                    new ExternalAssetOwnerLoanProductAttributeProvider());
             stubFromApiJsonHelper();
         }
 
@@ -391,4 +697,5 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
                     jsonCommandElement)).thenReturn(attributeValue);
         }
     }
+
 }

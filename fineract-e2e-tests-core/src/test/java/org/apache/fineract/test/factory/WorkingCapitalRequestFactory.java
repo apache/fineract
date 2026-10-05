@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.test.factory;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.apache.fineract.test.data.DaysInYearType.DAYS365;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.CURRENCY_CODE;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.CURRENCY_CODE_USD;
@@ -34,6 +35,9 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
+import org.apache.fineract.client.models.DelinquencyBucketResponse;
+import org.apache.fineract.client.models.DelinquencyRangeResponse;
+import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
@@ -86,6 +90,8 @@ public class WorkingCapitalRequestFactory {
     public static final Integer DEFAULT_WC_NEAR_BREACH_FREQUENCY = 12;
     public static final String DEFAULT_WC_NEAR_BREACH_FREQUENCY_TYPE = WorkingCapitalBreachFrequencyType.DAYS.getCode();
     public static final BigDecimal DEFAULT_WC_NEAR_BREACH_THRESHOLD = new BigDecimal("70.23");
+    public static final BigDecimal DEFAULT_WC_ANNUAL_EIR = new BigDecimal("43.7562");
+    public static final BigDecimal DEFAULT_WC_DISCOUNT = new BigDecimal("1000");
 
     public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductRequestWithAccrualAccounting() {
         return defaultWorkingCapitalLoanProductRequest()//
@@ -168,6 +174,32 @@ public class WorkingCapitalRequestFactory {
                 .allowAttributeOverrides(allowAttributeOverrides);
     }
 
+    /**
+     * Annual EIR strategy product: no period payment rate, required discount, and discount override enabled so loan
+     * applications may pass a discount (as in the reference EIR calculation scenarios).
+     */
+    public PostWorkingCapitalLoanProductsRequest defaultAnnualEirWorkingCapitalLoanProductRequest(final BigDecimal annualEir,
+            final BigDecimal discount) {
+        return defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                .paymentAmountCalculationStrategy(PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.ANNUAL_EIR) //
+                .annualEir(annualEir) //
+                .discount(discount) //
+                .periodPaymentRate(null);
+    }
+
+    /**
+     * Payment Amount strategy product: no period payment rate / annual EIR, required discount, and discount override
+     * enabled so loan applications may pass a discount (as in the reference Payment Amount calculation scenarios).
+     */
+    public PostWorkingCapitalLoanProductsRequest defaultPaymentAmountWorkingCapitalLoanProductRequest(final BigDecimal paymentAmount,
+            final BigDecimal discount) {
+        return defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                .paymentAmountCalculationStrategy(PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.PAYMENT_AMOUNT) //
+                .paymentAmount(paymentAmount) //
+                .discount(discount) //
+                .periodPaymentRate(null);
+    }
+
     public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductBreachRequest() {
         String name = Utils.randomStringGenerator(WCLP_NAME_PREFIX, 10);
         String shortName = loanProductsRequestFactory.generateShortNameSafely();
@@ -184,7 +216,21 @@ public class WorkingCapitalRequestFactory {
 
         Long breachId = getWCBreachIdByName(DEFAULT_WC_BREACH_NAME);
         Long nearBreachId = getWCNearBreachIdByName(DEFAULT_WC_NEAR_BREACH_NAME);
-        return defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest().name(name)//
+        return defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest()//
+                .name(name)//
+                .shortName(shortName)//
+                .breachId(breachId) //
+                .nearBreachId(nearBreachId); //
+    }
+
+    public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductBreachNearBreachRequestWithAccrualAccounting() {
+        String name = Utils.randomStringGenerator(WCLP_NAME_PREFIX, 10);
+        String shortName = loanProductsRequestFactory.generateShortNameSafely();
+
+        Long breachId = getWCBreachIdByName(DEFAULT_WC_BREACH_NAME);
+        Long nearBreachId = getWCNearBreachIdByName(DEFAULT_WC_NEAR_BREACH_NAME);
+        return defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()//
+                .name(name)//
                 .shortName(shortName)//
                 .breachId(breachId) //
                 .nearBreachId(nearBreachId); //
@@ -223,6 +269,15 @@ public class WorkingCapitalRequestFactory {
                 .paymentAllocation(List.of(//
                         createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(), //
                                 List.of(DUE_FEE, DUE_PRINCIPAL, DUE_PENALTY, IN_ADVANCE_FEE, IN_ADVANCE_PRINCIPAL, IN_ADVANCE_PENALTY))));//
+    }
+
+    public List<PostPaymentAllocation> invalidPaymentAllocationRulesWithTrnTypeForWorkingCapitalLoanProductRequest() {
+        return List.of(//
+                createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(), //
+                        List.of(DUE_FEE, DUE_PRINCIPAL, DUE_PENALTY, IN_ADVANCE_FEE, IN_ADVANCE_PRINCIPAL, IN_ADVANCE_PENALTY)), //
+                createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(), //
+                        List.of(DUE_FEE, DUE_PRINCIPAL, DUE_PENALTY, IN_ADVANCE_FEE, IN_ADVANCE_PRINCIPAL, IN_ADVANCE_PENALTY))//
+        );//
     }
 
     public List<PostPaymentAllocation> invalidNumberOfPaymentAllocationRulesForWorkingCapitalLoanProductCreateRequest() {
@@ -272,11 +327,26 @@ public class WorkingCapitalRequestFactory {
         return paymentAllocationData;
     }
 
+    /**
+     * Delinquency range ids are environment specific (the global initializer creates the ranges, partly in parallel),
+     * so custom WC buckets reuse the ranges of the seeded {@link DelinquencyBucket#WC_DELINQUENCY_BUCKET} (D00..D270)
+     * instead of a hardcoded id. This keeps delinquency tag classifications (e.g. D00 for 1-30 days) deterministic.
+     */
+    public List<Long> seededWorkingCapitalDelinquencyRangeIds() {
+        final long seededBucketId = delinquencyBucketResolver.resolve(DelinquencyBucket.WC_DELINQUENCY_BUCKET);
+        final DelinquencyBucketResponse seededBucket = ok(
+                () -> fineractClient.delinquencyRangeAndBucketsManagement().getBucket(seededBucketId));
+        if (seededBucket.getRanges() == null || seededBucket.getRanges().isEmpty()) {
+            throw new IllegalStateException("Seeded WC delinquency bucket has no ranges");
+        }
+        return seededBucket.getRanges().stream().map(DelinquencyRangeResponse::getId).toList();
+    }
+
     public DelinquencyBucketRequest defaultWorkingCapitalDelinquencyBucketRequest() {
         return new DelinquencyBucketRequest() //
                 .name("DB-WCL-" + Utils.randomStringGenerator(8)) //
                 .bucketType(DelinquencyBucketType.WORKING_CAPITAL.name())//
-                .ranges(List.of(1L)) //
+                .ranges(seededWorkingCapitalDelinquencyRangeIds()) //
                 .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule() //
                         .frequency(1) //
                         .minimumPaymentType(DelinquencyMinimumPayment.PERCENTAGE.name()) //
@@ -303,6 +373,12 @@ public class WorkingCapitalRequestFactory {
 
     public PostWorkingCapitalLoanTransactionsRequest defaultWorkingCapitalLoanRepaymentRequest() {
         return new PostWorkingCapitalLoanTransactionsRequest() //
+                .dateFormat(DATE_FORMAT) //
+                .locale(LOCALE_EN);
+    }
+
+    public ExecuteWorkingCapitalLoanTransactionCommandRequest defaultWorkingCapitalLoanTransactionCommandRequest() {
+        return new ExecuteWorkingCapitalLoanTransactionCommandRequest() //
                 .dateFormat(DATE_FORMAT) //
                 .locale(LOCALE_EN);
     }

@@ -22,9 +22,12 @@ import java.math.BigDecimal;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsGsimClient;
+import org.apache.fineract.client.models.PostSavingsAccountsGsimSavings;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PutSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PutSavingsProductsProductIdRequest;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -47,6 +50,9 @@ public final class SavingsRequestBuilders {
                 .interestCalculationType(SavingsTestData.InterestCalculationType.DAILY_BALANCE)//
                 .interestCalculationDaysInYearType(SavingsTestData.InterestCalculationDaysInYearType.DAYS_365)//
                 .accountingRule(SavingsTestData.AccountingRule.NONE)//
+                .lockinPeriodFrequency(0)//
+                .lockinPeriodFrequencyType(SavingsTestData.PeriodFrequencyType.DAYS)//
+                .lienAllowed(false)//
                 .locale(SavingsTestData.LOCALE);
     }
 
@@ -110,19 +116,77 @@ public final class SavingsRequestBuilders {
                 .interestReceivableAccountId(accountId(interestReceivableAccount));
     }
 
+    /** The cash-based mapping the RestAssured {@code SavingsProductHelper} built from one account per type. */
+    public static PostSavingsProductsRequest withCashBasedAccounting(PostSavingsProductsRequest request, Account assetAccount,
+            Account liabilityAccount, Account incomeAccount, Account expenseAccount) {
+        return request//
+                .accountingRule(SavingsTestData.AccountingRule.CASH_BASED)//
+                .savingsReferenceAccountId(accountId(assetAccount))//
+                .overdraftPortfolioControlId(accountId(assetAccount))//
+                .savingsControlAccountId(accountId(liabilityAccount))//
+                .transfersInSuspenseAccountId(accountId(liabilityAccount))//
+                .interestOnSavingsAccountId(accountId(expenseAccount))//
+                .writeOffAccountId(accountId(expenseAccount))//
+                .incomeFromFeeAccountId(accountId(incomeAccount))//
+                .incomeFromPenaltyAccountId(accountId(incomeAccount))//
+                .incomeFromInterestId(accountId(incomeAccount));
+    }
+
     public static Long accountId(Account account) {
         return account.getAccountID().longValue();
     }
 
     public static ChargeRequest savingsWithdrawalFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.WITHDRAWAL_FEE);
+    }
+
+    /** A withdrawal fee that only applies to withdrawals made with the given payment type. */
+    public static ChargeRequest savingsWithdrawalFeeCharge(Double amount, Long paymentTypeId) {
+        return savingsCharge(SavingsTestData.ChargeTimeType.WITHDRAWAL_FEE)//
+                .amount(amount)//
+                .enablePaymentType(true)//
+                .paymentTypeId(paymentTypeId);
+    }
+
+    public static ChargeRequest savingsActivationFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.SAVINGS_ACTIVATION);
+    }
+
+    public static ChargeRequest savingsNoActivityFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.SAVINGS_NO_ACTIVITY_FEE);
+    }
+
+    public static ChargeRequest savingsSpecifiedDueDateCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.SPECIFIED_DUE_DATE).feeInterval("2");
+    }
+
+    public static ChargeRequest savingsSpecifiedDueDateCharge(Double amount, String currencyCode) {
+        return savingsCharge(SavingsTestData.ChargeTimeType.SPECIFIED_DUE_DATE).amount(amount).currencyCode(currencyCode);
+    }
+
+    /** The recurring fees carry the day they fall due; the annual one recurs yearly, so it needs no interval. */
+    public static ChargeRequest savingsAnnualFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.ANNUAL_FEE).feeOnMonthDay(SavingsTestData.FEE_ON_MONTH_DAY);
+    }
+
+    public static ChargeRequest savingsMonthlyFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.MONTHLY_FEE).feeOnMonthDay(SavingsTestData.FEE_ON_MONTH_DAY).feeInterval("2");
+    }
+
+    public static ChargeRequest savingsWeeklyFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.WEEKLY_FEE).feeInterval("1");
+    }
+
+    public static ChargeRequest savingsCharge(int chargeTimeType) {
         return new ChargeRequest()//
                 .active(true)//
                 .name(Utils.uniqueRandomStringGenerator("Charge_Savings_", 6))//
                 .currencyCode(SavingsTestData.CURRENCY_CODE)//
                 .amount(SavingsTestData.DEFAULT_CHARGE_AMOUNT)//
                 .chargeAppliesTo(SavingsTestData.ChargeAppliesTo.SAVINGS)//
-                .chargeTimeType(SavingsTestData.ChargeTimeType.WITHDRAWAL_FEE)//
+                .chargeTimeType(chargeTimeType)//
                 .chargeCalculationType(SavingsTestData.ChargeCalculationType.FLAT)//
+                .monthDayFormat(SavingsTestData.MONTH_DAY_FORMAT)//
                 .locale(SavingsTestData.LOCALE);
     }
 
@@ -138,6 +202,50 @@ public final class SavingsRequestBuilders {
                 .clientId(clientId)//
                 .productId(productId)//
                 .submittedOnDate(submittedOnDate)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    /** A group application carries a groupId where an individual one carries a clientId. */
+    public static PostSavingsAccountsRequest submitGroupSavingsApplication(Long groupId, Long productId, String submittedOnDate) {
+        return new PostSavingsAccountsRequest()//
+                .groupId(groupId)//
+                .productId(productId)//
+                .submittedOnDate(submittedOnDate)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    public static PutSavingsAccountsAccountIdRequest updateGroupSavingsApplication(Long groupId, Long productId, String submittedOnDate) {
+        return new PutSavingsAccountsAccountIdRequest()//
+                .groupId(groupId)//
+                .productId(productId)//
+                .submittedOnDate(submittedOnDate)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    /** One member of a GSIM application; exactly one of them is the parent the commands then act through. */
+    public static PostSavingsAccountsGsimClient gsimClient(Long clientId, Long groupId, Long productId, String submittedOnDate,
+            boolean isParentAccount) {
+        return new PostSavingsAccountsGsimClient()//
+                .clientId(clientId)//
+                .groupId(groupId)//
+                .productId(productId)//
+                .submittedOnDate(submittedOnDate)//
+                .isParentAccount(isParentAccount)//
+                .isGSIM("true")//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    public static PostSavingsAccountsGsimSavings gsimSavings(Long childAccountId, Long paymentTypeId, String transactionAmount,
+            String transactionDate) {
+        return new PostSavingsAccountsGsimSavings()//
+                .childAccountId(childAccountId)//
+                .paymentTypeId(paymentTypeId)//
+                .transactionAmount(new BigDecimal(transactionAmount))//
+                .transactionDate(transactionDate)//
                 .dateFormat(SavingsTestData.DATETIME_PATTERN)//
                 .locale(SavingsTestData.LOCALE);
     }
@@ -196,6 +304,20 @@ public final class SavingsRequestBuilders {
                 .paymentTypeId(1);
     }
 
+    /** A savings application update is validated as a fresh application, so it re-sends client, product and date. */
+    public static PutSavingsAccountsAccountIdRequest updateSavingsApplication(Long clientId, Long productId, String submittedOnDate) {
+        return new PutSavingsAccountsAccountIdRequest()//
+                .clientId(clientId)//
+                .productId(productId)//
+                .submittedOnDate(submittedOnDate)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    public static PostSavingsAccountTransactionsRequest withdrawal(String amount, String transactionDate, Long paymentTypeId) {
+        return withdrawal(amount, transactionDate).paymentTypeId(paymentTypeId.intValue());
+    }
+
     public static PostSavingsAccountTransactionsRequest postInterestAsOn(String transactionDate) {
         return new PostSavingsAccountTransactionsRequest()//
                 .transactionDate(transactionDate)//
@@ -212,5 +334,13 @@ public final class SavingsRequestBuilders {
                 .reasonForBlock(reasonForBlock)//
                 .dateFormat(SavingsTestData.DATETIME_PATTERN)//
                 .locale(SavingsTestData.LOCALE);
+    }
+
+    /**
+     * A lien hold may take the balance below zero; without the flag the same hold is rejected for insufficient funds.
+     */
+    public static PostSavingsAccountTransactionsRequest holdAmount(String amount, String transactionDate, String reasonForBlock,
+            boolean lienAllowed) {
+        return holdAmount(amount, transactionDate, reasonForBlock).lienAllowed(String.valueOf(lienAllowed));
     }
 }

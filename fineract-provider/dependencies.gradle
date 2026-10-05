@@ -45,7 +45,7 @@ dependencies {
     implementation(project(path: ':fineract-security'))
     implementation(project(path: ':fineract-working-capital-loan'))
 
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat-runtime")
 
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
@@ -57,16 +57,18 @@ dependencies {
             project(path: ':fineract-avro-schemas')
             )
     implementation(
-            'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-webmvc',
             'org.springframework.boot:spring-boot-starter-validation',
             'org.springframework.boot:spring-boot-starter-security',
-            'org.springframework.boot:spring-boot-starter-oauth2-authorization-server',
-            'org.springframework.boot:spring-boot-starter-oauth2-client',
+            'org.springframework.boot:spring-boot-starter-security-oauth2-authorization-server',
+            'org.springframework.boot:spring-boot-starter-security-oauth2-client',
             'org.springframework.boot:spring-boot-starter-cache',
-            'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
+            'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server',
             'org.springframework.boot:spring-boot-starter-actuator',
-            'org.springframework.boot:spring-boot-starter-batch',
+            'org.springframework.boot:spring-boot-starter-batch-jdbc',
             'org.springframework.boot:spring-boot-starter-data-jdbc',
+            'org.springframework.boot:spring-boot-liquibase',
+            'org.springframework.boot:spring-boot-gson',
             'org.springframework.batch:spring-batch-integration',
             'org.springframework.boot:spring-boot-starter-integration',
             'org.springframework.integration:spring-integration-event',
@@ -120,7 +122,7 @@ dependencies {
             'org.springdoc:springdoc-openapi-starter-webmvc-ui',
             'org.mapstruct:mapstruct',
 
-            'io.github.resilience4j:resilience4j-spring-boot3',
+            'io.github.resilience4j:resilience4j-spring-boot4',
             'org.reflections:reflections',
             )
 
@@ -139,6 +141,8 @@ dependencies {
         exclude group: 'org.hibernate.validator', module: 'hibernate-validator'
         exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
     }
+    // Spring Boot 4 defaults to Jackson 3; re-enable Jackson 2 so the Jersey REST layer (Jackson-2 island) keeps working
+    implementation 'org.springframework.boot:spring-boot-jackson2'
     implementation('org.dom4j:dom4j') {
         exclude group: 'javax.xml.bind'
     }
@@ -225,7 +229,6 @@ dependencies {
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testImplementation ('org.mockito:mockito-inline')
     testImplementation 'org.springframework.modulith:spring-modulith-api'
     testImplementation 'org.springframework.modulith:spring-modulith-core'
 

@@ -153,6 +153,18 @@ public interface EMICalculator {
 
     OutstandingDetails getOutstandingAmountsTillDate(ProgressiveLoanInterestScheduleModel model, LocalDate targetDate);
 
+    /**
+     * Gives back the outstanding principal and interest of the whole model on the given date. Fixed interest till date
+     * calculation flag indicates that the fixed interest should be counted only till date or not. This flag should be
+     * true for accrued interest calculation. It should be false for repayment or repayment schedule related
+     * calculation, which needs the whole fixed interest that is ultimately payable.
+     *
+     * @param fixedInterestTillDate
+     *            indicates that fixed interest should be counted till the date.
+     */
+    OutstandingDetails getOutstandingAmountsTillDate(ProgressiveLoanInterestScheduleModel model, LocalDate targetDate,
+            boolean fixedInterestTillDate);
+
     void calculateRateFactorForRepaymentPeriod(RepaymentPeriod repaymentPeriod, ProgressiveLoanInterestScheduleModel scheduleModel);
 
     Money getSumOfDueInterestsOnDate(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate subjectDate);

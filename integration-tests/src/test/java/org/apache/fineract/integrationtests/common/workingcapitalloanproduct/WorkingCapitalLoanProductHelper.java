@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.common.workingcapitalloanproduct;
 
 import java.util.List;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.DeleteWorkingCapitalLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsProductIdResponse;
@@ -36,6 +37,11 @@ public class WorkingCapitalLoanProductHelper {
 
     public PostWorkingCapitalLoanProductsResponse createWorkingCapitalLoanProduct(final PostWorkingCapitalLoanProductsRequest request) {
         return FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts()
+                .createWorkingCapitalLoanProduct(request));
+    }
+
+    public CallFailedRuntimeException createWorkingCapitalLoanProductExpectingFailure(final PostWorkingCapitalLoanProductsRequest request) {
+        return FeignCalls.fail(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts()
                 .createWorkingCapitalLoanProduct(request));
     }
 

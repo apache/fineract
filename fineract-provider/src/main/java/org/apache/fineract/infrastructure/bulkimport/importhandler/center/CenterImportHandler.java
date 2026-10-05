@@ -197,7 +197,7 @@ public class CenterImportHandler implements ImportHandler {
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             } catch (RuntimeException ex) {
                 errorCount++;
-                LOG.error("Runtime Exception occured in importEntity function", ex);
+                LOG.error("Runtime Exception occurred in importEntity function", ex);
                 errorMessage = ImportHandlerUtils.getErrorMessage(ex);
                 writeCenterErrorMessage(workbook, centerId, errorMessage, progressLevel, statusCell, errorReportCell, row);
             }

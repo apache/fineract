@@ -30,9 +30,9 @@ import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.resolver.CatchUpFlagResolver;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
+import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.ExecutionContext;
 
 @RequiredArgsConstructor
 public class BeforeStepLockingItemReaderHelper {

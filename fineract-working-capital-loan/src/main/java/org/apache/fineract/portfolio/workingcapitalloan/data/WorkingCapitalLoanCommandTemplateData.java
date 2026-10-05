@@ -21,18 +21,20 @@ package org.apache.fineract.portfolio.workingcapitalloan.data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
-import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
 /**
- * Data Transfer Object for Working Capital Loan Transactions.
+ * Template behind {@code GET /working-capital-loans/{loanId}/template?templateType=approve}.
+ * <p>
+ * Approval is the only loan action that posts no transaction - it just moves the loan's status - which is why it is the
+ * only one left here. Everything that writes a transaction row, disbursement included, lives on {@code GET
+ * /working-capital-loans/{loanId}/transactions/template} and answers with
+ * {@link WorkingCapitalLoanTransactionTemplateData} instead.
  */
 @Getter
 @Setter
@@ -41,23 +43,13 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 @AllArgsConstructor
 public class WorkingCapitalLoanCommandTemplateData implements Serializable {
 
-    private Long loanId;
     private LocalDate approvalDate;
     private BigDecimal approvalAmount;
     private BigDecimal discountAmount;
     private Boolean overrideDiscountDisabled;
 
     private LocalDate expectedDisbursementDate;
-    private BigDecimal expectedAmount;
-    private LocalDate expectedMaturityDate;
 
     private CurrencyData currency;
 
-    private Collection<PaymentTypeData> paymentTypeOptions;
-    private Collection<CodeValueData> classificationOptions;
-
-    // Charge-off template: amount is the auto-calculated outstanding balance as of the charge-off date (read-only).
-    private BigDecimal chargeOffAmount;
-    private LocalDate chargeOffDate;
-    private Collection<CodeValueData> chargeOffReasonOptions;
 }

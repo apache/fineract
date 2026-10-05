@@ -215,7 +215,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
                     "name", name);
         }
 
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.office.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 

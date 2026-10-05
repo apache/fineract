@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -597,10 +598,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         if (transactionCtx.getInstallments().stream().anyMatch(this::isNotObligationsMet)) {
             handleAccelerateMaturityDate(loanTransaction, transactionCtx);
 
-            final BigDecimal newInterest = getInterestTillChargeOffForPeriod(loanTransaction.getLoan(),
-                    loanTransaction.getTransactionDate(), transactionCtx);
-            createMissingAccrualTransactionDuringChargeOffIfNeeded(newInterest, loanTransaction, loanTransaction.getTransactionDate(),
-                    transactionCtx);
+            // A pending termination accrues through the regular daily accruals until its date
+            if (!DateUtils.isAfterBusinessDate(loanTransaction.getTransactionDate())) {
+                final BigDecimal newInterest = getInterestTillChargeOffForPeriod(loanTransaction.getLoan(),
+                        loanTransaction.getTransactionDate(), transactionCtx);
+                createMissingAccrualTransactionDuringChargeOffIfNeeded(newInterest, loanTransaction, loanTransaction.getTransactionDate(),
+                        transactionCtx);
+            }
 
             if (!loanTransaction.getLoan().isInterestBearingAndInterestRecalculationEnabled()) {
                 recalculateInstallmentFeeCharges(loanTransaction);
@@ -626,8 +630,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             progressiveTransactionCtx.setContractTerminated(true);
         }
 
+        // A pending termination survives an early payoff, so reversing that payoff brings the termination amount back
         if (isAllComponentsZero(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion)
-                && loanTransaction.isNotReversed()) {
+                && loanTransaction.isNotReversed() && !DateUtils.isAfterBusinessDate(loanTransaction.getTransactionDate())) {
             loanTransaction.reverse();
             loanTransaction.getLoan().liftContractTerminationSubStatus();
 
@@ -2215,6 +2220,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
             final List<LoanRepaymentScheduleInstallment> installmentsUpToTransactionDate = loan
                     .getInstallmentsUpToTransactionDate(transactionDate);
+            keepInstallmentsStartingOnTransactionDate(installments, installmentsUpToTransactionDate, transactionDate);
 
             final List<LoanTransaction> transactionsToBeReprocessed = loan.getLoanTransactions().stream()
                     .filter(transaction -> transaction.getTransactionDate().isBefore(transactionDate))
@@ -2261,6 +2267,32 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             }
             loanBalanceService.updateLoanSummaryDerivedFields(loan);
         }
+    }
+
+    /**
+     * Adds back the installments that both start and fall due on the charge-off date.
+     * <p>
+     * {@link Loan#getInstallmentsUpToTransactionDate(LocalDate)} keeps an installment only when the transaction date is
+     * strictly after its start date, so a zero-length installment starting on the charge-off date is left out and gets
+     * dropped from the rebuilt schedule. That is exactly the shape of the down payment installment of a tranche
+     * disbursed on the charge-off date: removing it strands the down payment already allocated to it, which the loan
+     * summary then reports as a phantom overpayment.
+     */
+    private void keepInstallmentsStartingOnTransactionDate(final List<LoanRepaymentScheduleInstallment> installments,
+            final List<LoanRepaymentScheduleInstallment> installmentsUpToTransactionDate, final LocalDate transactionDate) {
+        final List<LoanRepaymentScheduleInstallment> missingInstallments = installments.stream().filter(
+                installment -> transactionDate.equals(installment.getFromDate()) && transactionDate.equals(installment.getDueDate()))
+                .filter(installment -> installmentsUpToTransactionDate.stream()
+                        .noneMatch(i -> i.getInstallmentNumber().equals(installment.getInstallmentNumber())))
+                .toList();
+
+        if (missingInstallments.isEmpty()) {
+            return;
+        }
+
+        installmentsUpToTransactionDate.addAll(missingInstallments);
+        // Callers rely on the list being ordered by installment number to derive the next free number.
+        installmentsUpToTransactionDate.sort(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber));
     }
 
     private void handleZeroInterestChargeOff(final LoanTransaction loanTransaction, final TransactionCtx transactionCtx) {
@@ -2716,10 +2748,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             // Clear any previously skipped installments before re-evaluating
             ProgressiveTransactionCtx progressiveTransactionCtx = (ProgressiveTransactionCtx) ctx;
             progressiveTransactionCtx.getSkipRepaymentScheduleInstallments().clear();
+            // The skip list must exclude an installment from re-selection in both branches: a not-fully-paid
+            // installment which could not absorb any amount in a previous iteration (e.g. its model dues diverge
+            // from the schedule by a rounding cent, or it is not represented in the interest schedule model) would
+            // otherwise be selected again forever with zero allocation progress until the LoopGuard aborts.
             paymentAllocationContext
                     .setInAdvanceInstallmentsFilteringRules(installment -> loanTransaction.isBefore(installment.getDueDate())
-                            && (installment.isNotFullyPaidOff() || (installment.isDueBalanceZero()
-                                    && !progressiveTransactionCtx.getSkipRepaymentScheduleInstallments().contains(installment))));
+                            && !progressiveTransactionCtx.getSkipRepaymentScheduleInstallments().contains(installment)
+                            && (installment.isNotFullyPaidOff() || installment.isDueBalanceZero()));
         } else {
             paymentAllocationContext.setInAdvanceInstallmentsFilteringRules(
                     installment -> loanTransaction.isBefore(installment.getDueDate()) && installment.isNotFullyPaidOff());
@@ -2730,6 +2766,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         && context.getCtx().getInstallments().stream().anyMatch(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
                         && context.getTransactionAmountUnprocessed().isGreaterThanZero(), //
                 context -> {
+                    final Money unprocessedAtIterationStart = context.getTransactionAmountUnprocessed();
                     LoanRepaymentScheduleInstallment oldestPastDueInstallment = context.getCtx().getInstallments().stream()
                             .filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
                             .filter(e -> context.getLoanTransaction().isAfter(e.getDueDate()))
@@ -2885,6 +2922,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                 }
                             }
                         }
+                    }
+                    if (isInterestRecalculationSupported(ctx, loanTransaction.getLoan()) && !inAdvanceInstallments.isEmpty() && context
+                            .getTransactionAmountUnprocessed().getAmount().compareTo(unprocessedAtIterationStart.getAmount()) == 0) {
+                        // Nothing could be allocated to the selected in-advance installments in this iteration. The
+                        // selection is deterministic, so re-running the same iteration would allocate nothing again;
+                        // mark them as skipped to let the selector move on to the remaining installments instead of
+                        // spinning until the LoopGuard aborts the whole transaction.
+                        ((ProgressiveTransactionCtx) ctx).getSkipRepaymentScheduleInstallments().addAll(inAdvanceInstallments);
                     }
                 });
         return paymentAllocationContext.getTransactionAmountUnprocessed();
@@ -3382,16 +3427,20 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
     }
 
-    private void updateInstallmentsByModelForReAging(final LoanTransaction loanTransaction, final ProgressiveTransactionCtx ctx,
+    // visible for testing
+    void updateInstallmentsByModelForReAging(final LoanTransaction loanTransaction, final ProgressiveTransactionCtx ctx,
             final LocalDate reAgePeriodStartDate) {
         final List<LoanRepaymentScheduleInstallment> installments = ctx.getInstallments();
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
 
         final Optional<RepaymentPeriod> reAgeSpecialRepaymentPeriodOpt = ctx.getModel().repaymentPeriods().stream()
                 .filter(RepaymentPeriod::isReAgedEarlyRepaymentHolder).findFirst();
+        final Map<LoanTransactionToRepaymentScheduleMapping, LoanRepaymentScheduleInstallment> liftedMappingOrigins = new LinkedHashMap<>();
         final LoanRepaymentScheduleInstallment installmentWithMovedPaidAmounts = reAgeSpecialRepaymentPeriodOpt
-                .map(repaymentPeriod -> createInstallmentWithMovedPaidAmounts(ctx, loanTransaction, installments, repaymentPeriod))
+                .map(repaymentPeriod -> createInstallmentWithMovedPaidAmounts(ctx, loanTransaction, installments, repaymentPeriod,
+                        liftedMappingOrigins))
                 .orElse(null);
+        final AtomicBoolean movedPaidAmountsInstallmentUsed = new AtomicBoolean(false);
 
         final List<LoanCharge> liftedLoanCharges = new ArrayList<>();
         installments.stream().filter(installment -> !installment.getDueDate().isBefore(transactionDate))
@@ -3408,6 +3457,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             while (iterator.hasNext() && (installment == null || installment.isAdditional() || installment.isDownPayment())) {
                 installment = iterator.next();
                 installmentCounter.getAndIncrement();
+            }
+            // the loop above stops as soon as the installments run out, so the last one it looked at can still be an
+            // additional or down payment installment, which this repayment period must not be matched against
+            if (installment != null && (installment.isAdditional() || installment.isDownPayment())) {
+                installment = null;
             }
 
             if (installment != null) {
@@ -3430,8 +3484,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     installment.updateObligationsMet(ctx.getCurrency(), transactionDate);
                 }
             } else {
-                if (rp.isReAgedEarlyRepaymentHolder()) {
+                if (rp.isReAgedEarlyRepaymentHolder() && installmentWithMovedPaidAmounts != null) {
                     iterator.add(installmentWithMovedPaidAmounts);
+                    movedPaidAmountsInstallmentUsed.set(true);
                 } else {
                     installmentCounter.getAndIncrement();
                     final LoanRepaymentScheduleInstallment newInstallment = LoanRepaymentScheduleInstallment.newReAgedInstallment(
@@ -3449,12 +3504,29 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             }
         });
 
+        if (installmentWithMovedPaidAmounts != null && !movedPaidAmountsInstallmentUsed.get()) {
+            restoreLiftedMappings(liftedMappingOrigins);
+        }
+
         for (LoanCharge loanCharge : liftedLoanCharges) {
             loanChargeRepaymentScheduleProcessing.reprocess(ctx.getCurrency(), loanTransaction.getLoan().getDisbursementDate(),
                     installments, loanCharge);
         }
 
         reApplyInterestPauseOnReAgedInstallments(loanTransaction, ctx, reAgePeriodStartDate, installments);
+    }
+
+    /**
+     * Puts the mappings back onto the installment they were lifted from. Both sides of the association are mapped with
+     * orphan removal, so a mapping that is left out of them is deleted when the changes are flushed.
+     */
+    private void restoreLiftedMappings(
+            final Map<LoanTransactionToRepaymentScheduleMapping, LoanRepaymentScheduleInstallment> liftedMappingOrigins) {
+        liftedMappingOrigins.forEach((mapping, originalInstallment) -> {
+            mapping.setInstallment(originalInstallment);
+            originalInstallment.getLoanTransactionToRepaymentScheduleMappings().add(mapping);
+            mapping.getLoanTransaction().getLoanTransactionToRepaymentScheduleMappings().add(mapping);
+        });
     }
 
     private void reApplyInterestPauseOnReAgedInstallments(final LoanTransaction loanTransaction, final ProgressiveTransactionCtx ctx,
@@ -3499,7 +3571,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
      * @return new installment with moved paid amounts
      */
     private LoanRepaymentScheduleInstallment createInstallmentWithMovedPaidAmounts(final ProgressiveTransactionCtx ctx,
-            final LoanTransaction loanTransaction, final List<LoanRepaymentScheduleInstallment> installments, final RepaymentPeriod rp) {
+            final LoanTransaction loanTransaction, final List<LoanRepaymentScheduleInstallment> installments, final RepaymentPeriod rp,
+            final Map<LoanTransactionToRepaymentScheduleMapping, LoanRepaymentScheduleInstallment> liftedMappingOrigins) {
         final MonetaryCurrency currency = loanTransaction.getLoan().loanCurrency();
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final Optional<LoanRepaymentScheduleInstallment> firstReAgedInstallment = installments.stream()
@@ -3523,7 +3596,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         newInstallment.setTotalPaidInAdvance(paidInAdvanceBalances.getPaidInAdvance().getAmount());
         newInstallment.setTotalPaidLate(paidInAdvanceBalances.getPaidLate());
-        paidInAdvanceBalances.loanTransactionToRepaymentScheduleMappings.forEach(m -> m.setInstallment(newInstallment));
+        paidInAdvanceBalances.loanTransactionToRepaymentScheduleMappings.forEach(m -> {
+            liftedMappingOrigins.put(m, m.getInstallment());
+            m.setInstallment(newInstallment);
+            newInstallment.getLoanTransactionToRepaymentScheduleMappings().add(m);
+            m.getLoanTransaction().getLoanTransactionToRepaymentScheduleMappings().add(m);
+        });
         newInstallment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
         newInstallment.updateObligationsMet(currency, transactionDate);
 
@@ -3701,11 +3779,18 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             return;
         }
 
-        final BigDecimal sumOfAccrualsTillChargeOff = loan.getLoanTransactions().stream()
+        // Accruals created earlier in the same reprocessing are not attached to the loan yet
+        final List<LoanTransaction> accrualCandidates = Stream
+                .concat(loan.getLoanTransactions().stream(),
+                        ctx.getChangedTransactionDetail().getTransactionChanges().stream()
+                                .filter(change -> change.getOldTransaction() == null).map(TransactionChangeData::getNewTransaction))
+                .distinct().toList();
+
+        final BigDecimal sumOfAccrualsTillChargeOff = accrualCandidates.stream()
                 .filter(lt -> lt.isAccrual() && !lt.getTransactionDate().isAfter(chargeOffDate) && lt.isNotReversed())
                 .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(ZERO)).reduce(ZERO, BigDecimal::add);
 
-        final BigDecimal sumOfAccrualAdjustmentsTillChargeOff = loan.getLoanTransactions().stream()
+        final BigDecimal sumOfAccrualAdjustmentsTillChargeOff = accrualCandidates.stream()
                 .filter(lt -> lt.isAccrualAdjustment() && !lt.getTransactionDate().isAfter(chargeOffDate) && lt.isNotReversed())
                 .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(ZERO)).reduce(ZERO, BigDecimal::add);
 
@@ -3928,7 +4013,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
                     created.setTotalPaidInAdvance(paidInAdvanceBalances.getPaidInAdvance().getAmount());
 
-                    paidInAdvanceBalances.loanTransactionToRepaymentScheduleMappings.forEach(m -> m.setInstallment(created));
+                    paidInAdvanceBalances.loanTransactionToRepaymentScheduleMappings.forEach(m -> {
+                        m.setInstallment(created);
+                        created.getLoanTransactionToRepaymentScheduleMappings().add(m);
+                        m.getLoanTransaction().getLoanTransactionToRepaymentScheduleMappings().add(m);
+                    });
                 } else {
                     created.setFeeChargesCharged(calculatedFees.calculateValueBigDecimal(reAgedInstallmentIndex));
                     created.setPenaltyCharges(calculatedPenalties.calculateValueBigDecimal(reAgedInstallmentIndex));

@@ -38,15 +38,24 @@ public enum ChargeCalculationType {
     }
 
     public static List<ChargeCalculationType> validEnumsForWorkingCapitalLoan() {
-        return List.of(ChargeCalculationType.FLAT);
+        return ChargeTimeType.validWorkingCapitalLoanProduct().stream()
+                .flatMap(chargeTimeType -> validEnumsForWorkingCapitalLoan(chargeTimeType).stream()).distinct().toList();
     }
 
-    public static List<ChargeCalculationType> validEnumsForWorkingCapitalLoanSpecifiedDueDate() {
-        return List.of(ChargeCalculationType.FLAT);
+    public static List<ChargeCalculationType> validEnumsForWorkingCapitalLoan(final ChargeTimeType chargeTimeType) {
+        if (chargeTimeType == null) {
+            return List.of();
+        }
+        return switch (chargeTimeType) {
+            case DISBURSEMENT -> List.of(ChargeCalculationType.FLAT, ChargeCalculationType.PERCENT_OF_AMOUNT);
+            case SPECIFIED_DUE_DATE -> List.of(ChargeCalculationType.FLAT);
+            default -> List.of();
+        };
     }
 
-    public static Object[] validValuesForWorkingCapitalLoanSpecifiedDueDate() {
-        return validEnumsForWorkingCapitalLoanSpecifiedDueDate().stream().map(ChargeCalculationType::getValue).toArray();
+    public static Object[] validValuesForWorkingCapitalLoan(final Integer chargeTimeType) {
+        return validEnumsForWorkingCapitalLoan(ChargeTimeType.fromInt(chargeTimeType)).stream().map(ChargeCalculationType::getValue)
+                .toArray();
     }
 
     public Integer getValue() {

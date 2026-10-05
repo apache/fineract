@@ -179,7 +179,7 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     private WorkingCapitalLoanProductRelatedDetails loanProductRelatedDetails;
 
     @Setter
-    @Column(name = "total_payment_volume", scale = 6, precision = 19, nullable = false)
+    @Column(name = "total_payment_volume", scale = 6, precision = 19)
     private BigDecimal totalPaymentVolume;
 
     /**
@@ -222,6 +222,10 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "write_off_reason_cv_id")
     private CodeValue writeOffReason;
+
+    @Setter
+    @Column(name = "overpaid_on_date")
+    private LocalDate overpaidOnDate;
 
     public Long getOfficeId() {
         return client != null && client.getOffice() != null ? client.getOffice().getId() : null;

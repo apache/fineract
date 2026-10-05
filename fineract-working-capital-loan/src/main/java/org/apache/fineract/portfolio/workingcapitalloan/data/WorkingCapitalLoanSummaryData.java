@@ -46,11 +46,13 @@ public class WorkingCapitalLoanSummaryData implements Serializable {
     // Fee
     private BigDecimal fee;
     private BigDecimal feePaid;
+    private BigDecimal feeWaived;
     private BigDecimal feeOutstanding;
 
     // Penalty
     private BigDecimal penalty;
     private BigDecimal penaltyPaid;
+    private BigDecimal penaltyWaived;
     private BigDecimal penaltyOutstanding;
 
     // Income recognition

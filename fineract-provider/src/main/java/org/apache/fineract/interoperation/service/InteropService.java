@@ -29,7 +29,7 @@ import org.apache.fineract.interoperation.data.InteropTransactionRequestResponse
 import org.apache.fineract.interoperation.data.InteropTransactionsData;
 import org.apache.fineract.interoperation.data.InteropTransferResponseData;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public interface InteropService {
 

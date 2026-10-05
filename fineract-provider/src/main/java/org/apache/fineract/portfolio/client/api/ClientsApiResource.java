@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -303,7 +304,7 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client obligee details", operationId = "retrieveClientObligeeDetails", description = "Retrieve client obligee details")
     @AlternativeOperationId("retrieveObligeeDetails")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientObligeeDetailsResponse.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ClientsApiResourceSwagger.GetObligeeData.class))))
     @ApiResponse(responseCode = "400", description = "Bad Request")
     public String retrieveObligeeDetails(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
         return retrieveClientObligeeDetails(clientId, null);
@@ -422,7 +423,7 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client obligee details", operationId = "retrieveClientObligeeDetailsByExternalId", description = "Retrieve client obligee details using the client external Id")
     @AlternativeOperationId("retrieveObligeeDetails_1")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientObligeeDetailsResponse.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ClientsApiResourceSwagger.GetObligeeData.class))))
     @ApiResponse(responseCode = "400", description = "Bad Request")
     public String retrieveObligeeDetails(@PathParam("externalId") final String externalId, @Context final UriInfo uriInfo) {
         return retrieveClientObligeeDetails(null, externalId);

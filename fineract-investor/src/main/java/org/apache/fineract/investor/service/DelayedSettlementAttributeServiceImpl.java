@@ -37,6 +37,7 @@ public class DelayedSettlementAttributeServiceImpl implements DelayedSettlementA
                 .retrieveAllLoanProductAttributesByLoanProductId(loanProductId, DELAYED_SETTLEMENT.getAttributeKey());
         String attributeValue = attributesDataPage.getPageItems().stream().findFirst()
                 .map(ExternalTransferLoanProductAttributesData::getAttributeValue).orElse(null);
-        return DELAYED_SETTLEMENT.getAttributeValue().equals(attributeValue);
+        // values stored before validation became case sensitive may be lower case
+        return DELAYED_SETTLEMENT.getAttributeValue().equalsIgnoreCase(attributeValue);
     }
 }

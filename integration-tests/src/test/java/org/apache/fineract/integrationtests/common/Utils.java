@@ -69,9 +69,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.ConfigProperties;
 import org.apache.http.conn.HttpHostConnectException;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.NonNull;
 
 /**
  * Util for RestAssured tests. This class here in src/integrationTest is copy/pasted to src/test; please keep them in

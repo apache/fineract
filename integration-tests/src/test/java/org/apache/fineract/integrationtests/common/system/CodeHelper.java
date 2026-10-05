@@ -36,9 +36,6 @@ import org.apache.fineract.integrationtests.common.Utils;
 
 public final class CodeHelper {
 
-    private static final String COUNTRY_CODE_NAME = "COUNTRY";
-    private static final String STATE_CODE_NAME = "STATE";
-    private static final String ADDRESS_TYPE_CODE_NAME = "ADDRESS_TYPE";
     private static final String CHARGE_OFF_REASONS_CODE_NAME = "ChargeOffReasons";
 
     public static final String CODE_ID_ATTRIBUTE_NAME = "id";
@@ -242,39 +239,6 @@ public final class CodeHelper {
         return Utils.performServerDelete(requestSpec, responseSpec, CODE_URL + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
                 jsonAttributeToGetback);
 
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createAddressTypeCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String addressTypeName, final Integer position) {
-        HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, ADDRESS_TYPE_CODE_NAME);
-        Integer countryCode = (Integer) code.get("id");
-        return createCodeValue(requestSpec, responseSpec, countryCode, addressTypeName, position);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createStateCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String stateName, final Integer position) {
-        HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, STATE_CODE_NAME);
-        Integer countryCode = (Integer) code.get("id");
-        return createCodeValue(requestSpec, responseSpec, countryCode, stateName, position);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createCountryCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String countryName, final Integer position) {
-        HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, COUNTRY_CODE_NAME);
-        Integer countryCode = (Integer) code.get("id");
-        return createCodeValue(requestSpec, responseSpec, countryCode, countryName, position);
     }
 
     // TODO: Rewrite to use fineract-client instead!

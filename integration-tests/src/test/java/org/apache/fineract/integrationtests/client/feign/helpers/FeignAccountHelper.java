@@ -21,7 +21,9 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.Collections;
+import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.services.GeneralLedgerAccountApi.RetrieveAllAccountsQueryParams;
 import org.apache.fineract.client.models.DeleteGLAccountsResponse;
 import org.apache.fineract.client.models.GetGLAccountsResponse;
 import org.apache.fineract.client.models.PostGLAccountsRequest;
@@ -98,6 +100,21 @@ public class FeignAccountHelper {
         GetGLAccountsResponse response = ok(
                 () -> fineractClient.generalLedgerAccount().retreiveAccount(account.getAccountID().longValue(), Collections.emptyMap()));
         return response.getGlCode();
+    }
+
+    public List<GetGLAccountsResponse> findGLAccountsByName(String name) {
+        return ok(() -> fineractClient.generalLedgerAccount().retrieveAllAccounts(new RetrieveAllAccountsQueryParams())).stream()
+                .filter(account -> name.equals(account.getName())).toList();
+    }
+
+    public GetGLAccountsResponse createEquityAccountWithExactName(String name) {
+        PostGLAccountsRequest request = new PostGLAccountsRequest()//
+                .name(name)//
+                .glCode(Utils.uniqueRandomStringGenerator("GL_3", 6))//
+                .manualEntriesAllowed(true)//
+                .type(getAccountTypeId("EQUITY"))//
+                .usage(1);
+        return getGLAccount(createGLAccount(request).getResourceId());
     }
 
     public PostGLAccountsResponse createGLAccount(PostGLAccountsRequest request) {

@@ -73,6 +73,10 @@ public class FeignGlobalConfigurationHelper {
         ok(() -> fineractClient.globalConfiguration().updateConfigurationByName(configName, request));
     }
 
+    public void updateConfigurationStringValue(String configName, String stringValue) {
+        updateGlobalConfiguration(configName, new PutGlobalConfigurationsRequest().stringValue(stringValue));
+    }
+
     public Long getConfigurationIdByName(String configName) {
         List<GlobalConfigurationPropertyData> configs = getConfigurationList();
         return configs.stream().filter(c -> configName.equals(c.getName())).findFirst().map(GlobalConfigurationPropertyData::getId)

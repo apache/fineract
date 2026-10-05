@@ -102,6 +102,19 @@ public final class Utils {
         }
     }
 
+    public record DoubleFormatterCustomPrecision(double value, String format) {
+
+        @Override
+        public String format() {
+            boolean isWholeNumber = (value % 1.0 == 0);
+            String result = isWholeNumber ? String.format(Locale.ROOT, "%.1f", value) : String.format(Locale.ROOT, format, value);
+            if (!isWholeNumber && result.endsWith("0")) {
+                result = result.substring(0, result.length() - 1);
+            }
+            return result;
+        }
+    }
+
     public static boolean isEqualLists(List a, List b) {
         if (a.size() != b.size()) {
             return false;

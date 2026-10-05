@@ -1,0 +1,76 @@
+{
+    "name": "WorkingCapitalLoanPeriodPaymentRateChangeDataV1",
+    "namespace": "org.apache.fineract.avro.workingcapitalloan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "effectiveDate",
+            "doc": "Date the new period payment rate takes effect.",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "previousRate",
+            "doc": "Period payment rate in force before this change.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "newRate",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "reversed",
+            "doc": "True when the change was superseded by another change on the same effective date.",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "reversedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "calculatedAnnualEir",
+            "doc": "Annual effective interest rate, as a percentage (e.g. 43.756245), of the schedule segment this change opened, snapshotted when the change was booked and never restated.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "dailyPaymentAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "segmentTerm",
+            "doc": "Payment periods the segment this change opened runs for; not the loan's term, which spans every segment.",
+            "type": [
+                "null",
+                "int"
+            ]
+        }
+    ]
+}

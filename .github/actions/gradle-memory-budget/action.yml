@@ -1,0 +1,27 @@
+name: Gradle Memory Budget
+description: >-
+  Cap the Gradle build JVM heap and worker concurrency for the current job, so jobs that run
+  several JVMs at once stay inside the runner's RAM. Run it after gradle/actions/setup-gradle
+  where that is used; otherwise it writes to Gradle's default ~/.gradle.
+
+inputs:
+  max-heap:
+    description: Value for -Xmx in the Gradle build JVM (org.gradle.jvmargs).
+    default: '4g'
+  workers-max:
+    description: Maximum concurrent Gradle workers (org.gradle.workers.max).
+    default: '2'
+  working-directory:
+    description: Directory containing the gradle.properties to derive org.gradle.jvmargs from.
+    default: '.'
+
+runs:
+  using: composite
+  steps:
+    - name: Apply Gradle memory budget
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        MAX_HEAP: ${{ inputs.max-heap }}
+        WORKERS_MAX: ${{ inputs.workers-max }}
+      run: "$GITHUB_ACTION_PATH/../../scripts/gradle-memory-budget.sh"

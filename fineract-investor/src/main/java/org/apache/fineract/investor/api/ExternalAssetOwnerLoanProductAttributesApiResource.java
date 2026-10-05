@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -123,6 +124,24 @@ public class ExternalAssetOwnerLoanProductAttributesApiResource {
         platformUserRightsContext.isAuthenticated();
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
         CommandWrapper request = builder.updateExternalAssetOwnerLoanProductAttribute(loanProductId, attributeId).build();
+
+        return commandsSourceWritePlatformService.logCommandSource(request);
+    }
+
+    @DELETE
+    @Path("/{loanProductId}/attributes/{id}")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(tags = {
+            "External Asset Owner Loan Product Attributes" }, summary = "Delete a Loan Product Attribute", operationId = "deleteExternalAssetOwnerLoanProductAttribute", description = "Deletes a loan product attribute with a given loan product id and attribute id, so that the loan product falls back to the default behaviour of the attribute", parameters = {
+                    @Parameter(name = "loanProductId", description = "loanProductId"),
+                    @Parameter(name = "attributeId", description = "attributeId") })
+    @AlternativeOperationId("deleteLoanProductAttribute")
+    public CommandProcessingResult deleteLoanProductAttribute(
+            @PathParam("loanProductId") @Parameter(description = "loanProductId") final Long loanProductId,
+            @PathParam("id") @Parameter(description = "attributeId") final Long attributeId) {
+        platformUserRightsContext.isAuthenticated();
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder();
+        CommandWrapper request = builder.deleteExternalAssetOwnerLoanProductAttribute(loanProductId, attributeId).build();
 
         return commandsSourceWritePlatformService.logCommandSource(request);
     }

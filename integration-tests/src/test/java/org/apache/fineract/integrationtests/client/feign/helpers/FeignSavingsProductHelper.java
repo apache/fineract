@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
 import org.apache.fineract.client.models.GetSavingsProductsResponse;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
@@ -40,6 +42,10 @@ public class FeignSavingsProductHelper {
 
     public PostSavingsProductsResponse createSavingsProduct(PostSavingsProductsRequest request) {
         return ok(() -> fineractClient.savingsProduct().createSavingsProduct(request));
+    }
+
+    public CallFailedRuntimeException createSavingsProductExpectingError(PostSavingsProductsRequest request) {
+        return fail(() -> fineractClient.savingsProduct().createSavingsProduct(request));
     }
 
     public PostSavingsProductsResponse createDefaultSavingsProduct() {

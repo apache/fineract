@@ -21,11 +21,10 @@ package org.apache.fineract.portfolio.loanaccount.jobs.generateloanlossprovision
 import org.apache.fineract.accounting.provisioning.service.ProvisioningEntriesWritePlatformService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteriaReadPlatformService;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -53,7 +52,7 @@ public class GenerateLoanlossProvisioningConfig {
     @Bean
     public Job generateLoanlossProvisioningJob() {
         return new JobBuilder(JobName.GENERATE_LOANLOSS_PROVISIONING.name(), jobRepository).start(generateLoanlossProvisioningStep())
-                .incrementer(new RunIdIncrementer()).build();
+                .build();
     }
 
     @Bean

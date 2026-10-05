@@ -41,10 +41,12 @@ public interface WorkingCapitalLoanSummaryDataMapper {
     // Fee
     @Mapping(target = "fee", source = "balance.fee", qualifiedByName = "nullToZero")
     @Mapping(target = "feePaid", source = "balance.feePaid", qualifiedByName = "nullToZero")
+    @Mapping(target = "feeWaived", source = "balance.feeWaived", qualifiedByName = "nullToZero")
     @Mapping(target = "feeOutstanding", source = "balance.feeOutstanding", qualifiedByName = "nullToZero")
     // Penalty
     @Mapping(target = "penalty", source = "balance.penalty", qualifiedByName = "nullToZero")
     @Mapping(target = "penaltyPaid", source = "balance.penaltyPaid", qualifiedByName = "nullToZero")
+    @Mapping(target = "penaltyWaived", source = "balance.penaltyWaived", qualifiedByName = "nullToZero")
     @Mapping(target = "penaltyOutstanding", source = "balance.penaltyOutstanding", qualifiedByName = "nullToZero")
     // Income recognition
     @Mapping(target = "realizedIncomeFromDiscountFee", source = "balance.realizedIncomeFromDiscountFee", qualifiedByName = "nullToZero")

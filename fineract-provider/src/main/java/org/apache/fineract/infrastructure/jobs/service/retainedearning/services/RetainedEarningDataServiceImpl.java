@@ -69,7 +69,7 @@ public class RetainedEarningDataServiceImpl implements RetainedEarningDataServic
 
     private final RetainedEarningConfigurationService retainedEarningConfigurationService;
 
-    private record ProductOwnerKey(String productName, ExternalId ownerExternalId) {
+    private record ProductOwnerKey(String productName, ExternalId ownerExternalId, String originatorExternalIds) {
     }
 
     @Override
@@ -89,6 +89,7 @@ public class RetainedEarningDataServiceImpl implements RetainedEarningDataServic
         entrySummary.setGlCode(String.valueOf(summaryDTO.getGlAccountCode()));
         entrySummary.setOfficeId(summaryDTO.getOfficeId());
         entrySummary.setOwnerExternalId(summaryDTO.getOwnerExternalId());
+        entrySummary.setOriginatorExternalIds(summaryDTO.getOriginatorExternalIds());
         entrySummary.setOpeningBalanceAmount(summaryDTO.getOpeningBalanceAmount());
         entrySummary.setYearEndDate(summaryDTO.getYearEndDate());
         entrySummary.setCurrencyCode(summaryDTO.getCurrencyCode());
@@ -150,8 +151,8 @@ public class RetainedEarningDataServiceImpl implements RetainedEarningDataServic
         final Map<String, LoanProduct> productByName = loanProductRepository.findAllByNameIgnoreCase(distinctProductNamesLower).stream()
                 .collect(Collectors.toMap(p -> p.getName().toLowerCase(), p -> p, (a, b) -> a));
 
-        final Map<ProductOwnerKey, BigDecimal> retainedByProductAndOwner = incomeExpenseRecords.stream()
-                .collect(Collectors.toMap(r -> new ProductOwnerKey(r.getProductName(), r.getOwnerExternalId()),
+        final Map<ProductOwnerKey, BigDecimal> retainedByProductAndOwner = incomeExpenseRecords.stream().collect(
+                Collectors.toMap(r -> new ProductOwnerKey(r.getProductName(), r.getOwnerExternalId(), r.getOriginatorExternalIds()),
                         r -> Optional.ofNullable(r.getEndingBalanceAmount()).orElse(BigDecimal.ZERO), BigDecimal::add));
 
         final List<AccountGLJournalEntryAnnualSummaryData> retainedEarningRecords = createRetainedEarningRecords(retainedByProductAndOwner,
@@ -210,9 +211,9 @@ public class RetainedEarningDataServiceImpl implements RetainedEarningDataServic
         final String retainedEarningGlAccountCode = retainedEarningConfigurationService.getRetainedEarningGlAccount();
 
         final Map<ProductOwnerKey, AccountGLJournalEntryAnnualSummaryData> firstRecordByProductAndOwner = originalData.stream()
-                .filter(r -> r.getOwnerExternalId() != null && !r.getOwnerExternalId().isEmpty() && r.getProductName() != null)
-                .collect(Collectors.toMap(r -> new ProductOwnerKey(r.getProductName(), r.getOwnerExternalId()), r -> r,
-                        (first, second) -> first));
+                .filter(r -> r.getOwnerExternalId() != null && !r.getOwnerExternalId().isEmpty() && r.getProductName() != null).collect(
+                        Collectors.toMap(r -> new ProductOwnerKey(r.getProductName(), r.getOwnerExternalId(), r.getOriginatorExternalIds()),
+                                r -> r, (first, second) -> first));
 
         Long defaultOfficeId = retainedEarningConfigurationService.getOfficeId();
         return retainedByProductAndOwner.entrySet().stream().filter(e -> e.getValue().compareTo(BigDecimal.ZERO) != 0).map(e -> {
@@ -220,8 +221,9 @@ public class RetainedEarningDataServiceImpl implements RetainedEarningDataServic
             AccountGLJournalEntryAnnualSummaryData template = firstRecordByProductAndOwner.get(key);
             return AccountGLJournalEntryAnnualSummaryData.builder().productName(key.productName())
                     .glAccountCode(retainedEarningGlAccountCode).officeId(template != null ? template.getOfficeId() : defaultOfficeId)
-                    .ownerExternalId(key.ownerExternalId()).openingBalanceAmount(e.getValue()).endingBalanceAmount(e.getValue())
-                    .yearEndDate(lastDayOfPreviousFiscalYear).manualEntry(false).build();
+                    .ownerExternalId(key.ownerExternalId()).originatorExternalIds(key.originatorExternalIds())
+                    .openingBalanceAmount(e.getValue()).endingBalanceAmount(e.getValue()).yearEndDate(lastDayOfPreviousFiscalYear)
+                    .manualEntry(false).build();
         }).collect(Collectors.toList());
     }
 
@@ -230,9 +232,9 @@ public class RetainedEarningDataServiceImpl implements RetainedEarningDataServic
             return dataParser.parse(jsonResponse).stream()
                     .map(record -> AccountGLJournalEntryAnnualSummaryData.builder().glAccountCode(record.getGlAcct())
                             .productName(record.getProduct()).officeId(retainedEarningConfigurationService.getOfficeId())
-                            .ownerExternalId(record.getAssetOwner()).openingBalanceAmount(record.getEndingBalance().negate())
-                            .endingBalanceAmount(record.getEndingBalance()).yearEndDate(LocalDate.parse(record.getPostingDate()))
-                            .manualEntry(false).build())
+                            .ownerExternalId(record.getAssetOwner()).originatorExternalIds(record.getOriginatorExternalIds())
+                            .openingBalanceAmount(record.getEndingBalance().negate()).endingBalanceAmount(record.getEndingBalance())
+                            .yearEndDate(LocalDate.parse(record.getPostingDate())).manualEntry(false).build())
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to parse trial balance data: " + e.getMessage(), e);

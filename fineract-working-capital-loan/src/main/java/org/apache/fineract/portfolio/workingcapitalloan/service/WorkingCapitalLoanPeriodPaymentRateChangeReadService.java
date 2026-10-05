@@ -20,8 +20,12 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 
 public interface WorkingCapitalLoanPeriodPaymentRateChangeReadService {
 
     List<WorkingCapitalLoanPeriodPaymentRateChangeData> retrieveRateChangeHistory(Long loanId);
+
+    /** Same history for an already-loaded loan, without the existence check. */
+    List<WorkingCapitalLoanPeriodPaymentRateChangeData> retrieveRateChangeHistory(WorkingCapitalLoan loan);
 }

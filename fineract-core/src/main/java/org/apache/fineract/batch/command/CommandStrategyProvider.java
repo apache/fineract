@@ -311,6 +311,13 @@ public class CommandStrategyProvider {
                 CommandContext.resource("v1\\/working-capital-loans\\/external-id\\/" + UUID_PARAM_REGEX
                         + "\\/transactions\\/external-id\\/" + UUID_PARAM_REGEX + OPTIONAL_QUERY_PARAM_REGEX).method(GET).build(),
                 "getWorkingCapitalLoanTransactionByExternalIdCommandStrategy");
+        commandStrategies.put(
+                CommandContext.resource("v1\\/working-capital-loans\\/" + NUMBER_REGEX + "\\/breach-schedule" + OPTIONAL_QUERY_PARAM_REGEX)
+                        .method(GET).build(),
+                "getWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategy");
+        commandStrategies.put(CommandContext
+                .resource("v1\\/working-capital-loans\\/" + NUMBER_REGEX + "\\/delinquency-range-schedule" + OPTIONAL_QUERY_PARAM_REGEX)
+                .method(GET).build(), "getWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy");
     }
 
 }

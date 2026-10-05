@@ -197,6 +197,37 @@ class InstallmentDelinquencyAggregatorTest {
         assertInstallmentDelinquency(result.get(1), 2L, "RANGE_2", 2, 3, "100.00");
     }
 
+    @Test
+    void testAggregateAndSortInstallmentLevels_groupsByRangeSumsAmountsAndSortsByMinimumAgeDays() {
+        InstallmentLevelDelinquency range2First = installmentLevel(2L, "RANGE_2", 31, 60, "270.00");
+        InstallmentLevelDelinquency range1First = installmentLevel(1L, "RANGE_1", 1, 30, "270.00");
+        InstallmentLevelDelinquency range1Second = installmentLevel(1L, "RANGE_1", 1, 30, "130.50");
+        InstallmentLevelDelinquency range1WithoutAmount = installmentLevel(1L, "RANGE_1", 1, 30, null);
+
+        List<InstallmentLevelDelinquency> result = InstallmentDelinquencyAggregator
+                .aggregateAndSortInstallmentLevels(List.of(range2First, range1First, range1Second, range1WithoutAmount));
+
+        assertThat(result).hasSize(2);
+        assertInstallmentDelinquency(result.get(0), 1L, "RANGE_1", 1, 30, "400.50");
+        assertInstallmentDelinquency(result.get(1), 2L, "RANGE_2", 31, 60, "270.00");
+    }
+
+    @Test
+    void testAggregateAndSortInstallmentLevels_nullInput_returnsEmptyList() {
+        assertThat(InstallmentDelinquencyAggregator.aggregateAndSortInstallmentLevels(null)).isEmpty();
+    }
+
+    private InstallmentLevelDelinquency installmentLevel(Long rangeId, String classification, Integer minDays, Integer maxDays,
+            String amount) {
+        InstallmentLevelDelinquency installmentLevel = new InstallmentLevelDelinquency();
+        installmentLevel.setRangeId(rangeId);
+        installmentLevel.setClassification(classification);
+        installmentLevel.setMinimumAgeDays(minDays);
+        installmentLevel.setMaximumAgeDays(maxDays);
+        installmentLevel.setDelinquentAmount(amount == null ? null : new BigDecimal(amount));
+        return installmentLevel;
+    }
+
     private LoanInstallmentDelinquencyTagData createTagData(Long installmentId, Long rangeId, String classification, Integer minDays,
             Integer maxDays, String amount) {
         return new TestLoanInstallmentDelinquencyTagData(installmentId,

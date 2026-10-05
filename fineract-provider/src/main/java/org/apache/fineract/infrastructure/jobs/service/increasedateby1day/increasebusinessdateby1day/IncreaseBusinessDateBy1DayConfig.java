@@ -21,9 +21,8 @@ package org.apache.fineract.infrastructure.jobs.service.increasedateby1day.incre
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.springframework.batch.core.Job;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.context.annotation.Bean;
@@ -44,6 +43,6 @@ public class IncreaseBusinessDateBy1DayConfig {
             IncreaseBusinessDateBy1DayTasklet tasklet) {
         return new JobBuilder(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY.name(), jobRepository).start(
                 new StepBuilder(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY.name(), jobRepository).tasklet(tasklet, transactionManager).build())
-                .incrementer(new RunIdIncrementer()).build();
+                .build();
     }
 }

@@ -30,11 +30,11 @@ dependencies {
 
     // Spring Boot Security dependencies
     implementation(
-            'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-webmvc',
             'org.springframework.boot:spring-boot-starter-security',
-            'org.springframework.boot:spring-boot-starter-oauth2-authorization-server',
-            'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
-            'org.springframework.boot:spring-boot-starter-oauth2-client',
+            'org.springframework.boot:spring-boot-starter-security-oauth2-authorization-server',
+            'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server',
+            'org.springframework.boot:spring-boot-starter-security-oauth2-client',
             'org.springframework.boot:spring-boot-starter-cache',
 
             'jakarta.ws.rs:jakarta.ws.rs-api',
@@ -93,6 +93,5 @@ dependencies {
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testImplementation ('org.mockito:mockito-inline')
     testImplementation 'org.springframework.security:spring-security-test'
 }

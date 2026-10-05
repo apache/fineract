@@ -45,9 +45,11 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.job.JobInstance;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.ExecutionContext;
 
 public class LoanItemReaderStepDefinitions implements En {
 
@@ -68,7 +70,7 @@ public class LoanItemReaderStepDefinitions implements En {
 
     public LoanItemReaderStepDefinitions() {
         Given("/^The LoanItemReader.read method with loanIds (.*)$/", (String loanIds) -> {
-            JobExecution jobExecution = new JobExecution(1L);
+            JobExecution jobExecution = new JobExecution(1L, new JobInstance(1L, "test"), new JobParameters());
             ExecutionContext jobExecutionContext = new ExecutionContext();
             jobExecution.setExecutionContext(jobExecutionContext);
             StepExecution stepExecution = new StepExecution("test", jobExecution);

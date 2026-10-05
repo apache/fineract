@@ -27,8 +27,12 @@ public class JpaAuditingHandlerRegistrar implements ImportBeanDefinitionRegistra
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        registry.registerBeanDefinition("jpaAuditingHandler",
-                BeanDefinitionBuilder.rootBeanDefinition(CustomAuditingHandler.class).addConstructorArgReference("jpaMappingContext")
-                        .addConstructorArgReference("auditorAware").setScope("prototype").getBeanDefinition());
+        // Deliberately a singleton, which is also what Spring Data own auditing registrar uses. Since Spring Data
+        // Commons 4.x the AuditingHandler constructor walks every persistent entity to build its auditing metadata,
+        // so a prototype rebuilt that whole mapping-context scan on every command and dominated the server CPU.
+        // The prototype scope existed only to keep the mutable DateTimeProvider per caller; CustomAuditingHandler now
+        // keeps that choice in a thread local, so a shared instance is safe.
+        registry.registerBeanDefinition("jpaAuditingHandler", BeanDefinitionBuilder.rootBeanDefinition(CustomAuditingHandler.class)
+                .addConstructorArgReference("jpaMappingContext").addConstructorArgReference("auditorAware").getBeanDefinition());
     }
 }

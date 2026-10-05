@@ -185,7 +185,7 @@ public class ApiGlobalErrorResponse {
 
     public static ApiGlobalErrorResponse serverSideError(final String globalisationMessageCode, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
-        String msg = "An unexpected error occured on the platform server.";
+        String msg = "An unexpected error occurred on the platform server.";
         final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
 

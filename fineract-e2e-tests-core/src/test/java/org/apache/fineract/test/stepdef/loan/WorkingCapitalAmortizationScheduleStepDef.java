@@ -330,6 +330,33 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
         assertions.assertAll();
     }
 
+    @Then("The last projected payment amount is the smaller tail remainder")
+    public void verifyLastProjectedPaymentIsSmallerTail() {
+        final ProjectedAmortizationScheduleData response = getRetrievedSchedule();
+        final List<ProjectedAmortizationSchedulePaymentData> payments = response.getPayments();
+        assertThat(payments).as("payments list").hasSizeGreaterThan(1);
+        final ProjectedAmortizationSchedulePaymentData last = payments.getLast();
+        assertThat(last.getPaymentNo()).as("last paymentNo").isGreaterThan(0);
+        assertThat(last.getExpectedBalance()).as("last expectedBalance").isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(last.getExpectedDiscountFeeBalance()).as("last expectedDiscountFeeBalance").isEqualByComparingTo(BigDecimal.ZERO);
+        final ProjectedAmortizationSchedulePaymentData firstPayment = payments.get(1);
+        assertThat(last.getExpectedPaymentAmount()).as("tail expectedPaymentAmount must be positive").isPositive();
+        assertThat(last.getExpectedPaymentAmount()).as("tail expectedPaymentAmount must be strictly less than the regular instalment %s",
+                firstPayment.getExpectedPaymentAmount()).isLessThan(firstPayment.getExpectedPaymentAmount());
+    }
+
+    @Then("The retrieved amortization schedule has at least {int} payment rows")
+    public void verifyAmortizationScheduleHasAtLeastPaymentRows(final int minRows) {
+        final ProjectedAmortizationScheduleData response = getRetrievedSchedule();
+        assertThat(response.getPayments()).as("amortization schedule payment row count").hasSizeGreaterThanOrEqualTo(minRows);
+    }
+
+    @Then("The retrieved amortization schedule has exactly {int} payment rows")
+    public void verifyAmortizationScheduleHasExactlyPaymentRows(final int exactRows) {
+        final ProjectedAmortizationScheduleData response = getRetrievedSchedule();
+        assertThat(response.getPayments()).as("amortization schedule payment row count").hasSize(exactRows);
+    }
+
     @Then("The retrieved amortization schedule has no negative amounts")
     public void verifyRetrievedScheduleHasNoNegativeAmounts() {
         final ProjectedAmortizationScheduleData response = TestContext.INSTANCE.get(WC_AMORT_SCHEDULE_KEY);
@@ -373,10 +400,10 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
     }
 
     /**
-     * Ledger/schedule consistency guard (PS-3313 "amortization amounts + not yet amortized amounts matches discount
-     * fee"): the actual amortization rows must add up to the realized discount-fee income booked on the loan, the last
-     * paid row's actual discount fee balance must equal the loan's unrealized income, and realized + unrealized must
-     * equal the discount fee the schedule was built with.
+     * Ledger/schedule consistency guard ("amortization amounts + not yet amortized amounts matches discount fee"): the
+     * actual amortization rows must add up to the realized discount-fee income booked on the loan, the last paid row's
+     * actual discount fee balance must equal the loan's unrealized income, and realized + unrealized must equal the
+     * discount fee the schedule was built with.
      *
      * <p>
      * Precondition: use it right after a close of business on a loan that is still active. The ledger only follows the
@@ -433,6 +460,15 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
         assertInt(assertions, "npvDayCount", response.getNpvDayCount(), expected.get("npvDayCount"));
         assertDecimal(assertions, "expectedPaymentAmount", response.getExpectedPaymentAmount(), expected.get("expectedPaymentAmount"));
         assertInt(assertions, "originalPaymentNumber", response.getOriginalPaymentNumber(), expected.get("originalPaymentNumber"));
+        assertDecimal(assertions, "annualEir", response.getAnnualEir(), expected.get("annualEir"));
+        assertDecimal(assertions, "paymentAmount", response.getPaymentAmount(), expected.get("paymentAmount"));
+        final String expectedStrategy = expected.get("paymentAmountCalculationStrategy");
+        if (!WorkingCapitalScheduleMatcher.isBlank(expectedStrategy)) {
+            assertions
+                    .assertThat(response.getPaymentAmountCalculationStrategy() == null ? null
+                            : response.getPaymentAmountCalculationStrategy().getId())
+                    .as("paymentAmountCalculationStrategy").isEqualTo(expectedStrategy);
+        }
     }
 
     private void verifySummaryFields(final DataTable dataTable) {

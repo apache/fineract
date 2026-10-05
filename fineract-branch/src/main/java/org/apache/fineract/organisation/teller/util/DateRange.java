@@ -70,14 +70,14 @@ public class DateRange {
         try {
             dateRange.setStartDate(LocalDate.parse(tokenizer.nextToken(), DateUtils.DEFAULT_DATE_FORMATTER));
         } catch (DateTimeParseException ex) {
-            LOG.error("Problem occurred in DateRange function Could not parse the date recieved.", ex);
+            LOG.error("Problem occurred in DateRange function Could not parse the date received.", ex);
         }
 
         if (tokenizer.hasMoreTokens()) {
             try {
                 dateRange.setEndDate(LocalDate.parse(tokenizer.nextToken(), DateUtils.DEFAULT_DATE_FORMATTER));
             } catch (DateTimeParseException ex) {
-                LOG.error("Problem occurred in DateRange function Could not parse the date recieved.", ex);
+                LOG.error("Problem occurred in DateRange function Could not parse the date received.", ex);
             }
         }
         return dateRange;

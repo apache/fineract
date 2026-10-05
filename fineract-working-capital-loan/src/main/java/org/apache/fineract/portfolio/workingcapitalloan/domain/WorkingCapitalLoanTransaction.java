@@ -245,10 +245,33 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         return transaction;
     }
 
+    /**
+     * Like a write-off, a waiver moves no money, so it carries no payment detail. The amount is the relieved
+     * outstanding regardless of how much of it was ever accrued.
+     */
+    public static WorkingCapitalLoanTransaction chargeWaiver(final WorkingCapitalLoan loan, final BigDecimal amount,
+            final LocalDate transactionDate, final ExternalId externalId) {
+        final WorkingCapitalLoanTransaction txn = new WorkingCapitalLoanTransaction();
+        txn.initialize(loan, LoanTransactionType.WAIVE_CHARGES, transactionDate, amount, null, null, externalId);
+        return txn;
+    }
+
     public static WorkingCapitalLoanTransaction writeOff(final WorkingCapitalLoan loan, final BigDecimal amount,
             final LocalDate transactionDate, final ExternalId externalId) {
         final WorkingCapitalLoanTransaction txn = new WorkingCapitalLoanTransaction();
         txn.initialize(loan, LoanTransactionType.WRITEOFF, transactionDate, amount, null, null, externalId);
+        return txn;
+    }
+
+    /**
+     * A recovery payment collects money on a loan that was already written off. It carries no allocation: the balance
+     * was zeroed by the write-off and stays that way, so the amount is recognized as recovery income rather than
+     * applied against principal, fees or penalties. The loan keeps its {@code CLOSED_WRITTEN_OFF} status.
+     */
+    public static WorkingCapitalLoanTransaction recoveryPayment(final WorkingCapitalLoan loan, final BigDecimal amount,
+            final PaymentDetail paymentDetail, final LocalDate transactionDate, final ExternalId externalId) {
+        final WorkingCapitalLoanTransaction txn = new WorkingCapitalLoanTransaction();
+        txn.initialize(loan, LoanTransactionType.RECOVERY_REPAYMENT, transactionDate, amount, paymentDetail, null, externalId);
         return txn;
     }
 

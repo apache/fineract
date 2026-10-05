@@ -21,11 +21,14 @@ package org.apache.fineract.test.stepdef.common;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.BusinessStep;
@@ -35,13 +38,27 @@ import org.apache.fineract.client.models.JobBusinessStepConfigData;
 import org.apache.fineract.client.models.JobBusinessStepDetail;
 import org.apache.fineract.test.helper.WorkFlowJobHelper;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
+@RequiredArgsConstructor
 public class BusinessStepConfigurationStepDef extends AbstractStepDef {
 
-    @Autowired
-    private WorkFlowJobHelper workFlowJobHelper;
+    private static final String WORKFLOW_NAME_WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS = "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS";
+
+    private final WorkFlowJobHelper workFlowJobHelper;
+
+    private List<BusinessStep> savedWorkingCapitalBusinessSteps;
+
+    @Before("@WCBusinessStepConfig")
+    public void saveWorkingCapitalBusinessSteps() {
+        savedWorkingCapitalBusinessSteps = workFlowJobHelper
+                .getConfiguredWorkflowSteps(WORKFLOW_NAME_WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS).getBusinessSteps();
+    }
+
+    @After("@WCBusinessStepConfig")
+    public void restoreWorkingCapitalBusinessSteps() {
+        workFlowJobHelper.updateWorkflowSteps(WORKFLOW_NAME_WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS, savedWorkingCapitalBusinessSteps);
+    }
 
     @Then("Admin checks that configured business jobs contain {string}")
     public void checkConfiguredBusinessJobsContain(String jobName) {

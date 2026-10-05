@@ -45,10 +45,6 @@ public class WorkingCapitalAdvancedPaymentAllocationsValidator {
                 raiseValidationError("wc-payment-allocation-with-duplicate-transaction-type",
                         "The same transaction type must be provided only once");
             }
-
-            for (final WorkingCapitalLoanProductPaymentAllocationRule rule : rulesToValidate) {
-                validateAllocationRule(rule);
-            }
         }
     }
 
@@ -81,13 +77,6 @@ public class WorkingCapitalAdvancedPaymentAllocationsValidator {
     private boolean hasDuplicateTransactionTypes(final List<WorkingCapitalLoanProductPaymentAllocationRule> rules) {
         return rules != null && rules.stream().map(WorkingCapitalLoanProductPaymentAllocationRule::getTransactionType).distinct().toList()
                 .size() != rules.size();
-    }
-
-    private void validateAllocationRule(final WorkingCapitalLoanProductPaymentAllocationRule rule) {
-        if (rule.getTransactionType() == null) {
-            raiseValidationError("wc-payment-allocation.with.not.valid.transaction.type",
-                    "Payment allocation was provided with a not valid transaction type");
-        }
     }
 
     private boolean hasAtLeastOneDefaultPaymentAllocation(final List<WorkingCapitalLoanProductPaymentAllocationRule> rules) {

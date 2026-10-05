@@ -23,12 +23,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.fund.data.FundData;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.api.WorkingCapitalLoanProductApiResourceSwagger;
 
 /**
@@ -164,6 +166,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public LocalDate expectedMaturityDate;
         @Schema(example = "[2024, 12, 31]", description = "Actual maturity date (when loan is fully paid)")
         public LocalDate actualMaturityDate;
+        @Schema(example = "[2024, 2, 1]", description = "Overpaid date")
+        public LocalDate overpaidOnDate;
     }
 
     @Schema(description = "GetWorkingCapitalLoansLoanIdResponse")
@@ -219,7 +223,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal netDisbursalAmount;
 
         public CurrencyData currency;
-        @Schema(example = "1.0")
+        @Schema(example = "1.0", description = "The loan's own period payment rate. A rate change does not move it - the rate in force on "
+                + "a given date comes from the rate-change history")
         public BigDecimal paymentRate;
         @Schema(example = "30")
         public Integer repaymentEvery;
@@ -232,6 +237,12 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public Integer loanProductCounter;
         @Schema(example = "10500.00")
         public BigDecimal totalPaymentVolume;
+        @Schema(example = "43.7562", description = "Configured annual EIR percentage for ANNUAL_EIR strategy loans")
+        public BigDecimal annualEir;
+        @Schema(example = "47.22", description = "Configured daily payment amount for PAYMENT_AMOUNT strategy loans")
+        public BigDecimal paymentAmount;
+        @Schema(description = "Payment amount calculation strategy inherited from product")
+        public StringEnumOptionData paymentAmountCalculationStrategy;
         @Schema(example = "0.0", description = "Discount fee set during loan disbursement")
         public BigDecimal discountFee;
         @Schema(example = "0.0", description = "Proposed discount fee at loan submission time")
@@ -239,14 +250,29 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(example = "0.0", description = "Approved discount fee set during loan approval")
         public BigDecimal approvedDiscountFee;
         @Schema(example = "90", description = "Number of repayments (effectiveTotalTerm from the amortization schedule; for WC this is the "
-                + "loan term in days); null if schedule not yet generated")
+                + "loan term in days). Unlike the priced figures beside it a rate change does move it, to the day the rate now in force is "
+                + "solved to close the schedule on - a day the amounts here cannot be used to derive, because it falls out of the balance "
+                + "and the fee still unearned when the change takes effect. Null if schedule not yet generated")
         public Integer numberOfRepayments;
-        @Schema(example = "116.67", description = "Daily expected payment amount from the amortization schedule; null if schedule not yet generated")
+        @Schema(example = "0.29", description = "Daily payment amount the loan was priced at, following "
+                + "paymentAmountCalculationStrategy: totalPaymentVolume x paymentRate / 100 / npvDayCount rounded to the currency under "
+                + "TPV, solved from annualEir under ANNUAL_EIR, and paymentAmount itself under PAYMENT_AMOUNT. A rate change does not "
+                + "restate it, no more than it restates paymentRate or "
+                + "calculatedAnnualEir - what is billed from the day a change takes effect follows the rate then in force, and is read "
+                + "off the amortization schedule rows. Null if schedule not yet generated")
         public BigDecimal periodPaymentAmount;
-        @Schema(example = "0.000435", description = "Periodic (daily) effective interest rate computed via RATE(); null if schedule not yet generated")
-        public BigDecimal dailyEir;
-        @Schema(example = "0.1691", description = "Annualized EIR: (1 + dailyEir)^365 − 1; null if schedule not yet generated")
+        @Schema(example = "46.845102", description = "Annual effective rate the loan was priced at, as a percentage: compounded over "
+                + "the product's NPV day count, not a calendar year, and rounded to six decimals. The base schedule's daily "
+                + "discounting derives from it. A rate change does not restate it - the schedule re-solves its own rate from the day "
+                + "the change takes effect. Comes from discount-fee pricing, not a lending interest rate. Null if schedule not yet "
+                + "generated or if the loan amortizes FLAT, which solves no rate")
         public BigDecimal calculatedAnnualEir;
+        @Schema(description = "Period payment rate change history, most recently booked first - which for a backdated change is not "
+                + "the same as effective-date order. Each entry carries the annual EIR (as a percentage, e.g. 43.756245, the unit the "
+                + "top-level calculatedAnnualEir is expressed in as well), daily payment amount and segment term the amortization "
+                + "schedule computed when that change was booked; those are null for changes booked before the snapshot was "
+                + "introduced, and the EIR is null on a FLAT loan")
+        public List<WorkingCapitalLoanPeriodPaymentRateChangeData> periodPaymentRateHistory;
         @Schema(description = "Working capital breach)")
         public WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse.GetWorkingCapitalLoanBreach breach;
         public WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanNearBreach nearBreach;
@@ -260,11 +286,21 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(description = "Breach start type: LOAN_CREATION or DISBURSEMENT")
         public StringEnumOptionData breachStartType;
         @Schema(example = "[2024, 1, 14]", description = "Start date of the loan's breach, i.e. the fromDate of the earliest breached "
-                + "breach schedule period (the breach grace days are already reflected in this date). Null when the loan is not in breach")
+                + "breach schedule period. Null when the loan is not in breach")
         public LocalDate breachStartDate;
+        @Schema(example = "[2024, 1, 19]", description = "Effective start date of the loan's breach, i.e. breachStartDate shifted "
+                + "forward by breachGraceDays (the cool off period). Only the first breach period carries the grace days, so this is "
+                + "null when the earliest breached period is not the first one, when no breach grace days are configured, and when the "
+                + "loan is not in breach")
+        public LocalDate breachEffectiveStartDate;
         @Schema(example = "[2024, 1, 14]", description = "Start date of the loan's delinquency, i.e. the fromDate of the earliest "
-                + "delinquent range schedule period shifted by delinquencyGraceDays. Null when the loan is not delinquent")
+                + "delinquent range schedule period. Null when the loan is not delinquent")
         public LocalDate delinquencyStartDate;
+        @Schema(example = "[2024, 1, 17]", description = "Effective start date of the loan's delinquency, i.e. delinquencyStartDate "
+                + "shifted forward by delinquencyGraceDays (the cool off period). Only the first delinquency period carries the grace "
+                + "days, so this is null when the earliest delinquent period is not the first one, when no delinquency grace days are "
+                + "configured, and when the loan is not delinquent")
+        public LocalDate delinquencyEffectiveStartDate;
         @Schema(example = "[2024, 1, 14]", description = "Last closed business date (COB)")
         public LocalDate lastClosedBusinessDate;
         public List<GetPaymentAllocation> paymentAllocation;
@@ -280,6 +316,9 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public GetBalance balance;
         @Schema(description = "Loan summary: principal / fee / penalty totals, income recognition and aggregates")
         public GetWorkingCapitalLoanSummary summary;
+
+        @Schema(example = "2024-01-14", description = "Date on which loan was overpaid otherwise null")
+        public LocalDate overpaidOnDate;
 
         @Schema(description = "Working Capital Loan charge")
         public static final class GetWorkingCapitalLoanCharge {
@@ -303,6 +342,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
             public BigDecimal amountPaid;
             @Schema(example = "0")
             public BigDecimal amountWrittenOff;
+            @Schema(example = "0")
+            public BigDecimal amountWaived;
             @Schema(example = "0")
             public BigDecimal amountOutstanding;
             @Schema(example = "false")
@@ -333,9 +374,13 @@ public final class WorkingCapitalLoanApiResourceSwagger {
             public BigDecimal principalOutstanding;
             public BigDecimal fee;
             public BigDecimal feePaid;
+            @Schema(description = "Fees moved out of the outstanding balance by a charge waiver")
+            public BigDecimal feeWaived;
             public BigDecimal feeOutstanding;
             public BigDecimal penalty;
             public BigDecimal penaltyPaid;
+            @Schema(description = "Penalties moved out of the outstanding balance by a charge waiver")
+            public BigDecimal penaltyWaived;
             public BigDecimal penaltyOutstanding;
             public BigDecimal realizedIncomeFromDiscountFee;
             public BigDecimal unrealizedIncomeFromDiscountFee;
@@ -417,6 +462,22 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal penaltyPaid;
         @Schema(example = "10000.00")
         public BigDecimal penaltyOutstanding;
+        @Schema(example = "10000.00", description = "Principal moved out of the outstanding balance by a write-off")
+        public BigDecimal principalWrittenOff;
+        @Schema(example = "0.00", description = "Fees moved out of the outstanding balance by a write-off")
+        public BigDecimal feeWrittenOff;
+        @Schema(example = "0.00", description = "Penalties moved out of the outstanding balance by a write-off")
+        public BigDecimal penaltyWrittenOff;
+        @Schema(example = "10000.00", description = "Gross amount written off; not reduced by recoveries")
+        public BigDecimal totalWrittenOff;
+        @Schema(example = "2000.00", description = "Collected after the write-off and recognized as recovery income")
+        public BigDecimal totalRecovered;
+        @Schema(example = "8000.00", description = "Still recoverable (totalWrittenOff - totalRecovered); caps the next recovery payment")
+        public BigDecimal writtenOffOutstanding;
+        @Schema(example = "0.00", description = "Fees moved out of the outstanding balance by a charge waiver")
+        public BigDecimal feeWaived;
+        @Schema(example = "0.00", description = "Penalties moved out of the outstanding balance by a charge waiver")
+        public BigDecimal penaltyWaived;
         @Schema(example = "10000.00")
         public BigDecimal realizedIncomeFromDiscountFee;
         @Schema(example = "10000.00")
@@ -501,6 +562,11 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal principalAmount;
         @Schema(example = "10500.00")
         public BigDecimal totalPaymentVolume;
+        @Schema(example = "43.7562", description = "Annual EIR percentage (6 decimal places max). Required for ANNUAL_EIR strategy products.")
+        public BigDecimal annualEir;
+        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+                + "Overrides the product default on PAYMENT_AMOUNT strategy products.")
+        public BigDecimal paymentAmount;
         @Schema(example = "15 January 2024")
         public String submittedOnDate;
         @Schema(example = "1 February 2024")
@@ -537,6 +603,9 @@ public final class WorkingCapitalLoanApiResourceSwagger {
                 If the global config 'enable_originator_creation_during_loan_application' is enabled, \
                 non-existing originators will be auto-created using the provided details (name, typeId, channelTypeId).""")
         public List<PostWorkingCapitalLoansOriginatorData> originators;
+
+        @Schema(example = "List of PostWorkingCapitalLoansDataTable")
+        public List<PostWorkingCapitalLoansDataTable> datatables;
 
         @Schema(example = "en_GB")
         public String locale;
@@ -583,6 +652,17 @@ public final class WorkingCapitalLoanApiResourceSwagger {
 
             @Schema(description = "Code value ID for channel type (from LoanOriginationChannelType code)", example = "2")
             public Long channelTypeId;
+        }
+
+        @Schema(description = "PostWorkingCapitalLoansDataTable")
+        public static final class PostWorkingCapitalLoansDataTable {
+
+            private PostWorkingCapitalLoansDataTable() {}
+
+            @Schema(example = "dt_wc_loan_extra")
+            public String registeredTableName;
+            @Schema(example = "Datatable data")
+            public Map<String, Object> data;
         }
     }
 
@@ -639,6 +719,9 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal principalAmount;
         @Schema(example = "10500.00")
         public BigDecimal totalPaymentVolume;
+        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+                + "Overrides the product default on PAYMENT_AMOUNT strategy products.")
+        public BigDecimal paymentAmount;
         @Schema(example = "15 January 2024")
         public String submittedOnDate;
         @Schema(example = "1 February 2024")

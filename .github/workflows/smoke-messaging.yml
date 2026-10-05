@@ -18,7 +18,7 @@ permissions:
 jobs:
   smoke-test:
     name: Smoke Test with ${{ matrix.messaging }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -36,14 +36,14 @@ jobs:
 
     steps:
       - name: Set up JDK 25
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '25'
           distribution: 'zulu'
 
       - name: Download workspace
         id: download-workspace
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         continue-on-error: true
         with:
           name: fineract-workspace-${{ github.run_id }}
@@ -63,12 +63,18 @@ jobs:
 
       - name: Build workspace fallback
         if: steps.download-workspace.outcome != 'success'
-        uses: ./.github/actions/setup-and-build-fineract
+        uses: $/.github/actions/setup-and-build-fineract
         with:
           cache-read-only: false
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+      - name: Apply Gradle memory budget
+        uses: $/.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
 
       - name: Build the image
         run: ./gradlew --no-daemon --console=plain :fineract-provider:jibDockerBuild -Djib.to.image=$IMAGE_NAME -x test -x cucumber -x buildJavaSdk
@@ -104,7 +110,7 @@ jobs:
           jq -e '.git | type == "object"' actuator-info-worker1.json
 
       - name: Run Smoke Test with Remote COB
-        run: ./gradlew --no-daemon --console=plain :integration-tests:cleanTest :integration-tests:test --tests "org.apache.fineract.integrationtests.investor.externalassetowner.InitiateExternalAssetOwnerTransferTest.saleActiveLoanToExternalAssetOwnerAndBuybackADayLater" -PcargoDisabled -x buildJavaSdk
+        run: ./gradlew --no-daemon --console=plain :integration-tests:cleanTest :integration-tests:test --tests "org.apache.fineract.integrationtests.investor.externalassetowner.InitiateExternalAssetOwnerTransferTest.saleActiveLoanToExternalAssetOwnerAndBuybackADayLater" -x buildJavaSdk
 
       - name: Collect Docker logs
         if: ${{ failure() || inputs.upload_artifacts }}

@@ -25,6 +25,7 @@ import java.util.Optional;
 import org.apache.fineract.cob.data.COBIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -86,7 +87,7 @@ public interface WorkingCapitalLoanRepository extends JpaRepository<WorkingCapit
     List<COBIdAndLastClosedBusinessDate> findAllLoansBehindOrNullByLoanIdsAndStatuses(@Param("cobBusinessDate") LocalDate cobBusinessDate,
             @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
-    @Query("select loan.id as id from  WorkingCapitalLoan loan where loan.externalId = :externalId")
+    @Query("select loan.id from WorkingCapitalLoan loan where loan.externalId = :externalId")
     Long findIdByExternalId(@Param("externalId") ExternalId externalId);
 
     @Query("select loan.id, loan.lastClosedBusinessDate from WorkingCapitalLoan loan where loan.id IN :loanIds and loan.loanStatus in :loanStatuses and loan.lastClosedBusinessDate < :cobBusinessDate")
@@ -109,6 +110,8 @@ public interface WorkingCapitalLoanRepository extends JpaRepository<WorkingCapit
     Optional<LocalDate> findFirstActualDisbursementDate(@Param("loanId") Long loanId);
 
     boolean existsByLoanProduct_Id(Long productId);
+
+    boolean existsByLoanProductRelatedDetails_DelinquencyBucket(DelinquencyBucket delinquencyBucket);
 
     List<WorkingCapitalLoan> findByClient_Id(Long clientId);
 

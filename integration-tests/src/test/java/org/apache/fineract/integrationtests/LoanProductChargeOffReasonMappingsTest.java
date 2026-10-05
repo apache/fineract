@@ -35,9 +35,9 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignFundHelper
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.lang.NonNull;
 
 public class LoanProductChargeOffReasonMappingsTest extends FeignLoanTestBase {
 

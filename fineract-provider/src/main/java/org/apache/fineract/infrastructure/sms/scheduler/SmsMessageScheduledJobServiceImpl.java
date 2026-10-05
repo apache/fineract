@@ -146,7 +146,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
             log.debug("Sending triggered SMS to specific provider with request - {}", request);
             this.taskExecutor.execute(new SmsTask(apiQueueResourceDatas, ThreadLocalContextUtil.getContext()));
         } catch (Exception e) {
-            log.error("Error occured.", e);
+            log.error("Error occurred.", e);
         }
     }
 

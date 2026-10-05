@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   javadoc:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
 
     env:
@@ -26,14 +26,14 @@ jobs:
 
     steps:
       - name: Set up JDK 25
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '25'
           distribution: 'zulu'
 
       - name: Download workspace
         id: download-workspace
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         continue-on-error: true
         with:
           name: fineract-workspace-${{ github.run_id }}
@@ -53,7 +53,7 @@ jobs:
 
       - name: Build workspace fallback
         if: steps.download-workspace.outcome != 'success'
-        uses: ./.github/actions/setup-and-build-fineract
+        uses: $/.github/actions/setup-and-build-fineract
         with:
           cache-read-only: false
 
@@ -62,8 +62,14 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: $/.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Generate Javadocs
-        run: ./gradlew javadoc
+        run: ./gradlew javadoc -x buildJavaSdk
 
       - name: Archive Javadoc reports
         if: ${{ failure() || inputs.upload_artifacts }}
@@ -76,7 +82,7 @@ jobs:
           compression-level: 9
 
   checkstyle:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
 
     env:
@@ -85,14 +91,14 @@ jobs:
 
     steps:
       - name: Set up JDK 25
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '25'
           distribution: 'zulu'
 
       - name: Download workspace
         id: download-workspace
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         continue-on-error: true
         with:
           name: fineract-workspace-${{ github.run_id }}
@@ -112,7 +118,7 @@ jobs:
 
       - name: Build workspace fallback
         if: steps.download-workspace.outcome != 'success'
-        uses: ./.github/actions/setup-and-build-fineract
+        uses: $/.github/actions/setup-and-build-fineract
         with:
           cache-read-only: false
 
@@ -121,8 +127,14 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: $/.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Run Checkstyle
-        run: ./gradlew checkstyleMain checkstyleTest checkstyleJmh
+        run: ./gradlew checkstyleMain checkstyleTest checkstyleJmh -x buildJavaSdk
 
       - name: Archive Checkstyle reports
         if: ${{ failure() || inputs.upload_artifacts }}
@@ -135,7 +147,7 @@ jobs:
           compression-level: 9
 
   rat:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
 
     env:
@@ -144,14 +156,14 @@ jobs:
 
     steps:
       - name: Set up JDK 25
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '25'
           distribution: 'zulu'
 
       - name: Download workspace
         id: download-workspace
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         continue-on-error: true
         with:
           name: fineract-workspace-${{ github.run_id }}
@@ -171,7 +183,7 @@ jobs:
 
       - name: Build workspace fallback
         if: steps.download-workspace.outcome != 'success'
-        uses: ./.github/actions/setup-and-build-fineract
+        uses: $/.github/actions/setup-and-build-fineract
         with:
           cache-read-only: false
 
@@ -180,8 +192,14 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: $/.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Run RAT
-        run: ./gradlew rat
+        run: ./gradlew rat -x buildJavaSdk
 
       - name: Archive RAT reports
         if: ${{ failure() || inputs.upload_artifacts }}
@@ -194,7 +212,7 @@ jobs:
           compression-level: 9
 
   spotbugs:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
 
     env:
@@ -203,14 +221,14 @@ jobs:
 
     steps:
       - name: Set up JDK 25
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '25'
           distribution: 'zulu'
 
       - name: Download workspace
         id: download-workspace
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         continue-on-error: true
         with:
           name: fineract-workspace-${{ github.run_id }}
@@ -230,7 +248,7 @@ jobs:
 
       - name: Build workspace fallback
         if: steps.download-workspace.outcome != 'success'
-        uses: ./.github/actions/setup-and-build-fineract
+        uses: $/.github/actions/setup-and-build-fineract
         with:
           cache-read-only: false
 
@@ -239,8 +257,14 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: $/.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Run SpotBugs
-        run: ./gradlew spotbugsMain spotbugsTest
+        run: ./gradlew spotbugsMain spotbugsTest -x buildJavaSdk
 
       - name: Archive SpotBugs reports
         if: ${{ failure() || inputs.upload_artifacts }}
@@ -253,7 +277,7 @@ jobs:
           compression-level: 9
 
   spotless:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
 
     env:
@@ -262,14 +286,14 @@ jobs:
 
     steps:
       - name: Set up JDK 25
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '25'
           distribution: 'zulu'
 
       - name: Download workspace
         id: download-workspace
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         continue-on-error: true
         with:
           name: fineract-workspace-${{ github.run_id }}
@@ -289,7 +313,7 @@ jobs:
 
       - name: Build workspace fallback
         if: steps.download-workspace.outcome != 'success'
-        uses: ./.github/actions/setup-and-build-fineract
+        uses: $/.github/actions/setup-and-build-fineract
         with:
           cache-read-only: false
 
@@ -298,5 +322,126 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: $/.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Run Spotless
-        run: ./gradlew spotlessCheck
+        run: ./gradlew spotlessCheck -x buildJavaSdk
+
+  licenses:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      BASE_REF: ${{ github.event.pull_request.base.sha }}
+
+    steps:
+      # This job diffs the PR head against its target branch, so it needs
+      # real git history for a worktree checkout of BASE_REF -- the
+      # shared-workspace-tar shortcut the other jobs use doesn't carry
+      # .git, so a plain full checkout is used here instead.
+      - name: Checkout PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          java-version: '25'
+          distribution: 'zulu'
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          validate-wrappers: true
+
+      - name: Apply Gradle memory budget
+        uses: $/.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
+      - name: Run dependency license check
+        run: ./scripts/check-dependency-licenses.sh --base-ref "$BASE_REF" --check-jar
+
+      - name: Archive license reports
+        if: ${{ failure() || inputs.upload_artifacts }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: license-reports-quality-checks
+          path: |
+            **/build/reports/dependency-license/
+            head-violations.json
+            base-violations.json
+            new-violations.json
+            bundled-jars.txt
+            violation-jars.tsv
+            bundled-violations.tsv
+          if-no-files-found: ignore
+          retention-days: 5
+          compression-level: 9
+
+  licenses-artifact:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+    steps:
+      # Runs unconditionally (push and PR alike): unlike the diff-based
+      # `licenses` job, this is the absolute artifact gate -- it needs the
+      # actual built bootJar, not just git history, so a plain checkout is
+      # enough (no worktree needed here).
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          java-version: '25'
+          distribution: 'zulu'
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          validate-wrappers: true
+
+      - name: Apply Gradle memory budget
+        uses: $/.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
+      - name: Run dependency license check (release artifact)
+        run: ./scripts/check-dependency-licenses.sh --check-jar
+
+      - name: Archive license reports
+        if: ${{ failure() || inputs.upload_artifacts }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: license-artifact-reports-quality-checks
+          path: |
+            **/build/reports/dependency-license/
+            head-violations.json
+            new-violations.json
+            bundled-jars.txt
+            violation-jars.tsv
+            bundled-violations.tsv
+          if-no-files-found: ignore
+          retention-days: 5
+          compression-level: 9

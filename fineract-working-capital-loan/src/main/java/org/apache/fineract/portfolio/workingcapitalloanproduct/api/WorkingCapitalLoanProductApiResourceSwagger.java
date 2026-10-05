@@ -92,6 +92,14 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         // Core product parameters (related detail: amortization, repayment defaults)
         @Schema(example = "EIR", allowableValues = { "EIR", "FLAT" })
         public String amortizationType;
+        @Schema(example = "TPV", allowableValues = { "TPV", "ANNUAL_EIR",
+                "PAYMENT_AMOUNT" }, description = "Payment amount calculation strategy: TPV (default), ANNUAL_EIR or PAYMENT_AMOUNT")
+        public String paymentAmountCalculationStrategy;
+        @Schema(example = "43.7562", description = "Annual EIR percentage (6 decimal places max). Required when strategy is ANNUAL_EIR.")
+        public BigDecimal annualEir;
+        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+                + "Required when strategy is PAYMENT_AMOUNT.")
+        public BigDecimal paymentAmount;
         @Schema(example = "1")
         public Long delinquencyBucketId;
         @Schema(example = "365")
@@ -113,6 +121,14 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public BigDecimal periodPaymentRate;
         @Schema(example = "2.0")
         public BigDecimal maxPeriodPaymentRate;
+        @Schema(example = "20.0", description = "Minimum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
+        public BigDecimal minAnnualEir;
+        @Schema(example = "50.0", description = "Maximum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
+        public BigDecimal maxAnnualEir;
+        @Schema(example = "10.0", description = "Minimum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        public BigDecimal minPaymentAmount;
+        @Schema(example = "100.0", description = "Maximum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        public BigDecimal maxPaymentAmount;
         @Schema(example = "0.0")
         public BigDecimal discount;
         @Schema(example = "30")
@@ -192,9 +208,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
 
             private PostPaymentAllocation() {}
 
-            @Schema(example = "DEFAULT", allowableValues = { "DEFAULT", "REPAYMENT", "DOWN_PAYMENT", "MERCHANT_ISSUED_REFUND",
-                    "PAYOUT_REFUND", "GOODWILL_CREDIT", "CHARGE_REFUND", "CHARGE_ADJUSTMENT", "WAIVE_INTEREST", "CHARGE_PAYMENT",
-                    "REFUND_FOR_ACTIVE_LOAN", "INTEREST_PAYMENT_WAIVER", "INTEREST_REFUND", "CAPITALIZED_INCOME_ADJUSTMENT" })
+            @Schema(example = "DEFAULT", allowableValues = { "DEFAULT", "REPAYMENT", "PAYOUT_REFUND", "GOODWILL_CREDIT",
+                    "CHARGE_ADJUSTMENT" })
             public String transactionType;
             public List<PaymentAllocationOrder> paymentAllocationOrder;
 
@@ -322,6 +337,21 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public BigDecimal periodPaymentRate;
         @Schema(example = "2.0")
         public BigDecimal maxPeriodPaymentRate;
+        @Schema(example = "20.0", description = "Minimum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
+        public BigDecimal minAnnualEir;
+        @Schema(example = "50.0", description = "Maximum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
+        public BigDecimal maxAnnualEir;
+        @Schema(example = "10.0", description = "Minimum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        public BigDecimal minPaymentAmount;
+        @Schema(example = "100.0", description = "Maximum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        public BigDecimal maxPaymentAmount;
+        @Schema(example = "47.22", description = "Configured daily payment amount. Only for PAYMENT_AMOUNT strategy.")
+        public BigDecimal paymentAmount;
+        @Schema(example = "43.7562", description = "Configured annual EIR percentage. Only for ANNUAL_EIR strategy.")
+        public BigDecimal annualEir;
+        @Schema(description = "Payment amount calculation strategy: TPV, ANNUAL_EIR or PAYMENT_AMOUNT. Decides which of "
+                + "periodPaymentRate, annualEir and paymentAmount (with their min/max) apply.")
+        public StringEnumOptionData paymentAmountCalculationStrategy;
         @Schema(example = "0.0")
         public BigDecimal discount;
         @Schema(example = "30")
@@ -445,6 +475,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public List<ChargeData> penaltyOptions;
         public List<CurrencyData> currencyOptions;
         public List<StringEnumOptionData> amortizationTypeOptions;
+        @Schema(description = "Payment amount calculation strategies a product can be created with")
+        public List<StringEnumOptionData> paymentAmountCalculationStrategyOptions;
         public List<StringEnumOptionData> periodFrequencyTypeOptions;
         public List<WorkingCapitalBreachData> breachOptions;
         public List<WorkingCapitalNearBreachData> nearBreachOptions;
@@ -509,6 +541,21 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public BigDecimal periodPaymentRate;
         @Schema(example = "2.0")
         public BigDecimal maxPeriodPaymentRate;
+        @Schema(example = "20.0", description = "Minimum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
+        public BigDecimal minAnnualEir;
+        @Schema(example = "50.0", description = "Maximum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
+        public BigDecimal maxAnnualEir;
+        @Schema(example = "10.0", description = "Minimum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        public BigDecimal minPaymentAmount;
+        @Schema(example = "100.0", description = "Maximum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        public BigDecimal maxPaymentAmount;
+        @Schema(example = "47.22", description = "Configured daily payment amount. Only for PAYMENT_AMOUNT strategy.")
+        public BigDecimal paymentAmount;
+        @Schema(example = "43.7562", description = "Configured annual EIR percentage. Only for ANNUAL_EIR strategy.")
+        public BigDecimal annualEir;
+        @Schema(description = "Payment amount calculation strategy: TPV, ANNUAL_EIR or PAYMENT_AMOUNT. Decides which of "
+                + "periodPaymentRate, annualEir and paymentAmount (with their min/max) apply.")
+        public StringEnumOptionData paymentAmountCalculationStrategy;
         @Schema(example = "0.0")
         public BigDecimal discount;
         @Schema(example = "30")
@@ -590,6 +637,23 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public BigDecimal periodPaymentRate;
         @Schema(example = "2.0")
         public BigDecimal maxPeriodPaymentRate;
+        @Schema(example = "20.0", description = "Minimum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
+        public BigDecimal minAnnualEir;
+        @Schema(example = "50.0", description = "Maximum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
+        public BigDecimal maxAnnualEir;
+        @Schema(example = "10.0", description = "Minimum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        public BigDecimal minPaymentAmount;
+        @Schema(example = "100.0", description = "Maximum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        public BigDecimal maxPaymentAmount;
+        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+                + "Required when strategy is PAYMENT_AMOUNT.")
+        public BigDecimal paymentAmount;
+        @Schema(example = "43.7562", description = "Annual EIR percentage (6 decimal places max). Required when strategy is ANNUAL_EIR.")
+        public BigDecimal annualEir;
+        @Schema(example = "PAYMENT_AMOUNT", allowableValues = { "TPV", "ANNUAL_EIR", "PAYMENT_AMOUNT" }, description = "Switches the "
+                + "payment amount calculation strategy. The inputs of the other strategies (periodPaymentRate, annualEir, paymentAmount "
+                + "and their min/max) are cleared, so the request must carry the new strategy's input.")
+        public String paymentAmountCalculationStrategy;
         @Schema(example = "0.0")
         public BigDecimal discount;
         @Schema(example = "30")

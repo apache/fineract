@@ -171,6 +171,10 @@ public final class ErrorMessageHelper {
                 loanIdStr);
     }
 
+    public static String writeOffBeforeLastTransactionFailure() {
+        return "The date of the writeoff transaction must occur on or after previous transactions.";
+    }
+
     public static String notChargedOffFailure(Long loanId) {
         String loanIdStr = String.valueOf(loanId);
         return String.format("Loan: %s is not charged-off", loanIdStr);
@@ -1019,6 +1023,14 @@ public final class ErrorMessageHelper {
         return "Validation errors: [id] Loan reamortization can only be done once a day. There has already been a reamortization done for today";
     }
 
+    public static String contractTerminationBeforeBusinessDateFailure() {
+        return "[transactionDate] Failed data validation due to: cannot.be.before.business.date.";
+    }
+
+    public static String contractTerminationNotBeforeMaturityDateFailure() {
+        return "[transactionDate] Failed data validation due to: must.be.before.maturity.date.";
+    }
+
     public static String incorrectExpectedValueInResponse() {
         return "The parameter is not matching to expected.";
     }
@@ -1050,6 +1062,10 @@ public final class ErrorMessageHelper {
 
     public static String paymentAllocationRulesWithoutDefaultFailure() {
         return "At least one DEFAULT payment allocation must be provided";
+    }
+
+    public static String invalidTrnTypeDuplicatedForPaymentAllocationFailure() {
+        return "The same transaction type must be provided only once";
     }
 
     public static String workingCapitalLoanProductIdentifiedDoesNotExistFailure(String identifierId) {
@@ -1104,6 +1120,10 @@ public final class ErrorMessageHelper {
         return "Failed data validation due to: override.not.allowed.by.product.";
     }
 
+    public static String overrideDisallowedByProductFailure(String disallowedOverrideSettingName) {
+        return String.format("validation.msg.WORKINGCAPITALLOAN.%s.override.not.allowed.by.product", disallowedOverrideSettingName);
+    }
+
     public static String discountAlreadySetBeforeDisburseFailure() {
         return "Discount was already set before disbursement and cannot be added again";
     }
@@ -1140,8 +1160,9 @@ public final class ErrorMessageHelper {
         return "Undo is not supported for transaction type";
     }
 
-    public static String discountAdjustmentUndoTransactionNotFoundFailure() {
-        return "Working capital loan transaction not found";
+    public static String workingCapitalLoanTransactionNotFoundFailure(final long transactionId, final long loanId) {
+        return String.format("Working Capital Loan transaction with identifier %s does not exist for loan with identifier %s.",
+                transactionId, loanId);
     }
 
     public static String discountAdjustmentUndoNotActiveLoanFailure() {

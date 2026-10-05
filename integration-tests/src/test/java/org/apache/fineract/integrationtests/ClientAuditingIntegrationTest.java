@@ -18,94 +18,81 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_BY;
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_DATE;
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_BY;
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE;
+import static org.apache.fineract.integrationtests.client.feign.modules.ClientTestData.CREATED_DATE_PLUS_ONE;
+import static org.apache.fineract.integrationtests.client.feign.modules.ClientTestData.DEFAULT_SUBMITTED_ON_DATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
+import org.apache.fineract.client.models.ClientAuditFieldsData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientAuditingIntegrationTest {
+public class ClientAuditingIntegrationTest extends FeignIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientAuditingIntegrationTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
+    private static final Long SUPER_USER_ROLE_ID = 1L;
+    private static final Long ADMIN_USER_ID = 1L;
+    private static final String PASSWORD = "A1b2c3d4e5f$";
 
-    @BeforeEach
+    private FeignClientHelper clientHelper;
+    private FeignStaffHelper staffHelper;
+
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        clientHelper = new FeignClientHelper(fineractClient());
+        staffHelper = new FeignStaffHelper(fineractClient());
     }
 
     @Test
     public void checkAuditDates() throws InterruptedException {
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Long staffId = staffHelper.createStaff().getResourceId();
         String username = Utils.uniqueRandomStringGenerator("user", 8);
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "A1b2c3d4e5f$",
-                "resourceId");
+        final Long userId = FeignUserHelper.createUser(SUPER_USER_ROLE_ID, staffId, username, PASSWORD).getResourceId();
         OffsetDateTime now = Utils.getAuditDateTimeToCompare();
         LOG.info("-------------------------Creating Client---------------------------");
 
-        final Integer clientID = ClientHelper.createClientPending(requestSpec, responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
-        Map<String, Object> auditFieldsResponse = ClientHelper.getClientAuditFields(requestSpec, responseSpec, clientID, "");
+        final Long clientID = clientHelper.createClientPending(DEFAULT_SUBMITTED_ON_DATE).getClientId();
+        assertEquals(clientID, clientHelper.getClient(clientID).getId());
+        ClientAuditFieldsData auditFieldsResponse = clientHelper.getClientAuditFields(clientID);
 
-        OffsetDateTime createdDate = OffsetDateTime.parse((String) auditFieldsResponse.get(CREATED_DATE),
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        OffsetDateTime lastModifiedDate = OffsetDateTime.parse((String) auditFieldsResponse.get(LAST_MODIFIED_DATE),
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        OffsetDateTime createdDate = auditFieldsResponse.getCreatedDate();
+        OffsetDateTime lastModifiedDate = auditFieldsResponse.getLastModifiedDate();
 
         LOG.info("-------------------------Check Audit dates---------------------------");
-        assertEquals(1, auditFieldsResponse.get(CREATED_BY));
-        assertEquals(1, auditFieldsResponse.get(LAST_MODIFIED_BY));
+        assertEquals(ADMIN_USER_ID, auditFieldsResponse.getCreatedBy());
+        assertEquals(ADMIN_USER_ID, auditFieldsResponse.getLastModifiedBy());
         assertTrue(DateUtils.isEqual(now, createdDate, ChronoUnit.MINUTES));
         assertTrue(DateUtils.isEqual(now, lastModifiedDate, ChronoUnit.MINUTES));
 
         LOG.info("-------------------------Modify Client with System user---------------------------");
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization",
-                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, "A1b2c3d4e5f$"));
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        FeignClientHelper userClientHelper = new FeignClientHelper(
+                FineractFeignClientHelper.createNewFineractFeignClient(username, PASSWORD));
 
         OffsetDateTime now2 = Utils.getAuditDateTimeToCompare();
-        this.clientHelper.activateClient(clientID);
-        auditFieldsResponse = ClientHelper.getClientAuditFields(requestSpec, responseSpec, clientID, "");
+        userClientHelper.activateClient(clientID, ClientRequestBuilders.activateClient(CREATED_DATE_PLUS_ONE));
+        auditFieldsResponse = clientHelper.getClientAuditFields(clientID);
 
-        OffsetDateTime createdDate2 = OffsetDateTime.parse((String) auditFieldsResponse.get(CREATED_DATE),
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        lastModifiedDate = OffsetDateTime.parse((String) auditFieldsResponse.get(LAST_MODIFIED_DATE),
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        OffsetDateTime createdDate2 = auditFieldsResponse.getCreatedDate();
+        lastModifiedDate = auditFieldsResponse.getLastModifiedDate();
 
         LOG.info("-------------------------Check Audit dates---------------------------");
-        assertEquals(1, auditFieldsResponse.get(CREATED_BY));
+        assertEquals(ADMIN_USER_ID, auditFieldsResponse.getCreatedBy());
         assertTrue(DateUtils.isEqual(now, createdDate2, ChronoUnit.MINUTES));
         assertTrue(DateUtils.isEqual(createdDate, createdDate2));
 
-        assertEquals(userId, auditFieldsResponse.get(LAST_MODIFIED_BY));
+        assertEquals(userId, auditFieldsResponse.getLastModifiedBy());
         assertTrue(DateUtils.isEqual(now2, lastModifiedDate, ChronoUnit.MINUTES));
     }
 }

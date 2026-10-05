@@ -176,12 +176,11 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
             Assertions.assertNotNull(clientID);
 
-            final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
-                    ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
+            final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE);
             Assertions.assertNotNull(savingsProductID);
 
-            savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
-                    ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL, submittedDateString);
+            savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL,
+                    submittedDateString);
             Assertions.assertNotNull(savingsProductID);
 
             HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
@@ -229,12 +228,10 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
-                ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE);
         Assertions.assertNotNull(savingsProductID);
 
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
-                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
         Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
@@ -265,12 +262,10 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
-                ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE);
         Assertions.assertNotNull(savingsProductID);
 
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
-                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
         Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
@@ -552,12 +547,10 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
-                ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE);
         Assertions.assertNotNull(savingsProductID);
 
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
-                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
         Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
@@ -695,12 +688,11 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
-                ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE);
         Assertions.assertNotNull(savingsProductID);
 
         final Integer fromSavingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
-                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
+                ACCOUNT_TYPE_INDIVIDUAL);
         Assertions.assertNotNull(savingsProductID);
 
         HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, fromSavingsId);
@@ -713,7 +705,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(fromSavingsStatusHashMap);
 
         final Integer toSavingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
-                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
+                ACCOUNT_TYPE_INDIVIDUAL);
         Assertions.assertNotNull(savingsProductID);
 
         HashMap toSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, toSavingsId);
@@ -1283,8 +1275,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, String.valueOf(balance));
         Assertions.assertNotNull(savingsProductID);
 
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID,
-                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
         Assertions.assertNotNull(savingsId);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);

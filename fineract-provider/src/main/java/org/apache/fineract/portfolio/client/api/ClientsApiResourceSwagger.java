@@ -299,6 +299,14 @@ final class ClientsApiResourceSwagger {
             public Boolean isActive;
         }
 
+        static final class PostClientsNonPersonDetails {
+
+            private PostClientsNonPersonDetails() {}
+
+            @Schema(example = "17")
+            public Long constitutionId;
+        }
+
         @Schema(example = "1")
         public Long officeId;
         @Schema(example = "1")
@@ -335,6 +343,7 @@ final class ClientsApiResourceSwagger {
         public List<ClientAddressRequest> address;
         @Schema(example = "test@test.com")
         public String emailAddress;
+        public PostClientsNonPersonDetails clientNonPersonDetails;
     }
 
     @Schema(description = "PostClientsResponse")
@@ -367,6 +376,8 @@ final class ClientsApiResourceSwagger {
         public String firstname;
         @Schema(example = "Client_LastName")
         public String lastname;
+        @Schema(example = "+353851239876")
+        public String mobileNo;
     }
 
     @Schema(description = "PutClientsClientIdResponse")
@@ -468,33 +479,27 @@ final class ClientsApiResourceSwagger {
         public LocalDate proposedTransferDate;
     }
 
-    @Schema(description = "GetClientObligeeDetailsResponse")
-    public static final class GetClientObligeeDetailsResponse {
+    @Schema(description = "GetObligeeData")
+    public static final class GetObligeeData {
 
-        static final class GetObligeeData {
+        private GetObligeeData() {}
 
-            private GetObligeeData() {}
-
-            @Schema(example = "John")
-            public String firstName;
-            @Schema(example = "Doe")
-            public String lastName;
-            @Schema(example = "John Doe")
-            public String displayName;
-            @Schema(example = "00000002")
-            public String accountNumber;
-            @Schema(example = "12000.00")
-            public Double loanAmount;
-            @Schema(example = "100.00")
-            public Double guaranteeAmount;
-            @Schema(example = "10000.00")
-            public Double amountReleased;
-            @Schema(example = "1000.00")
-            public Double amountTransferred;
-
-        }
-
-        public Set<GetObligeeData> obligees;
+        @Schema(example = "John")
+        public String firstName;
+        @Schema(example = "Doe")
+        public String lastName;
+        @Schema(example = "John Doe")
+        public String displayName;
+        @Schema(example = "00000002")
+        public String accountNumber;
+        @Schema(example = "12000.00")
+        public Double loanAmount;
+        @Schema(example = "100.00")
+        public Double guaranteeAmount;
+        @Schema(example = "10000.00")
+        public Double amountReleased;
+        @Schema(example = "1000.00")
+        public Double amountTransferred;
     }
 
     @Schema(description = "GetClientsClientIdAccountsResponse")

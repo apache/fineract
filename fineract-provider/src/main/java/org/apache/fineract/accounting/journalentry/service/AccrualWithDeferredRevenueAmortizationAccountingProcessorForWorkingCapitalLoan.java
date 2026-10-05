@@ -55,14 +55,34 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     private final AccountingProcessorHelper helper;
     private final JournalEntryRepository journalEntryRepository;
 
+    private boolean isAccountingDisabled(final WorkingCapitalLoan loan) {
+        return !loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization();
+    }
+
     @Override
     public void postJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final WorkingCapitalLoanTransactionAllocation allocation, final boolean isChargedOff) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         final Office office = loan.getClient().getOffice();
         helper.checkForBranchClosures(helper.getLatestClosureByBranch(office.getId()), txn.getTransactionDate());
 
         final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
         plannedPostings(loan, txn, allocation, isChargedOff).forEach(accountPostHelper::post);
+    }
+
+    @Override
+    public void postJournalEntriesForChargeWaiver(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final BigDecimal recognizedFeePortion, final BigDecimal recognizedPenaltyPortion, final boolean isChargedOff) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
+        final Office office = loan.getClient().getOffice();
+        helper.checkForBranchClosures(helper.getLatestClosureByBranch(office.getId()), txn.getTransactionDate());
+
+        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
+        chargeWaiverPostings(recognizedFeePortion, recognizedPenaltyPortion, isChargedOff).forEach(accountPostHelper::post);
     }
 
     /**
@@ -118,6 +138,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         final BigDecimal overpaymentPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getOverpaymentPortion());
 
         return switch (txn.getTypeOf()) {
+            case LoanTransactionType.DISBURSEMENT -> disbursementPostings(txn, principalPortion);
             case LoanTransactionType.REPAYMENT ->
                 repaymentPostings(txn, principalPortion, feesPortion, penaltiesPortion, overpaymentPortion, isChargedOff);
             case LoanTransactionType.GOODWILL_CREDIT ->
@@ -130,6 +151,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             case LoanTransactionType.ACCRUAL -> chargeAccrualPostings(feesPortion, penaltiesPortion);
             case LoanTransactionType.CHARGE_OFF -> chargeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion);
             case LoanTransactionType.WRITEOFF -> writeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion, isChargedOff);
+            case LoanTransactionType.RECOVERY_REPAYMENT -> recoveryPaymentPostings(txn);
             default -> throw new NotImplementedException(
                     "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
         };
@@ -160,6 +182,11 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 LedgerPosting.creditWithoutPaymentDetail(penaltiesAccount, penaltiesPortion),
                 LedgerPosting.creditWithoutPaymentDetail(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion),
                 LedgerPosting.debit(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount()));
+    }
+
+    private List<LedgerPosting> disbursementPostings(final WorkingCapitalLoanTransaction txn, final BigDecimal principalPortion) {
+        return List.of(LedgerPosting.debit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
+                LedgerPosting.credit(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount()));
     }
 
     private List<LedgerPosting> chargeAdjustmentPostings(final WorkingCapitalLoanTransaction txn, final BigDecimal principalPortion,
@@ -202,6 +229,16 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     }
 
     /**
+     * Money collected after the loan was written off. The portfolio and receivables were already relieved by the
+     * write-off, so there is nothing to credit back: the whole amount is recognized as recovery income against the fund
+     * source. No split by principal, fee or penalty - the transaction carries no allocation.
+     */
+    private List<LedgerPosting> recoveryPaymentPostings(final WorkingCapitalLoanTransaction txn) {
+        return List.of(LedgerPosting.debit(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount()),
+                LedgerPosting.creditWithoutPaymentDetail(CashAccountsForLoan.INCOME_FROM_RECOVERY, txn.getTransactionAmount()));
+    }
+
+    /**
      * Terminal write-off: debit the write-off loss account for the whole outstanding, credit the portfolio and
      * receivable accounts per portion (mirrors the accrual term-loan treatment, without the interest leg WC does not
      * have). The loss debits the expense account the product maps to the loan's write-off reason when such a mapping
@@ -232,20 +269,43 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     }
 
     /**
+     * Books only the recognized part of the waiver, passed in separately because the allocation carries the whole
+     * relief: a charge whose income was never accrued books nothing - crediting a receivable that does not exist would
+     * drive it negative. A waiver addresses exactly one charge, so one credit leg is always zero, and it carries no
+     * write-off reason to map the debit onto. On a charged-off loan the receivables are already off the books, so the
+     * credits go to the charged-off income accounts, as in {@link #writeOffPostings}.
+     */
+    private List<LedgerPosting> chargeWaiverPostings(final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
+            final boolean isChargedOff) {
+        final CashAccountsForLoan feesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES
+                : CashAccountsForLoan.FEES_RECEIVABLE;
+        final CashAccountsForLoan penaltiesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY
+                : CashAccountsForLoan.PENALTIES_RECEIVABLE;
+
+        return List.of(LedgerPosting.debit(CashAccountsForLoan.LOSSES_WRITTEN_OFF, MathUtil.add(feesPortion, penaltiesPortion)),
+                LedgerPosting.credit(feesAccount, feesPortion), LedgerPosting.credit(penaltiesAccount, penaltiesPortion));
+    }
+
+    /**
      * The debit leg a write-off expenses the loss to: the expense account the product maps to the loan's write-off
      * reason, falling back to the generic Losses Written-off account when the write-off carries no reason or the
      * product does not map it.
      */
     private LedgerPosting writeOffLossDebit(final WorkingCapitalLoan loan, final BigDecimal amount) {
+        return LedgerPosting.debit(writeOffExpenseAccount(loan), amount);
+    }
+
+    private GLAccount writeOffExpenseAccount(final WorkingCapitalLoan loan) {
         final CodeValue writeOffReason = loan.getWriteOffReason();
         if (writeOffReason != null) {
             final ProductToGLAccountMapping mapping = helper.getWriteOffMappingByCodeValue(loan.getLoanProduct().getId(),
                     PortfolioProductType.WORKING_CAPITAL_LOAN, writeOffReason.getId());
             if (mapping != null) {
-                return LedgerPosting.debit(mapping.getGlAccount(), amount);
+                return mapping.getGlAccount();
             }
         }
-        return LedgerPosting.debit(CashAccountsForLoan.LOSSES_WRITTEN_OFF, amount);
+        return helper.getLinkedGLAccountForWorkingCapitalLoanProduct(loan.getLoanProduct().getId(),
+                CashAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(), null);
     }
 
     private boolean isAdjustedChargeAPenalty(final WorkingCapitalLoanTransaction txn) {
@@ -324,6 +384,10 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     @Override
     public void restateJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final WorkingCapitalLoanTransactionAllocation allocation, final boolean isChargedOff) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
+        retireUndoMirrors(txn);
         final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
         if (!splitDiffersFromLedger(loan, txn, allocation, effectiveEntries, isChargedOff)) {
             // The ledger already reflects the recomputed split; re-posting would only add cancelling noise.
@@ -341,6 +405,23 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     private List<JournalEntry> effectiveJournalEntries(final WorkingCapitalLoanTransaction txn) {
         final String transactionId = AccountingProcessorHelper.WORKING_CAPITAL_LOAN_TRANSACTION_IDENTIFIER + txn.getId();
         return journalEntryRepository.findJournalEntries(transactionId, WORKING_CAPITAL_LOAN_ENTITY_TYPE);
+    }
+
+    /**
+     * An undo keeps its mirrors live (see {@link #reverseExistingEntries}), so on a transaction that was undone the
+     * live set holds only those mirrors: they cancel the originals, which are flagged reversed, and the transaction's
+     * net on the ledger is zero. A restatement treats the live set as the current posting, so when such a transaction
+     * is revived it must not see the mirrors: cancelling them would reinstate the originals and the fresh posting would
+     * then be booked on top of them. Flagging each mirror reversed retires the undo pair from the live set without
+     * touching the ledger - the pair still nets to zero - so the restatement posts the transaction afresh.
+     */
+    private void retireUndoMirrors(final WorkingCapitalLoanTransaction txn) {
+        final String transactionId = AccountingProcessorHelper.WORKING_CAPITAL_LOAN_TRANSACTION_IDENTIFIER + txn.getId();
+        for (final JournalEntry mirror : journalEntryRepository.findLiveReversalJournalEntries(transactionId,
+                WORKING_CAPITAL_LOAN_ENTITY_TYPE)) {
+            mirror.setReversed(true);
+            helper.persistJournalEntry(mirror);
+        }
     }
 
     private JournalEntry createMirrorEntry(final JournalEntry journalEntry, final String transactionId, final LocalDate transactionDate) {
@@ -407,6 +488,9 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
 
     @Override
     public void postReversalJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         reverseExistingEntries(loan, txn, false);
     }
 
@@ -445,7 +529,10 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
 
     @Override
     public void postJournalEntriesForDiscountFeeAmortization(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
-            final boolean isChargedOff) {
+            final boolean routeToExpense) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         final Office office = loan.getClient().getOffice();
         final Long productId = loan.getLoanProduct().getId();
         final String currencyCode = loan.getCurrencyCode();
@@ -462,9 +549,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, deferredIncomeAccount, loanId, txnId, transactionDate,
                     amount, null);
 
-            final CashAccountsForLoan creditAccountType = resolveChargeOffExpenseAccount(loan, isChargedOff);
-            final GLAccount creditAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, creditAccountType.getValue(),
-                    null);
+            final GLAccount creditAccount = resolveAmortizationCreditAccount(loan, productId, routeToExpense);
             helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, creditAccount, loanId, txnId, transactionDate,
                     amount, null);
         }
@@ -473,8 +558,12 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     @Override
     public void restateJournalEntriesForDiscountFeeAmortization(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final boolean isChargedOff) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
+        retireUndoMirrors(txn);
         final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
-        if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff)) {
+        if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff, false)) {
             // The ledger already reflects the recomputed amount; re-posting would only add cancelling noise.
             return;
         }
@@ -482,11 +571,27 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         postJournalEntriesForDiscountFeeAmortization(loan, txn, isChargedOff);
     }
 
+    @Override
+    public void restateJournalEntriesForDiscountFeeAmortizationAdjustment(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction txn, final boolean isChargedOff) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
+        retireUndoMirrors(txn);
+        final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
+        if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff, true)) {
+            return;
+        }
+        reverseExistingEntries(loan, txn, true);
+        postJournalEntriesForDiscountFeeAmortizationAdjustment(loan, txn, isChargedOff);
+    }
+
     /**
-     * {@link #splitDiffersFromLedger}'s counterpart for the fixed debit/credit pair a discount-fee-amortization posts.
+     * {@link #splitDiffersFromLedger}'s counterpart for the fixed debit/credit pair a discount-fee amortization (or its
+     * adjustment mirror) posts.
      */
     private boolean discountFeeAmortizationSplitDiffersFromLedger(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
-            final List<JournalEntry> effectiveEntries, final boolean isChargedOff) {
+            final List<JournalEntry> effectiveEntries, final boolean routeToExpense, final boolean amortizationAdjustment) {
         if (effectiveEntries.isEmpty()) {
             return true;
         }
@@ -497,11 +602,15 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         if (MathUtil.isGreaterThanZero(amount)) {
             final GLAccount deferredIncomeAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId,
                     CashAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), null);
-            final CashAccountsForLoan creditAccountType = resolveChargeOffExpenseAccount(loan, isChargedOff);
-            final GLAccount creditAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, creditAccountType.getValue(),
-                    null);
-            planned.merge(new PostingKey(deferredIncomeAccount.getId(), true), amount, BigDecimal::add);
-            planned.merge(new PostingKey(creditAccount.getId(), false), amount, BigDecimal::add);
+            final GLAccount expenseOrIncomeAccount = resolveAmortizationCreditAccount(loan, productId, routeToExpense);
+            if (amortizationAdjustment) {
+                // Adjustment mirrors amortization: credit deferred income, debit expense/income.
+                planned.merge(new PostingKey(deferredIncomeAccount.getId(), false), amount, BigDecimal::add);
+                planned.merge(new PostingKey(expenseOrIncomeAccount.getId(), true), amount, BigDecimal::add);
+            } else {
+                planned.merge(new PostingKey(deferredIncomeAccount.getId(), true), amount, BigDecimal::add);
+                planned.merge(new PostingKey(expenseOrIncomeAccount.getId(), false), amount, BigDecimal::add);
+            }
         }
 
         final Map<PostingKey, BigDecimal> posted = postedAmountsByPosition(effectiveEntries);
@@ -513,7 +622,10 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
 
     @Override
     public void postJournalEntriesForDiscountFeeAmortizationAdjustment(final WorkingCapitalLoan loan,
-            final WorkingCapitalLoanTransaction txn, final boolean isChargedOff) {
+            final WorkingCapitalLoanTransaction txn, final boolean routeToExpense) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         final Office office = loan.getClient().getOffice();
         final Long productId = loan.getLoanProduct().getId();
         final String currencyCode = loan.getCurrencyCode();
@@ -530,9 +642,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, deferredIncomeAccount, loanId, txnId,
                     transactionDate, amount, null);
 
-            final CashAccountsForLoan debitAccountType = resolveChargeOffExpenseAccount(loan, isChargedOff);
-            final GLAccount debitAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, debitAccountType.getValue(),
-                    null);
+            final GLAccount debitAccount = resolveAmortizationCreditAccount(loan, productId, routeToExpense);
             helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, debitAccount, loanId, txnId, transactionDate, amount,
                     null);
         }
@@ -540,11 +650,17 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
 
     @Override
     public void postJournalEntriesForDiscountFee(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         postDiscountFeeDeferralEntries(loan, txn, CashAccountsForLoan.LOAN_PORTFOLIO, CashAccountsForLoan.DEFERRED_INCOME_LIABILITY);
     }
 
     @Override
     public void postJournalEntriesForDiscountFeeAdjustment(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         postDiscountFeeDeferralEntries(loan, txn, CashAccountsForLoan.DEFERRED_INCOME_LIABILITY, CashAccountsForLoan.LOAN_PORTFOLIO);
     }
 
@@ -580,11 +696,21 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         return null;
     }
 
-    private CashAccountsForLoan resolveChargeOffExpenseAccount(final WorkingCapitalLoan loan, final boolean isChargedOff) {
-        if (!isChargedOff) {
-            return CashAccountsForLoan.INCOME_FROM_DISCOUNT_FEE;
+    /**
+     * Credit (or debit, for amortization adjustments) destination for discount-fee amortization. Periodic amortization
+     * credits discount-fee income; a terminal charge-off / write-off credits the matching expense so deferred income is
+     * not left parked on a loan that COB will never touch again. Written-off takes precedence over charged-off because
+     * a final amort on write-off runs after the loan is already {@code CLOSED_WRITTEN_OFF}.
+     */
+    private GLAccount resolveAmortizationCreditAccount(final WorkingCapitalLoan loan, final Long productId, final boolean routeToExpense) {
+        if (!routeToExpense) {
+            return helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, CashAccountsForLoan.INCOME_FROM_DISCOUNT_FEE.getValue(),
+                    null);
         }
-        return chargeOffExpenseAccount(loan);
+        if (loan.isClosedWrittenOff()) {
+            return writeOffExpenseAccount(loan);
+        }
+        return helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, chargeOffExpenseAccount(loan).getValue(), null);
     }
 
     private class JournalEntryPostingHelper {

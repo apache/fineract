@@ -75,6 +75,26 @@ See [Cucumber E2E Tests](https://fineract.apache.org/docs/current/#testing-cucum
 
 #### Integration tests
 
+Like the Cucumber tests, the integration tests run against a live Fineract instance instead of starting one for you.
+Bring one up first — the Docker stack is what CI uses, so it is the configuration these suites are verified against:
+
+```bash
+# Build the image once
+./gradlew :fineract-provider:jibDockerBuild -Djib.to.image=fineract -x test -x cucumber
+
+# Start Fineract plus its database, LocalStack and the mock OAuth2 server
+docker compose -f docker-compose-postgresql-test.yml up -d
+./gradlew :integration-tests:waitForFineract
+
+./gradlew :integration-tests:test --tests ClientLoanIntegrationTest
+```
+
+`./gradlew :fineract-provider:bootRun` works too, provided you created the databases as shown above for the
+Cucumber tests. `:twofactor-tests` and `:oauth2-tests` need the server started in a different authentication mode,
+and `docker-compose-war-test.yml` runs the WAR in a stock Tomcat instead of the Spring Boot jar; see
+[Integration Testing](https://fineract.apache.org/docs/current/#testing-integration) for those and for the
+`BACKEND_*` variables that point the suites at a non-default address.
+
 Running tests with external dependencies is a multi-step process with many moving parts.
 Sometimes there are arbitrary failures and the prerequisite setup can be daunting.
 A full local integration test run (on a developer workstation) covering every possible test using every external service and every supported relational database engine could take an entire day - and that's assuming everything is properly configured and runs as expected.
@@ -87,7 +107,7 @@ Incorrect default Java-related executables may cause test failures.
 To fix this on Debian and Ubuntu systems, run the following:
 
 ```bash
-export JAVA_HOME=/usr/lib/jvm/zulu21
+export JAVA_HOME=/usr/lib/jvm/zulu25
 sudo update-alternatives --set java $JAVA_HOME/bin/java
 sudo update-alternatives --set javac $JAVA_HOME/bin/javac
 sudo update-alternatives --set javadoc $JAVA_HOME/bin/javadoc
@@ -112,19 +132,19 @@ git clean --force -dx
 
 # Destroy various caches and configs.
 # ⚠️ This may delete gibibytes of cached data, making the next build very slow.
-rm -rf ~/.gradle ~/.m2 /tmp/cargo*
+rm -rf ~/.gradle ~/.m2
 
-# Destroy any Java containers left running.
-# 💚 This is generally very safe to run between builds.
-ps auxwww | grep [c]argo | awk '{ print $2 }' | xargs -r kill
+# Tear down the test stack, including its database volume.
+# ⚠️ This discards the data of the instance the integration tests were running against.
+docker compose -f docker-compose-postgresql-test.yml down -v
 ```
 
 Integration test runs such as
 ```bash
 ./gradlew --no-daemon --console=plain test -x :twofactor-tests:test \
-  -x :oauth2-tests:test :fineract-e2e-tests-runner:test -PdbType=postgresql
+  -x :oauth2-tests:test -x :fineract-e2e-tests-runner:test
 ```
-in `.github/workflows/build-postgresql.yml` often take an hour or longer to complete.
+in `.github/workflows/run-integration-test-sequentially-postgresql.yml` often take an hour or longer to complete.
 If you notice the `:integration-tests:test` task taking significantly less time, say, one minute, gradle may be skipping it.
 Look for something like this in the test output:
 
@@ -132,8 +152,6 @@ Look for something like this in the test output:
 Custom actions are attached to task ':integration-tests:test'.
 Build cache key for task ':integration-tests:test' is 6aeeec3f58bf9703d4c100fbaa657f5c
 Skipping task ':integration-tests:test' as it is up-to-date.
-Resolve mutations for :integration-tests:cargoStopLocal (Thread[Execution worker Thread 11,5,main]) started.
-:integration-tests:cargoStopLocal (Thread[Execution worker Thread 11,5,main]) started.
 
 
 (This is with the `--info` gradle argument with eyeballs added for emphasis.)
@@ -141,6 +159,25 @@ The `--rerun-tasks` gradle argument may help, or you can try destroying `~/.grad
 This is useful for repeated test runs (say, for timing) when gradle would otherwise assume a task is "up-to-date" and not re-run it.
 
 See the next section for testing in Eclipse and [here](https://fineract-academy.com) for testing in IntelliJ.
+
+### How to run Apache RAT (Release Audit Tool)
+
+1. Extract the archive file to your local directory.
+2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
+
+### How to build documentation
+
+Run the following command:
+
+```bash
+./gradlew doc
+```
+
+Some dependencies are required (e.g. Ghostscript, Graphviz), see [.github/workflows/build-documentation.yml](https://github.com/apache/fineract/tree/develop/.github/workflows/build-documentation.yml) for hints.
+
+IDEs such as IntelliJ are useful for editing the AsciiDoc source files while providing a live rendered preview.
+
+HTML rendered from the AsciiDoc source files is also available online at [https://fineract.apache.org/docs/current/](https://fineract.apache.org/docs/current/).
 
 ## Recommended IDEs
 
@@ -189,41 +226,6 @@ IntelliJ IDEA provides strong Gradle integration and is recommended for most new
 ### Notes
 - IntelliJ may take several minutes to index the project on first open
 - If you encounter build issues, try running `./gradlew clean build` from the terminal
-
-How to download Gradle wrapper
----
-The file gradle/wrapper/gradle-wrapper.jar binary is checked into this projects Git source repository,
-but won't exist in your copy of the Fineract codebase if you downloaded a released source archive from apache.org.
-In that case, you need to download it using the commands below:
-```bash
-wget -P gradle/wrapper https://github.com/apache/fineract/raw/develop/gradle/wrapper/gradle-wrapper.jar
-```
-or
-```bash
-curl -L https://github.com/apache/fineract/raw/develop/gradle/wrapper/gradle-wrapper.jar > \
-    gradle/wrapper/gradle-wrapper.jar
-```
-
-### How to run Apache RAT (Release Audit Tool)
-
-1. Extract the archive file to your local directory.
-2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
-
-
-### How to build documentation
-
-Run the following command:
-
-```bash
-./gradlew doc
-```
-
-Some dependencies are required (e.g. Ghostscript, Graphviz), see [.github/workflows/build-documentation.yml](https://github.com/apache/fineract/tree/develop/.github/workflows/build-documentation.yml) for hints.
-
-IDEs such as IntelliJ are useful for editing the AsciiDoc source files while providing a live rendered preview.
-
-HTML rendered from the AsciiDoc source files is also available online at [https://fineract.apache.org/docs/current/](https://fineract.apache.org/docs/current/).
-
 
 ## How We Code
 
@@ -287,6 +289,14 @@ The project uses [Lombok](https://projectlombok.org/) to reduce boilerplate code
     * `LOG.info()` can be used notably for one-time actions taken during start-up.  It should typically NOT be used to print out "regular" application usage information.  The default logging configuration always outputs the application INFO logs, and in production under load, there's really no point to constantly spew out lots of information from frequently traversed paths in the code about what's going on.  (Metrics are a better way.)  `LOG.info()` *can* be used freely in tests though.
     * `LOG.debug()` can be used anywhere in the code to log things that may be useful during investigations of specific problems.  They are not shown in the default logging configuration, but can be enabled for troubleshooting.  Developers should typically "turn down" most `LOG.info()` which they used while writing a new feature to "follow along what happens during local testing" to `LOG.debug()` for production before we merge their PRs.
     * `LOG.trace()` is not used in Fineract.
+
+### AI Policy
+
+- AI tools may assist contribution work.
+- AI tools must not replace contributor accountability.
+- The human submitter is responsible for correctness, safety, performance, and maintainability of all submitted changes.
+- Follow the [Generative Tooling Guidance by the ASF](https://www.apache.org/legal/generative-tooling.html).
+- Disclose generative AI tool usage with `Assisted-By: TOOL-MODEL-VERSION` trailer(s) in commit log messages, e.g. `Assisted-By: botcoder-poem-5.1`.
 
 ## Change Process
 

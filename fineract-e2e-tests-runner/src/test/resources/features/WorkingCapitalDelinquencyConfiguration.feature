@@ -79,3 +79,34 @@ Feature: Working Capital Delinquency Configuration
     Then Admin failed to delete WC Delinquency Bucket that is assigned to a Working Capital Loan Product
     Then Admin deletes a Working Capital Loan Product
     When Admin deletes WC Delinquency Bucket With Values
+
+  @TestRailId:C106805
+  Scenario: Verify updating WC Delinquency Bucket without bucketType keeps WORKING_CAPITAL type
+    When Admin creates WC Delinquency Bucket With Values
+    When Admin updates WC Delinquency Bucket name without bucketType
+    Then Check Delinquency Bucket still has bucketType "WORKING_CAPITAL"
+    When Admin deletes WC Delinquency Bucket With Values
+
+  @TestRailId:C106806
+  Scenario: Verify changing WC Delinquency Bucket type to REGULAR while assigned to a product is rejected
+    When Admin creates WC Delinquency Bucket With Values
+    When Admin creates a new Working Capital Loan Product with existing WC Delinquency Bucket
+    Then Admin failed to update WC Delinquency Bucket bucketType to "REGULAR" while assigned to a Working Capital Loan Product
+    Then Admin deletes a Working Capital Loan Product
+    When Admin deletes WC Delinquency Bucket With Values
+
+  @TestRailId:C106837
+  Scenario: Verify changing WC Delinquency Bucket type to REGULAR while overridden on a Working Capital Loan is rejected
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays |
+      | 1               | MONTHS              | FLAT                        | 500          | 5               |
+    And Admin creates WC Delinquency Bucket With Values:
+      | frequency | frequencyType | minimumPaymentType | minimumPayment |
+      | 2         | WEEKS         | FLAT               | 248            |
+    And Admin creates a working capital loan using created product with breachGraceDays 11 and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId | delinquencyGraceDays |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |                     | 13                   |
+    And Admin modifies the working capital loan with delinquency override data
+    Then Admin failed to update WC Delinquency Bucket bucketType to "REGULAR" while overridden on a Working Capital Loan

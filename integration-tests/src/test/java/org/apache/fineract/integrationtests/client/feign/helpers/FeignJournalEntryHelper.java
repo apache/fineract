@@ -130,36 +130,48 @@ public class FeignJournalEntryHelper {
     }
 
     public void checkJournalEntryForAssetAccount(Account assetAccount, String date, LoanTestData.Journal... accountEntries) {
-        checkJournalEntryForAccount(assetAccount, date, accountEntries);
+        checkJournalEntryForAccount(null, assetAccount, date, accountEntries);
     }
 
     public void checkJournalEntryForLiabilityAccount(Account liabilityAccount, String date, LoanTestData.Journal... accountEntries) {
-        checkJournalEntryForAccount(liabilityAccount, date, accountEntries);
+        checkJournalEntryForAccount(null, liabilityAccount, date, accountEntries);
+    }
+
+    /** Scoped to one office: an account transfer between offices posts to the same account in both of them. */
+    public void checkJournalEntryForLiabilityAccount(Long officeId, Account liabilityAccount, String date,
+            LoanTestData.Journal... accountEntries) {
+        checkJournalEntryForAccount(officeId, liabilityAccount, date, accountEntries);
     }
 
     public void checkJournalEntryForIncomeAccount(Account incomeAccount, String date, LoanTestData.Journal... accountEntries) {
-        checkJournalEntryForAccount(incomeAccount, date, accountEntries);
+        checkJournalEntryForAccount(null, incomeAccount, date, accountEntries);
     }
 
     public void checkJournalEntryForExpenseAccount(Account expenseAccount, String date, LoanTestData.Journal... accountEntries) {
-        checkJournalEntryForAccount(expenseAccount, date, accountEntries);
+        checkJournalEntryForAccount(null, expenseAccount, date, accountEntries);
     }
 
-    private void checkJournalEntryForAccount(Account account, String date, LoanTestData.Journal... accountEntries) {
-        Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put("glAccountId", account.getAccountID());
-        queryParams.put("type", account.getAccountType());
-        queryParams.put("fromDate", date);
-        queryParams.put("toDate", date);
-        queryParams.put("orderBy", "id");
-        queryParams.put("sortOrder", "desc");
-        queryParams.put("locale", "en");
-        queryParams.put("dateFormat", "dd MMMM yyyy");
+    public void checkJournalEntryForEquityAccount(Account equityAccount, String date, LoanTestData.Journal... accountEntries) {
+        checkJournalEntryForAccount(null, equityAccount, date, accountEntries);
+    }
 
-        GetJournalEntriesTransactionIdResponse journalEntries = ok(
-                () -> fineractClient.journalEntries().retrieveAllJournalEntries(queryParams));
-        List<JournalEntryTransactionItem> actualEntries = journalEntries.getPageItems();
-        assertNotNull(actualEntries);
+    /**
+     * The transaction id of the first entry on the account and date that matches one of the expected entries, or empty.
+     */
+    public String getJournalEntryTransactionIdByAccount(Account account, String date, LoanTestData.Journal... accountEntries) {
+        List<JournalEntryTransactionItem> actualEntries = retrieveJournalEntries(null, account, date);
+        for (LoanTestData.Journal expected : accountEntries) {
+            for (JournalEntryTransactionItem item : actualEntries) {
+                if (matchesJournalEntry(item, expected)) {
+                    return item.getTransactionId();
+                }
+            }
+        }
+        return "";
+    }
+
+    private void checkJournalEntryForAccount(Long officeId, Account account, String date, LoanTestData.Journal... accountEntries) {
+        List<JournalEntryTransactionItem> actualEntries = retrieveJournalEntries(officeId, account, date);
 
         List<JournalEntryTransactionItem> remaining = new ArrayList<>(actualEntries);
         for (LoanTestData.Journal expected : accountEntries) {
@@ -176,5 +188,26 @@ public class FeignJournalEntryHelper {
                 remaining.remove(matchIndex);
             }
         }
+    }
+
+    private List<JournalEntryTransactionItem> retrieveJournalEntries(Long officeId, Account account, String date) {
+        Map<String, Object> queryParams = new HashMap<>();
+        if (officeId != null) {
+            queryParams.put("officeId", officeId);
+        }
+        queryParams.put("glAccountId", account.getAccountID());
+        queryParams.put("type", account.getAccountType());
+        queryParams.put("fromDate", date);
+        queryParams.put("toDate", date);
+        queryParams.put("orderBy", "id");
+        queryParams.put("sortOrder", "desc");
+        queryParams.put("locale", "en");
+        queryParams.put("dateFormat", "dd MMMM yyyy");
+
+        GetJournalEntriesTransactionIdResponse journalEntries = ok(
+                () -> fineractClient.journalEntries().retrieveAllJournalEntries(queryParams));
+        List<JournalEntryTransactionItem> actualEntries = journalEntries.getPageItems();
+        assertNotNull(actualEntries);
+        return actualEntries;
     }
 }

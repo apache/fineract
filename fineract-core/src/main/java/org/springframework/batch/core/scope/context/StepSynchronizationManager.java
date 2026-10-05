@@ -19,10 +19,10 @@
 package org.springframework.batch.core.scope.context;
 
 import org.apache.fineract.infrastructure.jobs.TenantAwareEqualsHashCodeAdvice;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepExecution;
+import org.jspecify.annotations.Nullable;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.step.StepExecution;
 import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.lang.Nullable;
 
 // Temporary solution until spring-batch fixes the concurrency issue
 // https://github.com/spring-projects/spring-batch/issues/4774
@@ -49,6 +49,12 @@ public class StepSynchronizationManager {
     }
 
     public static StepContext register(StepExecution stepExecution) {
+        if (Enhancer.isEnhanced(stepExecution.getClass())) {
+            // already wrapped by a previous registration (e.g. when re-registering on a
+            // chunk-processing pool thread); reuse it so the shared context map finds the
+            // existing context and step-scoped beans resolve to the same instances
+            return manager.register(stepExecution);
+        }
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(StepExecution.class);
         enhancer.setCallback(new TenantAwareEqualsHashCodeAdvice(stepExecution));

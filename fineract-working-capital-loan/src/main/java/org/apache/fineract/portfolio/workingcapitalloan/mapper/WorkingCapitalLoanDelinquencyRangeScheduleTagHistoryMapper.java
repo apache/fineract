@@ -22,6 +22,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.mapper;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
+import org.apache.fineract.portfolio.loanaccount.data.InstallmentLevelDelinquency;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyTagHistoryData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanRangeScheduleDelinquencyData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeScheduleTagHistory;
@@ -50,11 +51,18 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper {
         }
     }
 
+    default WorkingCapitalLoanRangeScheduleDelinquencyData mapForCollectionData(
+            WorkingCapitalLoanDelinquencyRangeScheduleTagHistory source) {
+        return mapForCollectionData(mapToInstallmentLevelDelinquency(source));
+    }
+
     @Mapping(target = "rangeId", source = "delinquencyRange.id")
     @Mapping(target = "classification", source = "delinquencyRange.classification")
     @Mapping(target = "minimumAgeDays", source = "delinquencyRange.minimumAgeDays")
     @Mapping(target = "maximumAgeDays", source = "delinquencyRange.maximumAgeDays")
     @Mapping(target = "delinquentAmount", source = "outstandingAmount")
-    WorkingCapitalLoanRangeScheduleDelinquencyData mapForCollectionData(WorkingCapitalLoanDelinquencyRangeScheduleTagHistory source);
+    InstallmentLevelDelinquency mapToInstallmentLevelDelinquency(WorkingCapitalLoanDelinquencyRangeScheduleTagHistory source);
+
+    WorkingCapitalLoanRangeScheduleDelinquencyData mapForCollectionData(InstallmentLevelDelinquency source);
 
 }

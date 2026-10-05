@@ -18,22 +18,25 @@
  */
 package org.apache.fineract.infrastructure.jobs.config;
 
-import static org.springframework.batch.support.DatabaseType.MARIADB;
-import static org.springframework.batch.support.DatabaseType.MYSQL;
-import static org.springframework.batch.support.DatabaseType.POSTGRES;
+import static org.springframework.batch.infrastructure.support.DatabaseType.MARIADB;
+import static org.springframework.batch.infrastructure.support.DatabaseType.MYSQL;
+import static org.springframework.batch.infrastructure.support.DatabaseType.POSTGRES;
 
 import java.util.List;
 import java.util.Locale;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
-import org.springframework.batch.support.DatabaseType;
+import org.springframework.batch.infrastructure.item.database.support.DataFieldMaxValueIncrementerFactory;
+import org.springframework.batch.infrastructure.support.DatabaseType;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncrementer;
 
 @RequiredArgsConstructor
 public class FineractDataFieldMaxValueIncrementerFactory implements DataFieldMaxValueIncrementerFactory {
+
+    private static final String BATCH_6_JOB_INSTANCE_SEQUENCE = "JOB_INSTANCE_SEQ";
+    private static final String BATCH_5_JOB_INSTANCE_SEQUENCE = "JOB_SEQ";
 
     private static final List<DatabaseType> SUPPORTED_DATABASE_TYPES = List.of(MARIADB, MYSQL, POSTGRES);
 
@@ -53,8 +56,29 @@ public class FineractDataFieldMaxValueIncrementerFactory implements DataFieldMax
         this.incrementerColumnName = incrementerColumnName;
     }
 
+    /**
+     * Spring Batch 6 renamed the job instance sequence to {@code BATCH_JOB_INSTANCE_SEQ}. Fineract stays on the Batch 5
+     * name and maps it here.
+     * <p>
+     * The name is bound into the incrementer when the job repository is built and cannot be re-resolved afterwards, so
+     * renaming the sequence would break every already-running instance the moment the migration landed - old and new
+     * instances could not share a database during a rolling deploy, and the same split would recur whenever the name
+     * changed again. Nothing in Batch 6 requires the new name; it is a default, not a contract.
+     * <p>
+     * Mapped here rather than through {@code spring.batch.jdbc.schema.legacy} or {@code setJobInstanceIncrementerName},
+     * both of which live on {@code JobRepositoryFactoryBean} - {@code @Deprecated(since = "6.0", forRemoval = true)},
+     * scheduled for removal in Batch 6.2.
+     */
+    private static String resolveIncrementerName(String incrementerName) {
+        return incrementerName.endsWith(BATCH_6_JOB_INSTANCE_SEQUENCE)
+                ? incrementerName.substring(0, incrementerName.length() - BATCH_6_JOB_INSTANCE_SEQUENCE.length())
+                        + BATCH_5_JOB_INSTANCE_SEQUENCE
+                : incrementerName;
+    }
+
     @Override
-    public DataFieldMaxValueIncrementer getIncrementer(String incrementerType, String incrementerName) {
+    public DataFieldMaxValueIncrementer getIncrementer(String incrementerType, String rawIncrementerName) {
+        String incrementerName = resolveIncrementerName(rawIncrementerName);
         DatabaseType databaseType = getDatabaseType(incrementerType);
         if (databaseType == MYSQL || databaseType == MARIADB) {
             MySQLMaxValueIncrementer mySQLMaxValueIncrementer = new MySQLMaxValueIncrementer(dataSource, incrementerName,

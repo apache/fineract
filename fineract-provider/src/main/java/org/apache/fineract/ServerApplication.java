@@ -21,8 +21,8 @@ package org.apache.fineract;
 import java.io.IOException;
 import org.apache.fineract.infrastructure.core.boot.FineractLiquibaseOnlyApplicationConfiguration;
 import org.apache.fineract.infrastructure.core.boot.FineractWebApplicationConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Import;
 

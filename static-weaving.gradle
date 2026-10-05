@@ -26,65 +26,72 @@ interface StaticWeavingExecOperations {
     ExecOperations getExecOperations()
 }
 
-private static List<String> findJpaManagedClasses(Project moduleProject) {
-    File sourceRoot = moduleProject.file('src/main/java')
-    if (!sourceRoot.exists()) {
-        return []
+// Plain classes rather than script-level methods: a task doLast closure invokes these dynamically
+// through the build script's own metaclass, and that dispatch does not survive being restored from
+// the configuration cache (the replayed action has no live script instance to resolve against).
+// Static methods on an ordinary class compile to normal JVM invokestatic calls instead, which work
+// the same whether the task action runs from a fresh evaluation or a cached one.
+class StaticWeavingSupport {
+
+    static List<String> findJpaManagedClasses(Project moduleProject) {
+        File sourceRoot = moduleProject.file('src/main/java')
+        if (!sourceRoot.exists()) {
+            return []
+        }
+
+        moduleProject.fileTree(sourceRoot) {
+            include '**/*.java'
+        }.findAll { File javaSource ->
+            isJpaManagedClass(javaSource.text)
+        }.collect { File javaSource ->
+            toFullyQualifiedClassName(javaSource)
+        }.findAll {
+            it != null
+        }.unique().sort()
     }
 
-    moduleProject.fileTree(sourceRoot) {
-        include '**/*.java'
-    }.findAll { File javaSource ->
-        isJpaManagedClass(javaSource.text)
-    }.collect { File javaSource ->
-        toFullyQualifiedClassName(javaSource)
-    }.findAll {
-        it != null
-    }.unique().sort()
-}
-
-private static boolean isJpaManagedClass(String source) {
-    def hasManagedAnnotation = (source =~ /(?m)^\s*@((jakarta|javax)\.persistence\.)?(Entity|MappedSuperclass|Converter)\b/).find()
-    def isConcreteAttributeConverter = (source =~ /(?s)\bimplements\b.*?\bAttributeConverter\s*</).find()
-            && !(source =~ /(?m)^\s*(public\s+|protected\s+|private\s+)?abstract\s+class\s+/).find()
-    hasManagedAnnotation || isConcreteAttributeConverter
-}
-
-private static String toFullyQualifiedClassName(File javaSource) {
-    def packageMatcher = javaSource.text =~ /(?m)^\s*package\s+([^;]+);/
-    if (!packageMatcher.find()) {
-        return null
-    }
-    "${packageMatcher.group(1)}.${javaSource.name - '.java'}"
-}
-
-private static List<Project> runtimeProjectDependencies(Project moduleProject) {
-    def runtimeClasspath = moduleProject.configurations.findByName('runtimeClasspath')
-    if (runtimeClasspath == null || !runtimeClasspath.canBeResolved) {
-        return []
+    private static boolean isJpaManagedClass(String source) {
+        def hasManagedAnnotation = (source =~ /(?m)^\s*@((jakarta|javax)\.persistence\.)?(Entity|MappedSuperclass|Converter)\b/).find()
+        def isConcreteAttributeConverter = (source =~ /(?s)\bimplements\b.*?\bAttributeConverter\s*</).find()
+                && !(source =~ /(?m)^\s*(public\s+|protected\s+|private\s+)?abstract\s+class\s+/).find()
+        hasManagedAnnotation || isConcreteAttributeConverter
     }
 
-    runtimeClasspath.incoming.resolutionResult.allComponents.collect { component ->
-        component.id
-    }.findAll { componentId ->
-        componentId instanceof ProjectComponentIdentifier && componentId.projectPath != moduleProject.path
-    }.collect { componentId ->
-        moduleProject.rootProject.project(componentId.projectPath)
-    }.unique().sort { left, right ->
-        left.path <=> right.path
+    private static String toFullyQualifiedClassName(File javaSource) {
+        def packageMatcher = javaSource.text =~ /(?m)^\s*package\s+([^;]+);/
+        if (!packageMatcher.find()) {
+            return null
+        }
+        "${packageMatcher.group(1)}.${javaSource.name - '.java'}"
     }
-}
 
-private static Map<Project, List<String>> managedClassesByProject(Project moduleProject) {
-    (runtimeProjectDependencies(moduleProject) + moduleProject).collectEntries { Project candidateProject ->
-        def managedClasses = findJpaManagedClasses(candidateProject)
-        managedClasses.isEmpty() ? [:] : [(candidateProject): managedClasses]
+    private static List<Project> runtimeProjectDependencies(Project moduleProject) {
+        def runtimeClasspath = moduleProject.configurations.findByName('runtimeClasspath')
+        if (runtimeClasspath == null || !runtimeClasspath.canBeResolved) {
+            return []
+        }
+
+        runtimeClasspath.incoming.resolutionResult.allComponents.collect { component ->
+            component.id
+        }.findAll { componentId ->
+            componentId instanceof ProjectComponentIdentifier && componentId.projectPath != moduleProject.path
+        }.collect { componentId ->
+            moduleProject.rootProject.project(componentId.projectPath)
+        }.unique().sort { left, right ->
+            left.path <=> right.path
+        }
     }
-}
 
-private static void writePersistenceXml(File outputFile, Map<Project, List<String>> classesByProject) {
-    outputFile.parentFile.mkdirs()
-    outputFile.text = """<?xml version="1.0" encoding="UTF-8"?>
+    static Map<String, List<String>> managedClassesByProject(Project moduleProject) {
+        (runtimeProjectDependencies(moduleProject) + moduleProject).collectEntries { Project candidateProject ->
+            def managedClasses = findJpaManagedClasses(candidateProject)
+            managedClasses.isEmpty() ? [:] : [(candidateProject.name): managedClasses]
+        }
+    }
+
+    static void writePersistenceXml(File outputFile, Map<String, List<String>> classesByProject) {
+        outputFile.parentFile.mkdirs()
+        outputFile.text = """<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Licensed to the Apache Software Foundation (ASF) under one
@@ -116,13 +123,13 @@ private static void writePersistenceXml(File outputFile, Map<Project, List<Strin
     <!--  You can find the runtime configuration in the JPAConfig class.  -->
     <persistence-unit name="jpa-pu" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-${classesByProject.collect { Project moduleProject, List<String> managedClasses ->
-        """
-        <!--  ${moduleProject.name} module: -->
+${classesByProject.collect { String moduleName, List<String> managedClasses ->
+            """
+        <!--  ${moduleName} module: -->
 ${managedClasses.collect { managedClass ->
-            "        <class>${managedClass}</class>"
-        }.join('\n')}"""
-    }.join('\n')}
+                "        <class>${managedClass}</class>"
+            }.join('\n')}"""
+        }.join('\n')}
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
@@ -132,6 +139,7 @@ ${managedClasses.collect { managedClass ->
     </persistence-unit>
 </persistence>
 """
+    }
 }
 
 // Wait until after project evaluation to ensure all plugins and dependencies are applied.
@@ -141,7 +149,7 @@ project.afterEvaluate {
         return
     }
 
-    def ownManagedClasses = findJpaManagedClasses(project)
+    def ownManagedClasses = StaticWeavingSupport.findJpaManagedClasses(project)
     if (ownManagedClasses.isEmpty()) {
         logger.info("No JPA managed classes found in ${project.name}, skipping static weaving configuration")
         return
@@ -150,6 +158,11 @@ project.afterEvaluate {
     logger.info("Configuring EclipseLink static weaving for ${project.name}")
 
     def generatedPersistenceXml = layout.buildDirectory.file('tmp/compileJava/static-weaving/META-INF/persistence.xml')
+    // A provider rather than a doLast lookup: Task.project is unsupported in task actions under the
+    // configuration cache. It stays lazy -- resolving the runtime classpath and scanning sources
+    // eagerly here would add seconds to every invocation's configuration phase.
+    def classesByProject = providers.provider { StaticWeavingSupport.managedClassesByProject(project) }
+    def projectPath = project.path
     def generateStaticWeavingPersistenceXml = tasks.register('generateStaticWeavingPersistenceXml') {
         description = 'Generates the EclipseLink static weaving persistence.xml from project JPA classes'
         group = 'build'
@@ -159,10 +172,10 @@ project.afterEvaluate {
         outputs.upToDateWhen { false }
 
         doLast {
-            def classesByProject = managedClassesByProject(project)
-            def classCount = classesByProject.values().sum { List<String> managedClasses -> managedClasses.size() } ?: 0
-            writePersistenceXml(generatedPersistenceXml.get().asFile, classesByProject)
-            logger.lifecycle("Generated EclipseLink static weaving persistence.xml for ${project.path} with ${classCount} managed classes from ${classesByProject.size()} modules")
+            def classes = classesByProject.get()
+            def classCount = classes.values().sum { List<String> managedClasses -> managedClasses.size() } ?: 0
+            StaticWeavingSupport.writePersistenceXml(generatedPersistenceXml.get().asFile, classes)
+            logger.lifecycle("Generated EclipseLink static weaving persistence.xml for ${projectPath} with ${classCount} managed classes from ${classes.size()} modules")
         }
     }
 

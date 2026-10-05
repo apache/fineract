@@ -39,13 +39,4 @@ public interface WorkingCapitalLoanBreachActionRepository extends JpaRepository<
             AND action.workingCapitalLoan.id = :loanId AND action.startDate <= :date AND (action.endDate IS NULL OR action.endDate >= :date)
             """)
     boolean isBreachDisabledAsOf(@Param("loanId") Long loanId, @Param("date") LocalDate date);
-
-    @Query("""
-            SELECT ba FROM WorkingCapitalLoanBreachAction ba
-            WHERE ba.workingCapitalLoan.id= :workingCapitalLoanId
-            AND ba.action IN :actionTypes
-            ORDER BY ba.startDate, ba.id
-            """)
-    List<WorkingCapitalLoanBreachAction> findByLoanAndActionType(@Param("workingCapitalLoanId") Long workingCapitalLoanId,
-            @Param("actionTypes") List<WorkingCapitalLoanBreachActionType> actionTypes);
 }

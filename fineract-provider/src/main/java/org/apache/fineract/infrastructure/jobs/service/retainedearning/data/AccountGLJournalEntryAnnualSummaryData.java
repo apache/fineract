@@ -38,6 +38,8 @@ public class AccountGLJournalEntryAnnualSummaryData {
 
     private ExternalId ownerExternalId;
 
+    private String originatorExternalIds;
+
     private Boolean manualEntry;
 
     private BigDecimal openingBalanceAmount;

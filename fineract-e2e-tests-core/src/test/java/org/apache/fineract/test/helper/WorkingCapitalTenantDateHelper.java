@@ -74,8 +74,7 @@ public class WorkingCapitalTenantDateHelper {
     }
 
     private LocalDate getEffectiveDateFromServer(final Long loanId) {
-        return ok(
-                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanActionTemplate(loanId, CHARGE_OFF_TEMPLATE))
-                .getChargeOffDate();
+        return ok(() -> fineractClient.workingCapitalLoanTransactions().getWorkingCapitalLoanTransactionTemplateById(loanId,
+                CHARGE_OFF_TEMPLATE, null, null, null)).getChargeOffDate();
     }
 }

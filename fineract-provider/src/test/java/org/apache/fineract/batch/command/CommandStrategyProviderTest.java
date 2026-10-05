@@ -62,8 +62,10 @@ import org.apache.fineract.batch.command.internal.GetLoanTransactionByExternalId
 import org.apache.fineract.batch.command.internal.GetLoanTransactionByIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetReagePreviewByLoanExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetReagePreviewByLoanIdCommandStrategy;
+import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanByExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanByIdCommandStrategy;
+import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanTransactionByExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanTransactionByExternalLoanIdAndTransactionIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanTransactionByIdCommandStrategy;
@@ -321,7 +323,19 @@ public class CommandStrategyProviderTest {
                 Arguments.of(
                         "working-capital-loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/transactions/external-id/7dfad438-2319-48ce-8520-10a62801e9ab?fields=id",
                         HttpMethod.GET, "getWorkingCapitalLoanTransactionByExternalIdCommandStrategy",
-                        mock(GetWorkingCapitalLoanTransactionByExternalIdCommandStrategy.class)));
+                        mock(GetWorkingCapitalLoanTransactionByExternalIdCommandStrategy.class)),
+                Arguments.of("working-capital-loans/123/breach-schedule", HttpMethod.GET,
+                        "getWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategy",
+                        mock(GetWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategy.class)),
+                Arguments.of("working-capital-loans/123/breach-schedule?fields=id", HttpMethod.GET,
+                        "getWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategy",
+                        mock(GetWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategy.class)),
+                Arguments.of("working-capital-loans/123/delinquency-range-schedule", HttpMethod.GET,
+                        "getWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy",
+                        mock(GetWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy.class)),
+                Arguments.of("working-capital-loans/123/delinquency-range-schedule?fields=id", HttpMethod.GET,
+                        "getWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy",
+                        mock(GetWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy.class)));
     }
 
     /**

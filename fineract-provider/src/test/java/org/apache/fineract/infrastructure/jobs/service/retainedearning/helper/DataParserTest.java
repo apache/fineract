@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.jobs.service.retainedearning.helper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -197,5 +198,70 @@ class DataParserTest {
         assertEquals(2, records.size());
         assertEquals(BigDecimal.ZERO, records.get(0).getEndingBalance());
         assertEquals(new BigDecimal("-200.75"), records.get(1).getEndingBalance());
+    }
+
+    @Test
+    void shouldParseOriginatorExternalIdsVerbatim() throws Exception {
+        List<AccountGLJournalEntryAnnualSummaryRecord> records = parser.parse(reportJsonWithOriginator("\"ALPHA-01, ZETA-01\""));
+
+        assertEquals(1, records.size());
+        assertEquals("ALPHA-01, ZETA-01", records.get(0).getOriginatorExternalIds());
+    }
+
+    @Test
+    void shouldParseEmptyOriginatorExternalIdsAsNull() throws Exception {
+        List<AccountGLJournalEntryAnnualSummaryRecord> records = parser.parse(reportJsonWithOriginator("\"\""));
+
+        assertEquals(1, records.size());
+        assertNull(records.get(0).getOriginatorExternalIds());
+    }
+
+    @Test
+    void shouldParseJsonNullOriginatorExternalIdsAsNull() throws Exception {
+        List<AccountGLJournalEntryAnnualSummaryRecord> records = parser.parse(reportJsonWithOriginator("null"));
+
+        assertEquals(1, records.size());
+        assertNull(records.get(0).getOriginatorExternalIds());
+    }
+
+    @Test
+    void shouldLeaveOriginatorExternalIdsNullWhenColumnIsAbsent() throws Exception {
+        String json = """
+                {
+                  "columnHeaders": [
+                    {"columnName": "postingdate"},
+                    {"columnName": "product"},
+                    {"columnName": "glacct"},
+                    {"columnName": "assetowner"},
+                    {"columnName": "endingbalance"}
+                  ],
+                  "data": [
+                    {"row": ["2024-12-31", "TestProduct", "400001", "self", "-500.00"]}
+                  ]
+                }
+                """;
+
+        List<AccountGLJournalEntryAnnualSummaryRecord> records = parser.parse(json);
+
+        assertEquals(1, records.size());
+        assertNull(records.get(0).getOriginatorExternalIds());
+    }
+
+    private String reportJsonWithOriginator(String originatorJsonValue) {
+        return """
+                {
+                  "columnHeaders": [
+                    {"columnName": "postingdate"},
+                    {"columnName": "product"},
+                    {"columnName": "glacct"},
+                    {"columnName": "assetowner"},
+                    {"columnName": "originator_external_ids"},
+                    {"columnName": "endingbalance"}
+                  ],
+                  "data": [
+                    {"row": ["2024-12-31", "TestProduct", "400001", "self", ORIGINATOR, "-500.00"]}
+                  ]
+                }
+                """.replace("ORIGINATOR", originatorJsonValue);
     }
 }

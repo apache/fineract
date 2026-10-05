@@ -31,8 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanUndoChargeOffBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanAdjustTransactionBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
@@ -44,7 +42,6 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionComparator;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelation;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargePaidByRepository;
@@ -79,7 +76,6 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
     private final WorkingCapitalLoanTransactionRelationRepository transactionRelationRepository;
     private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
-    private final WorkingCapitalLoanTransactionDataFactory transactionDataFactory;
 
     @Override
     public void reprocessTransactions(final WorkingCapitalLoan loan) {
@@ -155,7 +151,6 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         }
 
         // 3) Forward-replay the suffix onto the rewound balance, re-planning each allocation and mutating it in place.
-        final boolean accountingEnabled = loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization();
         final boolean chargeOffInSuffix = replaySet.stream().anyMatch(this::isChargeOff);
         boolean afterChargeOff = loan.isChargedOff() && !chargeOffInSuffix;
         boolean afterLiftedChargeOff = false;
@@ -167,8 +162,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         final List<WorkingCapitalLoanTransaction> adjustedTransactions = new ArrayList<>();
         for (final WorkingCapitalLoanTransaction txn : replaySet) {
             if (isChargeOff(txn)) {
-                final boolean stillChargedOff = replayChargeOff(loan, balance, txn, accountingEnabled, updatedAllocations,
-                        adjustedTransactions);
+                final boolean stillChargedOff = replayChargeOff(loan, balance, txn, updatedAllocations, adjustedTransactions);
                 afterChargeOff = stillChargedOff;
                 afterLiftedChargeOff = !stillChargedOff;
                 if (afterLiftedChargeOff) {
@@ -197,11 +191,10 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
                 adjustedTransactions.add(txn);
             }
 
-            if (accountingEnabled) {
-                final boolean chargeOffRoutingMayHaveChanged = afterChargeOff || afterLiftedChargeOff;
-                postOrRestateJournalEntries(loan, txn, allocated.allocation(), afterChargeOff, allocated.hadStoredAllocation(),
-                        allocated.allocationChanged(), chargeOffRoutingMayHaveChanged);
-            }
+            final boolean chargeOffRoutingMayHaveChanged = afterChargeOff || afterLiftedChargeOff;
+            postOrRestateJournalEntries(loan, txn, allocated.allocation(), afterChargeOff, allocated.hadStoredAllocation(),
+                    allocated.allocationChanged(), chargeOffRoutingMayHaveChanged);
+
         }
 
         allocationRepository.saveAll(updatedAllocations);
@@ -271,7 +264,6 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         final Map<Long, WorkingCapitalLoanCharge> chargesById = charges.stream()
                 .collect(Collectors.toMap(WorkingCapitalLoanCharge::getId, Function.identity()));
 
-        final boolean accountingEnabled = loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization();
         final List<PrincipalPayment> principalPayments = new ArrayList<>();
         final List<PrincipalAdjustment> principalAdjustments = new ArrayList<>();
         final List<WorkingCapitalLoanTransactionAllocation> updatedAllocations = new ArrayList<>();
@@ -281,8 +273,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         WorkingCapitalLoanTransaction liftedChargeOffTransaction = null;
         for (final WorkingCapitalLoanTransaction txn : replayable) {
             if (isChargeOff(txn)) {
-                final boolean stillChargedOff = replayChargeOff(loan, balance, txn, accountingEnabled, updatedAllocations,
-                        adjustedTransactions);
+                final boolean stillChargedOff = replayChargeOff(loan, balance, txn, updatedAllocations, adjustedTransactions);
                 afterChargeOff = stillChargedOff;
                 afterLiftedChargeOff = !stillChargedOff;
                 if (afterLiftedChargeOff) {
@@ -328,11 +319,10 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
                 adjustedTransactions.add(txn);
             }
 
-            if (accountingEnabled) {
-                final boolean chargeOffRoutingMayHaveChanged = afterChargeOff || afterLiftedChargeOff;
-                postOrRestateJournalEntries(loan, txn, updatedAllocation, afterChargeOff, hadStoredAllocation, allocationChanged,
-                        chargeOffRoutingMayHaveChanged);
-            }
+            final boolean chargeOffRoutingMayHaveChanged = afterChargeOff || afterLiftedChargeOff;
+            postOrRestateJournalEntries(loan, txn, updatedAllocation, afterChargeOff, hadStoredAllocation, allocationChanged,
+                    chargeOffRoutingMayHaveChanged);
+
         }
 
         allocationRepository.saveAll(updatedAllocations);
@@ -402,29 +392,37 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
      * @return {@code false} when outstanding is zero and the charge-off is lifted.
      */
     private boolean replayChargeOff(final WorkingCapitalLoan loan, final WorkingCapitalLoanBalance balance,
-            final WorkingCapitalLoanTransaction chargeOffTransaction, final boolean accountingEnabled,
+            final WorkingCapitalLoanTransaction chargeOffTransaction,
             final List<WorkingCapitalLoanTransactionAllocation> updatedAllocations,
             final List<WorkingCapitalLoanTransaction> adjustedTransactions) {
-        final BigDecimal chargeOffAmount = balance.getTotalOutstanding();
+        // A waiver that sorts after the charge-off is not part of what that charge-off had to write off, but its
+        // buckets are in the balance all the same - they survive the reset that rebuilds the paid distribution. Adding
+        // them back restores the outstanding as of the charge-off's own position in the replay, which is the order the
+        // waiver's journal entries are routed on too. Waivers sorting before it stay subtracted: they had already
+        // reduced the outstanding when the charge-off was first booked.
+        final BigDecimal feeWaivedAfterChargeOff = transactionRelationRepository.sumAmountForChargesSortingAfter(loan.getId(),
+                LoanTransactionType.WAIVE_CHARGES, chargeOffTransaction.getTransactionDate(), chargeOffTransaction.getId(), false);
+        final BigDecimal penaltyWaivedAfterChargeOff = transactionRelationRepository.sumAmountForChargesSortingAfter(loan.getId(),
+                LoanTransactionType.WAIVE_CHARGES, chargeOffTransaction.getTransactionDate(), chargeOffTransaction.getId(), true);
+
         final BigDecimal principalPortion = balance.getPrincipalOutstanding();
-        final BigDecimal feePortion = balance.getFeeOutstanding();
-        final BigDecimal penaltyPortion = balance.getPenaltyOutstanding();
+        final BigDecimal feePortion = MathUtil.add(balance.getFeeOutstanding(), feeWaivedAfterChargeOff);
+        final BigDecimal penaltyPortion = MathUtil.add(balance.getPenaltyOutstanding(), penaltyWaivedAfterChargeOff);
+        final BigDecimal chargeOffAmount = MathUtil.add(principalPortion, feePortion, penaltyPortion);
         final BigDecimal overpaymentPortion = MathUtil.nullToZero(balance.getOverpaymentAmount());
 
         if (!MathUtil.isGreaterThanZero(chargeOffAmount)) {
             // Mirrors the explicit undo-charge-off path: lifting the charge-off must also reverse its linked final
             // discount-fee amortization, or that transaction's journal entries keep crediting the charge-off expense
             // account on a loan that is no longer charged off.
-            discountFeeAmortizationService.undoDiscountFeeAmortizationOnChargeOff(loan, chargeOffTransaction);
+            discountFeeAmortizationService.undoFinalDiscountFeeAmortization(loan, chargeOffTransaction);
 
             chargeOffTransaction.setReversed(true);
             chargeOffTransaction.setReversedOnDate(DateUtils.getBusinessLocalDate());
             transactionRepository.saveAndFlush(chargeOffTransaction);
             loan.liftChargeOff();
             loanRepository.saveAndFlush(loan);
-            if (accountingEnabled) {
-                accountingProcessor.postReversalJournalEntries(loan, chargeOffTransaction);
-            }
+            accountingProcessor.postReversalJournalEntries(loan, chargeOffTransaction);
             return false;
         }
 
@@ -449,92 +447,12 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         // amountChanged half of the condition.
         if (amountChanged || allocationChanged) {
             adjustedTransactions.add(chargeOffTransaction);
-        }
-
-        if (accountingEnabled && (amountChanged || allocationChanged)) {
             accountingProcessor.restateJournalEntries(loan, chargeOffTransaction, storedAllocation, true);
         }
 
-        restateFinalDiscountFeeAmortization(loan, balance, chargeOffTransaction, accountingEnabled);
+        discountFeeAmortizationService.restateFinalDiscountFeeAmortization(loan, balance, chargeOffTransaction);
 
         return true;
-    }
-
-    /**
-     * Replays the charge-off's final lump-sum discount-fee amortization (see
-     * {@code WorkingCapitalLoanDiscountFeeAmortizationServiceImpl#processFinalDiscountFeeAmortizationOnChargeOff}), in
-     * place, against the current discount pool. A no-op when nothing is linked (no discount was ever charged off) or
-     * the recomputed amount has not moved.
-     * <p>
-     * The link is looked up regardless of the amortization's own reversed state: a prior replay can have zeroed the
-     * pool and reversed it (see below), and a later backdated change (e.g. undoing the discount-fee adjustment that
-     * zeroed it) can bring the pool back up, needing the same transaction revived rather than left behind for good.
-     * </p>
-     */
-    private void restateFinalDiscountFeeAmortization(final WorkingCapitalLoan loan, final WorkingCapitalLoanBalance balance,
-            final WorkingCapitalLoanTransaction chargeOffTransaction, final boolean accountingEnabled) {
-        final List<WorkingCapitalLoanTransactionRelation> linkedAmortizations = transactionRelationRepository
-                .findAllByToTransactionAndFromTransactionTransactionType(chargeOffTransaction,
-                        LoanTransactionType.DISCOUNT_FEE_AMORTIZATION);
-        if (linkedAmortizations.isEmpty()) {
-            return;
-        }
-
-        final BigDecimal netDiscountPool = MathUtil.subtract(MathUtil.nullToZero(balance.getTotalDiscountFee()),
-                MathUtil.nullToZero(balance.getTotalDiscountFeeAdjustment()));
-        final BigDecimal netAmortized = transactionRepository.sumNetAmortization(loan.getId(),
-                LoanTransactionType.DISCOUNT_FEE_AMORTIZATION, LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT);
-
-        for (final WorkingCapitalLoanTransactionRelation relation : linkedAmortizations) {
-            final WorkingCapitalLoanTransaction amortizationTxn = relation.getFromTransaction();
-            final boolean wasReversed = amortizationTxn.isReversed();
-            // sumNetAmortization only counts non-reversed transactions, so a currently-reversed amortization
-            // contributes nothing to netAmortized already - only a live one's own (stale) amount needs excluding from
-            // what is "already realized elsewhere" to recompute the target as if the final push were happening now.
-            final BigDecimal ownLiveContribution = wasReversed ? BigDecimal.ZERO
-                    : MathUtil.nullToZero(amortizationTxn.getTransactionAmount());
-            final BigDecimal realizedElsewhere = MathUtil.subtract(netAmortized, ownLiveContribution);
-            final BigDecimal newAmount = MathUtil.subtract(netDiscountPool, realizedElsewhere).max(BigDecimal.ZERO);
-
-            if (!MathUtil.isGreaterThanZero(newAmount)) {
-                if (!wasReversed) {
-                    // The discount pool no longer leaves anything to push to expense: the final transaction becomes
-                    // moot.
-                    amortizationTxn.setReversed(true);
-                    amortizationTxn.setReversedOnDate(DateUtils.getBusinessLocalDate());
-                    transactionRepository.saveAndFlush(amortizationTxn);
-                    if (accountingEnabled) {
-                        accountingProcessor.postReversalJournalEntries(loan, amortizationTxn);
-                    }
-                    final WorkingCapitalLoanTransactionData reversedTxnData = transactionDataFactory.create(amortizationTxn);
-                    businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanAdjustTransactionBusinessEvent(
-                            WorkingCapitalLoanAdjustTransactionBusinessEvent.Data.reversal(reversedTxnData), loan.getId()));
-                }
-                continue;
-            }
-
-            final boolean amountChanged = MathUtil.nullToZero(amortizationTxn.getTransactionAmount()).compareTo(newAmount) != 0;
-            if (wasReversed) {
-                // The pool moved back above zero: revive the transaction this same charge-off already created rather
-                // than leaving it behind reversed forever.
-                amortizationTxn.setReversed(false);
-                amortizationTxn.setReversedOnDate(null);
-            }
-            amortizationTxn.updateAmount(newAmount);
-            transactionRepository.save(amortizationTxn);
-            if (accountingEnabled && (amountChanged || wasReversed)) {
-                accountingProcessor.restateJournalEntriesForDiscountFeeAmortization(loan, amortizationTxn, true);
-            }
-            if (amountChanged || wasReversed) {
-                // Reuses the same event the transaction's original creation fires, rather than a dedicated
-                // "restated"/"revived" event: it announces the same thing either way -- this discount-fee
-                // amortization transaction is live with this amount.
-                businessEventNotifierService.notifyPostBusinessEvent(
-                        new WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent(amortizationTxn, loan.getId()));
-            }
-        }
-
-        discountFeeAmortizationService.recalculateRealizedIncome(loan);
     }
 
     private boolean chargeOffAllocationMatches(final WorkingCapitalLoanTransactionAllocation allocation, final BigDecimal principalPortion,

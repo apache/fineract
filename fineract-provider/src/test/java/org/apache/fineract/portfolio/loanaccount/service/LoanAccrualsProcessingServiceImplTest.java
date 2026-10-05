@@ -218,6 +218,8 @@ public class LoanAccrualsProcessingServiceImplTest {
         LoanRepaymentScheduleInstallment lastInstallment = mock(LoanRepaymentScheduleInstallment.class);
         when(lastInstallment.getDueDate()).thenReturn(lastDueDate);
         when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(lastInstallment);
+        // reprocessing skips unsaved loans, so the mock must look persisted
+        when(loan.getId()).thenReturn(1L);
         when(loan.isChargedOff()).thenReturn(false);
         when(loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()).thenReturn(true);
         when(loan.isProgressiveSchedule()).thenReturn(false); // cumulative

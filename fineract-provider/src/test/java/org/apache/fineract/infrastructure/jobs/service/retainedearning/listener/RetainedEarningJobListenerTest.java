@@ -35,8 +35,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.step.StepExecution;
 
 @ExtendWith(MockitoExtension.class)
 class RetainedEarningJobListenerTest {
@@ -56,7 +56,7 @@ class RetainedEarningJobListenerTest {
     public void testBeforeJob() {
         // beforeJob should complete without exceptions and log the job ID
         retainedEarningJobListener.beforeJob(jobExecution);
-        verify(jobExecution).getJobId();
+        verify(jobExecution).getJobInstanceId();
     }
 
     @Test

@@ -44,8 +44,7 @@ repositories {
 configurations.all {
     resolutionStrategy {
         dependencySubstitution {
-            // Substitution is to resolve CVE-2025-12183
-            substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.11.0')
+            substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.11.4')
         }
     }
 }
@@ -63,6 +62,7 @@ dependencies {
     implementation 'org.eclipse.jgit:org.eclipse.jgit'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.gpg.bc'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache'
+    implementation 'org.apache.maven:maven-artifact'
     implementation 'com.vdurmont:semver4j'
     implementation 'org.beryx:text-io'
     implementation 'commons-io:commons-io'

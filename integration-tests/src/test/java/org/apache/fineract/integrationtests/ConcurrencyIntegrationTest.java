@@ -18,79 +18,57 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansRequestCollateralData;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignTransactionHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class ConcurrencyIntegrationTest {
+public class ConcurrencyIntegrationTest extends FeignLoanTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConcurrencyIntegrationTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
 
     private static final String NO_ACCOUNTING = "1";
 
     static final int MYTHREADS = 30;
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-    }
+    private final FeignCollateralHelper collateralHelper = new FeignCollateralHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void verifyConcurrentLoanRepayments() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        final Integer loanProductID = createLoanProduct(false, NO_ACCOUNTING);
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, "12,000.00");
-        this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00",
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        final Long clientId = createClient();
+        Assertions.assertNotNull(clientHelper.getClient(clientId));
+        final Long loanProductId = createLoanProduct(false, NO_ACCOUNTING);
+        final Long loanId = applyForLoanApplicationWithCollateral(clientId, loanProductId, "12,000.00");
+        // the loanHelper.approveLoan(date, loanId) shorthand pins the approved amount at 1000; this loan is for 12000
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(12000.0, "20 September 2011"));
+        BigDecimal netDisbursalAmount = getLoanDetails(loanId).getNetDisbursalAmount();
+        disburseLoan(loanId, LoanRequestBuilders.disburseLoan(12000.0, "20 September 2011").netDisbursalAmount(netDisbursalAmount));
         ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
         Calendar date = Calendar.getInstance();
         date.set(2011, 9, 20);
-        Float repaymentAmount = 100.0f;
+        Double repaymentAmount = 100.0;
         for (int i = 0; i < 10; i++) {
             LOG.info("Starting concurrent transaction number {}", i);
             date.add(Calendar.DAY_OF_MONTH, 1);
             repaymentAmount = repaymentAmount + 100;
-            Runnable worker = new LoanRepaymentExecutor(loanTransactionHelper, loanID, repaymentAmount, date);
+            Runnable worker = new LoanRepaymentExecutor(transactionHelper, loanId, repaymentAmount, date);
             executor.execute(worker);
         }
 
@@ -103,7 +81,7 @@ public class ConcurrencyIntegrationTest {
 
     }
 
-    private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
+    private Long createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder() //
                 .withPrincipal("12,000.00") //
@@ -120,67 +98,41 @@ public class ConcurrencyIntegrationTest {
         if (multiDisburseLoan) {
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
         }
-        final String loanProductJSON = builder.build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return createLoanProduct(builder.buildRequest(null));
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal) {
+    private Long applyForLoanApplicationWithCollateral(final Long clientId, final Long loanProductId, String principal) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientId, collateralId).getResourceId();
         Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal(principal) //
-                .withLoanTermFrequency("4") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("4") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate("20 September 2011") //
-                .withSubmittedOnDate("20 September 2011") //
-                .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-    }
-
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
-        collaterals.add(collaterals(collateralId, quantity));
-    }
-
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
-        HashMap<String, String> collateral = new HashMap<String, String>(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("quantity", quantity.toString());
-        return collateral;
+        final PostLoansRequest application = LoanRequestBuilders
+                .legacyIndividualApplication(clientId, loanProductId, principal, 4, BigDecimal.valueOf(2), "20 September 2011")//
+                .collateral(List.of(new PostLoansRequestCollateralData().clientCollateralId(clientCollateralId).quantity(BigDecimal.ONE)));
+        return applyForLoan(application);
     }
 
     public static class LoanRepaymentExecutor implements Runnable {
 
-        private final Integer loanId;
-        private final Float repaymentAmount;
+        private final Long loanId;
+        private final Double repaymentAmount;
         private final String repaymentDate;
-        private final LoanTransactionHelper loanTransactionHelper;
+        private final FeignTransactionHelper transactionHelper;
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 
-        LoanRepaymentExecutor(LoanTransactionHelper loanTransactionHelper, Integer loanId, Float repaymentAmount, Calendar repaymentDate) {
+        LoanRepaymentExecutor(FeignTransactionHelper transactionHelper, Long loanId, Double repaymentAmount, Calendar repaymentDate) {
             this.loanId = loanId;
             this.repaymentAmount = repaymentAmount;
             this.repaymentDate = dateFormat.format(repaymentDate.getTime());
-            this.loanTransactionHelper = loanTransactionHelper;
+            this.transactionHelper = transactionHelper;
         }
 
         @Override
         public void run() {
             try {
-                this.loanTransactionHelper.makeRepayment(repaymentDate, repaymentAmount, loanId);
+                this.transactionHelper.makeLoanRepayment(loanId, LoanRequestBuilders.repayLoan(repaymentAmount, repaymentDate));
             } catch (Exception e) {
                 LOG.info("Found an exception {}", e.getMessage());
                 LOG.info("Details of failed concurrent transaction (date, amount, loanId) are {},{},{}", repaymentDate, repaymentAmount,
