@@ -1261,6 +1261,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     "Interest refund transaction: " + transactionId + " cannot be reversed or adjusted directly", transactionId);
         }
 
+        // Reversing a waiver here would leave its charge waived; only undo-waive restores the charge
+        if (transactionToAdjust.isWaiveCharge()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.update.not.allowed",
+                    "Waive charge transaction: " + transactionId + " cannot be reversed or adjusted directly, use PUT /loans/" + loanId
+                            + "/transactions/" + transactionId + " to undo the waiver",
+                    transactionId);
+        }
+
         Long commandId = command.commandId();
         final String noteText = command.stringValueOfParameterNamed("note");
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");

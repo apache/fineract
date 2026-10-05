@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.fineract.commands.service.CommandProcessingService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -64,6 +65,7 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
+import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -155,6 +157,9 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
 
     @Mock
     private AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
+
+    @Mock
+    private AccountTransfersReadPlatformService accountTransfersReadPlatformService;
 
     @Mock
     private LoanDisbursementService loanDisbursementService;
@@ -329,6 +334,34 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         CommandProcessingResult result = loanWritePlatformService.chargeOff(command);
 
         assertEquals(1L, result.getClientId());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void adjustLoanTransaction_withWaiveChargeTransaction_expectException() {
+        final Long transactionId = 2L;
+        LoanTransaction waiver = mock(LoanTransaction.class);
+        when(waiver.isWaiveCharge()).thenReturn(true);
+        when(loanTransactionRepository.findByIdAndLoanId(transactionId, LOAN_ID)).thenReturn(Optional.of(waiver));
+
+        LoanProduct loanProduct = mock(LoanProduct.class);
+        when(loanProduct.getLoanProductRelatedDetail()).thenReturn(mock(LoanProductRelatedDetail.class));
+        loan = new LoanBuilder(loanProduct).withId(LOAN_ID).withLoanStatus(LoanStatus.ACTIVE).build();
+        when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
+
+        command = mock(JsonCommand.class);
+        when(command.entityId()).thenReturn(transactionId);
+        when(command.getLoanId()).thenReturn(LOAN_ID);
+
+        GeneralPlatformDomainRuleException exception = assertThrows(GeneralPlatformDomainRuleException.class,
+                () -> loanWritePlatformService.adjustLoanTransaction(LOAN_ID, transactionId, command));
+
+        assertEquals("error.msg.loan.transaction.update.not.allowed", exception.getGlobalisationMessageCode());
+        assertEquals(
+                "Waive charge transaction: 2 cannot be reversed or adjusted directly, use PUT /loans/1/transactions/2 to undo the waiver",
+                exception.getMessage());
+        verify(waiver, never()).reverse();
+        verify(waiver, never()).reverse(any());
     }
 
     @Test
