@@ -51,6 +51,10 @@ public class FeignExternalEventHelper {
         }
     }
 
+    public Map<String, Boolean> getEnabledByEventType() {
+        return configurationHelper.retrieveEnabledByEventType();
+    }
+
     public List<ExternalEventResponse> getExternalEventsByType(String type) {
         return ok(() -> internalEventsApi.getAllExternalEvents(Map.of("type", type)));
     }

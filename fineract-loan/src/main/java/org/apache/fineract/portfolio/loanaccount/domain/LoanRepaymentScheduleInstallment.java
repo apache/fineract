@@ -27,7 +27,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -339,6 +341,22 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         final Money interestAccountedFor = getInterestPaid(currency).plus(getInterestWaived(currency))
                 .plus(getInterestWrittenOff(currency));
         return getInterestCharged(currency).minus(interestAccountedFor);
+    }
+
+    /**
+     * The interest outstanding prorated by the days of the installment elapsed until {@code date}, which is what an
+     * early termination on that date charges for the installment when interest is not recalculated.
+     */
+    public Money getInterestOutstandingProratedTill(final LocalDate date, final MonetaryCurrency currency) {
+        final Money interestOutstanding = getInterestOutstanding(currency);
+        if (!interestOutstanding.isGreaterThanZero()) {
+            return interestOutstanding;
+        }
+        final long daysInInstallment = ChronoUnit.DAYS.between(getFromDate(), getDueDate());
+        final long daysTillDate = ChronoUnit.DAYS.between(getFromDate(), date);
+        final MathContext mc = MoneyHelper.getMathContext();
+        return Money.of(currency, interestOutstanding.getAmount().divide(BigDecimal.valueOf(daysInInstallment), mc)
+                .multiply(BigDecimal.valueOf(daysTillDate), mc), mc);
     }
 
     public Money getInterestAccrued(final MonetaryCurrency currency) {

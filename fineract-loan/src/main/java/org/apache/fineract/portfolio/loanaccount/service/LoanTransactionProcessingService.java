@@ -51,4 +51,9 @@ public interface LoanTransactionProcessingService {
 
     OutstandingAmountsDTO fetchPrepaymentDetail(ScheduleGeneratorDTO scheduleGeneratorDTO, LocalDate onDate, Loan loan);
 
+    /**
+     * The amounts an early termination (contract termination, loan withdrawal) on {@code onDate} would collect.
+     */
+    OutstandingAmountsDTO fetchEarlyTerminationDetail(ScheduleGeneratorDTO scheduleGeneratorDTO, LocalDate onDate, Loan loan);
+
 }

@@ -582,7 +582,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case REAMORTIZE -> handleReAmortization(loanTransaction, ctx);
             case REAGE -> handleReAge(loanTransaction, ctx);
             case CAPITALIZED_INCOME -> handleCapitalizedIncome(loanTransaction, ctx);
-            case CONTRACT_TERMINATION -> handleContractTermination(loanTransaction, ctx);
+            case CONTRACT_TERMINATION, LOAN_WITHDRAWAL -> handleContractTermination(loanTransaction, ctx);
             // TODO: Cover rest of the transaction types
             default -> log.warn("Unhandled transaction processing for transaction type: {}", loanTransaction.getTypeOf());
         }
@@ -634,7 +634,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         if (isAllComponentsZero(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion)
                 && loanTransaction.isNotReversed() && !DateUtils.isAfterBusinessDate(loanTransaction.getTransactionDate())) {
             loanTransaction.reverse();
-            loanTransaction.getLoan().liftContractTerminationSubStatus();
+            loanTransaction.getLoan().liftEarlyTerminationSubStatus();
 
             if (transactionCtx instanceof ProgressiveTransactionCtx progressiveCtx) {
                 progressiveCtx.setContractTerminated(false);
@@ -2174,19 +2174,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     if (interestOutstanding.compareTo(ZERO) > 0 || totalInterest.compareTo(ZERO) > 0) {
                         currentInstallment.updateInterestCharged(totalInterest);
                     }
-                } else {
-                    final BigDecimal totalInterest = currentInstallment.getInterestOutstanding(transactionCtx.getCurrency()).getAmount();
-                    if (totalInterest.compareTo(ZERO) > 0) {
-                        final long totalDaysInPeriod = ChronoUnit.DAYS.between(currentInstallment.getFromDate(),
-                                currentInstallment.getDueDate());
-                        final long daysTillChargeOff = ChronoUnit.DAYS.between(currentInstallment.getFromDate(), transactionDate);
-
-                        final MathContext mc = MoneyHelper.getMathContext();
-                        final Money interestTillChargeOff = Money.of(transactionCtx.getCurrency(), totalInterest
-                                .divide(BigDecimal.valueOf(totalDaysInPeriod), mc).multiply(BigDecimal.valueOf(daysTillChargeOff), mc), mc);
-
-                        currentInstallment.updateInterestCharged(interestTillChargeOff.getAmount());
-                    }
+                } else if (currentInstallment.getInterestOutstanding(transactionCtx.getCurrency()).isGreaterThanZero()) {
+                    currentInstallment.updateInterestCharged(currentInstallment
+                            .getInterestOutstandingProratedTill(transactionDate, transactionCtx.getCurrency()).getAmount());
                 }
             }
 
@@ -2763,6 +2753,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             paymentAllocationContext.setInAdvanceInstallmentsFilteringRules(
                     installment -> loanTransaction.isBefore(installment.getDueDate()) && installment.isNotFullyPaidOff());
         }
+        // An early termination accelerates what it collapses onto its date, so on that date it is already past due
+        final boolean terminatedEarly = loanTransaction.getLoan().isTerminatedEarlyOnDate(loanTransaction.getTransactionDate());
         LoopGuard.runSafeDoWhileLoop(paymentAllocationContext.getCtx().getInstallments().size() * 100, //
                 paymentAllocationContext, //
                 (HorizontalPaymentAllocationContext context) -> !context.isExitCondition()
@@ -2772,12 +2764,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     final Money unprocessedAtIterationStart = context.getTransactionAmountUnprocessed();
                     LoanRepaymentScheduleInstallment oldestPastDueInstallment = context.getCtx().getInstallments().stream()
                             .filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                            .filter(e -> context.getLoanTransaction().isAfter(e.getDueDate()))
+                            .filter(e -> context.getLoanTransaction().isAfter(e.getDueDate())
+                                    || (terminatedEarly && context.getLoanTransaction().isOn(e.getDueDate())))
                             .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).orElse(null);
-                    LoanRepaymentScheduleInstallment dueInstallment = context.getCtx().getInstallments().stream()
-                            .filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                            .filter(e -> context.getLoanTransaction().isOn(e.getDueDate()))
-                            .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).orElse(null);
+                    LoanRepaymentScheduleInstallment dueInstallment = terminatedEarly ? null
+                            : context.getCtx().getInstallments().stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
+                                    .filter(e -> context.getLoanTransaction().isOn(e.getDueDate()))
+                                    .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).orElse(null);
 
                     // For having similar logic we are populating installment list even when the future installment
                     // allocation rule is NEXT_INSTALLMENT or LAST_INSTALLMENT hence the list has only one element.

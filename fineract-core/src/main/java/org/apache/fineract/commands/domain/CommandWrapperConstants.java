@@ -147,6 +147,8 @@ public final class CommandWrapperConstants {
     public static final String ACTION_BUYDOWNFEEADJUSTMENT = "BUYDOWNFEEADJUSTMENT";
     public static final String ACTION_CONTRACT_TERMINATION = "CONTRACT_TERMINATION";
     public static final String ACTION_CONTRACT_TERMINATION_UNDO = "CONTRACT_TERMINATION_UNDO";
+    public static final String ACTION_LOAN_WITHDRAWAL = "LOAN_WITHDRAWAL";
+    public static final String ACTION_LOAN_WITHDRAWAL_UNDO = "LOAN_WITHDRAWAL_UNDO";
     public static final String ACTION_BUYDOWNFEE = "BUYDOWNFEE";
     public static final String ACTION_UPDATE_APPROVED_AMOUNT = "UPDATE_APPROVED_AMOUNT";
     public static final String ACTION_MANUAL_INTEREST_REFUND_TRANSACTION = "MANUAL_INTEREST_REFUND_TRANSACTION";
