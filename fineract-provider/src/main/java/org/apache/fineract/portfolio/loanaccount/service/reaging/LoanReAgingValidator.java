@@ -191,6 +191,11 @@ public class LoanReAgingValidator {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.not.allowed.on.contract.terminated",
                     "Loan re-aging is not allowed on contract terminated loan.", loan.getId());
         }
+
+        if (loan.isLoanWithdrawal()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.not.allowed.on.loan.withdrawal",
+                    "Loan re-aging is not allowed after loan withdrawal has been applied to the loan account.", loan.getId());
+        }
     }
 
     public void validateUndoReAge(Loan loan) {

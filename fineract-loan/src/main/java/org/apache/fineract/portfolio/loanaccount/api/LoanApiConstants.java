@@ -186,6 +186,8 @@ public interface LoanApiConstants {
     String CAPITALIZED_INCOME_ADJUSTMENT_TRANSACTION_COMMAND = "capitalizedIncomeAdjustment";
     String CONTRACT_TERMINATION_COMMAND = "contractTermination";
     String UNDO_CONTRACT_TERMINATION_COMMAND = "undoContractTermination";
+    String LOAN_WITHDRAWAL_COMMAND = "loanWithdrawal";
+    String UNDO_LOAN_WITHDRAWAL_COMMAND = "undoLoanWithdrawal";
     String BUY_DOWN_FEE_COMMAND = "buyDownFee";
     String BUY_DOWN_FEE_ADJUSTMENT_COMMAND = "buyDownFeeAdjustment";
     String REAGE_COMMAND = "reAge";

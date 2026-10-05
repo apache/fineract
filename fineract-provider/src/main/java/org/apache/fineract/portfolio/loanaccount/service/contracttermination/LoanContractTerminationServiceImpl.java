@@ -24,6 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -36,8 +38,11 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionContractTerminationPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionLoanWithdrawalPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoContractTerminationBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoLoanWithdrawalBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -46,6 +51,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
@@ -77,49 +83,75 @@ public class LoanContractTerminationServiceImpl {
     private final ProgressiveLoanTransactionValidator loanTransactionValidator;
     private final LoanTransactionService loanTransactionService;
 
+    private static final TerminationKind CONTRACT_TERMINATION = new TerminationKind("Contract termination",
+            LoanTransactionType.CONTRACT_TERMINATION, LoanSubStatus.CONTRACT_TERMINATION,
+            "error.msg.loan.contract.termination.is.only.supported.for.progressive.loan.schedule.type",
+            "error.msg.loan.account.is.already.contract.termination.substate", "Loan Account is already terminated.",
+            LoanTransactionContractTerminationPostBusinessEvent::new, LoanUndoContractTerminationBusinessEvent::new);
+    private static final TerminationKind LOAN_WITHDRAWAL = new TerminationKind("Loan withdrawal", LoanTransactionType.LOAN_WITHDRAWAL,
+            LoanSubStatus.LOAN_WITHDRAWAL, "error.msg.loan.withdrawal.is.only.supported.for.progressive.loan.schedule.type",
+            "error.msg.loan.account.is.already.loan.withdrawal.substate", "Loan withdrawal has been applied to the loan account.",
+            LoanTransactionLoanWithdrawalPostBusinessEvent::new, LoanUndoLoanWithdrawalBusinessEvent::new);
+
     public CommandProcessingResult applyContractTermination(final JsonCommand command) {
+        return applyTermination(command, CONTRACT_TERMINATION, loanTransactionValidator::validateContractTermination);
+    }
+
+    public CommandProcessingResult undoContractTermination(final JsonCommand command) {
+        loanTransactionValidator.validateContractTerminationUndo(command, command.getLoanId());
+        return undoTermination(command, CONTRACT_TERMINATION);
+    }
+
+    public CommandProcessingResult applyLoanWithdrawal(final JsonCommand command) {
+        return applyTermination(command, LOAN_WITHDRAWAL, loanTransactionValidator::validateLoanWithdrawal);
+    }
+
+    public CommandProcessingResult undoLoanWithdrawal(final JsonCommand command) {
+        loanTransactionValidator.validateLoanWithdrawalUndo(command, command.getLoanId());
+        return undoTermination(command, LOAN_WITHDRAWAL);
+    }
+
+    private CommandProcessingResult applyTermination(final JsonCommand command, final TerminationKind kind,
+            final BiConsumer<JsonCommand, Long> requestValidation) {
         Loan loan = loanAssembler.assembleFrom(command.getLoanId());
-        // validate client or group is active
         loanUtilService.checkClientOrGroupActive(loan);
 
-        // validate Contract Termination
-        validateTerminationEligibility(loan);
-        loanTransactionValidator.validateContractTermination(command, loan.getId());
+        validateTerminationEligibility(loan, kind);
+        requestValidation.accept(command, loan.getId());
 
         final ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         final LocalDate transactionDate = Objects.requireNonNullElseGet(
                 command.localDateValueOfParameterNamed(LoanApiConstants.transactionDateParamName), DateUtils::getBusinessLocalDate);
-        final LoanTransaction contractTermination = LoanTransaction.contractTermination(loan, transactionDate, externalId);
+        final LoanTransaction termination = LoanTransaction.earlyTermination(loan, transactionDate, kind.transactionType(), externalId);
 
-        // Mark Contract Termination, Update Loan SubStatus
-        loan.setLoanSubStatus(LoanSubStatus.CONTRACT_TERMINATION);
+        loan.setLoanSubStatus(kind.subStatus());
         changes.put(LoanApiConstants.subStatusAttributeName, loan.getLoanSubStatus().getCode());
 
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             loanScheduleService.regenerateRepaymentSchedule(loan);
-            reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(contractTermination));
-            loan.addLoanTransaction(contractTermination);
+            reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(termination));
+            loan.addLoanTransaction(termination);
         } else {
-            reprocessLoanTransactionsService.processLatestTransaction(contractTermination, loan);
-            loan.addLoanTransaction(contractTermination);
+            reprocessLoanTransactionsService.processLatestTransaction(termination, loan);
+            loan.addLoanTransaction(termination);
         }
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            final Note note = Note.loanTransactionNote(loan, contractTermination, noteText);
+            final Note note = Note.loanTransactionNote(loan, termination, noteText);
             noteRepository.save(note);
         }
-        loanTransactionRepository.saveAndFlush(contractTermination);
+        loanTransactionRepository.saveAndFlush(termination);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionContractTerminationPostBusinessEvent(contractTermination));
+        businessEventNotifierService.notifyPostBusinessEvent(kind.appliedEvent().apply(termination));
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(contractTermination.getId()) //
-                .withEntityExternalId(contractTermination.getExternalId()) //
+                .withEntityId(termination.getId()) //
+                .withEntityExternalId(termination.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -128,39 +160,33 @@ public class LoanContractTerminationServiceImpl {
                 .build();
     }
 
-    public CommandProcessingResult undoContractTermination(final JsonCommand command) {
+    private CommandProcessingResult undoTermination(final JsonCommand command, final TerminationKind kind) {
         final Long loanId = command.getLoanId();
-
-        loanTransactionValidator.validateContractTerminationUndo(command, loanId);
-
         final Loan loan = loanAssembler.assembleFrom(loanId);
-        final LoanTransaction contractTerminationTransaction = loan.findContractTerminationTransaction();
+        final LoanTransaction termination = loan.getLoanTransaction(t -> t.isNotReversed() && kind.transactionType().equals(t.getTypeOf()));
 
-        businessEventNotifierService.notifyPreBusinessEvent(new LoanUndoContractTerminationBusinessEvent(contractTerminationTransaction));
-        businessEventNotifierService.notifyPreBusinessEvent(
-                new LoanAdjustTransactionBusinessEvent(new LoanAdjustTransactionBusinessEvent.Data(contractTerminationTransaction)));
+        businessEventNotifierService.notifyPreBusinessEvent(kind.undoneEvent().apply(termination));
+        businessEventNotifierService
+                .notifyPreBusinessEvent(new LoanAdjustTransactionBusinessEvent(new LoanAdjustTransactionBusinessEvent.Data(termination)));
 
-        // check if reversalExternalId is provided
         final String reversalExternalId = command.stringValueOfParameterNamedAllowingNull(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME);
         final ExternalId reversalTxnExternalId = ExternalIdFactory.produce(reversalExternalId);
         final Map<String, Object> changes = new LinkedHashMap<>();
 
-        // Add note if provided
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            final Note note = Note.loanTransactionNote(loan, contractTerminationTransaction, noteText);
+            final Note note = Note.loanTransactionNote(loan, termination, noteText);
             noteRepository.save(note);
         }
 
-        loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(contractTerminationTransaction.getLoan(),
-                contractTerminationTransaction, "reversed");
-        contractTerminationTransaction.reverse(reversalTxnExternalId);
-        contractTerminationTransaction.manuallyAdjustedOrReversed();
+        loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(termination.getLoan(), termination, "reversed");
+        termination.reverse(reversalTxnExternalId);
+        termination.manuallyAdjustedOrReversed();
 
-        loan.liftContractTerminationSubStatus();
+        loan.liftEarlyTerminationSubStatus();
         changes.put(LoanApiConstants.subStatusAttributeName, loan.getLoanSubStatus());
-        loanTransactionRepository.saveAndFlush(contractTerminationTransaction);
+        loanTransactionRepository.saveAndFlush(termination);
 
         final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
         if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -172,51 +198,44 @@ public class LoanContractTerminationServiceImpl {
         reprocessLoanTransactionsService.reprocessTransactions(loan);
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoContractTerminationBusinessEvent(contractTerminationTransaction));
-
-        final LoanAdjustTransactionBusinessEvent.Data eventData = new LoanAdjustTransactionBusinessEvent.Data(
-                contractTerminationTransaction);
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(eventData));
+        businessEventNotifierService.notifyPostBusinessEvent(kind.undoneEvent().apply(termination));
+        businessEventNotifierService
+                .notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(new LoanAdjustTransactionBusinessEvent.Data(termination)));
 
         return new CommandProcessingResultBuilder() //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
-                .withEntityId(contractTerminationTransaction.getId()) //
-                .withEntityExternalId(contractTerminationTransaction.getExternalId()) //
+                .withEntityId(termination.getId()) //
+                .withEntityExternalId(termination.getExternalId()) //
                 .with(changes) //
                 .build();
     }
 
-    public void validateTerminationEligibility(final Loan loan) {
+    private void validateTerminationEligibility(final Loan loan, final TerminationKind kind) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final String notApplicable = kind.label() + " can not be applied, ";
 
         if (!loan.isOpen()) {
-            final String defaultUserMessage = "Contract termination can not be applied, Loan Account is not Active.";
-            final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.account.is.not.active.state",
-                    defaultUserMessage);
-            dataValidationErrors.add(error);
+            dataValidationErrors.add(ApiParameterError.generalError("error.msg.loan.account.is.not.active.state",
+                    notApplicable + "Loan Account is not Active."));
         }
 
         if (!loan.getLoanProduct().getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)) {
-            final String defaultUserMessage = "Contract termination can not be applied, Loan product schedule type is not Progressive.";
-            final ApiParameterError error = ApiParameterError.generalError(
-                    "error.msg.loan.contract.termination.is.only.supported.for.progressive.loan.schedule.type", defaultUserMessage);
-            dataValidationErrors.add(error);
+            dataValidationErrors.add(ApiParameterError.generalError(kind.progressiveOnlyCode(),
+                    notApplicable + "Loan product schedule type is not Progressive."));
         }
 
         if (loan.isChargedOff()) {
-            final String defaultUserMessage = "Contract termination can not be applied, Loan Account is Charge-Off.";
-            final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.account.is.charge-off", defaultUserMessage);
-            dataValidationErrors.add(error);
+            dataValidationErrors.add(
+                    ApiParameterError.generalError("error.msg.loan.account.is.charge-off", notApplicable + "Loan Account is Charge-Off."));
         }
 
-        if (loan.isContractTermination()) {
-            final String defaultUserMessage = "Contract termination can not be applied, Loan Account is already terminated.";
-            final ApiParameterError error = ApiParameterError
-                    .generalError("error.msg.loan.account.is.already.contract.termination.substate", defaultUserMessage);
-            dataValidationErrors.add(error);
+        if (loan.isTerminatedEarly()) {
+            final TerminationKind applied = loan.isLoanWithdrawal() ? LOAN_WITHDRAWAL : CONTRACT_TERMINATION;
+            dataValidationErrors
+                    .add(ApiParameterError.generalError(applied.alreadyAppliedCode(), notApplicable + applied.alreadyAppliedMessage()));
         }
 
         if (!dataValidationErrors.isEmpty()) {
@@ -224,4 +243,8 @@ public class LoanContractTerminationServiceImpl {
         }
     }
 
+    private record TerminationKind(String label, LoanTransactionType transactionType, LoanSubStatus subStatus, String progressiveOnlyCode,
+            String alreadyAppliedCode, String alreadyAppliedMessage, Function<LoanTransaction, LoanTransactionBusinessEvent> appliedEvent,
+            Function<LoanTransaction, LoanTransactionBusinessEvent> undoneEvent) {
+    }
 }

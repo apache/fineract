@@ -89,6 +89,8 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_INTERESTPAYMENTWAIVER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_INTERMEDIARYSALE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_INVALIDATE;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_LOAN_WITHDRAWAL;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_LOAN_WITHDRAWAL_UNDO;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_MANUAL_INTEREST_REFUND_TRANSACTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_MERCHANTISSUEDREFUND;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_PAY;
@@ -4087,6 +4089,24 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder undoContractTermination(final Long loanId) {
         this.actionName = ACTION_CONTRACT_TERMINATION_UNDO;
+        this.entityName = ENTITY_LOAN;
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder applyLoanWithdrawal(final Long loanId) {
+        this.actionName = ACTION_LOAN_WITHDRAWAL;
+        this.entityName = ENTITY_LOAN;
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder undoLoanWithdrawal(final Long loanId) {
+        this.actionName = ACTION_LOAN_WITHDRAWAL_UNDO;
         this.entityName = ENTITY_LOAN;
         this.entityId = loanId;
         this.loanId = loanId;

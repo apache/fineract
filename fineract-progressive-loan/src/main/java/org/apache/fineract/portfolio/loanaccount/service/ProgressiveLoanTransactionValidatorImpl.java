@@ -27,9 +27,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -81,6 +84,16 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     private static final String DATE_FORMAT = "dateFormat";
     private static final String LOCALE = "locale";
     private static final String PAYMENT_TYPE_ID = "paymentTypeId";
+
+    private static final EarlyTerminationRules CONTRACT_TERMINATION = new EarlyTerminationRules("loan.contract.termination",
+            "Contract Termination", Loan::isContractTermination, Loan::findContractTerminationTransaction,
+            "error.msg.loan.is.not.contract.terminated", "is not contract terminated",
+            "error.msg.loan.contract.termination.transaction.not.found",
+            "error.msg.loan.contract.termination.is.not.the.last.user.transaction");
+    private static final EarlyTerminationRules LOAN_WITHDRAWAL = new EarlyTerminationRules("loan.withdrawal", "Loan Withdrawal",
+            Loan::isLoanWithdrawal, Loan::findLoanWithdrawalTransaction, "error.msg.loan.is.not.loan.withdrawal",
+            "has no loan withdrawal applied", "error.msg.loan.withdrawal.transaction.not.found",
+            "error.msg.loan.withdrawal.is.not.the.last.user.transaction");
 
     private static final String NOT_PROGRESSIVE_LOAN = "not.progressive.loan";
     private static final String NOT_VALID_LOAN_STATUS = "not.valid.loan.status";
@@ -254,11 +267,30 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
 
     @Override
     public void validateContractTermination(final JsonCommand command, final Long loanId) {
+        validateEarlyTermination(command, loanId, CONTRACT_TERMINATION);
+    }
+
+    @Override
+    public void validateContractTerminationUndo(final JsonCommand command, final Long loanId) {
+        validateEarlyTerminationUndo(command, loanId, CONTRACT_TERMINATION);
+    }
+
+    @Override
+    public void validateLoanWithdrawal(final JsonCommand command, final Long loanId) {
+        validateEarlyTermination(command, loanId, LOAN_WITHDRAWAL);
+    }
+
+    @Override
+    public void validateLoanWithdrawalUndo(final JsonCommand command, final Long loanId) {
+        validateEarlyTerminationUndo(command, loanId, LOAN_WITHDRAWAL);
+    }
+
+    private void validateEarlyTermination(final JsonCommand command, final Long loanId, final EarlyTerminationRules rules) {
         final String json = command.json();
         final JsonElement element = StringUtils.isNotBlank(json) ? this.fromApiJsonHelper.parse(json) : null;
         if (element != null) {
             final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-            this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getContractTerminationParameters());
+            this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getEarlyTerminationParameters());
         }
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(TRANSACTION_DATE);
@@ -267,28 +299,27 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
             return;
         }
 
-        Validator.validateOrThrow("loan.contract.termination", baseDataValidator -> {
+        Validator.validateOrThrow(rules.resource(), baseDataValidator -> {
             if (transactionDate == null) {
                 // A sent but unparseable date reads as null too, and must not take the business date default
                 baseDataValidator.reset().parameter(TRANSACTION_DATE).failWithCode("invalid.date.format",
-                        "Contract termination transaction date could not be read as a date");
+                        rules.label() + " transaction date could not be read as a date");
             } else if (DateUtils.isBeforeBusinessDate(transactionDate)) {
                 baseDataValidator.reset().parameter(TRANSACTION_DATE).value(transactionDate).failWithCode("cannot.be.before.business.date",
-                        "Contract termination transaction date cannot be before the business date");
+                        rules.label() + " transaction date cannot be before the business date");
             } else if (DateUtils.isDateInTheFuture(transactionDate)) {
                 // Deliberately future dated only: terminating on the business date after maturity stays allowed
                 final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
                 final LocalDate maturityDate = loan.getMaturityDate();
                 if (maturityDate != null && !transactionDate.isBefore(maturityDate)) {
                     baseDataValidator.reset().parameter(TRANSACTION_DATE).value(transactionDate).failWithCode(
-                            "must.be.before.maturity.date", "Contract termination transaction date must be before the maturity date");
+                            "must.be.before.maturity.date", rules.label() + " transaction date must be before the maturity date");
                 }
             }
         });
     }
 
-    @Override
-    public void validateContractTerminationUndo(final JsonCommand command, final Long loanId) {
+    private void validateEarlyTerminationUndo(final JsonCommand command, final Long loanId, final EarlyTerminationRules rules) {
         final String json = command.json();
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
@@ -296,30 +327,29 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getContractTerminationUndoParameters());
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getEarlyTerminationUndoParameters());
 
-        Validator.validateOrThrow("loan.contract.termination.undo", baseDataValidator -> {
+        Validator.validateOrThrow(rules.resource() + ".undo", baseDataValidator -> {
             final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
             validateLoanClientIsActive(loan);
             validateLoanGroupIsActive(loan);
 
             if (!loan.isOpen()) {
                 throw new GeneralPlatformDomainRuleException("error.msg.loan.is.not.active",
-                        "Loan: " + loanId + " Undo Contract Termination is not allowed. Loan Account is not Active", loanId);
+                        "Loan: " + loanId + " Undo " + rules.title() + " is not allowed. Loan Account is not Active", loanId);
             }
-            if (!loan.isContractTermination()) {
-                throw new GeneralPlatformDomainRuleException("error.msg.loan.is.not.contract.terminated",
-                        "Loan: " + loanId + " is not contract terminated", loanId);
+            if (!rules.appliedOn().test(loan)) {
+                throw new GeneralPlatformDomainRuleException(rules.notAppliedCode(), "Loan: " + loanId + " " + rules.notAppliedMessage(),
+                        loanId);
             }
-            final LoanTransaction contractTerminationTransaction = loan.findContractTerminationTransaction();
-            if (contractTerminationTransaction == null) {
-                throw new GeneralPlatformDomainRuleException("error.msg.loan.contract.termination.transaction.not.found",
-                        "Loan: " + loanId + " contract termination transaction was not found", loanId);
+            final LoanTransaction transaction = rules.transactionFinder().apply(loan);
+            if (transaction == null) {
+                throw new GeneralPlatformDomainRuleException(rules.transactionNotFoundCode(),
+                        "Loan: " + loanId + " " + rules.lowerCaseLabel() + " transaction was not found", loanId);
             }
-            if (!contractTerminationTransaction.equals(loan.getLastUserTransaction())) {
-                throw new GeneralPlatformDomainRuleException("error.msg.loan.contract.termination.is.not.the.last.user.transaction",
-                        "Loan: " + loanId
-                                + " contract termination cannot be undone. User transaction was found after contract termination!",
+            if (!transaction.equals(loan.getLastUserTransaction())) {
+                throw new GeneralPlatformDomainRuleException(rules.notLastUserTransactionCode(), "Loan: " + loanId + " "
+                        + rules.lowerCaseLabel() + " cannot be undone. User transaction was found after " + rules.lowerCaseLabel() + "!",
                         loanId);
             }
 
@@ -657,15 +687,28 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
         return new HashSet<>(Arrays.asList(TRANSACTION_DATE, DATE_FORMAT, LOCALE, TRANSACTION_AMOUNT, PAYMENT_TYPE_ID, NOTE, EXTERNAL_ID));
     }
 
-    private Set<String> getContractTerminationParameters() {
+    private Set<String> getEarlyTerminationParameters() {
         return new HashSet<>(Arrays.asList(TRANSACTION_DATE, DATE_FORMAT, LOCALE, NOTE, EXTERNAL_ID));
     }
 
-    private Set<String> getContractTerminationUndoParameters() {
+    private Set<String> getEarlyTerminationUndoParameters() {
         return new HashSet<>(Arrays.asList(NOTE, "reversalExternalId"));
     }
 
     private Set<String> getBuyDownFeeAdjustmentParameters() {
         return new HashSet<>(Arrays.asList(TRANSACTION_DATE, DATE_FORMAT, LOCALE, TRANSACTION_AMOUNT, PAYMENT_TYPE_ID, NOTE, EXTERNAL_ID));
+    }
+
+    private record EarlyTerminationRules(String resource, String title, Predicate<Loan> appliedOn,
+            Function<Loan, LoanTransaction> transactionFinder, String notAppliedCode, String notAppliedMessage,
+            String transactionNotFoundCode, String notLastUserTransactionCode) {
+
+        String label() {
+            return StringUtils.capitalize(lowerCaseLabel());
+        }
+
+        String lowerCaseLabel() {
+            return title.toLowerCase(Locale.ROOT);
+        }
     }
 }

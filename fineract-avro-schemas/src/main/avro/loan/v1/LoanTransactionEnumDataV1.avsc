@@ -346,6 +346,14 @@
                 "null",
                 "boolean"
             ]
+        },
+        {
+            "default": null,
+            "name": "loanWithdrawal",
+            "type": [
+                "null",
+                "boolean"
+            ]
         }
     ]
 }
