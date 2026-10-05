@@ -167,7 +167,7 @@ jobs:
           cache-read-only: false
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
 
       # This job holds two Gradle build JVMs plus a backend and a test JVM at the same time.
       # The build JVMs only configure the project and launch forked processes, so 2g is
