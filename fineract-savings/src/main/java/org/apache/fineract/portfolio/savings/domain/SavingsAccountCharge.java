@@ -327,6 +327,17 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
     }
 
     public void undoPayment(final MonetaryCurrency currency, final Money transactionAmount) {
+        // A partial payment on a recurring fee leaves its cycle open: pay() only advances the due date and resets the
+        // cycle once the outstanding reaches zero. Undoing such a payment must hand the amount back to that same open
+        // cycle, not reset the outstanding to the full fee and roll the due date back a cycle it never left.
+        if (isRecurringFee() && isPaymentOnOpenCycle(currency, transactionAmount)) {
+            this.amountPaid = getAmountPaid(currency).minus(transactionAmount).getAmount();
+            this.amountOutstanding = getAmountOutstanding(currency).plus(transactionAmount).getAmount();
+            this.paid = false;
+            this.status = true;
+            return;
+        }
+
         Money amountPaid = getAmountPaid(currency);
         amountPaid = amountPaid.minus(transactionAmount);
         this.amountPaid = amountPaid.getAmount();
@@ -340,6 +351,20 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
         updateToPreviousDueDate();// reset annual and monthly due date.
         this.paid = false;
         this.status = true;
+    }
+
+    /**
+     * Whether {@code transactionAmount} was paid against the current, still-open cycle: that cycle is partly paid
+     * (outstanding below the fee amount) and has already received at least this much. amountPaid and amountWaived
+     * accumulate across cycles, so the open cycle's paid part is read off its outstanding instead; waive() always
+     * closes a whole cycle, so an open cycle carries no waiver.
+     */
+    private boolean isPaymentOnOpenCycle(final MonetaryCurrency currency, final Money transactionAmount) {
+        if (this.amountOutstanding == null || transactionAmount == null) {
+            return false;
+        }
+        final Money paidOnOpenCycle = getAmount(currency).minus(getAmountOutstanding(currency));
+        return paidOnOpenCycle.isGreaterThanZero() && !transactionAmount.isGreaterThan(paidOnOpenCycle);
     }
 
     public Money waive(final MonetaryCurrency currency) {
