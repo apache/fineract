@@ -2256,23 +2256,23 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     private void updateModelForReageEqualAmortization(ProgressiveLoanInterestScheduleModel interestSchedule,
             LoanReAgeParameterData reageParameter, List<RepaymentPeriod> reAgedRepaymentPeriods) {
-        int numberOfInstallmentsToAdd = reageParameter.getNumberOfInstallments();
-        LocalDate toDate = reageParameter.getStartDate();
+        final int numberOfInstallmentsToAdd = reageParameter.getNumberOfInstallments();
+        final LocalDate startDate = reageParameter.getStartDate();
         RepaymentPeriod previous = interestSchedule.getLastRepaymentPeriod();
-        int frequency = reageParameter.getFrequencyNumber();
-        PeriodFrequencyType frequencyType = reageParameter.getFrequencyType();
+        final int frequency = reageParameter.getFrequencyNumber();
+        final PeriodFrequencyType frequencyType = reageParameter.getFrequencyType();
 
         // insert new reaged repayment periods
         for (int i = 0; i < numberOfInstallmentsToAdd; i++) {
-            RepaymentPeriod repaymentPeriod = RepaymentPeriod.create(previous, previous.getDueDate(), toDate, interestSchedule.zero(),
-                    interestSchedule.mc(), previous.getLoanProductRelatedDetail());
+            final LocalDate dueDate = scheduledDateGenerator.getRepaymentPeriodDate(frequencyType, frequency * i, startDate);
+            final RepaymentPeriod repaymentPeriod = RepaymentPeriod.create(previous, previous.getDueDate(), dueDate,
+                    interestSchedule.zero(), interestSchedule.mc(), previous.getLoanProductRelatedDetail());
             repaymentPeriod.setTotalCapitalizedIncomeAmount(previous.getTotalCapitalizedIncomeAmount());
             repaymentPeriod.setTotalDisbursedAmount(previous.getTotalDisbursedAmount());
             repaymentPeriod.setReAged(true);
             interestSchedule.repaymentPeriods().add(repaymentPeriod);
             reAgedRepaymentPeriods.add(repaymentPeriod);
             previous = repaymentPeriod;
-            toDate = scheduledDateGenerator.getRepaymentPeriodDate(frequencyType, frequency, toDate);
         }
     }
 
