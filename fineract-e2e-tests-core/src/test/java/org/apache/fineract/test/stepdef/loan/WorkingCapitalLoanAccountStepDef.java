@@ -3410,6 +3410,15 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         checkPeriodPaymentRateChangeHistory(data, rateChangesResponse, header, resourceId);
     }
 
+    @Then("Working Capital Loan Period Payment Rate changes history is empty")
+    public void periodPaymentRateChangesHistoryIsEmpty() {
+        final Long loanId = getCreatedLoanId();
+        final List<WorkingCapitalLoanPeriodPaymentRateChangeData> rateChanges = ok(
+                () -> fineractClient.workingCapitalLoans().getWorkingCapitalLoanRateChangeHistoryById(loanId));
+        assertThat(rateChanges).as("Rate change history of loan %d", loanId).isEmpty();
+        log.info("Verified that loan {} has no period payment rate changes", loanId);
+    }
+
     @Given("Admin captures the current tenant date for the Working Capital loan")
     public void captureCurrentTenantDateForWorkingCapitalLoan() {
         workingCapitalTenantDateHelper.captureCurrentTenantDateBeforeAction(getCreatedLoanId());

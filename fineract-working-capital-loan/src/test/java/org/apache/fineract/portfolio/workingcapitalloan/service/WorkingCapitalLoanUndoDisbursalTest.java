@@ -53,6 +53,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanDataValidator;
@@ -101,6 +102,8 @@ public class WorkingCapitalLoanUndoDisbursalTest {
     private WorkingCapitalLoanChargeRepository chargeRepository;
     @Mock
     private WorkingCapitalLoanBalanceRepository balanceRepository;
+    @Mock
+    private WorkingCapitalLoanPeriodPaymentRateChangeRepository rateChangeRepository;
 
     @Mock
     private WorkingCapitalLoan loan;
@@ -199,10 +202,11 @@ public class WorkingCapitalLoanUndoDisbursalTest {
 
         writePlatformService.undoDisbursal(LOAN_ID, command);
 
-        final InOrder order = inOrder(delinquencyRangeScheduleService, breachScheduleService, chargeRepository, balanceRepository,
-                amortizationScheduleWriteService);
+        final InOrder order = inOrder(delinquencyRangeScheduleService, breachScheduleService, rateChangeRepository, chargeRepository,
+                balanceRepository, amortizationScheduleWriteService);
         order.verify(delinquencyRangeScheduleService).deleteScheduleAndActions(LOAN_ID);
         order.verify(breachScheduleService).deleteScheduleAndActions(LOAN_ID);
+        order.verify(rateChangeRepository).deleteByWorkingCapitalLoanId(LOAN_ID);
         order.verify(chargeRepository).saveAll(List.of(fee, penalty));
         order.verify(balanceRepository).delete(staleBalance);
         order.verify(balanceRepository).flush();

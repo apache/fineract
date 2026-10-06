@@ -250,6 +250,10 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         this.loanRepository.saveAndFlush(loan);
 
+        // The approval-time projection is overwritten by one made from the submitted values, now that the loan is back
+        // in submitted status: with the approved principal zeroed, the projection falls back to the expected amount.
+        this.amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnApproval(loan);
+
         createNote(command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName), loan);
 
         businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanUndoApprovalBusinessEvent(loan));
@@ -1479,12 +1483,15 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     /**
      * Drops everything the disbursement brought into being, so the loan is back where approval left it and the next
      * disbursement builds it all again from the loan's current configuration: the delinquency and breach schedules with
-     * every action recorded against them, the charges (deactivated, as transactions still reference them) and the
-     * balance. The amortization model is regenerated last, from that clean approved state.
+     * every action recorded against them, the period payment rate changes (history that only an active loan can
+     * accumulate, and that a later rate change would otherwise read as still in force), the charges (deactivated, as
+     * transactions still reference them) and the balance. The amortization model is regenerated last, from that clean
+     * approved state.
      */
     private void resetToApprovedState(final WorkingCapitalLoan loan) {
         delinquencyRangeScheduleService.deleteScheduleAndActions(loan.getId());
         breachScheduleService.deleteScheduleAndActions(loan.getId());
+        rateChangeRepository.deleteByWorkingCapitalLoanId(loan.getId());
         deactivateCharges(loan);
         replaceBalance(loan);
         amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnApproval(loan);

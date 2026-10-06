@@ -242,7 +242,9 @@ As repayments are received, the fee earned on the money collected determines how
 | Stage | Behavior
 
 | *Approve* | Generates a projected schedule from approved loan parameters and expected disbursement date.
+| *Undo approval* | Deletes the approval-time schedule and projects a new one from the submitted values: proposed principal, proposed discount and expected disbursement date.
 | *Disburse* | Regenerates the schedule using the actual disbursement amount and actual disbursement date.
+| *Undo disbursal* | Projects the schedule again from the approved values, exactly as approval does, once the loan is back on the clean slate of a never disbursed approved loan: the breach schedule, the delinquency range schedule and its tags, the breach, delinquency and near breach actions and the period payment rate changes are deleted, the loan charges are deactivated and the balance is replaced by a fresh one. A later disbursement anchors its schedules on its own date.
 | *Repayment* | `applyPayment()` records the repayment against the calculated schedule date and rebuilds the schedule. Calculates actual amortization and income modification for applied payment rows.
 | *Period Payment Rate Change* | Records the change's effective date and rate, and rebuilds; the walk switches to the new rate on the day it reaches that date, re-solving from the balance and unearned fee it is carrying. The effective date may be in the future, in which case the schedule carries the change immediately while the rate stored on the loan is switched over by the `WC_PERIOD_PAYMENT_RATE_EFFECTIVE_DATE` COB step once that date arrives. A date past the end of the schedule takes effect on its last day; a date at or before the first instalment takes effect on the first day, so two changes a day apart either side of it can land on the same day — the one booked later governs it.
 |===
@@ -266,7 +268,7 @@ As repayments are received, the fee earned on the money collected determines how
 | `undoapproval`
 | Approved
 | Submitted and Pending Approval
-| Clears approval data and regenerates the schedule from the submitted loan values
+| Clears approval data, deletes the approval-time schedule and projects a new one from the submitted loan values
 
 | `disburse`
 | Approved
@@ -276,7 +278,7 @@ As repayments are received, the fee earned on the money collected determines how
 | `undodisbursal`
 | Active
 | Approved
-| Allowed only when there are no active monetary transactions other than disbursement, discount fee, discount fee amortization, and discount fee adjustment; reverses transactions, resets balance, and regenerates the schedule
+| Allowed only when there are no active monetary transactions other than disbursement, discount fee, discount fee amortization, and discount fee adjustment; reverses transactions, resets balance, deletes the breach and delinquency schedules, every breach, delinquency and near breach action and every rate change, and re-projects the amortization schedule from the approved values
 
 | repayment transaction
 | Active or Overpaid

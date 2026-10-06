@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -46,11 +47,13 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateChange;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanEirNotCalculableException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
@@ -60,12 +63,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 
 class WorkingCapitalLoanAmortizationScheduleWriteServiceImplTest {
 
     private static final MathContext MC = MathContext.DECIMAL128;
     private static final CurrencyData CURRENCY = new CurrencyData("EUR", 2, null);
     private static final LocalDate DISBURSEMENT = LocalDate.of(2026, 1, 1);
+    private static final Long LOAN_ID = 3L;
 
     private final ProjectedAmortizationScheduleRepositoryWrapper scheduleRepositoryWrapper = mock(
             ProjectedAmortizationScheduleRepositoryWrapper.class);
@@ -183,6 +188,37 @@ class WorkingCapitalLoanAmortizationScheduleWriteServiceImplTest {
         return change;
     }
 
+    /**
+     * Undoing the approval projects from the submitted values: the expected amount, not the (now zero) approved one.
+     */
+    @Test
+    void undoApproval_ShouldProjectTheSubmittedStateFromTheExpectedDisbursementAmount() {
+        final WorkingCapitalLoan loan = notYetDisbursedLoan();
+        when(loan.isSubmittedAndPendingApproval()).thenReturn(true);
+        when(loan.getApprovedPrincipal()).thenReturn(BigDecimal.ZERO);
+        when(loan.getLoanProductRelatedDetails().getDiscountProposed()).thenReturn(BigDecimal.ZERO);
+
+        service.generateAndSaveAmortizationScheduleOnApproval(loan);
+
+        final ArgumentCaptor<ProjectedAmortizationScheduleModel> model = ArgumentCaptor.forClass(ProjectedAmortizationScheduleModel.class);
+        verify(scheduleRepositoryWrapper).writeModel(eq(loan), model.capture());
+        assertEquals(0, new BigDecimal("9000").compareTo(model.getValue().netDisbursementAmount().getAmount()));
+    }
+
+    /** A calculable TPV loan with one tranche expected on 1 January 2026 for 9000, as submitted. */
+    private static WorkingCapitalLoan notYetDisbursedLoan() {
+        final WorkingCapitalLoan loan = loan(WorkingCapitalPaymentAmountCalculationStrategy.TPV, new BigDecimal("100000"),
+                new BigDecimal("18"));
+        when(loan.getId()).thenReturn(LOAN_ID);
+        when(loan.getLoanProductRelatedDetails().getAmortizationType()).thenReturn(WorkingCapitalAmortizationType.EIR);
+        final WorkingCapitalLoanDisbursementDetails detail = mock(WorkingCapitalLoanDisbursementDetails.class);
+        when(detail.getExpectedDisbursementDate()).thenReturn(LocalDate.of(2026, 1, 1));
+        when(detail.getExpectedAmount()).thenReturn(new BigDecimal("9000"));
+        when(loan.getDisbursementDetails()).thenReturn(List.of(detail));
+        return loan;
+    }
+
+    /** A loan whose product carries no default for any strategy input, so only the loan's own values count. */
     private static WorkingCapitalLoan loan(final WorkingCapitalPaymentAmountCalculationStrategy strategy,
             final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate) {
         return loan(strategy, totalPaymentVolume, periodPaymentRate, new BigDecimal("1000"));

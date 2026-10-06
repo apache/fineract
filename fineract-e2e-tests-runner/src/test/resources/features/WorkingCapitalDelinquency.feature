@@ -1022,6 +1022,7 @@ Feature: Working Capital Delinquency
     When Admin successfully disburse the Working Capital loan on "02 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "03 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
+    # The undone disbursement left no schedule behind, so the new one is anchored on the second disbursement date.
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-02 | 2026-01-28 | 248.0          | 0.0        | 248.0             | null                  | null             | null           |
