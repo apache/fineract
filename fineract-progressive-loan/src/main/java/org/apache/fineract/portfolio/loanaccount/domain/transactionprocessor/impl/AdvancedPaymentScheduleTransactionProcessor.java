@@ -369,6 +369,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     .repaymentPeriodFrequencyType(repaymentFrequency) //
                     .fixedLength(loan.getLoanProductRelatedDetail().getFixedLength()) //
                     .seedDate(newDueDate) //
+                    .monthEndDueDateStrategy(loan.getLoanProductRelatedDetail().getMonthEndDueDateStrategy()) //
                     .build();
             emiCalculator.changeDueDate(scheduleModel, loanApplicationTerms, targetRepaymentPeriodDueDate, newDueDate);
         }
@@ -4272,9 +4273,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .interestRecognitionOnDisbursementDate(
                         loan.getLoanProduct().getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate())
                 .daysInYearCustomStrategy(loan.getLoanProduct().getLoanProductRelatedDetail().getDaysInYearCustomStrategy())
-                .interestMethod(loan.getLoanProductRelatedDetail().getInterestMethod()).allowPartialPeriodInterestCalculation(
+                .interestMethod(loan.getLoanProductRelatedDetail().getInterestMethod())
+                .allowPartialPeriodInterestCalculation(
                         loan.getLoanProduct().getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalculation())
-                .mc(mc).build();
+                .monthEndDueDateStrategy(loan.getLoanProductRelatedDetail().getMonthEndDueDateStrategy()).mc(mc).build();
 
         final LocalDate reAgePeriodStartDate = calculateFirstReAgedPeriodStartDate(loanTransaction);
         final LocalDate reAgeFirstDueDate = loanTransaction.getLoanReAgeParameter().getStartDate();

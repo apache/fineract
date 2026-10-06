@@ -77,6 +77,7 @@ import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformSer
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketType;
@@ -140,7 +141,7 @@ public class LoanProductsApiResource {
             LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT, LoanProductConstants.ENABLE_DOWN_PAYMENT,
             LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT, LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT,
             LoanProductConstants.REPAYMENT_START_DATE_TYPE, LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME,
-            LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME,
+            LoanProductConstants.MONTH_END_DUE_DATE_STRATEGY_PARAMETER_NAME, LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME,
             LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME,
             LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME,
             LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME,
@@ -471,6 +472,8 @@ public class LoanProductsApiResource {
                 .retrieveCodeValuesByCode(LoanApiConstants.CHARGE_OFF_REASONS);
         final List<StringEnumOptionData> daysInYearCustomStrategyOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(DaysInYearCustomStrategyType.class);
+        final List<StringEnumOptionData> monthEndDueDateStrategyOptions = ApiFacingEnum
+                .getValuesAsStringEnumOptionDataList(MonthEndDueDateStrategy.class);
         final List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeCalculationType.class);
         final List<StringEnumOptionData> capitalizedIncomeStrategyOptions = ApiFacingEnum
@@ -503,7 +506,8 @@ public class LoanProductsApiResource {
                 creditAllocationAllocationTypes, supportedInterestRefundTypesOptions, chargeOffBehaviourOptions, chargeOffReasonOptions,
                 daysInYearCustomStrategyOptions, capitalizedIncomeCalculationTypeOptions, capitalizedIncomeStrategyOptions,
                 capitalizedIncomeTypeOptions, buyDownFeeCalculationTypeOptions, buyDownFeeStrategyOptions, buyDownFeeIncomeTypeOptions,
-                writeOffReasonOptions, capitalizedIncomeClassificationOptions, buydownFeeClassificationOptions);
+                writeOffReasonOptions, capitalizedIncomeClassificationOptions, buydownFeeClassificationOptions,
+                monthEndDueDateStrategyOptions);
     }
 
 }

@@ -1305,6 +1305,7 @@ final class LoansApiResourceSwagger {
         @Schema(description = "List of GetLoansLoanIdLoanTermVariations")
         public List<GetLoansLoanIdLoanTermVariations> loanTermVariations;
         public StringEnumOptionData chargeOffBehaviour;
+        public StringEnumOptionData monthEndDueDateStrategy;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
         @Schema(example = "false")
@@ -1454,6 +1455,9 @@ final class LoansApiResourceSwagger {
         public BigDecimal fixedEmiAmount;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        @Schema(example = "FIRST_DAY_OF_NEXT_MONTH", allowableValues = { "LAST_DAY_OF_MONTH",
+                "FIRST_DAY_OF_NEXT_MONTH" }, description = "Overrides the loan product's month end due date strategy for this loan")
+        public String monthEndDueDateStrategy;
         @Schema(example = "false")
         public Boolean enableIncomeCapitalization;
         @Schema(example = "FLAT", allowableValues = "FLAT")
@@ -1703,6 +1707,9 @@ final class LoansApiResourceSwagger {
         public Boolean enableAutoRepaymentForDownPayment;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        @Schema(example = "FIRST_DAY_OF_NEXT_MONTH", allowableValues = { "LAST_DAY_OF_MONTH",
+                "FIRST_DAY_OF_NEXT_MONTH" }, description = "Overrides the loan product's month end due date strategy for this loan")
+        public String monthEndDueDateStrategy;
 
         static final class PutLoansLoanIdChargeData {
 

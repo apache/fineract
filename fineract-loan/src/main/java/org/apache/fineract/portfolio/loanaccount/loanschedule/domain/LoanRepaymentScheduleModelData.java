@@ -27,6 +27,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 
 public record LoanRepaymentScheduleModelData(@NotNull LocalDate scheduleGenerationStartDate, @NotNull CurrencyData currency,
@@ -36,5 +37,5 @@ public record LoanRepaymentScheduleModelData(@NotNull LocalDate scheduleGenerati
         BigDecimal downPaymentPercentage, Integer installmentAmountInMultiplesOf, Integer fixedLength,
         @NotNull Boolean interestRecognitionOnDisbursementDate, @Nullable DaysInYearCustomStrategyType daysInYearCustomStrategy,
         @NotNull InterestMethod interestMethod, @NotNull boolean allowPartialPeriodInterestCalculation,
-        @NotNull boolean allowFullTermForTranche) {
+        @NotNull boolean allowFullTermForTranche, @Nullable MonthEndDueDateStrategy monthEndDueDateStrategy) {
 }

@@ -20,10 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.List;
 import net.fortuna.ical4j.model.Recur;
@@ -38,6 +35,8 @@ import org.apache.fineract.portfolio.calendar.data.CalendarHistoryDataWrapper;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarHistory;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
+import org.apache.fineract.portfolio.common.domain.MonthlyDueDateResolver;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
@@ -125,10 +124,18 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             LocalDate seedDate = null;
             String reccuringString = null;
             Calendar currentCalendar = loanApplicationTerms.getLoanCalendar();
+            // the meeting calendar decides a calendar loan's due dates, so the strategy must not steer even the date
+            // the calendar history is looked up by
+            final MonthEndDueDateStrategy monthEndDueDateStrategy = currentCalendar == null
+                    ? loanApplicationTerms.getMonthEndDueDateStrategy()
+                    : null;
+            final LocalDate chainedFromDate = currentCalendar == null
+                    ? LoanApplicationTerms.unrollChainedDueDate(loanApplicationTerms, lastRepaymentDate)
+                    : lastRepaymentDate;
             dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
-                    loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate);
-            dueRepaymentPeriodDate = (LocalDate) adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
-                    loanApplicationTerms.getRepaymentPeriodFrequencyType());
+                    loanApplicationTerms.getRepaymentEvery(), chainedFromDate);
+            dueRepaymentPeriodDate = (LocalDate) MonthlyDueDateResolver.adjustDate(dueRepaymentPeriodDate,
+                    loanApplicationTerms.getSeedDate(), loanApplicationTerms.getRepaymentPeriodFrequencyType(), monthEndDueDateStrategy);
             if (currentCalendar != null) {
                 // If we have currentCalendar object, this means there is a
                 // calendar associated with
@@ -158,21 +165,6 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         }
 
         return dueRepaymentPeriodDate;
-    }
-
-    /*
-     * NOTE: This method a copy of CalendarUtils.adjustDate() method. Purpose of this method copy here is to eliminate
-     * the whole "ical4j" dependency for the small stateless embeddable progressive loan jar. Registered exception
-     * brings the whole ical4j deps.
-     */
-    private Temporal adjustDate(final Temporal date, final Temporal seedDate, final PeriodFrequencyType frequencyType) {
-        if (frequencyType.isMonthly() && seedDate.get(ChronoField.DAY_OF_MONTH) > 28 && date.get(ChronoField.DAY_OF_MONTH) >= 28) {
-            int noOfDaysInCurrentMonth = YearMonth.from(date).lengthOfMonth();
-            int seedDay = seedDate.get(ChronoField.DAY_OF_MONTH);
-            int adjustedDay = Math.min(noOfDaysInCurrentMonth, seedDay);
-            return date.with(ChronoField.DAY_OF_MONTH, adjustedDay);
-        }
-        return date;
     }
 
     @Override
@@ -390,7 +382,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case MONTHS:
                 if (loanCalendar == null) {
-                    idealDisbursementDate = firstRepaymentDate.minusMonths(repaidEvery);
+                    idealDisbursementDate = idealDisbursementDateForMonthlyRepayments(repaidEvery, firstRepaymentDate,
+                            loanApplicationTerms);
                 } else {
                     idealDisbursementDate = CalendarUtils.getNewRepaymentMeetingDate(loanCalendar.getRecurrence(),
                             firstRepaymentDate.minusMonths(repaidEvery), firstRepaymentDate.minusMonths(repaidEvery), repaidEvery,
@@ -410,6 +403,22 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         }
 
         return idealDisbursementDate;
+    }
+
+    /*
+     * A due date rolled forward to the 1st stands for the month before it, so stepping back from it has to start from
+     * that month and land on the anchor day again - otherwise 1 March minus one month is 1 February, and the first
+     * period looks a day shorter than it is.
+     */
+    private LocalDate idealDisbursementDateForMonthlyRepayments(final int repaidEvery, final LocalDate firstRepaymentDate,
+            final LoanApplicationTerms loanApplicationTerms) {
+        final MonthEndDueDateStrategy monthEndDueDateStrategy = loanApplicationTerms.getMonthEndDueDateStrategy();
+        if (!MonthEndDueDateStrategy.rollsForward(monthEndDueDateStrategy) || loanApplicationTerms.getSeedDate() == null) {
+            return firstRepaymentDate.minusMonths(repaidEvery);
+        }
+        final LocalDate unrolledFirstRepaymentDate = LoanApplicationTerms.unrollChainedDueDate(loanApplicationTerms, firstRepaymentDate);
+        return (LocalDate) MonthlyDueDateResolver.adjustDate(unrolledFirstRepaymentDate.minusMonths(repaidEvery),
+                loanApplicationTerms.getSeedDate(), PeriodFrequencyType.MONTHS, monthEndDueDateStrategy);
     }
 
     @Override

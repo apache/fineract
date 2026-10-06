@@ -37,6 +37,7 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.fund.domain.Fund;
@@ -210,6 +211,8 @@ public class LoanProductAssembler {
 
         final DaysInYearCustomStrategyType daysInYearCustomStrategy = command.enumValueOfParameterNamed(
                 LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, DaysInYearCustomStrategyType.class);
+        final MonthEndDueDateStrategy monthEndDueDateStrategy = command
+                .enumValueOfParameterNamed(LoanProductConstants.MONTH_END_DUE_DATE_STRATEGY_PARAMETER_NAME, MonthEndDueDateStrategy.class);
 
         LoanProductInterestRecalculationDetails interestRecalculationSettings = null;
 
@@ -356,7 +359,7 @@ public class LoanProductAssembler {
                 enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate,
                 daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
                 capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                merchantBuyDownFee, allowFullTermForTranche);
+                merchantBuyDownFee, allowFullTermForTranche, monthEndDueDateStrategy);
 
     }
 
