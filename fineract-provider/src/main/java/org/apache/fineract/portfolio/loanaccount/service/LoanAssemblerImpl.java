@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -60,6 +61,7 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralAssembler;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.fund.domain.FundRepository;
@@ -589,6 +591,15 @@ public class LoanAssemblerImpl implements LoanAssembler {
                 loan.setIsFloatingInterestRate(null);
             }
             loan.updateIsInterestRecalculationEnabled();
+            // the loan takes the new product's strategy unless the request overrides it
+            if (!command.parameterExists(LoanApiConstants.monthEndDueDateStrategyParameterName)) {
+                final MonthEndDueDateStrategy productStrategy = loanProduct.getLoanProductRelatedDetail().getMonthEndDueDateStrategy();
+                if (!Objects.equals(productStrategy, loan.getLoanRepaymentScheduleDetail().getMonthEndDueDateStrategy())) {
+                    changes.put(LoanApiConstants.monthEndDueDateStrategyParameterName,
+                            productStrategy == null ? null : productStrategy.name());
+                    loan.getLoanRepaymentScheduleDetail().setMonthEndDueDateStrategy(productStrategy);
+                }
+            }
             changes.put(Loan.RECALCULATE_LOAN_SCHEDULE, true);
         }
 

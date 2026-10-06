@@ -37,6 +37,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDa
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanMeetingCalendarService;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanInterestRefundServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
@@ -140,9 +141,9 @@ public class LoanAccountAutoStarter {
             final ExternalIdFactory externalIdFactory, final LoanScheduleComponent loanSchedule,
             final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService,
             @Lazy final LoanChargeService loanChargeService, final ScheduledDateGenerator scheduledDateGenerator,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService, final LoanMeetingCalendarService loanMeetingCalendarService) {
         return new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, progressiveLoanInterestRefundService, externalIdFactory,
                 loanSchedule, loanChargeValidator, loanBalanceService, loanChargeService, scheduledDateGenerator,
-                configurationDomainService);
+                configurationDomainService, loanMeetingCalendarService);
     }
 }

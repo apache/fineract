@@ -39,9 +39,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -79,6 +81,8 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.common.domain.DayOfWeekType;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
+import org.apache.fineract.portfolio.common.domain.MonthlyDueDateResolver;
 import org.apache.fineract.portfolio.common.domain.NthDayType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
@@ -141,6 +145,7 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoanScheduleAssembler {
@@ -312,15 +317,21 @@ public class LoanScheduleAssembler {
             }
         }
 
+        MonthEndDueDateStrategy monthEndDueDateStrategy = loanProduct.getLoanProductRelatedDetail().getMonthEndDueDateStrategy();
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.monthEndDueDateStrategyParameterName, element)) {
+            monthEndDueDateStrategy = this.fromApiJsonHelper.enumValueOfParameterNamed(
+                    LoanApiConstants.monthEndDueDateStrategyParameterName, element, MonthEndDueDateStrategy.class);
+        }
+
         /*
          * If user has not passed the first repayments date then then derive the same based on loan type.
          */
         if (calculatedRepaymentsStartingFromDate == null) {
             LocalDate tmpCalculatedRepaymentsStartingFromDate = deriveFirstRepaymentDate(loanType, repaymentEvery, expectedDisbursementDate,
-                    repaymentPeriodFrequencyType, 0, calendar, submittedOnDate, repaymentStartDateType);
+                    repaymentPeriodFrequencyType, 0, calendar, submittedOnDate, repaymentStartDateType, monthEndDueDateStrategy);
             calculatedRepaymentsStartingFromDate = deriveFirstRepaymentDate(loanType, repaymentEvery, expectedDisbursementDate,
                     repaymentPeriodFrequencyType, loanProduct.getMinimumDaysBetweenDisbursalAndFirstRepayment(), calendar, submittedOnDate,
-                    repaymentStartDateType);
+                    repaymentStartDateType, monthEndDueDateStrategy);
             if (!tmpCalculatedRepaymentsStartingFromDate.equals(calculatedRepaymentsStartingFromDate)) {
                 repaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
             }
@@ -545,6 +556,11 @@ public class LoanScheduleAssembler {
             allowFullTermForTranche = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element);
         }
 
+        if (calendar != null && MonthEndDueDateStrategy.rollsForward(monthEndDueDateStrategy)) {
+            log.debug("Month end due date strategy {} of loan product {} is superseded by meeting calendar {}", monthEndDueDateStrategy,
+                    loanProduct.getId(), calendar.getId());
+        }
+
         return LoanApplicationTerms.assembleFrom(applicationCurrency.toData(), loanTermFrequency, loanTermPeriodFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -573,7 +589,7 @@ public class LoanScheduleAssembler {
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeCalculationType(),
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeStrategy(),
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeIncomeType(),
-                loanProduct.getLoanProductRelatedDetail().isMerchantBuyDownFee(), allowFullTermForTranche);
+                loanProduct.getLoanProductRelatedDetail().isMerchantBuyDownFee(), allowFullTermForTranche, monthEndDueDateStrategy);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
@@ -1171,7 +1187,7 @@ public class LoanScheduleAssembler {
     private LocalDate deriveFirstRepaymentDate(final AccountType loanType, final Integer repaymentEvery,
             final LocalDate expectedDisbursementDate, final PeriodFrequencyType repaymentPeriodFrequencyType,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final Calendar calendar, final LocalDate submittedOnDate,
-            final RepaymentStartDateType repaymentStartDateType) {
+            final RepaymentStartDateType repaymentStartDateType, final MonthEndDueDateStrategy monthEndDueDateStrategy) {
         LocalDate derivedFirstRepayment = null;
 
         final LocalDate dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment = expectedDisbursementDate
@@ -1191,7 +1207,7 @@ public class LoanScheduleAssembler {
             } else if (repaymentPeriodFrequencyType.isWeekly()) {
                 dateBasedOnRepaymentFrequency = seedDate.plusWeeks(repaymentEvery);
             } else if (repaymentPeriodFrequencyType.isMonthly()) {
-                dateBasedOnRepaymentFrequency = seedDate.plusMonths(repaymentEvery);
+                dateBasedOnRepaymentFrequency = MonthlyDueDateResolver.plusMonths(seedDate, repaymentEvery, monthEndDueDateStrategy);
             } else { // yearly loan
                 dateBasedOnRepaymentFrequency = seedDate.plusYears(repaymentEvery);
             }
@@ -1497,6 +1513,15 @@ public class LoanScheduleAssembler {
                     .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE);
             changes.put(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, newValue);
             loanProductRelatedDetail.updateInterestRecognitionOnDisbursementDate(newValue);
+        }
+
+        if (command.parameterExists(LoanApiConstants.monthEndDueDateStrategyParameterName)) {
+            final MonthEndDueDateStrategy newValue = command
+                    .enumValueOfParameterNamed(LoanApiConstants.monthEndDueDateStrategyParameterName, MonthEndDueDateStrategy.class);
+            if (!Objects.equals(newValue, loanProductRelatedDetail.getMonthEndDueDateStrategy())) {
+                changes.put(LoanApiConstants.monthEndDueDateStrategyParameterName, newValue == null ? null : newValue.name());
+                loanProductRelatedDetail.setMonthEndDueDateStrategy(newValue);
+            }
         }
     }
 
