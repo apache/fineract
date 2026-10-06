@@ -3175,8 +3175,10 @@ public class LoanStepDef extends AbstractStepDef {
         GetLoansLoanIdTransactions loanTransaction = getLoanTransactionIdByDate(transactionType, transactionDate);
 
         Set<GetLoansLoanIdLoanTransactionRelation> transactionRelations = loanTransaction.getTransactionRelations();
-        Long originalTransactionId = transactionRelations.stream().map(GetLoansLoanIdLoanTransactionRelation::getToLoanTransaction)
-                .filter(Objects::nonNull).findFirst()
+        // A transaction replayed more than once inherits the REPLAYED relations of its predecessors, so the one it
+        // directly replaced is the most recent one
+        Long originalTransactionId = transactionRelations.stream().filter(r -> "REPLAYED".equals(r.getRelationType()))
+                .map(GetLoansLoanIdLoanTransactionRelation::getToLoanTransaction).filter(Objects::nonNull).max(Long::compare)
                 .orElseThrow(() -> new IllegalStateException("Transaction was reversed, but not replayed!"));
 
         // Check whether reverse-replay event got occurred
