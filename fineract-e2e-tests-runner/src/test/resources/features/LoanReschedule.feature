@@ -3173,7 +3173,7 @@ Feature: LoanReschedule
       | 480.0         | 0.0      | 0.0  | 0.0       | 480.0 | 168.0 | 48.0       | 0.0  | 312.0       |
     And Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @AdvancedPaymentAllocation
+  @TestRailId:C111028 @AdvancedPaymentAllocation
   Scenario: Verify reschedule with extra terms after re-aging with a start date on the 31st keeps month-end due dates
     When Admin sets the business date to "01 January 2024"
     And Admin creates a client with random data

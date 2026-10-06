@@ -2770,8 +2770,8 @@ Feature: LoanReAgingEqualAmortization - Part3
     When Loan Pay-off is made on "10 June 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @AdvancedPaymentAllocation
-  Scenario: Verify re-aging with a start date on the 30th or 31st keeps the start day of month on zero interest loan with down payment
+  @TestRailId:C111023 @AdvancedPaymentAllocation
+  Scenario: Verify re-aging with a start date on the 30th or 31st keeps the start day of month on zero interest loan with down payment - UC1
     When Admin sets the business date to "01 September 2026"
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -2839,9 +2839,11 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 01 September 2026 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 01 September 2026 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        | false    |
       | 28 September 2026 | Re-age           | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "28 September 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @AdvancedPaymentAllocation
-  Scenario: Verify re-aging with a start date on the 31st keeps month-end due dates on interest bearing loan with interest recalculation
+  @TestRailId:C111024 @AdvancedPaymentAllocation
+  Scenario: Verify re-aging with a start date on the 31st keeps month-end due dates on interest bearing loan with interest recalculation - UC2
     When Admin sets the business date to "01 January 2024"
     And Admin creates a client with random data
     And Admin set "LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -2903,9 +2905,11 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    |
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "15 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @AdvancedPaymentAllocation
-  Scenario: Verify re-aging after maturity with a start date on the 31st keeps month-end due dates on interest bearing loan without interest recalculation
+  @TestRailId:C111025 @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity with a start date on the 31st keeps month-end due dates on interest bearing loan without interest recalculation - UC3
     When Admin sets the business date to "07 September 2025"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_BEHAVIOUR" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -2953,9 +2957,11 @@ Feature: LoanReAgingEqualAmortization - Part3
       | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 07 September 2025 | Disbursement     | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 17 April 2026     | Re-age           | 926.42 | 900.0     | 26.42    | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "17 April 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @AdvancedPaymentAllocation
-  Scenario: Verify re-aging with 30, 16 and 15 days frequency across the end of February on zero interest loan with down payment
+  @TestRailId:C111026 @AdvancedPaymentAllocation
+  Scenario: Verify re-aging with 30, 16 and 15 days frequency across the end of February on zero interest loan with down payment - UC4
     When Admin sets the business date to "31 October 2025"
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -3034,9 +3040,11 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 31 October 2025  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 31 October 2025  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        | false    |
       | 20 February 2026 | Re-age           | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "20 February 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @AdvancedPaymentAllocation
-  Scenario: Verify re-aging from an installment date on the last day of February keeps the 28th day of month on zero interest loan with down payment
+  @TestRailId:C111027 @AdvancedPaymentAllocation
+  Scenario: Verify re-aging from an installment date on the last day of February keeps the 28th day of month on zero interest loan with down payment - UC5
     When Admin sets the business date to "31 October 2025"
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -3098,3 +3106,5 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 31 October 2025  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 31 October 2025  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        | false    |
       | 20 February 2026 | Re-age           | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "20 February 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
