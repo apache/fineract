@@ -333,6 +333,12 @@ public class FineractProperties {
         private int threadPoolCorePoolSize;
         private int threadPoolMaxPoolSize;
         private int threadPoolQueueCapacity;
+        /**
+         * Maximum number of event batches one "Send Asynchronous Events" run reads and sends. 1 keeps the historical
+         * behavior (one batch per run); a larger value lets a backlog drain within a single run. A run still stops as
+         * soon as a batch is not full.
+         */
+        private int maxBatchesPerRun = 1;
     }
 
     @Getter

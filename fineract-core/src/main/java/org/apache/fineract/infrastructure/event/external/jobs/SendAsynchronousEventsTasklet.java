@@ -76,9 +76,7 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
         try {
             if (isDownstreamChannelEnabled()) {
-                List<ExternalEventView> events = getQueuedEventsBatch();
-                log.debug("Queued events size: {}", events.size());
-                sendEvents(events);
+                sendQueuedEventsInBatches();
             }
         } catch (Exception e) {
             log.error("Error occurred while processing events: ", e);
@@ -86,13 +84,30 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
         return RepeatStatus.FINISHED;
     }
 
+    /**
+     * Sends queued events batch by batch. A run reads at most {@code max-batches-per-run} batches (default 1, i.e. the
+     * historical behavior) and stops early as soon as a batch is not full, meaning the backlog is drained. Each batch
+     * is sent and marked as sent before the next one is read, so a failure leaves only the batch in flight unsent.
+     */
+    private void sendQueuedEventsInBatches() {
+        int maxBatches = Math.max(1, fineractProperties.getEvents().getExternal().getMaxBatchesPerRun());
+        for (int batch = 0; batch < maxBatches; batch++) {
+            int readBatchSize = getBatchSize();
+            List<ExternalEventView> events = getQueuedEventsBatch(readBatchSize);
+            log.debug("Queued events size: {}", events.size());
+            sendEvents(events);
+            if (events.size() < readBatchSize) {
+                break;
+            }
+        }
+    }
+
     protected boolean isDownstreamChannelEnabled() {
         return fineractProperties.getEvents().getExternal().getProducer().getJms().isEnabled()
                 || fineractProperties.getEvents().getExternal().getProducer().getKafka().isEnabled();
     }
 
-    private List<ExternalEventView> getQueuedEventsBatch() {
-        int readBatchSize = getBatchSize();
+    private List<ExternalEventView> getQueuedEventsBatch(int readBatchSize) {
         Pageable batchSize = PageRequest.ofSize(readBatchSize);
         return measure(() -> repository.findByStatusOrderByBusinessDateAscIdAsc(ExternalEventStatus.TO_BE_SENT, batchSize),
                 (events, timeTaken) -> log.debug("Loaded {} events in {}ms", events.size(), timeTaken.toMillis()));
