@@ -57,6 +57,20 @@ public class SavingsAccountRepositoryWrapper {
         return account;
     }
 
+    /**
+     * Locks the given accounts (SELECT ... FOR UPDATE) in ascending id order. Two transactions that touch the same two
+     * accounts in opposite directions (A to B and B to A) would otherwise each lock one account and wait for the other:
+     * a deadlock, which the database resolves by aborting one of them. With a single global lock order they queue up
+     * instead.
+     */
+    @Transactional
+    public void lockInIdOrder(final Long... savingsIds) {
+        final List<Long> ids = java.util.Arrays.stream(savingsIds).filter(java.util.Objects::nonNull).distinct().sorted().toList();
+        if (!ids.isEmpty()) {
+            this.repository.findAllLockedOrderedById(ids);
+        }
+    }
+
     @Transactional
     public SavingsAccount findSavingsWithNotFoundDetection(final Long savingsId, final boolean backdatedTxnsAllowedTill) {
         SavingsAccount account = null;
