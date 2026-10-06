@@ -21,10 +21,12 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeIncomeType;
@@ -277,6 +279,16 @@ public class LoanProductRelatedDetailUpdateUtil {
                     .valueOf(command.stringValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME));
             actualChanges.put(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, newValue.name());
             loanRepaymentScheduleDetail.setDaysInYearCustomStrategy(newValue);
+        }
+
+        if (command.parameterExists(LoanProductConstants.MONTH_END_DUE_DATE_STRATEGY_PARAMETER_NAME)) {
+            final MonthEndDueDateStrategy newValue = command.enumValueOfParameterNamed(
+                    LoanProductConstants.MONTH_END_DUE_DATE_STRATEGY_PARAMETER_NAME, MonthEndDueDateStrategy.class);
+            if (!Objects.equals(newValue, loanRepaymentScheduleDetail.getMonthEndDueDateStrategy())) {
+                actualChanges.put(LoanProductConstants.MONTH_END_DUE_DATE_STRATEGY_PARAMETER_NAME,
+                        newValue == null ? null : newValue.name());
+                loanRepaymentScheduleDetail.setMonthEndDueDateStrategy(newValue);
+            }
         }
 
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME,

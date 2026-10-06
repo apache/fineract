@@ -75,6 +75,8 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
+import org.apache.fineract.portfolio.common.domain.MonthlyDueDateResolver;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
@@ -112,6 +114,7 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidat
 import org.apache.fineract.portfolio.loanaccount.service.InterestRefundService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanMeetingCalendarService;
 import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculatorDataMapper;
@@ -144,12 +147,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private final SingleLoanChargeRepaymentScheduleProcessingWrapper loanChargeRepaymentScheduleProcessing;
     private final ScheduledDateGenerator scheduledDateGenerator;
     private final ConfigurationDomainService configurationDomainService;
+    private final LoanMeetingCalendarService loanMeetingCalendarService;
 
     public AdvancedPaymentScheduleTransactionProcessor(final EMICalculator emiCalculator, final InterestRefundService interestRefundService,
             final ExternalIdFactory externalIdFactory, final LoanScheduleComponent loanSchedule,
             final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService,
             final LoanChargeService loanChargeService, ScheduledDateGenerator scheduledDateGenerator,
-            ConfigurationDomainService configurationDomainService) {
+            ConfigurationDomainService configurationDomainService, LoanMeetingCalendarService loanMeetingCalendarService) {
         super(externalIdFactory, loanChargeValidator, loanBalanceService);
         this.emiCalculator = emiCalculator;
         this.interestRefundService = interestRefundService;
@@ -158,6 +162,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         this.loanChargeRepaymentScheduleProcessing = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
         this.scheduledDateGenerator = scheduledDateGenerator;
         this.configurationDomainService = configurationDomainService;
+        this.loanMeetingCalendarService = loanMeetingCalendarService;
     }
 
     @Override
@@ -235,8 +240,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .collect(Collectors.toCollection(ArrayList::new));
         final Integer installmentAmountInMultiplesOf = loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf();
         ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateInstallmentInterestScheduleModel(
-                EMICalculatorDataMapper.toRepaymentScheduleInstallmentDataList(installments), LoanConfigurationDetailsMapper.map(loan),
-                installmentAmountInMultiplesOf, overpaymentHolder.getMoneyObject().getMc());
+                EMICalculatorDataMapper.toRepaymentScheduleInstallmentDataList(installments),
+                LoanConfigurationDetailsMapper.map(loan, loanMeetingCalendarService), installmentAmountInMultiplesOf,
+                overpaymentHolder.getMoneyObject().getMc());
         List<Long> loanChargeIdProcessed = new ArrayList<>();
 
         ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, charges, overpaymentHolder,
@@ -360,6 +366,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final PeriodFrequencyType repaymentFrequency = lastActiveReAgeTransaction.map(t -> t.getLoanReAgeParameter().getFrequencyType())
                 .orElse(loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType());
         final ChronoUnit repaymentFrequencyChronoUnit = resolveChronoUnit(repaymentFrequency);
+        final MonthEndDueDateStrategy monthEndDueDateStrategy = LoanConfigurationDetailsMapper.monthEndDueDateStrategy(loan,
+                loanMeetingCalendarService);
         boolean canUseEmiCalculator = !reAgeAlreadyProcessed || loan.isInterestBearingAndInterestRecalculationEnabled();
 
         if (canUseEmiCalculator && targetExistsInScheduleModel && !isStalePreReAgeVariation) {
@@ -369,6 +377,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     .repaymentPeriodFrequencyType(repaymentFrequency) //
                     .fixedLength(loan.getLoanProductRelatedDetail().getFixedLength()) //
                     .seedDate(newDueDate) //
+                    .monthEndDueDateStrategy(monthEndDueDateStrategy) //
                     .build();
             emiCalculator.changeDueDate(scheduleModel, loanApplicationTerms, targetRepaymentPeriodDueDate, newDueDate);
         }
@@ -389,9 +398,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             int offsetFrom = i - targetInstallmentIndex - 1;
                             int offsetDue = i - targetInstallmentIndex;
                             if (offsetDue != 0) {
-                                installment.updateFromDate(newDueDate.plus(offsetFrom * repayEvery, repaymentFrequencyChronoUnit));
+                                installment.updateFromDate(MonthlyDueDateResolver.plusPeriods(newDueDate, offsetFrom * repayEvery,
+                                        repaymentFrequencyChronoUnit, monthEndDueDateStrategy));
                             }
-                            installment.updateDueDate(newDueDate.plus(offsetDue * repayEvery, repaymentFrequencyChronoUnit));
+                            installment.updateDueDate(MonthlyDueDateResolver.plusPeriods(newDueDate, offsetDue * repayEvery,
+                                    repaymentFrequencyChronoUnit, monthEndDueDateStrategy));
                             continue;
                         }
 
@@ -411,7 +422,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         // When the target date was already consumed by generate() and a ReAge was processed,
         // the re-aged installments still carry their original dates. Shift them to apply the reschedule.
         if (targetInstallment.isEmpty() && reAgeAlreadyProcessed) {
-            shiftReAgedInstallmentsAfterReschedule(installments, newDueDate, repayEvery, repaymentFrequencyChronoUnit);
+            shiftReAgedInstallmentsAfterReschedule(installments, newDueDate, repayEvery, repaymentFrequencyChronoUnit,
+                    monthEndDueDateStrategy);
         }
 
         if (!dateShiftOnly) {
@@ -431,7 +443,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void shiftReAgedInstallmentsAfterReschedule(List<LoanRepaymentScheduleInstallment> installments, LocalDate newDueDate,
-            Integer repayEvery, ChronoUnit repaymentFrequencyChronoUnit) {
+            Integer repayEvery, ChronoUnit repaymentFrequencyChronoUnit, MonthEndDueDateStrategy monthEndDueDateStrategy) {
         final Optional<LoanRepaymentScheduleInstallment> firstUnmetReAged = installments.stream()
                 .filter(inst -> inst.isReAged() && isNotObligationsMet(inst))
                 .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate));
@@ -447,7 +459,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 continue;
             }
             long offsetDue = installment.getInstallmentNumber() - targetInstallmentIndex;
-            final LocalDate shiftedDueDate = newDueDate.plus(offsetDue * repayEvery, repaymentFrequencyChronoUnit);
+            final LocalDate shiftedDueDate = MonthlyDueDateResolver.plusPeriods(newDueDate, offsetDue * repayEvery,
+                    repaymentFrequencyChronoUnit, monthEndDueDateStrategy);
 
             installment.updateDueDate(shiftedDueDate);
         }
@@ -4162,9 +4175,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         reAgedInstallment = insertOrReplaceRelatedInstallment(installments, reAgedInstallment, currency, transactionDate);
         createChargeMappingsForInstallment(reAgedInstallment, calculatedCharges, reAgedInstallmentIndex);
         reAgedInstallmentIndex++;
+        final MonthEndDueDateStrategy monthEndDueDateStrategy = LoanConfigurationDetailsMapper.monthEndDueDateStrategy(loan,
+                loanMeetingCalendarService);
         for (int i = 1; i < numberOfReAgeInstallments; i++) {
             final LocalDate calculatedDueDate = scheduledDateGenerator.getRepaymentPeriodDate(loanReAgeParameter.getFrequencyType(),
-                    loanReAgeParameter.getFrequencyNumber() * i, loanReAgeParameter.getStartDate());
+                    loanReAgeParameter.getFrequencyNumber() * i, loanReAgeParameter.getStartDate(), monthEndDueDateStrategy);
             int nextReAgedInstallmentNumber = firstReAgeInstallmentProps.reAgedInstallmentNumber + i;
 
             reAgedInstallment = LoanRepaymentScheduleInstallment.newReAgedInstallment(reAgedInstallment.getLoan(),
@@ -4277,9 +4292,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .interestRecognitionOnDisbursementDate(
                         loan.getLoanProduct().getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate())
                 .daysInYearCustomStrategy(loan.getLoanProduct().getLoanProductRelatedDetail().getDaysInYearCustomStrategy())
-                .interestMethod(loan.getLoanProductRelatedDetail().getInterestMethod()).allowPartialPeriodInterestCalculation(
+                .interestMethod(loan.getLoanProductRelatedDetail().getInterestMethod())
+                .allowPartialPeriodInterestCalculation(
                         loan.getLoanProduct().getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalculation())
-                .mc(mc).build();
+                .monthEndDueDateStrategy(LoanConfigurationDetailsMapper.monthEndDueDateStrategy(loan, loanMeetingCalendarService)).mc(mc)
+                .build();
 
         final LocalDate reAgePeriodStartDate = calculateFirstReAgedPeriodStartDate(loanTransaction);
         final LocalDate reAgeFirstDueDate = loanTransaction.getLoanReAgeParameter().getStartDate();

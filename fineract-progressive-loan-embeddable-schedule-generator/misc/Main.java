@@ -20,6 +20,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlan;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanDisbursementPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanDownPaymentPeriod;
@@ -61,8 +62,9 @@ public class Main {
         final DaysInYearCustomStrategyType dasInYearCustomStrategy = null;
         final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
         final boolean allowPartialPeriodInterestCalculation = true;
+        final MonthEndDueDateStrategy monthEndDueDateStrategy = null;
 
-        var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments, repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType, daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate, dasInYearCustomStrategy, interestMethod, allowPartialPeriodInterestCalculation, false);
+        var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments, repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType, daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate, dasInYearCustomStrategy, interestMethod, allowPartialPeriodInterestCalculation, false, monthEndDueDateStrategy);
 
         final LoanSchedulePlan plan = calculator.generate(mc, config);
         printPlan(plan);
