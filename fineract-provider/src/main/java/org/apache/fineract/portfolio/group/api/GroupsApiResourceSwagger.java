@@ -292,6 +292,10 @@ final class GroupsApiResourceSwagger {
 
         @Schema(example = "First Group (changed)")
         public String name;
+        @Schema(example = "externalId1")
+        public String externalId;
+        @Schema(example = "1")
+        public Long staffId;
     }
 
     @Schema(description = "PutGroupsGroupIdResponse")
@@ -305,6 +309,10 @@ final class GroupsApiResourceSwagger {
 
             @Schema(example = "First Group (changed)")
             public String name;
+            @Schema(example = "externalId1")
+            public String externalId;
+            @Schema(example = "1")
+            public Long staffId;
         }
 
         @Schema(example = "1")
