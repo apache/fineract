@@ -475,7 +475,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         final Optional<LocalDate> candidateToDate = breachScheduleRepository.findCurrentOpenPeriod(workingCapitalLoan.getId(), businessDate)
                 .map(currentPeriod -> WorkingCapitalLoanBreachScheduleEvaluationUtils.calculateRescheduledToDate(
                         currentPeriod.getFromDate(), currentPeriod.getPeriodNumber(), action.getFrequency(), action.getFrequencyType(),
-                        breachGraceDays, existing));
+                        breachGraceDays, existing, activeBreachResetResolver.activeRestartResetDates(existing)));
         if (candidateToDate.filter(toDate -> toDate.isBefore(businessDate)).isPresent()) {
             failGeneralValidation(dataValidator, "reschedule.frequency.results.endDate.before.businessDate",
                     "Frequency change results a breach period endDate before current businessDate is not allowed");

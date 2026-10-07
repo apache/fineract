@@ -86,9 +86,9 @@ public final class WorkingCapitalLoanBreachScheduleEvaluationUtils {
      */
     public static LocalDate calculateRescheduledToDate(final LocalDate fromDate, final Integer periodNumber, final Integer frequency,
             final WorkingCapitalLoanPeriodFrequencyType frequencyType, final Integer breachGraceDays,
-            final List<WorkingCapitalLoanBreachAction> actions) {
+            final List<WorkingCapitalLoanBreachAction> actions, final List<LocalDate> restartResetDates) {
         return WorkingCapitalLoanBreachPauseUtils.extendToDateByRecordedPauses(fromDate,
-                calculateNaturalToDate(fromDate, periodNumber, frequency, frequencyType, breachGraceDays), actions);
+                calculateNaturalToDate(fromDate, periodNumber, frequency, frequencyType, breachGraceDays), actions, restartResetDates);
     }
 
 }
