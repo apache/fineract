@@ -50,12 +50,12 @@ public enum LoanTransactionRelationTypeEnum {
             return LoanTransactionRelationTypeEnum.INVALID;
         }
 
-        return switch (transactionType) {
-            case 1 -> LoanTransactionRelationTypeEnum.CHARGEBACK;
-            case 2 -> LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT;
-            case 3 -> LoanTransactionRelationTypeEnum.REPLAYED;
-            default -> LoanTransactionRelationTypeEnum.INVALID;
-        };
+        for (LoanTransactionRelationTypeEnum type : values()) {
+            if (type.value.equals(transactionType)) {
+                return type;
+            }
+        }
+        return LoanTransactionRelationTypeEnum.INVALID;
     }
 
 }
