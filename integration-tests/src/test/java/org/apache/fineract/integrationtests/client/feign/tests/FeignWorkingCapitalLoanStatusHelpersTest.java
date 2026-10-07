@@ -322,17 +322,16 @@ public class FeignWorkingCapitalLoanStatusHelpersTest extends FeignIntegrationTe
      * current configuration), hence both must stay empty.
      */
     @Test
-    @DisplayName("undo disbursal clears the actual disbursement date and COB stops adding periods")
-    void undoDisbursal_clearsActualDisbursementDateAndFreezesSchedule() {
+    @DisplayName("undo disbursal clears the actual disbursement date, discards the schedules and COB creates none")
+    void undoDisbursal_clearsActualDisbursementDateAndDiscardsSchedules() {
         businessDateHelper.runAt(BUSINESS_DATE, () -> {
             final Long loanId = submitApproveAndDisburseLoan();
 
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", COB_DATE);
             wcLoanHelper.executeInlineWCCOB(loanId);
-            final int delinquencyPeriodsBeforeUndo = wcLoanHelper.getDelinquencyRangeSchedule(loanId).size();
-            final int breachPeriodsBeforeUndo = wcLoanHelper.getBreachSchedule(loanId).size();
-            assertEquals(1, delinquencyPeriodsBeforeUndo, "COB on the disbursed loan must have created delinquency period 1");
-            assertEquals(1, breachPeriodsBeforeUndo, "COB on the disbursed loan must have created breach period 1");
+            assertEquals(1, wcLoanHelper.getDelinquencyRangeSchedule(loanId).size(),
+                    "COB on the disbursed loan must have created delinquency period 1");
+            assertEquals(1, wcLoanHelper.getBreachSchedule(loanId).size(), "COB on the disbursed loan must have created breach period 1");
 
             wcLoanHelper.undoDisbursal(loanId, WorkingCapitalLoanRequestBuilders.undoDisbursal());
             assertTrue(wcLoanHelper.getDelinquencyRangeSchedule(loanId).isEmpty(),

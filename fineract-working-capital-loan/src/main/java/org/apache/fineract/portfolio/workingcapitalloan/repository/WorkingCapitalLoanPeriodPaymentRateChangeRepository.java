@@ -22,9 +22,6 @@ import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateChange;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateHistoryHelper;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -39,8 +36,4 @@ public interface WorkingCapitalLoanPeriodPaymentRateChangeRepository
      * be backdated.
      */
     List<WorkingCapitalLoanPeriodPaymentRateChange> findByWorkingCapitalLoanIdAndReversedFalse(Long loanId);
-
-    @Modifying(flushAutomatically = true)
-    @Query("delete from WorkingCapitalLoanPeriodPaymentRateChange change where change.workingCapitalLoan.id = :loanId")
-    void deleteByWorkingCapitalLoanId(@Param("loanId") Long loanId);
 }

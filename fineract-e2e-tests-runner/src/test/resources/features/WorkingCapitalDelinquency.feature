@@ -1028,6 +1028,42 @@ Feature: Working Capital Delinquency
       | 1            | 2026-01-02 | 2026-01-28 | 248.0          | 0.0        | 248.0             | null                  | null             | null           |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 January 2026"
 
+  @TestRailId:C111074
+  Scenario: Verify delinquency range schedule change after disbursement undo with the following disbursal with diff amounts - UC2.1
+    Given Admin sets the business date to "28 February 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate   | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 28 February 2026  | 28 February 2026         | 9000            | 100000             | 18                | 800      |
+    And Working Capital Loan has transactions:
+      | transactionDate  | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 28 February 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 28 February 2026 | Discount Fee | 800.0             | 800.0            | 0.0               | 0.0                   | false    |
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-02-28 | 2026-03-29 | 294.0          | 0.0        | 294.0             | null                  | null             | null           |
+    When Admin sets the business date to "01 April 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin successfully undo Working Capital disbursal
+    Then Working Capital loan status will be "APPROVED"
+    And Working Capital Loan has transactions:
+      | transactionDate  | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 28 February 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+      | 28 February 2026 | Discount Fee | 800.0             | 800.0            | 0.0               | 0.0                   | true     |
+# --- disburse again with diff discount amount and diff date --- #
+    Then Admin successfully disburse the Working Capital loan on "01 April 2026" with "9000" EUR transaction amount and "500" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    Then Verify Working Capital loan disbursement was successful
+    And Working Capital Loan has transactions:
+      | transactionDate  | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 28 February 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+      | 28 February 2026 | Discount Fee | 800.0             | 800.0            | 0.0               | 0.0                   | true     |
+      | 01 April 2026    | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 April 2026    | Discount Fee | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-04-01 | 2026-04-30 | 285.0          | 0.0        | 285.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 April 2026"
+
   @TestRailId:C106712
   Scenario: Verify WC Loan account create with delinquency override while delinquency override is disallowed on WCLP is failed - UC3
     When Admin sets the business date to "01 January 2026"
@@ -1354,3 +1390,43 @@ Feature: Working Capital Delinquency
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2026-02-03  |              | D00            | 1              | 30             |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 February 2026"
+
+  @TestRailId:C111075
+  Scenario: Verify WC delinquency grace days and start type has been updated correctly on modify loan account stage after undo disbursement
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with delinquencyGraceDays 4 and delinquencyStartType "DISBURSEMENT" for loan test
+    And Admin creates a working capital loan with the grace days product and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate |
+      | 01 January 2026 | 08 January 2026          | 9000.0          | 100000.0           | 18.0              |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "08 January 2026"
+    When Admin sets the business date to "08 January 2026"
+    And Admin successfully disburse the Working Capital loan on "08 January 2026" with "9000" EUR transaction amount
+# --- undo disbursement -> undo approval --- #
+    Then Admin successfully undo Working Capital disbursal
+    Then Working Capital loan status will be "APPROVED"
+    When Admin makes undo approval on the working capital loan
+    Then Working capital loan undo approval was successful
+    Then Working Capital loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
+# ---- modify loan account with delinquencyGraceDays and delinquencyStartType --- #
+    Then Admin modifies the working capital loan with delinquency 3 grace days and "LOAN_CREATION" start type override data
+    And Admin successfully approves the working capital loan on "08 January 2026" with "9000" amount and expected disbursement date on "08 January 2026"
+    And Admin successfully disburse the Working Capital loan on "08 January 2026" with "9000" EUR transaction amount
+    # --- Business event exposes delinquency effective start date ---
+    When Admin sets the business date to "13 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital Loan Delinquency Range Change business event is raised with delinquency data:
+      | delinquencyStartType | delinquencyStartDate | delinquencyEffectiveStartDate | delinquentAmount | totalDelinquentAmount |
+      | LOAN_CREATION        | 2026-01-01           | 2026-01-04                    | 270.0            | 270.0                  |
+    And Working capital loan account has the correct data:
+      | delinquencyStartDate | delinquencyEffectiveStartDate |
+      | 2026-01-01           | 2026-01-04                    |
+    And Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 11             |
+      | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 1            | 2026-02-13  |              | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "13 February 2026"
+

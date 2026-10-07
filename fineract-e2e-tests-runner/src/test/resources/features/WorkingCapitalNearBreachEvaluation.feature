@@ -1114,7 +1114,7 @@ Feature: Working Capital Near Breach Evaluation
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
 
   @TestRailId:C98174
-  Scenario: Verify that breach Id is overridable and applied while nearBreach Id not changing - UC1
+  Scenario: Verify that near breach Id is overridable and applied while breach Id not changing - UC1
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
@@ -1146,7 +1146,7 @@ Feature: Working Capital Near Breach Evaluation
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "13 January 2026"
 
   @TestRailId:C98175
-  Scenario: Verify that nearBreach Id is overridable and applied while breach Id isn't changed - UC2
+  Scenario: Verify that breach Id is overridable and applied while near breach Id isn't changed - UC2
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
@@ -1205,6 +1205,143 @@ Feature: Working Capital Near Breach Evaluation
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-13 | 13           | 250.00           | 250.00            | true       | null   |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "13 January 2026"
+
+  @TestRailId:C111078
+  Scenario: Verify that near breach Id is overridable and applied while breach Id not changing and applied on modify loan account after undo disbursement - UC4
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays | nearBreachFrequency | nearBreachFrequencyType | nearBreachThreshold |
+      | 9               | DAYS                | FLAT                        | 500          | 5               | 5                   | DAYS                    | 33.33               |
+    And Admin creates a new Working Capital Near Breach Configuration:
+      | nearBreachFrequency | nearBreachFrequencyType | nearBreachThreshold |
+      | 1                   | WEEKS                   | 17.25               |
+    And Admin creates a working capital loan using created product with breachGraceDays 4 and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | nearBreachId |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |              |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-01-13 | 13           | 500.00           | 500.00            | null       | null   |
+# --- undo disbursement -> undo approval --- #
+    Then Admin successfully undo Working Capital disbursal
+    Then Working Capital loan status will be "APPROVED"
+    When Admin makes undo approval on the working capital loan
+    Then Working capital loan undo approval was successful
+    Then Working Capital loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
+# --- modify WC loan account with override near breach --- #
+    And Admin modifies the working capital loan with near breach override data
+    And Admin successfully approves the working capital loan on "02 January 2026" with "9000" amount and expected disbursement date on "02 January 2026"
+    When Admin successfully disburse the Working Capital loan on "02 January 2026" with "9000" EUR transaction amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-02 | 2026-01-14 | 13           | 500.00           | 500.00            | null       | null   |
+    When Admin sets the business date to "08 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-02 | 2026-01-14 | 13           | 500.00           | 500.00            | null       | null   |
+    When Admin sets the business date to "13 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-02 | 2026-01-14 | 13           | 500.00           | 500.00            | true       | null   |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "13 January 2026"
+
+  @TestRailId:C111079
+  Scenario: Verify that breach Id is overridable and applied while near breach Id isn't changed and applied on modify loan account after undo disbursement - UC5
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays | nearBreachFrequency | nearBreachFrequencyType | nearBreachThreshold |
+      | 6               | DAYS                | FLAT                        | 900          | 5               | 3                   | DAYS                    | 33.33               |
+    And Admin creates a new Working Capital Breach Configuration:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount |
+      | 9               | DAYS                | FLAT                        | 250          |
+    And Admin creates a working capital loan using created product with breachGraceDays 4 and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | breachId     |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |              |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-01-10 | 10           | 900.00           | 900.00            | null       | null   |
+# --- undo disbursement -> undo approval --- #
+    Then Admin successfully undo Working Capital disbursal
+    Then Working Capital loan status will be "APPROVED"
+    When Admin makes undo approval on the working capital loan
+    Then Working capital loan undo approval was successful
+    Then Working Capital loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
+# --- modify WC loan account with override breach --- #
+    And Admin modifies the working capital loan with breach override data
+    And Admin successfully approves the working capital loan on "02 January 2026" with "9000" amount and expected disbursement date on "02 January 2026"
+    When Admin successfully disburse the Working Capital loan on "02 January 2026" with "9000" EUR transaction amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-02 | 2026-01-14 | 13           | 250.00           | 250.00            | null       | null   |
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-02 | 2026-01-14 | 13           | 250.00           | 250.00            | null       | null   |
+    When Admin sets the business date to "09 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-02 | 2026-01-14 | 13           | 250.00           | 250.00            | true       | null   |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "09 January 2026"
+
+  @TestRailId:C111080
+  Scenario: Verify that breach Id and nearBreach Id are overridable and applied on modify loan account after undo disbursement - UC6
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays | nearBreachFrequency | nearBreachFrequencyType | nearBreachThreshold |
+      | 6               | DAYS                | FLAT                        | 900          | 5               | 3                   | DAYS                    | 33.33               |
+    And Admin creates a new Working Capital Breach Configuration:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount |
+      | 9               | DAYS                | FLAT                        | 250          |
+    And Admin creates a new Working Capital Near Breach Configuration:
+      | nearBreachFrequency | nearBreachFrequencyType | nearBreachThreshold |
+      | 1                   | WEEKS                   | 17.25               |
+    And Admin creates a working capital loan using created product with breachGraceDays 4 and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | breachId     | nearBreachId |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |              |              |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-01-10 | 10           | 900.00           | 900.00            | null       | null   |
+# --- undo disbursement -> undo approval --- #
+    Then Admin successfully undo Working Capital disbursal
+    Then Working Capital loan status will be "APPROVED"
+    When Admin makes undo approval on the working capital loan
+    Then Working capital loan undo approval was successful
+    Then Working Capital loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
+# --- modify WC loan account with override breach and near breach --- #
+    And Admin modifies the working capital loan with breach and near breach override data
+    And Admin successfully approves the working capital loan on "02 January 2026" with "9000" amount and expected disbursement date on "02 January 2026"
+    When Admin successfully disburse the Working Capital loan on "02 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-02 | 2026-01-14 | 13           | 250.00           | 250.00            | null       | null   |
+    When Admin sets the business date to "13 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-02 | 2026-01-14 | 13           | 250.00           | 250.00            | true       | null   |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "13 January 2026"
 
   @TestRailId:C98199

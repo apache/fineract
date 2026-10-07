@@ -650,6 +650,11 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     public void verifyWorkingCapitalLoanDetailFieldValues(final DataTable table) {
         final GetWorkingCapitalLoansLoanIdResponse response = retrieveLoanDetails(getCreatedLoanId());
 
+        validateWorkingCapitalLoanDetailFieldValuesResponse(table, response);
+    }
+
+    public void validateWorkingCapitalLoanDetailFieldValuesResponse(final DataTable table,
+            final GetWorkingCapitalLoansLoanIdResponse response) {
         table.asMap().forEach((field, expected) -> {
             final String actual = resolveFieldValue(response, field);
             if ("present".equals(expected)) {
@@ -1169,6 +1174,17 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         log.info("Working Capital Loan modified with delinquency bucket with ID: {}", response.getResourceId());
     }
 
+    @When("Admin modifies the working capital loan with delinquency {int} grace days and {string} start type override data")
+    public void modifyWorkingCapitalLoanWithDelinquencyData(final int delinquencyGraceDays, final String delinquencyStartType) {
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .delinquencyGraceDays(delinquencyGraceDays).delinquencyStartType(delinquencyStartType);
+
+        final PutWorkingCapitalLoansLoanIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, response);
+        log.info("Working Capital Loan modified with delinquency grace days and start type: {}", response.getResourceId());
+    }
+
     @Then("Admin failed to modify working capital loan with delinquencyBucketId {string} and got an error {string}")
     public void adminFailedToModifyWorkingCapitalLoanWithDelinquencyBucketId(final String delinquencyBucketId, final String expectedError) {
         final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
@@ -1195,8 +1211,19 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 response.getResourceId());
     }
 
+    @When("Admin modifies the working capital loan with breach {int} grace days and {string} start type override data")
+    public void modifyWorkingCapitalLoanWithBreachData(final int breachGraceDays, final String breachStartType) {
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .breachGraceDays(breachGraceDays).breachStartType(breachStartType);
+
+        final PutWorkingCapitalLoansLoanIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, response);
+        log.info("Working Capital Loan modified with breach grace days and start type: {}", response.getResourceId());
+    }
+
     @When("Admin modifies the working capital loan with {int} {string} breach override data")
-    public void modifyWorkingCapitalLoanWithBreachData(int breachFrequency, String breachFrequencyType) {
+    public void modifyWorkingCapitalLoanWithBreachFrequencyData(int breachFrequency, String breachFrequencyType) {
         final Long breachId = createBreachAndGetId(breachFrequency, breachFrequencyType);
         final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
                 .breachId(breachId);
@@ -1205,12 +1232,49 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final PutWorkingCapitalLoansLoanIdResponse response = ok(
                 () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
         testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, response);
-        log.info("Working Capital Loan modified with breach with ID: {}", response.getResourceId());
+        log.info("Working Capital Loan modified with breach frequency data with breach ID: {}", response.getResourceId());
+    }
+
+    @When("Admin modifies the working capital loan with breach override data")
+    public void modifyWorkingCapitalLoanWithBreachData() {
+        final Long breachId = testContext().get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .breachId(breachId);
+
+        final PutWorkingCapitalLoansLoanIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, response);
+        log.info("Working Capital Loan modified with breach: {}", response.getResourceId());
+    }
+
+    @When("Admin modifies the working capital loan with near breach override data")
+    public void modifyWorkingCapitalLoanWithNearBreachData() {
+        final Long nearBreachId = testContext().get(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_ID);
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .nearBreachId(nearBreachId);
+
+        final PutWorkingCapitalLoansLoanIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, response);
+        log.info("Working Capital Loan modified with near breach: {}", response.getResourceId());
+    }
+
+    @When("Admin modifies the working capital loan with breach and near breach override data")
+    public void modifyWorkingCapitalLoanWithBreachAndNearBreachData() {
+        final Long breachId = testContext().get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
+        final Long nearBreachId = testContext().get(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_ID);
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .breachId(breachId).nearBreachId(nearBreachId);
+
+        final PutWorkingCapitalLoansLoanIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, response);
+        log.info("Working Capital Loan modified with breach and near breach: {}", response.getResourceId());
     }
 
     @When("Admin modifies the working capital loan with {int} {string} breach and {int} {string} near breach override data")
-    public void modifyWorkingCapitalLoanWithBreachNearBreachData(int breachFrequency, String breachFrequencyType, int nearBreachFrequency,
-            String nearBreachFrequencyType) {
+    public void modifyWorkingCapitalLoanWithBreachNearBreachFrequencyData(int breachFrequency, String breachFrequencyType,
+            int nearBreachFrequency, String nearBreachFrequencyType) {
         final Long breachId = createBreachAndGetId(breachFrequency, breachFrequencyType);
         final Long nearBreachId = createNearBreachAndGetId(nearBreachFrequency, nearBreachFrequencyType);
         final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()

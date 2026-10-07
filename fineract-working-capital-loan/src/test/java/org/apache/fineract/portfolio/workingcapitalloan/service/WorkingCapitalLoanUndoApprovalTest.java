@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -106,19 +107,20 @@ public class WorkingCapitalLoanUndoApprovalTest {
     }
 
     @Test
-    public void undoApprovalReprojectsTheScheduleOnlyOnceTheLoanIsBackToItsSubmittedValues() {
+    public void undoApprovalDeletesTheApprovalTimeProjectionInsteadOfReprojecting() {
         writePlatformService.undoApplicationApproval(LOAN_ID, command);
 
-        // The projection reads the loan, so it must see the submitted principal and expected amount already restored
-        // and saved, so the projection is written from them.
+        // A submitted loan carries no projection, so the approval-time one is dropped (not rebuilt) once the submitted
+        // values are restored, and before the flush that persists what the deletion clears on the loan.
         final InOrder order = inOrder(stateMachine, loan, loanProductRelatedDetails, disbursementDetails, loanRepository,
                 amortizationScheduleWriteService);
         order.verify(stateMachine).transition(any(WorkingCapitalLoanEvent.class), any(WorkingCapitalLoan.class), any(LocalDate.class));
         order.verify(loan).setApprovedPrincipal(BigDecimal.ZERO);
         order.verify(loanProductRelatedDetails).setPrincipal(PROPOSED_PRINCIPAL);
         order.verify(disbursementDetails).setExpectedAmount(PROPOSED_PRINCIPAL);
+        order.verify(amortizationScheduleWriteService).deleteAmortizationScheduleOnUndoApproval(loan);
         order.verify(loanRepository).saveAndFlush(loan);
-        order.verify(amortizationScheduleWriteService).generateAndSaveAmortizationScheduleOnApproval(loan);
+        verify(amortizationScheduleWriteService, never()).generateAndSaveAmortizationScheduleOnApproval(loan);
 
         verify(validator).validateUndoApproval("{}");
     }
