@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -56,4 +57,8 @@ public interface WorkingCapitalLoanBreachScheduleRepository extends JpaRepositor
               AND s.toDate >= :businessDate""")
     Optional<WorkingCapitalLoanBreachSchedule> findCurrentOpenPeriod(@Param("loanId") Long loanId,
             @Param("businessDate") LocalDate businessDate);
+
+    @Modifying(flushAutomatically = true)
+    @Query("delete from WorkingCapitalLoanBreachSchedule s where s.loan.id = :loanId")
+    void deleteByLoanId(@Param("loanId") Long loanId);
 }

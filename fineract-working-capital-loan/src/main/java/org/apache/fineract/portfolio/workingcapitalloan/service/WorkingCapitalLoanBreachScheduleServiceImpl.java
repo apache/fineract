@@ -52,6 +52,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNearBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.domain.WorkingCapitalBreach;
@@ -71,6 +72,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
     private final WorkingCapitalLoanBreachScheduleMapper mapper;
     private final WorkingCapitalLoanRepository loanRepository;
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
+    private final WorkingCapitalLoanNearBreachActionRepository nearBreachActionRepository;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
     private final WorkingCapitalLoanBalanceRepository balanceRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
@@ -104,6 +106,14 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
     @Override
     public boolean hasSchedule(final Long loanId) {
         return repository.existsByLoanId(loanId);
+    }
+
+    @Override
+    public void deleteScheduleAndActions(final Long loanId) {
+        repository.deleteByLoanId(loanId);
+        breachActionRepository.deleteByWorkingCapitalLoanId(loanId);
+        nearBreachActionRepository.deleteByWorkingCapitalLoanId(loanId);
+        log.debug("Deleted breach schedule and actions for WC loan {}", loanId);
     }
 
     @Override

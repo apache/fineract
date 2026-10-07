@@ -442,17 +442,12 @@ Feature: Working Capital Loan Charge Accrual
     And Admin successfully disburse the Working Capital loan on "10 March 2027" with "9000" EUR transaction amount
     And Admin sets the business date to "21 March 2027"
     And Admin runs inline COB job for Working Capital Loan by loanId
+# --- undo disbursal disabled the charge, so it no longer accrues after the re-disbursal --- #
     Then Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 March 2027   | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
       | 10 March 2027   | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
       | 10 March 2027   | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 20 March 2027   | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
-    And a Working Capital Loan Accrual transaction business event is raised with "100.0" EUR amount
-    And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "20 March 2027" which has the following Journal entries:
-      | Type   | Account code | Account name            | Debit | Credit |
-      | ASSET  | 112603       | Interest/Fee Receivable | 100.0 |        |
-      | INCOME | 404007       | Fee Income              |       | 100.0  |
     And Admin sets the business date to "25 March 2027"
     Then Admin closes the Working Capital loan with a full repayment on "25 March 2027"
 

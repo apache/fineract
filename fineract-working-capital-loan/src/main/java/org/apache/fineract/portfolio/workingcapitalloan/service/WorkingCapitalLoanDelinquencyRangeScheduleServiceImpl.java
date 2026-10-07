@@ -101,11 +101,12 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
     }
 
     @Override
-    public void deleteSchedule(final Long loanId) {
+    public void deleteScheduleAndActions(final Long loanId) {
         // Tag history references the periods, so it has to go first.
         delinquencyRangeScheduleTagHistoryRepository.deleteByLoanId(loanId);
         loanDelinquencyRangeScheduleRepository.deleteByLoanId(loanId);
-        log.debug("Deleted delinquency range schedule for WC loan {}", loanId);
+        loanDelinquencyActionRepository.deleteByWorkingCapitalLoanId(loanId);
+        log.debug("Deleted delinquency range schedule and actions for WC loan {}", loanId);
     }
 
     @Override

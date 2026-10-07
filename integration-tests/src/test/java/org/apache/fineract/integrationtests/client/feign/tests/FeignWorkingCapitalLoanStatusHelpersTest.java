@@ -318,8 +318,8 @@ public class FeignWorkingCapitalLoanStatusHelpersTest extends FeignIntegrationTe
      * predicate - and not a status-based one - the correct semantics: the loan returns to APPROVED and COB must stop
      * adding periods again. A status-based {@code isDisbursed()} would give the same answer here by coincidence, but
      * only because APPROVED happens to line up; the discriminating part is that COB adds no period afterwards. Undo
-     * disbursal also drops the delinquency schedule (so the next disbursement rebuilds it from the current
-     * configuration), hence it must stay empty, while the breach schedule keeps its count.
+     * disbursal also drops the delinquency and breach schedules (so the next disbursement rebuilds them from the
+     * current configuration), hence both must stay empty.
      */
     @Test
     @DisplayName("undo disbursal clears the actual disbursement date and COB stops adding periods")
@@ -337,6 +337,8 @@ public class FeignWorkingCapitalLoanStatusHelpersTest extends FeignIntegrationTe
             wcLoanHelper.undoDisbursal(loanId, WorkingCapitalLoanRequestBuilders.undoDisbursal());
             assertTrue(wcLoanHelper.getDelinquencyRangeSchedule(loanId).isEmpty(),
                     "undo disbursal must drop the delinquency schedule so the next disbursement rebuilds it");
+            assertTrue(wcLoanHelper.getBreachSchedule(loanId).isEmpty(),
+                    "undo disbursal must drop the breach schedule so the next disbursement rebuilds it");
 
             final GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
             assertNotNull(loan.getStatus(), "loan status must be present");
@@ -349,8 +351,8 @@ public class FeignWorkingCapitalLoanStatusHelpersTest extends FeignIntegrationTe
 
             assertTrue(wcLoanHelper.getDelinquencyRangeSchedule(loanId).isEmpty(),
                     "COB must not rebuild the delinquency schedule once the actual disbursement date is cleared");
-            assertEquals(breachPeriodsBeforeUndo, wcLoanHelper.getBreachSchedule(loanId).size(),
-                    "COB must add no breach period once the actual disbursement date is cleared");
+            assertTrue(wcLoanHelper.getBreachSchedule(loanId).isEmpty(),
+                    "COB must not rebuild the breach schedule once the actual disbursement date is cleared");
         });
     }
 

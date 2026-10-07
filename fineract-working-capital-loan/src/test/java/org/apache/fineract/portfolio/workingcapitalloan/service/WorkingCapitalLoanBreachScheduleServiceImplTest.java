@@ -51,6 +51,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNearBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.domain.WorkingCapitalBreach;
@@ -85,6 +86,10 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
     private WorkingCapitalLoanBreachActionRepository breachActionRepository;
 
     @Mock
+
+    private WorkingCapitalLoanNearBreachActionRepository nearBreachActionRepository;
+
+    @Mock
     private WorkingCapitalLoanTransactionRepository transactionRepository;
 
     @Mock
@@ -108,7 +113,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BUSINESS_DATE, LocalDate.of(2026, 6, 1))));
         underTest = new WorkingCapitalLoanBreachScheduleServiceImpl(repository, mapper, loanRepository, breachActionRepository,
-                transactionRepository, balanceRepository, businessEventNotifierService,
+                nearBreachActionRepository, transactionRepository, balanceRepository, businessEventNotifierService,
                 new WorkingCapitalLoanActiveBreachResetResolver(breachActionRepository));
         loan = new WorkingCapitalLoan();
         loan.setId(LOAN_ID);

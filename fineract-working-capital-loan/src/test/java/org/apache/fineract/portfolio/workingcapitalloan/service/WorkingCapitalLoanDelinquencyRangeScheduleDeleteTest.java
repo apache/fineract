@@ -19,7 +19,9 @@
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
 
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository;
 import org.junit.jupiter.api.Test;
@@ -38,16 +40,19 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDeleteTest {
     private WorkingCapitalLoanDelinquencyRangeScheduleRepository rangeScheduleRepository;
     @Mock
     private WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository tagHistoryRepository;
+    @Mock
+    private WorkingCapitalLoanDelinquencyActionRepository actionRepository;
 
     @InjectMocks
     private WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl rangeScheduleService;
 
     @Test
-    void deleteScheduleRemovesTheTagHistoryBeforeThePeriodsItReferences() {
-        rangeScheduleService.deleteSchedule(LOAN_ID);
+    void deleteScheduleAndActionsRemovesTheTagHistoryBeforeThePeriodsItReferencesAndTheActions() {
+        rangeScheduleService.deleteScheduleAndActions(LOAN_ID);
 
         final InOrder order = inOrder(tagHistoryRepository, rangeScheduleRepository);
         order.verify(tagHistoryRepository).deleteByLoanId(LOAN_ID);
         order.verify(rangeScheduleRepository).deleteByLoanId(LOAN_ID);
+        verify(actionRepository).deleteByWorkingCapitalLoanId(LOAN_ID);
     }
 }

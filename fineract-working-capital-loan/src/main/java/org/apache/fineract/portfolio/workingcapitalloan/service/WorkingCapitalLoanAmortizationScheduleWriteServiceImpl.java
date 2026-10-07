@@ -329,11 +329,6 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         generateAndSaveForApprovedLoanState(loan);
     }
 
-    @Override
-    public void regenerateAmortizationScheduleOnUndoDisbursal(final WorkingCapitalLoan loan) {
-        generateAndSaveForApprovedLoanState(loan);
-    }
-
     private BigDecimal getWorkingCapitalLoanDiscountAmount(WorkingCapitalLoan loan) {
         BigDecimal discount = BigDecimal.ZERO;
         if (loan.getLoanProductRelatedDetails() != null) {

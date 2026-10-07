@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -46,8 +47,12 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanDataValidator;
@@ -57,6 +62,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -89,6 +95,12 @@ public class WorkingCapitalLoanUndoDisbursalTest {
     private WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
     @Mock
     private WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
+    @Mock
+    private WorkingCapitalLoanBreachScheduleService breachScheduleService;
+    @Mock
+    private WorkingCapitalLoanChargeRepository chargeRepository;
+    @Mock
+    private WorkingCapitalLoanBalanceRepository balanceRepository;
 
     @Mock
     private WorkingCapitalLoan loan;
@@ -176,13 +188,34 @@ public class WorkingCapitalLoanUndoDisbursalTest {
     }
 
     @Test
-    public void undoDisbursalDropsTheDelinquencyScheduleSoTheNextDisbursementRebuildsIt() {
+    public void undoDisbursalResetsTheLoanToItsApprovedStateBeforeRegeneratingTheAmortizationModel() {
         final WorkingCapitalLoanTransaction disbursement = transaction(LoanTransactionType.DISBURSEMENT, false);
         when(transactionRepository.findByWcLoan_IdOrderByTransactionDateAscIdAsc(LOAN_ID)).thenReturn(List.of(disbursement));
+        final WorkingCapitalLoanBalance staleBalance = mock(WorkingCapitalLoanBalance.class);
+        when(loan.getBalance()).thenReturn(staleBalance);
+        final WorkingCapitalLoanCharge fee = new WorkingCapitalLoanCharge();
+        final WorkingCapitalLoanCharge penalty = new WorkingCapitalLoanCharge();
+        when(chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(LOAN_ID)).thenReturn(List.of(fee, penalty));
 
         writePlatformService.undoDisbursal(LOAN_ID, command);
 
-        verify(delinquencyRangeScheduleService).deleteSchedule(LOAN_ID);
+        final InOrder order = inOrder(delinquencyRangeScheduleService, breachScheduleService, chargeRepository, balanceRepository,
+                amortizationScheduleWriteService);
+        order.verify(delinquencyRangeScheduleService).deleteScheduleAndActions(LOAN_ID);
+        order.verify(breachScheduleService).deleteScheduleAndActions(LOAN_ID);
+        order.verify(chargeRepository).saveAll(List.of(fee, penalty));
+        order.verify(balanceRepository).delete(staleBalance);
+        order.verify(balanceRepository).flush();
+        order.verify(balanceRepository).saveAndFlush(any(WorkingCapitalLoanBalance.class));
+        order.verify(amortizationScheduleWriteService).generateAndSaveAmortizationScheduleOnApproval(loan);
+        assertThat(fee.isActive()).isFalse();
+        assertThat(penalty.isActive()).isFalse();
+
+        final ArgumentCaptor<WorkingCapitalLoanBalance> freshBalance = ArgumentCaptor.forClass(WorkingCapitalLoanBalance.class);
+        verify(loan, atLeastOnce()).setBalance(freshBalance.capture());
+        assertThat(freshBalance.getAllValues()).containsExactly(null, freshBalance.getValue());
+        assertThat(freshBalance.getValue()).isNotSameAs(staleBalance);
+        assertThat(freshBalance.getValue().getWcLoan()).isSameAs(loan);
     }
 
     private static WorkingCapitalLoanTransaction transaction(final LoanTransactionType type, final boolean reversed) {

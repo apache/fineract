@@ -52,8 +52,6 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
 
     void generateAndSaveAmortizationScheduleOnApproval(WorkingCapitalLoan loan);
 
-    void regenerateAmortizationScheduleOnUndoDisbursal(WorkingCapitalLoan loan);
-
     void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
 
     void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
