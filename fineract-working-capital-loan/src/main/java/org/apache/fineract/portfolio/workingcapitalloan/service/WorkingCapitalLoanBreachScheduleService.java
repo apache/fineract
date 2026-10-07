@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
@@ -45,9 +46,9 @@ public interface WorkingCapitalLoanBreachScheduleService {
 
     boolean evaluateBreachOnDate(WorkingCapitalLoanBreachSchedule period, LocalDate businessDate);
 
-    void applyRepayment(Long loanId, LocalDate transactionDate, BigDecimal amount);
+    void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal amount);
 
-    void applyRepaymentUndo(Long loanId, LocalDate transactionDate, BigDecimal amount);
+    void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal amount);
 
     boolean evaluateBreach(WorkingCapitalLoan loan, LocalDate businessDate);
 
@@ -59,14 +60,20 @@ public interface WorkingCapitalLoanBreachScheduleService {
 
     void recalculateMinimumPayment(WorkingCapitalLoan loan);
 
-    void splitPeriodAtReset(WorkingCapitalLoan loan, LocalDate resetDate);
-
-    void restoreSplitPeriod(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction undoneReset);
-
     void recalculatePastDueAmount(WorkingCapitalLoan loan);
 
     /** Derives the reset flags from the persisted breach actions, so a new RESET or UNDO_RESET must be saved first. */
     void applyActiveResetFlags(WorkingCapitalLoan loan);
 
     void reprocessBreachSchedule(WorkingCapitalLoan loan);
+
+    void splitPeriodAtResetAndReprocess(WorkingCapitalLoan loan, LocalDate resetDate);
+
+    void restoreSplitPeriodAndReprocess(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction undoneReset);
+
+    /**
+     * Re-derives the near breach of the open period when the loan has just been reopened from {@code statusBefore}: the
+     * near breach is not evaluated while a loan is closed, so it would otherwise stay stale until the next COB.
+     */
+    void rederiveNearBreachIfReopened(WorkingCapitalLoan loan, LoanStatus statusBefore);
 }

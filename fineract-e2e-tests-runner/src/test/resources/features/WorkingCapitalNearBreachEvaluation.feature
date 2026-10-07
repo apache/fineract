@@ -72,7 +72,7 @@ Feature: Working Capital Near Breach Evaluation
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "07 January 2026"
 
   @TestRailId:C76638
-  Scenario: Verify near breach is immutable - stays true after subsequent payment
+  Scenario: Verify near breach is cleared when the minimum payment is paid before the period ends
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
@@ -90,14 +90,14 @@ Feature: Working Capital Near Breach Evaluation
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 900.00           | 900.00            | true       | null   |
-    # Now pay full amount - near breach must stay true (immutable)
+    # Paying the full minimum inside the open period re-derives near breach -> false
     When Admin sets the business date to "06 January 2026"
     And Customer makes repayment on "06 January 2026" with 900.0 transaction amount on Working Capital loan
     When Admin sets the business date to "07 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-01-06 | 900.00           | 0.00              | true       | false  |
+      | 1            | 2026-01-01 | 2026-01-06 | 900.00           | 0.00              | false      | false  |
       | 2            | 2026-01-07 | 2026-01-12 | 900.00           | 900.00            | null       | null   |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "07 January 2026"
 
@@ -523,7 +523,7 @@ Feature: Working Capital Near Breach Evaluation
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 400.00           | 150.00            | true       | null   |
     # Advance past P1 end (01-06) and P2 eval#1 (01-08).
-    # P1 breach: paid=250 < min=400 -> breach=true. P1 nearBreach remains true (immutable).
+    # P1 breach: paid=250 < min=400 -> breach=true. P1 nearBreach stays true (closed period is not re-derived).
     # P2: 01-07 -> 01-12, 2 evals: 01-08, 01-10. Step required = 132.
     # No payment in P2 -> cumulative at eval#1 (01-08) = 0 < 132 -> trigger Y.
     When Admin sets the business date to "09 January 2026"
@@ -554,7 +554,7 @@ Feature: Working Capital Near Breach Evaluation
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 90.00             | true       | null   |
-    # Re-run COB on the same business date. State must remain unchanged (immutability gate via nearBreach != null).
+    # Re-run COB on the same business date. Re-derivation is idempotent, so the state stays unchanged.
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
@@ -562,7 +562,7 @@ Feature: Working Capital Near Breach Evaluation
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C80952
-  Scenario: Verify that near breach stays immutable when backdated repayment with transaction date inside window is posted later - UC3
+  Scenario: Verify that near breach is cleared when backdated repayment with transaction date inside window is posted before the period is closed - UC3
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
@@ -582,16 +582,15 @@ Feature: Working Capital Near Breach Evaluation
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 90.00             | true       | null   |
     # Now post a backdated repayment of 60 dated 02 Jan and run COB up to the period end (effective date 01-06).
-    # 60 clears the cumulative requirement at both eval points (29.997 and 59.994), so a re-evaluating
-    # implementation would reach the close-out branch and overwrite the flag with false. Immutability must
-    # keep the already recorded true instead.
+    # 60 clears the cumulative requirement at both eval points (29.997 and 59.994) -> nearBreach re-derived to false;
+    # 60 < 90 -> breach true.
     # paidAmount/outstanding update synchronously via applyRepayment.
     When Admin sets the business date to "07 January 2026"
     And Customer makes repayment on "02 January 2026" with 60.0 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 30.00             | true       | true   |
+      | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 30.00             | false      | true   |
       | 2            | 2026-01-07 | 2026-01-12 | 90.00            | 90.00             | null       | null   |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "07 January 2026"
 
@@ -629,7 +628,7 @@ Feature: Working Capital Near Breach Evaluation
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "07 January 2026"
 
   @TestRailId:C80954
-  Scenario: Verify that near breach stays null between evals and is detected when cumulative paid falls short of stepped requirement at a later eval - UC5
+  Scenario: Verify that near breach is false after a satisfied eval and is detected when cumulative paid falls short of stepped requirement at a later eval - UC5
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
@@ -648,12 +647,12 @@ Feature: Working Capital Near Breach Evaluation
     # No further payment -> cumulative at 01-04 = 400 < 660 -> trigger Y at eval#2.
     When Admin sets the business date to "02 January 2026"
     And Customer makes repayment on "02 January 2026" with 400.0 transaction amount on Working Capital loan
-    # Phase A: COB on 04 Jan (AFTER eval#1, BEFORE eval#2) -> #1 passed without trigger, #2 not yet evaluated, period not ended -> nearBreach stays null.
+    # Phase A: COB on 04 Jan (AFTER eval#1, BEFORE eval#2) -> #1 satisfied, #2 not yet evaluated -> nearBreach false.
     When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-01-06 | 1000.00          | 600.00            | null       | null   |
+      | 1            | 2026-01-01 | 2026-01-06 | 1000.00          | 600.00            | false      | null   |
     # Phase B: COB on 06 Jan (AFTER eval#2) -> eval#2 triggers (400 < 660) -> nearBreach=true.
     When Admin sets the business date to "06 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -663,7 +662,7 @@ Feature: Working Capital Near Breach Evaluation
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "06 January 2026"
 
   @TestRailId:C80955
-  Scenario: Verify credit balance refund does not mutate already evaluated near breach schedule - UC6
+  Scenario: Verify near breach is cleared by an overpaying repayment followed by a credit balance refund - UC6
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
@@ -681,13 +680,13 @@ Feature: Working Capital Near Breach Evaluation
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 90.00             | true       | null   |
-    # Overpay the loan and post CBR. CBR must not clear or recalculate the already evaluated nearBreach flag.
+    # Overpay the loan and post CBR: the repayment covers the elapsed checkpoint -> nearBreach false.
     When Admin sets the business date to "06 January 2026"
     And Customer makes repayment on "06 January 2026" with 9500.0 transaction amount on Working Capital loan
     And Customer makes credit balance refund on "06 January 2026" with 500.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 0.00              | true       | false  |
+      | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 0.00              | false      | false  |
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
   @TestRailId:C77001
@@ -874,7 +873,7 @@ Feature: Working Capital Near Breach Evaluation
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 90.00             | true       | null   |
-    # Post RESCHEDULE with threshold that would NOT have triggered. Immutability must protect already-set nearBreach=true.
+    # Post RESCHEDULE with threshold that would NOT have triggered. Freq 14 leaves no checkpoint inside the period, so the already-set nearBreach=true is kept.
     When Admin creates a near breach reschedule action with threshold "99" frequency 14 frequencyType "DAYS"
     Then Near breach action history has the following data:
       | action     | threshold | frequency | frequencyType |
@@ -942,7 +941,7 @@ Feature: Working Capital Near Breach Evaluation
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 90.00             | null       | null   |
     # Post RESCHEDULE on 02-Jan: threshold=50% (=45), freq=4 DAYS -> eval#1 at 01-04.
-    # Pay 50 on 03-Jan: cumulative paid at eval#1 = 50 >= 45 -> nearBreach not triggered (stays null).
+    # Pay 50 on 03-Jan: cumulative paid at eval#1 = 50 >= 45 -> nearBreach false.
     When Admin sets the business date to "02 January 2026"
     And Admin creates a near breach reschedule action with threshold "50" frequency 4 frequencyType "DAYS"
     Then Near breach action history has the following data:
@@ -954,11 +953,11 @@ Feature: Working Capital Near Breach Evaluation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 40.00             | null       | null   |
+      | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 40.00             | false      | null   |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "06 January 2026"
 
   @TestRailId:C85322
-  Scenario: Verify near breach RESCHEDULE action - UC8: backdated repayment does not clear immutable nearBreach set under new config
+  Scenario: Verify near breach RESCHEDULE action - UC8: backdated repayment clears nearBreach set under new config
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
@@ -988,14 +987,13 @@ Feature: Working Capital Near Breach Evaluation
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 90.00             | true       | null   |
     # Backdate repayment of 50 to 02-Jan and run COB up to the period end (effective date 01-06).
-    # 50 clears the rescheduled requirement at eval#1 (45), so a re-evaluating implementation would reach the
-    # close-out branch and overwrite the flag with false. Immutability must keep the already recorded true.
+    # 50 clears the rescheduled requirement at eval#1 (45) -> nearBreach re-derived to false; 50 < 90 -> breach true.
     When Admin sets the business date to "07 January 2026"
     And Customer makes repayment on "02 January 2026" with 50.0 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 40.00             | true       | true   |
+      | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 40.00             | false      | true   |
       | 2            | 2026-01-07 | 2026-01-12 | 90.00            | 90.00             | null       | null   |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "07 January 2026"
 
@@ -1018,7 +1016,7 @@ Feature: Working Capital Near Breach Evaluation
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 90.00             | null       | null   |
-    # Goodwill credit of 50 on 03-Jan: cumulative paid at eval#1 (01-04) = 50 >= 45 -> nearBreach not triggered (stays null).
+    # Goodwill credit of 50 on 03-Jan: cumulative paid at eval#1 (01-04) = 50 >= 45 -> nearBreach false.
     When Admin sets the business date to "02 January 2026"
     And Admin creates a near breach reschedule action with threshold "50" frequency 4 frequencyType "DAYS"
     Then Near breach action history has the following data:
@@ -1030,7 +1028,7 @@ Feature: Working Capital Near Breach Evaluation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 40.00             | null       | null   |
+      | 1            | 2026-01-01 | 2026-01-06 | 90.00            | 40.00             | false      | null   |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "06 January 2026"
 
   @TestRailId:C85324

@@ -44,6 +44,20 @@ public final class WorkingCapitalBreachTestValidators {
         }
     }
 
+    public record ExpectedNearBreachState(int periodNumber, String fromDate, String toDate, String paidAmount, String outstandingAmount,
+            Boolean nearBreach, Boolean breach) {
+
+        public static ExpectedNearBreachState nearBreachState(int periodNumber, String paidAmount, String outstandingAmount,
+                Boolean nearBreach, Boolean breach) {
+            return new ExpectedNearBreachState(periodNumber, null, null, paidAmount, outstandingAmount, nearBreach, breach);
+        }
+
+        public static ExpectedNearBreachState nearBreachState(int periodNumber, String fromDate, String toDate, String paidAmount,
+                String outstandingAmount, Boolean nearBreach, Boolean breach) {
+            return new ExpectedNearBreachState(periodNumber, fromDate, toDate, paidAmount, outstandingAmount, nearBreach, breach);
+        }
+    }
+
     public record ExpectedBreachAction(String action, String startDate) {
 
         public static ExpectedBreachAction action(String action, String startDate) {
@@ -80,6 +94,28 @@ public final class WorkingCapitalBreachTestValidators {
         }
     }
 
+    public static void validateNearBreachStates(final List<WorkingCapitalLoanBreachScheduleData> actualSchedule,
+            final ExpectedNearBreachState... expectedStates) {
+        assertNotNull(actualSchedule, "Breach schedule must be present");
+        for (final ExpectedNearBreachState expected : expectedStates) {
+            final String row = "breach period " + expected.periodNumber();
+            final WorkingCapitalLoanBreachScheduleData actual = actualSchedule.stream()
+                    .filter(period -> Integer.valueOf(expected.periodNumber()).equals(period.getPeriodNumber())).findFirst()
+                    .orElseThrow(() -> new AssertionError(row + " not found in " + describe(actualSchedule)));
+            if (expected.fromDate() != null) {
+                assertEquals(LocalDate.parse(expected.fromDate()), actual.getFromDate(), row + " — fromDate");
+            }
+            if (expected.toDate() != null) {
+                assertEquals(LocalDate.parse(expected.toDate()), actual.getToDate(), row + " — toDate");
+            }
+            assertBigDecimalEquals(new BigDecimal(expected.paidAmount()), actual.getPaidAmount(), row + " — paidAmount");
+            assertBigDecimalEquals(new BigDecimal(expected.outstandingAmount()), actual.getOutstandingAmount(),
+                    row + " — outstandingAmount");
+            assertEquals(expected.nearBreach(), actual.getNearBreach(), row + " — nearBreach");
+            assertEquals(expected.breach(), actual.getBreach(), row + " — breach");
+        }
+    }
+
     public static void validateBreachActions(final List<WorkingCapitalLoanBreachActionData> actualActions,
             final ExpectedBreachAction... expectedActions) {
         assertNotNull(actualActions, "Breach actions must be present");
@@ -113,8 +149,8 @@ public final class WorkingCapitalBreachTestValidators {
     private static String describe(final List<WorkingCapitalLoanBreachScheduleData> schedule) {
         return schedule.stream()
                 .map(period -> "P" + period.getPeriodNumber() + "[" + period.getFromDate() + ".." + period.getToDate() + " days="
-                        + period.getNumberOfDays() + " outstanding=" + period.getOutstandingAmount() + " breach=" + period.getBreach()
-                        + " reset=" + period.getReset() + "]")
+                        + period.getNumberOfDays() + " paid=" + period.getPaidAmount() + " outstanding=" + period.getOutstandingAmount()
+                        + " nearBreach=" + period.getNearBreach() + " breach=" + period.getBreach() + " reset=" + period.getReset() + "]")
                 .reduce((a, b) -> a + ", " + b).orElse("<empty>");
     }
 }

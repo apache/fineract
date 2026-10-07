@@ -850,6 +850,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final LocalDate reversedOnDate = waiverTransaction.getReversedOnDate();
         final LoanStatus oldStatus = loan.getLoanStatus();
         stateMachine.determineAndTransition(loan, reversedOnDate);
+        breachScheduleService.rederiveNearBreachIfReopened(loan, oldStatus);
         transactionProcessor.recalculateOverpaidOnDate(loan, waiverTransaction);
         loanRepository.saveAndFlush(loan);
 
@@ -1065,6 +1066,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final LoanStatus oldStatus = loan.getLoanStatus();
 
         stateMachine.determineAndTransition(loan, reversedOnDate);
+        breachScheduleService.rederiveNearBreachIfReopened(loan, oldStatus);
 
         loanRepository.saveAndFlush(loan);
 
@@ -1414,6 +1416,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     }
 
     private void processUndoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
+        final LoanStatus statusBeforeUndo = loan.getLoanStatus();
         final boolean lastMonetaryAction = transactionProcessor.isLastMonetaryAction(transaction);
         final boolean isAccountingOnly = isAccountingOnlyTransaction(transaction);
         final boolean isChargesInvolved = isChargesInvolved(loan);
@@ -1439,13 +1442,17 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
 
         if (!isAccountingOnly) {
-            breachScheduleService.applyRepaymentUndo(loan.getId(), transaction.getTransactionDate(), transaction.getTransactionAmount());
+            breachScheduleService.applyRepaymentUndo(loan, transaction.getTransactionDate(), transaction.getTransactionAmount());
             delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
         }
 
         accountingProcessor.postReversalJournalEntries(loan, transaction);
 
         stateMachine.determineAndTransition(loan, DateUtils.getBusinessLocalDate());
+        if (!isAccountingOnly) {
+            // The breach undo above ran while the loan was still closed, which the near breach evaluation skips.
+            breachScheduleService.rederiveNearBreachIfReopened(loan, statusBeforeUndo);
+        }
         transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
         transactionProcessor.recalculateSettlementDates(loan);
     }

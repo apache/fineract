@@ -83,6 +83,7 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
+    private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
 
     @Transactional
     @Override
@@ -205,6 +206,7 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
         // The restored balance re-derives the delinquency the loan had before the write-off: the schedule replays the
         // repayment history and reclassifies against the outstanding that is back on the books.
         this.delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+        this.breachScheduleService.rederiveNearBreachIfReopened(loan, oldStatus);
 
         this.accountingProcessor.postReversalJournalEntries(loan, writeOffTransaction);
 

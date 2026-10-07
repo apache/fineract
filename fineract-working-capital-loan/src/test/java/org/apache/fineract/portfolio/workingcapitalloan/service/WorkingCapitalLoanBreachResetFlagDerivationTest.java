@@ -88,6 +88,8 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
     private WorkingCapitalLoanBalanceRepository balanceRepository;
     @Mock
     private BusinessEventNotifierService businessEventNotifierService;
+    @Mock
+    private WorkingCapitalLoanNearBreachEvaluationService nearBreachEvaluationService;
 
     private WorkingCapitalLoanBreachScheduleServiceImpl scheduleService;
     private WorkingCapitalLoanBreachResetServiceImpl resetService;
@@ -104,7 +106,8 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
         final WorkingCapitalLoanActiveBreachResetResolver resolver = new WorkingCapitalLoanActiveBreachResetResolver(
                 breachActionRepository);
         scheduleService = new WorkingCapitalLoanBreachScheduleServiceImpl(repository, mapper, loanRepository, breachActionRepository,
-                nearBreachActionRepository, transactionRepository, balanceRepository, businessEventNotifierService, resolver);
+                nearBreachActionRepository, transactionRepository, balanceRepository, businessEventNotifierService, resolver,
+                new WorkingCapitalLoanNearBreachRederivation(nearBreachEvaluationService, businessEventNotifierService));
         resetService = new WorkingCapitalLoanBreachResetServiceImpl(scheduleService, resolver);
         loan = new WorkingCapitalLoan();
         loan.setId(LOAN_ID);
