@@ -80,7 +80,14 @@ public class WorkingCapitalLoanBreachActionWriteServiceImpl implements WorkingCa
             existing.stream().filter(action -> WorkingCapitalLoanBreachActionType.DISABLE == action.getAction())
                     .reduce((first, second) -> second).ifPresent(action -> {
                         action.setEndDate(breachAction.getStartDate().minusDays(1));
+                        actionRepository.saveAndFlush(action);
                     });
+            // Nothing was evaluated or updated while disabled, so every period is recalculated as if the loan had never
+            // been disabled.
+            if (!breachScheduleService.hasSchedule(workingCapitalLoanId)) {
+                breachScheduleService.generateInitialPeriod(workingCapitalLoan);
+            }
+            breachScheduleService.recalculateMinimumPayment(workingCapitalLoan);
             breachScheduleService.reprocessBreachSchedule(workingCapitalLoan);
         }
 

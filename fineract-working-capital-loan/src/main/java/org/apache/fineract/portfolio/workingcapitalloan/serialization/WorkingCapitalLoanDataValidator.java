@@ -1121,7 +1121,7 @@ public class WorkingCapitalLoanDataValidator {
                     .failWithCodeNoParameterAddedToErrorCode("near.breach.action.not.allowed.loan.has.no.near.breach.configuration");
         }
 
-        if (breachActionRepository.isBreachDisabledAsOf(loan.getId(), DateUtils.getBusinessLocalDate())) {
+        if (breachActionRepository.isBreachDisabled(loan.getId())) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("breach.is.disabled");
         }
 

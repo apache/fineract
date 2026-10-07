@@ -73,7 +73,7 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 1, 1))));
         MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
         underTest = new WorkingCapitalLoanNearBreachEvaluationServiceImpl(breachScheduleRepository, breachActionRepository);
-        when(breachActionRepository.isBreachDisabledAsOf(anyLong(), any())).thenReturn(false);
+        when(breachActionRepository.isBreachDisabled(anyLong())).thenReturn(false);
     }
 
     @AfterEach

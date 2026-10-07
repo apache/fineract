@@ -107,7 +107,7 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
         loan.setId(LOAN_ID);
         balance = WorkingCapitalLoanBalance.createFor(loan);
         balance.setPrincipal(BigDecimal.valueOf(10_000));
-        lenient().when(breachActionRepository.isBreachDisabledAsOf(anyLong(), any())).thenReturn(false);
+        lenient().when(breachActionRepository.isBreachDisabled(anyLong())).thenReturn(false);
         when(breachActionRepository.findByWorkingCapitalLoanIdAndActionOrderByIdDesc(anyLong(), any())).thenReturn(List.of());
         when(balanceRepository.findByWcLoan_Id(LOAN_ID)).thenReturn(Optional.of(balance));
         when(repository.findByLoanIdOrderByPeriodNumberAsc(LOAN_ID)).thenAnswer(inv -> sorted());

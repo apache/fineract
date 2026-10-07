@@ -113,7 +113,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         loan = new WorkingCapitalLoan();
         loan.setId(LOAN_ID);
         balance = WorkingCapitalLoanBalance.createFor(loan);
-        lenient().when(breachActionRepository.isBreachDisabledAsOf(anyLong(), any())).thenReturn(false);
+        lenient().when(breachActionRepository.isBreachDisabled(anyLong())).thenReturn(false);
     }
 
     @AfterEach
@@ -211,7 +211,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
 
     @Test
     void recalculatePastDueAmount_skipsWhenBreachEvaluationDisabled() {
-        when(breachActionRepository.isBreachDisabledAsOf(LOAN_ID, LocalDate.of(2026, 6, 1))).thenReturn(true);
+        when(breachActionRepository.isBreachDisabled(LOAN_ID)).thenReturn(true);
 
         underTest.recalculatePastDueAmount(loan);
 
@@ -254,7 +254,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
     @Test
     void applyRepayment_skipsWhenBreachEvaluationDisabled() {
         final LocalDate transactionDate = LocalDate.of(2026, 5, 15);
-        when(breachActionRepository.isBreachDisabledAsOf(LOAN_ID, LocalDate.of(2026, 6, 1))).thenReturn(true);
+        when(breachActionRepository.isBreachDisabled(LOAN_ID)).thenReturn(true);
 
         underTest.applyRepayment(LOAN_ID, transactionDate, BigDecimal.valueOf(60));
 
@@ -315,7 +315,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
     @Test
     void applyRepaymentUndo_skipsWhenBreachEvaluationDisabled() {
         final LocalDate transactionDate = LocalDate.of(2026, 5, 15);
-        when(breachActionRepository.isBreachDisabledAsOf(LOAN_ID, LocalDate.of(2026, 6, 1))).thenReturn(true);
+        when(breachActionRepository.isBreachDisabled(LOAN_ID)).thenReturn(true);
 
         underTest.applyRepaymentUndo(LOAN_ID, transactionDate, BigDecimal.valueOf(60));
 

@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType;
@@ -33,10 +32,13 @@ public interface WorkingCapitalLoanBreachActionRepository extends JpaRepository<
     List<WorkingCapitalLoanBreachAction> findByWorkingCapitalLoanIdAndActionOrderByIdDesc(Long workingCapitalLoanId,
             WorkingCapitalLoanBreachActionType action);
 
+    /**
+     * True while a Breach Disable is active: a DISABLE action that has not been closed by an enable (no end date).
+     */
     @Query("""
             SELECT CASE WHEN COUNT(action) > 0 THEN TRUE ELSE FALSE END FROM WorkingCapitalLoanBreachAction action
             WHERE action.action = org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.DISABLE
-            AND action.workingCapitalLoan.id = :loanId AND action.startDate <= :date AND (action.endDate IS NULL OR action.endDate >= :date)
+            AND action.workingCapitalLoan.id = :loanId AND action.endDate IS NULL
             """)
-    boolean isBreachDisabledAsOf(@Param("loanId") Long loanId, @Param("date") LocalDate date);
+    boolean isBreachDisabled(@Param("loanId") Long loanId);
 }
