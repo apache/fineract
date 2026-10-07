@@ -131,6 +131,8 @@ Feature: LoanRepayment - Part4
     When Admin sets the business date to "15 March 2024"
     When Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 17.01 EUR transaction amount
     Then Customer undo "1"th transaction made on "01 February 2024" results a 403 error and "update not allowed as loan transaction is linked to other transactions" error message
+    When Customer undo "1"th "Chargeback" transaction made on "15 March 2024"
+    When Customer undo "1"th transaction made on "01 February 2024"
     When Loan Pay-off is made on "15 March 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 

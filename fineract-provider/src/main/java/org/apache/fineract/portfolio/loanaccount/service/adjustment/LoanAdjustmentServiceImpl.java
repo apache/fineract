@@ -51,6 +51,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachin
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -98,6 +99,7 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
     private final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
     private final LoanScheduleService loanScheduleService;
+    private final LoanTransactionRelationRepository loanTransactionRelationRepository;
 
     @Override
     public CommandProcessingResult adjustLoanTransaction(Loan loan, LoanTransaction transactionToAdjust, LoanAdjustmentParameter parameter,
@@ -289,10 +291,10 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
         if (!transactionForAdjustment.isAccrualRelated() && transactionForAdjustment.isNotRepaymentLikeType()
                 && transactionForAdjustment.isNotWaiver() && transactionForAdjustment.isNotCreditBalanceRefund()
                 && !transactionForAdjustment.isDeferredIncome() && !transactionForAdjustment.isCapitalizedIncomeAdjustment()
-                && !transactionForAdjustment.isBuyDownFeeAdjustment()) {
-            final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee or buy down fee adjustment can be adjusted.";
+                && !transactionForAdjustment.isBuyDownFeeAdjustment() && !transactionForAdjustment.isChargeback()) {
+            final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee, buy down fee adjustment or chargeback can be adjusted.";
             throw new InvalidLoanTransactionTypeException("transaction",
-                    "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.or.capitalizedIncome.or.capitalizedIncomeAdjustment.or.buyDownFee.or.buyDownFeeAdjustment.transactions",
+                    "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.or.capitalizedIncome.or.capitalizedIncomeAdjustment.or.buyDownFee.or.buyDownFeeAdjustment.or.chargeback.transactions",
                     errorMessage);
         }
 
@@ -334,6 +336,14 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
 
         if (transactionForAdjustment.getTypeOf().equals(LoanTransactionType.CAPITALIZED_INCOME)) {
             loanScheduleService.regenerateScheduleWithReprocessingTransactions(loan);
+        }
+
+        if (transactionForAdjustment.getTypeOf().isChargeback()) {
+            loanTransactionRelationRepository
+                    .findByToTransactionAndRelationType(transactionForAdjustment, LoanTransactionRelationTypeEnum.CHARGEBACK)
+                    .forEach(relation -> relation.getFromTransaction().getLoanTransactionRelations().remove(relation));
+            loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
+            reprocessLoanTransactionsService.reprocessTransactions(loan);
         }
     }
 
