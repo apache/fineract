@@ -86,8 +86,8 @@ class WorkingCapitalLoanBreachResetServiceImplTest {
         final InOrder inOrder = inOrder(breachScheduleService);
         inOrder.verify(breachScheduleService).applyActiveResetFlags(loan);
         inOrder.verify(breachScheduleService).recalculatePastDueAmount(loan);
-        verify(breachScheduleService, never()).splitPeriodAtReset(any(), any());
-        verify(breachScheduleService, never()).restoreSplitPeriod(any(), any());
+        verify(breachScheduleService, never()).splitPeriodAtResetAndReprocess(any(), any());
+        verify(breachScheduleService, never()).restoreSplitPeriodAndReprocess(any(), any());
         verify(breachScheduleService, never()).reprocessBreachSchedule(any());
     }
 
@@ -104,9 +104,7 @@ class WorkingCapitalLoanBreachResetServiceImplTest {
 
         underTest.resetBreach(loan, restartReset(1L, resetDate));
 
-        final InOrder inOrder = inOrder(breachScheduleService);
-        inOrder.verify(breachScheduleService).splitPeriodAtReset(loan, resetDate);
-        inOrder.verify(breachScheduleService).reprocessBreachSchedule(loan);
+        verify(breachScheduleService).splitPeriodAtResetAndReprocess(loan, resetDate);
         verify(breachScheduleService, never()).applyActiveResetFlags(any());
         verify(breachScheduleService, never()).recalculatePastDueAmount(any());
     }
@@ -124,9 +122,7 @@ class WorkingCapitalLoanBreachResetServiceImplTest {
 
         underTest.undoResetBreach(loan, undo(2L, LocalDate.of(2026, 4, 15)), List.of(undoneReset));
 
-        final InOrder inOrder = inOrder(breachScheduleService);
-        inOrder.verify(breachScheduleService).restoreSplitPeriod(loan, undoneReset);
-        inOrder.verify(breachScheduleService).reprocessBreachSchedule(loan);
+        verify(breachScheduleService).restoreSplitPeriodAndReprocess(loan, undoneReset);
         verify(breachScheduleService, never()).applyActiveResetFlags(any());
         verify(breachScheduleService, never()).recalculatePastDueAmount(any());
     }
@@ -148,8 +144,7 @@ class WorkingCapitalLoanBreachResetServiceImplTest {
         underTest.undoResetBreach(loan, undo(4L, LocalDate.of(2026, 4, 20)),
                 List.of(restartReset, reset(2L, LocalDate.of(2026, 4, 15)), undo(3L, LocalDate.of(2026, 4, 16))));
 
-        verify(breachScheduleService).restoreSplitPeriod(loan, restartReset);
-        verify(breachScheduleService).reprocessBreachSchedule(loan);
+        verify(breachScheduleService).restoreSplitPeriodAndReprocess(loan, restartReset);
     }
 
     @Test

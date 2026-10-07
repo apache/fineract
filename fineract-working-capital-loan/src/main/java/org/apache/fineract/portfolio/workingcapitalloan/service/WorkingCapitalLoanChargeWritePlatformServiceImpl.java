@@ -321,6 +321,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
             }
             loan.setMaturedOnDate(chargeDueDate);
             generateDelinquencyAndBreachPeriods(loan, chargeDueDate);
+            breachScheduleService.rederiveNearBreachIfReopened(loan, statusBeforeCharge);
         } else if (statusBeforeCharge.isOverpaid()) {
             // The overpayment exactly settled the charge: the loan closes with obligations met.
             stateMachine.transition(WorkingCapitalLoanEvent.LOAN_CREDIT_BALANCE_REFUND_IN_FULL, loan, chargeDueDate);

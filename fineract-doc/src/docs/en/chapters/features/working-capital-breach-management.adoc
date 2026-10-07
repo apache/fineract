@@ -56,13 +56,15 @@ Breach and near-breach configurations are maintained as independent, named, reus
 
 The near-breach configuration defines checkpoints *within* a breach period. The system enforces that the near-breach frequency (i.e., the interval between checkpoints) is strictly less than the breach period frequency. This is validated through `WorkingCapitalNearBreachParseAndValidator.validateNearBreachAgainstBreach` when product or loan application breach settings are validated.
 
-=== Breach Evaluation Is Idempotent
+=== Breach Evaluation Is Idempotent, Near Breach Is Re-Derived
 
-Both `evaluateBreach` and `evaluateNearBreach` check whether the relevant boolean flag is already non-null before doing any work. Once a period has been evaluated (flag set to `true` or `false`), the COB step does not re-evaluate it. This prevents double-flagging and keeps COB idempotent.
+`evaluateBreach` checks whether the `breach` flag is already non-null before doing any work. Once a period has been evaluated (flag set to `true` or `false`), the COB step does not re-evaluate it. This prevents double-flagging and keeps COB idempotent.
+
+`nearBreach` of the open period is instead a value derived from the current state of the period. It is re-derived on every COB run and after every monetary event that changes the period's `paidAmount`, so it can move from `true` to `false` when the borrower catches up and back to `true` when a repayment is undone. Re-deriving an unchanged state yields the same value, so it is idempotent as well.
 
 === `null` Means "Not Yet Evaluated"
 
-The `breach` and `nearBreach` columns on `m_wc_loan_breach_schedule` use three-state semantics: `null` = period still open and not yet evaluated, `false` = evaluated and the condition was not met, `true` = condition triggered. This distinction is important: a period with `paidAmount = 0` but not yet past its `toDate` correctly has `breach = null`.
+The `breach` and `nearBreach` columns on `m_wc_loan_breach_schedule` use three-state semantics: `null` = period still open and not yet evaluated (for `nearBreach`: no checkpoint of the period has elapsed yet), `false` = evaluated and the condition was not met, `true` = condition triggered. This distinction is important: a period with `paidAmount = 0` but not yet past its `toDate` correctly has `breach = null`.
 
 === Minimum Payment Applied at Repayment Time
 
@@ -127,7 +129,7 @@ The `m_wc_loan_breach_schedule` table stores one row per breach period per WC lo
 | `min_payment_amount` | DECIMAL(19,6) | nullable | Minimum amount due within this period
 | `paid_amount` | DECIMAL(19,6) | nullable | Cumulative amount paid within this period so far
 | `outstanding_amount` | DECIMAL(19,6) | nullable | `min_payment_amount − paid_amount` (floor 0)
-| `near_breach` | BOOLEAN | nullable | `true` = near-breach triggered; `false` = evaluated, not triggered; `null` = not yet evaluated
+| `near_breach` | BOOLEAN | nullable | `true` = paid amount below the requirement of the latest elapsed checkpoint; `false` = requirement met; `null` = no checkpoint elapsed yet
 | `breach` | BOOLEAN | nullable | `true` = breach triggered; `false` = evaluated, not triggered; `null` = not yet evaluated
 | `created_by` | BIGINT | not null | Audit field
 | `created_on_utc` | DATETIME(6) / TIMESTAMP WITH TIME ZONE | not null | Audit field
@@ -373,9 +375,25 @@ GET /v1/working-capital-loans/{loanId}/breach-schedule
 ----
 requiredCumulative = (checkpointIndex + 1) × (threshold / 100) × minPaymentAmount
 ----
-* If `paidAmount < requiredCumulative` on a checkpoint, the period is flagged `nearBreach = true`.
-* If the business date reaches `toDate` and no checkpoint was triggered, the period is marked `nearBreach = false`.
-* Once `nearBreach` is non-null, the COB step skips further evaluation for that period.
+* The value is point-in-time: it compares `paidAmount` with `requiredCumulative` of the latest checkpoint that has elapsed. It is `true` if `paidAmount < requiredCumulative`, `false` otherwise, and `null` while no checkpoint of a period that was never evaluated has elapsed.
+* When there is nothing to judge against — no minimum payment, no checkpoint inside the period (for example after a `RESCHEDULE` to a longer frequency) or no checkpoint elapsed yet — the period keeps the value it has. A value is never turned back into `null`.
+* If the business date reaches `toDate`, the value of the last checkpoint closes the period out (`false` when no checkpoint falls inside the period).
+* Every COB run re-derives the period covering the COB date, so a later missed checkpoint raises a flag that an earlier catch-up cleared.
+* The latest near-breach `RESCHEDULE` action of the loan overrides the threshold and frequency of the product configuration.
+* Re-derivation is skipped for loans that are not active, have no near-breach configuration or whose breach evaluation is disabled on the business date (in COB: the COB date). A skipped re-derivation leaves every value untouched and raises no event.
+* `WorkingCapitalLoanNearBreachChangeBusinessEvent` is raised only when the persisted value changes.
+
+=== Near-Breach Re-Evaluation on Monetary Activity
+
+* Outside COB the effective date is the day before the business date: a checkpoint counts once its day has closed, so this is the same date the latest COB evaluated. The disabled-breach guard asks whether evaluation is enabled now, on the business date, the same date the paid-amount update of a repayment is guarded on. On the day breach evaluation is enabled again, the enable reprocess and every repayment re-derive the near breach immediately; on the day it is disabled nothing is re-derived.
+* After a repayment-like transaction (`applyRepayment`) or its undo (`applyRepaymentUndo`) the near breach of the period it lands in is re-derived immediately, if that period is still open (`toDate >= businessDate`).
+* When an undo moves the loan from closed back to active, the open period is re-derived once more after the status transition, so the undo of a repayment that closed the loan re-raises the flag on the reopened loan.
+* Periods that are already closed keep the near breach they were closed out with when a monetary event lands in them.
+* A breach reset with restart, the undo of such a reset, an enable and the replay after a pause, resume or breach reschedule compare against a snapshot of the schedule taken before any period is re-dated, deleted or regenerated. They re-derive the open period and every period whose dates, minimum payment or paid amount moved since that snapshot, or that was deleted and regenerated.
+* A period that is deleted and regenerated with the same bounds takes over the value of the period it replaces.
+* An explicit reprocess (reset with restart, its undo, enable) additionally re-derives every closed period that carries a value, so a value that no longer matches the replayed paid amount does not survive. Such a re-derivation can only switch between `true` and `false`.
+* A closed period that was never evaluated stays `null`, even when its dates, minimum payment or paid amount moved (for example one that closed while breach evaluation was disabled). Only the open period, or a period that was open in the snapshot and is being closed out now (the period a restart reset cuts), can go from `null` to a value.
+* One `WorkingCapitalLoanNearBreachChangeBusinessEvent` is raised when the re-derivation ran and a period holds a different value than in the snapshot. When the period open in the snapshot was deleted, as by the undo of a restart reset, its value is compared with the period open afterwards.
 
 === Repayment Application
 
@@ -414,7 +432,7 @@ Same breach configuration. The borrower makes a 1000 payment on `2025-01-20`.
 **Expected Behavior:**
 
 * During COB on `2025-02-14` the `WC_BREACH_SCHEDULE` step finds `breach` is already non-null and skips evaluation.
-* During COB on `2025-01-29` the `WC_NEAR_BREACH_EVALUATION` step computes `requiredCumulative = 500`; `paidAmount (1000) >= 500`, so `nearBreach` is not triggered (the period would eventually resolve to `false` at `toDate`).
+* During COB on `2025-01-29` the `WC_NEAR_BREACH_EVALUATION` step computes `requiredCumulative = 500`; `paidAmount (1000) >= 500`, so the period resolves to `nearBreach = false`.
 
 == Summary
 
@@ -424,4 +442,5 @@ Working Capital Breach Management provides a periodic, schedule-driven mechanism
 * A per-loan breach schedule generated by the COB pipeline — one period per breach frequency interval — starting from the disbursement date offset by delinquency grace days.
 * A two-stage COB evaluation: `WC_BREACH_SCHEDULE` (step 5) generates periods and evaluates end-of-period breaches; `WC_NEAR_BREACH_EVALUATION` (step 6) assesses mid-period cumulative-payment checkpoints.
 * Minimum payment amounts computed as either a flat amount or a percentage of `approvedPrincipal + discount`.
-* Idempotent evaluation: once a breach or near-breach flag is resolved (`true` or `false`), subsequent COB runs leave it unchanged.
+* Idempotent breach evaluation: once a breach flag is resolved (`true` or `false`), subsequent COB runs leave it unchanged.
+* A near-breach flag on the open period that follows the current state of the period: re-derived by COB and by every monetary event, frozen once the period is closed.

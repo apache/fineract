@@ -28,13 +28,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.NearBreachActionType;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanNearBreachAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNearBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.domain.WorkingCapitalNearBreach;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -44,78 +46,106 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
 
     private final WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
+    private final WorkingCapitalLoanNearBreachActionRepository nearBreachActionRepository;
 
     @Override
-    public boolean evaluateNearBreach(final WorkingCapitalLoan loan, final WorkingCapitalLoanNearBreachAction latestAction,
-            final LocalDate effectiveDate) {
-        final Optional<WorkingCapitalLoanBreachSchedule> relevantPeriod = breachScheduleRepository
-                .findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loan.getId(), effectiveDate, effectiveDate);
-        if (relevantPeriod.isEmpty()) {
+    public boolean evaluateNearBreachOnCob(final WorkingCapitalLoan loan, final LocalDate effectiveDate) {
+        final Optional<NearBreachParameters> parameters = resolveParameters(loan);
+        if (parameters.isEmpty()) {
             return false;
         }
-        final WorkingCapitalLoanBreachSchedule period = relevantPeriod.get();
-        if (period.getNearBreach() != null) {
-            return false;
-        }
-        if (breachActionRepository.isBreachDisabled(loan.getId())) {
-            log.debug("Skipping near breach evaluation for WC loan {} - breach evaluation is disabled", loan.getId());
-            return false;
-        }
-        final WorkingCapitalNearBreach config = loan.getLoanProductRelatedDetails().getNearBreach();
-
-        final BigDecimal effectiveThreshold;
-        final Integer effectiveFrequency;
-        final WorkingCapitalLoanPeriodFrequencyType effectiveFrequencyType;
-        if (latestAction != null) {
-            effectiveThreshold = latestAction.getThreshold();
-            effectiveFrequency = latestAction.getFrequency();
-            effectiveFrequencyType = latestAction.getFrequencyType();
-        } else {
-            effectiveThreshold = config.getThreshold();
-            effectiveFrequency = config.getFrequency();
-            effectiveFrequencyType = config.getFrequencyType();
-        }
-        final Integer breachGraceDays = getBreachGraceDays(loan);
-        if (evaluatePeriod(loan.getId(), period, effectiveThreshold, effectiveFrequency, effectiveFrequencyType, breachGraceDays,
-                effectiveDate)) {
-            breachScheduleRepository.saveAndFlush(period);
-            return true;
-        }
-        return false;
+        return breachScheduleRepository
+                .findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loan.getId(), effectiveDate, effectiveDate)
+                .map(period -> rederiveNearBreach(List.of(period), parameters.get(), effectiveDate)).orElse(false);
     }
 
-    private boolean evaluatePeriod(final Long loanId, final WorkingCapitalLoanBreachSchedule period, final BigDecimal threshold,
-            final Integer frequency, final WorkingCapitalLoanPeriodFrequencyType frequencyType, final Integer breachGraceDays,
+    @Override
+    public Optional<NearBreachParameters> resolveParameters(final WorkingCapitalLoan loan) {
+        final Optional<NearBreachParameters> parameters = resolveParametersWithBreachEvaluationEnabled(loan);
+        if (parameters.isPresent() && breachActionRepository.isBreachDisabled(loan.getId())) {
+            log.debug("Skipping near breach evaluation for WC loan {} - breach evaluation is disabled", loan.getId());
+            return Optional.empty();
+        }
+        return parameters;
+    }
+
+    @Override
+    public Optional<NearBreachParameters> resolveParametersWithBreachEvaluationEnabled(final WorkingCapitalLoan loan) {
+        if (!loan.isOpen()) {
+            log.debug("Skipping near breach evaluation for WC loan {} - loan status is {}", loan.getId(), loan.getLoanStatus());
+            return Optional.empty();
+        }
+        final Optional<NearBreachParameters> parameters = nearBreachActionRepository
+                .findTopByWorkingCapitalLoanIdAndActionOrderByIdDesc(loan.getId(), NearBreachActionType.RESCHEDULE)
+                .map(action -> new NearBreachParameters(action.getThreshold(), action.getFrequency(), action.getFrequencyType(),
+                        getBreachGraceDays(loan)))
+                .or(() -> productParameters(loan));
+        if (parameters.isEmpty()) {
+            log.debug("Skipping near breach evaluation for WC loan {} - no near breach configuration", loan.getId());
+        }
+        return parameters;
+    }
+
+    @Override
+    public boolean rederiveNearBreach(final List<WorkingCapitalLoanBreachSchedule> periods, final NearBreachParameters parameters,
+            final LocalDate effectiveDate) {
+        final List<WorkingCapitalLoanBreachSchedule> changed = periods.stream()
+                .filter(period -> rederive(period, parameters, effectiveDate)).toList();
+        if (changed.isEmpty()) {
+            return false;
+        }
+        breachScheduleRepository.saveAll(changed);
+        return true;
+    }
+
+    /**
+     * The near breach of a period as of {@code effectiveDate}: whether the cumulative paid amount falls short of the
+     * requirement at the latest elapsed checkpoint, and from the period end on the close-out value. Empty when there is
+     * nothing to judge against: no demand, no checkpoint inside the period or none elapsed yet.
+     */
+    Optional<Boolean> resolveNearBreachValue(final WorkingCapitalLoanBreachSchedule period, final NearBreachParameters parameters,
             final LocalDate effectiveDate) {
         if (period.getMinPaymentAmount() == null || period.getMinPaymentAmount().compareTo(BigDecimal.ZERO) == 0) {
-            return false;
+            return Optional.empty();
         }
-        final LocalDate evaluationStartDate = period.getFromDate().plusDays(breachGraceDays);
-        final LocalDate firstEvalDate = addFrequency(evaluationStartDate, frequency, frequencyType);
+        final LocalDate evaluationStartDate = period.getFromDate().plusDays(parameters.breachGraceDays());
+        final LocalDate firstEvalDate = addFrequency(evaluationStartDate, parameters.frequency(), parameters.frequencyType());
         if (firstEvalDate.isAfter(period.getToDate())) {
+            return Optional.empty();
+        }
+        final List<LocalDate> evalDates = listEvalDates(evaluationStartDate, period.getToDate(), parameters.frequency(),
+                parameters.frequencyType());
+        final int evalIndex = latestEvaluationIndex(evalDates, effectiveDate);
+        if (evalIndex < 0) {
+            return effectiveDate.isBefore(period.getToDate()) ? Optional.empty() : Optional.of(Boolean.FALSE);
+        }
+        final MonetaryCurrency currency = period.getLoan().getCurrency();
+        final BigDecimal thresholdFraction = parameters.threshold().divide(BigDecimal.valueOf(100), MoneyHelper.getMathContext());
+        final Money requiredCumulative = calculateRequiredCumulative(currency, period.getMinPaymentAmount(), thresholdFraction, evalIndex);
+        return Optional.of(Money.of(currency, period.getPaidAmount()).isLessThan(requiredCumulative));
+    }
+
+    private boolean rederive(final WorkingCapitalLoanBreachSchedule period, final NearBreachParameters parameters,
+            final LocalDate effectiveDate) {
+        final Optional<Boolean> resolved = resolveNearBreachValue(period, parameters, effectiveDate);
+        if (resolved.isEmpty() || resolved.get().equals(period.getNearBreach())) {
             return false;
         }
-        final List<LocalDate> evalDates = listEvalDates(evaluationStartDate, period.getToDate(), frequency, frequencyType);
-        final int evalIndex = latestEvaluationIndex(evalDates, effectiveDate);
-        if (evalIndex >= 0) {
-            final MonetaryCurrency currency = period.getLoan().getCurrency();
-            final BigDecimal thresholdFraction = threshold.divide(BigDecimal.valueOf(100), MoneyHelper.getMathContext());
-            final Money requiredCumulative = calculateRequiredCumulative(currency, period.getMinPaymentAmount(), thresholdFraction,
-                    evalIndex);
-            final Money paidCumulative = Money.of(currency, period.getPaidAmount());
-            if (paidCumulative.isLessThan(requiredCumulative)) {
-                period.setNearBreach(true);
-                log.debug("Near breach detected for period {} of WC loan {}: evalDate={} cumulativePaid={} requiredCumulative={}",
-                        period.getPeriodNumber(), loanId, effectiveDate, paidCumulative, requiredCumulative);
-                return true;
-            }
+        final Boolean nearBreach = resolved.get();
+        log.debug("Near breach of period {} of WC loan {} changed from {} to {} as of {}", period.getPeriodNumber(),
+                period.getLoan().getId(), period.getNearBreach(), nearBreach, effectiveDate);
+        period.setNearBreach(nearBreach);
+        return true;
+    }
+
+    private Optional<NearBreachParameters> productParameters(final WorkingCapitalLoan loan) {
+        final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();
+        if (details == null || details.getNearBreach() == null) {
+            return Optional.empty();
         }
-        if (!effectiveDate.isBefore(period.getToDate())) {
-            period.setNearBreach(false);
-            log.debug("No near breach for period {} of WC loan {} after all evaluation points", period.getPeriodNumber(), loanId);
-            return true;
-        }
-        return false;
+        final WorkingCapitalNearBreach config = details.getNearBreach();
+        return Optional.of(new NearBreachParameters(config.getThreshold(), config.getFrequency(), config.getFrequencyType(),
+                getBreachGraceDays(loan)));
     }
 
     private Money calculateRequiredCumulative(final MonetaryCurrency currency, final BigDecimal minPaymentAmount,

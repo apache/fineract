@@ -136,6 +136,12 @@ public final class WorkingCapitalLoanRequestBuilders {
                 .locale(LOCALE).dateFormat(DATE_FORMAT);
     }
 
+    public static PostWorkingCapitalLoansBreachActionRequest breachMinimumPaymentReschedule(BigDecimal minimumPayment,
+            String minimumPaymentType) {
+        return new PostWorkingCapitalLoansBreachActionRequest().action("reschedule").minimumPayment(minimumPayment)
+                .minimumPaymentType(minimumPaymentType).locale(LOCALE).dateFormat(DATE_FORMAT);
+    }
+
     public static PostWorkingCapitalLoansBreachActionRequest breachUndoReset() {
         return new PostWorkingCapitalLoansBreachActionRequest().action("undo_reset").locale(LOCALE).dateFormat(DATE_FORMAT);
     }
@@ -272,6 +278,16 @@ public final class WorkingCapitalLoanRequestBuilders {
 
     public static PostWorkingCapitalLoansBreachActionRequest breachPause(String startDate, String endDate) {
         return new PostWorkingCapitalLoansBreachActionRequest().action("pause").startDate(startDate).endDate(endDate).locale(LOCALE)
+                .dateFormat(DATE_FORMAT);
+    }
+
+    public static PostWorkingCapitalLoansBreachActionRequest breachDisable(String startDate) {
+        return new PostWorkingCapitalLoansBreachActionRequest().action("disable").startDate(startDate).locale(LOCALE)
+                .dateFormat(DATE_FORMAT);
+    }
+
+    public static PostWorkingCapitalLoansBreachActionRequest breachEnable(String startDate) {
+        return new PostWorkingCapitalLoansBreachActionRequest().action("enable").startDate(startDate).locale(LOCALE)
                 .dateFormat(DATE_FORMAT);
     }
 

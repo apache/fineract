@@ -40,8 +40,7 @@ public class WorkingCapitalLoanBreachResetServiceImpl implements WorkingCapitalL
             return;
         }
         if (Boolean.TRUE.equals(resetAction.getRestartPeriodFromResetDate())) {
-            breachScheduleService.splitPeriodAtReset(loan, resetAction.getStartDate());
-            breachScheduleService.reprocessBreachSchedule(loan);
+            breachScheduleService.splitPeriodAtResetAndReprocess(loan, resetAction.getStartDate());
         } else {
             breachScheduleService.applyActiveResetFlags(loan);
             breachScheduleService.recalculatePastDueAmount(loan);
@@ -60,8 +59,7 @@ public class WorkingCapitalLoanBreachResetServiceImpl implements WorkingCapitalL
             log.warn("No active breach reset found to undo on working capital loan {}", loan.getId());
         }
         if (undoneReset != null && Boolean.TRUE.equals(undoneReset.getRestartPeriodFromResetDate())) {
-            breachScheduleService.restoreSplitPeriod(loan, undoneReset);
-            breachScheduleService.reprocessBreachSchedule(loan);
+            breachScheduleService.restoreSplitPeriodAndReprocess(loan, undoneReset);
         } else {
             breachScheduleService.applyActiveResetFlags(loan);
             breachScheduleService.recalculatePastDueAmount(loan);
