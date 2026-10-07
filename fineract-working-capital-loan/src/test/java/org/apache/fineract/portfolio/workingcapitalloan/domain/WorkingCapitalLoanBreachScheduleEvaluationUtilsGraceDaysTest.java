@@ -62,7 +62,7 @@ class WorkingCapitalLoanBreachScheduleEvaluationUtilsGraceDaysTest {
     @Test
     void rescheduledToDate_firstPeriod_keepsTheGraceDaysUnderTheNewFrequency() {
         final LocalDate toDate = WorkingCapitalLoanBreachScheduleEvaluationUtils.calculateRescheduledToDate(FROM_DATE, 1, 2,
-                WorkingCapitalLoanPeriodFrequencyType.DAYS, GRACE_DAYS, List.of());
+                WorkingCapitalLoanPeriodFrequencyType.DAYS, GRACE_DAYS, List.of(), List.of());
 
         // A frequency shorter than the grace days would otherwise end the period before the grace is over.
         assertThat(toDate).isEqualTo(LocalDate.of(2026, 1, 7));
@@ -71,7 +71,7 @@ class WorkingCapitalLoanBreachScheduleEvaluationUtilsGraceDaysTest {
     @Test
     void rescheduledToDate_laterPeriod_ignoresTheGraceDays() {
         final LocalDate toDate = WorkingCapitalLoanBreachScheduleEvaluationUtils.calculateRescheduledToDate(FROM_DATE, 3, 2,
-                WorkingCapitalLoanPeriodFrequencyType.DAYS, GRACE_DAYS, List.of());
+                WorkingCapitalLoanPeriodFrequencyType.DAYS, GRACE_DAYS, List.of(), List.of());
 
         assertThat(toDate).isEqualTo(LocalDate.of(2026, 1, 2));
     }

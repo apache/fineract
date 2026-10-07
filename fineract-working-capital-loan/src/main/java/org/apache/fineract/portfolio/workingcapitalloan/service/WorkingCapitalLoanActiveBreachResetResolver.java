@@ -81,6 +81,22 @@ public class WorkingCapitalLoanActiveBreachResetResolver {
         return actions.stream().filter(Objects::nonNull).sorted(CHRONOLOGICAL).toList();
     }
 
+    /**
+     * Start dates of the active resets that restarted the schedule. A reset that only flags its period leaves the
+     * geometry untouched and is therefore not a cut.
+     */
+    public List<LocalDate> activeRestartResetDates(final List<WorkingCapitalLoanBreachAction> actions) {
+        return activeResets(actions).stream() //
+                .filter(reset -> Boolean.TRUE.equals(reset.getRestartPeriodFromResetDate())) //
+                .map(WorkingCapitalLoanBreachAction::getStartDate) //
+                .filter(Objects::nonNull) //
+                .toList();
+    }
+
+    public List<LocalDate> activeRestartResetDates(final Long workingCapitalLoanId) {
+        return activeRestartResetDates(breachActionRepository.findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId));
+    }
+
     public Deque<WorkingCapitalLoanBreachAction> activeResets(final Long workingCapitalLoanId) {
         return activeResets(breachActionRepository.findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId));
     }

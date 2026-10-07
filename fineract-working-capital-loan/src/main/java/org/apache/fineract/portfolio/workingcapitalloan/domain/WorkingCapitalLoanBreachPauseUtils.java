@@ -56,12 +56,37 @@ public final class WorkingCapitalLoanBreachPauseUtils {
     }
 
     /**
-     * Extends an inclusive period end date by the recorded pauses. See
-     * {@link WorkingCapitalLoanPausePeriodUtils#applyPauses} for the rule.
+     * Extends an inclusive period end date by the recorded pauses. See {@link #applyPauses} for the rule.
      */
     public static LocalDate extendToDateByRecordedPauses(final LocalDate fromDate, final LocalDate baseToDate,
-            final List<WorkingCapitalLoanBreachAction> actions) {
-        return WorkingCapitalLoanPausePeriodUtils.extendToDate(fromDate, baseToDate, toEffectivePauses(actions));
+            final List<WorkingCapitalLoanBreachAction> actions, final List<LocalDate> restartResetDates) {
+        return applyPauses(fromDate, baseToDate, toEffectivePauses(actions), restartResetDates).toDate();
+    }
+
+    /**
+     * The bounds of a breach period after the pauses, holding its start in place when a restart reset began it.
+     *
+     * A period's start falling inside a pause normally moves the whole period past the pause (see
+     * {@link WorkingCapitalLoanPausePeriodUtils#applyPauses}). The reset date is a hard boundary, though: the restarted
+     * period begins on it even while a pause is active, so a pause that began before the reset only counts from the
+     * reset date on. Its earlier days stay with the period the reset cut.
+     */
+    public static WorkingCapitalLoanPeriodBounds applyPauses(final LocalDate fromDate, final LocalDate toDate,
+            final List<WorkingCapitalLoanPausePeriod> pauses, final List<LocalDate> restartResetDates) {
+        final List<WorkingCapitalLoanPausePeriod> applicablePauses = restartResetDates.contains(fromDate)
+                ? pausesCountingFrom(fromDate, pauses)
+                : pauses;
+        return WorkingCapitalLoanPausePeriodUtils.applyPauses(fromDate, toDate, applicablePauses);
+    }
+
+    /** The pauses as seen from a reset date: the ones that ended before it are dropped, the active one starts on it. */
+    private static List<WorkingCapitalLoanPausePeriod> pausesCountingFrom(final LocalDate resetDate,
+            final List<WorkingCapitalLoanPausePeriod> pauses) {
+        return pauses.stream() //
+                .filter(WorkingCapitalLoanPausePeriod::isValid) //
+                .filter(pause -> !pause.endDate().isBefore(resetDate)) //
+                .map(pause -> pause.startDate().isBefore(resetDate) ? new WorkingCapitalLoanPausePeriod(resetDate, pause.endDate()) : pause) //
+                .toList();
     }
 
 }
