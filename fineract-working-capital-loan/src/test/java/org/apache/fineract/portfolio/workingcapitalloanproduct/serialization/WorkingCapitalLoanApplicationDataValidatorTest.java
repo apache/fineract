@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloanproduct.serialization;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
@@ -52,6 +53,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.ExpectedDisbursementDateValidator;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
+import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanApplicationDataValidator;
@@ -223,6 +225,33 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
     }
 
     @Test
+    void testValidateForCreate_WithDiscountAboveThePrincipal_ShouldThrowException() {
+        final JsonObject json = createBaseJsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.discountParamName, 6000);
+        final JsonCommand command = jsonCommand(json.toString());
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateForCreate(command));
+
+        assertTrue(exception.getErrors().stream()
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal")));
+    }
+
+    /** The modification is validated on the assembled loan, so it sees whichever side of the pair the request moved. */
+    @Test
+    void testValidateForModify_WithDiscountAboveThePrincipal_ShouldThrowException() {
+        final WorkingCapitalLoan loan = submittedLoanWithStrategy(WorkingCapitalPaymentAmountCalculationStrategy.TPV);
+        lenient().when(loan.getLoanProductRelatedDetails().getDiscountProposed()).thenReturn(new BigDecimal("150"));
+        lenient().when(loan.getProposedPrincipal()).thenReturn(new BigDecimal("100"));
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateForModify(loan));
+
+        assertTrue(exception.getErrors().stream()
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal")));
+    }
+
+    @Test
     void testValidateForUpdate_WithEmptyJson_ShouldThrowException() {
         final JsonCommand command = jsonCommand("");
         assertThrows(InvalidJsonException.class, () -> validator.validateForUpdate(command));
@@ -294,6 +323,25 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
         final JsonObject json = updateJsonObject();
         json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountParamName, 0);
         assertUpdateCodes(json, WCL + "paymentAmount.not.greater.than.zero", WCL + "paymentAmount.not.allowed.for.annual.eir.strategy");
+    }
+
+    /** An annual EIR above the calculable cap can never produce a schedule, so the loan refuses it as entered. */
+    @Test
+    void annualEirLoan_WithAnnualEirAboveTheEirCap_ShouldReportGreaterThanMax() {
+        stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, null, null, null);
+        final JsonObject json = paymentAmountJsonObject(null);
+        json.addProperty(WorkingCapitalLoanConstants.annualEirParamName,
+                ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR.add(BigDecimal.ONE));
+        assertCreateCodes(json, WCL + "annualEir.is.greater.than.max");
+    }
+
+    @Test
+    void annualEirLoanUpdate_WithAnnualEirAboveTheEirCap_ShouldReportGreaterThanMax() {
+        stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, null, null, null);
+        final JsonObject json = updateJsonObject();
+        json.addProperty(WorkingCapitalLoanConstants.annualEirParamName,
+                ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR.add(BigDecimal.ONE));
+        assertUpdateCodes(json, WCL + "annualEir.is.greater.than.max");
     }
 
     @Test
