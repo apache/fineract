@@ -23,6 +23,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.java.en.When;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -56,6 +57,17 @@ public class AccountTransferStepDef extends AbstractStepDef {
         createAccountTransfer(clientId, savingsId, SAVINGS_ACCOUNT_TYPE, loanId, LOAN_ACCOUNT_TYPE, date, amount);
     }
 
+    @When("Initiate account transfer from loan to savings on {string} for {double}")
+    public void initiateLoanToSavingsTransfer(String date, double amount) {
+        PostClientsResponse clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
+        long clientId = clientResponse.getClientId();
+        long loanId = ((PostLoansResponse) testContext().get(TestContextKey.LOAN_CREATE_RESPONSE)).getLoanId();
+        long savingsId = ((PostSavingsAccountsResponse) testContext().get(TestContextKey.EUR_SAVINGS_ACCOUNT_CREATE_RESPONSE))
+                .getSavingsId();
+
+        createAccountTransfer(clientId, loanId, LOAN_ACCOUNT_TYPE, savingsId, SAVINGS_ACCOUNT_TYPE, date, amount);
+    }
+
     @When("Initiate account transfer from savings {string} to savings {string} on {string} for {double}")
     public void initiateAccountTransferBetweenSavings(String fromAlias, String toAlias, String date, double amount) {
         PostClientsResponse clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
@@ -71,16 +83,26 @@ public class AccountTransferStepDef extends AbstractStepDef {
     @When("Undo the last account transfer")
     public void undoAccountTransfer() {
         PostAccountTransfersResponse response = testContext().get("accountTransferResponse");
-        ok(() -> fineractClient.accountTransfers().accountTransferOperation(response.getResourceId(), "undo"));
+        final Long transferTransactionId = resolveTransferTransactionId(response);
+        ok(() -> fineractClient.accountTransfers().accountTransferOperation(transferTransactionId, "undo"));
     }
 
     @When("Undo the last account transfer it fails with error: it is already reverted")
     public void undoAccountTransferFail() {
         PostAccountTransfersResponse response = testContext().get("accountTransferResponse");
+        final Long transferTransactionId = resolveTransferTransactionId(response);
         CallFailedRuntimeException exception = fail(
-                () -> fineractClient.accountTransfers().accountTransferOperation(response.getResourceId(), "undo"));
+                () -> fineractClient.accountTransfers().accountTransferOperation(transferTransactionId, "undo"));
         assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
         assertThat(exception.getMessage()).contains("error.msg.account.transfer.already.reversed");
+    }
+
+    /** The create call returns the transfer details id; undo needs the id of the transfer transaction. */
+    private Long resolveTransferTransactionId(PostAccountTransfersResponse response) {
+        var page = ok(
+                () -> fineractClient.accountTransfers().retrieveAllAccountTransfers(Map.of("accountDetailId", response.getResourceId())));
+        assertThat(page.getPageItems()).hasSize(1);
+        return page.getPageItems().iterator().next().getId();
     }
 
     private void createAccountTransfer(long clientId, long fromAccountId, String fromAccountType, long toAccountId, String toAccountType,
