@@ -347,6 +347,19 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
                 params.minimumPayment(), params.minimumPaymentType(), params.frequency(), params.frequencyType());
     }
 
+    @Override
+    public void recalculateBaseExpectedAmount(final WorkingCapitalLoan loan) {
+        final DelinquencyMinimumPaymentPeriodAndRule rule = getMinimumPaymentRule(loan);
+        if (rule == null) {
+            return;
+        }
+        final BigDecimal expectedAmount = calculateExpectedAmount(loan, resolveEffectiveRescheduleParams(loan.getId(), rule));
+        final List<WorkingCapitalLoanDelinquencyRangeSchedule> periods = loanDelinquencyRangeScheduleRepository
+                .findNotEndedPeriods(loan.getId(), DateUtils.getBusinessLocalDate());
+        periods.forEach(period -> period.setBaseExpectedAmount(expectedAmount));
+        loanDelinquencyRangeScheduleRepository.saveAll(periods);
+    }
+
     private LocalDate resolveRescheduledToDate(final WorkingCapitalLoan loan,
             final WorkingCapitalLoanDelinquencyRangeSchedule currentPeriod, final Integer frequency,
             final DelinquencyFrequencyType frequencyType) {

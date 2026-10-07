@@ -88,7 +88,7 @@ Feature: Working Capital Delinquency
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 January 2026"
 
   @TestRailId:C74466
-  Scenario: Verify working capital loan delinquency range schedule - UC5: delinquency range schedule on first day of 2nd range
+  Scenario: Verify working capital loan delinquency range schedule - UC5: delinquency range schedule on first day of 2nd range, a discount fee added later re-derives only the current range
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
@@ -117,6 +117,11 @@ Feature: Working Capital Delinquency
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
       | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    When Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 2            | 2026-01-04 | 2026-01-06 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C74467

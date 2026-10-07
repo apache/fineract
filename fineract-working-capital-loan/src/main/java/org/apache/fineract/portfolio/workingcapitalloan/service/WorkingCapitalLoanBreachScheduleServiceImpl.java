@@ -246,6 +246,25 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
         replayPeriodsFrom(loan, breachOpt.get(), periods, replayStartPeriod(loan.getId(), action, periods));
     }
 
+    @Override
+    public void recalculateMinimumPayment(final WorkingCapitalLoan loan) {
+        final Optional<WorkingCapitalBreach> breachOpt = getBreachConfig(loan);
+        if (breachOpt.isEmpty()) {
+            return;
+        }
+        final List<WorkingCapitalLoanBreachSchedule> periods = repository.findByLoanIdOrderByPeriodNumberAsc(loan.getId());
+        if (periods.isEmpty()) {
+            return;
+        }
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        final int currentPeriodNumber = periods.stream() //
+                .filter(period -> !DateUtils.isBefore(period.getToDate(), businessDate)) //
+                .findFirst() //
+                .map(WorkingCapitalLoanBreachSchedule::getPeriodNumber) //
+                .orElseGet(() -> periods.getLast().getPeriodNumber() + 1);
+        replayPeriodsFrom(loan, breachOpt.get(), periods, currentPeriodNumber);
+    }
+
     /**
      * Rebuilds the geometry of the periods from {@code firstPeriodNumber} on, in one forward walk over the recorded
      * actions.

@@ -82,6 +82,13 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleRepository
     List<WorkingCapitalLoanDelinquencyRangeSchedule> findFuturePeriodsOrderByPeriodNumberAsc(@Param("loanId") Long loanId,
             @Param("businessDate") LocalDate businessDate);
 
+    @Query("""
+            SELECT s FROM WorkingCapitalLoanDelinquencyRangeSchedule s
+            WHERE s.loan.id = :loanId
+              AND s.toDate >= :businessDate""")
+    List<WorkingCapitalLoanDelinquencyRangeSchedule> findNotEndedPeriods(@Param("loanId") Long loanId,
+            @Param("businessDate") LocalDate businessDate);
+
     boolean existsByLoanId(Long loanId);
 
     List<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndToDateLessThanEqualAndMinPaymentCriteriaMetIsNull(Long loanId,
