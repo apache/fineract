@@ -23,9 +23,8 @@ import static org.apache.fineract.investor.data.attribute.SettlementModelExterna
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
-import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.investor.data.ExternalTransferLoanProductAttributesData;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -48,19 +47,19 @@ public class DelayedSettlementAttributeServiceImplTest {
         ExternalTransferLoanProductAttributesData lowerCaseEnabledAttributesData = new ExternalTransferLoanProductAttributesData();
         lowerCaseEnabledAttributesData.setAttributeValue("delayed_settlement");
 
-        return Stream.of(Arguments.of(new Page(List.of(enabledAttributesData), 1), true),
-                Arguments.of(new Page(List.of(lowerCaseEnabledAttributesData), 1), true),
-                Arguments.of(new Page(List.of(disabledAttributesData), 1), false), Arguments.of(new Page(List.of(), 0), false));
+        return Stream.of(Arguments.of(enabledAttributesData.getAttributeValue(), true),
+                Arguments.of(lowerCaseEnabledAttributesData.getAttributeValue(), true),
+                Arguments.of(disabledAttributesData.getAttributeValue(), false), Arguments.of(null, false));
     }
 
     @ParameterizedTest
     @MethodSource("attributesDataProvider")
-    void isEnabled(final Page<ExternalTransferLoanProductAttributesData> attributesDataPage, final boolean expectedResult) {
+    void isEnabled(final String attributeValue, final boolean expectedResult) {
         // given
         TestContext testContext = new TestContext();
 
-        when(testContext.externalAssetOwnerLoanProductAttributesReadService.retrieveAllLoanProductAttributesByLoanProductId(LOAN_PRODUCT_ID,
-                DELAYED_SETTLEMENT.getAttributeKey())).thenReturn(attributesDataPage);
+        when(testContext.externalAssetOwnerLoanProductAttributesReadService.getAttributeValue(LOAN_PRODUCT_ID,
+                DELAYED_SETTLEMENT.getAttributeKey())).thenReturn(Optional.ofNullable(attributeValue));
 
         // when
         boolean result = testContext.testSubject.isEnabled(LOAN_PRODUCT_ID);

@@ -37,6 +37,8 @@ public interface LoanBuyDownFeeBalanceRepository
 
     LoanBuyDownFeeBalance findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(Long loanId, Long transactionId);
 
+    LoanBuyDownFeeBalance findByLoanIdAndLoanTransactionIdAndClosedFalse(Long loanId, Long transactionId);
+
     @Query("SELECT lbdfb FROM LoanBuyDownFeeBalance lbdfb, LoanTransaction lt, LoanTransactionRelation ltr WHERE lt.loan.id = lbdfb.loan.id AND ltr.fromTransaction.id =:transactionId AND ltr.toTransaction.id=lt.id AND lbdfb.loanTransaction.id = lt.id AND lbdfb.deleted = false AND lbdfb.closed = false")
     LoanBuyDownFeeBalance findBalanceForAdjustment(@Param("transactionId") Long transactionId);
 

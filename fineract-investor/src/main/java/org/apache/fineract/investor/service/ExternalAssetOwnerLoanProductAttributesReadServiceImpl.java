@@ -21,6 +21,7 @@ package org.apache.fineract.investor.service;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -71,6 +72,12 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceImpl implements E
 
         return new Page<>(pageOfAttributeData.getContent().stream().map(mapper::mapLoanProductAttributes).toList(),
                 pageOfAttributeData.getNumberOfElements());
+    }
+
+    @Override
+    public Optional<String> getAttributeValue(final Long loanProductId, final String attributeKey) {
+        return retrieveAllLoanProductAttributesByLoanProductId(loanProductId, attributeKey).getPageItems().stream().findFirst()
+                .map(ExternalTransferLoanProductAttributesData::getAttributeValue);
     }
 
     private void addAttributeValues(List<ExternalTransferLoanProductAttributesTemplateData> result,
