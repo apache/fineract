@@ -20,8 +20,10 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -41,6 +43,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,9 +55,8 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 /**
- * Verifies that the delinquency data (delinquentAmount/delinquentDays) on range schedule periods is frozen while a
- * Delinquency Disable is in effect: repayment and repayment-undo bookkeeping still runs, but no delinquency values are
- * written until the disable is reversed.
+ * Verifies that the range schedule is neither evaluated nor updated while a Delinquency Disable is active: repayment,
+ * repayment undo, reprocessing and period evaluation leave every period untouched until the disable is reversed.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -72,6 +74,8 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
     private DelinquencyMinimumPaymentPeriodAndRuleRepository minimumPaymentPeriodAndRuleRepository;
     @Mock
     private WorkingCapitalLoanDelinquencyClassificationService classificationService;
+    @Mock
+    private WorkingCapitalLoanTransactionRepository transactionRepository;
     @Mock
     private WorkingCapitalLoan loan;
 
@@ -99,23 +103,25 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
     }
 
     @Test
-    void repaymentUndoWhileDisabledDoesNotWriteDelinquencyData() {
-        when(classificationService.isDelinquencyDisabled(loan, today)).thenReturn(true);
-        final WorkingCapitalLoanDelinquencyRangeSchedule pastPeriod = pastOpenPeriod();
+    void repaymentUndoWhileDisabledDoesNotTouchTheSchedule() {
+        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(true);
+        final WorkingCapitalLoanDelinquencyRangeSchedule paidPeriod = fullyPaidPastPeriod(1, today.minusDays(35), today.minusDays(6));
         when(rangeScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, today, today))
                 .thenReturn(Optional.empty());
-        when(rangeScheduleRepository.findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(LOAN_ID, today)).thenReturn(List.of(pastPeriod));
+        when(rangeScheduleRepository.findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(LOAN_ID, today)).thenReturn(List.of(paidPeriod));
 
         rangeScheduleService.applyRepaymentUndo(loan, today, new BigDecimal("100"));
 
-        assertThat(pastPeriod.getMinPaymentCriteriaMet()).isFalse();
-        assertThat(pastPeriod.getDelinquentAmount()).isNull();
-        assertThat(pastPeriod.getDelinquentDays()).isNull();
+        assertThat(paidPeriod.getPaidAmount()).isEqualByComparingTo(new BigDecimal("100"));
+        assertThat(paidPeriod.getOutstandingAmount()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(paidPeriod.getMinPaymentCriteriaMet()).isTrue();
+        verifyNoInteractions(rangeScheduleRepository);
+        verify(classificationService, never()).instantClassifyDelinquency(any(), any());
     }
 
     @Test
     void repaymentUndoWhileEnabledWritesDelinquencyData() {
-        when(classificationService.isDelinquencyDisabled(loan, today)).thenReturn(false);
+        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(false);
         final WorkingCapitalLoanDelinquencyRangeSchedule pastPeriod = pastOpenPeriod();
         when(rangeScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, today, today))
                 .thenReturn(Optional.empty());
@@ -129,8 +135,8 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
     }
 
     @Test
-    void repaymentWhileDisabledDoesNotResetDelinquencyData() {
-        when(classificationService.isDelinquencyDisabled(loan, today)).thenReturn(true);
+    void repaymentWhileDisabledDoesNotTouchTheSchedule() {
+        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(true);
         final WorkingCapitalLoanDelinquencyRangeSchedule pastPeriod = pastOpenPeriod();
         pastPeriod.setMinPaymentCriteriaMet(false);
         pastPeriod.setDelinquentAmount(new BigDecimal("100"));
@@ -141,9 +147,76 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
 
         rangeScheduleService.applyRepayment(loan, today, new BigDecimal("100"));
 
-        assertThat(pastPeriod.getMinPaymentCriteriaMet()).isTrue();
+        assertThat(pastPeriod.getPaidAmount()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(pastPeriod.getOutstandingAmount()).isEqualByComparingTo(new BigDecimal("100"));
+        assertThat(pastPeriod.getMinPaymentCriteriaMet()).isFalse();
         assertThat(pastPeriod.getDelinquentAmount()).isEqualByComparingTo(new BigDecimal("100"));
         assertThat(pastPeriod.getDelinquentDays()).isEqualTo(5L);
+        verifyNoInteractions(rangeScheduleRepository);
+        verify(classificationService, never()).instantClassifyDelinquency(any(), any());
+    }
+
+    @Test
+    void repaymentWhileEnabledUpdatesTheSchedule() {
+        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(false);
+        final WorkingCapitalLoanDelinquencyRangeSchedule pastPeriod = pastOpenPeriod();
+        pastPeriod.setMinPaymentCriteriaMet(false);
+        when(rangeScheduleRepository.findPastOpenPeriodsForRepayment(LOAN_ID, today)).thenReturn(List.of(pastPeriod));
+        when(rangeScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, today, today))
+                .thenReturn(Optional.empty());
+
+        rangeScheduleService.applyRepayment(loan, today, new BigDecimal("100"));
+
+        assertThat(pastPeriod.getPaidAmount()).isEqualByComparingTo(new BigDecimal("100"));
+        assertThat(pastPeriod.getMinPaymentCriteriaMet()).isTrue();
+        assertThat(pastPeriod.getDelinquentAmount()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(pastPeriod.getDelinquentDays()).isZero();
+    }
+
+    @Test
+    void expiredPeriodEvaluationWhileDisabledDoesNothing() {
+        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(true);
+
+        assertThat(rangeScheduleService.evaluateExpiredPeriods(loan, today)).isFalse();
+
+        verifyNoInteractions(rangeScheduleRepository);
+    }
+
+    @Test
+    void expiredPeriodEvaluationWhileEnabledEvaluatesThePeriod() {
+        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(false);
+        final WorkingCapitalLoanDelinquencyRangeSchedule pastPeriod = pastOpenPeriod();
+        when(rangeScheduleRepository.findByLoanIdAndToDateLessThanEqualAndMinPaymentCriteriaMetIsNull(LOAN_ID, today))
+                .thenReturn(List.of(pastPeriod));
+
+        assertThat(rangeScheduleService.evaluateExpiredPeriods(loan, today)).isTrue();
+
+        assertThat(pastPeriod.getMinPaymentCriteriaMet()).isFalse();
+    }
+
+    @Test
+    void reprocessWhileDisabledDoesNothing() {
+        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(true);
+
+        rangeScheduleService.reprocessDelinquencySchedule(loan);
+
+        verifyNoInteractions(rangeScheduleRepository, transactionRepository);
+        verify(classificationService, never()).classifyDelinquency(any(), any());
+    }
+
+    @Test
+    void reprocessWhileEnabledRecalculatesThePeriods() {
+        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(false);
+        final WorkingCapitalLoanDelinquencyRangeSchedule pastPeriod = pastOpenPeriod();
+        when(rangeScheduleRepository.findByLoanIdOrderByPeriodNumberAsc(LOAN_ID)).thenReturn(List.of(pastPeriod));
+        when(rangeScheduleRepository.findByLoanIdAndToDateLessThanEqualAndMinPaymentCriteriaMetIsNull(LOAN_ID, today))
+                .thenReturn(List.of(pastPeriod));
+
+        rangeScheduleService.reprocessDelinquencySchedule(loan);
+
+        assertThat(pastPeriod.getMinPaymentCriteriaMet()).isFalse();
+        verify(transactionRepository).fetchTransactionDateAndAmount(anyLong(), any());
+        verify(classificationService).classifyDelinquency(loan, today);
     }
 
     @Test
@@ -158,7 +231,7 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
 
     @Test
     void repaymentUndoUnpaysNewestPastPeriodFirst() {
-        when(classificationService.isDelinquencyDisabled(loan, today)).thenReturn(false);
+        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(false);
         // Two fully-paid past periods; the repository returns them ordered by period number ascending (oldest first).
         final WorkingCapitalLoanDelinquencyRangeSchedule olderPeriod = fullyPaidPastPeriod(1, today.minusDays(66), today.minusDays(36));
         final WorkingCapitalLoanDelinquencyRangeSchedule newerPeriod = fullyPaidPastPeriod(2, today.minusDays(35), today.minusDays(6));

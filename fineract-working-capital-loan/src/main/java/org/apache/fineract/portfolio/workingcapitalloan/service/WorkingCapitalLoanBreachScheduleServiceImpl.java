@@ -79,7 +79,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
     @Override
     public boolean generateInitialPeriod(final WorkingCapitalLoan loan) {
         final Optional<WorkingCapitalBreach> breachOpt = getBreachConfig(loan);
-        if (breachOpt.isEmpty()) {
+        if (breachOpt.isEmpty() || isBreachEvaluationDisabled(loan.getId())) {
             return false;
         }
 
@@ -114,7 +114,8 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
         }
 
         final Optional<WorkingCapitalLoanBreachSchedule> latestPeriodOpt = repository.findTopByLoanIdOrderByPeriodNumberDesc(loan.getId());
-        if (latestPeriodOpt.isEmpty() || latestPeriodOpt.get().getToDate().isAfter(businessDate)) {
+        if (latestPeriodOpt.isEmpty() || latestPeriodOpt.get().getToDate().isAfter(businessDate)
+                || isBreachEvaluationDisabled(loan.getId())) {
             return false;
         }
 
@@ -162,7 +163,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
 
     @Override
     public void applyRepayment(final Long loanId, final LocalDate transactionDate, final BigDecimal amount) {
-        if (isBreachEvaluationDisabled(loanId, DateUtils.getBusinessLocalDate())) {
+        if (isBreachEvaluationDisabled(loanId)) {
             log.debug("Skipping breach schedule repayment update for WC loan {} - breach evaluation is disabled", loanId);
             return;
         }
@@ -194,7 +195,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
 
     @Override
     public void applyRepaymentUndo(final Long loanId, final LocalDate transactionDate, final BigDecimal amount) {
-        if (isBreachEvaluationDisabled(loanId, DateUtils.getBusinessLocalDate())) {
+        if (isBreachEvaluationDisabled(loanId)) {
             log.debug("Skipping breach schedule repayment undo for WC loan {} - breach evaluation is disabled", loanId);
             return;
         }
@@ -249,7 +250,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
     @Override
     public void recalculateMinimumPayment(final WorkingCapitalLoan loan) {
         final Optional<WorkingCapitalBreach> breachOpt = getBreachConfig(loan);
-        if (breachOpt.isEmpty()) {
+        if (breachOpt.isEmpty() || isBreachEvaluationDisabled(loan.getId())) {
             return;
         }
         final List<WorkingCapitalLoanBreachSchedule> periods = repository.findByLoanIdOrderByPeriodNumberAsc(loan.getId());
@@ -422,6 +423,10 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
 
     @Override
     public void reprocessBreachSchedule(final WorkingCapitalLoan loan) {
+        if (isBreachEvaluationDisabled(loan.getId())) {
+            log.debug("Skipping breach schedule reprocessing for WC loan {} - breach evaluation is disabled", loan.getId());
+            return;
+        }
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         generateNextPeriodIfNeeded(loan, businessDate);
         List<WorkingCapitalLoanBreachSchedule> breachPeriods = resetAllPeriodsForReprocessing(loan.getId());
@@ -656,7 +661,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
     }
 
     private boolean evaluateExpiredBreaches(final WorkingCapitalLoan loan, final LocalDate businessDate) {
-        if (isBreachEvaluationDisabled(loan.getId(), businessDate)) {
+        if (isBreachEvaluationDisabled(loan.getId())) {
             return false;
         }
         final List<WorkingCapitalLoanBreachSchedule> periods = repository
@@ -671,8 +676,12 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
         return evaluated;
     }
 
-    private boolean isBreachEvaluationDisabled(final Long loanId, final LocalDate date) {
-        return breachActionRepository.isBreachDisabledAsOf(loanId, date);
+    /**
+     * While a Breach Disable is active the breach schedule is neither evaluated nor updated; the enable recalculates
+     * every period as if the loan had never been disabled.
+     */
+    private boolean isBreachEvaluationDisabled(final Long loanId) {
+        return breachActionRepository.isBreachDisabled(loanId);
     }
 
     @Override
@@ -691,7 +700,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
 
     private void recalculatePastDueAmount(final Long loanId) {
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        if (isBreachEvaluationDisabled(loanId, businessDate)) {
+        if (isBreachEvaluationDisabled(loanId)) {
             log.debug("Skipping breach past due recalculation for WC loan {} - breach evaluation is disabled", loanId);
             return;
         }

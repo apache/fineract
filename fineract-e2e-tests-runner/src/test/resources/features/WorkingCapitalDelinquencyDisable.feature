@@ -24,17 +24,22 @@ Feature: Working Capital Delinquency Disable
       | DISABLE | 2026-01-15 |         |
     And Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
-    When Admin sets the business date to "20 January 2026"
+      | 1            | 2026-01-01 | 2026-01-03 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+    # Period 1 ends on 01-03 while the evaluation is disabled. Nothing is evaluated or updated while disabled:
+    # period 1 is not closed out and period 2 is not generated.
+    When Admin sets the business date to "05 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-03 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
     # Enable delinquency evaluation
     And Admin initiate a Working Capital loan delinquency enable with startDate "20 January 2026"
     Then Working Capital loan delinquency action has the following data:
       | action  | startDate  | endDate    |
-      | DISABLE | 2026-01-15 | 2026-01-19 |
-      | ENABLE  | 2026-01-20 |            |
-    When Admin sets the business date to "06 February 2026"
-    And Admin runs inline COB job for Working Capital Loan by loanId
+      | DISABLE | 2026-01-02 | 2026-01-04 |
+      | ENABLE  | 2026-01-05 |            |
+    # The enable recalculates every period as if the loan had never been disabled;
+    # delinquentDays = businessDate - toDate
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 0.0        | 300.0             | false                 | 300.0            | 7              |
