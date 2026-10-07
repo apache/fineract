@@ -93,18 +93,6 @@ public class WorkingCapitalNearBreachConfigStepDef extends AbstractStepDef {
         TestContext.INSTANCE.set(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_CREATE_REQUEST_FOR_UPDATE, request);
     }
 
-    @When("Admin failed to create WC Near Breach With duplicated name")
-    public void adminCreateWCNearBreachWithDuplicateNameFailure() {
-        Long existingBearBreachId = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_ID_FOR_UPDATE);
-        WorkingCapitalNearBreachRequest nearBreachRequestForUpdate = TestContext.INSTANCE
-                .get(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_CREATE_REQUEST_FOR_UPDATE);
-        String name = nearBreachRequestForUpdate.getNearBreachName();
-        WorkingCapitalNearBreachRequest breachRequest = workingCapitalRequestFactory.defaultWorkingCapitalNearBreachRequest()
-                .nearBreachName(name); //
-        String errorMessage = ErrorMessageHelper.workingCapitalBreachDuplicateNameFailure(existingBearBreachId);
-        checkCreateWCNearBreachWithInvalidDataFailure(breachRequest, errorMessage, 403);
-    }
-
     @When("Admin modifies WC Near Breach With Values")
     public void adminModifiesWCBreachWithValues() {
         final Long id = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_ID);

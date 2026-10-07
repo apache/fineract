@@ -34,7 +34,6 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.LoanAccountLock;
 import org.apache.fineract.client.models.LoanAccountLockResponseDTO;
 import org.apache.fineract.client.models.LockRequest;
-import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
@@ -46,32 +45,6 @@ import org.junit.jupiter.api.Assertions;
 public class LoanCOBStepDef extends AbstractStepDef {
 
     private final FineractFeignClient fineractClient;
-
-    @Then("The cobProcessedDate of the oldest loan processed by COB is more than 1 day earlier than cobBusinessDate")
-    public void checkOldestCOBProcessed() {
-        OldestCOBProcessedLoanDTO response = ok(() -> fineractClient.loanCobCatchUp().getOldestCOBProcessedLoan());
-
-        LocalDate cobDate = response.getCobBusinessDate();
-        Assertions.assertNotNull(cobDate);
-        LocalDate cobDateMinusOne = cobDate.minusDays(1);
-        LocalDate cobProcessedDate = response.getCobProcessedDate();
-        log.debug("cobDateMinusOne: {}", cobDateMinusOne);
-        log.debug("cobProcessedDate: {}", cobProcessedDate);
-
-        boolean result = cobDateMinusOne.isAfter(cobProcessedDate);
-        assertThat(result).as(ErrorMessageHelper.wrongLastCOBProcessedLoanDate(cobProcessedDate, cobDateMinusOne)).isTrue();
-    }
-
-    @Then("There are no locked loan accounts")
-    public void listOfLockedLoansEmpty() {
-        LoanAccountLockResponseDTO response = ok(
-                () -> fineractClient.loanAccountLock().retrieveLockedAccounts(Map.of("page", 0, "size", 1000)));
-
-        Assertions.assertNotNull(response.getContent());
-        int size = response.getContent().size();
-        assertThat(size).as(ErrorMessageHelper.listOfLockedLoansNotEmpty(response)).isEqualTo(0);
-        log.debug("Size of List of the locked loans: {}", size);
-    }
 
     @Then("The loan account is not locked")
     public void loanIsNotInListOfLockedLoans() {
@@ -161,14 +134,6 @@ public class LoanCOBStepDef extends AbstractStepDef {
                 new LockRequest().cobBusinessDate(parsed)));
     }
 
-    @When("Admin places a lock on second loan account WITHOUT an error message")
-    public void placeLockOnSecondLoanAccountNoErrorMessage() {
-        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_SECOND_LOAN_RESPONSE);
-        final Long loanId = loanResponse.getLoanId();
-
-        executeVoid(() -> fineractClient.loanAccountLock().placeLockOnLoanAccount(loanId, "LOAN_COB_CHUNK_PROCESSING", new LockRequest()));
-    }
-
     @When("Admin places a lock on second loan account with an error message")
     public void placeLockOnSecondLoanAccountWithErrorMessage() {
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_SECOND_LOAN_RESPONSE);
@@ -176,23 +141,6 @@ public class LoanCOBStepDef extends AbstractStepDef {
 
         executeVoid(() -> fineractClient.loanAccountLock().placeLockOnLoanAccount(loanId, "LOAN_COB_CHUNK_PROCESSING",
                 new LockRequest().error("ERROR")));
-    }
-
-    @Then("The second loan account is not locked")
-    public void secondLoanIsNotInListOfLockedLoans() {
-        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_SECOND_LOAN_RESPONSE);
-        final Long targetLoanId = loanResponse.getLoanId();
-
-        final LoanAccountLockResponseDTO response = ok(
-                () -> fineractClient.loanAccountLock().retrieveLockedAccounts(Map.of("page", 0, "size", 1000)));
-
-        Assertions.assertNotNull(response.getContent());
-        Assertions.assertNotNull(targetLoanId);
-        final boolean contains = response.getContent().stream()//
-                .map(LoanAccountLock::getLoanId)//
-                .anyMatch(targetLoanId::equals);
-
-        assertThat(contains).as(ErrorMessageHelper.listOfLockedLoansContainsLoan(targetLoanId, response)).isFalse();
     }
 
     @Then("The second loan account is locked by chunk processing")

@@ -2483,18 +2483,6 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         attemptCreateWithAdvancedMappings(paymentChannelMappings, buildDefaultChargeOffMappings(), buildDefaultWriteOffMappings());
     }
 
-    @When("Admin attempts to create Working Capital Loan Product with duplicate fundSourceAccountId in payment channel mappings")
-    public void attemptCreateWithDuplicateFundSourceAccountId() {
-        List<WorkingCapitalLoanPaymentChannelToFundSourceMappings> paymentChannelMappings = List.of(
-                new WorkingCapitalLoanPaymentChannelToFundSourceMappings()
-                        .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
-                        .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES)),
-                new WorkingCapitalLoanPaymentChannelToFundSourceMappings()
-                        .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
-                        .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES)));
-        attemptCreateWithAdvancedMappings(paymentChannelMappings, buildDefaultChargeOffMappings(), buildDefaultWriteOffMappings());
-    }
-
     @When("Admin creates Working Capital Loan Product with unique payment channel mappings")
     public void createWithUniquePaymentChannelMappings() {
         List<WorkingCapitalLoanPaymentChannelToFundSourceMappings> paymentChannelMappings = List.of(

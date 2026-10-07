@@ -153,30 +153,6 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
-    @And("Customer makes externalID controlled {string} repayment on {string} with {double} EUR transaction amount")
-    public void makeRepaymentByExternalId(String repaymentType, String transactionDate, double transactionAmount) throws IOException {
-        eventStore.reset();
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        long loanId = loanResponse.getLoanId();
-        String resourceExternalId = loanResponse.getResourceExternalId();
-
-        DefaultPaymentType paymentType = DefaultPaymentType.valueOf(repaymentType);
-        Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
-
-        PostLoansLoanIdTransactionsRequest repaymentRequest = loanRequestFactory.defaultRepaymentRequest().transactionDate(transactionDate)
-                .transactionAmount(transactionAmount).paymentTypeId(paymentTypeValue).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
-
-        String idempotencyKey = UUID.randomUUID().toString();
-        testContext().set(TestContextKey.TRANSACTION_IDEMPOTENCY_KEY, idempotencyKey);
-
-        PostLoansLoanIdTransactionsResponse repaymentResponse = ok(
-                () -> fineractClient.loanTransactions().handleCommandsLoanTransactionByLoanExternalId(resourceExternalId, repaymentRequest,
-                        Map.<String, Object>of("command", "repayment")));
-
-        testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, repaymentResponse);
-        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
-    }
-
     @And("Created user makes externalID controlled {string} repayment on {string} with {double} EUR transaction amount")
     public void makeRepaymentWithGivenUserByExternalId(String repaymentType, String transactionDate, double transactionAmount)
             throws IOException {
@@ -205,53 +181,6 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
                         Map.<String, Object>of("command", "repayment")));
         testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, repaymentResponse);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
-    }
-
-    @And("Customer not able to make {string} repayment on {string} with {double} EUR transaction amount")
-    public void makeLoanRepaymentFails(String repaymentType, String transactionDate, double transactionAmount) throws IOException {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        long loanId = loanResponse.getLoanId();
-
-        DefaultPaymentType paymentType = DefaultPaymentType.valueOf(repaymentType);
-        Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
-
-        PostLoansLoanIdTransactionsRequest repaymentRequest = loanRequestFactory.defaultRepaymentRequest().transactionDate(transactionDate)
-                .transactionAmount(transactionAmount).paymentTypeId(paymentTypeValue).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
-
-        try {
-            ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, repaymentRequest,
-                    Map.<String, Object>of("command", "repayment")));
-            throw new IllegalStateException("Expected FeignException but call succeeded");
-        } catch (feign.FeignException e) {
-            ErrorResponse errorDetails = ErrorResponse.fromFeignException(e);
-            assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(400);
-            assertThat(errorDetails.getSingleError().getDeveloperMessage())
-                    .isEqualTo(ErrorMessageHelper.loanRepaymentOnClosedLoanFailureMsg());
-        }
-    }
-
-    @Then("Customer not able to make a repayment undo on {string} due to charge off")
-    public void makeLoanRepaymentUndoAfterChargeOff(String transactionDate) throws IOException {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        PostLoansLoanIdTransactionsResponse transactionResponse = testContext().get(TestContextKey.LOAN_REPAYMENT_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-        Long transactionId = transactionResponse.getResourceId();
-
-        PostLoansLoanIdTransactionsResponse repaymentResponse = testContext().get(TestContextKey.LOAN_REPAYMENT_RESPONSE);
-
-        PostLoansLoanIdTransactionsTransactionIdRequest repaymentUndoRequest = loanRequestFactory.defaultRepaymentUndoRequest()
-                .transactionDate(transactionDate).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
-
-        try {
-            ok(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId, repaymentResponse.getResourceId(),
-                    repaymentUndoRequest, Map.<String, Object>of()));
-            throw new IllegalStateException("Expected FeignException but call succeeded");
-        } catch (feign.FeignException e) {
-            ErrorResponse errorDetails = ErrorResponse.fromFeignException(e);
-            assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.repaymentUndoFailureDueToChargeOffCodeMsg()).isEqualTo(403);
-            assertThat(errorDetails.getSingleError().getDeveloperMessage())
-                    .isEqualTo(ErrorMessageHelper.repaymentUndoFailureDueToChargeOff(transactionId));
-        }
     }
 
     @And("Customer makes {string} repayment on {string} with {double} EUR transaction amount \\(and transaction fails because of wrong date)")

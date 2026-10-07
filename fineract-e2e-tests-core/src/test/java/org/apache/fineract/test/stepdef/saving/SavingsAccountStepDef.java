@@ -243,19 +243,6 @@ public class SavingsAccountStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.EUR_SAVINGS_ACCOUNT_WITHDRAW_RESPONSE, withdrawalResponse);
     }
 
-    @And("Client successfully withdraw {double} USD from the savings account on {string} date")
-    public void createUsdWithdraw(double withdrawAmount, String transcationDate) {
-        PostSavingsAccountsResponse savingsAccountResponse = testContext().get(TestContextKey.USD_SAVINGS_ACCOUNT_CREATE_RESPONSE);
-        long savingsAccountID = savingsAccountResponse.getSavingsId();
-
-        PostSavingsAccountTransactionsRequest withdrawRequest = SavingsAccountRequestFactory.defaultWithdrawRequest()
-                .transactionDate(transcationDate).transactionAmount(BigDecimal.valueOf(withdrawAmount));
-
-        PostSavingsAccountTransactionsResponse withdrawalResponse = ok(() -> fineractClient.savingsAccountTransactions()
-                .createSavingsAccountTransaction(savingsAccountID, withdrawRequest, Map.of("command", "withdrawal")));
-        testContext().set(TestContextKey.USD_SAVINGS_ACCOUNT_WITHDRAW_RESPONSE, withdrawalResponse);
-    }
-
     @And("Client successfully deposits {double} EUR to the {string} savings account on {string} date")
     public void createNamedEurDeposit(double depositAmount, String accountAlias, String depositDate) {
         long savingsAccountID = getNamedSavingsAccountId(EUR, accountAlias);

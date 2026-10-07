@@ -287,14 +287,6 @@ public class LoanChargeStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.UNDO_WAIVE_RESPONSE, undoWaiveResponse);
     }
 
-    @Then("Charge is successfully added to the loan")
-    public void loanChargeStatus() throws IOException {
-        PostLoansLoanIdChargesResponse response = testContext().get(TestContextKey.ADD_NSF_FEE_RESPONSE);
-
-        assertThat(response).as("Charge response should not be null").isNotNull();
-        assertThat(response.getResourceId()).as("Charge resource ID should be present").isNotNull();
-    }
-
     @Then("Charge is successfully added to the loan with {float} EUR")
     public void checkLoanChargeAmount(float chargeAmount) throws IOException {
         PostLoansLoanIdChargesResponse response = testContext().get(TestContextKey.ADD_PROCESSING_FEE_RESPONSE);
