@@ -320,7 +320,9 @@ From then on, the bulk event works just like any of the event. It'll be picked u
 TBD
 
 === Selective event producing
-TBD
+Every event type has a row in the `m_external_event_configuration` table with an `enabled` flag, maintained through the `/externalevents/configuration` API. A disabled event type is still raised internally (its listeners run as usual) but no external event is created for it, neither on its own nor as an item of a bulk event.
+
+Some events are derived from a transaction of another type: the transaction adjustment events (`LoanAdjustTransactionBusinessEvent`, `WorkingCapitalLoanAdjustTransactionBusinessEvent`) are one event type regardless of which transaction got adjusted. Such an event implements `DependentExternalEvent` and names the event type of the adjusted transaction type (for example `LoanReAgeTransactionBusinessEvent` for a re-age); it's only posted externally when both its own type and that governing type are enabled. Disabling a transaction type's event therefore also silences the adjustments of that transaction type, including the ones raised by a reverse-replay. Transaction types without an event of their own are governed by the adjustment event alone.
 
 == Customizations
 The framework provides a number of customization options:

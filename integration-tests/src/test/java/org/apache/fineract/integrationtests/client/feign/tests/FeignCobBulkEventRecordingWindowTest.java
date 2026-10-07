@@ -60,8 +60,11 @@ public class FeignCobBulkEventRecordingWindowTest extends FeignLoanTestBase {
     private static final String LOAN_ADJUST_TRANSACTION_EVENT = "LoanAdjustTransactionBusinessEvent";
     private static final String LOAN_REPAYMENT_DUE_EVENT = "LoanRepaymentDueBusinessEvent";
     private static final String LOAN_ACCRUAL_TRANSACTION_EVENT = "LoanAccrualTransactionCreatedBusinessEvent";
+    // FINERACT-2684: the adjustment of a transaction is only posted while that transaction type's own event is enabled
+    // too. The replayed transaction is a repayment, so its event must be on for the adjust event to be raised.
+    private static final String LOAN_REPAYMENT_EVENT = "LoanTransactionMakeRepaymentPostBusinessEvent";
     private static final List<String> REQUIRED_EVENT_TYPES = List.of(LOAN_ADJUST_TRANSACTION_EVENT, LOAN_REPAYMENT_DUE_EVENT,
-            LOAN_ACCRUAL_TRANSACTION_EVENT);
+            LOAN_ACCRUAL_TRANSACTION_EVENT, LOAN_REPAYMENT_EVENT);
 
     @BeforeEach
     public void configureCob() {
