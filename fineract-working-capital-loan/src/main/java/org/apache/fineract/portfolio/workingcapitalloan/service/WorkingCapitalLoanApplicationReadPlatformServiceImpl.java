@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymen
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCollectionData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTemplateData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
@@ -188,7 +189,10 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         enrichWithFullCurrency(data);
         enrichWithSubmittedBy(loan, data);
         enrichWithRateAndTerm(loan, data);
-        data.setPeriodPaymentRateHistory(rateChangeReadService.retrieveRateChangeHistory(loan));
+        final List<WorkingCapitalLoanPeriodPaymentRateChangeData> rateChangeHistory = rateChangeReadService.retrieveRateChangeHistory(loan);
+        data.setPeriodPaymentRateHistory(rateChangeHistory);
+        data.setEffectivePaymentRate(
+                rateChangeReadService.retrieveEffectivePaymentRate(loan, ThreadLocalContextUtil.getBusinessDate(), rateChangeHistory));
         enrichWithStartDates(loan, data);
         enrichWithOriginators(loanId, data);
         return data;

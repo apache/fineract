@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
@@ -26,6 +29,8 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +38,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class WorkingCapitalLoanPeriodPaymentRateChangeReadServiceImpl implements WorkingCapitalLoanPeriodPaymentRateChangeReadService {
+
+    /** Same order as {@code WorkingCapitalLoanPeriodPaymentRateHistoryHelper}: effective date, then id. */
+    private static final Comparator<WorkingCapitalLoanPeriodPaymentRateChangeData> CHRONOLOGICAL = Comparator
+            .comparing(WorkingCapitalLoanPeriodPaymentRateChangeData::effectiveDate)
+            .thenComparing(WorkingCapitalLoanPeriodPaymentRateChangeData::id, Comparator.nullsLast(Comparator.naturalOrder()));
 
     private final WorkingCapitalLoanPeriodPaymentRateChangeRepository repository;
     private final WorkingCapitalLoanRepository loanRepository;
@@ -48,6 +58,24 @@ public class WorkingCapitalLoanPeriodPaymentRateChangeReadServiceImpl implements
     @Override
     public List<WorkingCapitalLoanPeriodPaymentRateChangeData> retrieveRateChangeHistory(final WorkingCapitalLoan loan) {
         return historyOf(loan.getId());
+    }
+
+    /**
+     * TPV (and a null strategy, which the rest of the WC module treats as TPV) always answers with the rate in force on
+     * {@code asOf}. Non-TPV strategies have no period payment rate, so the field stays null.
+     */
+    @Override
+    public BigDecimal retrieveEffectivePaymentRate(final WorkingCapitalLoan loan, final LocalDate asOf,
+            final List<WorkingCapitalLoanPeriodPaymentRateChangeData> history) {
+        final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();
+        final WorkingCapitalPaymentAmountCalculationStrategy strategy = details.getPaymentAmountCalculationStrategy();
+        if (!(strategy == null || strategy.isTpv())) {
+            return null;
+        }
+        // Same selection as WorkingCapitalLoanPeriodPaymentRateHistoryHelper.rateInEffectAt, over the history already
+        // loaded for loan details — avoids a second read of the rate-change table.
+        return history.stream().filter(change -> !change.reversed()).filter(change -> !change.effectiveDate().isAfter(asOf))
+                .max(CHRONOLOGICAL).map(WorkingCapitalLoanPeriodPaymentRateChangeData::newRate).orElse(details.getPeriodPaymentRate());
     }
 
     private List<WorkingCapitalLoanPeriodPaymentRateChangeData> historyOf(final Long loanId) {
