@@ -336,15 +336,6 @@ public class LoanOriginationStepDef extends AbstractStepDef {
         log.info("Attach originator {} to non-existent loan failed with expected status {}", originatorId, expectedStatus);
     }
 
-    @Then("Creating a loan originator without name should fail with status {int}")
-    public void createOriginatorWithoutNameShouldFail(int expectedStatus) {
-        PostLoanOriginatorsRequest request = new PostLoanOriginatorsRequest().externalId(UUID.randomUUID().toString());
-
-        CallFailedRuntimeException exception = fail(() -> fineractClient.loanOriginators().createLoanOriginator(request));
-        assertExpectedStatus(exception, expectedStatus);
-        log.info("Create originator without name failed with expected status {}", expectedStatus);
-    }
-
     @Then("Creating a loan originator without name succeeds")
     public void createOriginatorWithoutNameSucceeds() {
         PostLoanOriginatorsRequest request = new PostLoanOriginatorsRequest().externalId(UUID.randomUUID().toString());

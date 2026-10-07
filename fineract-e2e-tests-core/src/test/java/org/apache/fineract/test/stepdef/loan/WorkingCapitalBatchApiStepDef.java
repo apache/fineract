@@ -636,11 +636,6 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
 
     // Combined workflow steps
 
-    @When("Batch API call with working capital steps: {string} runs with enclosingTransaction: {string}")
-    public void batchApiWCCallWithSteps(String steps, String enclosingTransaction) throws IOException {
-        batchApiWCCallWithStepsInternal(steps, enclosingTransaction, null);
-    }
-
     @When("Batch API call with working capital steps: {string} runs with enclosingTransaction: {string} and loan data:")
     public void batchApiWCCallWithStepsAndLoanData(String steps, String enclosingTransaction, DataTable loanData) throws IOException {
         batchApiWCCallWithStepsInternal(steps, enclosingTransaction, loanData.asMaps().get(0));
@@ -684,11 +679,6 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
         }
     }
 
-    @When("Batch API call with working capital steps by external IDs: {string} runs with enclosingTransaction: {string}")
-    public void batchApiWCCallWithStepsByExternalId(String steps, String enclosingTransaction) throws IOException {
-        batchApiWCCallWithStepsByExternalIdInternal(steps, enclosingTransaction, null, null);
-    }
-
     @When("Batch API call with working capital steps by external IDs: {string} runs with enclosingTransaction: {string} and loan data:")
     public void batchApiWCCallWithStepsByExternalIdAndLoanData(String steps, String enclosingTransaction, DataTable loanData)
             throws IOException {
@@ -724,11 +714,6 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
 
         storeLoanIdFromBatchResponse(stepArray, responses);
-    }
-
-    @When("Batch API call with working capital steps: {string} runs with enclosingTransaction: {string}, with failed disburse step")
-    public void batchApiWCCallWithFailedStep(String steps, String enclosingTransaction) throws IOException {
-        batchApiWCCallWithFailedStepInternal(steps, enclosingTransaction, null);
     }
 
     @When("Batch API call with working capital steps: {string} runs with enclosingTransaction: {string}, with failed disburse step and loan data:")
@@ -856,28 +841,7 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
         assertThat(actualValues).as("Batch API working capital transaction data should match expected values").isEqualTo(expectedValues);
     }
 
-    @Then("Batch API response contains {string} transaction")
-    public void verifyBatchResponseContainsTransaction(String transactionType) {
-        final List<BatchResponse> responses = testContext().get(TestContextKey.BATCH_API_CALL_RESPONSE);
-        assertThat(responses).isNotEmpty();
-
-        final BatchResponse response = responses.get(0);
-        final String body = response.getBody();
-        assertThat(body).contains("\"type\":\"" + transactionType + "\"");
-    }
-
-    @Then("Batch API response contains transaction with external ID {string}")
-    public void verifyBatchResponseContainsTransactionWithExternalId(String externalId) {
-        final List<BatchResponse> responses = testContext().get(TestContextKey.BATCH_API_CALL_RESPONSE);
-        assertThat(responses).isNotEmpty();
-
-        final BatchResponse response = responses.get(0);
-        final String body = response.getBody();
-        assertThat(body).contains("\"externalId\":\"" + externalId + "\"");
-    }
-
-    @Then("Batch API response contains working capital loan details")
-    public void verifyBatchResponseContainsWCLoanDetails() {
+    private void verifyBatchResponseContainsWCLoanDetails() {
         final List<BatchResponse> responses = testContext().get(TestContextKey.BATCH_API_CALL_RESPONSE);
         assertThat(responses).isNotEmpty();
 
@@ -926,24 +890,6 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
                 .orElseThrow(() -> new IllegalStateException(String.format("Step %d is not found in batch responses", step)));
         assertThat(response.getStatusCode()).as("Step %d should result %d", step, errorCode).isEqualTo(errorCode);
         assertThat(response.getBody()).as("Step %d error body should contain message \"%s\"", step, errorMessage).contains(errorMessage);
-    }
-
-    @Then("Nr. {int} Working capital loan was created")
-    public void verifyWCLoanCreated(int index) {
-        final List<BatchResponse> responses = testContext().get(TestContextKey.BATCH_API_CALL_RESPONSE);
-        assertThat(responses).hasSizeGreaterThanOrEqualTo(index);
-
-        final BatchResponse response = responses.get(index - 1);
-        assertThat(response.getStatusCode()).isEqualTo(200);
-    }
-
-    @Then("Nr. {int} Working capital loan was approved")
-    public void verifyWCLoanApproved(int index) {
-        final List<BatchResponse> responses = testContext().get(TestContextKey.BATCH_API_CALL_RESPONSE);
-        assertThat(responses).hasSizeGreaterThanOrEqualTo(index);
-
-        final BatchResponse response = responses.get(index - 1);
-        assertThat(response.getStatusCode()).isEqualTo(200);
     }
 
     @Then("Nr. {int} Working capital loan creation was rolled back")

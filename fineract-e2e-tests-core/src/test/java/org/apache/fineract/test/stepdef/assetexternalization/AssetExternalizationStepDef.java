@@ -794,32 +794,6 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         eventCheckHelper.loanAccountSnapshotBusinessEventCheck(loanId, transferId);
     }
 
-    @Then("Asset externalization response {string} has the correct Loan ID, transferExternalId")
-    public void checkAssetExternalizationResponse(String type) {
-        String ownerExternalIdStored = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID);
-
-        String transferExternalIdExpected = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_BUYBACK_TRANSFER_PREFIX + "_" + type);
-
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        long loanId = loanResponse.getLoanId();
-
-        PostInitiateTransferResponse response = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_RESPONSE);
-        Long loanIdActual = response.getSubResourceId();
-        String transferExternalIdActual = response.getResourceExternalId();
-
-        logAssetExternalizationResponseDetails(loanId, ownerExternalIdStored, transferExternalIdExpected, transferExternalIdActual);
-
-        assertThat(loanIdActual).as(ErrorMessageHelper.wrongDataInAssetExternalizationResponse(loanIdActual, loanId)).isEqualTo(loanId);
-        assertThat(response.getResourceId()).isNotNull();
-        if (transferExternalIdExpected != null) {
-            assertThat(transferExternalIdActual)
-                    .as(ErrorMessageHelper.wrongDataInAssetExternalizationResponse(transferExternalIdActual, transferExternalIdExpected))
-                    .isEqualTo(transferExternalIdExpected);
-        } else {
-            assertThat(transferExternalIdActual).isNotEmpty();
-        }
-    }
-
     @When("Admin makes asset externalization request for type {string} by Loan ID with unique ownerExternalId, user-generated transferExternalId and the following data:")
     public void createAssetExternalizationRequestByLoanIdUserGeneratedExtId(String type, DataTable table) throws IOException {
         // if user created transferExternalId previously, it will use that, otherwise create a new one
@@ -1124,8 +1098,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         assertThat(exception.getMessage()).contains(expectedErrorMessagePart);
     }
 
-    @When("Admin updates external asset owner loan product attribute {string} for loan product {string} with attributeKey {string} and value {string}")
-    public void updateExternalAssetOwnerLoanProductAttributeForProduct(String storedAttributeKey, String loanProductName,
+    private void updateExternalAssetOwnerLoanProductAttributeForProduct(String storedAttributeKey, String loanProductName,
             String bodyAttributeKey, String bodyAttributeValue) {
         long loanProductId = resolveLoanProductIdByName(loanProductName);
         long attributeId = resolveExternalAssetOwnerLoanProductAttributeId(loanProductId, storedAttributeKey);

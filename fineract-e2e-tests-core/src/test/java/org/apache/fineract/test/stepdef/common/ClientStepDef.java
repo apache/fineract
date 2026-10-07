@@ -65,16 +65,6 @@ public class ClientStepDef extends AbstractStepDef {
         eventCheckHelper.clientEventCheck(response);
     }
 
-    @When("Admin creates a second client with random data")
-    public void createSecondClientRandomFirstNameLastName() {
-        PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest();
-
-        PostClientsResponse response = ok(() -> fineractClient.clients().createClient(clientsRequest));
-        testContext().set(TestContextKey.CLIENT_CREATE_SECOND_CLIENT_RESPONSE, response);
-
-        eventCheckHelper.clientEventCheck(response);
-    }
-
     @When("Admin creates a client with Firstname {string} and Lastname {string}")
     public void createClient(String firstName, String lastName) {
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest().firstname(firstName).lastname(lastName);
@@ -101,16 +91,6 @@ public class ClientStepDef extends AbstractStepDef {
         PostClientsResponse response = ok(() -> fineractClient.clients().createClient(clientsRequest));
         testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
 
-    }
-
-    @When("Admin creates a client with Firstname {string} and Lastname {string} with {string} activation date")
-    public void createClientWithSpecifiedDates(String firstName, String lastName, String activationDate) {
-
-        PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest().firstname(firstName).lastname(lastName)
-                .activationDate(activationDate);
-
-        PostClientsResponse response = ok(() -> fineractClient.clients().createClient(clientsRequest));
-        testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
     }
 
     @Then("Client is created successfully")

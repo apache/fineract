@@ -86,11 +86,6 @@ public class WorkingCapitalDelinquencyStepDef extends AbstractStepDef {
         log.info("Verified delinquency resume initiation failed with expected error for loan {}", loanId);
     }
 
-    @Then("Initiating a Working Capital loan delinquency pause with startDate {string} and endDate {string} results an error")
-    public void initiateDelinquencyPauseResultsAnError(String startDate, String endDate) {
-        initiateDelinquencyPauseResultsAnErrorWithDetails(startDate, endDate, null);
-    }
-
     @Then("Initiating a Working Capital loan delinquency pause with startDate {string} and endDate {string} results an error with the following data:")
     public void initiateDelinquencyPauseResultsAnErrorWithDetails(String startDate, String endDate, DataTable table) {
         Long loanId = extractLoanId();

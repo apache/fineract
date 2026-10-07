@@ -932,23 +932,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertThat(exception.getStatus()).as("HTTP status").isEqualTo(404);
     }
 
-    @Then("Admin creates working capital loan with breach override allowed with breach override and the following data:")
-    public void createLoanWithBreachOverrideAllowedWithBreach(final DataTable table) {
-        final List<List<String>> data = table.asLists();
-        final List<String> loanData = data.get(1);
-        final Long overrideBreachId = createBreachAndGetId();
-        createWorkingCapitalLoanAccountWithBreachNearBreachData(loanData, overrideBreachId, null);
-    }
-
-    @Then("Admin creates working capital loan with breach override allowed with breach and near breach override and the following data:")
-    public void createLoanWithBreachOverrideAllowedWithBreachAndNearBreachOverride(final DataTable table) {
-        final List<List<String>> data = table.asLists();
-        final List<String> loanData = data.get(1);
-        final Long overrideBreachId = createBreachAndGetId();
-        final Long overrideNearBreachId = createNearBreachAndGetId();
-        createWorkingCapitalLoanAccountWithBreachNearBreachData(loanData, overrideBreachId, overrideNearBreachId);
-    }
-
     @Then("Admin creates working capital loan with {int} {string} breach override and the following data:")
     public void createLoanWithBreachOverrideAllowedWithBreachOverrideData(int breachFrequency, String breachFrequencyType,
             final DataTable table) {
@@ -961,15 +944,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("Admin creates working capital loan with {int} {string} breach and {int} {string} near breach override and the following data:")
     public void createLoanWithBreachOverrideAllowedWithBreachAndNearBreachOverrideData(int breachFrequency, String breachFrequencyType,
             int nearBreachFrequency, String nearBreachFrequencyType, final DataTable table) {
-        final List<List<String>> data = table.asLists();
-        final Long overrideBreachId = createBreachOverrideAndGetId(breachFrequency, breachFrequencyType);
-        final Long overrideNearBreachId = createNearBreachOverrideAndGetId(nearBreachFrequency, nearBreachFrequencyType);
-        createWorkingCapitalLoanAccountWithBreachNearBreachData(data.get(1), overrideBreachId, overrideNearBreachId);
-    }
-
-    @Then("Admin creates working capital loan with breach override allowed with {int} {string} breach and the following data:")
-    public void createLoanWithBreachOverrideAllowedWithBreachhData(final DataTable table, int breachFrequency, String breachFrequencyType,
-            int nearBreachFrequency, String nearBreachFrequencyType) {
         final List<List<String>> data = table.asLists();
         final Long overrideBreachId = createBreachOverrideAndGetId(breachFrequency, breachFrequencyType);
         final Long overrideNearBreachId = createNearBreachOverrideAndGetId(nearBreachFrequency, nearBreachFrequencyType);
@@ -1089,18 +1063,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertThat(loanAccountResponse.getNearBreach()).isNull();
     }
 
-    @Then("Admin failed to create working capital loan while breach override disallowed with breach override and the following data:")
-    public void createLoanWithBreachOverrideDisallowedWithBreachFailure(final DataTable table) {
-        final List<List<String>> data = table.asLists();
-        final List<String> loanData = data.get(1);
-        final Long overrideBreachId = createBreachOverrideAndGetId();
-
-        final PostWorkingCapitalLoansRequest loansRequest = createWorkingCapitalLoanAccountWithBreachNearBreachRequest(loanData,
-                overrideBreachId, null);
-        String message = ErrorMessageHelper.overrideDisallowedByProductFailure();
-        verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, message);
-    }
-
     @Then("Admin failed to create working capital loan while breach override disallowed with breach override and default following data:")
     public void createLoanWithBreachOverrideDisallowedWithBreachDefaultFailure(final DataTable table) {
         final List<String> loanData = table.asLists().get(1);
@@ -1110,19 +1072,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final Long overrideBreachId = createBreachOverrideAndGetId();
         final PostWorkingCapitalLoansRequest loansRequest = createWorkingCapitalLoanAccountDefaultRequest(loanProduct, submittedOnDate)
                 .breachId(overrideBreachId);
-        String message = ErrorMessageHelper.overrideDisallowedByProductFailure();
-        verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, message);
-    }
-
-    @Then("Admin failed to create working capital loan while breach override disallowed with breach and near breach override and the following data:")
-    public void createLoanWithBreachOverrideDisallowedWithBreachAndNearBreachFailure(final DataTable table) {
-        final List<List<String>> data = table.asLists();
-        final List<String> loanData = data.get(1);
-        final Long overrideBreachId = createBreachOverrideAndGetId();
-        final Long overrideNearBreachId = createNearBreachOverrideAndGetId();
-
-        final PostWorkingCapitalLoansRequest loansRequest = createWorkingCapitalLoanAccountWithBreachNearBreachRequest(loanData,
-                overrideBreachId, overrideNearBreachId);
         String message = ErrorMessageHelper.overrideDisallowedByProductFailure();
         verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, message);
     }
@@ -2027,20 +1976,10 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         log.info("Verified working capital loan undo disbursal failed with expected error");
     }
 
-    @Then("Working Capital disbursal transaction business event is raised")
-    public void workingCapitalDisbursalTransactionBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanDisbursalTransactionEventCheck(getCreatedLoanId());
-    }
-
     @Then("Working Capital disbursal transaction business event is raised with {string} amount and reversed {string}")
     public void workingCapitalDisbursalTransactionBusinessEventIsRaisedWithAmountAndReversed(final String amount, final String reversed) {
         eventCheckHelper.workingCapitalLoanDisbursalTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
         assertThat(Boolean.parseBoolean(reversed)).isFalse();
-    }
-
-    @Then("Working Capital undo disbursal transaction business event is raised")
-    public void workingCapitalUndoDisbursalTransactionBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanUndoDisbursalTransactionEventCheck(getCreatedLoanId());
     }
 
     @Then("Working Capital undo disbursal transaction business event is raised with {string} amount and reversed {string}")
@@ -2087,11 +2026,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("a Working Capital Loan Rejected business event is raised")
     public void aWorkingCapitalLoanRejectedBusinessEventIsRaised() {
         eventCheckHelper.workingCapitalLoanRejectedEventCheck(getCreatedLoanId());
-    }
-
-    @Then("a Working Capital Loan Disbursal business event is raised")
-    public void aWorkingCapitalLoanDisbursalBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanDisbursalEventCheck(getCreatedLoanId());
     }
 
     @Then("a Working Capital Loan Undo Disbursal business event is raised")
@@ -2396,16 +2330,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("no Working Capital Loan Status Changed business event is raised")
     public void noWorkingCapitalLoanStatusChangedBusinessEventIsRaised() {
         eventCheckHelper.workingCapitalLoanStatusChangedEventNotRaisedCheck(getCreatedLoanId());
-    }
-
-    @Then("no Working Capital Loan Delinquency Schedule Changed business event is raised")
-    public void noWorkingCapitalLoanDelinquencyScheduleChangedBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanDelinquencyScheduleChangedEventNotRaisedCheck(getCreatedLoanId());
-    }
-
-    @Then("no Working Capital Loan Breach Schedule Changed business event is raised")
-    public void noWorkingCapitalLoanBreachScheduleChangedBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanBreachScheduleChangedEventNotRaisedCheck(getCreatedLoanId());
     }
 
     @Then("no Working Capital Loan Breach Past Due Change business event is raised")
@@ -3297,24 +3221,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
             assertThat(txn.getExternalLoanId()).as("WC transaction id=%s type=%s must carry the loan externalId", txn.getId(),
                     txn.getType() == null ? null : txn.getType().getValue()).isEqualTo(loanExternalId);
         }
-    }
-
-    @Then("Add discount with {string} amount on Working Capital loan account failed due to already added discount before disbursement")
-    public void addDiscountWithAmountOnWorkingCapitalLoanAccountFailedDueToAlreadyAddedDiscountBeforeDisbursement(String discountAmount) {
-        String errorMessage = ErrorMessageHelper.discountAlreadySetBeforeDisburseFailure();
-        addDiscountFeeFailedCheck(discountAmount, errorMessage);
-    }
-
-    @Then("Add discount with {string} amount on Working Capital loan account failed due to override disallowed by product")
-    public void updateDiscountWithAmountOnWorkingCapitalLoanAccountFailedDueToOverrideDisallowedByProduct(String discountAmount) {
-        String errorMessage = ErrorMessageHelper.overrideDisallowedByProductFailure();
-        addDiscountFeeFailedCheck(discountAmount, errorMessage);
-    }
-
-    @Then("Add discount with {string} amount on Working Capital loan account failed due to exceed discount amount")
-    public void updateDiscountWithAmountOnWorkingCapitalLoanAccountFailedDueToExceedDiscountAmount(String discountAmount) {
-        String errorMessage = ErrorMessageHelper.discountExceedProductDiscountFailure();
-        addDiscountFeeFailedCheck(discountAmount, errorMessage);
     }
 
     @When("Admin update Working Capital period payment rate with {string} value")
@@ -4404,8 +4310,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         loanWCStatus("CLOSED_OBLIGATIONS_MET");
     }
 
-    @Then("Admin closes the Working Capital loan with a full repayment by loan external ID on {string}")
-    public void closeWorkingCapitalLoanWithFullRepaymentByExternalId(final String transactionDate) {
+    private void closeWorkingCapitalLoanWithFullRepaymentByExternalId(final String transactionDate) {
         final Long loanId = getCreatedLoanId();
         final String loanExternalId = retrieveLoanExternalId(loanId);
         final WorkingCapitalLoanTransactionTemplateResponse templateResponse = fetchPrepaymentTemplateByExternalId(loanExternalId,
