@@ -45,6 +45,8 @@ final class RolesApiResourceSwagger {
         public String name;
         @Schema(example = "This role provides all application permissions.")
         public String description;
+        @Schema(example = "false")
+        public Boolean disabled;
 
     }
 
@@ -61,6 +63,8 @@ final class RolesApiResourceSwagger {
         public String name;
         @Schema(example = "This role provides all application permissions.")
         public String description;
+        @Schema(example = "false")
+        public Boolean disabled;
 
     }
 
@@ -166,6 +170,8 @@ final class RolesApiResourceSwagger {
         public String name;
         @Schema(example = "This role provides all application permissions.")
         public String description;
+        @Schema(example = "false")
+        public Boolean disabled;
         public Collection<GetRolesRoleIdPermissionsResponsePermissionData> permissionUsageData;
 
     }
@@ -194,7 +200,7 @@ final class RolesApiResourceSwagger {
 
             }
 
-            @Schema(example = "\"CREATE_GUARANTOR\":true,\n" + "    \"CREATE_CLIENT\":true")
+            @Schema(example = "{\"CREATE_GUARANTOR\": true, \"CREATE_CLIENT\": true}")
             public Map<String, Boolean> permissions;
         }
 

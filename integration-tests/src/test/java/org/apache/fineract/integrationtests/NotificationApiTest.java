@@ -71,7 +71,7 @@ public class NotificationApiTest {
                 .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(password).repeatPassword(password)
                 .sendPasswordToEmail(false).roles(List.of(SUPER_USER_ROLE_ID)).officeId(headOffice.getId());
 
-        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        PostUsersResponse userCreationResponse = UserHelper.createUser(createUserRequest);
         Assertions.assertNotNull(userCreationResponse.getResourceId());
 
         FineractFeignClient newUserClient = FineractFeignClientHelper.createNewFineractFeignClient(username, password);
