@@ -24,7 +24,10 @@ import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeScheduleTagHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -38,4 +41,8 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository
     List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> findByLoanIdOrderByAddedOnDateDesc(Long loanId);
 
     List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> findByLoanIdAndLiftedOnDateIsNull(Long loanId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("delete from WorkingCapitalLoanDelinquencyRangeScheduleTagHistory tag where tag.loan.id = :loanId")
+    void deleteByLoanId(@Param("loanId") Long loanId);
 }

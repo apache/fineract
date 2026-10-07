@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -41,4 +42,8 @@ public interface WorkingCapitalLoanBreachActionRepository extends JpaRepository<
             AND action.workingCapitalLoan.id = :loanId AND action.endDate IS NULL
             """)
     boolean isBreachDisabled(@Param("loanId") Long loanId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("delete from WorkingCapitalLoanBreachAction action where action.workingCapitalLoan.id = :loanId")
+    void deleteByWorkingCapitalLoanId(@Param("loanId") Long loanId);
 }

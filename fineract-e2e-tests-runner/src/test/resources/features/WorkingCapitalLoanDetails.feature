@@ -548,3 +548,89 @@ Feature: Working Capital Loan Details
     # Closing the loan
     When Admin closes the Working Capital loan with a full repayment on "15 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:C111082
+  Scenario: Verify that undo disbursal resets delinquency, breach, charges and the amortization model, and the next disbursement rebuilds them
+    When Admin sets the business date to "01 September 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 10 DAYS and minimumPayment 3 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket and custom breach config:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount |
+      | 15              | DAYS                | PERCENTAGE                  | 10           |
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct      | submittedOnDate   | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 September 2026 | 05 September 2026        | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 September 2026" with "9000" amount and expected disbursement date on "05 September 2026"
+    Then Working capital loan approval was successful
+# --- disbursed two days after the expected disbursement date --- #
+    When Admin sets the business date to "07 September 2026"
+    And Admin successfully disburse the Working Capital loan on "07 September 2026" with "9000" EUR transaction amount
+    Then Working Capital loan status will be "ACTIVE"
+    And Admin retrieves the projected amortization schedule
+    And The retrieved amortization schedule has payments with the following details in first "2" lines:
+      | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
+      | 0         | 2026-09-07 | -9000.00              | 9000.00         |                            |                     |                          | 0.00                       | 9000.00       | 0.00                     |
+      | 1         | 2026-09-08 | 50.00                 | 8950.00         | 0.00                       |                     |                          | 0.00                       |               |                          |
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-09-07 | 2026-09-16 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-09-07 | 2026-09-21 | 15           | 900.00           | 900.00            | null       | null   |
+# --- charge, delinquency action and breach action on the disbursed loan --- #
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 September 2026" due date and 35.0 transaction amount
+    When Admin creates WC delinquency reschedule action with the following parameters:
+      | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | 5              | PERCENTAGE         | 10        | DAYS          |
+    When Admin creates WC breach reschedule action with the following parameters:
+      | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | 20             | PERCENTAGE         | 10        | DAYS          |
+    Then WC loan delinquency actions contain 1 action
+    Then WC loan breach actions have the following data:
+      | action     | startDate         | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | RESCHEDULE | 07 September 2026 | 20             | PERCENTAGE         | 10        | DAYS          |
+    Then Working capital loan details has the following field values:
+      | charges.size | 1 |
+# --- partial repayment, then COB makes the loan delinquent --- #
+    When Admin sets the business date to "10 September 2026"
+    And Customer makes repayment on "10 September 2026" with 100 transaction amount on Working Capital loan
+    When Admin sets the business date to "07 October 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 3            | 2026-10-07  |              | D00            | 1              | 30             |
+      | 2            | 2026-10-07  |              | D00            | 1              | 30             |
+      | 1            | 2026-10-07  |              | D00            | 1              | 30             |
+# --- undo the repayment, then the disbursal --- #
+    When Customer undo "1"th "Repayment" transaction made on "10 September 2026" on Working Capital loan
+    Then Admin successfully undo Working Capital disbursal
+    Then Working Capital loan status will be "APPROVED"
+# --- the amortization model is back on the approved state, from the expected disbursement date --- #
+    And Admin retrieves the projected amortization schedule
+    And The retrieved amortization schedule has payments with the following details in first "2" lines:
+      | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
+      | 0         | 2026-09-05 | -9000.00              | 9000.00         |                            |                     |                          | 0.00                       | 9000.00       | 0.00                     |
+      | 1         | 2026-09-06 | 50.00                 | 8950.00         | 0.00                       |                     |                          | 0.00                       |               |                          |
+# --- disbursed again, everything is rebuilt from the loan's own configuration, not the dropped reschedule actions --- #
+    When Admin successfully disburse the Working Capital loan on "06 October 2026" with "9000" EUR transaction amount
+    Then Working Capital loan status will be "ACTIVE"
+    And Admin retrieves the projected amortization schedule
+    And The retrieved amortization schedule has payments with the following details in first "2" lines:
+      | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
+      | 0         | 2026-10-06 | -9000.00              | 9000.00         |                            |                     |                          | 0.00                       | 9000.00       | 0.00                     |
+      | 1         | 2026-10-07 | 50.00                 | 8950.00         | 0.00                       |                     |                          | 0.00                       |               |                          |
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-10-06 | 2026-10-15 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-10-06 | 2026-10-20 | 15           | 900.00           | 900.00            | null       | null   |
+    Then WC loan delinquency actions contain 0 actions
+    Then WC loan breach actions have the following data:
+      | action | startDate | minimumPayment | minimumPaymentType | frequency | frequencyType |
+    Then Working capital loan details has the following field values:
+      | charges.size | 0 |
+    Then Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "07 October 2026"
+

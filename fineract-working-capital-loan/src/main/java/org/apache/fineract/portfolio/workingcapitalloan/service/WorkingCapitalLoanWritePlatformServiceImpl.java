@@ -443,7 +443,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final LoanStatus oldStatus = loan.getLoanStatus();
         this.stateMachine.transition(WorkingCapitalLoanEvent.LOAN_DISBURSAL_UNDO, loan, DateUtils.getBusinessLocalDate());
 
-        final WorkingCapitalLoanTransaction reversedTransaction = reverseDisbursementTransactionAndResetBalance(loan);
+        final WorkingCapitalLoanTransaction reversedTransaction = reverseDisbursementTransactions(loan);
         businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent(reversedTransaction, loan.getId()));
 
@@ -459,7 +459,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         loan.getLoanProductRelatedDetails().setDiscount(null);
         // Nothing is disbursed any more, so the active contractual principal falls back to the approved one.
         loan.getLoanProductRelatedDetails().setPrincipal(loan.getApprovedPrincipal());
-        amortizationScheduleWriteService.regenerateAmortizationScheduleOnUndoDisbursal(loan);
+        resetToApprovedState(loan);
 
         this.loanRepository.saveAndFlush(loan);
 
@@ -1432,7 +1432,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         this.transactionRepository.flush();
     }
 
-    private WorkingCapitalLoanTransaction reverseDisbursementTransactionAndResetBalance(final WorkingCapitalLoan loan) {
+    private WorkingCapitalLoanTransaction reverseDisbursementTransactions(final WorkingCapitalLoan loan) {
         final List<WorkingCapitalLoanTransaction> transactions = this.transactionRepository
                 .findByWcLoan_IdOrderByTransactionDateAscIdAsc(loan.getId());
         final List<WorkingCapitalLoanTransaction> activeDisbursements = transactions.stream()
@@ -1473,25 +1473,43 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 adjustTransactionEventPublisher.publishReversal(loan.getId(), reversed);
             }
         }
-
-        // Operate on loan.getBalance() directly: it is the single managed balance instance that
-        // recalculateRealizedIncome writes to, so all updates here apply to the same object that gets persisted.
-        final WorkingCapitalLoanBalance balance = loan.getBalance();
-        if (balance != null) {
-            // Restore balance to pre-disbursement state: nothing was paid out any more, so there is nothing
-            // repayable, exactly as on a loan that was approved but never disbursed.
-            balance.setPrincipal(BigDecimal.ZERO);
-            balance.setPrincipalAdjustment(BigDecimal.ZERO);
-            balance.setPrincipalPaid(BigDecimal.ZERO);
-            balance.setTotalDisbursement(BigDecimal.ZERO);
-            balance.setTotalDiscountFee(BigDecimal.ZERO);
-            balance.setTotalDiscountFeeAdjustment(BigDecimal.ZERO);
-            // All transactions were just reversed, so the single owner recomputes realized income to zero from them.
-            discountFeeAmortizationService.recalculateRealizedIncome(loan);
-            balance.setOverpaymentAmount(BigDecimal.ZERO);
-            this.balanceRepository.saveAndFlush(balance);
-        }
         return txn;
+    }
+
+    /**
+     * Drops everything the disbursement brought into being, so the loan is back where approval left it and the next
+     * disbursement builds it all again from the loan's current configuration: the delinquency and breach schedules with
+     * every action recorded against them, the charges (deactivated, as transactions still reference them) and the
+     * balance. The amortization model is regenerated last, from that clean approved state.
+     */
+    private void resetToApprovedState(final WorkingCapitalLoan loan) {
+        delinquencyRangeScheduleService.deleteScheduleAndActions(loan.getId());
+        breachScheduleService.deleteScheduleAndActions(loan.getId());
+        deactivateCharges(loan);
+        replaceBalance(loan);
+        amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnApproval(loan);
+    }
+
+    private void deactivateCharges(final WorkingCapitalLoan loan) {
+        final List<WorkingCapitalLoanCharge> charges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
+        charges.forEach(charge -> charge.setActive(false));
+        chargeRepository.saveAll(charges);
+    }
+
+    /**
+     * Swaps the balance for a fresh one, as loan creation sets it up. The old row is deleted and flushed first: the
+     * balance is unique per loan, and Hibernate would otherwise insert the new row before deleting the old one.
+     */
+    private void replaceBalance(final WorkingCapitalLoan loan) {
+        final WorkingCapitalLoanBalance staleBalance = loan.getBalance();
+        if (staleBalance != null) {
+            loan.setBalance(null);
+            balanceRepository.delete(staleBalance);
+            balanceRepository.flush();
+        }
+        final WorkingCapitalLoanBalance freshBalance = WorkingCapitalLoanBalance.createFor(loan);
+        loan.setBalance(freshBalance);
+        balanceRepository.saveAndFlush(freshBalance);
     }
 
     private void ensureUndoDisbursalAllowed(final WorkingCapitalLoan loan) {

@@ -34,6 +34,13 @@ public interface WorkingCapitalLoanBreachScheduleService {
 
     boolean hasSchedule(Long loanId);
 
+    /**
+     * Removes every breach schedule period of the loan together with the breach and near breach actions recorded
+     * against it, so the next disbursement generates the schedule again from the loan's current breach configuration
+     * alone.
+     */
+    void deleteScheduleAndActions(Long loanId);
+
     List<WorkingCapitalLoanBreachScheduleData> retrieveBreachSchedule(Long loanId);
 
     boolean evaluateBreachOnDate(WorkingCapitalLoanBreachSchedule period, LocalDate businessDate);

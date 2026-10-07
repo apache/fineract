@@ -34,6 +34,13 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
 
     boolean hasSchedule(Long loanId);
 
+    /**
+     * Removes every delinquency range schedule period of the loan together with its delinquency tag history and the
+     * delinquency actions recorded against it, so the next disbursement generates the schedule again from the loan's
+     * current delinquency configuration alone.
+     */
+    void deleteScheduleAndActions(Long loanId);
+
     void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal amount);
 
     void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate businessDate, BigDecimal amount);
