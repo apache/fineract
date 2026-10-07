@@ -5165,6 +5165,16 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         verifyTransactionsJournalEntries(transactionType, transactionDate, true, null, table);
     }
 
+    @Then("Working Capital Loan Transactions tab has a {string} transaction with date {string} which has no Journal entries")
+    public void verifyWorkingCapitalLoanTransactionHasNoJournalEntries(final String transactionType, final String transactionDate) {
+        verifyTransactionHasNoJournalEntries(transactionType, transactionDate, false);
+    }
+
+    @Then("Working Capital Loan Transactions tab has a reversed {string} transaction with date {string} which has no Journal entries")
+    public void verifyReversedWorkingCapitalLoanTransactionHasNoJournalEntries(final String transactionType, final String transactionDate) {
+        verifyTransactionHasNoJournalEntries(transactionType, transactionDate, true);
+    }
+
     @When("Customer undo {string}th working capital transaction made on {string}")
     public void undoNthTransaction(String nthItemStr, String transactionDate) throws IOException {
         final GetWorkingCapitalLoanTransactionsResponse getWorkingCapitalLoansLoanIdResponse = retrieveLoanTransactions(getCreatedLoanId());
@@ -5196,6 +5206,15 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                     + expectedCount + ", Actual: " + transactionsMatch.size()).isEqualTo(expectedCount);
         }
         verifyJournalEntries(transactionsMatch, table);
+    }
+
+    private void verifyTransactionHasNoJournalEntries(final String transactionType, final String transactionDate, final boolean reversed) {
+        final List<GetWorkingCapitalLoanTransactionIdResponse> transactionsMatch = findMatchingTransactions(getCreatedLoanId(),
+                resolveTransactionType(transactionType), transactionDate, reversed);
+        assertThat(transactionsMatch).as("No %s transaction found on %s", transactionType, transactionDate).isNotEmpty();
+        assertThat(getWorkingCapitalJournalLinesActualList(transactionsMatch))
+                .as("Journal entries of the %s transaction on %s", transactionType, transactionDate)
+                .allSatisfy(journalLines -> assertThat(journalLines).isEmpty());
     }
 
     private TransactionType resolveTransactionType(String transactionType) {
