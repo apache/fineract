@@ -25,12 +25,18 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -50,6 +56,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.slf4j.LoggerFactory;
 
 class ProjectedAmortizationScheduleCalculatorTest {
 
@@ -2799,6 +2806,97 @@ class ProjectedAmortizationScheduleCalculatorTest {
         final BigDecimal exp = BigDecimal.valueOf(expected).setScale(scale, RoundingMode.HALF_UP);
         final BigDecimal act = actual.setScale(scale, RoundingMode.HALF_UP);
         assertEquals(0, exp.compareTo(act), msg + " — expected: " + exp + ", actual: " + act);
+    }
+
+    /**
+     * A 100 balance against a 150 discount fee is repaid in five days, so the schedule earns the whole fee over those
+     * five days and solves to 5.8E+55 % a year - far above the cap on a meaningful annual EIR. The pre-check rejects
+     * it, so the approval that produced it fails as a validation error rather than breaking further down with the
+     * schedule already written and the loan already approved.
+     */
+    @Test
+    void aFeeEarnedInDaysSolvesToARateAboveTheEirCap() {
+        final MonetaryCurrency eur = new MonetaryCurrency("EUR", 2, null);
+        final BigDecimal fee = new BigDecimal("150");
+        final BigDecimal net = new BigDecimal("100");
+
+        assertFalse(
+                ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.EIR, fee, net, TPV, RATE, DAY_COUNT,
+                        eur, MC),
+                "an annual EIR above " + ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR + " % is not calculable");
+        assertThrows(IllegalStateException.class,
+                () -> ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR, fee, net, TPV, RATE, DAY_COUNT,
+                        EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE),
+                "and generate() refuses the same shape the pre-check refused");
+
+        // FLAT earns a fixed share of every payment and solves no rate, so there is no rate to check and the cap
+        // has nothing to say about it - what keeps this shape off a FLAT loan is the discount-versus-principal rule.
+        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, fee, net, TPV, RATE,
+                DAY_COUNT, eur, MC));
+    }
+
+    /**
+     * The cap is on the loan's EIR, not on the projection rate the walk re-solves after an off-plan payment. A 120
+     * balance against a 17 fee is written at 9,991,990,583,522.79 %, just under the cap; paying 30 instead of 50 on the
+     * first day re-solves the days ahead above it. Capped, that solve would fail and leave those days on the old rate,
+     * billing 106.43 for the 107.00 still owed. Uncapped, they bill exactly what is owed.
+     */
+    @Test
+    void anOffPlanPaymentReSolvesTheProjectionEvenAboveTheEirCap() {
+        final BigDecimal net = new BigDecimal("120");
+        final BigDecimal fee = new BigDecimal("17");
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
+                fee, net, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+        assertTrue(model.calculatedAnnualEir().compareTo(ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR) < 0,
+                "the loan's own EIR is within the cap");
+
+        final BigDecimal paid = new BigDecimal("30");
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), paid);
+
+        final List<ProjectedPayment> payments = model.projectedPayments();
+        final BigDecimal billedAhead = payments.stream().filter(payment -> payment.paymentNo() > 1)
+                .map(payment -> payment.expectedPaymentAmount().getAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(0, net.add(fee).subtract(paid).compareTo(billedAhead), "the days ahead bill exactly what is still owed");
+        assertEquals(0, new BigDecimal("7.00").compareTo(payments.getLast().expectedPaymentAmount().getAmount()));
+    }
+
+    /**
+     * When the projection cannot be re-solved from the position an off-plan payment left, the days ahead keep the
+     * previous projection and may not bill exactly what is owed. The walk knows no loan id, so the warning has to carry
+     * everything else needed to find the loan and replay the case: the day, the reason, the projection kept, the
+     * position, the loan's inputs and its payments.
+     */
+    @Test
+    void aProjectionThatCannotBeReSolvedIsKeptAndReportedWithEverythingNeededToReplayIt() {
+        final BigDecimal net = new BigDecimal("1000");
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
+                new BigDecimal("50"), net, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+        final Logger logger = (Logger) LoggerFactory.getLogger(AmortizationWalk.class.getName());
+        final ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        // The plan is solved from the net disbursement; only a re-solve starts from any other balance.
+        try (MockedStatic<AmortizationParams> params = mockStatic(AmortizationParams.class, CALLS_REAL_METHODS)) {
+            params.when(() -> AmortizationParams.solve(any(), argThat(balance -> balance.compareTo(net) != 0), any(), any(), any(),
+                    anyInt(), anyInt(), any())).thenThrow(new IllegalStateException("IRR did not converge"));
+
+            model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("30"));
+
+            assertFalse(model.projectedPayments().isEmpty(), "the schedule is still produced, on the previous projection");
+        } finally {
+            logger.detachAppender(appender);
+        }
+
+        final List<ILoggingEvent> warnings = appender.list.stream().filter(event -> event.getLevel() == Level.WARN).toList();
+        assertEquals(1, warnings.size());
+        final String message = warnings.getFirst().getFormattedMessage();
+        for (final String detail : List.of("on 2019-01-03 (day 2).", "may not bill exactly the 1020.00 still owed", "collected 30.00",
+                "TPV strategy, EIR amortization", "net disbursement 1000.00 on 2019-01-01", "discount fee 50.00",
+                "total payment volume 100000.00", "period payment rate in force 18", "NPV day count 360", "payments {2019-01-02=30.00}")) {
+            assertTrue(message.contains(detail), () -> "the warning reports '" + detail + "': " + message);
+        }
+        assertNotNull(warnings.getFirst().getThrowableProxy(), "with the exception that caused it");
+        assertEquals("IRR did not converge", warnings.getFirst().getThrowableProxy().getMessage(), "which says why the solve failed");
     }
 
 }

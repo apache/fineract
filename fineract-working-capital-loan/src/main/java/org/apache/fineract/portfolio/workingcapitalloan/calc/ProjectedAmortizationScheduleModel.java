@@ -93,6 +93,19 @@ public final class ProjectedAmortizationScheduleModel {
      */
     public static final int MAX_CALCULABLE_TOTAL_DAYS = 100_000;
 
+    /**
+     * Cap on the calculated annual EIR, as a percentage: the largest value the {@code DECIMAL(19,6)} columns an annual
+     * EIR is stored in can hold, at the six decimals it is rounded to. The rate is effective - the daily rate
+     * compounded over the NPV day count - so this cap is about 7.29 % of the balance a day. A schedule whose payments
+     * repay the balance in a handful of days earns its whole discount fee over that handful of days, and compounding
+     * that daily return produces a rate of astronomical magnitude - 5.8E+55 % for a 100 balance against a 150 fee
+     * repaid in five days - which no column could store, so such a schedule is rejected with the ordinary "not
+     * calculable" error every entry point already handles, the feasibility pre-checks included. It caps the loan's EIR,
+     * solved when the plan is written and when a rate change re-rates it, not the projection rate the schedule
+     * re-solves after an off-plan payment; see {@link AmortizationParams#requireAnnualEirWithinCap}.
+     */
+    public static final BigDecimal MAX_CALCULABLE_ANNUAL_EIR = new BigDecimal("9999999999999.999999");
+
     @SerializedName(value = "discountFeeAmount", alternate = "originationFeeAmount")
     private final Money discountFeeAmount;
     private final Money netDisbursementAmount;
@@ -524,8 +537,8 @@ public final class ProjectedAmortizationScheduleModel {
             return false;
         }
         try {
-            AmortizationParams.solve(amortizationType, net, fee, volume, periodPaymentRate, npvDayCount, currency.getDigitsAfterDecimal(),
-                    mc);
+            AmortizationParams.requireAnnualEirWithinCap(AmortizationParams.solve(amortizationType, net, fee, volume, periodPaymentRate,
+                    npvDayCount, currency.getDigitsAfterDecimal(), mc));
         } catch (final ArithmeticException | IllegalArgumentException | IllegalStateException e) {
             return false;
         }
@@ -570,8 +583,8 @@ public final class ProjectedAmortizationScheduleModel {
         }
 
         final WorkingCapitalAmortizationType type = amortizationType != null ? amortizationType : WorkingCapitalAmortizationType.EIR;
-        final AmortizationParams.Solved solved = AmortizationParams.solve(type, net.getAmount(), fee.getAmount(), volume.getAmount(),
-                periodPaymentRate, npvDayCount, currency.getDecimalPlaces(), mc);
+        final AmortizationParams.Solved solved = AmortizationParams.requireAnnualEirWithinCap(AmortizationParams.solve(type,
+                net.getAmount(), fee.getAmount(), volume.getAmount(), periodPaymentRate, npvDayCount, currency.getDecimalPlaces(), mc));
 
         return new ProjectedAmortizationScheduleModel(fee, net, volume, periodPaymentRate, null, null,
                 WorkingCapitalPaymentAmountCalculationStrategy.TPV, npvDayCount, expectedDisbursementDate,
@@ -608,8 +621,8 @@ public final class ProjectedAmortizationScheduleModel {
         }
 
         final WorkingCapitalAmortizationType type = amortizationType != null ? amortizationType : WorkingCapitalAmortizationType.EIR;
-        final AmortizationParams.Solved solved = AmortizationParams.solveFromAnnualEir(type, net.getAmount(), fee.getAmount(),
-                annualEirPercent, npvDayCount, currency.getDecimalPlaces(), mc);
+        final AmortizationParams.Solved solved = AmortizationParams.requireAnnualEirWithinCap(AmortizationParams.solveFromAnnualEir(type,
+                net.getAmount(), fee.getAmount(), annualEirPercent, npvDayCount, currency.getDecimalPlaces(), mc));
 
         return new ProjectedAmortizationScheduleModel(fee, net, null, null, annualEirPercent, null,
                 WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, npvDayCount, expectedDisbursementDate,
@@ -636,7 +649,8 @@ public final class ProjectedAmortizationScheduleModel {
         }
         try {
             final WorkingCapitalAmortizationType type = amortizationType != null ? amortizationType : WorkingCapitalAmortizationType.EIR;
-            AmortizationParams.solveFromAnnualEir(type, net, fee, annualEirPercent, npvDayCount, currency.getDigitsAfterDecimal(), mc);
+            AmortizationParams.requireAnnualEirWithinCap(AmortizationParams.solveFromAnnualEir(type, net, fee, annualEirPercent,
+                    npvDayCount, currency.getDigitsAfterDecimal(), mc));
         } catch (final ArithmeticException | IllegalArgumentException | IllegalStateException e) {
             return false;
         }
@@ -666,8 +680,8 @@ public final class ProjectedAmortizationScheduleModel {
         }
 
         final WorkingCapitalAmortizationType type = amortizationType != null ? amortizationType : WorkingCapitalAmortizationType.EIR;
-        final AmortizationParams.Solved solved = AmortizationParams.solveFromKnownPayment(type, net.getAmount(), fee.getAmount(),
-                paymentAmount, mc, npvDayCount, currency.getDecimalPlaces());
+        final AmortizationParams.Solved solved = AmortizationParams.requireAnnualEirWithinCap(AmortizationParams.solveFromKnownPayment(type,
+                net.getAmount(), fee.getAmount(), paymentAmount, mc, npvDayCount, currency.getDecimalPlaces()));
 
         return new ProjectedAmortizationScheduleModel(fee, net, null, null, null, paymentAmount,
                 WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, npvDayCount, expectedDisbursementDate,
@@ -690,7 +704,8 @@ public final class ProjectedAmortizationScheduleModel {
         }
         try {
             final WorkingCapitalAmortizationType type = amortizationType != null ? amortizationType : WorkingCapitalAmortizationType.EIR;
-            AmortizationParams.solveFromKnownPayment(type, net, fee, paymentAmount, mc, npvDayCount, currency.getDigitsAfterDecimal());
+            AmortizationParams.requireAnnualEirWithinCap(AmortizationParams.solveFromKnownPayment(type, net, fee, paymentAmount, mc,
+                    npvDayCount, currency.getDigitsAfterDecimal()));
         } catch (final ArithmeticException | IllegalArgumentException | IllegalStateException e) {
             return false;
         }

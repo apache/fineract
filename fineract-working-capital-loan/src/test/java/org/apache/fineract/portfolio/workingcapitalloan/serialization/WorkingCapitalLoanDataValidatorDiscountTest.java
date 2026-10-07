@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
@@ -37,6 +38,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConsta
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -122,6 +124,101 @@ public class WorkingCapitalLoanDataValidatorDiscountTest {
         final JsonElement body = parsedBody("{\"transactionAmount\":12,\"externalId\":\"discount-fee-ext-001\"}");
 
         assertDoesNotThrow(() -> validator.validateRelatedResourceIsNotInBody(body));
+    }
+
+    @Test
+    public void approvalRejectsADiscountWorthMoreThanTheApprovedPrincipal() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        loan.getLoanProductRelatedDetails().setDiscountProposed(new BigDecimal("150"));
+        loan.setProposedPrincipal(new BigDecimal("100"));
+
+        final String json = "{\"approvedOnDate\":\"" + BUSINESS_DATE + "\",\"expectedDisbursementDate\":\"" + BUSINESS_DATE
+                + "\",\"approvedLoanAmount\":100,\"discountAmount\":150,\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\"}";
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateApproval(json, loan));
+
+        assertThat(exception.getErrors())
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal"));
+    }
+
+    /** Approving less than was asked for inverts the pair without the request mentioning the discount at all. */
+    @Test
+    public void approvalRejectsAnApprovedPrincipalBelowTheDiscountProposedOnSubmission() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        loan.getLoanProductRelatedDetails().setDiscountProposed(new BigDecimal("150"));
+        loan.setProposedPrincipal(new BigDecimal("500"));
+
+        final String json = "{\"approvedOnDate\":\"" + BUSINESS_DATE + "\",\"expectedDisbursementDate\":\"" + BUSINESS_DATE
+                + "\",\"approvedLoanAmount\":100,\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\"}";
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateApproval(json, loan));
+
+        assertThat(exception.getErrors())
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal"));
+    }
+
+    /**
+     * An overridable product carries no approved discount unless the approval names one, so the discount proposed on
+     * submission is not charged and lowering the principal below it inverts nothing.
+     */
+    @Test
+    public void approvalAcceptsAnApprovedPrincipalBelowTheProposedDiscountWhenTheProductAllowsOverriding() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        final WorkingCapitalLoanProductConfigurableAttributes attributes = new WorkingCapitalLoanProductConfigurableAttributes();
+        attributes.setDiscountDefaultOverridable(true);
+        when(loan.getLoanProduct().getConfigurableAttributes()).thenReturn(attributes);
+        loan.getLoanProductRelatedDetails().setDiscountProposed(new BigDecimal("150"));
+        loan.setProposedPrincipal(new BigDecimal("500"));
+
+        final String json = "{\"approvedOnDate\":\"" + BUSINESS_DATE + "\",\"expectedDisbursementDate\":\"" + BUSINESS_DATE
+                + "\",\"approvedLoanAmount\":100,\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\"}";
+
+        assertDoesNotThrow(() -> validator.validateApproval(json, loan));
+    }
+
+    @Test
+    public void approvalAcceptsADiscountEqualToTheApprovedPrincipal() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        loan.getLoanProductRelatedDetails().setDiscountProposed(new BigDecimal("100"));
+        loan.setProposedPrincipal(new BigDecimal("100"));
+
+        final String json = "{\"approvedOnDate\":\"" + BUSINESS_DATE + "\",\"expectedDisbursementDate\":\"" + BUSINESS_DATE
+                + "\",\"approvedLoanAmount\":100,\"discountAmount\":100,\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\"}";
+
+        assertDoesNotThrow(() -> validator.validateApproval(json, loan));
+    }
+
+    /** The disbursed amount, not the approved principal: disbursing less than approved is allowed. */
+    @Test
+    public void disbursementRejectsADiscountWorthMoreThanTheAmountBeingDisbursed() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        loan.getLoanProductRelatedDetails().setDiscountApproved(new BigDecimal("150"));
+        loan.setApprovedPrincipal(new BigDecimal("500"));
+
+        final String json = "{\"actualDisbursementDate\":\"" + BUSINESS_DATE
+                + "\",\"transactionAmount\":100,\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\"}";
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateDisbursement(json, loan));
+
+        assertThat(exception.getErrors())
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal"));
+    }
+
+    @Test
+    public void discountFeeTransactionRejectsAnAmountWorthMoreThanTheDisbursedPrincipal() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        final WorkingCapitalLoanDisbursementDetails detail = disbursementDetail(BUSINESS_DATE);
+        detail.setActualAmount(new BigDecimal("100"));
+        loan.getDisbursementDetails().add(detail);
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateDiscountTransaction(loan, "{}", new BigDecimal("150"), null));
+
+        assertThat(exception.getErrors())
+                .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal"));
     }
 
     private static JsonElement parsedBody(final String json) {

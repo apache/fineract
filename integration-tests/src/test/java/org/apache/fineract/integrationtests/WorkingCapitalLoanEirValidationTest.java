@@ -65,6 +65,11 @@ public class WorkingCapitalLoanEirValidationTest {
     private static final String EXPECTED_SCHEDULE_ERROR_CODE = "unable.to.calculate.valid.schedule";
     private static final String FLAT = "FLAT";
     private static final BigDecimal OVER_CAP_PRODUCT_DISCOUNT = BigDecimal.valueOf(300000);
+    /**
+     * Equal to the principal below, not above it: a discount worth more than the principal is refused by a rule of its
+     * own before the feasibility check is ever reached, and this fixture is here to exercise the feasibility check.
+     */
+    private static final BigDecimal OVER_CAP_INHERITED_DISCOUNT = BigDecimal.valueOf(5000);
     private static final BigDecimal DISCOUNT_FEE = BigDecimal.valueOf(1000);
 
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
@@ -322,13 +327,14 @@ public class WorkingCapitalLoanEirValidationTest {
     /**
      * The submit-time feasibility check must evaluate the discount the loan will inherit from the product, not the
      * (absent) requested one: these inputs are calculable alone but breach the Total Days cap with the inherited
-     * default discount.
+     * default discount. A payment volume of 55 bills 55 * 18 / 360 / 100 = 0.0275 a day, rounded to 0.03, which takes
+     * over 330,000 days to repay the 10,000 the principal and the inherited discount add up to.
      */
     @Test
     @Order(8)
     public void testSubmitWithNonCalculableEirInputsViaProductDefaultDiscountIsRejectedWith400() {
         final Long productId = createProduct(builder -> builder //
-                .withDiscount(OVER_CAP_PRODUCT_DISCOUNT) //
+                .withDiscount(OVER_CAP_INHERITED_DISCOUNT) //
                 .withAllowAttributeOverrides(Map.of("discountDefault", Boolean.FALSE)));
         final Long clientId = createClient();
         final var json = new WorkingCapitalLoanApplicationTestBuilder() //
@@ -336,7 +342,7 @@ public class WorkingCapitalLoanEirValidationTest {
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
                 .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) // 18%
-                .withTotalPaymentVolume(BigDecimal.valueOf(5500)) //
+                .withTotalPaymentVolume(BigDecimal.valueOf(55)) //
                 .buildSubmitRequest();
 
         final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
@@ -384,6 +390,37 @@ public class WorkingCapitalLoanEirValidationTest {
      * (~250,000 days) exceeds the calculable cap while the EIR solver itself would return cleanly via its zero-rate
      * shortcut - only the cap guard stands between this input and a persisted quarter-million-row schedule.
      */
+    /**
+     * The same inherited discount, now worth more than the principal it would be charged on. That is refused by the
+     * discount rule rather than by the feasibility check, because the fee the borrower would owe exceeds the money they
+     * receive - so the caller is told which amount is wrong instead of being told the rate cannot be computed.
+     */
+    @Test
+    @Order(13)
+    public void testSubmitWithProductDefaultDiscountAboveThePrincipalIsRejectedWith400() {
+        final Long productId = createProduct(builder -> builder //
+                .withDiscount(OVER_CAP_PRODUCT_DISCOUNT) //
+                .withAllowAttributeOverrides(Map.of("discountDefault", Boolean.FALSE)));
+        final Long clientId = createClient();
+        final var json = new WorkingCapitalLoanApplicationTestBuilder() //
+                .withClientId(clientId) //
+                .withProductId(productId) //
+                .withPrincipal(BigDecimal.valueOf(5000)) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) // 18%
+                .withTotalPaymentVolume(BigDecimal.valueOf(5500)) //
+                .buildSubmitRequest();
+
+        final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
+        assertEquals(400, ex.getStatus(), "A discount above the principal must be rejected with 400, got: " + ex.getStatus());
+        assertEquals("Validation errors: [discount] Failed data validation due to: amount.cannot.exceed.principal.",
+                ex.getDeveloperMessage());
+        assertNotNull(ex.getResponseBody());
+        assertTrue(ex.getResponseBody().contains("amount.cannot.exceed.principal"),
+                "Expected the discount-above-principal validation code in: " + ex.getResponseBody());
+
+        productHelper.deleteWorkingCapitalLoanProductById(productId);
+    }
+
     @Test
     @Order(10)
     public void testRateChangeIntoOverCapTermIsRejectedWith403() {

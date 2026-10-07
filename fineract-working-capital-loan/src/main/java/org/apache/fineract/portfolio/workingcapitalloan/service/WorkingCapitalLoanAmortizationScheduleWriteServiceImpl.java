@@ -518,8 +518,7 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         final List<PrincipalAdjustment> preservedAdjustments = currentModel.snapshotPrincipalAdjustments().stream()
                 .map(adjustment -> new PrincipalAdjustment(adjustment.date(), adjustment.amount().getAmount())).toList();
 
-        final ProjectedAmortizationScheduleModel restatedModel = reconstructScheduleModel(loan, preservedPayments, preservedAdjustments);
-        scheduleRepositoryWrapper.writeModel(loan, restatedModel);
+        writeReconstructed(loan, preservedPayments, preservedAdjustments);
     }
 
     @Override
@@ -529,8 +528,7 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         Validate.notNull(principalPayments, "principalPayments must not be null");
         Validate.notNull(principalAdjustments, "principalAdjustments must not be null");
 
-        final ProjectedAmortizationScheduleModel model = reconstructScheduleModel(loan, principalPayments, principalAdjustments);
-        scheduleRepositoryWrapper.writeModel(loan, model);
+        writeReconstructed(loan, principalPayments, principalAdjustments);
     }
 
     @Override
