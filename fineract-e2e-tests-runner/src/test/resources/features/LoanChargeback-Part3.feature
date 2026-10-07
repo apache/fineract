@@ -801,3 +801,231 @@ Feature: LoanChargeback - Part3
     When Loan Pay-off is made on "01 August 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  # Reproduces BE ticket "[BE] PL - Chargeback interest Handling Improvements":
+  # after a chargeback, the reinstated interest portion must NOT be re-added to
+  # Accrual Activity, since it was already considered when the transaction was
+  # originally accrued and paid.
+  @TestRailId:C110988
+  Scenario: Verify Accrual Activity excludes chargeback interest and matches period accruals
+    When Admin sets the business date to "01 August 2026"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                               | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_INTEREST_RECALC_CHARGEBACK_ALLOCATION_INTEREST_FIRST_ACCRUAL_ACTIVITY | 01 August 2026    | 1000           | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 August 2026" with "1000" amount and expected disbursement date on "01 August 2026"
+    And Admin successfully disburse the loan on "01 August 2026" with "1000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2026    |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2026 |           | 669.42          | 330.58        | 8.32     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 2  | 30   | 01 October 2026   |           | 336.09          | 333.33        | 5.57     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 3  | 31   | 01 November 2026  |           | 0.0             | 336.09        | 2.8      | 0.0  | 0.0       | 338.89 | 0.0  | 0.0        | 0.0  | 338.89      |
+    # --- Repayment of period 1 (full interest 8.32 paid) ---
+    When Admin sets the business date to "23 September 2026"
+    And Customer makes "AUTOPAY" repayment on "23 September 2026" with 340 EUR transaction amount
+    Then Loan Transactions tab has a transaction with date: "23 September 2026", and with the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 23 September 2026 | Repayment        | 340.0  | 331.68    | 8.32     | 0.0  | 0.0       | 668.32       | false    | false    |
+    # --- Chargeback reinstates the period 1 interest (8.32); this is the portion that must be
+    # --- excluded from Accrual Activity going forward since it was already accrued/paid once ---
+    When Admin sets the business date to "24 September 2026"
+    And Admin runs inline COB job for Loan
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 340 EUR transaction amount for Payment nr. 1
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 August 2026    |                   | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
+      | 1  | 31   | 01 September 2026 | 23 September 2026 | 669.42          | 330.58        | 8.32     | 0.0  | 0.0       | 338.9  | 338.9 | 0.0        | 338.9 | 0.0         |
+      | 2  | 30   | 01 October 2026   |                   | 338.75          | 662.35        | 16.55    | 0.0  | 0.0       | 678.9  | 1.1   | 1.1        | 0.0   | 677.8       |
+      | 3  | 31   | 01 November 2026  |                   | 0.0             | 338.75        | 2.82     | 0.0  | 0.0       | 341.57 | 0.0   | 0.0        | 0.0   | 341.57      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2026    | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 September 2026 | Accrual Activity | 8.32   | 0.0       | 8.32     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 September 2026 | Repayment        | 340.0  | 331.68    | 8.32     | 0.0  | 0.0       | 668.32       | false    | false    |
+      | 23 September 2026 | Accrual          | 14.42  | 0.0       | 14.42    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 September 2026 | Chargeback       | 340.0  | 331.68    | 8.32     | 0.0  | 0.0       | 1000.0       | false    | false    |
+    # --- Run COB past the end of period 2: the final "Accrual Activity" for the period must be
+    # --- 8.23 (total accrued amount of the period minus total accrual adjustment of the period),
+    # --- NOT 16.55 (period 2 due interest), which would mean the chargeback interest (8.32) was
+    # --- wrongly re-added - this is the core regression check for this ticket ---
+    When Admin sets the business date to "02 October 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 August 2026    |                   | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
+      | 1  | 31   | 01 September 2026 | 23 September 2026 | 669.42          | 330.58        | 8.32     | 0.0  | 0.0       | 338.9  | 338.9 | 0.0        | 338.9 | 0.0         |
+      | 2  | 30   | 01 October 2026   |                   | 338.75          | 662.35        | 16.55    | 0.0  | 0.0       | 678.9  | 1.1   | 1.1        | 0.0   | 677.8       |
+      | 3  | 31   | 01 November 2026  |                   | 0.0             | 338.75        | 3.0      | 0.0  | 0.0       | 341.75 | 0.0   | 0.0        | 0.0   | 341.75      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2026    | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 September 2026 | Accrual Activity | 8.32   | 0.0       | 8.32     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 September 2026 | Repayment        | 340.0  | 331.68    | 8.32     | 0.0  | 0.0       | 668.32       | false    | false    |
+      | 23 September 2026 | Accrual          | 14.42  | 0.0       | 14.42    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 September 2026 | Chargeback       | 340.0  | 331.68    | 8.32     | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 24 September 2026 | Accrual          | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 September 2026 | Accrual          | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 September 2026 | Accrual          | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 September 2026 | Accrual          | 0.27   | 0.0       | 0.27     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 September 2026 | Accrual          | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 September 2026 | Accrual          | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 September 2026 | Accrual          | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 October 2026   | Accrual          | 0.27   | 0.0       | 0.27     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 October 2026   | Accrual Activity | 8.23   | 0.0       | 8.23     | 0.0  | 0.0       | 0.0          | false    | false    |
+    # --- Closure Accrual Activity must hold only the remaining period 3 interest (0.27), NOT 8.59,
+    # --- which would mean the chargeback interest (8.32) was re-added on loan closure ---
+    When Loan Pay-off is made on "02 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Transactions tab has a transaction with date: "02 October 2026", and with the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 02 October 2026  | Accrual Activity | 0.27   | 0.0       | 0.27     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+  # Reproduces BE ticket "[BE] PL - Chargeback interest Handling Improvements" for the
+  # interest-recalculation-DISABLED path: the chargeback is booked on the first installment due
+  # after the chargeback date (period 2), so the reinstated (credited) interest is added to that
+  # installment's interest and must NOT be included in its Accrual Activity.
+  @TestRailId:C110989
+  Scenario: Verify Accrual Activity excludes chargeback interest and matches period accruals - UC2: interest recalculation disabled
+    When Admin sets the business date to "01 August 2026"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_INTEREST_FIRST_ACCRUAL_ACTIVITY | 01 August 2026    | 1000           | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 August 2026" with "1000" amount and expected disbursement date on "01 August 2026"
+    And Admin successfully disburse the loan on "01 August 2026" with "1000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2026    |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2026 |           | 669.42          | 330.58        | 8.32     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 2  | 30   | 01 October 2026   |           | 336.09          | 333.33        | 5.57     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 3  | 31   | 01 November 2026  |           | 0.0             | 336.09        | 2.8      | 0.0  | 0.0       | 338.89 | 0.0  | 0.0        | 0.0  | 338.89      |
+    # --- Repayment of period 1 on its due date (full interest 8.32 paid) ---
+    When Admin sets the business date to "01 September 2026"
+    And Customer makes "AUTOPAY" repayment on "01 September 2026" with 338.9 EUR transaction amount
+    Then Loan Transactions tab has a transaction with date: "01 September 2026", and with the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 September 2026 | Repayment        | 338.9  | 330.58    | 8.32     | 0.0  | 0.0       | 669.42       | false    | false    |
+    # --- COB (run on the next business day) posts period 1's Accrual Activity for 01 September,
+    # --- full interest 8.32 ---
+    When Admin sets the business date to "02 September 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has a transaction with date: "01 September 2026", and with the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 September 2026 | Accrual Activity | 8.32   | 0.0       | 8.32     | 0.0  | 0.0       | 0.0          | false    | false    |
+    # --- Chargeback on 02 September reinstates the period 1 interest (8.32); it is booked on period 2
+    # --- (first installment due after the chargeback date), period 1 and its Accrual Activity stay untouched ---
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 338.9 EUR transaction amount for Payment nr. 1
+    When Admin sets the business date to "03 September 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has a transaction with date: "01 August 2026", and with the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2026   | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+    Then Loan Transactions tab has a transaction with date: "01 September 2026", and with the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 September 2026 | Accrual Activity | 8.32   | 0.0       | 8.32     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Transactions tab has a transaction with date: "02 September 2026", and with the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 02 September 2026 | Chargeback       | 338.9  | 330.58    | 8.32     | 0.0  | 0.0       | 1000.0       | false    | false    |
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date            | Principal due | Interest | Due   |
+      | 2  | 30   | 01 October 2026 | 663.91        | 13.89    | 677.8 |
+    # --- Run COB past the end of period 2: its Accrual Activity must be 5.57 (its own interest),
+    # --- NOT 13.89 (period 2 due interest incl. the 8.32 chargeback interest) - this is the core
+    # --- regression check for the recalc-disabled path ---
+    When Admin sets the business date to "02 October 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has a transaction with date: "01 October 2026", and with the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 October 2026  | Accrual Activity | 5.57   | 0.0       | 5.57     | 0.0  | 0.0       | 0.0          | false    | false    |
+    # --- Closure Accrual Activity must hold only the remaining period 3 interest (2.8), NOT 11.12,
+    # --- which would mean the chargeback interest (8.32) was re-added on loan closure ---
+    When Loan Pay-off is made on "02 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Transactions tab has a transaction with date: "02 October 2026", and with the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 02 October 2026  | Accrual Activity | 2.8    | 0.0       | 2.8      | 0.0  | 0.0       | 0.0          | false    | false    |
+
+  # Reproduces with an accrual
+  # adjustment in the period: a backdated repayment after the chargeback lowers the period 2 interest,
+  # so the Accrual Activity must equal the total accrued amount of the period minus the total accrual
+  # adjustment of the period, excluding the chargeback interest.
+  @TestRailId:C111042
+  Scenario: Verify Accrual Activity excludes chargeback interest and matches period accruals minus accrual adjustment - UC3: backdated repayment
+    When Admin sets the business date to "01 August 2026"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                               | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_INTEREST_RECALC_CHARGEBACK_ALLOCATION_INTEREST_FIRST_ACCRUAL_ACTIVITY | 01 August 2026    | 1000           | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 August 2026" with "1000" amount and expected disbursement date on "01 August 2026"
+    And Admin successfully disburse the loan on "01 August 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "23 September 2026"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2026    |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2026 |           | 669.42          | 330.58        | 8.32     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 2  | 30   | 01 October 2026   |           | 336.09          | 333.33        | 5.57     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 3  | 31   | 01 November 2026  |           | 0.0             | 336.09        | 2.8      | 0.0  | 0.0       | 338.89 | 0.0  | 0.0        | 0.0  | 338.89      |
+    And Customer makes "AUTOPAY" repayment on "23 September 2026" with 340 EUR transaction amount
+    # --- Chargeback reinstates the period 1 interest (8.32) on period 2 ---
+    When Admin sets the business date to "24 September 2026"
+    And Admin runs inline COB job for Loan
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 340 EUR transaction amount for Payment nr. 1
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 August 2026    |                   | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
+      | 1  | 31   | 01 September 2026 | 23 September 2026 | 669.42          | 330.58        | 8.32     | 0.0  | 0.0       | 338.9  | 338.9 | 0.0        | 338.9 | 0.0         |
+      | 2  | 30   | 01 October 2026   |                   | 338.75          | 662.35        | 16.55    | 0.0  | 0.0       | 678.9  | 1.1   | 1.1        | 0.0   | 677.8       |
+      | 3  | 31   | 01 November 2026  |                   | 0.0             | 338.75        | 2.82     | 0.0  | 0.0       | 341.57 | 0.0   | 0.0        | 0.0   | 341.57      |
+    # --- Backdated repayment after accruals were posted lowers the period 2 interest -> accrual adjustment ---
+    When Admin sets the business date to "30 September 2026"
+    And Admin runs inline COB job for Loan
+    And Customer makes "AUTOPAY" repayment on "25 September 2026" with 600 EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 August 2026    |                   | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
+      | 1  | 31   | 01 September 2026 | 23 September 2026 | 669.42          | 330.58        | 8.32     | 0.0  | 0.0       | 338.9  | 338.9 | 0.0        | 338.9 | 0.0         |
+      | 2  | 30   | 01 October 2026   |                   | 337.75          | 663.35        | 15.55    | 0.0  | 0.0       | 678.9  | 601.1 | 601.1      | 0.0   | 77.8        |
+      | 3  | 31   | 01 November 2026  |                   | 0.0             | 337.75        | 2.81     | 0.0  | 0.0       | 340.56 | 0.0   | 0.0        | 0.0   | 340.56      |
+    # --- Run COB past the end of period 2: the period 2 Accrual Activity must be 7.23 (16.11 total accrued
+    # --- - 0.56 accrual adjustment - 8.32 period 1 accrued), NOT 15.55 (period 2 due interest incl. the
+    # --- 8.32 chargeback interest) ---
+    When Admin sets the business date to "02 October 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 August 2026    |                   | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
+      | 1  | 31   | 01 September 2026 | 23 September 2026 | 669.42          | 330.58        | 8.32     | 0.0  | 0.0       | 338.9  | 338.9 | 0.0        | 338.9 | 0.0         |
+      | 2  | 30   | 01 October 2026   |                   | 337.75          | 663.35        | 15.55    | 0.0  | 0.0       | 678.9  | 601.1 | 601.1      | 0.0   | 77.8        |
+      | 3  | 31   | 01 November 2026  |                   | 0.0             | 337.75        | 2.83     | 0.0  | 0.0       | 340.58 | 0.0   | 0.0        | 0.0   | 340.58      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2026    | Disbursement       | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 September 2026 | Accrual Activity   | 8.32   | 0.0       | 8.32     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 September 2026 | Repayment          | 340.0  | 331.68    | 8.32     | 0.0  | 0.0       | 668.32       | false    | false    |
+      | 23 September 2026 | Accrual            | 14.42  | 0.0       | 14.42    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 September 2026 | Chargeback         | 340.0  | 331.68    | 8.32     | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 24 September 2026 | Accrual            | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 September 2026 | Accrual            | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 September 2026 | Repayment          | 600.0  | 600.0     | 0.0      | 0.0  | 0.0       | 400.0        | false    | false    |
+      | 26 September 2026 | Accrual            | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 September 2026 | Accrual            | 0.27   | 0.0       | 0.27     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 September 2026 | Accrual            | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 September 2026 | Accrual            | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 September 2026 | Accrual Adjustment | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 October 2026   | Accrual            | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 October 2026   | Accrual Activity   | 7.23   | 0.0       | 7.23     | 0.0  | 0.0       | 0.0          | false    | false    |
+    # --- Closure Accrual Activity must hold only the remaining period 3 interest (0.11), NOT 8.43,
+    # --- which would mean the chargeback interest (8.32) was re-added on loan closure ---
+    When Loan Pay-off is made on "02 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late  | Outstanding |
+      |    |      | 01 August 2026    |                   | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |       |             |
+      | 1  | 31   | 01 September 2026 | 23 September 2026 | 669.42          | 330.58        | 8.32     | 0.0  | 0.0       | 338.9  | 338.9  | 0.0        | 338.9 | 0.0         |
+      | 2  | 30   | 01 October 2026   | 02 October 2026   | 337.75          | 663.35        | 15.55    | 0.0  | 0.0       | 678.9  | 678.9  | 601.1      | 77.8  | 0.0         |
+      | 3  | 31   | 01 November 2026  | 02 October 2026   | 0.0             | 337.75        | 0.11     | 0.0  | 0.0       | 337.86 | 337.86 | 337.86     | 0.0   | 0.0         |
+    Then Loan Transactions tab has a transaction with date: "02 October 2026", and with the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 02 October 2026  | Repayment        | 415.66 | 400.0     | 15.66    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 October 2026  | Accrual          | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 October 2026  | Accrual Activity | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |

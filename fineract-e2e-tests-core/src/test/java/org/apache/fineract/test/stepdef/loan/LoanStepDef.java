@@ -2352,14 +2352,16 @@ public class LoanStepDef extends AbstractStepDef {
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
 
         List<List<String>> data = table.asLists();
-        List<String> expectedValues = data.get(1);
 
         List<List<String>> actualValuesList = transactions.stream().filter(t -> date.equals(FORMATTER.format(t.getDate())))
                 .map(t -> fetchValuesOfTransaction(data.get(0), t)).collect(Collectors.toList());
-        boolean containsExpectedValues = actualValuesList.stream().anyMatch(actualValues -> actualValues.equals(expectedValues));
+        for (int i = 1; i < data.size(); i++) {
+            List<String> expectedValues = data.get(i);
+            boolean containsExpectedValues = actualValuesList.stream().anyMatch(actualValues -> actualValues.equals(expectedValues));
 
-        assertThat(containsExpectedValues)
-                .as(ErrorMessageHelper.wrongValueInLineInTransactionsTab(resourceId, 1, actualValuesList, expectedValues)).isTrue();
+            assertThat(containsExpectedValues)
+                    .as(ErrorMessageHelper.wrongValueInLineInTransactionsTab(resourceId, i, actualValuesList, expectedValues)).isTrue();
+        }
     }
 
     @Then("Loan Transactions tab has the following data:")
