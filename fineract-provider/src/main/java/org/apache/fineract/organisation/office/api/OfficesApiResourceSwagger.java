@@ -50,6 +50,8 @@ final class OfficesApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "en")
         public String locale;
+        @Schema(example = "Head Office")
+        public String parentName;
 
         public Collection<GetOfficesResponse> allowedParents;
     }
