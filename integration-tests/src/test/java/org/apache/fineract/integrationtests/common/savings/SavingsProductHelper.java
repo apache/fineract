@@ -224,11 +224,6 @@ public class SavingsProductHelper {
         return this;
     }
 
-    public SavingsProductHelper withInterestPostingPeriodTypeAsDaily() {
-        this.interestPostingPeriodType = DAILY;
-        return this;
-    }
-
     public SavingsProductHelper withInterestCalculationPeriodTypeAsDailyBalance() {
         this.interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
         return this;
@@ -272,12 +267,6 @@ public class SavingsProductHelper {
         return this;
     }
 
-    public SavingsProductHelper withOverDraft(final String overdraftLimit) {
-        this.allowOverdraft = "true";
-        this.overdraftLimit = overdraftLimit;
-        return this;
-    }
-
     public SavingsProductHelper withAccountInterestReceivables(final String interestReceivableAccountId) {
         this.interestReceivableAccountId = interestReceivableAccountId;
         return this;
@@ -287,14 +276,6 @@ public class SavingsProductHelper {
         this.allowOverdraft = "true";
         this.overdraftLimit = overdraftLimit;
         this.nominalAnnualInterestRateOverdraft = nominalAnnualInterestRateOverdraft;
-        return this;
-    }
-
-    public SavingsProductHelper withWithHoldTax(final String taxGroupId) {
-        if (taxGroupId != null) {
-            this.withHoldTax = true;
-            this.taxGroupId = taxGroupId;
-        }
         return this;
     }
 
@@ -478,14 +459,6 @@ public class SavingsProductHelper {
         final String GET_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "/" + generatedProductID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseSavingsProductID = Utils.performServerGet(requestSpec, responseSpec, GET_SAVINGS_PRODUCT_URL, "id");
         assertEquals(generatedProductID, responseSavingsProductID, "ERROR IN CREATING THE Savings Product");
-    }
-
-    public SavingsProductHelper withDormancy() {
-        this.isDormancyTrackingActive = true;
-        this.daysToInactive = "30";
-        this.daysToDormancy = "60";
-        this.daysToEscheat = "90";
-        return this;
     }
 
     @Deprecated(forRemoval = true)

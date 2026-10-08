@@ -20,10 +20,7 @@ package org.apache.fineract.integrationtests.common.fixeddeposit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
-import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +33,6 @@ public final class FixedDepositAccountStatusChecker {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(FixedDepositAccountStatusChecker.class);
-    private static final String FIXED_DEPOSIT_ACCOUNT_URL = "/fineract-provider/api/v1/fixeddepositaccounts";
 
     public static void verifyFixedDepositIsApproved(final HashMap fixedDepositStatusHashMap) {
         LOG.info("-------------------- VERIFYING FIXED DEPOSIT APPLICATION IS APPROVED --------------------");
@@ -78,13 +74,6 @@ public final class FixedDepositAccountStatusChecker {
         LOG.info("------------------ VERIFYING FIXED DEPOSIT APPLICATION IS INACTIVE --------------------");
         Assertions.assertFalse(getStatus(fixedDepositStatusHashMap, "active"));
         LOG.info("{}", fixedDepositStatusHashMap);
-    }
-
-    public static HashMap getStatusOfFixedDepositAccount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String fixedDepositAccountID) {
-        final String GET_STATUS_OF_FIXED_DEPOSIT_ACCOUNT_URL = FIXED_DEPOSIT_ACCOUNT_URL + "/" + fixedDepositAccountID + "?"
-                + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, GET_STATUS_OF_FIXED_DEPOSIT_ACCOUNT_URL, "status");
     }
 
     public static void verifyFixedDepositAccountIsPrematureClosed(HashMap fixedDepositStatusHashMap) {

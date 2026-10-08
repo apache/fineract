@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -85,7 +86,8 @@ public class CreditBureauIntegrationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @RequestBody(description = "Fetch credit report", content = {
-            @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Object.class)) })
+            @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CreditBureauIntegrationApiResourceSwagger.PostCreditReportRequest.class)) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public String fetchCreditReport(@Context final UriInfo uriInfo, @RequestParam("params") final Map<String, Object> params) {
 
         Gson gson = new Gson();

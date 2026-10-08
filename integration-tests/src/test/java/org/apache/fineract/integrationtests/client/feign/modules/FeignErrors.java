@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.integrationtests.client.feign.modules;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FeignException;
@@ -59,5 +62,46 @@ public final class FeignErrors {
             // an error body that is not the standard envelope leaves the top-level code as the best answer
         }
         return topLevelCode;
+    }
+
+    /** The entries of the error envelope's {@code errors} list. */
+    public static List<ReportedError> reportedErrors(CallFailedRuntimeException exception) {
+        try {
+            List<ReportedError> reported = new ArrayList<>();
+            for (JsonNode error : ObjectMapperFactory.getShared().readTree(exception.getResponseBody()).path("errors")) {
+                reported.add(new ReportedError(error.path("userMessageGlobalisationCode").asText(null),
+                        error.path("defaultUserMessage").asText(null), error.path("developerMessage").asText(null),
+                        error.path("parameterName").asText(null)));
+            }
+            return reported;
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Error body is not the standard envelope: " + exception.getResponseBody(), e);
+        }
+    }
+
+    /** The first entry of the error envelope's {@code errors} list. */
+    public static ReportedError firstError(CallFailedRuntimeException exception) {
+        return reportedErrors(exception).get(0);
+    }
+
+    /**
+     * The rejection an error body reports at its top level. A request body that cannot be read names the offending
+     * field and value there, with no {@code errors} list beneath it.
+     */
+    public static RejectedValue rejectedValue(CallFailedRuntimeException exception) {
+        try {
+            JsonNode body = ObjectMapperFactory.getShared().readTree(exception.getResponseBody());
+            return new RejectedValue(body.path("userMessageGlobalisationCode").asText(null), body.path("parameterName").asText(null),
+                    body.path("value").asText(null));
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Error body is not the standard envelope: " + exception.getResponseBody(), e);
+        }
+    }
+
+    public record ReportedError(String userMessageGlobalisationCode, String defaultUserMessage, String developerMessage,
+            String parameterName) {
+    }
+
+    public record RejectedValue(String userMessageGlobalisationCode, String parameterName, String value) {
     }
 }
