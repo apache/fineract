@@ -90,6 +90,8 @@ final class CentersApiResourceSwagger {
 
             @Schema(example = "2")
             public Long id;
+            @Schema(example = "000000002")
+            public String accountNo;
             public GetCentersStatus status;
             @Schema(example = "false")
             public Boolean active;
@@ -127,15 +129,21 @@ final class CentersApiResourceSwagger {
 
         @Schema(example = "8")
         public Long id;
+        @Schema(example = "000000008")
+        public String accountNo;
         public GetCentersResponse.GetCentersPageItems.GetCentersStatus status;
         @Schema(example = "false")
         public Boolean active;
+        @Schema(example = "[2013, 4, 18]")
+        public LocalDate activationDate;
         @Schema(example = "First Center (No groups)")
         public String name;
         @Schema(example = "externalId1")
         public String externalId;
         @Schema(example = "1")
         public Long staffId;
+        @Schema(example = "D, Mary")
+        public String staffName;
         @Schema(example = "1")
         public Long officeId;
         @Schema(example = "Head Office")
@@ -167,6 +175,8 @@ final class CentersApiResourceSwagger {
         public String locale;
         @Schema(example = "04 March 2011")
         public String activationDate;
+        @Schema(example = "04 March 2011")
+        public String submittedOnDate;
         @Schema(description = "List of group ids to associate at creation")
         public List<Long> groupMembers;
     }
