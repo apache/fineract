@@ -131,6 +131,13 @@ public class DataValidatorBuilder {
         this.dataValidationErrors.add(error);
     }
 
+    public void failWithCodeAndMessage(final String errorCode, final String defaultEnglishMessage, final Object... defaultUserMessageArgs) {
+        String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + "." + errorCode;
+        final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, this.parameter,
+                this.value, defaultUserMessageArgs);
+        this.dataValidationErrors.add(error);
+    }
+
     public void failWithCodeNoParameterAddedToErrorCode(final String errorCode, final Object... defaultUserMessageArgs) {
         String validationErrorCode = "validation.msg." + this.resource + "." + errorCode;
         String defaultEnglishMessage = "Failed data validation due to: " + errorCode + ".";
