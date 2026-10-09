@@ -164,7 +164,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 }
             }
             if (!reqDatatables.isEmpty()) {
-                throw new DatatableEntryRequiredException(reqDatatables.toString());
+                throw new DatatableEntryRequiredException(reqDatatables, entityName, status);
             }
         }
     }
@@ -192,7 +192,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 }
             }
             if (!reqDatatables.isEmpty()) {
-                throw new DatatableEntryRequiredException(reqDatatables.toString());
+                throw new DatatableEntryRequiredException(reqDatatables, entityName, status);
             }
         }
     }
