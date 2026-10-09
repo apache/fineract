@@ -253,6 +253,10 @@ public final class WorkingCapitalLoanRequestBuilders {
         return new PostWorkingCapitalLoansLoanIdChargesChargeIdRequest().amount(amount).locale(LOCALE).dateFormat(DATE_FORMAT);
     }
 
+    public static PostWorkingCapitalLoansLoanIdChargesChargeIdRequest chargeWaiver() {
+        return new PostWorkingCapitalLoansLoanIdChargesChargeIdRequest().locale(LOCALE);
+    }
+
     public static PostWorkingCapitalLoanTransactionsRequest creditBalanceRefund(BigDecimal amount, String transactionDate) {
         return repayment(amount, transactionDate);
     }
