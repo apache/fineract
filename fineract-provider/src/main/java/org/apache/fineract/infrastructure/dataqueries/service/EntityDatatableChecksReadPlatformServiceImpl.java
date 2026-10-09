@@ -138,7 +138,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
     @Override
     public EntityDataTableChecksTemplateData retrieveTemplate() {
         List<DatatableChecksData> dataTables = getDataTables();
-        List<String> entities = EntityTables.getEntityNames();
+        List<String> entities = EntityTables.getCheckableEntityNames();
         List<DatatableCheckStatusData> clientStatuses = getStatusList(EntityTables.CLIENT.getCheckStatuses());
         List<DatatableCheckStatusData> loanStatuses = getStatusList(EntityTables.LOAN.getCheckStatuses());
         List<DatatableCheckStatusData> groupstatuses = getStatusList(EntityTables.GROUP.getCheckStatuses());
