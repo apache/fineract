@@ -93,6 +93,7 @@ public final class GlobalConfigurationConstants {
     public static final String LAST_MONTH_OF_FINANCIAL_YEAR = "last-month-of-financial-year";
     public static final String RETAINED_EARNING_GL_ACCOUNT = "retained-gl-account";
     public static final String RETAINED_EARNING_USED_BY_REPORT_NAME = "retained-earning-used-by-report-name";
+    public static final String RETAINED_EARNING_WC_USED_BY_REPORT_NAME = "retained-earning-wc-used-by-report-name";
     public static final String OFFICE_ID = "office-id";
     public static final String DISALLOW_BACKDATED_TRANSACTIONS = "disallow-backdated-transactions";
     public static final String WCL_CHARGE_ACCRUAL_TIME = "wcl-charge-accrual-time";

@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.jobs.service.retainedearning;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.data.AccountGLJournalEntryAnnualSummaryData;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.services.RetainedEarningDataService;
+import org.apache.fineract.portfolio.PortfolioProductType;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.listener.StepExecutionListener;
 import org.springframework.batch.core.step.StepExecution;
@@ -69,13 +71,11 @@ public class RetainedEarningJobReader implements ItemReader<AccountGLJournalEntr
             log.info("Retained earning job started: businessDate={}, fiscalYearEnd={}, dayOfWeek={}", currentDate,
                     lastDayOfPreviousFiscalYear, currentDate.getDayOfWeek());
 
-            List<AccountGLJournalEntryAnnualSummaryData> rawData = retainedEarningDataService
-                    .fetchTrialBalanceData(retainedEarningConfigurationService.getReportName(), lastDayOfPreviousFiscalYear);
-
-            log.info("Fetched {} raw records from trial balance for fiscalYearEnd={}", rawData.size(), lastDayOfPreviousFiscalYear);
-
-            final List<AccountGLJournalEntryAnnualSummaryData> processedData = retainedEarningDataService.processTrialBalanceData(rawData,
-                    lastDayOfPreviousFiscalYear);
+            final List<AccountGLJournalEntryAnnualSummaryData> processedData = new ArrayList<>();
+            processedData.addAll(fetchAndProcess(retainedEarningConfigurationService.getReportName(), PortfolioProductType.LOAN,
+                    lastDayOfPreviousFiscalYear));
+            processedData.addAll(fetchAndProcess(retainedEarningConfigurationService.getWorkingCapitalReportName(),
+                    PortfolioProductType.WORKING_CAPITAL_LOAN, lastDayOfPreviousFiscalYear));
 
             delegate = new ListItemReader<>(processedData);
             log.info("Initialized with {} total records for fiscalYearEnd={}", processedData.size(), lastDayOfPreviousFiscalYear);
@@ -84,5 +84,16 @@ public class RetainedEarningJobReader implements ItemReader<AccountGLJournalEntr
             log.error("Failed to initialize RetainedEarningJobReader", e);
             throw new RuntimeException("Error initializing reader: " + e.getMessage(), e);
         }
+    }
+
+    private List<AccountGLJournalEntryAnnualSummaryData> fetchAndProcess(final String reportName, final PortfolioProductType productType,
+            final LocalDate lastDayOfPreviousFiscalYear) {
+        final List<AccountGLJournalEntryAnnualSummaryData> rawData = retainedEarningDataService.fetchTrialBalanceData(reportName,
+                lastDayOfPreviousFiscalYear);
+
+        log.info("Fetched {} raw records from trial balance report '{}' for fiscalYearEnd={}", rawData.size(), reportName,
+                lastDayOfPreviousFiscalYear);
+
+        return retainedEarningDataService.processTrialBalanceData(rawData, lastDayOfPreviousFiscalYear, productType);
     }
 }
