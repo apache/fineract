@@ -317,8 +317,8 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             clientFamilyMember.setIsDependent(isDependent);
         }
 
-        if (command.longValueOfParameterNamed("relationShipId") != null) {
-            relationshipId = command.longValueOfParameterNamed("relationShipId");
+        if (command.longValueOfParameterNamed("relationshipId") != null) {
+            relationshipId = command.longValueOfParameterNamed("relationshipId");
             relationship = this.codeValueRepository.getReferenceById(relationshipId);
             clientFamilyMember.setRelationship(relationship);
         }
