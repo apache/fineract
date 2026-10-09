@@ -264,12 +264,15 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountWrittenOff = null;
             break;
             case FLAT:
-                Money money = Money.of(this.savingsAccount().getCurrency(), chargeAmount);
+                // A charge built by createNewWithoutSavingsAccount has no account (and so no currency) yet; its amount
+                // is rounded when it is attached to the account, see update(SavingsAccount).
+                final BigDecimal flatAmount = this.savingsAccount == null ? chargeAmount
+                        : Money.of(this.savingsAccount.getCurrency(), chargeAmount).getAmount();
                 this.percentage = null;
-                this.amount = money.getAmount();
+                this.amount = flatAmount;
                 this.amountPercentageAppliedTo = null;
                 this.amountPaid = null;
-                this.amountOutstanding = money.getAmount();
+                this.amountOutstanding = flatAmount;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
             break;
@@ -391,7 +394,18 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
     }
 
     public void update(final SavingsAccount savingsAccount) {
+        final boolean firstAttachment = this.savingsAccount == null && savingsAccount != null;
         this.savingsAccount = savingsAccount;
+        if (firstAttachment && ChargeCalculationType.fromInt(this.chargeCalculation).isFlat()) {
+            // Apply the currency rounding that populateDerivedFields could not apply before the account was known
+            final MonetaryCurrency currency = savingsAccount.getCurrency();
+            if (this.amount != null) {
+                this.amount = Money.of(currency, this.amount).getAmount();
+            }
+            if (this.amountOutstanding != null) {
+                this.amountOutstanding = Money.of(currency, this.amountOutstanding).getAmount();
+            }
+        }
     }
 
     public void update(final BigDecimal amount, final LocalDate dueDate, final MonthDay feeOnMonthDay, final Integer feeInterval) {
