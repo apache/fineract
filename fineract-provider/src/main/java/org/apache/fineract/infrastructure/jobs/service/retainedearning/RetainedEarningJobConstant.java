@@ -49,6 +49,11 @@ public final class RetainedEarningJobConstant {
     public static final String TRIAL_BALANCE_SUMMARY_WITH_ASSET_OWNER = "Trial Balance Summary Report with Asset Owner";
 
     /**
+     * Report type Trial Balance Summary for working capital loans
+     */
+    public static final String TRIAL_BALANCE_SUMMARY_FOR_WORKING_CAPITAL_LOANS = "Trial Balance Summary Report for Working Capital Loans";
+
+    /**
      * Query parameter - office id
      */
     public static final String OFFICE_ID_QUERY_PARAM = "R_officeId";

@@ -282,4 +282,8 @@
     <include file="parts/0261_transaction_summary_reports_for_working_capital_loans.xml" relativeToChangelogFile="true" />
     <include file="parts/0262_add_configuration_pl_charge_accrual_time.xml" relativeToChangelogFile="true" />
     <include file="parts/0263_update_charge_accrual_date_description.xml" relativeToChangelogFile="true" />
+    <include file="parts/0264_add_product_type_to_annual_summary.xml" relativeToChangelogFile="true" />
+    <include file="parts/0265_trial_balance_summary_report_filter_retained_earning_by_product_type.xml" relativeToChangelogFile="true" />
+    <include file="parts/0266_trial_balance_summary_report_for_working_capital_loans.xml" relativeToChangelogFile="true" />
+    <include file="parts/0267_add_retained_earning_wc_report_global_configuration.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
