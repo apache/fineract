@@ -49,6 +49,12 @@ The scope of this document includes:
 
 *RESCHEDULE Action:* A loan-level action that modifies the minimum payment amount and/or frequency for the current open period and all future unevaluated periods.
 
+*RESUME Action:* A loan-level action that ends an active pause early, on the resume date. The days the pause no longer covers are taken back out of the periods the pause had extended.
+
+*RESET Action:* A loan-level action that marks every period ending before the reset date as `reset`, lifting its delinquency tags and taking it out of evaluation and repayment allocation. With `startNewPeriod = true` it also cuts the current period on the day before the reset date and starts a new period on the reset date itself.
+
+*UNDO_RESET Action:* A loan-level action that closes the latest active reset and clears the `reset` flag on the periods it had flagged, so they are evaluated again. Period dates are left as they are.
+
 == Design Decisions and Considerations
 
 === Period-Level Delinquency, Not Loan-Level
@@ -58,6 +64,10 @@ Working Capital loans use a period-based delinquency model rather than the stand
 === PAUSE Extends Periods, Not Skips Them
 
 When a PAUSE action is recorded, all open and future schedule periods are extended by the exact number of days of the pause (`ChronoUnit.DAYS.between(pauseStart, pauseEnd)`). This preserves the expected minimum payment schedule while giving the borrower extra time. The pause is applied immediately when the action is created via API — it does not wait for the next COB run.
+
+=== The Reset Date Is a Hard Boundary for Pauses
+
+A reset with `startNewPeriod = true` can be recorded while a pause is active. The period it starts begins on the reset date even though that date is inside the pause: only the pause days from the reset date on extend it, while the earlier pause days stay with the period the reset cut. Without this rule the restarted period would be moved past the whole pause and the days in between would belong to no period, so a repayment dated there could not be allocated anywhere. The same rule holds when that pause is later resumed and when the restarted period is rescheduled. It keeps holding after the reset is undone: unlike breach, a delinquency undo does not merge the cut period back, so the boundary stays in the schedule and stays protected. It is the rule the breach schedule applies, implemented once in `WorkingCapitalLoanPausePeriodUtils` so the two schedules cannot drift.
 
 === RESCHEDULE Applies Forward-Only
 
@@ -159,16 +169,17 @@ The `m_wc_loan_range_delinquency_tag` table records the history of delinquency r
 
 === Table: m_wc_loan_delinquency_action
 
-The `m_wc_loan_delinquency_action` table stores loan-level delinquency control actions: PAUSE and RESCHEDULE.
+The `m_wc_loan_delinquency_action` table stores loan-level delinquency control actions: PAUSE, RESUME, RESCHEDULE, RESET and UNDO_RESET (DISABLE and ENABLE are covered in the delinquency disable chapter).
 
 [cols="1,2,1,3",options="header"]
 |===
 | Column Name | Type | Constraints | Description
 | `id` | BIGINT | PK, not null | Primary key
 | `wc_loan_id` | BIGINT | FK to `m_wc_loan`, not null | Associated Working Capital loan
-| `action` | VARCHAR(128) | not null | Enum: `PAUSE` or `RESCHEDULE`
+| `action` | VARCHAR(128) | not null | Enum: `PAUSE`, `RESUME`, `RESCHEDULE`, `RESET`, `UNDO_RESET`, `DISABLE`, `ENABLE`
 | `start_date` | DATE | not null | Effective start date of the action
-| `end_date` | DATE | nullable | Required only for PAUSE; end date of the pause window
+| `end_date` | DATE | nullable | PAUSE: end date of the pause window (mandatory). RESET: set to the undo date when the reset is undone; `null` while the reset is active
+| `start_new_period` | BOOLEAN | nullable | RESET only: `true` when the reset also starts a new period on the reset date
 | `minimum_payment` | DECIMAL(19,6) | nullable | New minimum payment value (RESCHEDULE only)
 | `minimum_payment_type` | VARCHAR(50) | nullable | Enum: `PERCENTAGE`, `FLAT` (RESCHEDULE only)
 | `frequency` | INT | nullable | New period frequency value (RESCHEDULE only)
@@ -236,7 +247,7 @@ Step 3 (`DelinquencyRangeScheduleBusinessStep`) is skipped for loans that have n
 
 ==== Create Delinquency Action
 
-Creates a delinquency action — either a PAUSE or a RESCHEDULE — for an active Working Capital loan.
+Creates a delinquency action — PAUSE, RESUME, RESCHEDULE, RESET or UNDO_RESET — for an active Working Capital loan.
 
 [source]
 ----
@@ -277,6 +288,43 @@ POST /v1/working-capital-loans/external-id/{loanExternalId}/delinquency-actions
 ====
 For RESCHEDULE, at least one of the payment group (`minimumPayment` + `minimumPaymentType`) or frequency group (`frequency` + `frequencyType`) must be provided. Both groups can be supplied in the same request.
 ====
+
+**Request Body — RESUME:**
+
+[source,json]
+----
+{
+  "action": "resume",
+  "startDate": "2024-03-10",      // mandatory — must be the business date, inside an active pause
+  "dateFormat": "yyyy-MM-dd",
+  "locale": "en"
+}
+----
+
+**Request Body — RESET:**
+
+[source,json]
+----
+{
+  "action": "reset",
+  "startDate": "2024-03-10",      // optional — defaults to the business date and must equal it
+  "startNewPeriod": true,         // optional — also cut the current period and start a new one on the reset date
+  "dateFormat": "yyyy-MM-dd",
+  "locale": "en"
+}
+----
+
+**Request Body — UNDO_RESET:**
+
+[source,json]
+----
+{
+  "action": "undo_reset",
+  "startDate": "2024-03-12",      // optional — defaults to the business date and must equal it
+  "dateFormat": "yyyy-MM-dd",
+  "locale": "en"
+}
+----
 
 **Response:**
 
@@ -386,7 +434,8 @@ This endpoint is currently available by loan ID.
 === General Rules
 
 * Delinquency actions can only be created for **active** Working Capital loan accounts.
-* `action` is mandatory; supported values are `pause` and `reschedule` (case-insensitive).
+* `action` is mandatory; supported values are `pause`, `resume`, `reschedule`, `reset`, `undo_reset`, `disable` and `enable` (case-insensitive).
+* PAUSE, RESUME, RESCHEDULE and RESET are rejected while delinquency evaluation is disabled for the loan.
 
 === Validation Rules for PAUSE
 
@@ -395,6 +444,18 @@ This endpoint is currently available by loan ID.
 * `startDate` must be on or after the first actual disbursement date of the loan.
 * `startDate` must not fall within or before a period that has already been evaluated (`minPaymentCriteriaMet != null`).
 * The pause period must not overlap with any existing PAUSE action for the same loan.
+* `startDate` must not be before the start date of the latest active RESET: a pause cannot re-date periods a reset already settled. A pause starting on the reset date itself is accepted.
+
+=== Validation Rules for RESUME
+
+* `startDate` is mandatory and must equal the business date.
+* A pause must be active on the business date and not resumed yet, and the resume date must be after that pause's `startDate` and not after its `endDate`, so the resume actually shortens it.
+
+=== Validation Rules for RESET and UNDO_RESET
+
+* `startDate` is optional; when provided it must equal the business date, and it defaults to the business date otherwise.
+* `startNewPeriod` is optional and only meaningful for RESET.
+* A RESET may be recorded while a pause is active; see <<Effect of RESET on Schedule>>.
 
 === Validation Rules for RESCHEDULE
 
@@ -436,6 +497,25 @@ This endpoint is currently available by loan ID.
 * For periods that have not yet started when the pause begins, both `fromDate` and `toDate` are shifted forward by the pause duration.
 * For the period currently active when the pause begins (if the pause starts mid-period), only `toDate` is extended.
 * Periods already evaluated are never modified.
+* The pause is applied again, from the recorded actions, whenever a new period is generated: a period whose start falls inside a pause is moved past it, keeping its length, unless the period was started by a reset (see below).
+
+=== Effect of RESUME on Schedule
+
+* The pause effectively ends on the resume date. The days between the resume date and the planned pause end are removed again from every unevaluated period the pause had extended: `toDate` moves back for the period the pause started in and for the later ones, `fromDate` moves back for the periods that started after the pause.
+* Periods already evaluated, and periods flagged by a reset, are never modified.
+
+=== Effect of RESET on Schedule
+
+* Every period that is not yet flagged and whose `toDate` is before the reset date gets `reset = true`: its amounts are cleared, its delinquency tags are lifted as of the reset date, and it is skipped by evaluation and by repayment allocation from then on.
+* With `startNewPeriod = true` the current period is cut so that it ends on the day before the reset date (and is flagged like the others), and the next period is generated starting on the reset date. A reset dated on the first day of the current period cuts nothing.
+* *Reset inside an active pause:* the restarted period keeps its start on the reset date. Only the pause days from the reset date on extend its `toDate`; the pause days before the reset stay with the cut period. A later RESUME of that pause shortens the restarted period from its end only, and a later RESCHEDULE of the restarted period counts the pause from the reset date in the same way. A pause recorded after the reset cannot start before it, so it never reaches the cut period.
+
+=== Effect of UNDO_RESET on Schedule
+
+* The latest active RESET gets its `end_date` set to the undo date.
+* The `reset` flag is cleared on the periods ending before the undo date that the undone reset had flagged, bounded below by the start date of the previous still-active reset, if any.
+* Period dates are not changed: a period the reset cut stays cut, and the period the reset started stays in place. The schedule is then reprocessed, replaying the repayments and re-evaluating the expired periods.
+* Because the cut stays, the reset date remains a boundary for pauses after the undo: a later RESUME or RESCHEDULE still keeps the restarted period starting on the reset date.
 
 === Effect of RESCHEDULE on Schedule
 
@@ -484,7 +564,27 @@ Delinquency management and EIR amortization are fully independent systems at the
 
 The borrower now has until 2024-03-30 to meet the minimum payment before the period is evaluated.
 
-=== Scenario #3: RESCHEDULE Action Without Affecting EIR
+=== Scenario #3: RESET With a New Period Inside an Active Pause
+
+**Setup:** Bucket frequency 3 days, minimum payment 25 % of the principal; loan of 800 disbursed on `2026-01-01`. On `2026-01-08` the schedule holds period 1 `[2026-01-01 .. 2026-01-03]` and period 2 `[2026-01-04 .. 2026-01-06]`, both evaluated as not met, and the open period 3 `[2026-01-07 .. 2026-01-09]`.
+
+**PAUSE created on `2026-01-08`:** startDate = `2026-01-08`, endDate = `2026-01-10` (3 days). Period 3 extends to `[2026-01-07 .. 2026-01-12]`.
+
+**RESET with `startNewPeriod = true` on `2026-01-09`, while the pause is active:**
+
+* Periods 1 and 2 are flagged `reset`.
+* Period 3 is cut to `[2026-01-07 .. 2026-01-08]` and flagged `reset`.
+* Period 4 starts on the reset date: 3 days from `2026-01-09` end on `2026-01-11`, extended by the pause days `2026-01-09` and `2026-01-10` only, giving `[2026-01-09 .. 2026-01-13]` with an expected amount of 200.
+
+A repayment of 200 dated `2026-01-10` is allocated to period 4, which meets its minimum payment. Without the boundary rule period 4 would have been generated as `[2026-01-12 .. 2026-01-14]`, and the repayment, dated on a day covered by no period, would have been lost.
+
+**RESUME variant:** with a pause of `2026-01-08 .. 2026-01-12` instead, period 4 is `[2026-01-09 .. 2026-01-15]`. A RESUME on `2026-01-10` removes the two pause days `2026-01-11` and `2026-01-12`: period 3 keeps its end on `2026-01-08`, period 4 keeps its start on `2026-01-09` and ends on `2026-01-13`.
+
+**UNDO_RESET variant:** the same pause of `2026-01-08 .. 2026-01-12` and reset on `2026-01-09`, with the reset undone on `2026-01-10` before the RESUME on that day. The undo clears the flags but keeps the cut, so the RESUME gives the same dates: period 3 `[2026-01-07 .. 2026-01-08]` and period 4 `[2026-01-09 .. 2026-01-13]`, with no overlap.
+
+These flows are asserted by `WorkingCapitalLoanDelinquencyResetInsidePauseTest` and by the E2E scenarios UC17–UC20 of `WorkingCapitalDelinquencyReset.feature`.
+
+=== Scenario #4: RESCHEDULE Action Without Affecting EIR
 
 **Setup:**
 
@@ -509,7 +609,9 @@ Working Capital Product Delinquency Management provides a purpose-built, period-
 
 * A dedicated COB pipeline with two ordered steps: range schedule generation and delinquency classification.
 * Per-period tracking of expected vs. paid minimum payments, with independent delinquency tags per period.
-* A PAUSE action that extends all open and future periods proportionally, freezing the delinquency clock.
+* A PAUSE action that extends all open and future periods proportionally, freezing the delinquency clock, and a RESUME action that ends it early.
+* A RESET action that takes the periods before the reset date out of delinquency, optionally starting a new period on the reset date, and an UNDO_RESET that brings them back.
+* The reset date as a hard boundary for pauses: a period started by a reset inside an active pause begins on the reset date and only counts the pause from there, exactly as the breach schedule does.
 * A RESCHEDULE action that modifies minimum payment terms for the current and all future periods.
 * A configurable minimum payment rule per delinquency bucket, expressed as either a flat amount or a percentage of principal.
 * Product-level controls for grace days and the stored delinquency start type.
