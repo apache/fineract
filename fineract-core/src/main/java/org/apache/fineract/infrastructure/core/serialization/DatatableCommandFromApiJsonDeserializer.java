@@ -315,7 +315,9 @@ public class DatatableCommandFromApiJsonDeserializer {
             validator = validator.reset().parameter(API_FIELD_LENGTH).value(length);
             if (jdbcType.hasPrecision(databaseTypeResolver.databaseType())) {
                 if (jdbcType.isStringType() && length == null) {
-                    validator.failWithCode("must.be.provided.when.type.is.String");
+                    final String columnName = this.fromApiJsonHelper.extractStringNamed(API_FIELD_NAME, column);
+                    validator.failWithCodeAndMessage("must.be.provided.when.type.is.String",
+                            "Column length is required for String columns (" + columnName + ").", columnName);
                 }
                 validator.ignoreIfNull().positiveAmount();
             } // else, the precision is ignored
