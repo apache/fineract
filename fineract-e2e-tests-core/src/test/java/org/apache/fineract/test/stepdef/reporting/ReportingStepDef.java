@@ -44,6 +44,8 @@ public class ReportingStepDef extends AbstractStepDef {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
     private static final String TRIAL_BALANCE_REPORT = "Trial Balance Summary Report with Asset Owner";
+    private static final String WC_TRANSACTION_SUMMARY_REPORT = "Transaction Summary Report for Working Capital Loans";
+    private static final String WC_TRANSACTION_SUMMARY_REPORT_WITH_ASSET_OWNER = "Transaction Summary Report with Asset Owner for Working Capital Loans";
     private final FineractFeignClient fineractClient;
 
     @Then("Transaction Summary Report for date {string} has the following data:")
@@ -70,6 +72,22 @@ public class ReportingStepDef extends AbstractStepDef {
     @Then("Transaction Summary Report with Asset Owner for date {string} column {string} has empty value for all rows")
     public void transactionSummaryReportWithAssetOwnerColumnEmpty(final String dateStr, final String columnName) {
         verifyColumnNullability("Transaction Summary Report with Asset Owner", dateStr, columnName, true);
+    }
+
+    @Then("Transaction Summary Report for Working Capital Loans for date {string} has the following data:")
+    public void transactionSummaryReportForWorkingCapitalLoansHasData(final String dateStr, final DataTable dataTable) {
+        verifyReportDataWithEmptyValues(WC_TRANSACTION_SUMMARY_REPORT, dateStr, dataTable);
+    }
+
+    @Then("Transaction Summary Report with Asset Owner for Working Capital Loans for date {string} has the following data:")
+    public void transactionSummaryReportWithAssetOwnerForWorkingCapitalLoansHasData(final String dateStr, final DataTable dataTable) {
+        verifyReportDataWithEmptyValues(WC_TRANSACTION_SUMMARY_REPORT_WITH_ASSET_OWNER, dateStr, dataTable);
+    }
+
+    @Then("Transaction Summary Report with Asset Owner for Working Capital Loans for date {string} has originatorId, asset owner externalId and the following data:")
+    public void transactionSummaryReportWithAssetOwnerForWorkingCapitalLoansHasDataWithOriginatorId(final String dateStr,
+            final DataTable dataTable) {
+        verifyReportDataWithOwnerExternalIdAndOriginatorId(WC_TRANSACTION_SUMMARY_REPORT_WITH_ASSET_OWNER, dateStr, dataTable);
     }
 
     @Then("Trial Balance Summary Report with Asset Owner for date {string} has originatorId, asset owner externalId and the following data:")
@@ -104,6 +122,15 @@ public class ReportingStepDef extends AbstractStepDef {
         final List<String> headers = expected.getFirst();
 
         verifyReportData(reportName, response, expected, headers);
+    }
+
+    private void verifyReportDataWithEmptyValues(final String reportName, final String dateStr, final DataTable dataTable) {
+        final RunReportsResponse response = executeReport(reportName, dateStr);
+
+        final List<List<String>> expected = dataTable.asLists();
+        final List<String> headers = expected.getFirst();
+
+        verifyReportDataWithEmptyValues(reportName, response, expected, headers);
     }
 
     private List<List<String>> verifyReportDataHeaders(final String reportName, final RunReportsResponse response,
