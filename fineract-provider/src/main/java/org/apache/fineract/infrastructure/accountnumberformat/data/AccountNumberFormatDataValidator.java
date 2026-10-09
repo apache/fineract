@@ -89,7 +89,8 @@ public class AccountNumberFormatDataValidator {
                 final String prefixCharacter = this.fromApiJsonHelper
                         .extractStringNamed(AccountNumberFormatConstants.prefixCharacterParamName, element);
 
-                baseDataValidator.reset().parameter(AccountNumberFormatConstants.prefixTypeParamName).value(prefixCharacter).notBlank();
+                baseDataValidator.reset().parameter(AccountNumberFormatConstants.prefixCharacterParamName).value(prefixCharacter)
+                        .notBlank();
             }
 
             /**

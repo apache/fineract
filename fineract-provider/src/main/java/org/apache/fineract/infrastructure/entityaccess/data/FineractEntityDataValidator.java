@@ -196,10 +196,10 @@ public class FineractEntityDataValidator {
             baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.fromEnityType).value(fromEnityType);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.fromEnityType, element)) {
+        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.toEntityType, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final String toEnityType = this.fromApiJsonHelper.extractStringNamed(FineractEntityApiResourceConstants.toEntityType, element);
-            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.fromEnityType).value(toEnityType);
+            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.toEntityType).value(toEnityType);
         }
 
         if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.toEntityType, element)) {

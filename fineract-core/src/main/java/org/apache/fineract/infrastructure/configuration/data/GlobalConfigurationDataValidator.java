@@ -74,7 +74,7 @@ public class GlobalConfigurationDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(GlobalConfigurationApiConstant.VALUE, element)) {
             final Long valueStr = this.fromApiJsonHelper.extractLongNamed(GlobalConfigurationApiConstant.VALUE, element);
-            baseDataValidator.reset().parameter(GlobalConfigurationApiConstant.ENABLED).value(valueStr).zeroOrPositiveAmount();
+            baseDataValidator.reset().parameter(GlobalConfigurationApiConstant.VALUE).value(valueStr).zeroOrPositiveAmount();
         }
 
         if (this.fromApiJsonHelper.parameterExists(GlobalConfigurationApiConstant.DATE_VALUE, element)) {
