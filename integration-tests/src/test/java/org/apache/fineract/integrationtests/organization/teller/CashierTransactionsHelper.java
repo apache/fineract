@@ -116,17 +116,13 @@ public class CashierTransactionsHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static Integer createCashier(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return createCashier(requestSpec, responseSpec, 1L, 1L);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static Integer createCashier(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Long tellerId, final Long staffId) {
-        return (Integer) createCashierWithJson(requestSpec, responseSpec, tellerId, createCashierAsJSON(staffId)).get("resourceId");
+        createCashierWithJson(requestSpec, responseSpec, tellerId, createCashierAsJSON(staffId));
+        // the create response only carries the teller id, so look the new cashier up by its staff
+        return Calls.ok(FineractClientHelper.getFineractClient().tellers.retrieveAllCashiersForTeller(tellerId, null, null)).getCashiers()
+                .stream().filter(cashier -> staffId.equals(cashier.getStaffId())).findFirst().map(cashier -> cashier.getId().intValue())
+                .orElseThrow();
     }
 
     public static Map<String, Object> createCashierWithJson(final RequestSpecification requestSpec,
