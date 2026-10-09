@@ -21,10 +21,13 @@ package org.apache.fineract.infrastructure.jobs.service.retainedearning;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,10 +43,12 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.data.AccountGLJournalEntryAnnualSummaryData;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.services.RetainedEarningDataService;
+import org.apache.fineract.portfolio.PortfolioProductType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -64,6 +69,9 @@ class RetainedEarningJobReaderTest {
     @Mock
     private StepExecution stepExecution;
 
+    private static final String LOAN_REPORT = "test-report";
+    private static final String WORKING_CAPITAL_REPORT = "test-wc-report";
+
     private final LocalDate businessDate = LocalDate.now(ZoneId.systemDefault());
     private final LocalDate lastDayOfPreviousFiscalYear = LocalDate.of(businessDate.getYear() - 1, 12, 31);
 
@@ -76,7 +84,8 @@ class RetainedEarningJobReaderTest {
         ThreadLocalContextUtil.setBusinessDates(businessDateMap);
 
         when(retainedEarningConfigurationService.getLastDayOfPreviousFiscalYear(businessDate)).thenReturn(lastDayOfPreviousFiscalYear);
-        when(retainedEarningConfigurationService.getReportName()).thenReturn("test-report");
+        when(retainedEarningConfigurationService.getReportName()).thenReturn(LOAN_REPORT);
+        lenient().when(retainedEarningConfigurationService.getWorkingCapitalReportName()).thenReturn(WORKING_CAPITAL_REPORT);
     }
 
     @AfterEach
@@ -87,15 +96,19 @@ class RetainedEarningJobReaderTest {
     @Test
     public void testReadWithEmptyData() throws Exception {
         when(retainedEarningDataService.fetchTrialBalanceData(any(), any())).thenReturn(Collections.emptyList());
-        when(retainedEarningDataService.processTrialBalanceData(anyList(), eq(lastDayOfPreviousFiscalYear)))
+        when(retainedEarningDataService.processTrialBalanceData(anyList(), eq(lastDayOfPreviousFiscalYear), any()))
                 .thenReturn(Collections.emptyList());
 
         retainedEarningJobReader.beforeStep(stepExecution);
         AccountGLJournalEntryAnnualSummaryData result = retainedEarningJobReader.read();
 
         assertNull(result, "Result should be null with empty data");
-        verify(retainedEarningDataService).fetchTrialBalanceData(any(), any());
-        verify(retainedEarningDataService).processTrialBalanceData(anyList(), eq(lastDayOfPreviousFiscalYear));
+        verify(retainedEarningDataService).fetchTrialBalanceData(LOAN_REPORT, lastDayOfPreviousFiscalYear);
+        verify(retainedEarningDataService).fetchTrialBalanceData(WORKING_CAPITAL_REPORT, lastDayOfPreviousFiscalYear);
+        verify(retainedEarningDataService).processTrialBalanceData(anyList(), eq(lastDayOfPreviousFiscalYear),
+                eq(PortfolioProductType.LOAN));
+        verify(retainedEarningDataService).processTrialBalanceData(anyList(), eq(lastDayOfPreviousFiscalYear),
+                eq(PortfolioProductType.WORKING_CAPITAL_LOAN));
     }
 
     @Test
@@ -112,8 +125,13 @@ class RetainedEarningJobReaderTest {
                         .ownerExternalId(ExternalIdFactory.produce("OWNER1")).openingBalanceAmount(BigDecimal.valueOf(1200))
                         .currencyCode("USD").yearEndDate(lastDayOfPreviousFiscalYear).build());
 
-        when(retainedEarningDataService.fetchTrialBalanceData(any(), any())).thenReturn(rawData);
-        when(retainedEarningDataService.processTrialBalanceData(eq(rawData), eq(lastDayOfPreviousFiscalYear))).thenReturn(processedData);
+        when(retainedEarningDataService.fetchTrialBalanceData(LOAN_REPORT, lastDayOfPreviousFiscalYear)).thenReturn(rawData);
+        when(retainedEarningDataService.fetchTrialBalanceData(WORKING_CAPITAL_REPORT, lastDayOfPreviousFiscalYear))
+                .thenReturn(Collections.emptyList());
+        when(retainedEarningDataService.processTrialBalanceData(eq(rawData), eq(lastDayOfPreviousFiscalYear),
+                eq(PortfolioProductType.LOAN))).thenReturn(processedData);
+        when(retainedEarningDataService.processTrialBalanceData(eq(Collections.emptyList()), eq(lastDayOfPreviousFiscalYear),
+                eq(PortfolioProductType.WORKING_CAPITAL_LOAN))).thenReturn(Collections.emptyList());
 
         retainedEarningJobReader.beforeStep(stepExecution);
 
@@ -125,7 +143,53 @@ class RetainedEarningJobReaderTest {
         }
 
         assertEquals(2, readCount, "Should read all processed records");
-        verify(retainedEarningDataService).processTrialBalanceData(eq(rawData), eq(lastDayOfPreviousFiscalYear));
+        verify(retainedEarningDataService).processTrialBalanceData(eq(rawData), eq(lastDayOfPreviousFiscalYear),
+                eq(PortfolioProductType.LOAN));
+    }
+
+    @Test
+    public void testReadConcatenatesLoanAndWorkingCapitalLoanRecords() throws Exception {
+        List<AccountGLJournalEntryAnnualSummaryData> loanRawData = List.of(AccountGLJournalEntryAnnualSummaryData.builder()
+                .glAccountCode("401001").productName("Loan Product").endingBalanceAmount(BigDecimal.valueOf(100)).build());
+        List<AccountGLJournalEntryAnnualSummaryData> workingCapitalRawData = List.of(AccountGLJournalEntryAnnualSummaryData.builder()
+                .glAccountCode("401001").productName("WC Product").endingBalanceAmount(BigDecimal.valueOf(200)).build());
+
+        AccountGLJournalEntryAnnualSummaryData loanRecord = AccountGLJournalEntryAnnualSummaryData.builder().glAccountCode("401001")
+                .productId(1L).productType(PortfolioProductType.LOAN).build();
+        AccountGLJournalEntryAnnualSummaryData workingCapitalRecord = AccountGLJournalEntryAnnualSummaryData.builder()
+                .glAccountCode("401001").productId(1L).productType(PortfolioProductType.WORKING_CAPITAL_LOAN).build();
+
+        when(retainedEarningDataService.fetchTrialBalanceData(LOAN_REPORT, lastDayOfPreviousFiscalYear)).thenReturn(loanRawData);
+        when(retainedEarningDataService.fetchTrialBalanceData(WORKING_CAPITAL_REPORT, lastDayOfPreviousFiscalYear))
+                .thenReturn(workingCapitalRawData);
+        when(retainedEarningDataService.processTrialBalanceData(loanRawData, lastDayOfPreviousFiscalYear, PortfolioProductType.LOAN))
+                .thenReturn(List.of(loanRecord));
+        when(retainedEarningDataService.processTrialBalanceData(workingCapitalRawData, lastDayOfPreviousFiscalYear,
+                PortfolioProductType.WORKING_CAPITAL_LOAN)).thenReturn(List.of(workingCapitalRecord));
+
+        retainedEarningJobReader.beforeStep(stepExecution);
+
+        assertEquals(loanRecord, retainedEarningJobReader.read());
+        assertEquals(workingCapitalRecord, retainedEarningJobReader.read());
+        assertNull(retainedEarningJobReader.read());
+
+        InOrder inOrder = inOrder(retainedEarningDataService);
+        inOrder.verify(retainedEarningDataService).fetchTrialBalanceData(LOAN_REPORT, lastDayOfPreviousFiscalYear);
+        inOrder.verify(retainedEarningDataService).fetchTrialBalanceData(WORKING_CAPITAL_REPORT, lastDayOfPreviousFiscalYear);
+    }
+
+    @Test
+    public void testInitializeFailsWhenWorkingCapitalReportFails() {
+        when(retainedEarningDataService.fetchTrialBalanceData(LOAN_REPORT, lastDayOfPreviousFiscalYear)).thenReturn(Collections.emptyList());
+        when(retainedEarningDataService.processTrialBalanceData(Collections.emptyList(), lastDayOfPreviousFiscalYear,
+                PortfolioProductType.LOAN)).thenReturn(Collections.emptyList());
+        when(retainedEarningDataService.fetchTrialBalanceData(WORKING_CAPITAL_REPORT, lastDayOfPreviousFiscalYear))
+                .thenThrow(new IllegalStateException("Working capital report failed"));
+
+        retainedEarningJobReader.beforeStep(stepExecution);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> retainedEarningJobReader.read());
+        assertTrue(exception.getMessage().contains("Working capital report failed"));
     }
 
     @Test

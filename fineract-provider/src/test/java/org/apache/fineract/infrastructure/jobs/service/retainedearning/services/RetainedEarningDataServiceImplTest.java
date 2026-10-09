@@ -43,7 +43,9 @@ import org.apache.fineract.infrastructure.jobs.service.retainedearning.data.Acco
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.helper.DataParser;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.model.AccountGLJournalEntryAnnualSummaryRecord;
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
+import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.repository.WorkingCapitalLoanProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -67,6 +69,9 @@ class RetainedEarningDataServiceImplTest {
     private LoanProductRepository loanProductRepository;
 
     @Mock
+    private WorkingCapitalLoanProductRepository workingCapitalLoanProductRepository;
+
+    @Mock
     private RetainedEarningConfigurationService retainedEarningConfigurationService;
 
     @InjectMocks
@@ -76,9 +81,9 @@ class RetainedEarningDataServiceImplTest {
     void shouldInsertBatchAndMapAllFieldsCorrectly() {
         LocalDate yearEndDate = LocalDate.of(2024, 12, 31);
         List<AccountGLJournalEntryAnnualSummaryData> summaries = List.of(AccountGLJournalEntryAnnualSummaryData.builder()
-                .glAccountCode("400001").productId(10L).officeId(1L).ownerExternalId(ExternalIdFactory.produce("OWNER1"))
-                .originatorExternalIds("ALPHA-01, ZETA-01").openingBalanceAmount(new BigDecimal("1000.50")).yearEndDate(yearEndDate)
-                .currencyCode("USD").manualEntry(false).build());
+                .glAccountCode("400001").productId(10L).productType(PortfolioProductType.LOAN).officeId(1L)
+                .ownerExternalId(ExternalIdFactory.produce("OWNER1")).originatorExternalIds("ALPHA-01, ZETA-01")
+                .openingBalanceAmount(new BigDecimal("1000.50")).yearEndDate(yearEndDate).currencyCode("USD").manualEntry(false).build());
 
         retainedEarningDataService.insertRetainedEarningSummaryBatch(summaries);
 
@@ -92,6 +97,7 @@ class RetainedEarningDataServiceImplTest {
         AccountGLJournalEntryAnnualSummary entity = savedEntities.get(0);
         assertEquals("400001", entity.getGlCode());
         assertEquals(10L, entity.getProductId());
+        assertEquals(PortfolioProductType.LOAN.getValue(), entity.getProductType());
         assertEquals(1L, entity.getOfficeId());
         assertEquals(ExternalIdFactory.produce("OWNER1"), entity.getOwnerExternalId());
         assertEquals("ALPHA-01, ZETA-01", entity.getOriginatorExternalIds());
@@ -101,15 +107,30 @@ class RetainedEarningDataServiceImplTest {
     }
 
     @Test
+    void shouldMapWorkingCapitalLoanProductTypeToEntity() {
+        List<AccountGLJournalEntryAnnualSummaryData> summaries = List.of(AccountGLJournalEntryAnnualSummaryData.builder()
+                .glAccountCode("400001").productId(10L).productType(PortfolioProductType.WORKING_CAPITAL_LOAN).officeId(1L)
+                .ownerExternalId(ExternalIdFactory.produce("self")).openingBalanceAmount(BigDecimal.TEN)
+                .yearEndDate(LocalDate.of(2024, 12, 31)).currencyCode("USD").build());
+
+        retainedEarningDataService.insertRetainedEarningSummaryBatch(summaries);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<AccountGLJournalEntryAnnualSummary>> captor = ArgumentCaptor.forClass(List.class);
+        verify(retainedEarningSummaryRepository).saveAll(captor.capture());
+        assertEquals(PortfolioProductType.WORKING_CAPITAL_LOAN.getValue(), captor.getValue().getFirst().getProductType());
+    }
+
+    @Test
     void shouldInsertMultipleRecordsInBatch() {
         LocalDate yearEndDate = LocalDate.of(2024, 12, 31);
         List<AccountGLJournalEntryAnnualSummaryData> summaries = Arrays.asList(
-                AccountGLJournalEntryAnnualSummaryData.builder().glAccountCode("400001").productId(10L).officeId(1L)
-                        .ownerExternalId(ExternalIdFactory.produce("OWNER1")).openingBalanceAmount(BigDecimal.valueOf(1000))
-                        .yearEndDate(yearEndDate).currencyCode("USD").build(),
-                AccountGLJournalEntryAnnualSummaryData.builder().glAccountCode("500001").productId(10L).officeId(1L)
-                        .ownerExternalId(ExternalIdFactory.produce("OWNER2")).openingBalanceAmount(BigDecimal.valueOf(2000))
-                        .yearEndDate(yearEndDate).currencyCode("EUR").build());
+                AccountGLJournalEntryAnnualSummaryData.builder().glAccountCode("400001").productId(10L)
+                        .productType(PortfolioProductType.LOAN).officeId(1L).ownerExternalId(ExternalIdFactory.produce("OWNER1"))
+                        .openingBalanceAmount(BigDecimal.valueOf(1000)).yearEndDate(yearEndDate).currencyCode("USD").build(),
+                AccountGLJournalEntryAnnualSummaryData.builder().glAccountCode("500001").productId(10L)
+                        .productType(PortfolioProductType.LOAN).officeId(1L).ownerExternalId(ExternalIdFactory.produce("OWNER2"))
+                        .openingBalanceAmount(BigDecimal.valueOf(2000)).yearEndDate(yearEndDate).currencyCode("EUR").build());
 
         retainedEarningDataService.insertRetainedEarningSummaryBatch(summaries);
 
@@ -202,9 +223,10 @@ class RetainedEarningDataServiceImplTest {
 
     @Test
     void shouldMapNullCurrencyCodeWithoutError() {
-        List<AccountGLJournalEntryAnnualSummaryData> summaries = List.of(AccountGLJournalEntryAnnualSummaryData.builder()
-                .glAccountCode("400001").productId(10L).officeId(1L).ownerExternalId(ExternalIdFactory.produce("OWNER1"))
-                .openingBalanceAmount(BigDecimal.ZERO).yearEndDate(LocalDate.of(2024, 12, 31)).currencyCode(null).build());
+        List<AccountGLJournalEntryAnnualSummaryData> summaries = List
+                .of(AccountGLJournalEntryAnnualSummaryData.builder().glAccountCode("400001").productId(10L)
+                        .productType(PortfolioProductType.LOAN).officeId(1L).ownerExternalId(ExternalIdFactory.produce("OWNER1"))
+                        .openingBalanceAmount(BigDecimal.ZERO).yearEndDate(LocalDate.of(2024, 12, 31)).currencyCode(null).build());
 
         retainedEarningDataService.insertRetainedEarningSummaryBatch(summaries);
 

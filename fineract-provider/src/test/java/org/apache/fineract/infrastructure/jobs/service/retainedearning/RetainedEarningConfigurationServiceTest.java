@@ -89,4 +89,19 @@ class RetainedEarningConfigurationServiceTest {
 
         assertEquals("Custom Report", retainedEarningConfigurationService.getReportName());
     }
+
+    @Test
+    void shouldReturnDefaultWorkingCapitalReportNameWhenNotConfigured() {
+        when(configurationDomainService.getRetainedEarningWorkingCapitalUsedByReportName()).thenReturn(null);
+
+        assertEquals(RetainedEarningJobConstant.TRIAL_BALANCE_SUMMARY_FOR_WORKING_CAPITAL_LOANS,
+                retainedEarningConfigurationService.getWorkingCapitalReportName());
+    }
+
+    @Test
+    void shouldReturnConfiguredWorkingCapitalReportName() {
+        when(configurationDomainService.getRetainedEarningWorkingCapitalUsedByReportName()).thenReturn("Custom WC Report");
+
+        assertEquals("Custom WC Report", retainedEarningConfigurationService.getWorkingCapitalReportName());
+    }
 }

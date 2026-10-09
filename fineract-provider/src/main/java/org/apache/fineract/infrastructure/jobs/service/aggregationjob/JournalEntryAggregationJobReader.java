@@ -98,16 +98,23 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
                             loan_product.id,
                             savings_product.id,
                             prov_product.id,
-                            share_product.id
+                            share_product.id,
+                            wc_loan_product.id
                         ) AS productId,
                         acc_gl_account.id AS glAccountId,
                         acc_gl_journal_entry.entity_type_enum AS entityTypeEnum,
                         acc_gl_journal_entry.office_id AS officeId,
                         aw.owner_id AS externalOwner,
-                        (SELECT \s""" + aggregateFunction + """
-                         FROM m_loan_originator_mapping mlom
-                         JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id
-                         WHERE mlom.loan_id = loan.id) AS originatorExternalIds,
+                        CASE acc_gl_journal_entry.entity_type_enum
+                            WHEN 1 THEN (SELECT {aggregateFunction}
+                                         FROM m_loan_originator_mapping mlom
+                                         JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id
+                                         WHERE mlom.loan_id = loan.id)
+                            WHEN 6 THEN (SELECT {aggregateFunction}
+                                         FROM m_wc_loan_originator_mapping mlom
+                                         JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id
+                                         WHERE mlom.loan_id = wc_loan.id)
+                        END AS originatorExternalIds,
                         acc_gl_journal_entry.type_enum,
                         acc_gl_journal_entry.amount,
                         acc_gl_journal_entry.submitted_on_date AS aggregatedOnDate,
@@ -151,6 +158,14 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
                         ON share_product.id = share.product_id
                         AND acc_gl_journal_entry.entity_type_enum = 4
 
+                    -- entity_type_enum = 6 → WORKING CAPITAL LOAN
+                    LEFT JOIN m_wc_loan wc_loan
+                        ON wc_loan.id = acc_gl_journal_entry.entity_id
+                        AND acc_gl_journal_entry.entity_type_enum = 6
+                    LEFT JOIN m_wc_loan_product wc_loan_product
+                        ON wc_loan_product.id = wc_loan.product_id
+                        AND acc_gl_journal_entry.entity_type_enum = 6
+
                     -- external owner
                     LEFT JOIN m_external_asset_owner_journal_entry_mapping aw
                         ON aw.journal_entry_id = acc_gl_journal_entry.id
@@ -167,6 +182,6 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
                     je.currencyCode,
                     je.entityTypeEnum,
                     je.officeId
-                """;
+                """.replace("{aggregateFunction}", aggregateFunction);
     }
 }

@@ -635,6 +635,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
+    public String getRetainedEarningWorkingCapitalUsedByReportName() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(
+                GlobalConfigurationConstants.RETAINED_EARNING_WC_USED_BY_REPORT_NAME);
+        return property.getStringValue();
+    }
+
+    @Override
     public boolean isBackdatedTransactionsDisallowed() {
         return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.DISALLOW_BACKDATED_TRANSACTIONS).isEnabled();
     }

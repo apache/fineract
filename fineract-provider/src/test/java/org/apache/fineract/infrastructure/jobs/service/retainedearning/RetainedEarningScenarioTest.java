@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -37,8 +38,12 @@ import org.apache.fineract.infrastructure.jobs.service.retainedearning.data.Acco
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.helper.DataParser;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.services.RetainedEarningDataServiceImpl;
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.repository.WorkingCapitalLoanProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -76,6 +81,9 @@ class RetainedEarningScenarioTest {
     private LoanProductRepository loanProductRepository;
 
     @Mock
+    private WorkingCapitalLoanProductRepository workingCapitalLoanProductRepository;
+
+    @Mock
     private RetainedEarningConfigurationService retainedEarningConfigurationService;
 
     @InjectMocks
@@ -84,16 +92,23 @@ class RetainedEarningScenarioTest {
     @Mock
     private LoanProduct loanProduct;
 
+    @Mock
+    private WorkingCapitalLoanProduct workingCapitalLoanProduct;
+
     private static final LocalDate FISCAL_YEAR_END = LocalDate.of(2023, 12, 31);
     private static final String RETAINED_EARNING_GL = "320000";
 
     private void setupConfigMocks() {
-        when(retainedEarningConfigurationService.getIncomeExpenseGlAccounts()).thenReturn("400000-899999");
-        when(retainedEarningConfigurationService.getRetainedEarningGlAccount()).thenReturn(RETAINED_EARNING_GL);
+        setupGlAccountConfigMocks();
         when(loanProductRepository.findAllByNameIgnoreCase(any())).thenReturn(List.of(loanProduct));
         when(loanProduct.getId()).thenReturn(1L);
         when(loanProduct.getName()).thenReturn("GPL_DE_PI30");
-        when(loanProduct.getCurrency()).thenReturn(new org.apache.fineract.organisation.monetary.domain.MonetaryCurrency("EUR", 2, null));
+        when(loanProduct.getCurrency()).thenReturn(new MonetaryCurrency("EUR", 2, null));
+    }
+
+    private void setupGlAccountConfigMocks() {
+        when(retainedEarningConfigurationService.getIncomeExpenseGlAccounts()).thenReturn("400000-899999");
+        when(retainedEarningConfigurationService.getRetainedEarningGlAccount()).thenReturn(RETAINED_EARNING_GL);
     }
 
     /**
@@ -107,7 +122,7 @@ class RetainedEarningScenarioTest {
         setupConfigMocks();
 
         List<AccountGLJournalEntryAnnualSummaryData> results = retainedEarningDataService.processTrialBalanceData(trialBalanceData,
-                FISCAL_YEAR_END);
+                FISCAL_YEAR_END, PortfolioProductType.LOAN);
 
         assertFalse(results.isEmpty(), "Should produce results");
 
@@ -147,7 +162,35 @@ class RetainedEarningScenarioTest {
         for (AccountGLJournalEntryAnnualSummaryData result : results) {
             assertEquals(1L, result.getProductId(), "All records should have product ID set");
             assertEquals("EUR", result.getCurrencyCode(), "All records should have currency code set");
+            assertEquals(PortfolioProductType.LOAN, result.getProductType(), "All records should be tagged as loan records");
         }
+        verifyNoInteractions(workingCapitalLoanProductRepository);
+    }
+
+    /**
+     * Working capital loan products live in their own table, so a working capital trial balance must resolve product
+     * names against working capital loan products only, even when a loan product with the same name exists.
+     */
+    @Test
+    void shouldResolveWorkingCapitalLoanProductsFromWorkingCapitalRepository() {
+        List<AccountGLJournalEntryAnnualSummaryData> trialBalanceData = buildSampleTrialBalanceData();
+        setupGlAccountConfigMocks();
+        when(workingCapitalLoanProductRepository.findAllByNameIgnoreCase(any())).thenReturn(List.of(workingCapitalLoanProduct));
+        when(workingCapitalLoanProduct.getId()).thenReturn(7L);
+        when(workingCapitalLoanProduct.getName()).thenReturn("GPL_DE_PI30");
+        when(workingCapitalLoanProduct.getCurrency()).thenReturn(new MonetaryCurrency("USD", 2, null));
+
+        List<AccountGLJournalEntryAnnualSummaryData> results = retainedEarningDataService.processTrialBalanceData(trialBalanceData,
+                FISCAL_YEAR_END, PortfolioProductType.WORKING_CAPITAL_LOAN);
+
+        assertEquals(6, results.size(), "Should have 4 income/expense records and 2 retained earning records");
+        for (AccountGLJournalEntryAnnualSummaryData result : results) {
+            assertEquals(7L, result.getProductId(), "All records should reference the working capital loan product");
+            assertEquals("USD", result.getCurrencyCode(), "All records should use the working capital loan product currency");
+            assertEquals(PortfolioProductType.WORKING_CAPITAL_LOAN, result.getProductType(),
+                    "All records should be tagged as working capital loan records");
+        }
+        verifyNoInteractions(loanProductRepository);
     }
 
     @Test
@@ -160,7 +203,7 @@ class RetainedEarningScenarioTest {
         setupConfigMocks();
 
         List<AccountGLJournalEntryAnnualSummaryData> results = retainedEarningDataService.processTrialBalanceData(trialBalanceData,
-                FISCAL_YEAR_END);
+                FISCAL_YEAR_END, PortfolioProductType.LOAN);
 
         List<AccountGLJournalEntryAnnualSummaryData> retainedEarningResults = results.stream()
                 .filter(r -> r.getGlAccountCode().equals(RETAINED_EARNING_GL)).toList();
@@ -192,7 +235,7 @@ class RetainedEarningScenarioTest {
         setupConfigMocks();
 
         List<AccountGLJournalEntryAnnualSummaryData> results = retainedEarningDataService.processTrialBalanceData(trialBalanceData,
-                FISCAL_YEAR_END);
+                FISCAL_YEAR_END, PortfolioProductType.LOAN);
 
         List<AccountGLJournalEntryAnnualSummaryData> retainedEarningResults = results.stream()
                 .filter(r -> r.getGlAccountCode().equals(RETAINED_EARNING_GL)).toList();
@@ -219,7 +262,7 @@ class RetainedEarningScenarioTest {
         setupConfigMocks();
 
         List<AccountGLJournalEntryAnnualSummaryData> results = retainedEarningDataService.processTrialBalanceData(trialBalanceData,
-                FISCAL_YEAR_END);
+                FISCAL_YEAR_END, PortfolioProductType.LOAN);
 
         assertEquals(2, results.size(), "Should only have income/expense records, no retained earnings");
         assertTrue(results.stream().noneMatch(rec -> rec.getGlAccountCode().equals(RETAINED_EARNING_GL)),
