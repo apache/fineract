@@ -278,6 +278,9 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             }
             reprocessLoanTransactionsService.reprocessTransactions(loan);
             loanLifecycleStateMachine.determineAndTransition(loan, transactionDate);
+        } else {
+            // reprocess skipped: bring stored installment interest up to the business date
+            updateProgressiveInterestModel(loan);
         }
 
         if (loan.isInterestBearingAndInterestRecalculationEnabled() && isAppliedOnBackDate
@@ -397,6 +400,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         businessEventNotifierService.notifyPreBusinessEvent(new LoanWaiveChargeUndoBusinessEvent(loanCharge));
 
         undoWaivedCharge(changes, loan, loanTransaction, loanChargePaidBy);
+        updateProgressiveInterestModel(loan);
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveChargeUndoBusinessEvent(loanCharge));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
@@ -953,6 +957,15 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             changes.put(AMOUNT, amountWaived);
         } else {
             throw new InstallmentNotFoundException(loanTransaction.getId());
+        }
+    }
+
+    // The stored installments must not depend on external event serialization, which recalculates them till the
+    // business date, but not after maturity.
+    private void updateProgressiveInterestModel(final Loan loan) {
+        if (loan.isProgressiveSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()
+                && !loan.isMatured(DateUtils.getBusinessLocalDate())) {
+            reprocessLoanTransactionsService.updateModel(loan);
         }
     }
 
