@@ -43,10 +43,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ParallelExecutionHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -203,35 +205,39 @@ public class SavingsInterestPostingTest extends FeignSavingsTestBase {
 
     @Test
     public void testPostInterestNotZero() {
-        businessDateHelper.runAt("2025-03-12", () -> {
+        businessDateHelper.runAt("2025-02-02", () -> {
             final BigDecimal amountDeposit = new BigDecimal("1000");
             final BigDecimal amountWithdrawal = new BigDecimal("1000");
             final LocalDate startDate = LocalDate.of(2025, Month.JANUARY, 1);
             final LocalDate februaryDate = LocalDate.of(2025, Month.FEBRUARY, 1);
             final LocalDate marchDate = LocalDate.of(2025, Month.MARCH, 1);
 
+            // Start on 2 Feb so only January interest is due
             final Long accountId = createActiveOverdraftAccount(startDate);
             deposit(accountId, amountDeposit.toPlainString(), DATE_FORMATTER.format(startDate));
 
             schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-            final List<SavingsAccountTransactionData> februaryPostings = getInterestTransactions(accountId);
+            final List<SavingsAccountTransactionData> februaryPostings = getInterestTransactions(accountId).stream()
+                    .filter(tx -> februaryDate.equals(tx.getDate())).toList();
             assertFalse(februaryPostings.isEmpty(), "No interest postings were found for February");
             SavingsTestValidators.verifyAmount(
                     interestForPeriod(INTEREST_RATE, amountDeposit, ChronoUnit.DAYS.between(startDate, februaryDate)),
-                    februaryPostings.get(0).getAmount(), "Verifying the February posting");
+                    februaryPostings.getFirst().getAmount(), "Verifying the February posting");
 
             // withdrawing the running balance leaves the account at zero, so the next withdrawal opens the overdraft
-            final BigDecimal runningBalance = februaryPostings.get(0).getRunningBalance();
+            final BigDecimal runningBalance = februaryPostings.getFirst().getRunningBalance();
+            assertNotNull(runningBalance);
             final BigDecimal roundedRunningBalance = runningBalance.setScale(2, RoundingMode.HALF_UP);
-            final String withdrawalDateString = DATE_FORMATTER.format(februaryDate);
-            withdraw(accountId, roundedRunningBalance.toPlainString(), withdrawalDateString);
-            withdraw(accountId, amountWithdrawal.toPlainString(), withdrawalDateString);
+            final BigDecimal overdrawnBalance = amountWithdrawal.subtract(runningBalance.subtract(roundedRunningBalance));
+            withdraw(accountId, roundedRunningBalance.toPlainString(), DATE_FORMATTER.format(februaryDate));
+            withdraw(accountId, amountWithdrawal.toPlainString(), DATE_FORMATTER.format(februaryDate));
 
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2025, Month.MARCH, 12));
             schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-            final BigDecimal overdrawnBalance = amountWithdrawal.subtract(runningBalance.subtract(roundedRunningBalance));
             for (SavingsAccountTransactionData transaction : getInterestTransactions(accountId)) {
+                assertNotNull(transaction.getTransactionType());
                 if (Boolean.TRUE.equals(transaction.getTransactionType().getOverDraftInterestPosting())) {
                     SavingsTestValidators.verifyAmount(
                             interestForPeriod(OVERDRAFT_INTEREST_RATE, overdrawnBalance, ChronoUnit.DAYS.between(februaryDate, marchDate)),
