@@ -3397,6 +3397,19 @@ public class LoanStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_WRITE_OFF_RESPONSE, writeOffResponse);
     }
 
+    @And("Admin makes a recovery payment of {double} on the loan on {string}")
+    public void makeRecoveryPayment(final double transactionAmount, final String transactionDate) {
+        final long loanId = getLoanId();
+        final PostLoansLoanIdTransactionsRequest recoveryRequest = new PostLoansLoanIdTransactionsRequest()//
+                .transactionDate(transactionDate)//
+                .transactionAmount(transactionAmount)//
+                .dateFormat(DATE_FORMAT)//
+                .locale(DEFAULT_LOCALE);
+
+        ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, recoveryRequest,
+                Map.of("command", "recoverypayment")));
+    }
+
     @Then("Write-off transaction is not possible on {string}")
     public void writeOffFailure(final String transactionDate) {
         final long loanId = getLoanId();

@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.client.models.ResultsetColumnHeaderData;
+import org.apache.fineract.client.models.ResultsetRowData;
 import org.apache.fineract.client.models.RunReportsResponse;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
@@ -44,6 +45,8 @@ public class ReportingStepDef extends AbstractStepDef {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
     private static final String TRIAL_BALANCE_REPORT = "Trial Balance Summary Report with Asset Owner";
+    private static final String WC_TRANSACTION_SUMMARY_REPORT = "Transaction Summary Report for Working Capital Loans";
+    private static final String WC_TRANSACTION_SUMMARY_REPORT_WITH_ASSET_OWNER = "Transaction Summary Report with Asset Owner for Working Capital Loans";
     private final FineractFeignClient fineractClient;
 
     @Then("Transaction Summary Report for date {string} has the following data:")
@@ -70,6 +73,22 @@ public class ReportingStepDef extends AbstractStepDef {
     @Then("Transaction Summary Report with Asset Owner for date {string} column {string} has empty value for all rows")
     public void transactionSummaryReportWithAssetOwnerColumnEmpty(final String dateStr, final String columnName) {
         verifyColumnNullability("Transaction Summary Report with Asset Owner", dateStr, columnName, true);
+    }
+
+    @Then("Transaction Summary Report for Working Capital Loans for date {string} has the following data:")
+    public void transactionSummaryReportForWorkingCapitalLoansHasData(final String dateStr, final DataTable dataTable) {
+        verifyReportDataWithEmptyValues(WC_TRANSACTION_SUMMARY_REPORT, dateStr, dataTable);
+    }
+
+    @Then("Transaction Summary Report with Asset Owner for Working Capital Loans for date {string} has the following data:")
+    public void transactionSummaryReportWithAssetOwnerForWorkingCapitalLoansHasData(final String dateStr, final DataTable dataTable) {
+        verifyReportDataWithEmptyValues(WC_TRANSACTION_SUMMARY_REPORT_WITH_ASSET_OWNER, dateStr, dataTable);
+    }
+
+    @Then("Transaction Summary Report with Asset Owner for Working Capital Loans for date {string} has originatorId, asset owner externalId and the following data:")
+    public void transactionSummaryReportWithAssetOwnerForWorkingCapitalLoansHasDataWithOriginatorId(final String dateStr,
+            final DataTable dataTable) {
+        verifyReportDataWithOwnerExternalIdAndOriginatorId(WC_TRANSACTION_SUMMARY_REPORT_WITH_ASSET_OWNER, dateStr, dataTable);
     }
 
     @Then("Trial Balance Summary Report with Asset Owner for date {string} has originatorId, asset owner externalId and the following data:")
@@ -106,17 +125,30 @@ public class ReportingStepDef extends AbstractStepDef {
         verifyReportData(reportName, response, expected, headers);
     }
 
+    private void verifyReportDataWithEmptyValues(final String reportName, final String dateStr, final DataTable dataTable) {
+        final RunReportsResponse response = executeReport(reportName, dateStr);
+
+        final List<List<String>> expected = dataTable.asLists();
+        final List<String> headers = expected.getFirst();
+
+        verifyReportDataWithEmptyValues(reportName, response, expected, headers);
+    }
+
     private List<List<String>> verifyReportDataHeaders(final String reportName, final RunReportsResponse response,
             final List<List<String>> expected, List<String> headers) {
-        assertThat(response.getColumnHeaders()).isNotNull();
-        final int[] colIdx = headers.stream().mapToInt(h -> findColumnIndex(response.getColumnHeaders(), h)).toArray();
+        final List<ResultsetColumnHeaderData> columnHeaders = response.getColumnHeaders();
+        assertThat(columnHeaders).isNotNull();
+        final int[] colIdx = headers.stream().mapToInt(h -> findColumnIndex(columnHeaders, h)).toArray();
 
-        final List<List<String>> actual = response.getData().stream().map(row -> {
-            assertThat(row.getRow()).as("Report '%s' returned a row with null cell list", reportName).isNotNull();
+        final List<ResultsetRowData> data = response.getData();
+        assertThat(data).as("Report '%s' returned no data", reportName).isNotNull();
+        final List<List<String>> actual = data.stream().map(row -> {
+            final List<Object> cells = row.getRow();
+            assertThat(cells).as("Report '%s' returned a row with null cell list", reportName).isNotNull();
             return IntStream.of(colIdx).mapToObj(i -> {
-                assertThat(i).as("Report '%s': column index %d is out of bounds (row size: %d)", reportName, i, row.getRow().size())
-                        .isLessThan(row.getRow().size());
-                return stringify(row.getRow().get(i));
+                assertThat(i).as("Report '%s': column index %d is out of bounds (row size: %d)", reportName, i, cells.size())
+                        .isLessThan(cells.size());
+                return stringify(cells.get(i));
             }).toList();
         }).toList();
 
@@ -150,7 +182,10 @@ public class ReportingStepDef extends AbstractStepDef {
             final List<String> actRow = actual.get(i - 1);
             for (int j = 0; j < headers.size(); j++) {
                 if (expRow.get(j).isEmpty()) {
-                    assertThat(actRow.get(j).isEmpty() || actRow.get(j).equals("null")).isTrue();
+                    if (!actRow.get(j).isEmpty() && !"null".equals(actRow.get(j))) {
+                        fail("Report '%s', row %d, column '%s': expected empty value, actual='%s'\nAll actual rows:\n%s", reportName, i,
+                                headers.get(j), actRow.get(j), formatRows(actual));
+                    }
                     continue;
                 }
                 if (!valuesMatch(expRow.get(j), actRow.get(j))) {
@@ -273,11 +308,14 @@ public class ReportingStepDef extends AbstractStepDef {
             final boolean expectEmpty) {
         final RunReportsResponse response = executeReport(reportName, dateStr);
 
-        assertThat(response.getColumnHeaders()).isNotNull();
-        final int colIdx = findColumnIndex(response.getColumnHeaders(), columnName);
+        final List<ResultsetColumnHeaderData> columnHeaders = response.getColumnHeaders();
+        assertThat(columnHeaders).isNotNull();
+        final int colIdx = findColumnIndex(columnHeaders, columnName);
 
-        for (int i = 0; i < response.getData().size(); i++) {
-            final List<Object> row = response.getData().get(i).getRow();
+        final List<ResultsetRowData> data = response.getData();
+        assertThat(data).as("Report '%s' returned no data", reportName).isNotNull();
+        IntStream.range(0, data.size()).forEach(i -> {
+            final List<Object> row = data.get(i).getRow();
             assertThat(row).as("Report '%s', row %d: null cell list", reportName, i + 1).isNotNull();
             assertThat(colIdx).as("Report '%s', row %d: column index out of bounds", reportName, i + 1).isLessThan(row.size());
             final String value = stringify(row.get(colIdx));
@@ -289,7 +327,7 @@ public class ReportingStepDef extends AbstractStepDef {
                 assertThat(isEmpty).as("Report '%s', row %d, column '%s': expected non-empty but was empty", reportName, i + 1, columnName)
                         .isFalse();
             }
-        }
+        });
     }
 
     private RunReportsResponse executeReport(final String reportName, final String dateStr) {
@@ -304,10 +342,15 @@ public class ReportingStepDef extends AbstractStepDef {
     }
 
     private BigDecimal sumColumnForGlAccount(final RunReportsResponse response, final String glCode, final String columnName) {
-        final int glIdx = findColumnIndex(response.getColumnHeaders(), "glacct");
-        final int colIdx = findColumnIndex(response.getColumnHeaders(), columnName);
-        return response.getData().stream().filter(r -> r.getRow() != null && glCode.equals(stringify(r.getRow().get(glIdx))))
-                .map(r -> new BigDecimal(Objects.toString(r.getRow().get(colIdx), "0"))).reduce(BigDecimal::add).orElse(null);
+        final List<ResultsetColumnHeaderData> columnHeaders = response.getColumnHeaders();
+        assertThat(columnHeaders).isNotNull();
+        final int glIdx = findColumnIndex(columnHeaders, "glacct");
+        final int colIdx = findColumnIndex(columnHeaders, columnName);
+
+        final List<ResultsetRowData> data = response.getData();
+        assertThat(data).isNotNull();
+        return data.stream().map(ResultsetRowData::getRow).filter(Objects::nonNull).filter(row -> glCode.equals(stringify(row.get(glIdx))))
+                .map(row -> new BigDecimal(Objects.toString(row.get(colIdx), "0"))).reduce(BigDecimal::add).orElse(null);
     }
 
     private boolean valuesMatch(final String expected, final String actual) {
