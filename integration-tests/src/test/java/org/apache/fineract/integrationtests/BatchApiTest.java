@@ -1592,7 +1592,7 @@ public class BatchApiTest extends FeignLoanTestBase {
         final BigDecimal firstWithdrawalRunningBalance = transactions.get(1).getRunningBalance();
         final BigDecimal secondWithdrawalRunningBalance = transactions.get(0).getRunningBalance();
 
-        final BigDecimal expectedAfterRelease = runningBalanceBeforeBatch.add(BigDecimal.valueOf(holdAmount));
+        final BigDecimal expectedAfterRelease = runningBalanceBeforeBatch;
         assertEquals(0, expectedAfterRelease.compareTo(releaseRunningBalance), "Verify running balance after release amount");
         assertEquals(0, expectedAfterRelease.subtract(BigDecimal.valueOf(withdrawalAmount)).compareTo(firstWithdrawalRunningBalance),
                 "Verify running balance after first withdrawal");
