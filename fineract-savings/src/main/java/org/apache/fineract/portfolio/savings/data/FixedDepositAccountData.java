@@ -56,6 +56,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
     private EnumOptionData depositPeriodFrequency;
     private BigDecimal activationCharge;
     private Long transferToSavingsId;
+    private boolean isRateChartOverridden;
 
     // used for account close
     private EnumOptionData onAccountClosure;
@@ -129,6 +130,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
         this.submittedOnDate = submittedOnDate;
         this.depositPeriodFrequencyId = depositPeriodFrequencyId;
         this.maturityInstructionOptions = null;
+        this.isRateChartOverridden = false;
     }
 
     public static FixedDepositAccountData instance(final DepositAccountData depositAccountData, final boolean preClosurePenalApplicable,
@@ -137,7 +139,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
             final Integer inMultiplesOfDepositTerm, final EnumOptionData inMultiplesOfDepositTermType, final BigDecimal depositAmount,
             final BigDecimal maturityAmount, final LocalDate maturityDate, final Integer depositPeriod,
             final EnumOptionData depositPeriodFrequency, final EnumOptionData onAccountClosure, final Boolean transferInterestToSavings,
-            final Long transferToSavingsId) {
+            final Long transferToSavingsId, final boolean isRateChartOverridden) {
 
         final PortfolioAccountData linkedAccount = null;
         final PortfolioAccountData transferToSavingsAccount = null;
@@ -169,7 +171,8 @@ public final class FixedDepositAccountData extends DepositAccountData {
                 maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate,
                 depositPeriod, depositPeriodFrequency, periodFrequencyTypeOptions, depositType, onAccountClosure, onAccountClosureOptions,
                 paymentTypeOptions, savingsAccountDatas, linkedAccount, transferInterestToSavings, depositAccountData.withHoldTax,
-                depositAccountData.taxGroup, maturityInstructionOptions, transferToSavingsId, transferToSavingsAccount);
+                depositAccountData.taxGroup, maturityInstructionOptions, transferToSavingsId, transferToSavingsAccount,
+                isRateChartOverridden);
     }
 
     public static FixedDepositAccountData withInterestChart(final FixedDepositAccountData account,
@@ -191,7 +194,8 @@ public final class FixedDepositAccountData extends DepositAccountData {
                 account.depositPeriod, account.depositPeriodFrequency, account.periodFrequencyTypeOptions, account.depositType,
                 account.onAccountClosure, account.onAccountClosureOptions, account.paymentTypeOptions, account.savingsAccounts,
                 account.linkedAccount, account.transferInterestToSavings, account.withHoldTax, account.taxGroup,
-                account.maturityInstructionOptions, account.transferToSavingsId, account.transferToSavingsAccount);
+                account.maturityInstructionOptions, account.transferToSavingsId, account.transferToSavingsAccount,
+                account.isRateChartOverridden);
     }
 
     public static FixedDepositAccountData associationsAndTemplate(final FixedDepositAccountData account, FixedDepositAccountData template,
@@ -219,7 +223,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
                 account.depositPeriod, account.depositPeriodFrequency, template.periodFrequencyTypeOptions, account.depositType,
                 account.onAccountClosure, account.onAccountClosureOptions, account.paymentTypeOptions, template.savingsAccounts,
                 linkedAccount, account.transferInterestToSavings, account.withHoldTax, account.taxGroup, account.maturityInstructionOptions,
-                account.transferToSavingsId, transferToSavingsAccount);
+                account.transferToSavingsId, transferToSavingsAccount, account.isRateChartOverridden);
     }
 
     public static FixedDepositAccountData withTemplateOptions(final FixedDepositAccountData account,
@@ -250,7 +254,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
                 account.depositPeriod, account.depositPeriodFrequency, periodFrequencyTypeOptions, account.depositType,
                 account.onAccountClosure, account.onAccountClosureOptions, account.paymentTypeOptions, savingsAccounts,
                 account.linkedAccount, account.transferInterestToSavings, account.withHoldTax, account.taxGroup, maturityInstructionOptions,
-                account.transferToSavingsId, account.transferToSavingsAccount);
+                account.transferToSavingsId, account.transferToSavingsAccount, account.isRateChartOverridden);
     }
 
     public static FixedDepositAccountData withClientTemplate(final Long clientId, final String clientName, final Long groupId,
@@ -322,6 +326,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
         final Collection<SavingsAccountData> savingsAccountDatas = null;
         final Collection<EnumOptionData> maturityInstructionOptions = null;
         final Long transferToSavingsId = null;
+        final boolean isRateChartOverridden = false;
 
         return new FixedDepositAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                 fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestPeriodType,
@@ -334,8 +339,8 @@ public final class FixedDepositAccountData extends DepositAccountData {
                 maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType,
                 depositAmount, maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, periodFrequencyTypeOptions, depositType,
                 onAccountClosure, onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, linkedAccount,
-                transferInterestToSavings, withHoldTax, taxGroup, maturityInstructionOptions, transferToSavingsId,
-                transferToSavingsAccount);
+                transferInterestToSavings, withHoldTax, taxGroup, maturityInstructionOptions, transferToSavingsId, transferToSavingsAccount,
+                isRateChartOverridden);
     }
 
     public static FixedDepositAccountData preClosureDetails(final Long accountId, BigDecimal maturityAmount,
@@ -407,6 +412,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
         final Collection<EnumOptionData> maturityInstructionOptions = null;
         final Long transferToSavingsId = null;
         final PortfolioAccountData transferToSavingsAccount = null;
+        final boolean isRateChartOverridden = false;
 
         return new FixedDepositAccountData(accountId, accountNo, externalId, groupId, groupName, clientId, clientName, productId,
                 productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestPeriodType,
@@ -419,8 +425,8 @@ public final class FixedDepositAccountData extends DepositAccountData {
                 maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType,
                 depositAmount, maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, periodFrequencyTypeOptions, depositType,
                 onAccountClosure, onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, linkedAccount,
-                transferInterestToSavings, withHoldTax, taxGroup, maturityInstructionOptions, transferToSavingsId,
-                transferToSavingsAccount);
+                transferInterestToSavings, withHoldTax, taxGroup, maturityInstructionOptions, transferToSavingsId, transferToSavingsAccount,
+                isRateChartOverridden);
     }
 
     public static FixedDepositAccountData withClosureTemplateDetails(final FixedDepositAccountData account,
@@ -444,7 +450,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
                 account.depositPeriod, account.depositPeriodFrequency, account.periodFrequencyTypeOptions, account.depositType,
                 account.onAccountClosure, onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, account.linkedAccount,
                 account.transferInterestToSavings, account.withHoldTax, account.taxGroup, account.maturityInstructionOptions,
-                account.transferToSavingsId, account.transferToSavingsAccount);
+                account.transferToSavingsId, account.transferToSavingsAccount, account.isRateChartOverridden);
 
     }
 
@@ -476,7 +482,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
             final Collection<PaymentTypeData> paymentTypeOptions, final Collection<SavingsAccountData> savingsAccountDatas,
             final PortfolioAccountData linkedAccount, final Boolean transferInterestToSavings, final boolean withHoldTax,
             final TaxGroupData taxGroup, final Collection<EnumOptionData> maturityInstructionOptions, final Long transferToSavingsId,
-            final PortfolioAccountData transferToSavingsAccount) {
+            final PortfolioAccountData transferToSavingsAccount, final boolean isRateChartOverridden) {
 
         super(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName, fieldofficerId, fieldofficerName,
                 status, timeline, currency, nominalAnnualInterestRate, interestPeriodType, interestPostingPeriodType,
@@ -515,6 +521,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
         this.savingsAccounts = savingsAccountDatas;
         this.maturityInstructionOptions = maturityInstructionOptions;
         this.transferToSavingsId = transferToSavingsId;
+        this.isRateChartOverridden = isRateChartOverridden;
     }
 
     @Override
