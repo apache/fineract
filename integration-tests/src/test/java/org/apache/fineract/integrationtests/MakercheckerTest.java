@@ -56,7 +56,6 @@ public class MakercheckerTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private MakercheckersHelper makercheckersHelper;
-    private RolesHelper rolesHelper;
     private SavingsProductHelper savingsProductHelper;
     private SavingsAccountHelper savingsAccountHelper;
     private static final String START_DATE_STRING = "03 June 2023";
@@ -70,7 +69,6 @@ public class MakercheckerTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.makercheckersHelper = new MakercheckersHelper(this.requestSpec, this.responseSpec);
-        this.rolesHelper = new RolesHelper();
         this.savingsProductHelper = new SavingsProductHelper();
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.globalConfigurationHelper = new GlobalConfigurationHelper();
@@ -95,19 +93,18 @@ public class MakercheckerTest {
         try {
             // client permission - maker-checker disabled
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
             putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
 
-            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            Long roleId = RolesHelper.createRole().getResourceId();
             Map<String, Boolean> permissionMap = Map.of("CREATE_CLIENT", true, "CREATE_CLIENT_CHECKER", true, "ACTIVATE_CLIENT", true,
                     "ACTIVATE_CLIENT_CHECKER", true, "WITHDRAWAL_SAVINGSACCOUNT", true, "WITHDRAWAL_SAVINGSACCOUNT_CHECKER", true);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
+            RolesHelper.addPermissionsToRole(roleId, permissionMap);
             final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
             // create maker user
             String maker = Utils.uniqueRandomStringGenerator("user", 8);
-            final Integer makerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker,
-                    "A1b2c3d4e5f$", "resourceId");
+            final Long makerUserId = UserHelper.createUser(roleId, staffId.longValue(), maker, "A1b2c3d4e5f$").getResourceId();
 
             // create client - maker-checker disabled
             RequestSpecification makerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
@@ -124,9 +121,9 @@ public class MakercheckerTest {
 
             // client and saving permission - maker-checker enabled
             putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", true);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
             putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("WITHDRAWAL_SAVINGSACCOUNT", true);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
 
             // create client - maker-checker enabled
             clientId = ClientHelper.createClient(makerRequestSpec, this.responseSpec);
@@ -155,8 +152,7 @@ public class MakercheckerTest {
 
             // create checker user
             String checker = Utils.uniqueRandomStringGenerator("user", 8);
-            final Integer checkerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, checker,
-                    "A1b2c3d4e5f$", "resourceId");
+            final Long checkerUserId = UserHelper.createUser(roleId, staffId.longValue(), checker, "A1b2c3d4e5f$").getResourceId();
             RequestSpecification checkerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
                     .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(checker, "A1b2c3d4e5f$"));
 
@@ -174,7 +170,7 @@ public class MakercheckerTest {
 
             // add checker superuser permission - actions are performed in one step
             permissionMap = Map.of("CHECKER_SUPER_USER", true);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
+            RolesHelper.addPermissionsToRole(roleId, permissionMap);
             clientId = ClientHelper.createClient(makerRequestSpec, this.responseSpec);
             assertNotNull(clientId);
             ClientHelper.verifyClientCreatedOnServer(requestSpec, this.responseSpec, clientId);
@@ -192,9 +188,9 @@ public class MakercheckerTest {
 
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("WITHDRAWAL_SAVINGSACCOUNT",
                     false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
             putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
         }
     }
 
@@ -211,22 +207,21 @@ public class MakercheckerTest {
         try {
             // enable maker-checker for datatable creation
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", true);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
 
             // create role with permissions for maker and checker
-            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            Long roleId = RolesHelper.createRole().getResourceId();
             Map<String, Boolean> permissionMap = Map.of("CREATE_DATATABLE", true, "CREATE_DATATABLE_CHECKER", true);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
+            RolesHelper.addPermissionsToRole(roleId, permissionMap);
 
             // create maker user
             Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
             String maker = Utils.uniqueRandomStringGenerator("user", 8);
-            Integer makerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker,
-                    "A1b2c3d4e5f$", "resourceId");
+            Long makerUserId = UserHelper.createUser(roleId, staffId.longValue(), maker, "A1b2c3d4e5f$").getResourceId();
 
             // create checker user
             String checker = Utils.uniqueRandomStringGenerator("user", 8);
-            UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, checker, "A1b2c3d4e5f$", "resourceId");
+            UserHelper.createUser(roleId, staffId.longValue(), checker, "A1b2c3d4e5f$");
 
             RequestSpecification makerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
                     .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker, "A1b2c3d4e5f$"));
@@ -251,7 +246,7 @@ public class MakercheckerTest {
             // verify the datatable no longer exists by trying to create it again
             // verify without maker checker, so transaction rollback in postgres doesn't break the test
             putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
 
             DatatableHelper adminDatatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
             String recreatedName = adminDatatableHelper.createDatatable(datatableJson, "resourceIdentifier");
@@ -266,7 +261,7 @@ public class MakercheckerTest {
                     new PutGlobalConfigurationsRequest().enabled(true));
 
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
         }
     }
 
@@ -279,17 +274,17 @@ public class MakercheckerTest {
 
         try {
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", true);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
 
-            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            Long roleId = RolesHelper.createRole().getResourceId();
             Map<String, Boolean> permissionMap = Map.of("CREATE_CLIENT", true, "CREATE_CLIENT_CHECKER", true, "ACTIVATE_CLIENT", true);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
+            RolesHelper.addPermissionsToRole(roleId, permissionMap);
             final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
 
             String maker1 = Utils.uniqueRandomStringGenerator("user", 8);
             String maker2 = Utils.uniqueRandomStringGenerator("user", 8);
-            UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker1, "A1b2c3d4e5f$", "resourceId");
-            UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker2, "A1b2c3d4e5f$", "resourceId");
+            UserHelper.createUser(roleId, staffId.longValue(), maker1, "A1b2c3d4e5f$");
+            UserHelper.createUser(roleId, staffId.longValue(), maker2, "A1b2c3d4e5f$");
 
             RequestSpecification maker1RequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
                     .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker1, "A1b2c3d4e5f$"));
@@ -317,7 +312,7 @@ public class MakercheckerTest {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
                     new PutGlobalConfigurationsRequest().enabled(true));
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
         }
     }
 
@@ -330,16 +325,15 @@ public class MakercheckerTest {
 
         try {
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", true);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
 
-            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            Long roleId = RolesHelper.createRole().getResourceId();
             Map<String, Boolean> permissionMap = Map.of("CREATE_CLIENT", true, "CREATE_CLIENT_CHECKER", true, "ACTIVATE_CLIENT", true);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
+            RolesHelper.addPermissionsToRole(roleId, permissionMap);
             final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
 
             String maker = Utils.uniqueRandomStringGenerator("user", 8);
-            final Integer makerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker,
-                    "A1b2c3d4e5f$", "resourceId");
+            final Long makerUserId = UserHelper.createUser(roleId, staffId.longValue(), maker, "A1b2c3d4e5f$").getResourceId();
             RequestSpecification makerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
                     .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker, "A1b2c3d4e5f$"));
 
@@ -363,7 +357,7 @@ public class MakercheckerTest {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
                     new PutGlobalConfigurationsRequest().enabled(true));
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            RolesHelper.updatePermissions(putPermissionsRequest);
         }
     }
 

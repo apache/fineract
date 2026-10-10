@@ -19,15 +19,20 @@
 
 package org.apache.fineract.integrationtests;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.ResponseBody;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdRequest;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
@@ -54,9 +59,10 @@ import org.slf4j.LoggerFactory;
 public class UserAdministrationTest extends IntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserAdministrationTest.class);
+    private static final Gson GSON = new Gson();
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
-    private List<Integer> transientUsers = new ArrayList<>();
+    private List<Long> transientUsers = new ArrayList<>();
 
     private ResponseSpecification expectStatusCode(int code) {
         return new ResponseSpecBuilder().expectStatusCode(code).build();
@@ -72,28 +78,32 @@ public class UserAdministrationTest extends IntegrationTest {
 
     @AfterEach
     public void tearDown() {
-        for (Integer userId : this.transientUsers) {
-            UserHelper.deleteUser(this.requestSpec, this.responseSpec, userId);
+        for (Long userId : this.transientUsers) {
+            UserHelper.deleteUser(userId);
         }
         this.transientUsers.clear();
     }
 
     @Test
-    public void testCreateNewUserBlocksDuplicateUsername() {
+    public void testCreateNewUserBlocksDuplicateUsername() throws IOException {
 
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = RolesHelper.createRole().getResourceId();
         Assertions.assertNotNull(roleId);
 
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
-                "resourceId");
+        final Long userId = UserHelper.createUser(roleId, staffId.longValue(), "alphabet").getResourceId();
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final List errors = (List) UserHelper.createUser(this.requestSpec, expectStatusCode(403), roleId, staffId, "alphabet", "errors");
-        Map reason = (Map) errors.get(0);
+        final CallFailedRuntimeException e = Assertions.assertThrows(CallFailedRuntimeException.class,
+                () -> UserHelper.createUser(roleId, staffId.longValue(), "alphabet"));
+        Assertions.assertEquals(403, e.getResponse().code());
+
+        final ResponseBody errors = e.getResponse().errorBody();
+        Assertions.assertNotNull(errors);
+        final Map reason = GSON.fromJson(errors.string(), Map.class);
         LOG.info("Reason: {}", reason.get("defaultUserMessage"));
         LOG.info("Code: {}", reason.get("userMessageGlobalisationCode"));
         Assertions.assertEquals("User with username alphabet already exists.", reason.get("defaultUserMessage"));
@@ -102,69 +112,65 @@ public class UserAdministrationTest extends IntegrationTest {
 
     @Test
     public void testUpdateUserAcceptsNewOrSameUsername() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = RolesHelper.createRole().getResourceId();
         Assertions.assertNotNull(roleId);
 
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
-                "resourceId");
+        final Long userId = UserHelper.createUser(roleId, staffId.longValue(), "alphabet").getResourceId();
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final Integer userId2 = (Integer) UserHelper.updateUser(this.requestSpec, this.responseSpec, userId, "renegade", "resourceId");
+        final Long userId2 = UserHelper.updateUser(userId).getResourceId();
         Assertions.assertNotNull(userId2);
 
-        final Integer userId3 = (Integer) UserHelper.updateUser(this.requestSpec, this.responseSpec, userId, "renegade", "resourceId");
+        final Long userId3 = UserHelper.updateUser(userId).getResourceId();
         Assertions.assertNotNull(userId3);
     }
 
     @Test
     public void testUpdateUserBlockDuplicateUsername() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Long roleId = RolesHelper.createRole().getResourceId();
         Assertions.assertNotNull(roleId);
 
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
-                "resourceId");
+        final Long userId = UserHelper.createUser(roleId, staffId.longValue(), "alphabet").getResourceId();
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final Integer userId2 = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "bilingual",
-                "resourceId");
+        final Long userId2 = UserHelper.createUser(roleId, staffId.longValue(), "bilingual").getResourceId();
         Assertions.assertNotNull(userId2);
         this.transientUsers.add(userId2);
 
-        final List errors = (List) UserHelper.updateUser(this.requestSpec, expectStatusCode(403), userId2, "alphabet", "errors");
-        Map reason = (Map) errors.get(0);
-        Assertions.assertEquals("User with username alphabet already exists.", reason.get("defaultUserMessage"));
-        Assertions.assertEquals("error.msg.user.duplicate.username", reason.get("userMessageGlobalisationCode"));
+        final CallFailedRuntimeException e = Assertions.assertThrows(CallFailedRuntimeException.class,
+                () -> UserHelper.updateUser(userId2));
+        Assertions.assertEquals(403, e.getResponse().code());
     }
 
     @Test
     public void testModifySystemUser() {
-        final Integer userId = UserHelper.getUserId(requestSpec, responseSpec, AppUserConstants.SYSTEM_USER_NAME);
+        final Long userId = UserHelper.getUserId(AppUserConstants.SYSTEM_USER_NAME);
         Assertions.assertNotNull(userId);
 
-        final List errors = (List) UserHelper.updateUser(this.requestSpec, expectStatusCode(403), userId, "systemtest", "errors");
+        final CallFailedRuntimeException e = Assertions.assertThrows(CallFailedRuntimeException.class, () -> UserHelper.updateUser(userId));
+        Assertions.assertEquals(403, e.getResponse().code());
     }
 
     @Test
     public void testApplicationUserCanUpdateOwnPassword() {
         // Admin creates a new user with an empty role
-        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        Long roleId = RolesHelper.createRole().getResourceId();
         String originalPassword = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
         PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername).firstname(Utils.randomFirstNameGenerator())
                 .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(originalPassword)
-                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId())
-                .roles(List.of(Long.valueOf(roleId)));
+                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(roleId));
 
-        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        PostUsersResponse userCreationResponse = UserHelper.createUser(createUserRequest);
         Long userId = userCreationResponse.getResourceId();
         Assertions.assertNotNull(userId);
 
@@ -188,16 +194,15 @@ public class UserAdministrationTest extends IntegrationTest {
     @Test
     public void testApplicationUserCanChangeOwnPassword() {
         // Admin creates a new user with an empty role
-        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        Long roleId = RolesHelper.createRole().getResourceId();
         String originalPassword = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
         PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername).firstname(Utils.randomFirstNameGenerator())
                 .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(originalPassword)
-                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId())
-                .roles(List.of(Long.valueOf(roleId)));
+                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(roleId));
 
-        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        PostUsersResponse userCreationResponse = UserHelper.createUser(createUserRequest);
         Long userId = userCreationResponse.getResourceId();
         Assertions.assertNotNull(userId);
 
@@ -222,7 +227,7 @@ public class UserAdministrationTest extends IntegrationTest {
     @Test
     public void testApplicationUserShallNotBeAbleToChangeItsOwnRoles() {
         // Admin creates a new user with one role assigned
-        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        Long roleId = RolesHelper.createRole().getResourceId();
         String password = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
@@ -230,12 +235,12 @@ public class UserAdministrationTest extends IntegrationTest {
                 .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(password).repeatPassword(password)
                 .sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
 
-        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        PostUsersResponse userCreationResponse = UserHelper.createUser(createUserRequest);
         Long userId = userCreationResponse.getResourceId();
         Assertions.assertNotNull(userId);
 
         // Admin creates a second role
-        Integer roleId2 = RolesHelper.createRole(requestSpec, responseSpec);
+        Long roleId2 = RolesHelper.createRole().getResourceId();
 
         // User tries to update it's own roles
         CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
@@ -251,8 +256,8 @@ public class UserAdministrationTest extends IntegrationTest {
     public void testUserCreationWithValidPassword() {
         String validPassword = "Abcdef1#2$3%XYZ";
 
-        PostUsersRequest createUserRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, validPassword);
-        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        PostUsersRequest createUserRequest = UserHelper.buildUserRequest(validPassword);
+        PostUsersResponse userCreationResponse = UserHelper.createUser(createUserRequest);
 
         Assertions.assertNotNull(userCreationResponse.getResourceId());
     }
@@ -271,8 +276,8 @@ public class UserAdministrationTest extends IntegrationTest {
         this.responseSpec = new ResponseSpecBuilder().build();
 
         invalidPasswords.forEach((description, password) -> {
-            PostUsersRequest createUserRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, password);
-            JsonObject jsonResponse = UserHelper.createUserWithJsonResponse(requestSpec, responseSpec, createUserRequest);
+            PostUsersRequest createUserRequest = UserHelper.buildUserRequest(password);
+            JsonObject jsonResponse = UserHelper.createUserWithJsonResponse(createUserRequest);
             Assertions.assertEquals("400", jsonResponse.get("httpStatusCode").getAsString(), "Expected HTTP 400 for: " + description);
             Assertions.assertEquals("validation.msg.validation.errors.exist",
                     jsonResponse.get("userMessageGlobalisationCode").getAsString(), "Expected user message code for: " + description);

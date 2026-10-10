@@ -48,7 +48,7 @@ public class PasswordResetIntegrationTest extends IntegrationTest {
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
     private GlobalConfigurationHelper globalConfigurationHelper;
-    private List<Integer> transientUsers = new ArrayList<>();
+    private List<Long> transientUsers = new ArrayList<>();
 
     @BeforeEach
     public void setup() {
@@ -64,8 +64,8 @@ public class PasswordResetIntegrationTest extends IntegrationTest {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_PASSWORD_RESET_ON_FIRST_LOGIN,
                 new PutGlobalConfigurationsRequest().value(0L).enabled(false));
 
-        for (Integer userId : this.transientUsers) {
-            UserHelper.deleteUser(this.requestSpec, this.responseSpec, userId);
+        for (Long userId : this.transientUsers) {
+            UserHelper.deleteUser(userId);
         }
         this.transientUsers.clear();
     }
@@ -76,11 +76,11 @@ public class PasswordResetIntegrationTest extends IntegrationTest {
                 new PutGlobalConfigurationsRequest().value(0L).enabled(true));
 
         String password = "Abcdef1#2$3%XYZ";
-        PostUsersRequest userRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, password);
-        PostUsersResponse userResponse = UserHelper.createUser(requestSpec, responseSpec, userRequest);
+        PostUsersRequest userRequest = UserHelper.buildUserRequest(password);
+        PostUsersResponse userResponse = UserHelper.createUser(userRequest);
         Long userId = userResponse.getResourceId();
         assertNotNull(userId, "User creation failed to return an ID!");
-        this.transientUsers.add(userId.intValue());
+        this.transientUsers.add(userId);
         String username = userRequest.getUsername();
 
         Response loginResponse = attemptLogin(username, password);
@@ -100,10 +100,10 @@ public class PasswordResetIntegrationTest extends IntegrationTest {
                 new PutGlobalConfigurationsRequest().value(0L).enabled(false));
 
         String password = "Abcdef1#2$3%XYZ";
-        PostUsersRequest userRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, password);
-        PostUsersResponse userResponse = UserHelper.createUser(requestSpec, responseSpec, userRequest);
+        PostUsersRequest userRequest = UserHelper.buildUserRequest(password);
+        PostUsersResponse userResponse = UserHelper.createUser(userRequest);
         assertNotNull(userResponse.getResourceId(), "User creation failed!");
-        this.transientUsers.add(userResponse.getResourceId().intValue());
+        this.transientUsers.add(userResponse.getResourceId());
         String username = userRequest.getUsername();
 
         Response loginResponse = attemptLogin(username, password);

@@ -200,7 +200,7 @@ final class RolesApiResourceSwagger {
 
             }
 
-            @Schema(example = "\"CREATE_GUARANTOR\":true,\n" + "    \"CREATE_CLIENT\":true")
+            @Schema(example = "{\"CREATE_GUARANTOR\": true, \"CREATE_CLIENT\": true}")
             public Map<String, Boolean> permissions;
         }
 
