@@ -60,6 +60,14 @@ Follow these steps to quickly set up and run Apache Fineract locally.
 - [Java JDK](https://fineract.apache.org/docs/develop/#_fineract_development_environment)
 - PostgreSQL running locally, listening on port 5432 with proper permissions (see [below](#database-and-tables) for how to run PostgreSQL in Docker)
 
+> [!NOTE]
+> If your JVM's default timezone is a deprecated IANA zone name, `createPGDB` and `devRun`
+> fail with `FATAL: invalid value for parameter "TimeZone"`. The JDBC driver sends the JVM's
+> zone name on connect, and recent PostgreSQL images no longer carry the legacy zone aliases.
+> Java on Windows with India regional settings reports `Asia/Calcutta`, for example, where
+> PostgreSQL expects `Asia/Kolkata`. Start the JVM with the current name for your zone:
+> `-Duser.timezone=Asia/Kolkata`.
+
 ```bash
 # get code
 git clone https://github.com/apache/fineract.git
