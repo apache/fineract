@@ -56,6 +56,7 @@ public final class LoanScheduleValidator {
             LoanApiConstants.interestRatePerPeriodParameterName, LoanApiConstants.repaymentEveryParameterName,
             LoanApiConstants.numberOfRepaymentsParameterName, LoanApiConstants.loanTermFrequencyParameterName,
             LoanApiConstants.loanTermFrequencyTypeParameterName, LoanApiConstants.repaymentFrequencyTypeParameterName,
+            LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH, LoanApiConstants.SECOND_REPAYMENT_DAY_OF_MONTH,
             LoanApiConstants.amortizationTypeParameterName, LoanApiConstants.interestTypeParameterName,
             LoanApiConstants.interestCalculationPeriodTypeParameterName,
             LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,

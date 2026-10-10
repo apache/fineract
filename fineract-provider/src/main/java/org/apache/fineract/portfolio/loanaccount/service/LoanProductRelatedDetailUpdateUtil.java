@@ -123,6 +123,21 @@ public class LoanProductRelatedDetailUpdateUtil {
             actualChanges.put("locale", localeAsInput);
             loanRepaymentScheduleDetail.setRepaymentPeriodFrequencyType(PeriodFrequencyType.fromInt(newValue));
         }
+
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH,
+                loanRepaymentScheduleDetail.getFirstRepaymentDayOfMonth())) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH);
+            actualChanges.put(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH, newValue);
+            actualChanges.put("locale", localeAsInput);
+            loanRepaymentScheduleDetail.setFirstRepaymentDayOfMonth(newValue);
+        }
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.SECOND_REPAYMENT_DAY_OF_MONTH,
+                loanRepaymentScheduleDetail.getSecondRepaymentDayOfMonth())) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.SECOND_REPAYMENT_DAY_OF_MONTH);
+            actualChanges.put(LoanProductConstants.SECOND_REPAYMENT_DAY_OF_MONTH, newValue);
+            actualChanges.put("locale", localeAsInput);
+            loanRepaymentScheduleDetail.setSecondRepaymentDayOfMonth(newValue);
+        }
         if (loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType() == PeriodFrequencyType.MONTHS) {
             final String repaymentFrequencyNthDayTypeParamName = "repaymentFrequencyNthDayType";
             Integer newValue = command.integerValueOfParameterNamed(repaymentFrequencyNthDayTypeParamName);

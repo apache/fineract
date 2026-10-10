@@ -56,6 +56,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplica
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyScheduleDates;
 import org.apache.fineract.portfolio.loanproduct.calc.data.EmiAdjustment;
 import org.apache.fineract.portfolio.loanproduct.calc.data.EmiChangeOperation;
 import org.apache.fineract.portfolio.loanproduct.calc.data.EqualAmortizationValues;
@@ -77,6 +78,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     private static final BigDecimal DIVISOR_100 = new BigDecimal("100");
     private static final BigDecimal ONE_WEEK_IN_DAYS = BigDecimal.valueOf(7);
+    private static final int SEMI_MONTHLY_PERIODS_IN_YEAR = 24;
 
     private final ScheduledDateGenerator scheduledDateGenerator;
 
@@ -243,6 +245,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .numberOfRepayments(loanProductRelatedDetail.getNumberOfRepayments())
                 .repaymentEvery(loanProductRelatedDetail.getRepayEvery())
                 .repaymentPeriodFrequencyType(loanProductRelatedDetail.getRepaymentPeriodFrequencyType())
+                .firstRepaymentDayOfMonth(loanProductRelatedDetail.getFirstRepaymentDayOfMonth())
+                .secondRepaymentDayOfMonth(loanProductRelatedDetail.getSecondRepaymentDayOfMonth())
                 // Interest configuration
                 .interestRatePerPeriod(loanProductRelatedDetail.getAnnualNominalInterestRate())
                 .annualNominalInterestRate(loanProductRelatedDetail.getAnnualNominalInterestRate())
@@ -1075,6 +1079,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             case WEEKS -> repaymentStartDate.plusWeeks(loanApplicationTerms.getFixedLength() + variationDays);
             case MONTHS -> repaymentStartDate.plusMonths(loanApplicationTerms.getFixedLength() + variationDays);
             case YEARS -> repaymentStartDate.plusYears(loanApplicationTerms.getFixedLength() + variationDays);
+            // The periods are of unequal length, so the fixed length is walked one due date at a time.
+            case SEMI_MONTHLY -> SemiMonthlyScheduleDates.plusPeriods(repaymentStartDate, loanApplicationTerms.getFixedLength(),
+                    scheduleModel.loanProductRelatedDetail().semiMonthlyDueDays()).plusDays(variationDays);
             case INVALID, WHOLE_TERM -> throw new IllegalArgumentException(
                     "Unsupported period frequency type for fixed length: " + loanApplicationTerms.getRepaymentPeriodFrequencyType());
         };
@@ -1499,6 +1506,11 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 return rateFactorByRepaymentPeriod(interestRate, BigDecimal.ONE, repaymentEvery, BigDecimal.valueOf(52), actualDaysInPeriod,
                         calculatedDaysInPeriod, mc);
             }
+            if (loanProductRelatedDetail.getRepaymentPeriodFrequencyType().isSemiMonthly()) {
+                // Every semi-monthly period carries the same rate, 1/24 of the annual one, whatever its length in days.
+                return rateFactorByRepaymentPeriod(interestRate, BigDecimal.ONE, repaymentEvery,
+                        BigDecimal.valueOf(SEMI_MONTHLY_PERIODS_IN_YEAR), actualDaysInPeriod, calculatedDaysInPeriod, mc);
+            }
         }
 
         // TODO check: loanApplicationTerms.calculatePeriodsBetweenDates(startDate, endDate); // calculate period data
@@ -1520,6 +1532,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 case MONTHS -> calculatePeriodRatio(scheduleModel, repaymentPeriod, ChronoUnit.MONTHS, mc);
                 case WEEKS -> calculatePeriodRatio(scheduleModel, repaymentPeriod, ChronoUnit.WEEKS, mc);
                 case DAYS -> calculatePeriodRatio(scheduleModel, repaymentPeriod, ChronoUnit.DAYS, mc);
+                // Consecutive due dates are one period apart; only an irregular period gets a fraction.
+                case SEMI_MONTHLY -> SemiMonthlyScheduleDates.periodsBetween(repaymentPeriod.getFromDate(), repaymentPeriod.getDueDate(),
+                        loanProductRelatedDetail.semiMonthlyDueDays(), mc);
                 default -> throw new UnsupportedOperationException("Unsupported repayment frequency: " + repaymentFrequency);
             };
 
@@ -1720,6 +1735,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 rateFactorByRepaymentEveryWeek(interestRate, repaymentEvery, daysInYear, actualDaysInPeriod, calculatedDaysInPeriod, mc);
             case MONTHS -> rateFactorByRepaymentEveryMonth(interestRate, repaymentEvery, daysInMonth, daysInYear, actualDaysInPeriod,
                     calculatedDaysInPeriod, mc);
+            // With 30-day months each semi-monthly period counts as half a month, i.e. 15 days.
+            case SEMI_MONTHLY -> rateFactorByRepaymentPeriod(interestRate, daysInMonth.divide(BigDecimal.valueOf(2), mc), repaymentEvery,
+                    daysInYear, actualDaysInPeriod, calculatedDaysInPeriod, mc);
             default -> throw new UnsupportedOperationException("Invalid repayment frequency"); // not supported yet
         };
     }

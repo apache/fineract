@@ -2722,6 +2722,9 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         final PeriodFrequencyType lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType);
         switch (lockinPeriodFrequencyType) {
             case INVALID:
+                // SEMI_MONTHLY is a loan repayment frequency and is never offered as a savings lock-in period, so it
+                // leaves the account unlocked just like an unset frequency does.
+            case SEMI_MONTHLY:
             break;
             case DAYS:
                 lockedInUntilLocalDate = activationLocalDate.plusDays(this.lockinPeriodFrequency);

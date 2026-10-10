@@ -1234,6 +1234,11 @@ final class LoansApiResourceSwagger {
         public Integer numberOfRepayments;
         @Schema(example = "1")
         public Integer repaymentEvery;
+        @Schema(example = "10", description = "First due day of the month of a semi-monthly loan, between 1 and 27.")
+        public Integer firstRepaymentDayOfMonth;
+        @Schema(example = "25", description = "Second due day of the month of a semi-monthly loan, between 2 and 31 and "
+                + "greater than the first one. A day the month lacks falls on its last day, so 31 is the last day of every month.")
+        public Integer secondRepaymentDayOfMonth;
         public GetLoansLoanIdRepaymentFrequencyType repaymentFrequencyType;
         @Schema(example = "1")
         public Integer fixedLength;
@@ -1382,6 +1387,11 @@ final class LoansApiResourceSwagger {
         public Integer numberOfRepayments;
         @Schema(example = "1")
         public Integer repaymentEvery;
+        @Schema(example = "10", description = "First due day of the month of a semi-monthly loan, between 1 and 27.")
+        public Integer firstRepaymentDayOfMonth;
+        @Schema(example = "25", description = "Second due day of the month of a semi-monthly loan, between 2 and 31 and "
+                + "greater than the first one. A day the month lacks falls on its last day, so 31 is the last day of every month.")
+        public Integer secondRepaymentDayOfMonth;
         @Schema(example = "2")
         public Integer repaymentFrequencyType;
         @Schema(example = "1")
@@ -1638,6 +1648,11 @@ final class LoansApiResourceSwagger {
         public Integer numberOfRepayments;
         @Schema(example = "1")
         public Integer repaymentEvery;
+        @Schema(example = "10", description = "First due day of the month of a semi-monthly loan, between 1 and 27.")
+        public Integer firstRepaymentDayOfMonth;
+        @Schema(example = "25", description = "Second due day of the month of a semi-monthly loan, between 2 and 31 and "
+                + "greater than the first one. A day the month lacks falls on its last day, so 31 is the last day of every month.")
+        public Integer secondRepaymentDayOfMonth;
         @Schema(example = "0")
         public Integer repaymentFrequencyType;
         @Schema(example = "1")

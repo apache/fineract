@@ -53,6 +53,9 @@ public final class DepositAccountUtils {
                 nextDepositDate = lastDepositDate.plusYears(recurringEvery);
             break;
             case INVALID:
+                // SEMI_MONTHLY is a loan repayment frequency and is never offered as a deposit recurrence, so the
+                // deposit date is left where it was, just like an unset frequency leaves it.
+            case SEMI_MONTHLY:
             break;
             case WHOLE_TERM:
                 LOG.error("TODO Implement calculateNextDepositDate for WHOLE_TERM");

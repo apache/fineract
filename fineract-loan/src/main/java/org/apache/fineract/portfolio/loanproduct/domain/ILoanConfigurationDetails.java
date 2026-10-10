@@ -23,6 +23,8 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyDueDays;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyScheduleDates;
 
 /**
  * Represents the bare minimum repayment details needed for activities related to generating repayment schedules.
@@ -54,6 +56,17 @@ public interface ILoanConfigurationDetails {
     Integer getRepayEvery();
 
     PeriodFrequencyType getRepaymentPeriodFrequencyType();
+
+    /** First due day of the month of a {@code SEMI_MONTHLY} loan; {@code null} for any other frequency. */
+    Integer getFirstRepaymentDayOfMonth();
+
+    /** Second due day of the month of a {@code SEMI_MONTHLY} loan; {@code null} for any other frequency. */
+    Integer getSecondRepaymentDayOfMonth();
+
+    /** The two due days of a {@code SEMI_MONTHLY} loan; fails when either of them is missing. */
+    default SemiMonthlyDueDays semiMonthlyDueDays() {
+        return SemiMonthlyScheduleDates.requireDueDays(getFirstRepaymentDayOfMonth(), getSecondRepaymentDayOfMonth());
+    }
 
     Integer getNumberOfRepayments();
 

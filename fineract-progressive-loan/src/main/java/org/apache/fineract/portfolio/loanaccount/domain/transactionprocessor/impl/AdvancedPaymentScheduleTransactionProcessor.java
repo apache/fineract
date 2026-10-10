@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -107,6 +108,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Tra
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyDueDays;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyScheduleDates;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanConfigurationDetailsMapper;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.InterestRefundService;
@@ -359,7 +362,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .orElse(loan.getLoanProductRelatedDetail().getRepayEvery());
         final PeriodFrequencyType repaymentFrequency = lastActiveReAgeTransaction.map(t -> t.getLoanReAgeParameter().getFrequencyType())
                 .orElse(loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType());
-        final ChronoUnit repaymentFrequencyChronoUnit = resolveChronoUnit(repaymentFrequency);
+        final BiFunction<LocalDate, Long, LocalDate> shiftByPeriods = resolvePeriodShifter(repaymentFrequency,
+                loan.getLoanProductRelatedDetail().getFirstRepaymentDayOfMonth(),
+                loan.getLoanProductRelatedDetail().getSecondRepaymentDayOfMonth());
         boolean canUseEmiCalculator = !reAgeAlreadyProcessed || loan.isInterestBearingAndInterestRecalculationEnabled();
 
         if (canUseEmiCalculator && targetExistsInScheduleModel && !isStalePreReAgeVariation) {
@@ -367,6 +372,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     .currency(loan.getCurrency().toData()) //
                     .repaymentEvery(repayEvery) //
                     .repaymentPeriodFrequencyType(repaymentFrequency) //
+                    .firstRepaymentDayOfMonth(loan.getLoanProductRelatedDetail().getFirstRepaymentDayOfMonth()) //
+                    .secondRepaymentDayOfMonth(loan.getLoanProductRelatedDetail().getSecondRepaymentDayOfMonth()) //
                     .fixedLength(loan.getLoanProductRelatedDetail().getFixedLength()) //
                     .seedDate(newDueDate) //
                     .build();
@@ -389,9 +396,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             int offsetFrom = i - targetInstallmentIndex - 1;
                             int offsetDue = i - targetInstallmentIndex;
                             if (offsetDue != 0) {
-                                installment.updateFromDate(newDueDate.plus(offsetFrom * repayEvery, repaymentFrequencyChronoUnit));
+                                installment.updateFromDate(shiftByPeriods.apply(newDueDate, (long) offsetFrom * repayEvery));
                             }
-                            installment.updateDueDate(newDueDate.plus(offsetDue * repayEvery, repaymentFrequencyChronoUnit));
+                            installment.updateDueDate(shiftByPeriods.apply(newDueDate, (long) offsetDue * repayEvery));
                             continue;
                         }
 
@@ -411,7 +418,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         // When the target date was already consumed by generate() and a ReAge was processed,
         // the re-aged installments still carry their original dates. Shift them to apply the reschedule.
         if (targetInstallment.isEmpty() && reAgeAlreadyProcessed) {
-            shiftReAgedInstallmentsAfterReschedule(installments, newDueDate, repayEvery, repaymentFrequencyChronoUnit);
+            shiftReAgedInstallmentsAfterReschedule(installments, newDueDate, repayEvery, shiftByPeriods);
         }
 
         if (!dateShiftOnly) {
@@ -431,7 +438,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void shiftReAgedInstallmentsAfterReschedule(List<LoanRepaymentScheduleInstallment> installments, LocalDate newDueDate,
-            Integer repayEvery, ChronoUnit repaymentFrequencyChronoUnit) {
+            Integer repayEvery, BiFunction<LocalDate, Long, LocalDate> shiftByPeriods) {
         final Optional<LoanRepaymentScheduleInstallment> firstUnmetReAged = installments.stream()
                 .filter(inst -> inst.isReAged() && isNotObligationsMet(inst))
                 .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate));
@@ -447,11 +454,25 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 continue;
             }
             long offsetDue = installment.getInstallmentNumber() - targetInstallmentIndex;
-            final LocalDate shiftedDueDate = newDueDate.plus(offsetDue * repayEvery, repaymentFrequencyChronoUnit);
+            final LocalDate shiftedDueDate = shiftByPeriods.apply(newDueDate, offsetDue * repayEvery);
 
             installment.updateDueDate(shiftedDueDate);
         }
         reprocessInstallments(installments);
+    }
+
+    /**
+     * Moves a date by a number of repayment periods. A semi-monthly period has no fixed length, so it is walked one due
+     * date at a time instead of being added as a {@link ChronoUnit}.
+     */
+    private BiFunction<LocalDate, Long, LocalDate> resolvePeriodShifter(final PeriodFrequencyType frequencyType,
+            final Integer firstRepaymentDayOfMonth, final Integer secondRepaymentDayOfMonth) {
+        if (frequencyType.isSemiMonthly()) {
+            final SemiMonthlyDueDays dueDays = SemiMonthlyScheduleDates.requireDueDays(firstRepaymentDayOfMonth, secondRepaymentDayOfMonth);
+            return (date, periods) -> SemiMonthlyScheduleDates.plusPeriods(date, periods, dueDays);
+        }
+        final ChronoUnit chronoUnit = resolveChronoUnit(frequencyType);
+        return (date, periods) -> date.plus(periods, chronoUnit);
     }
 
     private ChronoUnit resolveChronoUnit(final PeriodFrequencyType frequencyType) {
@@ -4401,6 +4422,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case WEEKS -> reAgingStartDate.minusWeeks(loanReAgeParameter.getFrequencyNumber());
             case MONTHS -> reAgingStartDate.minusMonths(loanReAgeParameter.getFrequencyNumber());
             case YEARS -> reAgingStartDate.minusYears(loanReAgeParameter.getFrequencyNumber());
+            case SEMI_MONTHLY -> throw new IllegalStateException("Unexpected RecalculationFrequencyType: SEMI_MONTHLY");
             case WHOLE_TERM -> throw new IllegalStateException("Unexpected RecalculationFrequencyType: WHOLE_TERM");
             case INVALID -> throw new IllegalStateException("Unexpected RecalculationFrequencyType: INVALID");
         };
