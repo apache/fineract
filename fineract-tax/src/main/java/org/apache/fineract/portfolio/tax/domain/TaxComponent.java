@@ -103,6 +103,11 @@ public class TaxComponent extends AbstractAuditableCustom {
     }
 
     public Map<String, Object> update(final JsonCommand command) {
+        return update(command, null, null, null, null);
+    }
+
+    public Map<String, Object> update(final JsonCommand command, final GLAccountType debitAccountType, final GLAccount debitAccount,
+            final GLAccountType creditAccountType, final GLAccount creditAccount) {
         final Map<String, Object> changes = new HashMap<>();
 
         if (command.isChangeInStringParameterNamed(TaxApiConstants.nameParamName, this.name)) {
@@ -122,7 +127,64 @@ public class TaxComponent extends AbstractAuditableCustom {
             TaxComponentHistory history = TaxComponentHistory.createTaxComponentHistory(this, this.percentage, oldStartDate, newStartDate);
             this.taxComponentHistories.add(history);
             this.percentage = newValue;
+        } else {
+            updateStartDate(command, changes, false);
+        }
 
+        // Handle debit account type
+        if (command.isChangeInIntegerParameterNamed(TaxApiConstants.debitAccountTypeParamName, this.debitAccountType)) {
+            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(TaxApiConstants.debitAccountTypeParamName);
+            changes.put(TaxApiConstants.debitAccountTypeParamName, newValue);
+            if (debitAccountType != null) {
+                this.debitAccountType = debitAccountType.getValue();
+            } else if (newValue != null) {
+                final GLAccountType accountType = GLAccountType.fromInt(newValue);
+                this.debitAccountType = accountType != null ? accountType.getValue() : null;
+            } else {
+                this.debitAccountType = null;
+            }
+        }
+
+        // Handle debit account ID
+        final Long currentDebitAccountId = this.debitAccount != null ? this.debitAccount.getId() : null;
+        if (command.isChangeInLongParameterNamed(TaxApiConstants.debitAccountIdParamName, currentDebitAccountId)) {
+            final Long newValue = command.longValueOfParameterNamed(TaxApiConstants.debitAccountIdParamName);
+            changes.put(TaxApiConstants.debitAccountIdParamName, newValue);
+            this.debitAccount = debitAccount;
+            if (newValue == null && command.parameterExists(TaxApiConstants.debitAccountIdParamName)) {
+                this.debitAccountType = null;
+                if (!changes.containsKey(TaxApiConstants.debitAccountTypeParamName)) {
+                    changes.put(TaxApiConstants.debitAccountTypeParamName, null);
+                }
+            }
+        }
+
+        // Handle credit account type
+        if (command.isChangeInIntegerParameterNamed(TaxApiConstants.creditAccountTypeParamName, this.creditAccountType)) {
+            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(TaxApiConstants.creditAccountTypeParamName);
+            changes.put(TaxApiConstants.creditAccountTypeParamName, newValue);
+            if (creditAccountType != null) {
+                this.creditAccountType = creditAccountType.getValue();
+            } else if (newValue != null) {
+                final GLAccountType accountType = GLAccountType.fromInt(newValue);
+                this.creditAccountType = accountType != null ? accountType.getValue() : null;
+            } else {
+                this.creditAccountType = null;
+            }
+        }
+
+        // Handle credit account ID
+        final Long currentCreditAccountId = this.creditAccount != null ? this.creditAccount.getId() : null;
+        if (command.isChangeInLongParameterNamed(TaxApiConstants.creditAccountIdParamName, currentCreditAccountId)) {
+            final Long newValue = command.longValueOfParameterNamed(TaxApiConstants.creditAccountIdParamName);
+            changes.put(TaxApiConstants.creditAccountIdParamName, newValue);
+            this.creditAccount = creditAccount;
+            if (newValue == null && command.parameterExists(TaxApiConstants.creditAccountIdParamName)) {
+                this.creditAccountType = null;
+                if (!changes.containsKey(TaxApiConstants.creditAccountTypeParamName)) {
+                    changes.put(TaxApiConstants.creditAccountTypeParamName, null);
+                }
+            }
         }
 
         return changes;
@@ -135,13 +197,14 @@ public class TaxComponent extends AbstractAuditableCustom {
             if (startDateFromUI != null) {
                 startDate = startDateFromUI;
             }
-            this.startDate = startDate;
-            changes.put(TaxApiConstants.startDateParamName, startDate);
+            if (setAsCurrentDate || !DateUtils.isEqual(this.startDate, startDate)) {
+                this.startDate = startDate;
+                changes.put(TaxApiConstants.startDateParamName, startDate);
+            }
         } else if (setAsCurrentDate) {
             changes.put(TaxApiConstants.startDateParamName, startDate);
             this.startDate = startDate;
         }
-
     }
 
     public BigDecimal getPercentage() {
