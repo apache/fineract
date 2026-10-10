@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
+import org.apache.fineract.nsimbi.userroles.service.NsimbiUserSecurityService;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.event.EventListener;
@@ -44,6 +45,7 @@ public class LoginAttemptEventListener {
     private final ConfigurationDomainService configurationDomainService;
     private final AppUserRepository appUserRepository;
     private final CacheManager cacheManager;
+    private final NsimbiUserSecurityService nsimbiUserSecurityService;
 
     @Transactional
     @EventListener
@@ -83,6 +85,8 @@ public class LoginAttemptEventListener {
         if (authentication == null || !(authentication.getPrincipal() instanceof AppUser user)) {
             return;
         }
+
+        this.nsimbiUserSecurityService.recordSuccessfulLogin(user.getId());
 
         if (user.getFailedLoginAttempts() <= 0) {
             return;

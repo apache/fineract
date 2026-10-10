@@ -32,6 +32,7 @@ import java.util.List;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.nsimbi.userroles.service.NsimbiUserSecurityService;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
@@ -63,6 +64,8 @@ class LoginAttemptEventListenerTest {
     private Cache usersCache;
     @Mock
     private Cache usersByUsernameCache;
+    @Mock
+    private NsimbiUserSecurityService nsimbiUserSecurityService;
 
     private LoginAttemptEventListener listener;
 
@@ -70,7 +73,7 @@ class LoginAttemptEventListenerTest {
     void setUp() {
         ThreadLocalContextUtil
                 .setTenant(FineractPlatformTenant.builder().id(1L).tenantIdentifier("default").name("default").timezoneId("UTC").build());
-        listener = new LoginAttemptEventListener(configurationDomainService, appUserRepository, cacheManager);
+        listener = new LoginAttemptEventListener(configurationDomainService, appUserRepository, cacheManager, nsimbiUserSecurityService);
     }
 
     @AfterEach
@@ -118,6 +121,7 @@ class LoginAttemptEventListenerTest {
         assertEquals(0, user.getFailedLoginAttempts());
         assertTrue(user.isAccountNonLocked());
         verify(appUserRepository).saveAndFlush(user);
+        verify(nsimbiUserSecurityService).recordSuccessfulLogin(user.getId());
     }
 
     @Test
@@ -131,6 +135,7 @@ class LoginAttemptEventListenerTest {
 
         verifyNoInteractions(appUserRepository);
         verifyNoInteractions(cacheManager);
+        verifyNoInteractions(nsimbiUserSecurityService);
     }
 
     @Test

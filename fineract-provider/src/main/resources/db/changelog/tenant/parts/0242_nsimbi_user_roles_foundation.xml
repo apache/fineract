@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more contributor
+ license agreements.  See the NOTICE file distributed with this work for
+ additional information regarding copyright ownership.  The ASF licenses this
+ file to You under the Apache License, Version 2.0.
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet author="nsimbi" id="1">
+        <createTable tableName="nsimbi_user_security_profile">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="appuser_id" type="BIGINT"><constraints nullable="false" unique="true" uniqueConstraintName="uk_nsimbi_user_security_profile_user"/></column>
+            <column name="suspended" type="BOOLEAN" defaultValueBoolean="false"><constraints nullable="false"/></column>
+            <column name="suspended_on" type="TIMESTAMP"/>
+            <column name="suspended_by_appuser_id" type="BIGINT"/>
+            <column name="last_login_at" type="TIMESTAMP"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="nsimbi_user_security_profile" baseColumnNames="appuser_id" constraintName="fk_nsimbi_security_profile_user" referencedTableName="m_appuser" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="nsimbi_user_security_profile" baseColumnNames="suspended_by_appuser_id" constraintName="fk_nsimbi_security_profile_suspended_by" referencedTableName="m_appuser" referencedColumnNames="id"/>
+    </changeSet>
+    <changeSet author="nsimbi" id="2">
+        <createTable tableName="nsimbi_user_office_assignment">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="appuser_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="office_id" type="BIGINT"><constraints nullable="false"/></column>
+        </createTable>
+        <addUniqueConstraint tableName="nsimbi_user_office_assignment" columnNames="appuser_id,office_id" constraintName="uk_nsimbi_user_office_assignment"/>
+        <addForeignKeyConstraint baseTableName="nsimbi_user_office_assignment" baseColumnNames="appuser_id" constraintName="fk_nsimbi_user_office_assignment_user" referencedTableName="m_appuser" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="nsimbi_user_office_assignment" baseColumnNames="office_id" constraintName="fk_nsimbi_user_office_assignment_office" referencedTableName="m_office" referencedColumnNames="id"/>
+    </changeSet>
+    <changeSet author="nsimbi" id="3">
+        <createTable tableName="nsimbi_role_operating_hours">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="role_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="day_of_week" type="SMALLINT"><constraints nullable="false"/></column>
+            <column name="opens_at" type="TIME"><constraints nullable="false"/></column>
+            <column name="closes_at" type="TIME"><constraints nullable="false"/></column>
+        </createTable>
+        <addUniqueConstraint tableName="nsimbi_role_operating_hours" columnNames="role_id,day_of_week" constraintName="uk_nsimbi_role_operating_hours"/>
+        <addForeignKeyConstraint baseTableName="nsimbi_role_operating_hours" baseColumnNames="role_id" constraintName="fk_nsimbi_operating_hours_role" referencedTableName="m_role" referencedColumnNames="id"/>
+    </changeSet>
+    <changeSet author="nsimbi" id="4">
+        <createTable tableName="nsimbi_user_monetary_authority">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="appuser_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="authority_type" type="VARCHAR(40)"><constraints nullable="false"/></column>
+            <column name="currency_code" type="VARCHAR(3)" defaultValue="UGX"><constraints nullable="false"/></column>
+            <column name="minimum_amount" type="DECIMAL(19,6)"/>
+            <column name="maximum_amount" type="DECIMAL(19,6)"/>
+        </createTable>
+        <addUniqueConstraint tableName="nsimbi_user_monetary_authority" columnNames="appuser_id,authority_type,currency_code" constraintName="uk_nsimbi_user_monetary_authority"/>
+        <addForeignKeyConstraint baseTableName="nsimbi_user_monetary_authority" baseColumnNames="appuser_id" constraintName="fk_nsimbi_monetary_authority_user" referencedTableName="m_appuser" referencedColumnNames="id"/>
+    </changeSet>
+    <changeSet author="nsimbi" id="5">
+        <insert tableName="m_permission"><column name="grouping" value="nsimbi_user_roles"/><column name="code" value="SUSPEND_USER"/><column name="entity_name" value="USER"/><column name="action_name" value="SUSPEND"/><column name="can_maker_checker" valueBoolean="false"/></insert>
+        <insert tableName="m_permission"><column name="grouping" value="nsimbi_user_roles"/><column name="code" value="REACTIVATE_USER"/><column name="entity_name" value="USER"/><column name="action_name" value="REACTIVATE"/><column name="can_maker_checker" valueBoolean="false"/></insert>
+        <insert tableName="m_permission"><column name="grouping" value="nsimbi_user_roles"/><column name="code" value="MANAGE_USER_BRANCH_ASSIGNMENTS"/><column name="entity_name" value="USER"/><column name="action_name" value="MANAGE_BRANCH_ASSIGNMENTS"/><column name="can_maker_checker" valueBoolean="false"/></insert>
+        <insert tableName="m_permission"><column name="grouping" value="nsimbi_user_roles"/><column name="code" value="MANAGE_ROLE_OPERATING_HOURS"/><column name="entity_name" value="ROLE"/><column name="action_name" value="MANAGE_OPERATING_HOURS"/><column name="can_maker_checker" valueBoolean="false"/></insert>
+        <insert tableName="m_permission"><column name="grouping" value="nsimbi_user_roles"/><column name="code" value="MANAGE_USER_MONETARY_AUTHORITY"/><column name="entity_name" value="USER"/><column name="action_name" value="MANAGE_MONETARY_AUTHORITY"/><column name="can_maker_checker" valueBoolean="false"/></insert>
+    </changeSet>
+</databaseChangeLog>
