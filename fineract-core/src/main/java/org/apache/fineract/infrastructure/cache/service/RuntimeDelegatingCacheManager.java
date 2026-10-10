@@ -31,6 +31,7 @@ import org.apache.fineract.infrastructure.cache.CacheEnumerations;
 import org.apache.fineract.infrastructure.cache.data.CacheData;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
@@ -47,7 +48,7 @@ import org.springframework.stereotype.Component;
 @Component(value = "runtimeDelegatingCacheManager")
 @RequiredArgsConstructor
 @Slf4j
-public class RuntimeDelegatingCacheManager implements CacheManager, InitializingBean {
+public class RuntimeDelegatingCacheManager implements CacheManager, InitializingBean, TransactionLifecycleCallback {
 
     @Qualifier("ehCacheManager")
     private final CacheManager ehCacheManager;
@@ -68,6 +69,25 @@ public class RuntimeDelegatingCacheManager implements CacheManager, Initializing
     @Override
     public Collection<String> getCacheNames() {
         return currentCacheManager.getCacheNames();
+    }
+
+    /**
+     * Transaction lifecycle hooks are forwarded only to the manager that is currently active. Before this, the
+     * transaction-bound manager cleared the shared cache instances on every transaction regardless of the mode, so
+     * switching to the single-node cache never cached the global configuration.
+     */
+    @Override
+    public void afterBegin() {
+        if (currentCacheManager instanceof TransactionScopedCacheManager transactionScoped) {
+            transactionScoped.afterBegin();
+        }
+    }
+
+    @Override
+    public void afterCompletion() {
+        if (currentCacheManager instanceof TransactionScopedCacheManager transactionScoped) {
+            transactionScoped.afterCompletion();
+        }
     }
 
     public Collection<CacheData> retrieveAll() {
