@@ -78,16 +78,4 @@ public class Staff extends AbstractPersistableCustom<Long> {
 
     @Column(name = "image_id")
     private Long imageId;
-
-    // TODO: these functions are mistakenly included in an API serialization
-
-    @Deprecated(forRemoval = true)
-    public boolean isNotLoanOfficer() {
-        return !isLoanOfficer();
-    }
-
-    @Deprecated(forRemoval = true)
-    public boolean isNotActive() {
-        return !isActive();
-    }
 }
