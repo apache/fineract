@@ -48,13 +48,6 @@ public class FloatingRatesReadServiceImpl implements FloatingRatesReadService {
     }
 
     @Override
-    public List<FloatingRateData> retrieveAllActive() {
-        FloatingRateRowMapper rateMapper = new FloatingRateRowMapper(false);
-        final String sql = "select " + rateMapper.schema() + " where rate.is_active = true ";
-        return this.jdbcTemplate.query(sql, rateMapper);// NOSONAR
-    }
-
-    @Override
     public List<FloatingRateData> retrieveLookupActive() {
         FloatingRateLookupMapper rateMapper = new FloatingRateLookupMapper();
         final String sql = "select " + rateMapper.schema() + " where rate.is_active = true ";
@@ -131,8 +124,7 @@ public class FloatingRatesReadServiceImpl implements FloatingRatesReadService {
                         + " where period.is_active = true and period.floating_rates_id = ? " + " order by period.from_date desc ";
                 ratePeriods = jdbcTemplate.query(sql, ratePeriodMapper, id); // NOSONAR
             }
-            return new FloatingRateData(id, name, isBaseLendingRate, isActive, createdBy, createdOn, modifiedBy, modifiedOn, ratePeriods,
-                    null);
+            return new FloatingRateData(id, name, isBaseLendingRate, isActive, createdBy, createdOn, modifiedBy, modifiedOn, ratePeriods);
         }
 
         public String schema() {
@@ -188,7 +180,7 @@ public class FloatingRatesReadServiceImpl implements FloatingRatesReadService {
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
             final boolean isBaseLendingRate = rs.getBoolean("isBaseLendingRate");
-            return new FloatingRateData(id, name, isBaseLendingRate, true, null, null, null, null, null, null);
+            return new FloatingRateData(id, name, isBaseLendingRate, true, null, null, null, null, null);
         }
 
         public String schema() {
