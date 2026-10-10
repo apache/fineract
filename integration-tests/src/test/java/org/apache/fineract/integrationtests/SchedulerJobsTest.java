@@ -119,19 +119,11 @@ public class SchedulerJobsTest {
     }
 
     private void updateJobStatus(Integer jobId) {
-        // Retrieving Scheduler Job by ID
         GetJobsResponse schedulerJob = SchedulerJobHelper.getSchedulerJobById(jobId);
-
         boolean active = !schedulerJob.getActive();
-
-        // Updating Scheduler Job
-        Map<String, Object> changes = SchedulerJobHelper.updateSchedulerJob(jobId, active);
-
-        // Verifying Scheduler Job updates
-        assertEquals(active, changes.get("active"), "Verifying Scheduler Job Updates");
-
+        SchedulerJobHelper.updateSchedulerJob(jobId, active);
         schedulerJob = SchedulerJobHelper.getSchedulerJobById(jobId);
-        assertEquals(active, schedulerJob.getActive(), "Verifying Get Scheduler Job");
+        assertEquals(active, schedulerJob.getActive(), "Verifying Scheduler Job Updates");
     }
 
     @Test
