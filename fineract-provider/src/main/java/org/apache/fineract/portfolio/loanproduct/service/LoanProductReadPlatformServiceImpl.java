@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -161,6 +162,25 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
 
         return this.jdbcTemplate.query(sql, rm); // NOSONAR
+    }
+
+    @Override
+    public Collection<LoanProductData> retrieveAllLoanProductsV2() {
+        this.context.authenticatedUser();
+        final LoanProductMapper rm = new LoanProductMapper(null, null, null, null, null, null);
+        final String sql = "select " + rm.loanProductSchema();
+        return this.fineractEntityAccessUtil.filterVisibleToOffice_ifGlobalConfigEnabled(
+                FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, null, this.jdbcTemplate.query(sql, rm), LoanProductData::getId); // NOSONAR
+    }
+
+    @Override
+    public Collection<LoanProductData> retrieveAllLoanProductsForLookupV2(final boolean activeOnly, final Long officeId) {
+        this.context.authenticatedUser();
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
+        final String sql = "select " + (activeOnly ? rm.activeOnlySchema() : rm.schema());
+        return this.fineractEntityAccessUtil.filterVisibleToOffice_ifGlobalConfigEnabled(
+                FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, officeId, this.jdbcTemplate.query(sql, rm),
+                LoanProductData::getId); // NOSONAR
     }
 
     @Override

@@ -28,6 +28,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessReadServiceImpl;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
@@ -62,7 +63,8 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     @Override
     @Caching(evict = {
             @CacheEvict(value = "offices", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'of')"),
-            @CacheEvict(value = "officesForDropdown", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'ofd')") })
+            @CacheEvict(value = "officesForDropdown", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'ofd')"),
+            @CacheEvict(value = FineractEntityAccessReadServiceImpl.OFFICE_ENTITY_ACCESS_CACHE_NAME, allEntries = true) })
     public CommandProcessingResult createOffice(final JsonCommand command) {
 
         try {
@@ -105,7 +107,8 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     @Caching(evict = {
             @CacheEvict(value = "offices", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'of')"),
             @CacheEvict(value = "officesForDropdown", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'ofd')"),
-            @CacheEvict(value = "officesById", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#officeId)") })
+            @CacheEvict(value = "officesById", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#officeId)"),
+            @CacheEvict(value = FineractEntityAccessReadServiceImpl.OFFICE_ENTITY_ACCESS_CACHE_NAME, allEntries = true) })
     public CommandProcessingResult updateOffice(final Long officeId, final JsonCommand command) {
 
         try {

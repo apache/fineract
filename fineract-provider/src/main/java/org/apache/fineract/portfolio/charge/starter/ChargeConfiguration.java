@@ -33,8 +33,10 @@ import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformServiceImp
 import org.apache.fineract.portfolio.charge.service.ChargeWritePlatformService;
 import org.apache.fineract.portfolio.charge.service.ChargeWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -58,10 +60,11 @@ public class ChargeConfiguration {
             ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, JdbcTemplate jdbcTemplate,
             DropdownReadPlatformService dropdownReadPlatformService, FineractEntityAccessUtil fineractEntityAccessUtil,
             AccountingDropdownReadPlatformService accountingDropdownReadPlatformService, TaxReadPlatformService taxReadPlatformService,
-            ConfigurationDomainServiceJpa configurationDomainServiceJpa, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+            ConfigurationDomainServiceJpa configurationDomainServiceJpa, NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+            LoanRepository loanRepository, SavingsAccountRepository savingsAccountRepository) {
         return new ChargeReadPlatformServiceImpl(currencyReadPlatformService, chargeDropdownReadPlatformService, jdbcTemplate,
                 dropdownReadPlatformService, fineractEntityAccessUtil, accountingDropdownReadPlatformService, taxReadPlatformService,
-                configurationDomainServiceJpa, namedParameterJdbcTemplate);
+                configurationDomainServiceJpa, namedParameterJdbcTemplate, loanRepository, savingsAccountRepository);
     }
 
     @Bean
