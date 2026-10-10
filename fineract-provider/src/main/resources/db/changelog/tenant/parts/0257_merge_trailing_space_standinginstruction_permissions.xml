@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet id="1" author="fineract">
+        <sql>
+            INSERT INTO m_role_permission (role_id, permission_id)
+            SELECT DISTINCT rp.role_id, np.id
+            FROM m_role_permission rp
+            JOIN m_permission sp ON sp.id = rp.permission_id
+            JOIN m_permission np ON np.id &lt;&gt; sp.id AND np.code = TRIM(sp.code)
+                AND CHAR_LENGTH(np.code) = CHAR_LENGTH(TRIM(np.code))
+            WHERE TRIM(sp.code) IN ('READ_STANDINGINSTRUCTION', 'CREATE_STANDINGINSTRUCTION', 'UPDATE_STANDINGINSTRUCTION',
+                'DELETE_STANDINGINSTRUCTION')
+              AND CHAR_LENGTH(sp.code) &gt; CHAR_LENGTH(TRIM(sp.code))
+              AND NOT EXISTS (SELECT 1 FROM m_role_permission x WHERE x.role_id = rp.role_id AND x.permission_id = np.id)
+        </sql>
+    </changeSet>
+    <changeSet id="2" author="fineract">
+        <sql>
+            UPDATE m_permission SET can_maker_checker = true
+            WHERE id IN (SELECT id FROM (
+                SELECT np.id
+                FROM m_permission sp
+                JOIN m_permission np ON np.id &lt;&gt; sp.id AND np.code = TRIM(sp.code)
+                    AND CHAR_LENGTH(np.code) = CHAR_LENGTH(TRIM(np.code))
+                WHERE TRIM(sp.code) IN ('READ_STANDINGINSTRUCTION', 'CREATE_STANDINGINSTRUCTION', 'UPDATE_STANDINGINSTRUCTION',
+                    'DELETE_STANDINGINSTRUCTION')
+                  AND CHAR_LENGTH(sp.code) &gt; CHAR_LENGTH(TRIM(sp.code))
+                  AND sp.can_maker_checker = true) merged)
+        </sql>
+    </changeSet>
+    <changeSet id="3" author="fineract">
+        <sql>
+            DELETE FROM m_role_permission
+            WHERE permission_id IN (SELECT id FROM (
+                SELECT sp.id
+                FROM m_permission sp
+                JOIN m_permission np ON np.id &lt;&gt; sp.id AND np.code = TRIM(sp.code)
+                    AND CHAR_LENGTH(np.code) = CHAR_LENGTH(TRIM(np.code))
+                WHERE TRIM(sp.code) IN ('READ_STANDINGINSTRUCTION', 'CREATE_STANDINGINSTRUCTION', 'UPDATE_STANDINGINSTRUCTION',
+                    'DELETE_STANDINGINSTRUCTION')
+                  AND CHAR_LENGTH(sp.code) &gt; CHAR_LENGTH(TRIM(sp.code))) duplicates)
+        </sql>
+        <sql>
+            DELETE FROM m_permission
+            WHERE id IN (SELECT id FROM (
+                SELECT sp.id
+                FROM m_permission sp
+                JOIN m_permission np ON np.id &lt;&gt; sp.id AND np.code = TRIM(sp.code)
+                    AND CHAR_LENGTH(np.code) = CHAR_LENGTH(TRIM(np.code))
+                WHERE TRIM(sp.code) IN ('READ_STANDINGINSTRUCTION', 'CREATE_STANDINGINSTRUCTION', 'UPDATE_STANDINGINSTRUCTION',
+                    'DELETE_STANDINGINSTRUCTION')
+                  AND CHAR_LENGTH(sp.code) &gt; CHAR_LENGTH(TRIM(sp.code))) duplicates)
+        </sql>
+    </changeSet>
+    <changeSet id="4" author="fineract">
+        <sql>
+            UPDATE m_permission SET code = TRIM(code), entity_name = TRIM(entity_name)
+            WHERE TRIM(code) IN ('READ_STANDINGINSTRUCTION', 'CREATE_STANDINGINSTRUCTION', 'UPDATE_STANDINGINSTRUCTION',
+                'DELETE_STANDINGINSTRUCTION')
+              AND (CHAR_LENGTH(code) &gt; CHAR_LENGTH(TRIM(code)) OR CHAR_LENGTH(entity_name) &gt; CHAR_LENGTH(TRIM(entity_name)))
+        </sql>
+    </changeSet>
+</databaseChangeLog>
