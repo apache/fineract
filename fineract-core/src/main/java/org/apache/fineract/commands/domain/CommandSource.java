@@ -120,7 +120,7 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
     @Column(name = "job_name")
     private String jobName;
 
-    @Column(name = "idempotency_key", length = 50)
+    @Column(name = "idempotency_key", length = 255)
     private String idempotencyKey;
 
     @Column(name = "resource_external_id")
