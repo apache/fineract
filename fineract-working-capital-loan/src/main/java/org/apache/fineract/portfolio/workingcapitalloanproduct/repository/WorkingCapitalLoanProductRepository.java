@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.workingcapitalloanproduct.repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -74,6 +75,9 @@ public interface WorkingCapitalLoanProductRepository
 
     @Query("select wclp FROM WorkingCapitalLoanProduct wclp where wclp.closeDate is null or wclp.closeDate >= :businessDate")
     List<WorkingCapitalLoanProduct> fetchActiveWorkingCapitalLoanProducts(LocalDate businessDate);
+
+    @Query("select wclp from WorkingCapitalLoanProduct wclp where lower(wclp.name) in :productNames")
+    List<WorkingCapitalLoanProduct> findAllByNameIgnoreCase(@Param("productNames") Collection<String> productNames);
 
     boolean existsByDelinquencyBucket(DelinquencyBucket delinquencyBucket);
 

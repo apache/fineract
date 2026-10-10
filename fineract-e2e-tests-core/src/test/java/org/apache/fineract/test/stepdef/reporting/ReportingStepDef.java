@@ -44,6 +44,7 @@ public class ReportingStepDef extends AbstractStepDef {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
     private static final String TRIAL_BALANCE_REPORT = "Trial Balance Summary Report with Asset Owner";
+    private static final String WORKING_CAPITAL_TRIAL_BALANCE_REPORT = "Trial Balance Summary Report for Working Capital Loans";
     private final FineractFeignClient fineractClient;
 
     @Then("Transaction Summary Report for date {string} has the following data:")
@@ -80,20 +81,55 @@ public class ReportingStepDef extends AbstractStepDef {
 
     @Then("Trial Balance Summary Report with Asset Owner for date {string} has a row for GL account {string} with non-zero ending balance")
     public void trialBalanceHasNonZeroEndingBalanceForGlAccount(final String dateStr, final String glCode) {
-        final BigDecimal ending = sumColumnForGlAccount(executeReport(TRIAL_BALANCE_REPORT, dateStr), glCode, "endingbalance");
-        assertThat(ending).as("Trial Balance for %s: expected GL account '%s' to be present", dateStr, glCode).isNotNull();
-        assertThat(ending.signum())
-                .as("Trial Balance for %s: expected GL account '%s' ending balance to be non-zero but was %s", dateStr, glCode, ending)
-                .isNotEqualTo(0);
+        verifyNonZeroEndingBalanceForGlAccount(TRIAL_BALANCE_REPORT, dateStr, glCode);
     }
 
     @Then("Trial Balance Summary Report with Asset Owner for date {string} shows GL account {string} closed out")
     public void trialBalanceShowsGlAccountClosedOut(final String dateStr, final String glCode) {
-        final BigDecimal ending = sumColumnForGlAccount(executeReport(TRIAL_BALANCE_REPORT, dateStr), glCode, "endingbalance");
+        verifyGlAccountClosedOut(TRIAL_BALANCE_REPORT, dateStr, glCode);
+    }
+
+    @Then("Trial Balance Summary Report for Working Capital Loans for date {string} has originatorId and the following data:")
+    public void workingCapitalTrialBalanceSummaryReportHasDataWithOriginatorId(final String dateStr, final DataTable dataTable) {
+        verifyBalanceReportDataWithOwnerExternalIdAndOriginatorId(WORKING_CAPITAL_TRIAL_BALANCE_REPORT, dateStr, dataTable);
+    }
+
+    @Then("Trial Balance Summary Report for Working Capital Loans for date {string} has a row for GL account {string} with non-zero ending balance")
+    public void workingCapitalTrialBalanceHasNonZeroEndingBalanceForGlAccount(final String dateStr, final String glCode) {
+        verifyNonZeroEndingBalanceForGlAccount(WORKING_CAPITAL_TRIAL_BALANCE_REPORT, dateStr, glCode);
+    }
+
+    @Then("Trial Balance Summary Report for Working Capital Loans for date {string} shows GL account {string} closed out")
+    public void workingCapitalTrialBalanceShowsGlAccountClosedOut(final String dateStr, final String glCode) {
+        verifyGlAccountClosedOut(WORKING_CAPITAL_TRIAL_BALANCE_REPORT, dateStr, glCode);
+    }
+
+    @Then("Trial Balance Summary Report with Asset Owner for date {string} has no rows")
+    public void trialBalanceHasNoRows(final String dateStr) {
+        assertThat(executeReport(TRIAL_BALANCE_REPORT, dateStr).getData()).as("Trial Balance for %s: expected no rows", dateStr).isEmpty();
+    }
+
+    @Then("Trial Balance Summary Report for Working Capital Loans for date {string} has no rows")
+    public void workingCapitalTrialBalanceHasNoRows(final String dateStr) {
+        assertThat(executeReport(WORKING_CAPITAL_TRIAL_BALANCE_REPORT, dateStr).getData())
+                .as("Working Capital Trial Balance for %s: expected no rows", dateStr).isEmpty();
+    }
+
+    private void verifyNonZeroEndingBalanceForGlAccount(final String reportName, final String dateStr, final String glCode) {
+        final BigDecimal ending = sumColumnForGlAccount(executeReport(reportName, dateStr), glCode, "endingbalance");
+        assertThat(ending).as("%s for %s: expected GL account '%s' to be present", reportName, dateStr, glCode).isNotNull();
+        assertThat(ending.signum())
+                .as("%s for %s: expected GL account '%s' ending balance to be non-zero but was %s", reportName, dateStr, glCode, ending)
+                .isNotEqualTo(0);
+    }
+
+    private void verifyGlAccountClosedOut(final String reportName, final String dateStr, final String glCode) {
+        final BigDecimal ending = sumColumnForGlAccount(executeReport(reportName, dateStr), glCode, "endingbalance");
         if (ending != null) {
-            assertThat(ending.signum()).as(
-                    "Trial Balance for %s: expected GL account '%s' to be closed out (absent or zero ending balance) but it has ending balance %s",
-                    dateStr, glCode, ending).isEqualTo(0);
+            assertThat(ending.signum())
+                    .as("%s for %s: expected GL account '%s' to be closed out (absent or zero ending balance) but it has ending balance %s",
+                            reportName, dateStr, glCode, ending)
+                    .isEqualTo(0);
         }
     }
 

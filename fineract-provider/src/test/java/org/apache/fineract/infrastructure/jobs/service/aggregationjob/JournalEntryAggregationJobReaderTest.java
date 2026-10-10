@@ -19,8 +19,10 @@
 package org.apache.fineract.infrastructure.jobs.service.aggregationjob;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -124,6 +126,58 @@ public class JournalEntryAggregationJobReaderTest {
 
         // Assert
         assertEquals(Long.valueOf(0L), result.getExternalOwnerId(), "Asset owner should be 0 when null in resultset");
+    }
+
+    @Test
+    public void testAggregationQueryResolvesWorkingCapitalLoanProductAndOriginatorsOnPostgres() throws Exception {
+        when(databaseTypeResolver.isMySQL()).thenReturn(false);
+
+        String query = invokeBuildAggregationQuery();
+
+        assertWorkingCapitalLoanJoins(query);
+        assertTrue(query.contains("STRING_AGG(DISTINCT mlo.external_id, ', ' ORDER BY mlo.external_id)"),
+                "PostgreSQL query should aggregate originator external IDs with STRING_AGG");
+    }
+
+    @Test
+    public void testAggregationQueryResolvesWorkingCapitalLoanProductAndOriginatorsOnMySQL() throws Exception {
+        when(databaseTypeResolver.isMySQL()).thenReturn(true);
+
+        String query = invokeBuildAggregationQuery();
+
+        assertWorkingCapitalLoanJoins(query);
+        assertTrue(query.contains("GROUP_CONCAT(DISTINCT mlo.external_id ORDER BY mlo.external_id SEPARATOR ', ')"),
+                "MySQL query should aggregate originator external IDs with GROUP_CONCAT");
+    }
+
+    private void assertWorkingCapitalLoanJoins(String query) {
+        String normalized = query.replaceAll("\\s+", " ");
+        assertTrue(normalized.contains(
+                "LEFT JOIN m_wc_loan wc_loan ON wc_loan.id = acc_gl_journal_entry.entity_id AND acc_gl_journal_entry.entity_type_enum = 6"),
+                "Query should join working capital loans for entity type 6");
+        assertTrue(normalized.contains(
+                "LEFT JOIN m_wc_loan_product wc_loan_product ON wc_loan_product.id = wc_loan.product_id AND acc_gl_journal_entry.entity_type_enum = 6"),
+                "Query should join working capital loan products for entity type 6");
+        assertTrue(normalized.contains("share_product.id, wc_loan_product.id ) AS productId"),
+                "Product ID should fall back to the working capital loan product");
+        assertTrue(normalized.contains("CASE acc_gl_journal_entry.entity_type_enum WHEN 1 THEN (SELECT "),
+                "Loan originators should only be read for loan journal entries");
+        assertTrue(
+                normalized.contains("FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id"
+                        + " WHERE mlom.loan_id = loan.id) WHEN 6 THEN (SELECT "),
+                "Working capital loan originators should only be read for working capital loan journal entries");
+        assertTrue(
+                normalized.contains("FROM m_wc_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id"
+                        + " WHERE mlom.loan_id = wc_loan.id) END AS originatorExternalIds"),
+                "Query should read working capital loan originators");
+        assertFalse(query.contains("{aggregateFunction}"), "Every aggregate function placeholder should be resolved");
+    }
+
+    private String invokeBuildAggregationQuery() throws Exception {
+        Method buildAggregationQuery = JournalEntryAggregationJobReader.class.getDeclaredMethod("buildAggregationQuery",
+                DatabaseTypeResolver.class);
+        buildAggregationQuery.setAccessible(true);
+        return (String) buildAggregationQuery.invoke(null, databaseTypeResolver);
     }
 
     private void setupResultSetMocks() throws SQLException {

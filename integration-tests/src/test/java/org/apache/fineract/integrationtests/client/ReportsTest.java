@@ -86,8 +86,8 @@ public class ReportsTest extends IntegrationTest {
 
     @Test
     void listReports() {
-        // count is 85 because @BeforeAll creates StringParamIntegrationTest fixture report
-        assertThat(ok(fineractClient().reports.retrieveAllReports())).hasSize(85);
+        // count is 86 because @BeforeAll creates StringParamIntegrationTest fixture report
+        assertThat(ok(fineractClient().reports.retrieveAllReports())).hasSize(86);
     }
 
     @Test

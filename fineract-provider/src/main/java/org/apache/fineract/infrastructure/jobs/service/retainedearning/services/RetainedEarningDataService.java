@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.jobs.service.retainedearning.services
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.data.AccountGLJournalEntryAnnualSummaryData;
+import org.apache.fineract.portfolio.PortfolioProductType;
 
 public interface RetainedEarningDataService {
 
@@ -29,6 +30,6 @@ public interface RetainedEarningDataService {
     List<AccountGLJournalEntryAnnualSummaryData> fetchTrialBalanceData(String reportName, LocalDate fiscalYearEnd);
 
     List<AccountGLJournalEntryAnnualSummaryData> processTrialBalanceData(List<AccountGLJournalEntryAnnualSummaryData> rawData,
-            LocalDate lastDayOfPreviousFiscalYear);
+            LocalDate lastDayOfPreviousFiscalYear, PortfolioProductType productType);
 
 }
