@@ -381,14 +381,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder addFamilyMembers(final long clientId) {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_FAMILYMEMBERS;
-        this.href = "/clients/" + clientId + "/familymembers";
-        this.clientId = clientId;
-        return this;
-    }
-
     public CommandWrapperBuilder updateFamilyMembers(final long familyMemberId) {
         this.actionName = ACTION_UPDATE;
         this.entityName = ENTITY_FAMILYMEMBERS;
