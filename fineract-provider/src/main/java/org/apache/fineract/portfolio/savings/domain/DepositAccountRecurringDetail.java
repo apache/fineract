@@ -27,7 +27,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -112,8 +111,12 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
         return actualChanges;
     }
 
+    /**
+     * Updates the recommended deposit amount and the schedule installments from {@code effectiveDate}. The caller must
+     * recalculate the maturity date and amount of the underlying account afterwards.
+     */
     public Map<String, Object> updateMandatoryRecommendedDepositAmount(BigDecimal newMandatoryRecommendedDepositAmount,
-            LocalDate effectiveDate, Boolean isSavingsInterestPostingAtCurrentPeriodEnd, Integer financialYearBeginningMonth) {
+            LocalDate effectiveDate) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
         actualChanges.put(mandatoryRecommendedDepositAmountParamName, newMandatoryRecommendedDepositAmount);
         this.mandatoryRecommendedDepositAmount = newMandatoryRecommendedDepositAmount;
@@ -128,10 +131,6 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
         }
         depositAccount.updateScheduleInstallmentsWithNewRecommendedDepositAmount(newMandatoryRecommendedDepositAmount, effectiveDate);
         depositAccount.updateOverduePayments(DateUtils.getBusinessLocalDate());
-        MathContext mc = MathContext.DECIMAL64;
-        Boolean isPreMatureClosure = false;
-        depositAccount.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth);
         return actualChanges;
     }
 
