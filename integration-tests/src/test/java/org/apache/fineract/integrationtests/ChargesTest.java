@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.GLAccountData;
 import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostTaxesComponentsRequest;
@@ -34,12 +35,14 @@ import org.apache.fineract.client.models.PostTaxesGroupResponse;
 import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
 import org.apache.fineract.client.models.PutChargesChargeIdRequest;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignTaxComponentHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignTaxGroupHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -61,12 +64,44 @@ public class ChargesTest extends FeignIntegrationTest {
     private FeignChargesHelper chargesHelper;
     private FeignTaxComponentHelper taxComponentHelper;
     private FeignTaxGroupHelper taxGroupHelper;
+    private FeignAccountHelper accountHelper;
 
     @BeforeAll
     public void setup() {
         chargesHelper = new FeignChargesHelper(fineractClient());
         taxComponentHelper = new FeignTaxComponentHelper(fineractClient());
         taxGroupHelper = new FeignTaxGroupHelper(fineractClient());
+        accountHelper = new FeignAccountHelper(fineractClient());
+    }
+
+    @Test
+    public void testClientChargeKeepsIncomeAccountOnCreateAndUpdate() {
+        Long incomeAccountId = accountHelper.createIncomeAccount().getAccountID().longValue();
+        Long otherIncomeAccountId = accountHelper.createIncomeAccount().getAccountID().longValue();
+
+        Long chargeId = chargesHelper
+                .createCharge(ChargeRequestBuilders.clientSpecifiedDueDateFee(CHARGE_AMOUNT).incomeAccountId(incomeAccountId))
+                .getResourceId();
+
+        ChargeData editTemplate = chargesHelper.getChargeWithTemplate(chargeId);
+        Assertions.assertNotNull(editTemplate.getIncomeOrLiabilityAccount(), "Income account must be stored on create");
+        Assertions.assertEquals(incomeAccountId, editTemplate.getIncomeOrLiabilityAccount().getId());
+
+        ChargeData addTemplate = chargesHelper.getChargeTemplate(ChargeAppliesTo.CLIENT.getValue().longValue(), null);
+        Assertions.assertEquals(accountIds(addTemplate.getIncomeOrLiabilityAccountOptions().get("incomeAccountOptions")),
+                accountIds(editTemplate.getIncomeOrLiabilityAccountOptions().get("incomeAccountOptions")));
+        Assertions.assertTrue(
+                accountIds(editTemplate.getIncomeOrLiabilityAccountOptions().get("incomeAccountOptions")).contains(incomeAccountId));
+
+        chargesHelper.updateCharge(chargeId, new ChargeRequest().locale(LOCALE).incomeAccountId(otherIncomeAccountId));
+        Assertions.assertEquals(otherIncomeAccountId, chargesHelper.getChargeWithTemplate(chargeId).getIncomeOrLiabilityAccount().getId(),
+                "Income account must be changed on update");
+
+        verifyDeletion(chargeId);
+    }
+
+    private static List<Long> accountIds(List<GLAccountData> accounts) {
+        return accounts.stream().map(GLAccountData::getId).sorted().toList();
     }
 
     @Test
