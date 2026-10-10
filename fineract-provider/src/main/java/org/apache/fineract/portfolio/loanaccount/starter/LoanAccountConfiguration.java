@@ -137,6 +137,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanCalculateRepaymentP
 import org.apache.fineract.portfolio.loanaccount.service.LoanCapitalizedIncomeAmortizationEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanCapitalizedIncomeAmortizationProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanCapitalizedIncomeAmortizationProcessingServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.LoanCapitalizedIncomeAmortizationStrategyService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
@@ -565,9 +566,10 @@ public class LoanAccountConfiguration {
     @ConditionalOnMissingBean(LoanCapitalizedIncomeAmortizationEventService.class)
     public LoanCapitalizedIncomeAmortizationEventService loanCapitalizedIncomeAmortizationEventService(
             BusinessEventNotifierService businessEventNotifierService,
-            LoanCapitalizedIncomeAmortizationProcessingService loanCapitalizedIncomeAmortizationProcessingService) {
+            LoanCapitalizedIncomeAmortizationProcessingService loanCapitalizedIncomeAmortizationProcessingService,
+            LoanCapitalizedIncomeAmortizationStrategyService loanCapitalizedIncomeAmortizationStrategyService) {
         return new LoanCapitalizedIncomeAmortizationEventService(businessEventNotifierService,
-                loanCapitalizedIncomeAmortizationProcessingService);
+                loanCapitalizedIncomeAmortizationProcessingService, loanCapitalizedIncomeAmortizationStrategyService);
     }
 
     @Bean
