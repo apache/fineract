@@ -33,8 +33,11 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.apache.fineract.portfolio.calendar.exception.CalendarNotFoundException;
+import org.apache.fineract.portfolio.common.domain.NthDayType;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -79,11 +82,15 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final EnumOptionData type = CalendarEnumerations.calendarType(typeId);
             final boolean repeating = rs.getBoolean("repeating");
             final String recurrence = rs.getString("recurrence");
-            final EnumOptionData frequency = CalendarEnumerations.calendarFrequencyType(CalendarUtils.getFrequency(recurrence));
-            final Integer interval = Integer.valueOf(CalendarUtils.getInterval(recurrence));
-            final EnumOptionData repeatsOnDay = CalendarEnumerations.calendarWeekDaysType(CalendarUtils.getRepeatsOnDay(recurrence));
-            final EnumOptionData repeatsOnNthDayOfMonth = CalendarEnumerations
-                    .calendarFrequencyNthDayType(CalendarUtils.getRepeatsOnNthDayOfMonth(recurrence));
+            // A non-repeating calendar has no recurrence rule and CalendarUtils cannot parse a null one:
+            // fall back to the INVALID/0 defaults (same guard as the humanReadable computation below).
+            final EnumOptionData frequency = CalendarEnumerations
+                    .calendarFrequencyType(recurrence != null ? CalendarUtils.getFrequency(recurrence) : CalendarFrequencyType.INVALID);
+            final Integer interval = recurrence != null ? Integer.valueOf(CalendarUtils.getInterval(recurrence)) : 0;
+            final EnumOptionData repeatsOnDay = CalendarEnumerations
+                    .calendarWeekDaysType(recurrence != null ? CalendarUtils.getRepeatsOnDay(recurrence) : CalendarWeekDaysType.INVALID);
+            final EnumOptionData repeatsOnNthDayOfMonth = CalendarEnumerations.calendarFrequencyNthDayType(
+                    recurrence != null ? CalendarUtils.getRepeatsOnNthDayOfMonth(recurrence) : NthDayType.INVALID);
             final Integer remindById = rs.getInt("remindById");
             EnumOptionData remindBy = null;
             if (remindById != null && remindById != 0) {
@@ -95,7 +102,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             if (startDate != null && recurrence != null) {
                 humanReadable = CalendarUtils.getRRuleReadable(startDate, recurrence);
             }
-            Integer monthOnDay = CalendarUtils.getMonthOnDay(recurrence);
+            Integer monthOnDay = recurrence != null ? CalendarUtils.getMonthOnDay(recurrence) : null;
             final OffsetDateTime createdDateLocal = JdbcSupport.getOffsetDateTime(rs, "createdDate");
             final OffsetDateTime createdDateUtc = JdbcSupport.getOffsetDateTime(rs, "createdDateUtc");
             final OffsetDateTime lastModifiedDateLocal = JdbcSupport.getOffsetDateTime(rs, "updatedDate");
@@ -470,11 +477,15 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final EnumOptionData type = CalendarEnumerations.calendarType(typeId);
             final boolean repeating = rs.getBoolean("repeating");
             final String recurrence = rs.getString("recurrence");
-            final EnumOptionData frequency = CalendarEnumerations.calendarFrequencyType(CalendarUtils.getFrequency(recurrence));
-            final Integer interval = Integer.valueOf(CalendarUtils.getInterval(recurrence));
-            final EnumOptionData repeatsOnDay = CalendarEnumerations.calendarWeekDaysType(CalendarUtils.getRepeatsOnDay(recurrence));
-            final EnumOptionData repeatsOnNthDayOfMonth = CalendarEnumerations
-                    .calendarFrequencyNthDayType(CalendarUtils.getRepeatsOnNthDayOfMonth(recurrence));
+            // A non-repeating calendar has no recurrence rule and CalendarUtils cannot parse a null one:
+            // fall back to the INVALID/0 defaults (same guard as the humanReadable computation below).
+            final EnumOptionData frequency = CalendarEnumerations
+                    .calendarFrequencyType(recurrence != null ? CalendarUtils.getFrequency(recurrence) : CalendarFrequencyType.INVALID);
+            final Integer interval = recurrence != null ? Integer.valueOf(CalendarUtils.getInterval(recurrence)) : 0;
+            final EnumOptionData repeatsOnDay = CalendarEnumerations
+                    .calendarWeekDaysType(recurrence != null ? CalendarUtils.getRepeatsOnDay(recurrence) : CalendarWeekDaysType.INVALID);
+            final EnumOptionData repeatsOnNthDayOfMonth = CalendarEnumerations.calendarFrequencyNthDayType(
+                    recurrence != null ? CalendarUtils.getRepeatsOnNthDayOfMonth(recurrence) : NthDayType.INVALID);
             final Integer remindById = rs.getInt("remindById");
             EnumOptionData remindBy = null;
             if (remindById != null && remindById != 0) {
@@ -494,7 +505,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final Long lastUpdatedByUserId = null;
             final String lastUpdatedByUserName = null;
             final LocalTime meetingTime = null;
-            Integer monthOnDay = CalendarUtils.getMonthOnDay(recurrence);
+            Integer monthOnDay = recurrence != null ? CalendarUtils.getMonthOnDay(recurrence) : null;
 
             return CalendarData.instance(id, calendarInstanceId, entityId, entityType, title, description, location, startDate, endDate,
                     duration, type, repeating, recurrence, frequency, interval, repeatsOnDay, repeatsOnNthDayOfMonth, remindBy,
