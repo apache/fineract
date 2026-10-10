@@ -29,6 +29,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -37,6 +38,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 @Entity
 @Table(name = "m_account_transfer_details")
+@Getter
 public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
