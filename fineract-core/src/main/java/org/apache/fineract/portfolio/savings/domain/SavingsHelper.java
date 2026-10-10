@@ -138,7 +138,7 @@ public final class SavingsHelper {
             break;
             case QUATERLY:
                 for (LocalDate quarterlyDate : quarterlyDates) {
-                    if (DateUtils.isAfter(quarterlyDate, periodStartDate)) {
+                    if (DateUtils.isAfterInclusive(quarterlyDate, periodStartDate)) {
                         // interest posting always occurs on the next day after the period end date.
                         periodEndDate = quarterlyDate.plusDays(1);
                         isEndDateSet = true;
@@ -153,7 +153,7 @@ public final class SavingsHelper {
             break;
             case BIANNUAL:
                 for (LocalDate biannualDate : biannualDates) {
-                    if (DateUtils.isAfter(biannualDate, periodStartDate)) {
+                    if (DateUtils.isAfterInclusive(biannualDate, periodStartDate)) {
                         // interest posting always occurs on the next day after the period end date.
                         periodEndDate = biannualDate.plusDays(1);
                         isEndDateSet = true;
