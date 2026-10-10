@@ -1,0 +1,36 @@
+@startuml
+actor "Staff" as user
+participant "AccountsApiResource" as api
+participant "CommandProcessing" as cmd
+participant "ShareAccountWrite\nPlatformService" as svc
+participant "ShareAccountData\nSerializer" as ser
+database "m_share_account*" as db
+
+== Apply for additional shares ==
+user -> api : POST /accounts/share/{id}\n?command=applyadditionalshares
+api -> cmd : APPLYADDITIONALSHARES SHAREACCOUNT
+cmd -> svc : applyAddtionalShares(id, json)
+svc -> ser : validateAndAssembleAdditionalShares
+ser --> svc : ShareAccountTransaction\n(status=APPLIED, type=PURCHASED)
+svc -> db : persist pending shares
+svc --> api : CommandProcessingResult
+
+== Approve additional shares ==
+user -> api : POST /accounts/share/{id}\n?command=approveadditionalshares
+api -> cmd : APPROVEADDITIONALSHARES SHAREACCOUNT
+cmd -> svc : approveAdditionalShares(id, json)
+svc -> db : transaction status APPLIED -> APPROVED
+note right of svc
+  totalSharesApproved += totalShares
+  apply purchase / activation charges
+end note
+svc --> api : CommandProcessingResult
+
+== Redeem shares ==
+user -> api : POST /accounts/share/{id}\n?command=redeemshares
+api -> cmd : REDEEMSHARES SHAREACCOUNT
+cmd -> svc : redeemShares(id, json)
+svc -> ser : validate lock-in period\n& available shares
+svc -> db : ShareAccountTransaction\n(type=REDEEMED), totalSharesApproved -= n
+svc --> api : CommandProcessingResult
+@enduml
