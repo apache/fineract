@@ -18,65 +18,31 @@
  */
 package org.apache.fineract.integrationtests;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.ArrayList;
-import java.util.HashMap;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.client.models.TemplateCreateRequest;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class TemplateIntegrationTest {
-
-    private static final String GET_TEMPLATES_URL = "/fineract-provider/api/v1/templates?tenantIdentifier=default";
-
-    private static final String RESPONSE_ATTRIBUTE_NAME = "name";
-
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-
-    @BeforeEach
-    public void setup() {
-
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
+public class TemplateIntegrationTest extends FeignIntegrationTest {
 
     @Disabled
     @Test
     public void test() {
 
-        final HashMap<String, String> metadata = new HashMap<>();
-        metadata.put("user", "resource_url");
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("name", "foo");
-        map.put("text", "Hello {{template}}");
-        map.put("mappers", metadata);
+        final int entriesBeforeTest = ok(() -> fineractClient().templates().retrieveAllTemplates((Integer) null, (Integer) null)).size();
 
-        ArrayList<?> get = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_TEMPLATES_URL, "");
-        final int entriesBeforeTest = get.size();
+        final Long id = ok(
+                () -> fineractClient().templates().createTemplate(new TemplateCreateRequest().name("foo").text("Hello {{template}}")))
+                .getResourceId();
 
-        final Integer id = Utils.performServerPost(this.requestSpec, this.responseSpec, GET_TEMPLATES_URL, new Gson().toJson(map),
-                "resourceId");
+        final String name = ok(() -> fineractClient().templates().retrieveOneTemplate(id)).getName();
 
-        final String templateUrlForId = String.format("/fineract-provider/api/v1/templates/%s?tenantIdentifier=default", id);
+        Assertions.assertTrue(name.equals("foo"));
 
-        final String getrequest2 = Utils.performServerGet(this.requestSpec, this.responseSpec, templateUrlForId, RESPONSE_ATTRIBUTE_NAME);
+        ok(() -> fineractClient().templates().deleteTemplate(id));
 
-        Assertions.assertTrue(getrequest2.equals("foo"));
-
-        Utils.performServerDelete(this.requestSpec, this.responseSpec, templateUrlForId, "");
-
-        get = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_TEMPLATES_URL, "");
-        final int entriesAfterTest = get.size();
+        final int entriesAfterTest = ok(() -> fineractClient().templates().retrieveAllTemplates((Integer) null, (Integer) null)).size();
 
         Assertions.assertEquals(entriesBeforeTest, entriesAfterTest);
     }

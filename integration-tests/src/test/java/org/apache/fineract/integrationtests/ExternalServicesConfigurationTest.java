@@ -20,64 +20,47 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.ArrayList;
-import java.util.HashMap;
-import org.apache.fineract.integrationtests.common.ExternalServicesConfigurationHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import java.util.List;
+import java.util.Map;
+import org.apache.fineract.client.models.ExternalServicesPropertiesData;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalServicesHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExternalServicesConfigurationTest {
+public class ExternalServicesConfigurationTest extends FeignIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExternalServicesConfigurationTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ExternalServicesConfigurationHelper externalServicesConfigurationHelper;
-    private ResponseSpecification httpStatusForidden;
+    private FeignExternalServicesHelper externalServicesHelper;
 
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.httpStatusForidden = new ResponseSpecBuilder().expectStatusCode(403).build();
-
+        this.externalServicesHelper = new FeignExternalServicesHelper(fineractClient());
     }
 
     @Test
     public void testExternalServicesConfiguration() {
-        this.externalServicesConfigurationHelper = new ExternalServicesConfigurationHelper(this.requestSpec, this.responseSpec);
-
         // Checking for S3
         String configName = "s3_access_key";
-        ArrayList<HashMap> externalServicesConfig = ExternalServicesConfigurationHelper
-                .getExternalServicesConfigurationByServiceName(requestSpec, responseSpec, "S3");
+        List<ExternalServicesPropertiesData> externalServicesConfig = externalServicesHelper.retrieveProperties("S3");
         Assertions.assertNotNull(externalServicesConfig);
-        for (Integer configIndex = 0; configIndex < externalServicesConfig.size(); configIndex++) {
-            String name = (String) externalServicesConfig.get(configIndex).get("name");
+        for (ExternalServicesPropertiesData config : externalServicesConfig) {
+            String name = config.getName();
             String value = null;
             if (name.equals(configName)) {
-                value = (String) externalServicesConfig.get(configIndex).get("value");
+                value = config.getValue();
                 if (value == null) {
                     value = "testnull";
                 }
                 String newValue = "test";
                 LOG.info("{} : {}", name, value);
-                HashMap arrayListValue = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
-                        responseSpec, "S3", name, newValue);
+                Map<String, Object> arrayListValue = externalServicesHelper.updateProperty("S3", name, newValue);
                 Assertions.assertNotNull(arrayListValue.get("value"));
                 Assertions.assertEquals(arrayListValue.get("value"), newValue);
-                HashMap arrayListValue1 = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
-                        responseSpec, "S3", name, value);
+                Map<String, Object> arrayListValue1 = externalServicesHelper.updateProperty("S3", name, value);
                 Assertions.assertNotNull(arrayListValue1.get("value"));
                 Assertions.assertEquals(arrayListValue1.get("value"), value);
             }
@@ -86,26 +69,23 @@ public class ExternalServicesConfigurationTest {
 
         // Checking for SMTP:
         configName = "username";
-        externalServicesConfig = ExternalServicesConfigurationHelper.getExternalServicesConfigurationByServiceName(requestSpec,
-                responseSpec, "SMTP");
+        externalServicesConfig = externalServicesHelper.retrieveProperties("SMTP");
         Assertions.assertNotNull(externalServicesConfig);
 
-        for (Integer configIndex = 0; configIndex < externalServicesConfig.size(); configIndex++) {
-            String name = (String) externalServicesConfig.get(configIndex).get("name");
+        for (ExternalServicesPropertiesData config : externalServicesConfig) {
+            String name = config.getName();
             String value = null;
             if (name.equals(configName)) {
-                value = (String) externalServicesConfig.get(configIndex).get("value");
+                value = config.getValue();
                 if (value == null) {
                     value = "testnull";
                 }
                 String newValue = "test";
                 LOG.info("{} : {}", name, value);
-                HashMap arrayListValue = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
-                        responseSpec, "SMTP", name, newValue);
+                Map<String, Object> arrayListValue = externalServicesHelper.updateProperty("SMTP", name, newValue);
                 Assertions.assertNotNull(arrayListValue.get("value"));
                 Assertions.assertEquals(arrayListValue.get("value"), newValue);
-                HashMap arrayListValue1 = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
-                        responseSpec, "SMTP", name, value);
+                Map<String, Object> arrayListValue1 = externalServicesHelper.updateProperty("SMTP", name, value);
                 Assertions.assertNotNull(arrayListValue1.get("value"));
                 Assertions.assertEquals(arrayListValue1.get("value"), value);
             }
@@ -114,15 +94,14 @@ public class ExternalServicesConfigurationTest {
 
         // Checking for Notifications:
         configName = "server_key";
-        externalServicesConfig = ExternalServicesConfigurationHelper.getExternalServicesConfigurationByServiceName(requestSpec,
-                responseSpec, "NOTIFICATION");
+        externalServicesConfig = externalServicesHelper.retrieveProperties("NOTIFICATION");
         Assertions.assertNotNull(externalServicesConfig);
 
-        for (Integer configIndex = 0; configIndex < externalServicesConfig.size(); configIndex++) {
-            String name = (String) externalServicesConfig.get(configIndex).get("name");
+        for (ExternalServicesPropertiesData config : externalServicesConfig) {
+            String name = config.getName();
             String value = null;
             if (name.equals(configName)) {
-                value = (String) externalServicesConfig.get(configIndex).get("value");
+                value = config.getValue();
                 if (value == null) {
                     value = "testnull";
                 }

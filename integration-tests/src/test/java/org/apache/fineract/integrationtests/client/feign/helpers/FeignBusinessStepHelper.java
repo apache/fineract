@@ -18,14 +18,19 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.failVoid;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.BusinessStep;
 import org.apache.fineract.client.models.BusinessStepRequest;
 import org.apache.fineract.client.models.JobBusinessStepConfigData;
+import org.apache.fineract.client.models.JobBusinessStepDetail;
 
 public class FeignBusinessStepHelper {
 
@@ -51,5 +56,19 @@ public class FeignBusinessStepHelper {
                     new BusinessStepRequest().businessSteps(stepList));
             return null;
         });
+    }
+
+    public JobBusinessStepDetail getAvailableBusinessStepsByJobName(String jobName) {
+        return ok(() -> fineractClient.businessStepConfiguration().retrieveAllAvailableBusinessStep(jobName));
+    }
+
+    public ApiResponse<Void> updateBusinessSteps(String jobName, List<BusinessStep> steps) {
+        return ok(() -> fineractClient.businessStepConfiguration().updateJobBusinessStepConfigWithHttpInfo(jobName,
+                new BusinessStepRequest().businessSteps(steps), Map.of()));
+    }
+
+    public CallFailedRuntimeException updateBusinessStepsExpectingError(String jobName, List<BusinessStep> steps) {
+        return failVoid(() -> fineractClient.businessStepConfiguration().updateJobBusinessStepConfig(jobName,
+                new BusinessStepRequest().businessSteps(steps)));
     }
 }

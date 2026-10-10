@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -222,6 +223,16 @@ final class SavingsAccountsApiResourceSwagger {
 
         private PostSavingsAccountsRequest() {}
 
+        static final class PostSavingsAccountsDatatable {
+
+            private PostSavingsAccountsDatatable() {}
+
+            @Schema(example = "dt_registered_table")
+            public String registeredTableName;
+            @Schema(description = "The datatable columns and their values")
+            public Map<String, Object> data;
+        }
+
         @Schema(example = "1")
         public Long clientId;
         @Schema(example = "1", description = "Mandatory for a group savings account, in place of clientId")
@@ -238,6 +249,8 @@ final class SavingsAccountsApiResourceSwagger {
         public String externalId;
         @Schema(example = "true")
         public Boolean withdrawalFeeForTransfers;
+        @Schema(description = "Entries for the datatables registered against this entity")
+        public List<PostSavingsAccountsDatatable> datatables;
     }
 
     @Schema(description = "PostSavingsAccountsResponse")
