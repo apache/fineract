@@ -83,6 +83,7 @@ public interface LoanProductConstants {
     String IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME = "isInterestRecalculationEnabled";
     String DAYS_IN_YEAR_TYPE_PARAMETER_NAME = "daysInYearType";
     String DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME = "daysInYearCustomStrategy";
+    String MONTH_END_DUE_DATE_STRATEGY_PARAMETER_NAME = "monthEndDueDateStrategy";
     String DAYS_IN_MONTH_TYPE_PARAMETER_NAME = "daysInMonthType";
     String interestRecalculationCompoundingMethodParameterName = "interestRecalculationCompoundingMethod";
     String rescheduleStrategyMethodParameterName = "rescheduleStrategyMethod";

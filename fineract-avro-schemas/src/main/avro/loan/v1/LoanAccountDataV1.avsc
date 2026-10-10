@@ -730,6 +730,14 @@
         },
         {
             "default": null,
+            "name": "monthEndDueDateStrategy",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.StringEnumOptionDataV1"
+            ]
+        },
+        {
+            "default": null,
             "name": "isInterestRecalculationEnabled",
             "type": [
                 "null",

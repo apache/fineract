@@ -5299,6 +5299,94 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         });
 
         tasks.add(() -> {
+            // LP1 monthly with actual/actual interest and LAST_DAY_OF_MONTH strategy
+            String name181 = DefaultLoanProduct.LP1_MONTHLY_END_DUE_DATE_CLAMP_CUMULATIVE.getName();
+            PostLoanProductsRequest loanProductsRequestLP1MonthlyEndDueDateClamp = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP1MonthEndDueDateClampActual().name(name181);
+            PostLoanProductsResponse responseLP1MonthlyEndDueDateClamp = createLoanProductIdempotent(
+                    loanProductsRequestLP1MonthlyEndDueDateClamp);
+            TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_MONTHLY_END_DUE_DATE_CLAMP,
+                    responseLP1MonthlyEndDueDateClamp);
+        });
+
+        tasks.add(() -> {
+            // LP1 monthly with actual/actual interest and FIRST_DAY_OF_NEXT_MONTH strategy
+            String name182 = DefaultLoanProduct.LP1_MONTHLY_END_DUE_DATE_ROLL_CUMULATIVE.getName();
+            PostLoanProductsRequest loanProductsRequestLP1MonthlyEndDueDateRoll = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP1MonthEndDueDateRollActual().name(name182);
+            PostLoanProductsResponse responseLP1MonthlyEndDueDateRoll = createLoanProductIdempotent(
+                    loanProductsRequestLP1MonthlyEndDueDateRoll);
+            TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_MONTHLY_END_DUE_DATE_ROLL,
+                    responseLP1MonthlyEndDueDateRoll);
+        });
+
+        tasks.add(() -> {
+            // LP1 monthly with 360/30 interest and LAST_DAY_OF_MONTH strategy
+            String name183 = DefaultLoanProduct.LP1_MONTHLY_36030_END_DUE_DATE_CLAMP_CUMULATIVE.getName();
+            PostLoanProductsRequest loanProductsRequestLP1Monthly36030EndDueDateClamp = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP1MonthEndDueDateClamp36030().name(name183);
+            PostLoanProductsResponse responseLP1Monthly36030EndDueDateClamp = createLoanProductIdempotent(
+                    loanProductsRequestLP1Monthly36030EndDueDateClamp);
+            TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_MONTHLY_36030_END_DUE_DATE_CLAMP,
+                    responseLP1Monthly36030EndDueDateClamp);
+        });
+
+        tasks.add(() -> {
+            // LP1 monthly with 360/30 interest and FIRST_DAY_OF_NEXT_MONTH strategy
+            String name184 = DefaultLoanProduct.LP1_MONTHLY_36030_END_DUE_DATE_ROLL_CUMULATIVE.getName();
+            PostLoanProductsRequest loanProductsRequestLP1Monthly36030EndDueDateRoll = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP1MonthEndDueDateRoll36030().name(name184);
+            PostLoanProductsResponse responseLP1Monthly36030EndDueDateRoll = createLoanProductIdempotent(
+                    loanProductsRequestLP1Monthly36030EndDueDateRoll);
+            TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_MONTHLY_36030_END_DUE_DATE_ROLL,
+                    responseLP1Monthly36030EndDueDateRoll);
+        });
+
+        tasks.add(() -> {
+            // LP2 monthly with actual/actual interest and LAST_DAY_OF_MONTH strategy
+            String name185 = DefaultLoanProduct.LP2_MONTHLY_END_DUE_DATE_CLAMP.getName();
+            PostLoanProductsRequest loanProductsRequestLP2MonthlyEndDueDateClamp = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2MonthEndDueDateClampActual().name(name185);
+            PostLoanProductsResponse responseLP2MonthlyEndDueDateClamp = createLoanProductIdempotent(
+                    loanProductsRequestLP2MonthlyEndDueDateClamp);
+            TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_MONTHLY_END_DUE_DATE_CLAMP,
+                    responseLP2MonthlyEndDueDateClamp);
+        });
+
+        tasks.add(() -> {
+            // LP2 monthly with actual/actual interest and FIRST_DAY_OF_NEXT_MONTH strategy
+            String name186 = DefaultLoanProduct.LP2_MONTHLY_END_DUE_DATE_ROLL.getName();
+            PostLoanProductsRequest loanProductsRequestLP2MonthlyEndDueDateRoll = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2MonthEndDueDateRollActual().name(name186);
+            PostLoanProductsResponse responseLP2MonthlyEndDueDateRoll = createLoanProductIdempotent(
+                    loanProductsRequestLP2MonthlyEndDueDateRoll);
+            TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_MONTHLY_END_DUE_DATE_ROLL,
+                    responseLP2MonthlyEndDueDateRoll);
+        });
+
+        tasks.add(() -> {
+            // LP2 monthly with 360/30 interest and LAST_DAY_OF_MONTH strategy
+            String name187 = DefaultLoanProduct.LP2_MONTHLY_36030_END_DUE_DATE_CLAMP.getName();
+            PostLoanProductsRequest loanProductsRequestLP2Monthly36030EndDueDateClamp = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2MonthEndDueDateClamp36030().name(name187);
+            PostLoanProductsResponse responseLP2Monthly36030EndDueDateClamp = createLoanProductIdempotent(
+                    loanProductsRequestLP2Monthly36030EndDueDateClamp);
+            TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_MONTHLY_36030_END_DUE_DATE_CLAMP,
+                    responseLP2Monthly36030EndDueDateClamp);
+        });
+
+        tasks.add(() -> {
+            // LP2 monthly with 360/30 interest and FIRST_DAY_OF_NEXT_MONTH strategy
+            String name188 = DefaultLoanProduct.LP2_MONTHLY_36030_END_DUE_DATE_ROLL.getName();
+            PostLoanProductsRequest loanProductsRequestLP2Monthly36030EndDueDateRoll = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2MonthEndDueDateRoll36030().name(name188);
+            PostLoanProductsResponse responseLP2Monthly36030EndDueDateRoll = createLoanProductIdempotent(
+                    loanProductsRequestLP2Monthly36030EndDueDateRoll);
+            TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_MONTHLY_36030_END_DUE_DATE_ROLL,
+                    responseLP2Monthly36030EndDueDateRoll);
+        });
+
+        tasks.add(() -> {
             // LP2 with interest recalculation + chargeback allocation(INTEREST, PENALTY, FEE, PRINCIPAL)
             // + accrual activity posting
             // (LP2_INTEREST_RECALC_CHARGEBACK_ALLOCATION_INTEREST_FIRST_ACCRUAL_ACTIVITY)

@@ -22,10 +22,12 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.List;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlan;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanDisbursementPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanPeriod;
@@ -63,11 +65,12 @@ class EmbeddableProgressiveLoanScheduleGeneratorTest {
         final DaysInYearCustomStrategyType daysInYearCustomStrategy = null;
         final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
         final boolean allowPartialPeriodInterestCalculation = true;
+        final MonthEndDueDateStrategy monthEndDueDateStrategy = null;
 
         var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments,
                 repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType,
                 daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate,
-                daysInYearCustomStrategy, interestMethod, allowPartialPeriodInterestCalculation, false);
+                daysInYearCustomStrategy, interestMethod, allowPartialPeriodInterestCalculation, false, monthEndDueDateStrategy);
 
         final LoanSchedulePlan plan = calculator.generate(mc, config);
 
@@ -90,6 +93,81 @@ class EmbeddableProgressiveLoanScheduleGeneratorTest {
                 17.00);
         checkPeriod(plan.getPeriods().get(6), 6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), 16.90, 0.10, 0.0, 0.0, 17.00, 0.0,
                 0.0);
+    }
+
+    @Test
+    void testMissingDayRollsToFirstDayOfNextMonth() {
+        final LoanSchedulePlan plan = generate(LocalDate.of(2025, 1, 31), 3, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL,
+                MonthEndDueDateStrategy.FIRST_DAY_OF_NEXT_MONTH);
+
+        Assertions.assertEquals(List.of(LocalDate.of(2025, 3, 1), LocalDate.of(2025, 3, 31), LocalDate.of(2025, 5, 1)), dueDates(plan));
+    }
+
+    @Test
+    void testMissingDayIsClampedByDefault() {
+        final List<LocalDate> clamped = List.of(LocalDate.of(2025, 2, 28), LocalDate.of(2025, 3, 31), LocalDate.of(2025, 4, 30));
+
+        Assertions.assertEquals(clamped,
+                dueDates(generate(LocalDate.of(2025, 1, 31), 3, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, null)));
+        Assertions.assertEquals(clamped, dueDates(generate(LocalDate.of(2025, 1, 31), 3, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL,
+                MonthEndDueDateStrategy.LAST_DAY_OF_MONTH)));
+    }
+
+    /**
+     * Under 30/360 every whole month is a thirtieth of the year, however many days it has, so rolling a due date
+     * forward moves no interest between periods.
+     */
+    @Test
+    void testRolledDueDateKeepsInterestPerPeriodUnder30360() {
+        final LoanSchedulePlan clamped = generate(LocalDate.of(2025, 1, 30), 3, DaysInMonthType.DAYS_30, DaysInYearType.DAYS_360,
+                MonthEndDueDateStrategy.LAST_DAY_OF_MONTH);
+        final LoanSchedulePlan rolled = generate(LocalDate.of(2025, 1, 30), 3, DaysInMonthType.DAYS_30, DaysInYearType.DAYS_360,
+                MonthEndDueDateStrategy.FIRST_DAY_OF_NEXT_MONTH);
+
+        Assertions.assertEquals(LocalDate.of(2025, 2, 28), dueDates(clamped).getFirst());
+        Assertions.assertEquals(LocalDate.of(2025, 3, 1), dueDates(rolled).getFirst());
+        Assertions.assertEquals(interests(clamped), interests(rolled));
+        Assertions.assertEquals(0, clamped.getTotalInterestAmount().compareTo(rolled.getTotalInterestAmount()));
+    }
+
+    /**
+     * Under Actual/Actual interest follows the days: the rolled first period (30 January - 1 March) is a day longer
+     * than the clamped one (30 January - 28 February) and bills more, and the second period (1 March - 30 March) is a
+     * day shorter and bills less.
+     */
+    @Test
+    void testRolledDueDateMovesInterestBetweenPeriodsUnderActualActual() {
+        final List<BigDecimal> clamped = interests(generate(LocalDate.of(2025, 1, 30), 3, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL,
+                MonthEndDueDateStrategy.LAST_DAY_OF_MONTH));
+        final List<BigDecimal> rolled = interests(generate(LocalDate.of(2025, 1, 30), 3, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL,
+                MonthEndDueDateStrategy.FIRST_DAY_OF_NEXT_MONTH));
+
+        Assertions.assertTrue(rolled.get(0).compareTo(clamped.get(0)) > 0, "First period is a day longer: " + rolled + " vs " + clamped);
+        Assertions.assertTrue(rolled.get(1).compareTo(clamped.get(1)) < 0, "Second period is a day shorter: " + rolled + " vs " + clamped);
+    }
+
+    private static LoanSchedulePlan generate(final LocalDate disbursementDate, final int numberOfRepayments,
+            final DaysInMonthType daysInMonthType, final DaysInYearType daysInYearType,
+            final MonthEndDueDateStrategy monthEndDueDateStrategy) {
+        final MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
+        final CurrencyData currency = new CurrencyData("usd", "US Dollar", 2, null, "usd", "$");
+        final var config = new LoanRepaymentScheduleModelData(disbursementDate, currency, BigDecimal.valueOf(10000), disbursementDate,
+                numberOfRepayments, 1, "MONTHS", BigDecimal.valueOf(12), false, daysInMonthType, daysInYearType, BigDecimal.ZERO, null,
+                null, false, null, InterestMethod.DECLINING_BALANCE, true, false, monthEndDueDateStrategy);
+        return new EmbeddableProgressiveLoanScheduleGenerator().generate(mc, config);
+    }
+
+    private static List<LoanSchedulePlanRepaymentPeriod> repaymentPeriods(final LoanSchedulePlan plan) {
+        return plan.getPeriods().stream().filter(LoanSchedulePlanRepaymentPeriod.class::isInstance)
+                .map(LoanSchedulePlanRepaymentPeriod.class::cast).toList();
+    }
+
+    private static List<LocalDate> dueDates(final LoanSchedulePlan plan) {
+        return repaymentPeriods(plan).stream().map(LoanSchedulePlanPeriod::periodDueDate).toList();
+    }
+
+    private static List<BigDecimal> interests(final LoanSchedulePlan plan) {
+        return repaymentPeriods(plan).stream().map(LoanSchedulePlanRepaymentPeriod::getInterestAmount).toList();
     }
 
     private static void checkPeriod(LoanSchedulePlanPeriod period, LocalDate fromDate, LocalDate dueDate, double principal,
