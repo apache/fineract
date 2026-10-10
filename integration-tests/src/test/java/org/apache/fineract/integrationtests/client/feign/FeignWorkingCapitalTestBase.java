@@ -25,12 +25,15 @@ import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DelinquencyRangeRequest;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanDelinquencyRangeScheduleTagHistoryResponse;
+import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.WorkingCapitalCollection;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
+import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEventHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
@@ -39,6 +42,8 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyRangeScheduleHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalLoanNearBreachActionsHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalNearBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterAll;
@@ -59,6 +64,9 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
     protected static WorkingCapitalLoanProductHelper productHelper;
     protected static WorkingCapitalBreachHelper breachHelper;
     protected static FeignGlobalConfigurationHelper globalConfigurationHelper;
+    protected static WorkingCapitalNearBreachHelper nearBreachHelper;
+    protected static WorkingCapitalLoanNearBreachActionsHelper nearBreachActionsHelper;
+    protected static FeignExternalEventHelper externalEventHelper;
 
     private final List<Long> createdWcLoanIds = new ArrayList<>();
 
@@ -71,6 +79,9 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
         productHelper = new WorkingCapitalLoanProductHelper();
         breachHelper = new WorkingCapitalBreachHelper();
         globalConfigurationHelper = new FeignGlobalConfigurationHelper(feignClient);
+        nearBreachHelper = new WorkingCapitalNearBreachHelper();
+        nearBreachActionsHelper = new WorkingCapitalLoanNearBreachActionsHelper();
+        externalEventHelper = new FeignExternalEventHelper(feignClient);
     }
 
     @AfterAll
@@ -122,6 +133,21 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
                 .withBreachId(breachId).withBreachGraceDays(breachGraceDays).build()).getResourceId();
     }
 
+    protected Long createWcProductWithBreachAndNearBreachConfig(int breachFrequency, String breachFrequencyType,
+            String breachAmountCalculationType, BigDecimal breachAmount, int breachGraceDays, BigDecimal nearBreachThreshold,
+            int nearBreachFrequency, String nearBreachFrequencyType) {
+        final Long breachId = breachHelper.create(breachHelper.createBreachRequest(Utils.randomStringGenerator("WC_BREACH_", 8),
+                breachFrequency, breachFrequencyType, breachAmountCalculationType, breachAmount));
+        final Long nearBreachId = nearBreachHelper.create(new WorkingCapitalNearBreachRequest()
+                .nearBreachName(Utils.randomStringGenerator("WC_NEAR_BREACH_", 8)).nearBreachThreshold(nearBreachThreshold)
+                .nearBreachFrequency(nearBreachFrequency).nearBreachFrequencyType(nearBreachFrequencyType)).getResourceId();
+        return productHelper.createWorkingCapitalLoanProduct(
+                new WorkingCapitalLoanProductTestBuilder().withName("WCL Near Breach " + Utils.uniqueRandomStringGenerator("", 8))
+                        .withShortName(Utils.uniqueRandomStringGenerator("", 4)).withBreachId(breachId).withBreachGraceDays(breachGraceDays)
+                        .withNearBreachId(nearBreachId).build())
+                .getResourceId();
+    }
+
     protected Long createDelinquencyRange(String classification, int minimumAgeDays, Integer maximumAgeDays) {
         return DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest().classification(classification)
                 .minimumAgeDays(minimumAgeDays).maximumAgeDays(maximumAgeDays).locale("en")).getResourceId();
@@ -148,6 +174,14 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
 
     protected Long makeWcRepayment(Long loanId, BigDecimal amount, String transactionDate) {
         return wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(amount, transactionDate));
+    }
+
+    protected void undoWcTransaction(Long loanId, Long transactionId) {
+        wcLoanHelper.undoTransaction(loanId, transactionId);
+    }
+
+    protected GetWorkingCapitalLoansLoanIdResponse getWcLoanDetails(Long loanId) {
+        return wcLoanHelper.getLoanDetails(loanId);
     }
 
     protected void runInlineWcCob(Long loanId) {
@@ -178,8 +212,43 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
         return wcLoanHelper.createBreachAction(loanId, WorkingCapitalLoanRequestBuilders.breachReschedule(frequency, frequencyType));
     }
 
+    protected Long createBreachMinimumPaymentReschedule(Long loanId, BigDecimal minimumPayment, String minimumPaymentType) {
+        return wcLoanHelper.createBreachAction(loanId,
+                WorkingCapitalLoanRequestBuilders.breachMinimumPaymentReschedule(minimumPayment, minimumPaymentType));
+    }
+
     protected Long createBreachPause(Long loanId, String startDate, String endDate) {
         return wcLoanHelper.createBreachAction(loanId, WorkingCapitalLoanRequestBuilders.breachPause(startDate, endDate));
+    }
+
+    protected Long createBreachDisable(Long loanId, String startDate) {
+        return wcLoanHelper.createBreachAction(loanId, WorkingCapitalLoanRequestBuilders.breachDisable(startDate));
+    }
+
+    protected Long createBreachEnable(Long loanId, String startDate) {
+        return wcLoanHelper.createBreachAction(loanId, WorkingCapitalLoanRequestBuilders.breachEnable(startDate));
+    }
+
+    protected void createNearBreachReschedule(Long loanId, BigDecimal threshold, int frequency, String frequencyType) {
+        nearBreachActionsHelper.createNearBreachActionById(loanId,
+                WorkingCapitalLoanRequestBuilders.createNearBreachRescheduleAction(threshold, frequency, frequencyType));
+    }
+
+    protected void enableExternalEvent(String eventType) {
+        externalEventHelper.enableBusinessEvent(eventType);
+    }
+
+    protected void disableExternalEvent(String eventType) {
+        externalEventHelper.disableBusinessEvent(eventType);
+    }
+
+    protected void deleteAllExternalEvents() {
+        externalEventHelper.deleteAllExternalEvents();
+    }
+
+    protected long countExternalEvents(String eventType, Long loanId) {
+        return externalEventHelper.getExternalEventsByType(eventType).stream().filter(event -> loanId.equals(event.getAggregateRootId()))
+                .count();
     }
 
     protected List<WorkingCapitalLoanBreachScheduleData> getBreachSchedule(Long loanId) {
