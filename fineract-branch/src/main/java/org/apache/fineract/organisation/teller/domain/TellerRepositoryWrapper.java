@@ -40,10 +40,6 @@ public class TellerRepositoryWrapper {
         return teller;
     }
 
-    public Teller save(final Teller teller) {
-        return this.repository.save(teller);
-    }
-
     public Teller saveAndFlush(final Teller teller) {
         return this.repository.saveAndFlush(teller);
     }
