@@ -671,13 +671,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 final Integer status = StandingInstructionStatus.ACTIVE.getValue();
                 final Integer recurrenceType = AccountTransferRecurrenceType.AS_PER_DUES.getValue();
                 final LocalDate validFrom = DateUtils.getBusinessLocalDate();
+                // auto-generated instructions keep the all-or-nothing default; partial transfers are opted into per
+                // instruction through the standing instruction API
+                final boolean allowPartialTransfer = false;
 
                 AccountTransferDetails accountTransferDetails = AccountTransferDetails.savingsToLoanTransfer(fromOffice, fromClient,
                         linkedSavingsAccount, toOffice, toClient, loan, transferType);
 
                 AccountTransferStandingInstruction accountTransferStandingInstruction = AccountTransferStandingInstruction.create(
                         accountTransferDetails, name, priority, instructionType, status, null, validFrom, null, recurrenceType, null, null,
-                        null);
+                        null, allowPartialTransfer);
                 accountTransferDetails.updateAccountTransferStandingInstruction(accountTransferStandingInstruction);
 
                 this.accountTransferDetailRepository.save(accountTransferDetails);
