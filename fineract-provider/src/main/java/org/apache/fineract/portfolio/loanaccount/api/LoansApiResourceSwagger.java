@@ -148,6 +148,12 @@ final class LoansApiResourceSwagger {
             public BigDecimal total;
             @Schema(example = "10000.00")
             public BigDecimal totalCollateral;
+            @Schema(example = "Gold")
+            public String name;
+            @Schema(example = "10000.00")
+            public BigDecimal unitPrice;
+            @Schema(example = "40")
+            public BigDecimal pctToBase;
         }
 
         static final class GetLoansLoanIdSubStatus {
