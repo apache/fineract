@@ -21,8 +21,6 @@ package org.apache.fineract.integrationtests.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
@@ -54,11 +52,6 @@ public final class PaymentTypeHelper {
         PaymentTypeData response = Calls
                 .ok(FineractClientHelper.getFineractClient().paymentTypes.retrieveOnePaymentType(generatedPaymentTypeID));
         assertEquals(generatedPaymentTypeID, response.getId(), "ERROR IN CREATING THE PAYMENT TYPE");
-    }
-
-    public static Object retrieveById(RequestSpecification requestSpec, ResponseSpecification responseSpec, final Long paymentTypeId) {
-        log.info("-------------------------------GETTING PAYMENT TYPE (COMPATIBILITY)-------------------------------------------");
-        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.retrieveOnePaymentType(paymentTypeId));
     }
 
     public static PaymentTypeData retrieveById(final Long paymentTypeId) {
