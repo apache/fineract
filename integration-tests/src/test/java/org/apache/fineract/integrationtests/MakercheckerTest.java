@@ -61,6 +61,7 @@ public class MakercheckerTest {
     private SavingsAccountHelper savingsAccountHelper;
     private static final String START_DATE_STRING = "03 June 2023";
     private static final String TRANSACTION_DATE_STRING = "05 June 2023";
+    private static final String CLIENTS_URL = "/fineract-provider/api/v1/clients";
     private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
@@ -365,6 +366,60 @@ public class MakercheckerTest {
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", false);
             rolesHelper.updatePermissions(putPermissionsRequest);
         }
+    }
+
+    @Test
+    public void testCheckerOnlyUserApprovesAnIdenticalPendingSubmissionThroughTheActionEndpoint() {
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        try {
+            Integer clientId = Utils.performServerPost(requestSpec, responseSpec, CLIENTS_URL + "?" + Utils.TENANT_IDENTIFIER,
+                    ClientHelper.getTestClientAsJSONPending(START_DATE_STRING, "1"), "clientId");
+            rolesHelper.updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", true));
+
+            Integer makerRoleId = RolesHelper.createRole(requestSpec, responseSpec);
+            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, makerRoleId, Map.of("ACTIVATE_CLIENT", true));
+            Integer checkerOnlyRoleId = RolesHelper.createRole(requestSpec, responseSpec);
+            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, checkerOnlyRoleId, Map.of("ACTIVATE_CLIENT_CHECKER", true));
+            Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
+            String password = "A1b2c3d4e5f$";
+            String maker = Utils.uniqueRandomStringGenerator("user", 8);
+            Integer makerUserId = (Integer) UserHelper.createUser(requestSpec, responseSpec, makerRoleId, staffId, maker, password,
+                    "resourceId");
+            String checkerOnly = Utils.uniqueRandomStringGenerator("user", 8);
+            UserHelper.createUser(requestSpec, responseSpec, checkerOnlyRoleId, staffId, checkerOnly, password, "resourceId");
+            RequestSpecification checkerOnlySpec = userRequestSpec(checkerOnly, password);
+            ResponseSpecification forbidden = new ResponseSpecBuilder().expectStatusCode(403).build();
+
+            assertNull(activateClient(userRequestSpec(maker, password), responseSpec, clientId, TRANSACTION_DATE_STRING, "clientId"),
+                    "The maker's activation should be queued for approval");
+
+            activateClient(checkerOnlySpec, forbidden, clientId, "06 June 2023", "");
+
+            assertEquals(clientId, activateClient(checkerOnlySpec, responseSpec, clientId, TRANSACTION_DATE_STRING, "clientId"));
+            assertEquals(Boolean.TRUE, Utils.performServerGet(requestSpec, responseSpec,
+                    CLIENTS_URL + "/" + clientId + "?" + Utils.TENANT_IDENTIFIER, "active"));
+            assertEquals(0,
+                    makercheckersHelper.getMakerCheckerList(
+                            Map.of("actionName", "ACTIVATE", "entityName", "CLIENT", "makerId", makerUserId.toString())).size(),
+                    "The pending activation should have been approved");
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            rolesHelper.updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false));
+        }
+    }
+
+    private static <T> T activateClient(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer clientId,
+            String activationDate, String jsonAttributeToGetBack) {
+        String body = "{\"activationDate\":\"" + activationDate + "\",\"dateFormat\":\"dd MMMM yyyy\",\"locale\":\"en\"}";
+        return Utils.performServerPost(requestSpec, responseSpec,
+                CLIENTS_URL + "/" + clientId + "?command=activate&" + Utils.TENANT_IDENTIFIER, body, jsonAttributeToGetBack);
+    }
+
+    private RequestSpecification userRequestSpec(String username, String password) {
+        return new RequestSpecBuilder().setContentType(ContentType.JSON).build().header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, password));
     }
 
     private Integer createSavingsProductDailyPosting() {
