@@ -3343,9 +3343,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private LoanRepaymentScheduleInstallment insertOrReplaceRelatedInstallment(List<LoanRepaymentScheduleInstallment> installments,
             final LoanRepaymentScheduleInstallment reAgedInstallment, final MonetaryCurrency currency, final LocalDate transactionDate) {
-        Optional<LoanRepaymentScheduleInstallment> first = installments.stream()
-                .filter(installment -> Objects.equals(installment.getInstallmentNumber(), reAgedInstallment.getInstallmentNumber()))
-                .findFirst();
+        Optional<LoanRepaymentScheduleInstallment> first = installments.stream().filter(installment -> !installment.isDownPayment()
+                && Objects.equals(installment.getInstallmentNumber(), reAgedInstallment.getInstallmentNumber())).findFirst();
 
         if (first.isPresent()) {
             int indexOfReplaceInstallment = installments.indexOf(first.get());
@@ -4178,7 +4177,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
         int lastReAgedInstallmentNumber = reAgedInstallment.getInstallmentNumber();
         List<LoanRepaymentScheduleInstallment> toRemove = installments.stream()
-                .filter(i -> i != null && !i.isAdditional() && i.getInstallmentNumber() != null
+                .filter(i -> i != null && !i.isAdditional() && !i.isDownPayment() && i.getInstallmentNumber() != null
                         && i.getInstallmentNumber() > lastReAgedInstallmentNumber && i.getTotalPaid(currency).isZero())
                 .toList();
         toRemove.forEach(installments::remove);
