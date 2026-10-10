@@ -1293,7 +1293,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
                     + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, "
                     + " ls.total_paid_in_advance_derived as totalPaidInAdvanceForPeriod, ls.total_paid_late_derived as totalPaidLateForPeriod, "
-                    + " mc.amount,mc.id as chargeId  from m_loan_repayment_schedule ls " + " inner join m_loan ml on ml.id = ls.loan_id "
+                    + " COALESCE(ml.overdue_charge_amount, mc.amount) as amount,mc.id as chargeId  from m_loan_repayment_schedule ls "
+                    + " inner join m_loan ml on ml.id = ls.loan_id "
                     + " join m_product_loan_charge plc on plc.product_loan_id = ml.product_id "
                     + " join m_charge mc on mc.id = plc.charge_id ";
 
@@ -1605,6 +1606,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             return list;
         }
         final Charge penaltyCharge = optPenaltyCharge.get();
+        final BigDecimal overdueChargeAmount = loan.getOverdueChargeAmount() != null ? loan.getOverdueChargeAmount()
+                : penaltyCharge.getAmount();
 
         final Long penaltyWaitPeriod = configurationDomainService.retrievePenaltyWaitPeriod();
         final boolean backdatePenalties = configurationDomainService.isBackdatePenaltiesEnabled();
@@ -1623,7 +1626,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 }
 
                 list.add(new OverdueLoanScheduleData(loan.getId(), penaltyCharge.getId(),
-                        DateUtils.DEFAULT_DATE_FORMATTER.format(installment.getDueDate()), penaltyCharge.getAmount(),
+                        DateUtils.DEFAULT_DATE_FORMATTER.format(installment.getDueDate()), overdueChargeAmount,
                         DateUtils.DEFAULT_DATE_FORMAT, Locale.ENGLISH.toLanguageTag(),
                         installment.getPrincipalOutstanding(loan.getCurrency()).getAmount(),
                         installment.getInterestOutstanding(loan.getCurrency()).getAmount(), installment.getInstallmentNumber()));

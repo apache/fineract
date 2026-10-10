@@ -58,4 +58,5 @@
   <include relativeToChangelogFile="true" file="parts/1033_add_reage_reasons_for_loan.xml"/>
   <include relativeToChangelogFile="true" file="parts/1034_loan_reamortization_parameters.xml"/>
   <include relativeToChangelogFile="true" file="parts/1035_add_tax_to_loan_charge.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1036_add_overdue_charge_amount_to_loan.xml"/>
 </databaseChangeLog>
