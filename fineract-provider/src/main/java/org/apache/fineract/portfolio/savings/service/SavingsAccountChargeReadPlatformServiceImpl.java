@@ -37,8 +37,11 @@ import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeNotFou
 import org.apache.fineract.portfolio.charge.service.ChargeDropdownReadPlatformService;
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
+import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountAnnualFeeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
+import org.apache.fineract.portfolio.savings.data.SavingsChargeTransactionData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -180,6 +183,43 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountChargeNotFoundException(savingsAccountId, e);
         }
+    }
+
+    @Override
+    public Collection<SavingsChargeTransactionData> retrieveChargeTransactions(final Long savingsAccountChargeId,
+            final Long savingsAccountId) {
+        this.context.authenticatedUser();
+
+        final String sql = "select tr.id as transactionId, allocation.id as allocationId, tr.transaction_date as transactionDate, "
+                + "tr.transaction_type_enum as transactionType, tr.amount as transactionAmount, allocation.amount as allocatedAmount, "
+                + "tr.is_reversed as reversed, pd.id as paymentDetailId, pd.payment_type_id as paymentTypeId, "
+                + "pt.value as paymentTypeName, pd.account_number as accountNumber, pd.check_number as checkNumber, "
+                + "pd.routing_code as routingCode, pd.receipt_number as receiptNumber, pd.bank_number as bankNumber "
+                + "from m_savings_account_charge_paid_by allocation "
+                + "join m_savings_account_charge charge on charge.id = allocation.savings_account_charge_id "
+                + "join m_savings_account_transaction tr on tr.id = allocation.savings_account_transaction_id "
+                + "left join m_payment_detail pd on pd.id = tr.payment_detail_id "
+                + "left join m_payment_type pt on pt.id = pd.payment_type_id "
+                + "where charge.id = ? and charge.savings_account_id = ? and tr.savings_account_id = ? "
+                + "order by tr.transaction_date desc, tr.id desc, allocation.id desc";
+
+        return this.jdbcTemplate.query(sql, (rs, rowNum) -> {
+            final Long paymentDetailId = JdbcSupport.getLong(rs, "paymentDetailId");
+            PaymentDetailData paymentDetailData = null;
+            if (paymentDetailId != null) {
+                final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentTypeId");
+                final PaymentTypeData paymentType = paymentTypeId == null ? null
+                        : PaymentTypeData.builder().id(paymentTypeId).name(rs.getString("paymentTypeName")).build();
+                paymentDetailData = new PaymentDetailData(paymentDetailId, paymentType, rs.getString("accountNumber"),
+                        rs.getString("checkNumber"), rs.getString("routingCode"), rs.getString("receiptNumber"),
+                        rs.getString("bankNumber"));
+            }
+            return SavingsChargeTransactionData.builder().transactionId(rs.getLong("transactionId"))
+                    .allocationId(rs.getLong("allocationId")).date(JdbcSupport.getLocalDate(rs, "transactionDate"))
+                    .transactionType(SavingsEnumerations.transactionType(rs.getInt("transactionType")))
+                    .amount(rs.getBigDecimal("transactionAmount")).amountAllocated(rs.getBigDecimal("allocatedAmount"))
+                    .reversed(rs.getBoolean("reversed")).paymentDetailData(paymentDetailData).build();
+        }, savingsAccountChargeId, savingsAccountId, savingsAccountId);
     }
 
     @Override
