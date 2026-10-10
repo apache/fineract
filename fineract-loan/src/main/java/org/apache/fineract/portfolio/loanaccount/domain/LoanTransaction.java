@@ -469,8 +469,12 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return createTerminalTransaction(loan, chargeOffDate, LoanTransactionType.CHARGE_OFF, externalId);
     }
 
-    public static LoanTransaction contractTermination(final Loan loan, final LocalDate transactionDate, final ExternalId externalId) {
-        return createTerminalTransaction(loan, transactionDate, LoanTransactionType.CONTRACT_TERMINATION, externalId);
+    public static LoanTransaction earlyTermination(final Loan loan, final LocalDate transactionDate,
+            final LoanTransactionType transactionType, final ExternalId externalId) {
+        if (!transactionType.isContractTermination() && !transactionType.isLoanWithdrawal()) {
+            throw new IllegalArgumentException("Not an early termination transaction type: " + transactionType);
+        }
+        return createTerminalTransaction(loan, transactionDate, transactionType, externalId);
     }
 
     private static LoanTransaction createTerminalTransaction(final Loan loan, final LocalDate transactionDate,
@@ -748,6 +752,14 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return LoanTransactionType.CONTRACT_TERMINATION.equals(getTypeOf()) && isNotReversed();
     }
 
+    public boolean isLoanWithdrawal() {
+        return LoanTransactionType.LOAN_WITHDRAWAL.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isEarlyTermination() {
+        return isContractTermination() || isLoanWithdrawal();
+    }
+
     public boolean isWaiver() {
         return isInterestWaiver() || isChargesWaiver();
     }
@@ -862,7 +874,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
                 || type == LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION || type == LoanTransactionType.CONTRACT_TERMINATION
                 || type == LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT || type == LoanTransactionType.BUY_DOWN_FEE
                 || type == LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT || type == LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION
-                || type == LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT);
+                || type == LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT || type == LoanTransactionType.LOAN_WITHDRAWAL);
     }
 
     public void updateOutstandingLoanBalance(BigDecimal outstandingLoanBalance) {

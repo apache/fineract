@@ -118,7 +118,7 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
                         loan.getActiveLoanTermVariations());
                 ctx.setChargedOff(loan.isChargedOff());
                 ctx.setWrittenOff(loan.isClosedWrittenOff());
-                ctx.setContractTerminated(loan.isContractTermination());
+                ctx.setContractTerminated(loan.isTerminatedEarly());
                 advancedPaymentScheduleTransactionProcessor.recalculateInterestForDate(businessDate, ctx);
             }
         } else {

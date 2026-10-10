@@ -31,6 +31,10 @@ public interface ProgressiveLoanTransactionValidator extends LoanTransactionVali
 
     void validateContractTerminationUndo(JsonCommand command, Long loanId);
 
+    void validateLoanWithdrawal(JsonCommand command, Long loanId);
+
+    void validateLoanWithdrawalUndo(JsonCommand command, Long loanId);
+
     void validateBuyDownFee(JsonCommand command, Long loanId);
 
     void validateBuyDownFeeAdjustment(JsonCommand command, Long loanId, Long buyDownFeeTransactionId);

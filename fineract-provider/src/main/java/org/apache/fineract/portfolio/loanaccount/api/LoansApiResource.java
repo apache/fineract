@@ -1378,6 +1378,10 @@ public class LoansApiResource {
             commandRequest = builder.applyContractTermination(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.UNDO_CONTRACT_TERMINATION_COMMAND)) {
             commandRequest = builder.undoContractTermination(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.LOAN_WITHDRAWAL_COMMAND)) {
+            commandRequest = builder.applyLoanWithdrawal(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.UNDO_LOAN_WITHDRAWAL_COMMAND)) {
+            commandRequest = builder.undoLoanWithdrawal(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {

@@ -155,7 +155,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         OutstandingAmountsDTO outstandingAmounts;
 
         if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargeOffOnDate(onDate)
-                && !loan.isContractTerminatedOnDate(onDate)) {
+                && !loan.isTerminatedEarlyOnDate(onDate)) {
             final MathContext mc = MoneyHelper.getMathContext();
 
             final InterestMethod interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod();
@@ -216,7 +216,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         progressiveContext.getAlreadyProcessedTransactions().addAll(loanTransactionService.retrieveListOfTransactionsForReprocessing(loan));
         progressiveContext.setChargedOff(loan.isChargedOff());
         progressiveContext.setWrittenOff(loan.isClosedWrittenOff());
-        progressiveContext.setContractTerminated(loan.isContractTermination());
+        progressiveContext.setContractTerminated(loan.isTerminatedEarly());
         ChangedTransactionDetail result = advancedProcessor.processLatestTransaction(loanTransaction, progressiveContext);
         if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
             modelRepository.writeInterestScheduleModel(loan, model);

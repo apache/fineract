@@ -582,7 +582,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case REAMORTIZE -> handleReAmortization(loanTransaction, ctx);
             case REAGE -> handleReAge(loanTransaction, ctx);
             case CAPITALIZED_INCOME -> handleCapitalizedIncome(loanTransaction, ctx);
-            case CONTRACT_TERMINATION -> handleContractTermination(loanTransaction, ctx);
+            case CONTRACT_TERMINATION, LOAN_WITHDRAWAL -> handleContractTermination(loanTransaction, ctx);
             // TODO: Cover rest of the transaction types
             default -> log.warn("Unhandled transaction processing for transaction type: {}", loanTransaction.getTypeOf());
         }
@@ -634,7 +634,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         if (isAllComponentsZero(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion)
                 && loanTransaction.isNotReversed() && !DateUtils.isAfterBusinessDate(loanTransaction.getTransactionDate())) {
             loanTransaction.reverse();
-            loanTransaction.getLoan().liftContractTerminationSubStatus();
+            loanTransaction.getLoan().liftEarlyTerminationSubStatus();
 
             if (transactionCtx instanceof ProgressiveTransactionCtx progressiveCtx) {
                 progressiveCtx.setContractTerminated(false);
