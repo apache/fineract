@@ -146,6 +146,7 @@ public final class SavingsAccountData implements Serializable {
     private transient Set<Long> existingReversedTransactionIds = new HashSet<>();
     private transient Long glAccountIdForSavingsControl;
     private transient Long glAccountIdForInterestOnSavings;
+    private transient Long glAccountIdForIncomeFromInterest;
 
     private Long glAccountIdForInterestPayable;
     private Long glAccountIdForOverdraftPorfolio;

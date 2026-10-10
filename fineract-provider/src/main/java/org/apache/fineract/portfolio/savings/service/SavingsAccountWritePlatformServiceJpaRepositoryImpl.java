@@ -721,14 +721,19 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public void selectAccountId(SavingsAccountTransactionData accountTransaction, SavingsAccountData savingsAccountData) {
         SavingsAccountTransactionType transactionType = SavingsAccountTransactionType
                 .fromInt(accountTransaction.getTransactionType().getId().intValue());
+        // cash-based products have no payable or receivable mappings: interest goes straight to expense or income
+        boolean cashBased = savingsAccountData.isCashBasedAccountingEnabledOnSavingsProduct();
         if (transactionType.isOverDraftInterestPosting()) {
             if (MathUtil.isGreaterThanZero(accountTransaction.getRunningBalance())) {
                 accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForSavingsControl());
-                accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForInterestReceivable());
             } else {
                 accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForOverdraftPorfolio());
-                accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForInterestReceivable());
             }
+            accountTransaction.setAccountCredit(cashBased ? savingsAccountData.getGlAccountIdForIncomeFromInterest()
+                    : savingsAccountData.getGlAccountIdForInterestReceivable());
+        } else if (transactionType.isInterestPosting() && cashBased) {
+            accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForInterestOnSavings());
+            accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForSavingsControl());
         } else {
             accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForInterestPayable());
             accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForSavingsControl());

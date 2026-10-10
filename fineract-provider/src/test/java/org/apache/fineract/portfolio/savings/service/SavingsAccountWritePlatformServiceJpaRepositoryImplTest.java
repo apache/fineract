@@ -63,8 +63,11 @@ import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatfor
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeDataValidator;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountDataValidator;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDataValidator;
 import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransactionRepository;
 import org.apache.fineract.portfolio.savings.domain.GSIMRepositoy;
@@ -92,6 +95,13 @@ import org.mockito.quality.Strictness;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
+
+    private static final Long INTEREST_ON_SAVINGS_GL_ACCOUNT_ID = 101L;
+    private static final Long SAVINGS_CONTROL_GL_ACCOUNT_ID = 102L;
+    private static final Long INTEREST_PAYABLE_GL_ACCOUNT_ID = 103L;
+    private static final Long INCOME_FROM_INTEREST_GL_ACCOUNT_ID = 105L;
+    private static final Long OVERDRAFT_PORTFOLIO_GL_ACCOUNT_ID = 106L;
+    private static final Long INTEREST_RECEIVABLE_GL_ACCOUNT_ID = 107L;
 
     @Mock
     private PlatformSecurityContext context;
@@ -480,5 +490,76 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
 
         // Then
         assertThat(result.getTransactionId()).isEqualTo(expectedTransactionId.toString());
+    }
+
+    @Test
+    void selectAccountId_cashBasedInterestPosting_debitsInterestOnSavings() {
+        final SavingsAccountTransactionData transaction = transactionOfType(SavingsAccountTransactionType.INTEREST_POSTING);
+
+        service.selectAccountId(transaction, savingsAccountWithGlAccounts(true));
+
+        verify(transaction).setAccountDebit(INTEREST_ON_SAVINGS_GL_ACCOUNT_ID);
+        verify(transaction).setAccountCredit(SAVINGS_CONTROL_GL_ACCOUNT_ID);
+    }
+
+    @Test
+    void selectAccountId_accrualInterestPosting_debitsInterestPayable() {
+        final SavingsAccountTransactionData transaction = transactionOfType(SavingsAccountTransactionType.INTEREST_POSTING);
+
+        service.selectAccountId(transaction, savingsAccountWithGlAccounts(false));
+
+        verify(transaction).setAccountDebit(INTEREST_PAYABLE_GL_ACCOUNT_ID);
+        verify(transaction).setAccountCredit(SAVINGS_CONTROL_GL_ACCOUNT_ID);
+    }
+
+    @Test
+    void selectAccountId_cashBasedOverdraftInterestOnNegativeBalance_debitsOverdraftPortfolio() {
+        final SavingsAccountTransactionData transaction = transactionOfType(SavingsAccountTransactionType.OVERDRAFT_INTEREST);
+        when(transaction.getRunningBalance()).thenReturn(new BigDecimal("-100"));
+
+        service.selectAccountId(transaction, savingsAccountWithGlAccounts(true));
+
+        verify(transaction).setAccountDebit(OVERDRAFT_PORTFOLIO_GL_ACCOUNT_ID);
+        verify(transaction).setAccountCredit(INCOME_FROM_INTEREST_GL_ACCOUNT_ID);
+    }
+
+    @Test
+    void selectAccountId_cashBasedOverdraftInterestOnPositiveBalance_debitsSavingsControl() {
+        final SavingsAccountTransactionData transaction = transactionOfType(SavingsAccountTransactionType.OVERDRAFT_INTEREST);
+        when(transaction.getRunningBalance()).thenReturn(new BigDecimal("100"));
+
+        service.selectAccountId(transaction, savingsAccountWithGlAccounts(true));
+
+        verify(transaction).setAccountDebit(SAVINGS_CONTROL_GL_ACCOUNT_ID);
+        verify(transaction).setAccountCredit(INCOME_FROM_INTEREST_GL_ACCOUNT_ID);
+    }
+
+    @Test
+    void selectAccountId_accrualOverdraftInterest_creditsInterestReceivable() {
+        final SavingsAccountTransactionData transaction = transactionOfType(SavingsAccountTransactionType.OVERDRAFT_INTEREST);
+        when(transaction.getRunningBalance()).thenReturn(new BigDecimal("-100"));
+
+        service.selectAccountId(transaction, savingsAccountWithGlAccounts(false));
+
+        verify(transaction).setAccountDebit(OVERDRAFT_PORTFOLIO_GL_ACCOUNT_ID);
+        verify(transaction).setAccountCredit(INTEREST_RECEIVABLE_GL_ACCOUNT_ID);
+    }
+
+    private static SavingsAccountTransactionData transactionOfType(final SavingsAccountTransactionType type) {
+        final SavingsAccountTransactionData transaction = mock(SavingsAccountTransactionData.class);
+        when(transaction.getTransactionType()).thenReturn(SavingsEnumerations.transactionType(type));
+        return transaction;
+    }
+
+    private static SavingsAccountData savingsAccountWithGlAccounts(final boolean cashBasedAccounting) {
+        final SavingsAccountData account = mock(SavingsAccountData.class);
+        when(account.isCashBasedAccountingEnabledOnSavingsProduct()).thenReturn(cashBasedAccounting);
+        when(account.getGlAccountIdForInterestOnSavings()).thenReturn(INTEREST_ON_SAVINGS_GL_ACCOUNT_ID);
+        when(account.getGlAccountIdForSavingsControl()).thenReturn(SAVINGS_CONTROL_GL_ACCOUNT_ID);
+        when(account.getGlAccountIdForInterestPayable()).thenReturn(INTEREST_PAYABLE_GL_ACCOUNT_ID);
+        when(account.getGlAccountIdForIncomeFromInterest()).thenReturn(INCOME_FROM_INTEREST_GL_ACCOUNT_ID);
+        when(account.getGlAccountIdForOverdraftPorfolio()).thenReturn(OVERDRAFT_PORTFOLIO_GL_ACCOUNT_ID);
+        when(account.getGlAccountIdForInterestReceivable()).thenReturn(INTEREST_RECEIVABLE_GL_ACCOUNT_ID);
+        return account;
     }
 }
