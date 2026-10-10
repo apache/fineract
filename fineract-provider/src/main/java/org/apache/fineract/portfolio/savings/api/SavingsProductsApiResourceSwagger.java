@@ -477,6 +477,28 @@ final class SavingsProductsApiResourceSwagger {
             public GetSavingsProductsGlAccount incomeAccount;
         }
 
+        static final class GetSavingsProductsLockinPeriodFrequencyType {
+
+            private GetSavingsProductsLockinPeriodFrequencyType() {}
+
+            @Schema(example = "0")
+            public Integer id;
+            @Schema(example = "savings.lockin.savingsPeriodFrequencyType.days")
+            public String code;
+            @Schema(example = "Days")
+            public String value;
+        }
+
+        static final class GetSavingsProductsTaxGroup {
+
+            private GetSavingsProductsTaxGroup() {}
+
+            @Schema(example = "1")
+            public Long id;
+            @Schema(example = "tax")
+            public String name;
+        }
+
         @Schema(example = "1")
         public Long id;
         @Schema(example = "savings product")
@@ -492,9 +514,43 @@ final class SavingsProductsApiResourceSwagger {
         public GetSavingsProductsResponse.GetSavingsProductsInterestPostingPeriodType interestPostingPeriodType;
         public GetSavingsProductsResponse.GetSavingsProductsInterestCalculationType interestCalculationType;
         public GetSavingsProductsResponse.GetSavingsProductsInterestCalculationDaysInYearType interestCalculationDaysInYearType;
+        @Schema(example = "10000.0")
+        public BigDecimal minRequiredOpeningBalance;
+        @Schema(example = "0")
+        public Integer lockinPeriodFrequency;
+        public GetSavingsProductsLockinPeriodFrequencyType lockinPeriodFrequencyType;
         @Schema(example = "false")
         public Boolean withdrawalFeeForTransfers;
         public GetSavingsProductsResponse.GetSavingsProductsAccountingRule accountingRule;
+        @Schema(example = "false")
+        public Boolean allowOverdraft;
+        @Schema(example = "10000")
+        public BigDecimal overdraftLimit;
+        @Schema(example = "100.0")
+        public BigDecimal minRequiredBalance;
+        @Schema(example = "false")
+        public Boolean enforceMinRequiredBalance;
+        @Schema(example = "2000.0")
+        public BigDecimal maxAllowedLienLimit;
+        @Schema(example = "false")
+        public Boolean lienAllowed;
+        @Schema(example = "100.0")
+        public BigDecimal minBalanceForInterestCalculation;
+        @Schema(example = "21.0")
+        public BigDecimal nominalAnnualInterestRateOverdraft;
+        @Schema(example = "0")
+        public BigDecimal minOverdraftForInterestCalculation;
+        @Schema(example = "false")
+        public Boolean withHoldTax;
+        public GetSavingsProductsTaxGroup taxGroup;
+        @Schema(example = "false")
+        public Boolean isDormancyTrackingActive;
+        @Schema(example = "30")
+        public Long daysToInactive;
+        @Schema(example = "60")
+        public Long daysToDormancy;
+        @Schema(example = "90")
+        public Long daysToEscheat;
         public GetSavingsProductsAccountingMappings accountingMappings;
         public Set<GetSavingsProductsPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public Set<GetSavingsProductsFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
