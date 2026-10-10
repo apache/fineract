@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.tax.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupMappingsData;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
+import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupMappings;
 
 public final class TaxUtils {
@@ -125,5 +127,22 @@ public final class TaxUtils {
             totalAmount = BigDecimal.valueOf(total).setScale(scale, MoneyHelper.getRoundingMode());
         }
         return totalAmount;
+    }
+
+    public static BigDecimal calculateChargeAmountWithTax(final BigDecimal baseAmount, final TaxGroup taxGroup,
+            final LocalDate transactionDate, final int scale) {
+        if (baseAmount == null) {
+            return null;
+        }
+        if (taxGroup == null) {
+            return baseAmount;
+        }
+        final Set<TaxGroupMappings> taxGroupMappings = taxGroup.getTaxGroupMappings();
+        if (taxGroupMappings == null || taxGroupMappings.isEmpty()) {
+            return baseAmount;
+        }
+        final List<TaxGroupMappings> mappingsList = new ArrayList<>(taxGroupMappings);
+        final BigDecimal totalAmount = addTax(baseAmount, transactionDate, mappingsList, scale);
+        return totalAmount != null ? totalAmount : baseAmount;
     }
 }
