@@ -45,7 +45,6 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyPauseUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPausePeriod;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPausePeriodUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodBounds;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleMapper;
@@ -453,6 +452,13 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         reprocessDelinquencySchedule(loan);
     }
 
+    /**
+     * Takes the days a resume removed from a pause back out of the periods the pause had extended. The reset date is a
+     * hard boundary here as well: a period the reset already cut keeps its end on the day before the reset, and the
+     * period the reset started keeps its start on the reset date, whether the pause began before it or not. This still
+     * holds after the reset is undone, since the undo leaves the cut in place. The days removed are the same seen from
+     * the pause start or from the reset date, since a resume cannot predate the reset.
+     */
     private void shrinkPeriodsForPause(final WorkingCapitalLoan loan, final LocalDate pauseStart, final LocalDate originalPauseEnd,
             final LocalDate newPauseEnd) {
         final long daysToRemove = WorkingCapitalLoanDelinquencyPauseUtils.calculateDaysRemovedOnResume(pauseStart, newPauseEnd,
@@ -460,16 +466,17 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         if (daysToRemove <= 0) {
             return;
         }
+        final List<LocalDate> restartResetDates = WorkingCapitalLoanDelinquencyPauseUtils.restartResetDates(findAllActions(loan.getId()));
         final List<WorkingCapitalLoanDelinquencyRangeSchedule> periods = loanDelinquencyRangeScheduleRepository
                 .findByLoanIdOrderByPeriodNumberAsc(loan.getId());
         for (final WorkingCapitalLoanDelinquencyRangeSchedule period : periods) {
-            if (period.getMinPaymentCriteriaMet() != null) {
+            if (period.getMinPaymentCriteriaMet() != null || Boolean.TRUE.equals(period.getReset())) {
                 continue;
             }
             if (!period.getToDate().isBefore(pauseStart)) {
                 period.setToDate(period.getToDate().minusDays(daysToRemove));
             }
-            if (period.getFromDate().isAfter(pauseStart)) {
+            if (period.getFromDate().isAfter(pauseStart) && !restartResetDates.contains(period.getFromDate())) {
                 period.setFromDate(period.getFromDate().minusDays(daysToRemove));
             }
         }
@@ -629,14 +636,18 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         return loanDelinquencyActionRepository.findByWorkingCapitalLoanIdOrderById(loanId);
     }
 
+    /**
+     * Re-dates a freshly built period by the recorded pauses. A period started by a reset inside an active pause keeps
+     * its start on the reset date and only counts the pause from there (see
+     * {@link WorkingCapitalLoanDelinquencyPauseUtils#applyRecordedPauses}); otherwise the restarted period would move
+     * past the pause and leave the days in between belonging to no period.
+     */
     private void applyRecordedPauses(final WorkingCapitalLoanDelinquencyRangeSchedule period, final WorkingCapitalLoan loan) {
         if (period == null || period.getFromDate() == null || period.getToDate() == null) {
             return;
         }
-        final List<WorkingCapitalLoanPausePeriod> pauses = WorkingCapitalLoanDelinquencyPauseUtils
-                .toEffectivePauses(findAllActions(loan.getId()));
-        final WorkingCapitalLoanPeriodBounds bounds = WorkingCapitalLoanPausePeriodUtils.applyPauses(period.getFromDate(),
-                period.getToDate(), pauses);
+        final WorkingCapitalLoanPeriodBounds bounds = WorkingCapitalLoanDelinquencyPauseUtils.applyRecordedPauses(period.getFromDate(),
+                period.getToDate(), findAllActions(loan.getId()));
         period.setFromDate(bounds.fromDate());
         period.setToDate(bounds.toDate());
     }
