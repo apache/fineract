@@ -290,6 +290,14 @@ final class DatatablesApiResourceSwagger {
 
         @Schema(example = "1")
         public Long resourceId;
+        @Schema(example = "1")
+        public Long groupId;
+        @Schema(example = "1")
+        public Long clientId;
+        @Schema(example = "1")
+        public Long loanId;
+        @Schema(example = "1")
+        public Long savingsId;
         /**
          * See {@link PutDataTablesAppTableIdDatatableIdResponse#transactionId}.
          */

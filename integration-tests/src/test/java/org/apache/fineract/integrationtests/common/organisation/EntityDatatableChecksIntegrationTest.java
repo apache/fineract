@@ -153,7 +153,7 @@ public class EntityDatatableChecksIntegrationTest extends FeignLoanTestBase {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Long appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, clientID).getResourceId();
+        Long appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, clientID).getClientId();
         assertEquals(clientID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -209,7 +209,7 @@ public class EntityDatatableChecksIntegrationTest extends FeignLoanTestBase {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Long appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, groupId).getResourceId();
+        Long appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, groupId).getGroupId();
         assertEquals(groupId, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -272,7 +272,7 @@ public class EntityDatatableChecksIntegrationTest extends FeignLoanTestBase {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Long appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, savingsId).getResourceId();
+        Long appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, savingsId).getSavingsId();
         assertEquals(savingsId, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -343,7 +343,7 @@ public class EntityDatatableChecksIntegrationTest extends FeignLoanTestBase {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Long appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, loanID).getResourceId();
+        Long appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, loanID).getLoanId();
         assertEquals(loanID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
