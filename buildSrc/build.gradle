@@ -44,7 +44,7 @@ repositories {
 configurations.all {
     resolutionStrategy {
         dependencySubstitution {
-            substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.11.4')
+            substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.12.0')
         }
     }
 }

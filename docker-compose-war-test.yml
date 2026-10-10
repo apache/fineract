@@ -37,7 +37,7 @@ services:
     # Same Tomcat major as the servlet API the WAR is built against, on the JDK the project targets.
     # Pinned to an exact patch version, like every other image the repo pulls, so a Tomcat release
     # cannot silently change what this job tests.
-    image: tomcat:10.1.59-jdk25-temurin
+    image: tomcat:10.1.60-jdk25-temurin
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
