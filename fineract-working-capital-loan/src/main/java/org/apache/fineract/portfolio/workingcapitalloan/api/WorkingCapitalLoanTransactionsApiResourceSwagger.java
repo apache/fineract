@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
@@ -287,6 +288,8 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public Long resourceId;
         @Schema(example = "repayment-ext-001")
         public String resourceExternalId;
+        @Schema(example = "{}")
+        public Map<String, Object> changes;
     }
 
     @Schema(description = "Transaction template for one command. Every command fills expectedAmount; the remaining fields "
