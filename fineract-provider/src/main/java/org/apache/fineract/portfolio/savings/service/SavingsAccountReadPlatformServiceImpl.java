@@ -30,7 +30,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -77,8 +79,10 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRep
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
+import org.apache.fineract.portfolio.tax.data.TaxComponentHistoryData;
 import org.apache.fineract.portfolio.tax.data.TaxDetailsData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
+import org.apache.fineract.portfolio.tax.data.TaxGroupMappingsData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -319,6 +323,16 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.interest_posted_till_date as interestPostedTillDate, ");
             sqlBuilder.append("sa.version as version, ");
             sqlBuilder.append("tg.id as taxGroupId, ");
+            sqlBuilder.append("tgm.id as taxGroupMappingId, tgm.start_date as taxGroupMappingStartDate, ");
+            sqlBuilder.append("tgm.end_date as taxGroupMappingEndDate, ");
+            sqlBuilder.append("tgcomp.id as taxGroupComponentId, tgcomp.name as taxGroupComponentName, ");
+            sqlBuilder.append("tgcomp.percentage as taxGroupComponentPercentage, ");
+            sqlBuilder.append("tgcomp.debit_account_id as taxGroupComponentDebitAccountId, ");
+            sqlBuilder.append("tgcomp.credit_account_id as taxGroupComponentCreditAccountId, ");
+            sqlBuilder.append("tgcomp.start_date as taxGroupComponentStartDate, ");
+            sqlBuilder.append("tgch.id as taxGroupComponentHistoryId, tgch.percentage as taxGroupComponentHistoryPercentage, ");
+            sqlBuilder.append("tgch.start_date as taxGroupComponentHistoryStartDate, ");
+            sqlBuilder.append("tgch.end_date as taxGroupComponentHistoryEndDate, ");
             sqlBuilder.append("(select COALESCE(max(sat.transaction_date),sa.activatedon_date) ");
             sqlBuilder.append("from m_savings_account_transaction as sat ");
             sqlBuilder.append("where sat.is_reversed = false and sat.is_reversal = false ");
@@ -344,6 +358,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     "msac.id as chargeId, msac.amount as chargeAmount, msac.charge_time_enum as chargeTimeType, msac.is_penalty as isPenaltyCharge, ");
             sqlBuilder.append("txd.id as taxDetailsId, txd.amount as taxAmount, ");
             sqlBuilder.append("apm.gl_account_id as glAccountIdForInterestOnSavings, apm1.gl_account_id as glAccountIdForSavingsControl, ");
+            sqlBuilder.append("apm5.gl_account_id as glAccountIdForSavingsReference, ");
             sqlBuilder.append(
                     "apm2.gl_account_id as glAccountIdForInterestReceivable,apm3.gl_account_id as glAccountIdForOverdraftPorfolio, ");
             sqlBuilder.append("apm4.gl_account_id as glAccountIdForInterestPayable, ");
@@ -360,6 +375,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("left join m_client c ON c.id = sa.client_id ");
             sqlBuilder.append("left join m_group g ON g.id = sa.group_id ");
             sqlBuilder.append("left join m_tax_group tg on tg.id = sa.tax_group_id ");
+            sqlBuilder.append("left join m_tax_group_mappings tgm on tgm.tax_group_id = tg.id ");
+            sqlBuilder.append("left join m_tax_component tgcomp on tgcomp.id = tgm.tax_component_id ");
+            sqlBuilder.append("left join m_tax_component_history tgch on tgch.tax_component_id = tgcomp.id ");
             sqlBuilder.append("left join m_savings_account_transaction_tax_details txd on txd.savings_transaction_id = tr.id ");
             sqlBuilder.append("left join m_tax_component mtc on mtc.id = txd.tax_component_id ");
             sqlBuilder.append(
@@ -369,6 +387,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("left join acc_product_mapping apm2 on apm2.product_id = sp.id and apm2.financial_account_type=18 ");
             sqlBuilder.append("left join acc_product_mapping apm3 on apm3.product_id = sp.id and apm3.financial_account_type = 11 ");
             sqlBuilder.append("left join acc_product_mapping apm4 on apm4.product_id = sp.id and apm4.financial_account_type = 17 ");
+            sqlBuilder.append(
+                    "left join acc_product_mapping apm5 on apm5.product_type = 2 and apm5.product_id = sp.id and apm5.financial_account_type=1 ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -389,6 +409,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             HashMap<String, Long> transMap = new HashMap<>();
             HashMap<String, Long> taxDetails = new HashMap<>();
             HashMap<String, Long> chargeDetails = new HashMap<>();
+            HashMap<Long, TaxComponentData> taxGroupComponents = new HashMap<>();
+            HashMap<Long, List<TaxComponentHistoryData>> taxGroupComponentHistories = new HashMap<>();
+            Set<Long> taxGroupComponentHistoryIds = new HashSet<>();
+            Set<Long> taxGroupMappingIds = new HashSet<>();
+            List<TaxGroupMappingsData> taxAssociations = null;
             SavingsAccountTransactionData savingsAccountTransactionData = null;
             SavingsAccountData savingsAccountData = null;
             int count = 0;
@@ -398,6 +423,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 final Long transactionId = rs.getLong("transactionId");
                 final Long taxDetailId = JdbcSupport.getLongDefaultToNullIfZero(rs, "taxDetailsId");
                 final Long taxComponentId = JdbcSupport.getLongDefaultToNullIfZero(rs, "taxComponentId");
+                final Long taxGroupMappingId = JdbcSupport.getLongDefaultToNullIfZero(rs, "taxGroupMappingId");
+                final Long taxGroupComponentId = JdbcSupport.getLongDefaultToNullIfZero(rs, "taxGroupComponentId");
+                final Long taxGroupComponentHistoryId = JdbcSupport.getLongDefaultToNullIfZero(rs, "taxGroupComponentHistoryId");
                 final String accountNo = rs.getString("accountNo");
                 final Long chargeId = rs.getLong("chargeId");
 
@@ -421,6 +449,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
                     final Long glAccountIdForInterestOnSavings = rs.getLong("glAccountIdForInterestOnSavings");
                     final Long glAccountIdForSavingsControl = rs.getLong("glAccountIdForSavingsControl");
+                    final Long glAccountIdForSavingsReference = rs.getLong("glAccountIdForSavingsReference");
 
                     final Long glAccountIdForOverdraftPorfolio = rs.getLong("glAccountIdForOverdraftPorfolio");
                     final Long glAccountIdForInterestReceivable = rs.getLong("glAccountIdForInterestReceivable");
@@ -524,9 +553,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
                     final boolean withHoldTax = rs.getBoolean("withHoldTax");
                     final Long taxGroupId = JdbcSupport.getLongDefaultToNullIfZero(rs, "taxGroupId");
+                    taxAssociations = new ArrayList<>();
+                    taxGroupMappingIds = new HashSet<>();
                     TaxGroupData taxGroupData = null;
                     if (taxGroupId != null) {
-                        taxGroupData = TaxGroupData.lookup(taxGroupId, null);
+                        taxGroupData = new TaxGroupData(taxGroupId, null, taxAssociations, null);
                     }
 
                     final BigDecimal nominalAnnualInterestRate = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
@@ -591,6 +622,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
                     savingsAccountData.setGlAccountIdForInterestOnSavings(glAccountIdForInterestOnSavings);
                     savingsAccountData.setGlAccountIdForSavingsControl(glAccountIdForSavingsControl);
+                    savingsAccountData.setGlAccountIdForSavingsReference(glAccountIdForSavingsReference);
                     final Integer version = JdbcSupport.getInteger(rs, "version");
                     savingsAccountData.setVersion(version);
                 }
@@ -672,6 +704,45 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     }
 
                     taxDetails.put("id", taxDetailId);
+                }
+
+                if (taxGroupMappingId != null && taxAssociations != null && taxGroupMappingIds.add(taxGroupMappingId)) {
+                    TaxComponentData taxGroupComponent = taxGroupComponents.get(taxGroupComponentId);
+                    if (taxGroupComponent == null) {
+                        final List<TaxComponentHistoryData> componentHistories = new ArrayList<>();
+                        taxGroupComponentHistories.put(taxGroupComponentId, componentHistories);
+                        final BigDecimal taxGroupComponentPercentage = JdbcSupport
+                                .getBigDecimalDefaultToNullIfZero(rs, "taxGroupComponentPercentage");
+                        final Long taxGroupComponentDebitAccountId = JdbcSupport
+                                .getLongDefaultToNullIfZero(rs, "taxGroupComponentDebitAccountId");
+                        final GLAccountData debitAccount = taxGroupComponentDebitAccountId != null
+                                ? GLAccountData.createFrom(taxGroupComponentDebitAccountId)
+                                : null;
+                        final Long taxGroupComponentCreditAccountId = JdbcSupport
+                                .getLongDefaultToNullIfZero(rs, "taxGroupComponentCreditAccountId");
+                        final GLAccountData creditAccount = taxGroupComponentCreditAccountId != null
+                                ? GLAccountData.createFrom(taxGroupComponentCreditAccountId)
+                                : null;
+                        final LocalDate taxGroupComponentStartDate = JdbcSupport.getLocalDate(rs, "taxGroupComponentStartDate");
+                        taxGroupComponent = TaxComponentData.instance(taxGroupComponentId, rs.getString("taxGroupComponentName"),
+                                taxGroupComponentPercentage, null, debitAccount, null, creditAccount, taxGroupComponentStartDate,
+                                componentHistories);
+                        taxGroupComponents.put(taxGroupComponentId, taxGroupComponent);
+                    }
+                    final LocalDate taxGroupMappingStartDate = JdbcSupport.getLocalDate(rs, "taxGroupMappingStartDate");
+                    final LocalDate taxGroupMappingEndDate = JdbcSupport.getLocalDate(rs, "taxGroupMappingEndDate");
+                    taxAssociations.add(new TaxGroupMappingsData(taxGroupMappingId, taxGroupComponent, taxGroupMappingStartDate,
+                            taxGroupMappingEndDate));
+                }
+
+                if (taxGroupComponentHistoryId != null && taxGroupComponentHistoryIds.add(taxGroupComponentHistoryId)) {
+                    final List<TaxComponentHistoryData> componentHistories = taxGroupComponentHistories.get(taxGroupComponentId);
+                    if (componentHistories != null) {
+                        componentHistories.add(new TaxComponentHistoryData(
+                                JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "taxGroupComponentHistoryPercentage"),
+                                JdbcSupport.getLocalDate(rs, "taxGroupComponentHistoryStartDate"),
+                                JdbcSupport.getLocalDate(rs, "taxGroupComponentHistoryEndDate")));
+                    }
                 }
 
             }
