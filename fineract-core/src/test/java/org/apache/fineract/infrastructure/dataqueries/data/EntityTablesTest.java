@@ -20,7 +20,9 @@ package org.apache.fineract.infrastructure.dataqueries.data;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.junit.jupiter.api.Test;
 
@@ -71,5 +73,12 @@ class EntityTablesTest {
         assertEquals(EntityTables.LOAN, EntityTables.fromEntityName("m_loan"));
         assertEquals(EntityTables.SAVINGS, EntityTables.fromEntityName("m_savings_account"));
         assertEquals(EntityTables.GROUP, EntityTables.fromEntityName("m_group"));
+    }
+
+    @Test
+    void testLoanProductSupportsCreateCheck() {
+        assertTrue(EntityTables.LOAN_PRODUCT.hasCheck());
+        assertEquals(List.of(StatusEnum.CREATE), EntityTables.LOAN_PRODUCT.getCheckStatuses());
+        assertEquals(List.of(StatusEnum.CREATE.getValue()), EntityTables.getCheckStatusCodes("m_product_loan"));
     }
 }
