@@ -35,6 +35,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,13 +45,11 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
-import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
-import org.apache.fineract.portfolio.tax.data.TaxDetailsData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -125,8 +124,8 @@ class SavingsSchedularInterestPosterTest {
 
     @Test
     void testPostInterestPersistsWithholdTaxDetailsAndBooksJournalEntriesPerTaxComponent() throws Exception {
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 10, 2),
-                BusinessDateType.COB_DATE, LocalDate.of(2026, 10, 2))));
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(
+                Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 10, 2), BusinessDateType.COB_DATE, LocalDate.of(2026, 10, 2))));
 
         final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
         final SavingsAccountWritePlatformService writeService = mock(SavingsAccountWritePlatformService.class);
@@ -141,20 +140,19 @@ class SavingsSchedularInterestPosterTest {
         final TaxComponentData secondComponent = TaxComponentData.instance(12L, "Tax 2", new BigDecimal("4.000000"), null, null, null,
                 GLAccountData.createFrom(802L), LocalDate.of(2020, 1, 1), List.of());
 
-        final SavingsAccountTransactionData withholdTransaction = mock(SavingsAccountTransactionData.class);
-        when(withholdTransaction.getId()).thenReturn(null);
-        when(withholdTransaction.isWithHoldTaxAndNotReversed()).thenReturn(true);
-        when(withholdTransaction.getTransactionType()).thenReturn(new SavingsAccountTransactionEnumData(
-                SavingsAccountTransactionType.WITHHOLD_TAX.getValue().longValue(), SavingsAccountTransactionType.WITHHOLD_TAX.getCode(),
-                SavingsAccountTransactionType.WITHHOLD_TAX.getValue().toString()));
-        when(withholdTransaction.getTransactionDate()).thenReturn(LocalDate.of(2026, 10, 1));
-        when(withholdTransaction.getAmount()).thenReturn(new BigDecimal("100.00"));
-        when(withholdTransaction.getRefNo()).thenReturn("ref-123");
-        when(withholdTransaction.getTaxDetails()).thenReturn(List.of(new TaxDetailsData(firstComponent, new BigDecimal("60.00")),
-                new TaxDetailsData(secondComponent, new BigDecimal("40.00"))));
-
         final SavingsAccountData savingsAccountData = mock(SavingsAccountData.class);
         when(savingsAccountData.getId()).thenReturn(1L);
+
+        final Map<TaxComponentData, BigDecimal> taxDetails = new LinkedHashMap<>();
+        taxDetails.put(firstComponent, new BigDecimal("60.00"));
+        taxDetails.put(secondComponent, new BigDecimal("40.00"));
+
+        // a real transaction object, built the way the posting service builds it: the poster assigns the
+        // fetched id to the transaction via setId, which a mock would silently swallow
+        final Money withholdTaxAmount = Money.of(new CurrencyData("USD", 2, null), new BigDecimal("100.00"));
+        final SavingsAccountTransactionData withholdTransaction = SavingsAccountTransactionData
+                .withHoldTax(savingsAccountData, LocalDate.of(2026, 10, 1), withholdTaxAmount, taxDetails);
+
         when(savingsAccountData.getOfficeId()).thenReturn(1L);
         when(savingsAccountData.getVersion()).thenReturn(1);
         when(savingsAccountData.getCurrency()).thenReturn(new CurrencyData("USD", 2, null));
@@ -166,10 +164,14 @@ class SavingsSchedularInterestPosterTest {
 
         when(writeService.postInterest(eq(savingsAccountData), anyBoolean(), isNull(), anyBoolean())).thenReturn(savingsAccountData);
 
-        final SavingsAccountTransactionData fetchedTransaction = mock(SavingsAccountTransactionData.class);
-        when(fetchedTransaction.getId()).thenReturn(555L);
-        when(fetchedTransaction.getRefNo()).thenReturn("ref-123");
-        when(readService.retrieveAllTransactionData(anyList())).thenReturn(List.of(fetchedTransaction));
+        // the poster fetches the persisted transactions by the refNos it assigned during the batch insert
+        when(readService.retrieveAllTransactionData(anyList())).thenAnswer(invocation -> {
+            final List<String> requestedRefNos = invocation.getArgument(0);
+            final SavingsAccountTransactionData fetchedTransaction = mock(SavingsAccountTransactionData.class);
+            when(fetchedTransaction.getId()).thenReturn(555L);
+            when(fetchedTransaction.getRefNo()).thenReturn(requestedRefNos.get(0));
+            return List.of(fetchedTransaction);
+        });
 
         when(jdbcTemplate.batchUpdate(anyString(), anyList())).thenReturn(new int[] { 1 });
 

@@ -130,8 +130,8 @@ public class SavingsSchedularInterestPoster {
                     final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
                     savingsAccountTransactionData.setId(dataFromFetch.getId());
                     if (savingsAccountTransactionData.isWithHoldTaxAndNotReversed()) {
-                        addWithholdTaxJournalEntries(paramsForGLInsertion, savingsAccountData, savingsAccountTransactionData,
-                                currencyCode, userId);
+                        addWithholdTaxJournalEntries(paramsForGLInsertion, savingsAccountData, savingsAccountTransactionData, currencyCode,
+                                userId);
                     } else if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
                             && savingsAccountData.getGlAccountIdForInterestOnSavings() != 0) {
                         OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
@@ -174,9 +174,9 @@ public class SavingsSchedularInterestPoster {
             return;
         }
         final OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
-        paramsForGLInsertion.add(journalEntryParams(savingsAccountData.getGlAccountIdForSavingsControl(), savingsAccountData,
-                savingsAccountTransactionData, currencyCode, JournalEntryType.DEBIT, savingsAccountTransactionData.getAmount(),
-                auditDatetime, userId));
+        paramsForGLInsertion.add(
+                journalEntryParams(savingsAccountData.getGlAccountIdForSavingsControl(), savingsAccountData, savingsAccountTransactionData,
+                        currencyCode, JournalEntryType.DEBIT, savingsAccountTransactionData.getAmount(), auditDatetime, userId));
         if (savingsAccountTransactionData.getTaxDetails() != null) {
             for (final TaxDetailsData taxDetailsData : savingsAccountTransactionData.getTaxDetails()) {
                 Long creditAccountId = null;
@@ -337,8 +337,8 @@ public class SavingsSchedularInterestPoster {
                             .get(savingsAccountTransactionData.getRefNo());
                     if (dataFromFetch != null) {
                         for (final TaxDetailsData taxDetailsData : savingsAccountTransactionData.getTaxDetails()) {
-                            paramsForTaxDetailsInsertion.add(new Object[] { dataFromFetch.getId(),
-                                    taxDetailsData.getTaxComponent().getId(), taxDetailsData.getAmount() });
+                            paramsForTaxDetailsInsertion.add(new Object[] { dataFromFetch.getId(), taxDetailsData.getTaxComponent().getId(),
+                                    taxDetailsData.getAmount() });
                         }
                     }
                 }
