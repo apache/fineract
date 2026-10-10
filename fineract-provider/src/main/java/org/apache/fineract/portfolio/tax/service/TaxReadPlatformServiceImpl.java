@@ -20,10 +20,15 @@ package org.apache.fineract.portfolio.tax.service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
+import org.apache.fineract.accounting.glaccount.data.GLAccountData;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
+import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepository;
@@ -41,6 +46,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
     private final TaxGroupRepository taxGroupRepository;
     private final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper;
     private final TaxGroupMapper taxGroupMapper;
+    private final ChargeRepository chargeRepository;
 
     @Override
     public List<TaxComponentData> retrieveAllTaxComponents() {
@@ -49,7 +55,25 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     @Override
     public TaxComponentData retrieveTaxComponentData(final Long id) {
-        return taxComponentMapper.map(taxComponentRepositoryWrapper.findOneWithNotFoundDetection(id));
+        final TaxComponent taxComponent = taxComponentRepositoryWrapper.findOneWithNotFoundDetection(id);
+        final TaxComponentData result = taxComponentMapper.map(taxComponent);
+
+        // Check if accounts are editable (component is not in use)
+        final boolean accountsEditable = !taxComponent
+                .isInUse(() -> chargeRepository.existsByTaxGroupContainingTaxComponent(taxComponent.getId()));
+
+        // Conditionally include account options if editable
+        Map<String, List<GLAccountData>> glAccountOptions = null;
+        Collection<EnumOptionData> glAccountTypeOptions = null;
+        if (accountsEditable) {
+            glAccountOptions = accountingDropdownReadPlatformService.retrieveAccountMappingOptions();
+            glAccountTypeOptions = accountingDropdownReadPlatformService.retrieveGLAccountTypeOptions();
+        }
+
+        // Return enhanced data with accountsEditable and conditional options
+        return TaxComponentData.instance(result.getId(), result.getName(), result.getPercentage(), result.getDebitAccountType(),
+                result.getDebitAccount(), result.getCreditAccountType(), result.getCreditAccount(), result.getStartDate(),
+                result.getTaxComponentHistories(), accountsEditable, glAccountOptions, glAccountTypeOptions);
     }
 
     @Override
