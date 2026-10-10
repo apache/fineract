@@ -124,6 +124,9 @@ final class ClientsApiResourceSwagger {
         public Set<GetClientsOfficeOptions> officeOptions;
         public Set<GetClientsStaffOptions> staffOptions;
         public Set<GetClientsSavingProductOptions> savingProductOptions;
+        public List<CodeValueData> genderOptions;
+        public List<CodeValueData> clientTypeOptions;
+        public List<CodeValueData> clientClassificationOptions;
         public Set<GetClientsDataTables> datatables;
     }
 
