@@ -16,21 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.savings;
+package org.apache.fineract.cob.service;
 
-import java.util.List;
+import org.apache.fineract.cob.COBBusinessStep;
+import org.apache.fineract.cob.savings.SavingsCOBBusinessStep;
+import org.apache.fineract.cob.savings.SavingsCOBConstant;
+import org.springframework.stereotype.Service;
 
-public interface SavingsLockingService {
+@Service
+public class SavingsBusinessStepCategoryServiceImpl implements BusinessStepCategoryService {
 
-    void upgradeLock(List<Long> accountsToLock, SavingsLockOwner lockOwner);
+    @Override
+    public BusinessStepCategory getCategory() {
+        return BusinessStepCategory.SAVINGS;
+    }
 
-    void deleteBySavingsIdInAndLockOwner(List<Long> savingsIds, SavingsLockOwner lockOwner);
+    @Override
+    public String getCobJobName() {
+        return SavingsCOBConstant.SAVINGS_COB_JOB_NAME;
+    }
 
-    List<SavingsAccountLock> findAllBySavingsIdIn(List<Long> savingsIds);
-
-    SavingsAccountLock findBySavingsIdAndLockOwner(Long savingsId, SavingsLockOwner lockOwner);
-
-    List<SavingsAccountLock> findAllBySavingsIdInAndLockOwner(List<Long> savingsIds, SavingsLockOwner lockOwner);
-
-    void applyLock(List<Long> savingsIds, SavingsLockOwner lockOwner);
+    @Override
+    public Class<? extends COBBusinessStep<?>> getBusinessStepClass() {
+        return SavingsCOBBusinessStep.class;
+    }
 }

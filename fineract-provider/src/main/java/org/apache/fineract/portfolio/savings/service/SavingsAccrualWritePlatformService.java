@@ -20,9 +20,17 @@ package org.apache.fineract.portfolio.savings.service;
 
 import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 public interface SavingsAccrualWritePlatformService {
 
     void addAccrualEntries(LocalDate tillDate) throws MultiException;
+
+    /**
+     * Adds the periodic accrual transactions for a single savings account up to the given date. Used by the Savings COB
+     * accrual business step, which processes one account at a time. Behaviour mirrors the batch-wide
+     * {@link #addAccrualEntries(LocalDate)} restricted to the supplied account.
+     */
+    void addAccrualEntries(SavingsAccount savingsAccount, LocalDate tillDate) throws MultiException;
 
 }

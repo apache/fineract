@@ -29,7 +29,6 @@ public final class SavingsCOBConstant extends COBConstant {
     public static final String SAVINGS_COB_WORKER_STEP = "savingsCOBWorkerStep";
 
     public static final String INLINE_SAVINGS_COB_JOB_NAME = "INLINE_SAVINGS_COB";
-    public static final String SAVINGS_IDS_PARAMETER_NAME = "SavingsIds";
 
     public static final String SAVINGS_COB_PARTITIONER_STEP = "Savings COB partition - Step";
     public static final String PARTITION_KEY = "partition";

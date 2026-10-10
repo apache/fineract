@@ -18,63 +18,29 @@
  */
 package org.apache.fineract.cob.savings;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.cob.domain.AccountLock;
+import org.apache.fineract.cob.domain.LockOwner;
 
+/**
+ * COB lock of a savings account. Shares the generic {@link AccountLock} contract with the loan and working capital loan
+ * locks; only the id column differs ({@code savings_id} instead of {@code loan_id}), so the inherited {@code loanId}
+ * property holds the savings account id.
+ */
 @Entity
 @Table(name = "m_savings_account_locks")
+@AttributeOverride(name = "loanId", column = @Column(name = "savings_id", nullable = false))
 @NoArgsConstructor
-@Getter
-public class SavingsAccountLock {
+public class SavingsAccountLock extends AccountLock {
 
-    @Id
-    @Column(name = "savings_id", nullable = false)
-    private Long savingsId;
+    private static final long serialVersionUID = 4178925463281037410L;
 
-    @Version
-    @Column(name = "version")
-    private Long version;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "lock_owner", nullable = false)
-    private SavingsLockOwner lockOwner;
-
-    @Column(name = "lock_placed_on", nullable = false)
-    private OffsetDateTime lockPlacedOn;
-
-    @Column(name = "error")
-    private String error;
-
-    @Column(name = "stacktrace")
-    private String stacktrace;
-
-    @Column(name = "lock_placed_on_cob_business_date")
-    private LocalDate lockPlacedOnCobBusinessDate;
-
-    public SavingsAccountLock(Long savingsId, SavingsLockOwner lockOwner, LocalDate lockPlacedOnCobBusinessDate) {
-        this.savingsId = savingsId;
-        this.lockOwner = lockOwner;
-        this.lockPlacedOn = DateUtils.getAuditOffsetDateTime();
-        this.lockPlacedOnCobBusinessDate = lockPlacedOnCobBusinessDate;
-    }
-
-    public void setError(String errorMessage, String stacktrace) {
-        this.error = errorMessage;
-        this.stacktrace = stacktrace;
-    }
-
-    public void setNewLockOwner(SavingsLockOwner newLockOwner) {
-        this.lockOwner = newLockOwner;
-        this.lockPlacedOn = DateUtils.getAuditOffsetDateTime();
+    public SavingsAccountLock(Long savingsId, LockOwner lockOwner, LocalDate lockPlacedOnCobBusinessDate) {
+        super(savingsId, lockOwner, lockPlacedOnCobBusinessDate);
     }
 }
