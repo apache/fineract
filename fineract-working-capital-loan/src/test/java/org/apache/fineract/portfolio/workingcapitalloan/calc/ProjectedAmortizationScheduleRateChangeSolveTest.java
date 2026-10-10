@@ -34,6 +34,8 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel.RateChangeSolve;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,8 +67,9 @@ class ProjectedAmortizationScheduleRateChangeSolveTest {
     }
 
     private ProjectedAmortizationScheduleModel modelWithRateChange() {
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
-                RATE, DAY_COUNT, DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE);
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
+                DISCOUNT_FEE, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT_DATE, MC,
+                CURRENCY, DISBURSEMENT_DATE);
         model.applyRateChange(NEW_RATE, RATE_CHANGE_DATE, RATE_CHANGE_DATE);
         return model;
     }
@@ -80,7 +83,7 @@ class ProjectedAmortizationScheduleRateChangeSolveTest {
         assertNotNull(solve);
         assertEquals(RATE_CHANGE_DATE, solve.effectiveDate());
         // (100000 x 17) / 360 / 100
-        assertEquals(0, new BigDecimal("47.22").compareTo(solve.dailyPayment().getAmount()));
+        assertEquals(0, new BigDecimal("47.22").compareTo(solve.periodPayment().getAmount()));
         assertTrue(solve.term() > 1);
         assertNotNull(solve.eir());
     }
@@ -98,8 +101,9 @@ class ProjectedAmortizationScheduleRateChangeSolveTest {
 
     @Test
     void rateChangeSolveOn_changeDatedPastTheScheduleEnd_isRecordedOnTheLastScheduledDay() {
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
-                RATE, DAY_COUNT, DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE);
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
+                DISCOUNT_FEE, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT_DATE, MC,
+                CURRENCY, DISBURSEMENT_DATE);
         final LocalDate lastScheduledDay = model.scheduledMaturityDate();
         final LocalDate pastTheEnd = lastScheduledDay.plusDays(30);
         // A higher rate bills more per day than the closing remainder, so the change re-prices the last day alone
@@ -110,14 +114,15 @@ class ProjectedAmortizationScheduleRateChangeSolveTest {
         assertNotNull(solve);
         assertEquals(lastScheduledDay, solve.effectiveDate());
         assertEquals(1, solve.term());
-        assertEquals(0, new BigDecimal("55.56").compareTo(solve.dailyPayment().getAmount()));
+        assertEquals(0, new BigDecimal("55.56").compareTo(solve.periodPayment().getAmount()));
         assertNull(model.rateChangeSolveOn(pastTheEnd));
     }
 
     @Test
     void rateChangeSolveOn_scheduleWithNoRateChange_returnsNull() {
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
-                RATE, DAY_COUNT, DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE);
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
+                DISCOUNT_FEE, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT_DATE, MC,
+                CURRENCY, DISBURSEMENT_DATE);
 
         assertNull(model.rateChangeSolveOn(RATE_CHANGE_DATE));
     }

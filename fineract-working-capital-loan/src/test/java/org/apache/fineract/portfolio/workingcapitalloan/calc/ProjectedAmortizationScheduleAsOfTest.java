@@ -32,6 +32,8 @@ import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,8 +75,8 @@ class ProjectedAmortizationScheduleAsOfTest {
     }
 
     private ProjectedAmortizationScheduleModel model(final BigDecimal discountFee) {
-        return ProjectedAmortizationScheduleModel.generateEir(discountFee, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, DISBURSEMENT_DATE, MC,
-                CURRENCY, DISBURSEMENT_DATE);
+        return ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR, discountFee, NET_DISBURSEMENT, TPV, RATE,
+                DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE);
     }
 
     // --- fast path: the discount asked about is the one the live schedule carries ---

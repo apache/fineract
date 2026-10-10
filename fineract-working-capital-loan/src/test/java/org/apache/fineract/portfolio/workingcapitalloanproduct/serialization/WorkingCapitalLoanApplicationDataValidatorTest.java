@@ -55,11 +55,13 @@ import org.apache.fineract.portfolio.loanaccount.domain.ExpectedDisbursementDate
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanApplicationDataValidator;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductMinMaxConstraints;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
@@ -408,6 +410,70 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
                 WCL + "paymentAmount.unable.to.build.schedule.from.payment.amount");
     }
 
+    /** YEARS used to be accepted on products, so a stored one must fail on the frequency, not as uncalculable. */
+    @Test
+    void tpvLoan_OnAProductStillStoringYears_ShouldReportTheFrequencyType() {
+        stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.TPV, null, null, null);
+        final WorkingCapitalLoanProductRelatedDetail relatedDetail = productRepository.findById(PRODUCT_ID).orElseThrow()
+                .getRelatedDetail();
+        when(relatedDetail.getRepaymentFrequencyType()).thenReturn(WorkingCapitalLoanPeriodFrequencyType.YEARS);
+        assertCreateCodes(createBaseJsonObject(), WCL + "repaymentFrequencyType.invalid.period.frequency.type");
+    }
+
+    @Test
+    void modifiedLoan_StillStoringYears_ShouldReportTheFrequencyType() {
+        final WorkingCapitalLoan loan = submittedLoanWithStrategy(WorkingCapitalPaymentAmountCalculationStrategy.TPV);
+        final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();
+        when(details.getNpvDayCount()).thenReturn(360);
+        when(details.getRepaymentFrequencyType()).thenReturn(WorkingCapitalLoanPeriodFrequencyType.YEARS);
+        when(details.getRepaymentEvery()).thenReturn(1);
+        assertCodes(() -> validator.validateForModify(loan), new JsonObject(),
+                WCL + "repaymentFrequencyType.invalid.period.frequency.type");
+    }
+
+    /** Half a frequency override would be paired with the product's other half, e.g. MONTHS with a 30 meant as days. */
+    @Test
+    void loanOverridingOnlyRepaymentEvery_ShouldRequireTheFrequencyTypeWithIt() {
+        stubFrequencyOverridableProduct();
+        final JsonObject json = createBaseJsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.repaymentEveryParamName, 2);
+        assertCreateCodes(json, WCL + "repaymentFrequencyType.must.be.provided.with.repaymentEvery");
+    }
+
+    @Test
+    void loanOverridingOnlyRepaymentFrequencyType_ShouldRequireRepaymentEveryWithIt() {
+        stubFrequencyOverridableProduct();
+        final JsonObject json = createBaseJsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName, "MONTHS");
+        assertCreateCodes(json, WCL + "repaymentEvery.must.be.provided.with.repaymentFrequencyType");
+    }
+
+    @Test
+    void loanUpdateOverridingOnlyRepaymentFrequencyType_ShouldRequireRepaymentEveryWithIt() {
+        stubFrequencyOverridableProduct();
+        final JsonObject json = updateJsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName, "WEEKS");
+        assertUpdateCodes(json, WCL + "repaymentEvery.must.be.provided.with.repaymentFrequencyType");
+    }
+
+    @Test
+    void loanOverridingTheWholeFrequency_ShouldBeAccepted() {
+        stubFrequencyOverridableProduct();
+        final JsonObject json = createBaseJsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.repaymentEveryParamName, 2);
+        json.addProperty(WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName, "WEEKS");
+        assertDoesNotThrow(() -> validator.validateForCreate(jsonCommand(json.toString())));
+    }
+
+    private void stubFrequencyOverridableProduct() {
+        stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.TPV, null, null, null);
+        final WorkingCapitalLoanProductConfigurableAttributes config = org.mockito.Mockito
+                .mock(WorkingCapitalLoanProductConfigurableAttributes.class);
+        lenient().when(config.isPeriodPaymentFrequency()).thenReturn(true);
+        lenient().when(config.isPeriodPaymentFrequencyType()).thenReturn(true);
+        when(productRepository.findById(PRODUCT_ID).orElseThrow().getConfigurableAttributes()).thenReturn(config);
+    }
+
     private static final String WCL = "validation.msg." + WorkingCapitalLoanConstants.WCL_RESOURCE_NAME + ".";
 
     private void stubProduct(final WorkingCapitalPaymentAmountCalculationStrategy strategy, final BigDecimal paymentAmount,
@@ -417,6 +483,8 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
         lenient().when(relatedDetail.getPaymentAmountCalculationStrategy()).thenReturn(strategy);
         lenient().when(relatedDetail.getPaymentAmount()).thenReturn(paymentAmount);
         lenient().when(relatedDetail.getNpvDayCount()).thenReturn(360);
+        lenient().when(relatedDetail.getRepaymentFrequencyType()).thenReturn(WorkingCapitalLoanPeriodFrequencyType.DAYS);
+        lenient().when(relatedDetail.getRepaymentEvery()).thenReturn(1);
         lenient().when(product.getRelatedDetail()).thenReturn(relatedDetail);
         lenient().when(product.getMinMaxConstraints())
                 .thenReturn(new WorkingCapitalLoanProductMinMaxConstraints(BigDecimal.valueOf(1000), BigDecimal.valueOf(10000),

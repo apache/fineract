@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.junit.jupiter.api.Test;
 
@@ -49,8 +50,9 @@ class ProjectedAmortizationSchedulePrincipalAdjustmentTest {
 
     /** 9000 disbursed with a 500 discount fee, giving a 50 daily expected payment over a 190 day term. */
     private ProjectedAmortizationScheduleModel model() {
-        return ProjectedAmortizationScheduleModel.generateEir(new BigDecimal("500"), new BigDecimal("9000"), TPV, RATE, DAY_COUNT,
-                DISBURSEMENT, MC, CURRENCY, DISBURSEMENT);
+        return ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR, new BigDecimal("500"),
+                new BigDecimal("9000"), TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT, MC, CURRENCY,
+                DISBURSEMENT);
     }
 
     private static ProjectedPayment paymentOn(final ProjectedAmortizationScheduleModel model, final LocalDate date) {
@@ -130,7 +132,8 @@ class ProjectedAmortizationSchedulePrincipalAdjustmentTest {
 
     private ProjectedAmortizationScheduleModel flatModel() {
         return ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT, new BigDecimal("500"),
-                new BigDecimal("9000"), TPV, RATE, DAY_COUNT, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT);
+                new BigDecimal("9000"), TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT, MC, CURRENCY,
+                DISBURSEMENT);
     }
 
     private static void assertSameAmount(final Money expected, final Money actual, final String message) {

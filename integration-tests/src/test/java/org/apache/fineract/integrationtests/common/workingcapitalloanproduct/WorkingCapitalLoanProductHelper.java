@@ -77,6 +77,12 @@ public class WorkingCapitalLoanProductHelper {
                 .updateWorkingCapitalLoanProduct(productId, request));
     }
 
+    public CallFailedRuntimeException updateWorkingCapitalLoanProductByIdExpectingFailure(final Long productId,
+            final PutWorkingCapitalLoanProductsProductIdRequest request) {
+        return FeignCalls.fail(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts()
+                .updateWorkingCapitalLoanProduct(productId, request));
+    }
+
     public DeleteWorkingCapitalLoanProductsProductIdResponse deleteWorkingCapitalLoanProductByExternalId(final String externalId) {
         return FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts()
                 .deleteWorkingCapitalLoanProductByExternalId(externalId));
