@@ -456,7 +456,7 @@ Feature: Working Capital Batch API
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
   @TestRailId:C110978
-  Scenario: Verify breach breach schedule via batch api with breach pause with start date type inside the pre-disbursement breach window - UC6
+  Scenario: Verify breach schedule via batch api with breach pause with start date type inside the pre-disbursement breach window - UC6
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
@@ -487,3 +487,67 @@ Feature: Working Capital Batch API
       | 4            | 2026-01-13 | 2026-01-15 | 3            | 100              | 100               | null       | null   |
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
+  @TestRailId:C111070
+  Scenario: Verify undo disbursal and approval discards the breach and delinquency schedules via batch API - UC7
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | nearBreachFrequency | nearBreachFrequencyType | nearBreachThreshold | delinquencyGraceDays |
+      | 9               | DAYS                | FLAT                        | 90           | 3                   | DAYS                    | 33.33               |                      |
+    And Admin creates WC Delinquency Bucket With Values:
+      | frequency | frequencyType | minimumPaymentType | minimumPayment |
+      | 2         | WEEKS         | FLAT               | 248            |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId | delinquencyGraceDays |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        | LAST_CREATED        | 13                   |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has 1 period
+    Then Working Capital loan breach schedule has the following data via batch api:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-01-09 | 9            | 90.0             | 90.0              | null       | null   |
+    And Working Capital loan delinquency range schedule has the following data via batch api:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-27 | 248.0          | 0.0        | 248.0             | null                  | null             | null           |
+    # --- everything an active loan can accumulate on top of its schedules --- #
+    When Admin initiate a Working Capital loan delinquency pause with startDate "02 January 2026" and endDate "05 January 2026"
+    And Admin creates a near breach reschedule action with threshold "40" frequency 4 frequencyType "DAYS"
+    And Admin initiate a Working Capital loan breach disable with startDate "02 January 2026"
+    And Admin update Working Capital period payment rate with "12.5" value
+    Then Working Capital Loan Period Payment Rate changes history contains the following data:
+      | Effective Date  | Previous Rate | New Rate | Reversed |
+      | 02 January 2026 | 18.0          | 12.5     | false    |
+    # --- undo disbursement: back to Approved on a clean slate --- #
+    When Admin successfully undo Working Capital disbursal
+    Then Working Capital loan status will be "APPROVED"
+    And Working Capital loan delinquency range schedule has no data via batch api
+    And Working Capital loan breach schedule has no data via batch api
+    And Working capital loan details has the following field values via batch api:
+      | status.value         | Approved |
+      | delinquencyStartDate | null     |
+      | breachStartDate      | null     |
+     # --- undo approval: back to Submitted and pending approval on a clean slate --- #
+    When Admin makes undo approval on the working capital loan
+    Then Working capital loan undo approval was successful
+    Then Working Capital loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
+    And Working Capital loan delinquency range schedule has no data via batch api
+    And Working Capital loan breach schedule has no data via batch api
+    And Working capital loan details has the following field values via batch api:
+      | status.value         | Submitted and pending approval |
+      | delinquencyStartDate | null                           |
+      | breachStartDate      | null                           |
+    # --- a later re-approve and re-disbursement builds its schedules from its own date, not the undone one --- #
+    And Admin successfully approves the working capital loan on "02 January 2026" with "9000" amount and expected disbursement date on "02 January 2026"
+    When Admin successfully disburse the Working Capital loan on "02 January 2026" with "9000" EUR transaction amount
+    And Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has 1 period
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-02 | 2026-01-10 | 9            | 90.0             | 90.0              | null       | null   |
+    And Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-02 | 2026-01-28 | 248.0          | 0.0        | 248.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 January 2026"

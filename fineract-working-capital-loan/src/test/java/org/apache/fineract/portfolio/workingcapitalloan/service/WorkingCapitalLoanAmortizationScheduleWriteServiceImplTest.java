@@ -183,6 +183,7 @@ class WorkingCapitalLoanAmortizationScheduleWriteServiceImplTest {
         return change;
     }
 
+    /** A loan whose product carries no default for any strategy input, so only the loan's own values count. */
     private static WorkingCapitalLoan loan(final WorkingCapitalPaymentAmountCalculationStrategy strategy,
             final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate) {
         return loan(strategy, totalPaymentVolume, periodPaymentRate, new BigDecimal("1000"));

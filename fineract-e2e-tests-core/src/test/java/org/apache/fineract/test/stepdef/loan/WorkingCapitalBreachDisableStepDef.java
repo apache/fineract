@@ -118,6 +118,13 @@ public class WorkingCapitalBreachDisableStepDef extends AbstractStepDef {
         log.info("Verified breach actions retrieval denied for user without READ_WC_BREACH_ACTION permission on loan {}", loanId);
     }
 
+    @Then("Working Capital loan has no breach actions")
+    public void verifyNoBreachActions() {
+        final Long loanId = extractLoanId();
+        assertThat(retrieveBreachActions(loanId)).as("Breach actions of loan %d", loanId).isEmpty();
+        log.info("Verified that loan {} has no breach actions", loanId);
+    }
+
     @Then("Working Capital loan breach disable action has the following data:")
     public void verifyBreachDisableActions(final DataTable dataTable) {
         final Long loanId = extractLoanId();

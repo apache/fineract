@@ -41,6 +41,30 @@ Feature: Working Capital Breach Schedule
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-28 | 59           | 110.70           | 110.70            | null       | null   |
 
+  @TestRailId:C111072
+  Scenario: Verify working capital loan breach schedule override after undo disbursement and following disbursement with new amounts
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 800      |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "800" discount amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "800" discount amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-28 | 59           | 120.54           | 120.54            | null       | null   |
+# --- undo disbursement --- #
+    Then Admin successfully undo Working Capital disbursal
+    Then Working Capital loan status will be "APPROVED"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "500" discount amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-28 | 59           | 116.85           | 116.85            | null       | null   |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
+
   @TestRailId:C74542
   Scenario: Verify working capital loan breach schedule - last day of 1st period - no evaluation yet
     When Admin sets the business date to "01 January 2026"

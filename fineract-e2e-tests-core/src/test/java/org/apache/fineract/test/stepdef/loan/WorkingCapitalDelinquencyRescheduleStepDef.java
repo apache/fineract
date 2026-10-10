@@ -292,6 +292,13 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
         assertThat(retrieveDelinquencyActions(loanId)).hasSize(count);
     }
 
+    @Then("Working Capital loan has no delinquency actions")
+    public void verifyNoDelinquencyActions() {
+        final Long loanId = getLoanId();
+        assertThat(retrieveDelinquencyActions(loanId)).as("Delinquency actions of loan %d", loanId).isEmpty();
+        log.info("Verified that loan {} has no delinquency actions", loanId);
+    }
+
     @Then("WC loan delinquency actions have the following data:")
     public void verifyDelinquencyActionsHistory(final DataTable table) {
         final Long loanId = getLoanId();
