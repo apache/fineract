@@ -77,7 +77,7 @@ public class BusinessConfigurationApiTest extends FeignIntegrationTest {
 
         List<BusinessStep> requestBody = new ArrayList<>();
         requestBody.add(getBusinessSteps(1L, APPLY_CHARGE_TO_OVERDUE_LOANS));
-        businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, requestBody);
+        assertEquals(204, businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, requestBody).getStatusCode());
 
         JobBusinessStepConfigData newStepConfig = businessStepHelper.getConfiguredBusinessStepsByJobName(LOAN_JOB_NAME);
         BusinessStep applyChargeStep = newStepConfig.getBusinessSteps().stream()
@@ -87,7 +87,7 @@ public class BusinessConfigurationApiTest extends FeignIntegrationTest {
 
         requestBody.add(getBusinessSteps(2L, LOAN_DELINQUENCY_CLASSIFICATION));
 
-        businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, requestBody);
+        assertEquals(204, businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, requestBody).getStatusCode());
         newStepConfig = businessStepHelper.getConfiguredBusinessStepsByJobName(LOAN_JOB_NAME);
         applyChargeStep = newStepConfig.getBusinessSteps().stream()
                 .filter(businessStep -> APPLY_CHARGE_TO_OVERDUE_LOANS.equals(businessStep.getStepName())).findFirst().get();
@@ -98,7 +98,7 @@ public class BusinessConfigurationApiTest extends FeignIntegrationTest {
         assertEquals(2L, loanDelinquencyStep.getOrder());
 
         requestBody.remove(1);
-        businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, requestBody);
+        assertEquals(204, businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, requestBody).getStatusCode());
 
         newStepConfig = businessStepHelper.getConfiguredBusinessStepsByJobName(LOAN_JOB_NAME);
         applyChargeStep = newStepConfig.getBusinessSteps().stream()
@@ -106,7 +106,7 @@ public class BusinessConfigurationApiTest extends FeignIntegrationTest {
         assertEquals(1, newStepConfig.getBusinessSteps().size());
         assertEquals(1L, applyChargeStep.getOrder());
 
-        businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, originalStepConfig.getBusinessSteps());
+        assertEquals(204, businessStepHelper.updateBusinessSteps(LOAN_JOB_NAME, originalStepConfig.getBusinessSteps()).getStatusCode());
     }
 
     @Test

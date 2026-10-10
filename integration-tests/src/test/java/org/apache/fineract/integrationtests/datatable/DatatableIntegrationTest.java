@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.DeleteDataTablesDatatableAppTableIdResponse;
 import org.apache.fineract.client.models.GetCodeValuesDataResponse;
 import org.apache.fineract.client.models.GetDataTablesResponse;
 import org.apache.fineract.client.models.PostColumnHeaderData;
@@ -328,7 +329,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         }
 
         // deleting datatable entries
-        Integer appTableId = deleteDatatableEntries(datatableName, clientID);
+        Integer appTableId = deleteDatatableEntries(datatableName, clientID).getClientId().intValue();
         assertEquals(clientID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -428,7 +429,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         LOG.info("query result : {}", queryResult);
 
         // deleting datatable entries
-        Integer appTableId = deleteDatatableEntries(datatableName, clientID);
+        Integer appTableId = deleteDatatableEntries(datatableName, clientID).getClientId().intValue();
         assertEquals(clientID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -644,7 +645,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         assertEquals(randomString, records.get(2));
         assertEquals(textValue, records.get(5));
 
-        Integer resourceId = deleteDatatableEntries(datatableName, clientId);
+        Integer resourceId = deleteDatatableEntries(datatableName, clientId).getResourceId().intValue();
         assertEquals(clientId, resourceId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // Update - update, delete DataTable columns
@@ -878,7 +879,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         assertEquals(datatableEntryMap.get("itsAText"), datatableEntryResponseNoGenericResult.get(0).get("itsAText"));
 
         // deleting datatable entries
-        Integer appTableId = deleteDatatableEntries(datatableName, loanID);
+        Integer appTableId = deleteDatatableEntries(datatableName, loanID).getLoanId().intValue();
         assertEquals(loanID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -1181,8 +1182,8 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
                 json));
     }
 
-    private Integer deleteDatatableEntries(String datatableName, Integer apptableId) {
-        return this.datatableHelper.deleteDatatableEntries(datatableName, apptableId.longValue()).getResourceId().intValue();
+    private DeleteDataTablesDatatableAppTableIdResponse deleteDatatableEntries(String datatableName, Integer apptableId) {
+        return this.datatableHelper.deleteDatatableEntries(datatableName, apptableId.longValue());
     }
 
     /**

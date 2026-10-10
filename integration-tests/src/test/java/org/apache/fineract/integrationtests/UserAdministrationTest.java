@@ -82,7 +82,9 @@ public class UserAdministrationTest extends FeignIntegrationTest {
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final ReportedError reason = FeignErrors.firstError(FeignUserHelper.createUserExpectingError(roleId, staffId, "alphabet"));
+        final CallFailedRuntimeException exception = FeignUserHelper.createUserExpectingError(roleId, staffId, "alphabet");
+        Assertions.assertEquals(403, exception.getStatus());
+        final ReportedError reason = FeignErrors.firstError(exception);
         LOG.info("Reason: {}", reason.defaultUserMessage());
         LOG.info("Code: {}", reason.userMessageGlobalisationCode());
         Assertions.assertEquals("User with username alphabet already exists.", reason.defaultUserMessage());

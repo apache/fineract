@@ -25,7 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import feign.FeignException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdRequest;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdResponse;
 import org.apache.fineract.client.models.PostAuthenticationRequest;
@@ -80,9 +82,10 @@ public class PasswordResetIntegrationTest extends FeignIntegrationTest {
                 "User should be forced to change password");
 
         String newPassword = "Abcdef1#2$3%XYZ_NEW";
-        assertNotNull(ok(() -> changePassword(username, password, userId, newPassword)).getResourceId(), "Password change should succeed");
+        assertEquals(200, ok(() -> changePassword(username, password, userId, newPassword)).getStatusCode(),
+                "Password change should succeed");
 
-        assertNotNull(ok(() -> attemptLogin(username, newPassword)), "User should be able to login after reset");
+        assertEquals(200, ok(() -> attemptLogin(username, newPassword)).getStatusCode(), "User should be able to login after reset");
     }
 
     @Test
@@ -97,17 +100,19 @@ public class PasswordResetIntegrationTest extends FeignIntegrationTest {
         this.transientUsers.add(userResponse.getResourceId());
         String username = userRequest.getUsername();
 
-        assertNotNull(ok(() -> attemptLogin(username, password)), "User should login normally when feature is disabled");
+        assertEquals(200, ok(() -> attemptLogin(username, password)).getStatusCode(),
+                "User should login normally when feature is disabled");
     }
 
-    private PostAuthenticationResponse attemptLogin(String username, String password) {
+    private ApiResponse<PostAuthenticationResponse> attemptLogin(String username, String password) {
         return fineractClient().authenticationHttpBasic()
-                .authenticate(new PostAuthenticationRequest().username(username).password(password));
+                .authenticateWithHttpInfo(new PostAuthenticationRequest().username(username).password(password), Map.of());
     }
 
-    private static ChangePwdUsersUserIdResponse changePassword(String username, String password, Long userId, String newPassword) {
+    private static ApiResponse<ChangePwdUsersUserIdResponse> changePassword(String username, String password, Long userId,
+            String newPassword) {
         FineractFeignClient userClient = FineractFeignClientHelper.createNewFineractFeignClient(username, password);
-        return userClient.users().changePasswordUser(userId,
-                new ChangePwdUsersUserIdRequest().password(newPassword).repeatPassword(newPassword));
+        return userClient.users().changePasswordUserWithHttpInfo(userId,
+                new ChangePwdUsersUserIdRequest().password(newPassword).repeatPassword(newPassword), Map.of());
     }
 }

@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -161,7 +162,7 @@ public class DatatableAdvancedQueryTest extends FeignIntegrationTest {
             assertEquals(transactionIdD1, first.path(COLUMN_TRANSACTION_ID).asLong());
             assertEquals(transactionIdD1.toString(), first.path(COLUMN_TEXT).asText());
             assertEquals(yesterdayIsoS, first.path(COLUMN_DATE).asText());
-            assertTrue(first.path(COLUMN_BOOLEAN).asBoolean());
+            assertEquals(BooleanNode.TRUE, first.path(COLUMN_BOOLEAN));
             assertEquals(1, first.path(COLUMN_INTEGER).asInt());
             assertEquals(0, decValue1.compareTo(first.path(COLUMN_DECIMAL).decimalValue()));
 
@@ -255,7 +256,7 @@ public class DatatableAdvancedQueryTest extends FeignIntegrationTest {
             assertEquals(transactionIdD2, first.path(COLUMN_TRANSACTION_ID).asLong());
             assertEquals(transactionIdD2.toString(), first.path(COLUMN_TEXT).asText());
             assertEquals(yesterdayIsoS, first.path(COLUMN_DATE).asText());
-            assertFalse(first.path(COLUMN_BOOLEAN).asBoolean());
+            assertEquals(BooleanNode.FALSE, first.path(COLUMN_BOOLEAN));
             assertEquals(2, first.path(COLUMN_INTEGER).asInt());
             assertEquals(0, decValue2.compareTo(first.path(COLUMN_DECIMAL).decimalValue()));
 
