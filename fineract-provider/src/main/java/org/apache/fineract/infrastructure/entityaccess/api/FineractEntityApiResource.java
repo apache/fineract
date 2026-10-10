@@ -67,7 +67,7 @@ public class FineractEntityApiResource {
     @AlternativeOperationId("retrieveAll_7")
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.ENTITY_MAPPING_RESOURCE_NAME);
 
         final Collection<FineractEntityRelationData> entityMappings = this.readPlatformService.retrieveAllSupportedMappingTypes();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -81,7 +81,7 @@ public class FineractEntityApiResource {
     @AlternativeOperationId("retrieveOne_4")
     public String retrieveOne(@PathParam("mapId") final Long mapId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.ENTITY_MAPPING_RESOURCE_NAME);
 
         final Collection<FineractEntityToEntityMappingData> entityToEntityMappings = this.readPlatformService.retrieveOneMapping(mapId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -95,7 +95,7 @@ public class FineractEntityApiResource {
     public String getEntityToEntityMappings(@PathParam("mapId") final Long mapId, @PathParam("fromId") final Long fromId,
             @PathParam("toId") final Long toId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.ENTITY_MAPPING_RESOURCE_NAME);
 
         final Collection<FineractEntityToEntityMappingData> entityToEntityMappings = this.readPlatformService
                 .retrieveEntityToEntityMappings(mapId, fromId, toId);

@@ -29,6 +29,7 @@ public final class FineractEntityApiResourceConstants {
     }
 
     public static final String FINERACT_ENTITY_RESOURCE_NAME = "FineractEntity";
+    public static final String ENTITY_MAPPING_RESOURCE_NAME = "ENTITYMAPPING";
     public static final String mappingTypes = "mappingTypes";
     public static final String mapId = "mapId";
     public static final String relId = "relId";
