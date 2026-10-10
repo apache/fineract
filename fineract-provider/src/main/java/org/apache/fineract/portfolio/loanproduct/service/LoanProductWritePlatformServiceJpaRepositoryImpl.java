@@ -401,12 +401,12 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-        if (realCause.getMessage().contains("'external_id'")) {
+        if (realCause.getMessage().contains("'external_id'") || realCause.getMessage().contains("m_product_loan_external_id_key")) {
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.externalId",
                     "Loan Product with externalId `" + externalId + "` already exists", "externalId", externalId, realCause);
-        } else if (realCause.getMessage().contains("'unq_name'")) {
+        } else if (realCause.getMessage().contains("'unq_name'") || realCause.getMessage().contains("m_product_loan_name_key")) {
 
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.name",

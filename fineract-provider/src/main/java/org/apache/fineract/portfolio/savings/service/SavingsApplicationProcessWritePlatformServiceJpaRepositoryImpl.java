@@ -694,13 +694,14 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         String param = null;
         Object[] msgArgs;
         Throwable checkEx = realCause == null ? dve : realCause;
-        if (checkEx.getMessage().contains("sa_account_no_UNIQUE")) {
+        if (checkEx.getMessage().contains("sa_account_no_UNIQUE") || checkEx.getMessage().contains("m_savings_account_account_no_key")) {
             final String accountNo = command.stringValueOfParameterNamed("accountNo");
             msgCode += ".duplicate.accountNo";
             msg = "Savings account with accountNo " + accountNo + " already exists";
             param = "accountNo";
             msgArgs = new Object[] { accountNo, dve };
-        } else if (checkEx.getMessage().contains("sa_externalid_UNIQUE")) {
+        } else if (checkEx.getMessage().contains("sa_externalid_UNIQUE")
+                || checkEx.getMessage().contains("m_savings_account_external_id_key")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             msgCode += ".duplicate.externalId";
             msg = "Savings account with externalId " + externalId + " already exists";
