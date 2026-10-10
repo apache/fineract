@@ -131,12 +131,13 @@ public class TaxAssembler {
                         dateFormat, locale);
                 final LocalDate endDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.endDateParamName, taxComponent,
                         dateFormat, locale);
-                if (endDate == null && startDate == null) {
+                final boolean isExistingMapping = isUpdate && mappingId != null;
+                if (endDate == null && startDate == null && !isExistingMapping) {
                     startDate = DateUtils.getBusinessLocalDate();
                 }
                 TaxGroupMappings mappings = null;
-                if (isUpdate && mappingId != null) {
-                    mappings = TaxGroupMappings.createTaxGroupMappings(mappingId, component, endDate);
+                if (isExistingMapping) {
+                    mappings = TaxGroupMappings.createTaxGroupMappings(mappingId, component, startDate, endDate);
                 } else {
                     mappings = TaxGroupMappings.createTaxGroupMappings(component, startDate);
                 }
