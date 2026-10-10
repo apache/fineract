@@ -367,6 +367,47 @@ public class MakercheckerTest {
         }
     }
 
+    @Test
+    public void testPendingSavingsAccountUpdateIsFoundBySavingsAccountId() {
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        Long pendingId = null;
+        try {
+            Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+            Integer savingsProductId = createSavingsProductDailyPosting();
+            Integer savingsId = savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductId, "INDIVIDUAL");
+            rolesHelper.updatePermissions(new PutPermissionsRequest().putPermissionsItem("UPDATE_SAVINGSACCOUNT", true));
+
+            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, Map.of("UPDATE_SAVINGSACCOUNT", true));
+            Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
+            String maker = Utils.uniqueRandomStringGenerator("user", 8);
+            Integer makerUserId = (Integer) UserHelper.createUser(requestSpec, responseSpec, roleId, staffId, maker, "A1b2c3d4e5f$",
+                    "resourceId");
+            RequestSpecification makerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
+                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker, "A1b2c3d4e5f$"));
+
+            new SavingsAccountHelper(makerRequestSpec, responseSpec).updateSavingsAccount(clientId, savingsProductId, savingsId,
+                    "INDIVIDUAL");
+
+            List<Map<String, Object>> pending = makercheckersHelper
+                    .getMakerCheckerList(Map.of("savingsAccountId", savingsId.toString(), "makerId", makerUserId.toString()));
+            assertEquals(1, pending.size(), "The pending savings account update should be found by savingsAccountId");
+            assertEquals("UPDATE", pending.get(0).get("actionName"));
+            assertEquals("SAVINGSACCOUNT", pending.get(0).get("entityName"));
+            assertEquals(savingsId, ((Double) pending.get(0).get("resourceId")).intValue());
+            assertNotNull(pending.get(0).get("savingsAccountNo"));
+            pendingId = ((Double) pending.get(0).get("id")).longValue();
+        } finally {
+            if (pendingId != null) {
+                MakercheckersHelper.rejectMakerCheckerEntry(FineractClientHelper.getFineractClient(), pendingId);
+            }
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            rolesHelper.updatePermissions(new PutPermissionsRequest().putPermissionsItem("UPDATE_SAVINGSACCOUNT", false));
+        }
+    }
+
     private Integer createSavingsProductDailyPosting() {
         final String savingsProductJSON = this.savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
                 .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
