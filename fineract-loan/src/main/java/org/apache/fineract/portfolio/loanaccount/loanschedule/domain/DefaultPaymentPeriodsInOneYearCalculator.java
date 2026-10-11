@@ -86,10 +86,10 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
         BigDecimal repayEveryBD = BigDecimal.valueOf(repaidEvery);
         BigDecimal noDaysInterestCalculationGrace = BigDecimal.valueOf(numberOfDaysInterestCalculationGrace);
         return switch (repaymentPeriodFrequencyType) {
-            case DAYS -> noDaysInterestCalculationGrace.multiply(repayEveryBD, mc);
-            case WEEKS -> noDaysInterestCalculationGrace.divide(BigDecimal.valueOf(7), mc).multiply(repayEveryBD, mc);
-            case MONTHS -> noDaysInterestCalculationGrace.divide(BigDecimal.valueOf(30), mc).multiply(repayEveryBD, mc);
-            case YEARS -> noDaysInterestCalculationGrace.divide(BigDecimal.valueOf(365), mc).multiply(repayEveryBD, mc);
+            case DAYS -> noDaysInterestCalculationGrace.divide(repayEveryBD, mc);
+            case WEEKS -> noDaysInterestCalculationGrace.divide(BigDecimal.valueOf(7).multiply(repayEveryBD), mc);
+            case MONTHS -> noDaysInterestCalculationGrace.divide(BigDecimal.valueOf(30).multiply(repayEveryBD), mc);
+            case YEARS -> noDaysInterestCalculationGrace.divide(BigDecimal.valueOf(365).multiply(repayEveryBD), mc);
             case WHOLE_TERM -> {
                 log.error("TODO Implement repaymentPeriodFrequencyType for WHOLE_TERM");
                 yield BigDecimal.ZERO;
