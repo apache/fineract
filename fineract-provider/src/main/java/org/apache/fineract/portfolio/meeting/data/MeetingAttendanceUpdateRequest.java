@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.meeting.data;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.Valid;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
@@ -44,6 +45,7 @@ public class MeetingAttendanceUpdateRequest implements Serializable {
     private CalendarEntityType entityType;
     @Hidden
     // @NotNull(message = "{org.apache.fineract.portfolio.meeting.attendance.id.not-null}")
+    @Valid
     private List<MeetingAttendanceData> meetingAttendance;
     private Integer attendanceType;
 }
