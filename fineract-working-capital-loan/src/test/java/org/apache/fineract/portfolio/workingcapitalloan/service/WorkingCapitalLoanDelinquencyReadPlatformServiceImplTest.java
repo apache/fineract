@@ -204,6 +204,19 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImplTest {
         assertThat(result.getDelinquentDays()).isEqualTo(36L);
     }
 
+    @Test
+    void pastDueDays_usesOpenPastDuePeriodWhenMinPaymentCriteriaMetIsStillNull() {
+        final WorkingCapitalLoanDelinquencyRangeSchedule period = period(1L, 1, "269.99");
+        period.setMinPaymentCriteriaMet(null);
+        period.setDelinquentDays(1L);
+        when(delinquencyRangeScheduleRepository.findOpenPastDuePeriodsOrderByFromDateAsc(LOAN_ID, BUSINESS_DATE))
+                .thenReturn(List.of(period));
+
+        final WorkingCapitalLoanCollectionData result = service.getCollectionData(LOAN_ID, BUSINESS_DATE);
+
+        assertThat(result.getPastDueDays()).isEqualTo(1L);
+    }
+
     private WorkingCapitalLoanDelinquencyRangeScheduleTagHistory tag(final WorkingCapitalLoanDelinquencyRangeSchedule period,
             final DelinquencyRange range, final String addedOnDate, final String liftedOnDate, final String outstandingAmount) {
         final WorkingCapitalLoanDelinquencyRangeScheduleTagHistory tag = new WorkingCapitalLoanDelinquencyRangeScheduleTagHistory();

@@ -1430,3 +1430,88 @@ Feature: Working Capital Delinquency
       | 1            | 2026-02-13  |              | D00            | 1              | 30             |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "13 February 2026"
 
+  Scenario: Verify pastDueDays when instant classification runs before COB evaluates minPaymentCriteriaMet
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with delinquencyGraceDays 3 and delinquencyStartType "DISBURSEMENT" for loan test
+    And Admin creates a working capital loan with the grace days product and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate |
+      | 01 January 2026 | 01 January 2026          | 9000.0          | 100000.0           | 18.0              |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    # Period 1 toDate includes the 3-day grace window (2026-02-02). Advance past it without COB so minPaymentCriteriaMet stays NULL.
+    When Admin sets the business date to "03 February 2026"
+    And Customer makes repayment on "03 February 2026" with 0.01 transaction amount on Working Capital loan
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.01       | 269.99            | null                  | 269.99           | 1              |
+    And Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 1            | 2026-02-03  |              | D00            | 1              | 30             |
+    And Working capital loan details has the following field values:
+      | delinquent.delinquentAmount   | 269.99     |
+      | delinquent.pastDueDays        | 1          |
+      | delinquencyStartDate          | 2026-01-01 |
+      | delinquencyEffectiveStartDate | 2026-01-04 |
+      | summary.overdueSinceDate      | 2026-02-02 |
+    Then Admin closes the Working Capital loan with a full repayment on "03 February 2026"
+
+  Scenario: Verify pastDueDays for backdated disbursement and partial repayment without COB
+    When Admin sets the business date to "01 April 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with delinquencyGraceDays 3 and delinquencyStartType "DISBURSEMENT" for loan test
+    And Admin creates a working capital loan with the grace days product and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate |
+      | 01 January 2026 | 01 January 2026          | 9000.0          | 100000.0           | 18.0              |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    # Partial repayment 50 days backdated: does not meet the minimum, triggers instant classification while minPaymentCriteriaMet stays NULL
+    And Customer makes repayment on "10 February 2026" with 0.01 transaction amount on Working Capital loan
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.01       | 269.99            | null                  | 269.99           | 58             |
+    And Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 1            | 2026-04-01  |              | D30            | 31             | 60             |
+    And Working capital loan details has the following field values:
+      | delinquent.delinquentAmount   | 269.99     |
+      | delinquent.pastDueDays        | 58         |
+      | delinquencyStartDate          | 2026-01-01 |
+      | delinquencyEffectiveStartDate | 2026-01-04 |
+      | summary.overdueSinceDate      | 2026-02-02 |
+    Then Admin closes the Working Capital loan with a full repayment on "01 April 2026"
+
+  Scenario: Verify pastDueDays after first COB and subsequent partial repayment on next day
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with delinquencyGraceDays 3 and delinquencyStartType "DISBURSEMENT" for loan test
+    And Admin creates a working capital loan with the grace days product and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate |
+      | 01 January 2026 | 01 January 2026          | 9000.0          | 100000.0           | 18.0              |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "03 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Working capital loan details has the following field values:
+      | delinquent.delinquentAmount   | 270.0      |
+      | delinquent.pastDueDays        | 1          |
+      | delinquencyStartDate          | 2026-01-01 |
+      | delinquencyEffectiveStartDate | 2026-01-04 |
+      | summary.overdueSinceDate      | 2026-02-02 |
+    When Admin sets the business date to "04 February 2026"
+    And Customer makes repayment on "04 February 2026" with 0.01 transaction amount on Working Capital loan
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.01       | 269.99            | false                 | 269.99           | 2              |
+      | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Working capital loan details has the following field values:
+      | delinquent.delinquentAmount   | 269.99     |
+      | delinquent.pastDueDays        | 2          |
+      | delinquencyStartDate          | 2026-01-01 |
+      | delinquencyEffectiveStartDate | 2026-01-04 |
+      | summary.overdueSinceDate      | 2026-02-02 |
+    Then Admin closes the Working Capital loan with a full repayment on "04 February 2026"
