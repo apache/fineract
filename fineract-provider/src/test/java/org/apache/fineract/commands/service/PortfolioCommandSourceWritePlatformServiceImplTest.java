@@ -21,9 +21,8 @@ package org.apache.fineract.commands.service;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -55,6 +54,7 @@ import org.mockito.quality.Strictness;
 class PortfolioCommandSourceWritePlatformServiceImplTest {
 
     private static final Long LOAN_ID = 7L;
+    private static final Integer AWAITING_APPROVAL = CommandProcessingResultType.AWAITING_APPROVAL.getValue();
 
     @Mock
     private PlatformSecurityContext context;
@@ -78,13 +78,14 @@ class PortfolioCommandSourceWritePlatformServiceImplTest {
     void setUp() {
         when(context.authenticatedUser(any(CommandWrapper.class))).thenReturn(user);
         when(user.getId()).thenReturn(99L);
+        when(commandSourceRepository.findFirstByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatusOrderByIdDesc(
+                any(), any(), any(), any(), any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
     void makerSubmittingSecondDisbursementForSameLoanIsRejected() {
         givenMaker("DISBURSE_LOAN");
-        when(commandSourceRepository.findFirstByActionNameAndEntityNameAndResourceIdAndStatusOrderByMadeOnDateDesc("DISBURSE", "LOAN",
-                LOAN_ID, CommandProcessingResultType.AWAITING_APPROVAL.getValue())).thenReturn(Optional.of(new CommandSource()));
+        givenPending("DISBURSE", "LOAN", LOAN_ID, null, "{}", new CommandSource());
 
         assertThrows(MakerCheckerDuplicatePendingSubmissionException.class, () -> underTest.logCommandSource(disburse()));
 
@@ -94,8 +95,41 @@ class PortfolioCommandSourceWritePlatformServiceImplTest {
     @Test
     void makerSubmittingFirstDisbursementIsExecuted() {
         givenMaker("DISBURSE_LOAN");
-        when(commandSourceRepository.findFirstByActionNameAndEntityNameAndResourceIdAndStatusOrderByMadeOnDateDesc(anyString(), anyString(),
-                anyLong(), any())).thenReturn(Optional.empty());
+
+        underTest.logCommandSource(disburse());
+
+        verify(processAndLogCommandService).executeCommand(any(), any(), eq(false));
+    }
+
+    @Test
+    void makerCanQueueADifferentChangeWhileOneIsPending() {
+        givenMaker("DISBURSE_LOAN");
+        givenPending("DISBURSE", "LOAN", LOAN_ID, null, "{}", new CommandSource());
+
+        underTest.logCommandSource(disburse("{\"actualDisbursementDate\":\"01 January 2026\"}"));
+
+        verify(processAndLogCommandService).executeCommand(any(), any(), eq(false));
+    }
+
+    @Test
+    void makerHoldingTheCheckerPermissionIsStillRejectedBecauseTheirSubmissionIsQueued() {
+        when(user.hasNotPermissionForAnyOf("DISBURSE_LOAN")).thenReturn(false);
+        when(user.hasNotPermissionForAnyOf("CHECKER_SUPER_USER", "DISBURSE_LOAN_CHECKER")).thenReturn(false);
+        when(configurationService.isMakerCheckerEnabledForTask("DISBURSE_LOAN")).thenReturn(true);
+        givenPending("DISBURSE", "LOAN", LOAN_ID, null, "{}", new CommandSource());
+
+        assertThrows(MakerCheckerDuplicatePendingSubmissionException.class, () -> underTest.logCommandSource(disburse()));
+
+        verify(processAndLogCommandService, never()).executeCommand(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void checkerSuperUserSkipsTheDuplicateCheck() {
+        when(user.hasNotPermissionForAnyOf("DISBURSE_LOAN")).thenReturn(false);
+        when(user.hasNotPermissionForAnyOf("CHECKER_SUPER_USER", "DISBURSE_LOAN_CHECKER")).thenReturn(false);
+        when(user.isCheckerSuperUser()).thenReturn(true);
+        when(configurationService.isMakerCheckerEnabledForTask("DISBURSE_LOAN")).thenReturn(true);
+        givenPending("DISBURSE", "LOAN", LOAN_ID, null, "{}", new CommandSource());
 
         underTest.logCommandSource(disburse());
 
@@ -108,19 +142,73 @@ class PortfolioCommandSourceWritePlatformServiceImplTest {
 
         underTest.logCommandSource(repayment());
 
-        verifyNoInteractions(commandSourceRepository);
+        verify(commandSourceRepository, never())
+                .findFirstByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatusOrderByIdDesc(any(), any(), any(),
+                        any(), any(), any());
         verify(processAndLogCommandService).executeCommand(any(), any(), eq(false));
     }
 
     @Test
     void checkerOnlyUserWithoutPendingSubmissionCannotInitiate() {
         givenCheckerOnly("DISBURSE_LOAN");
-        when(commandSourceRepository.findFirstByActionNameAndEntityNameAndResourceIdAndStatusOrderByMadeOnDateDesc(anyString(), anyString(),
-                anyLong(), any())).thenReturn(Optional.empty());
 
         assertThrows(MakerCheckerCheckerOnlyInitiationException.class, () -> underTest.logCommandSource(disburse()));
 
         verify(processAndLogCommandService, never()).executeCommand(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void checkerOnlyUserWithIdenticalPendingSubmissionApprovesIt() {
+        givenCheckerOnly("DISBURSE_LOAN");
+        CommandSource pendingCommand = mock(CommandSource.class);
+        when(pendingCommand.getId()).thenReturn(55L);
+        when(pendingCommand.isAwaitingApproval()).thenReturn(true);
+        when(pendingCommand.getCommandAsJson()).thenReturn("{}");
+        givenPending("DISBURSE", "LOAN", LOAN_ID, null, "{}", pendingCommand);
+        when(commandSourceRepository.findById(55L)).thenReturn(Optional.of(pendingCommand));
+        when(context.authenticatedUser()).thenReturn(user);
+        when(configurationService.isSameMakerCheckerEnabled()).thenReturn(true);
+
+        underTest.logCommandSource(disburse());
+
+        verify(processAndLogCommandService).executeCommand(any(), any(), eq(true));
+        verify(user, never()).validateHasPermissionTo("DISBURSE_LOAN");
+    }
+
+    @Test
+    void checkerOnlyUserDoesNotApproveAPendingSubmissionWithADifferentPayload() {
+        givenCheckerOnly("DISBURSE_LOAN");
+        givenPending("DISBURSE", "LOAN", LOAN_ID, null, "{}", new CommandSource());
+
+        assertThrows(MakerCheckerCheckerOnlyInitiationException.class,
+                () -> underTest.logCommandSource(disburse("{\"actualDisbursementDate\":\"01 January 2026\"}")));
+
+        verify(commandSourceRepository, never()).findById(any());
+        verify(processAndLogCommandService, never()).executeCommand(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void pendingLookupIsMatchedOnTheSubResourceToo() {
+        givenCheckerOnly("UNDOTRANSACTION_SAVINGSACCOUNT");
+
+        assertThrows(MakerCheckerCheckerOnlyInitiationException.class,
+                () -> underTest.logCommandSource(new CommandWrapperBuilder().undoSavingsAccountTransaction(5L, 8L).build()));
+
+        verify(commandSourceRepository)
+                .findFirstByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatusOrderByIdDesc("UNDOTRANSACTION",
+                        "SAVINGSACCOUNT", 5L, 8L, "{}", AWAITING_APPROVAL);
+    }
+
+    @Test
+    void taskWithoutMakerCheckerIsNotLookedUp() {
+        when(user.hasNotPermissionForAnyOf("DISBURSE_LOAN")).thenReturn(false);
+        when(user.hasNotPermissionForAnyOf("CHECKER_SUPER_USER", "DISBURSE_LOAN_CHECKER")).thenReturn(true);
+        when(configurationService.isMakerCheckerEnabledForTask("DISBURSE_LOAN")).thenReturn(false);
+
+        underTest.logCommandSource(disburse());
+
+        verifyNoInteractions(commandSourceRepository);
+        verify(processAndLogCommandService).executeCommand(any(), any(), eq(false));
     }
 
     private void givenMaker(final String permission) {
@@ -135,8 +223,18 @@ class PortfolioCommandSourceWritePlatformServiceImplTest {
         when(configurationService.isMakerCheckerEnabledForTask(permission)).thenReturn(true);
     }
 
+    private void givenPending(final String actionName, final String entityName, final Long resourceId, final Long subResourceId,
+            final String json, final CommandSource pendingCommand) {
+        when(commandSourceRepository.findFirstByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatusOrderByIdDesc(
+                actionName, entityName, resourceId, subResourceId, json, AWAITING_APPROVAL)).thenReturn(Optional.of(pendingCommand));
+    }
+
     private static CommandWrapper disburse() {
-        return new CommandWrapperBuilder().disburseLoanApplication(LOAN_ID).withJson("{}").build();
+        return disburse("{}");
+    }
+
+    private static CommandWrapper disburse(final String json) {
+        return new CommandWrapperBuilder().disburseLoanApplication(LOAN_ID).withJson(json).build();
     }
 
     private static CommandWrapper repayment() {
