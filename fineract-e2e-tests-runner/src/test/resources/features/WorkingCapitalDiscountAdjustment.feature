@@ -55,7 +55,7 @@ Feature: Working Capital Discount Adjustment
       | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement            | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee            | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee Adjustment | 11.0              | 11.0              | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee Adjustment | 11.0              | 11.0             | 0.0               | 0.0                   | false    |
     Then Add Discount fee adjustment with "3" amount on Working Capital loan account failed due to exceeding discount amount
     And Working Capital Loan has transactions:
       | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
