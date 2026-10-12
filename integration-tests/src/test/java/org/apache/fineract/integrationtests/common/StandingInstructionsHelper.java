@@ -64,6 +64,20 @@ public class StandingInstructionsHelper {
         return response.getResourceId();
     }
 
+    /**
+     * Creates a standing instruction for a fixed amount that may exceed the balance available on the from account,
+     * optionally letting the job transfer whatever is available instead of nothing.
+     */
+    public Integer createStandingInstruction(final String clientId, final String fromAccountId, final String toAccountId,
+            final String fromAccountType, final String toAccountType, final String validFrom, final String validTo, final String monthDay,
+            final String amount, final Boolean allowPartialTransfer) {
+        PostStandingInstructionsResponse response = ok(
+                () -> FineractFeignClientHelper.getFineractFeignClient().standingInstructions().createStandingInstruction(
+                        build(clientId, fromAccountId, toAccountId, fromAccountType, toAccountType, validFrom, validTo, monthDay)
+                                .amount(amount).allowPartialTransfer(allowPartialTransfer)));
+        return response.getResourceId();
+    }
+
     public GetStandingInstructionsStandingInstructionIdResponse getStandingInstructionById(final Long standingInstructionId) {
         return ok(() -> FineractFeignClientHelper.getFineractFeignClient().standingInstructions()
                 .retrieveOneStandingInstruction(standingInstructionId, null, null, null, null, null));
