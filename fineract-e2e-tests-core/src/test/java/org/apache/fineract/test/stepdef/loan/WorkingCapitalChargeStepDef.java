@@ -241,6 +241,17 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         return fineractClientConfiguration.fineractFeignClientForUser(username, password);
     }
 
+    @Then("Working Capital Loan has no charges")
+    public void verifyWorkingCapitalLoanHasNoCharges() {
+        final Long loanId = getLoanId();
+        Assertions.assertNotNull(loanId);
+
+        final List<WorkingCapitalLoanChargeData> charges = ok(
+                () -> fineractClient.workingCapitalLoanCharges().retrieveAllWorkingCapitalLoanChargesByLoanId(loanId));
+        assertThat(charges).as("Working Capital Loan %s should have no active charges", loanId).isEmpty();
+        log.info("Verified that loan {} has no active charges", loanId);
+    }
+
     @Then("Working Capital Loan has charges with the following data:")
     public void verifyWorkingCapitalLoanChargesWithData(DataTable table) {
         Long loanId = getLoanId();
