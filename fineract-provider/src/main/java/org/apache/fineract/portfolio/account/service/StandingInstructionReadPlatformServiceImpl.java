@@ -261,7 +261,8 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.standingInstructionMapper.schema());
         if (standingInstructionDTO.transferType() != null || standingInstructionDTO.clientId() != null
-                || standingInstructionDTO.clientName() != null) {
+                || standingInstructionDTO.clientName() != null
+                || (standingInstructionDTO.fromAccountType() != null && standingInstructionDTO.fromAccount() != null)) {
             sqlBuilder.append(" where ");
         }
         boolean addAndCaluse = false;
@@ -299,7 +300,8 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
                 sqlBuilder.append(" fromsavacc.id=? ");
                 paramObj.add(standingInstructionDTO.fromAccount());
             } else if (PortfolioAccountType.LOAN.equals(accountType)) {
-                sqlBuilder.append(" fromloanacc.id=? ");
+                sqlBuilder.append(" (toloanacc.id=? or fromloanacc.id=?) ");
+                paramObj.add(standingInstructionDTO.fromAccount());
                 paramObj.add(standingInstructionDTO.fromAccount());
             }
             addAndCaluse = true;
@@ -358,7 +360,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     public StandingInstructionDuesData retriveLoanDuesData(final Long loanId) {
         final StandingInstructionLoanDuesMapper rm = new StandingInstructionLoanDuesMapper();
         final String sql = "select " + rm.schema() + " where ml.id= ? and ls.duedate <= " + sqlGenerator.currentBusinessDate()
-                + " and ls.completed_derived <> 1";
+                + " and ls.completed_derived IS FALSE";
         return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
