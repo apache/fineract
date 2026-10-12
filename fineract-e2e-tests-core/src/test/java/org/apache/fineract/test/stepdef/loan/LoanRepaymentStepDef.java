@@ -29,6 +29,7 @@ import io.cucumber.java.en.When;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanAdjustTrans
 import org.apache.fineract.test.messaging.store.EventStore;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
+import org.springframework.util.Assert;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -626,6 +628,39 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
                     loanTransactionAdjustmentDataV1 -> loanTransactionAdjustmentDataV1.getNewTransactionDetail().getExternalOwnerId())
                     .isEqualTo(externalOwnerId);
         }
+    }
+
+    @When("Customer adjust {int}th {string} transaction made on {string} with {string} payment type on {string} with {double} EUR transaction amount")
+    public void adjustTransactionWithAutoIdempotencyKey(Integer transactionNumber, String transactionTypeInput,
+            String transactionOriginalDateStr, String paymentTypeString, String transactionDate, double transactionAmount)
+            throws IOException {
+        eventStore.reset();
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Assert.notNull(loanResponse, "There is no stored Loan response.");
+        Assert.notNull(loanResponse.getLoanId(), "Stored Loan Response's Loan ID should be NOT null.");
+        long loanId = loanResponse.getLoanId();
+
+        TransactionType transactionType = TransactionType.valueOf(transactionTypeInput);
+        DefaultPaymentType paymentType = DefaultPaymentType.valueOf(paymentTypeString);
+        Long paymentTypeId = paymentTypeResolver.resolve(paymentType);
+        LocalDate originalDate = LocalDate.parse(transactionOriginalDateStr, DateTimeFormatter.ofPattern(DATE_FORMAT));
+
+        List<GetLoansLoanIdTransactions> transactions = ok(
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("associations", "transactions"))).getTransactions();
+
+        int nthItem = transactionNumber - 1;
+        Assert.notNull(transactions, "Transactions list should be NOT null.");
+        GetLoansLoanIdTransactions targetTransaction = transactions.stream()
+                .filter(t -> t.getType() != null && transactionType.getValue().equalsIgnoreCase(t.getType().getValue()))
+                .filter(t -> originalDate.equals(t.getDate())).toList().get(nthItem);
+
+        PostLoansLoanIdTransactionsTransactionIdRequest repaymentUndoRequest = loanRequestFactory
+                .defaultRepaymentAdjustRequest(transactionAmount).paymentTypeId(paymentTypeId).transactionDate(transactionDate)
+                .dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
+
+        PostLoansLoanIdTransactionsResponse result = ok(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId,
+                targetTransaction.getId(), repaymentUndoRequest, Map.of("command", "adjust")));
+        Assert.notNull(result, "Result of adjust loan transaction should be NOT null.");
     }
 
     @Then("Customer undo {string}th transaction made on {string} results a {int} error and {string} error message")
