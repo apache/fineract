@@ -421,3 +421,62 @@ Feature: Working Capital Loan Charge Waiver Accounting
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "21 January 2026"
+
+  @TestRailId:C115183
+  Scenario: Verify Working Capital Loan charge waiver accounting - UC11: Waiving an unaccrued penalty charge with a past due date books no journal entries
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "due-date"
+    And Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "15 January 2026" due date and 100.0 transaction amount
+    # --- Unaccrued penalty waiver ---
+    When Admin sets the business date to "20 January 2026"
+    And Admin waives the last added charge on working capital loan
+    Then a Working Capital Loan Charge Waiver transaction business event is raised with "100.0" EUR amount
+    And Working Capital Loan Transactions tab has a "WAIVE_CHARGES" transaction with date "15 January 2026" which has no Journal entries
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 0.0        | 0.0             | 0.0      | 100.0          | 0.0             | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "20 January 2026"
+
+  @TestRailId:C115184
+  Scenario: Verify Working Capital Loan charge waiver accounting - UC12: Waiving the remainder of an accrued fee after a partial repayment books journal entries only for the waived portion
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "due-date"
+    And Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "15 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "16 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 100.0 |        |
+      | INCOME | 404007       | Fee Income              |       | 100.0  |
+    # --- Partial repayment and waiver of accrued fee ---
+    When Customer makes repayment on "16 January 2026" with 40.0 transaction amount on Working Capital loan
+    And Admin waives the last added charge on working capital loan
+    Then a Working Capital Loan Charge Waiver transaction business event is raised with "60.0" EUR amount
+    And Working Capital Loan has transactions:
+      | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Accrual            | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 15 January 2026 | Waive loan charges | 60.0              | 0.0              | 60.0              | 0.0                   | false    |
+      | 16 January 2026 | Repayment          | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "WAIVE_CHARGES" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name            | Debit | Credit |
+      | EXPENSE | e4           | Written off             | 60.0  |        |
+      | ASSET   | 112603       | Interest/Fee Receivable |       | 60.0   |
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "16 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 40.0  |        |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 40.0   |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 40.0     | 0.0            | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "16 January 2026"
