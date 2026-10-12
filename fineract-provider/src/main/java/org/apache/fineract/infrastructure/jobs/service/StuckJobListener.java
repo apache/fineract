@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
@@ -41,6 +42,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @ConditionalOnProperty(value = "fineract.mode.batch-manager-enabled", havingValue = "true")
@@ -78,6 +80,8 @@ public class StuckJobListener implements ApplicationListener<ContextRefreshedEve
                         SecurityContextHolder.getContext().setAuthentication(null);
                     }
                 }
+            } catch (RuntimeException e) {
+                log.error("Failed to resume stuck jobs of tenant {}, continuing with the next tenant", tenant.getTenantIdentifier(), e);
             } finally {
                 ThreadLocalContextUtil.reset();
             }

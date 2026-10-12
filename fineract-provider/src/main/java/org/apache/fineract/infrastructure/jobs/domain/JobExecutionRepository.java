@@ -22,13 +22,16 @@ import static org.springframework.batch.core.BatchStatus.COMPLETED;
 import static org.springframework.batch.core.BatchStatus.FAILED;
 import static org.springframework.batch.core.BatchStatus.STARTED;
 import static org.springframework.batch.core.BatchStatus.STARTING;
+import static org.springframework.batch.core.BatchStatus.STOPPING;
 import static org.springframework.batch.core.BatchStatus.UNKNOWN;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -37,6 +40,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class JobExecutionRepository {
+
+    private static final List<String> ACTIVE_STEP_STATUSES = List.of(STARTING.name(), STARTED.name(), STOPPING.name());
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final FineractProperties fineractProperties;
@@ -121,7 +126,11 @@ public class JobExecutionRepository {
                 List.of(COMPLETED.name(), FAILED.name(), UNKNOWN.name()), "threshold", threshold), Long.class);
     }
 
-    public Long getNotCompletedPartitionsCount(Long jobExecutionId, String partitionerStepName) {
+    /**
+     * Worker steps that may still be running. Terminal steps (COMPLETED, FAILED, STOPPED, ABANDONED) are not waited
+     * for: the job is restarted afterwards and only FAILED partitions are re-run.
+     */
+    public Long getActivePartitionsCount(Long jobExecutionId, String partitionerStepName) {
         return namedParameterJdbcTemplate.queryForObject("""
                     SELECT COUNT(BSE.STEP_EXECUTION_ID)
                     FROM BATCH_STEP_EXECUTION BSE
@@ -130,8 +139,32 @@ public class JobExecutionRepository {
                         AND
                         BSE.STEP_NAME <> :stepName
                         AND
-                        BSE.status <> :status
-                """, Map.of("jobExecutionId", jobExecutionId, "stepName", partitionerStepName, "status", COMPLETED.name()), Long.class);
+                        BSE.STATUS IN (:activeStatuses)
+                """, Map.of("jobExecutionId", jobExecutionId, "stepName", partitionerStepName, "activeStatuses", ACTIVE_STEP_STATUSES),
+                Long.class);
+    }
+
+    /**
+     * Fails the active worker steps nobody has updated since the cutoff: a live worker updates LAST_UPDATED on every
+     * chunk commit, so these belong to a worker that died.
+     */
+    public int failStalePartitions(Long jobExecutionId, String partitionerStepName, LocalDateTime lastUpdatedBefore) {
+        return namedParameterJdbcTemplate.update("""
+                    UPDATE BATCH_STEP_EXECUTION
+                    SET
+                        STATUS = :failed,
+                        EXIT_CODE = :failed,
+                        END_TIME = :now
+                    WHERE
+                        JOB_EXECUTION_ID = :jobExecutionId
+                        AND
+                        STEP_NAME <> :stepName
+                        AND
+                        STATUS IN (:activeStatuses)
+                        AND
+                        COALESCE(LAST_UPDATED, START_TIME) < :lastUpdatedBefore
+                """, Map.of("failed", FAILED.name(), "now", DateUtils.getLocalDateTimeOfSystem(), "jobExecutionId", jobExecutionId,
+                "stepName", partitionerStepName, "activeStatuses", ACTIVE_STEP_STATUSES, "lastUpdatedBefore", lastUpdatedBefore));
     }
 
     public void updateJobStatusToFailed(Long stuckJobId, String partitionerStepName) {
