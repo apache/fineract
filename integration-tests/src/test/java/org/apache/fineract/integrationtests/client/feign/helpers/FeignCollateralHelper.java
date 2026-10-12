@@ -26,6 +26,7 @@ import org.apache.fineract.client.models.ClientCollateralCreateRequest;
 import org.apache.fineract.client.models.ClientCollateralCreateResponse;
 import org.apache.fineract.client.models.ClientCollateralUpdateRequest;
 import org.apache.fineract.client.models.ClientCollateralUpdateResponse;
+import org.apache.fineract.client.models.CollateralManagementData;
 import org.apache.fineract.client.models.CollateralProductCreateRequest;
 import org.apache.fineract.client.models.CollateralProductCreateResponse;
 import org.apache.fineract.client.models.CollateralProductUpdateRequest;
@@ -68,6 +69,10 @@ public class FeignCollateralHelper {
                 new CollateralProductUpdateRequest().name(Utils.randomStringGenerator("COLLATERAL_PRODUCT", 5)).currency("USD")
                         .unitType("acre").quality("agriculture").pctToBase(UPDATED_PCT_TO_BASE).basePrice(UPDATED_BASE_PRICE)
                         .locale(LOCALE)));
+    }
+
+    public CollateralManagementData getCollateralProduct(Long collateralId) {
+        return ok(() -> fineractClient.collateralManagement().getCollateral(collateralId));
     }
 
     public ClientCollateralCreateResponse createClientCollateral(Long clientId, Long collateralId) {

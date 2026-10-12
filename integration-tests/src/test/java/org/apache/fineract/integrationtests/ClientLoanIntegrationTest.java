@@ -44,6 +44,7 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.CollateralManagementData;
 import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
@@ -4873,6 +4874,23 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         // then
         List<GetLoansLoanIdCollateralData> loanCollateral = getLoanDetails(loanId).getCollateral();
         assertEquals(clientCollateralId, loanCollateral.get(0).getClientCollateralId());
+    }
+
+    @Test
+    public void testLoanCollateralIncludesNameUnitPriceAndPercentageToBase() {
+        Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        CollateralManagementData collateralProduct = collateralHelper.getCollateralProduct(collateralId);
+        Long clientId = createClient();
+        Long clientCollateralId = collateralHelper.createClientCollateral(clientId, collateralId).getResourceId();
+        Long loanProductId = createLoanProduct(false, NONE);
+
+        Long loanId = applyForLoanApplication(clientId, loanProductId, null, null, "12,000.00",
+                List.of(collateral(clientCollateralId, BigDecimal.ONE)));
+
+        GetLoansLoanIdCollateralData loanCollateral = getLoanDetails(loanId).getCollateral().get(0);
+        assertEquals(collateralProduct.getName(), loanCollateral.getName());
+        assertEquals(0, collateralProduct.getBasePrice().compareTo(loanCollateral.getUnitPrice()));
+        assertEquals(0, collateralProduct.getPctToBase().compareTo(loanCollateral.getPctToBase()));
     }
 
     @Test
