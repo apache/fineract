@@ -1930,6 +1930,7 @@ public class CommandWrapperBuilder {
         this.actionName = ACTION_UPDATE;
         this.entityName = ENTITY_SAVINGSACCOUNT;
         this.entityId = accountId;
+        this.savingsId = accountId;
         this.href = "/savingsaccounts/" + accountId;
         return this;
     }
@@ -1946,6 +1947,7 @@ public class CommandWrapperBuilder {
         this.actionName = ACTION_DELETE;
         this.entityName = ENTITY_SAVINGSACCOUNT;
         this.entityId = accountId;
+        this.savingsId = accountId;
         this.href = "/savingsaccounts/" + accountId;
         return this;
     }
@@ -2708,6 +2710,7 @@ public class CommandWrapperBuilder {
         this.actionName = ACTION_UPDATE;
         this.entityName = ENTITY_FIXEDDEPOSITACCOUNT;
         this.entityId = accountId;
+        this.savingsId = accountId;
         this.href = "/fixeddepositaccounts/" + accountId;
         return this;
     }
@@ -2716,6 +2719,7 @@ public class CommandWrapperBuilder {
         this.actionName = ACTION_DELETE;
         this.entityName = ENTITY_FIXEDDEPOSITACCOUNT;
         this.entityId = accountId;
+        this.savingsId = accountId;
         this.href = "/fixeddepositaccounts/" + accountId;
         return this;
     }
@@ -2853,6 +2857,7 @@ public class CommandWrapperBuilder {
         this.actionName = ACTION_UPDATE;
         this.entityName = ENTITY_RECURRINGDEPOSITACCOUNT;
         this.entityId = accountId;
+        this.savingsId = accountId;
         this.href = "/recurringdepositaccounts/" + accountId;
         return this;
     }
@@ -2901,6 +2906,7 @@ public class CommandWrapperBuilder {
         this.actionName = ACTION_DELETE;
         this.entityName = ENTITY_RECURRINGDEPOSITACCOUNT;
         this.entityId = accountId;
+        this.savingsId = accountId;
         this.href = "/recurringdepositaccounts/" + accountId;
         return this;
     }
@@ -3055,6 +3061,7 @@ public class CommandWrapperBuilder {
         this.actionName = ACTION_UPDATESAVINGSOFFICER;
         this.entityName = ENTITY_SAVINGSACCOUNT;
         this.entityId = accountId;
+        this.savingsId = accountId;
         this.href = "/savingsaccounts/" + accountId + "?command=assignSavingsOfficer";
         return this;
     }
@@ -3063,6 +3070,7 @@ public class CommandWrapperBuilder {
         this.actionName = ACTION_REMOVESAVINGSOFFICER;
         this.entityName = ENTITY_SAVINGSACCOUNT;
         this.entityId = accountId;
+        this.savingsId = accountId;
         this.href = "/savingsaccounts/" + accountId + "?commad=unassignSavingsOfficer";
         return this;
     }
@@ -3505,6 +3513,7 @@ public class CommandWrapperBuilder {
         this.actionName = ACTION_UPDATEWITHHOLDTAX;
         this.entityName = ENTITY_SAVINGSACCOUNT;
         this.entityId = accountId;
+        this.savingsId = accountId;
         this.href = "/savingsaccounts/" + accountId + "?commad=updateTaxWithHoldTax";
         return this;
     }
