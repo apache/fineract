@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.meeting.data;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
 import java.io.Serial;
@@ -46,6 +47,7 @@ public class MeetingAttendanceUpdateRequest implements Serializable {
     @Hidden
     // @NotNull(message = "{org.apache.fineract.portfolio.meeting.attendance.id.not-null}")
     @Valid
+    @JsonAlias("clientsAttendance")
     private List<MeetingAttendanceData> meetingAttendance;
     private Integer attendanceType;
 }
