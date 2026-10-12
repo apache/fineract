@@ -143,12 +143,13 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         List<DatatableCheckStatusData> loanStatuses = getStatusList(EntityTables.LOAN.getCheckStatuses());
         List<DatatableCheckStatusData> groupstatuses = getStatusList(EntityTables.GROUP.getCheckStatuses());
         List<DatatableCheckStatusData> savingsStatuses = getStatusList(EntityTables.SAVINGS.getCheckStatuses());
+        List<DatatableCheckStatusData> loanProductStatuses = getStatusList(EntityTables.LOAN_PRODUCT.getCheckStatuses());
 
         Collection<LoanProductData> loanProductDatas = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup(true);
         Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService.retrieveAllForLookup();
 
-        return new EntityDataTableChecksTemplateData(entities, clientStatuses, groupstatuses, savingsStatuses, loanStatuses, dataTables,
-                loanProductDatas, savingsProductDatas);
+        return new EntityDataTableChecksTemplateData(entities, clientStatuses, groupstatuses, loanProductStatuses, savingsStatuses,
+                loanStatuses, dataTables, loanProductDatas, savingsProductDatas);
     }
 
     private List<DatatableCheckStatusData> getStatusList(List<StatusEnum> statuses) {

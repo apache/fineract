@@ -34,6 +34,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
@@ -121,6 +123,7 @@ public final class LoanProductDataValidator {
     public static final String IS_FLOATING_INTEREST_RATE_CALCULATION_ALLOWED = "isFloatingInterestRateCalculationAllowed";
     public static final String ACCOUNTING_RULE = "accountingRule";
     public static final String ENABLE_ACCRUAL_ACTIVITY_POSTING = "enableAccrualActivityPosting";
+    public static final String DATATABLES = "datatables";
 
     /**
      * The parameters supported for this command.
@@ -212,6 +215,9 @@ public final class LoanProductDataValidator {
             LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME //
     ));
 
+    private static final Set<String> SUPPORTED_CREATE_PARAMETERS = Stream.concat(SUPPORTED_PARAMETERS.stream(), Stream.of(DATATABLES))
+            .collect(Collectors.toUnmodifiableSet());
+
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
             LoanProductConstants.interestCalculationPeriodTypeParamName, LoanProductConstants.inArrearsToleranceParamName,
@@ -236,7 +242,7 @@ public final class LoanProductDataValidator {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_CREATE_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(LOANPRODUCT);
