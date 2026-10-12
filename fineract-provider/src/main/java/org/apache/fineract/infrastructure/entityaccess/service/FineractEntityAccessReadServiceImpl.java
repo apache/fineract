@@ -24,14 +24,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Set;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepository;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepositoryWrapper;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityMappingConfigurationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,14 +49,22 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
     private static final Logger LOG = LoggerFactory.getLogger(FineractEntityAccessReadServiceImpl.class);
+    private static final Set<String> OFFICE_RELATION_CODE_NAMES = Set.of(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.getStr(),
+            FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS.getStr(),
+            FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES.getStr());
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository;
+    private final FineractEntityRelationRepository entityRelationRepository;
+    private final OfficeRepository officeRepository;
 
     @Autowired
     public FineractEntityAccessReadServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository) {
+            final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository,
+            final FineractEntityRelationRepository entityRelationRepository, final OfficeRepository officeRepository) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.fineractEntityRelationRepository = fineractEntityRelationRepository;
+        this.entityRelationRepository = entityRelationRepository;
+        this.officeRepository = officeRepository;
     }
 
     /*
@@ -208,8 +219,17 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         String sql = entityToEntityMapper.schema();
         final Collection<FineractEntityToEntityMappingData> mapTypes = this.jdbcTemplate.query(sql, entityToEntityMapper,
                 new Object[] { mapId, fromId, fromId, toId, toId });
-        return mapTypes;
+        if (!isOfficeRelation(mapId)) {
+            return mapTypes;
+        }
+        final Set<Long> visibleOfficeIds = Set
+                .copyOf(this.officeRepository.findIdsByHierarchyLike(this.context.authenticatedUser().getOffice().getHierarchy() + "%"));
+        return mapTypes.stream().filter(mapping -> visibleOfficeIds.contains(mapping.getFromId())).toList();
+    }
 
+    private boolean isOfficeRelation(final Long mapId) {
+        return this.entityRelationRepository.findById(mapId).map(FineractEntityRelation::getCodeName)
+                .filter(OFFICE_RELATION_CODE_NAMES::contains).isPresent();
     }
 
     @Override
