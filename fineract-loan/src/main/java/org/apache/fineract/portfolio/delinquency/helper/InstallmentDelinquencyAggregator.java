@@ -53,24 +53,8 @@ public final class InstallmentDelinquencyAggregator {
         if (installmentData == null || installmentData.isEmpty()) {
             return List.of();
         }
-        return aggregateAndSortInstallmentLevels(installmentData.stream().map(InstallmentLevelDelinquency::from).toList());
-    }
 
-    /**
-     * Same as {@link #aggregateAndSort(Collection)} for callers whose installment data is already mapped to
-     * {@link InstallmentLevelDelinquency}.
-     *
-     * @param installmentLevelDelinquencies
-     *            installment-level delinquency data to aggregate
-     * @return Sorted list of aggregated delinquency data, empty list if input is null or empty
-     */
-    public static List<InstallmentLevelDelinquency> aggregateAndSortInstallmentLevels(
-            Collection<InstallmentLevelDelinquency> installmentLevelDelinquencies) {
-        if (installmentLevelDelinquencies == null || installmentLevelDelinquencies.isEmpty()) {
-            return List.of();
-        }
-
-        Collection<InstallmentLevelDelinquency> aggregated = installmentLevelDelinquencies.stream()
+        Collection<InstallmentLevelDelinquency> aggregated = installmentData.stream().map(InstallmentLevelDelinquency::from)
                 .collect(Collectors.groupingBy(InstallmentLevelDelinquency::getRangeId, delinquentAmountSummingCollector())).values()
                 .stream().map(opt -> opt.orElseThrow(() -> new IllegalStateException("Unexpected empty Optional in aggregation"))).toList();
 

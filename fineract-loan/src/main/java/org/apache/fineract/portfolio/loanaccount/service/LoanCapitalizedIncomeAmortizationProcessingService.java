@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.time.LocalDate;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 public interface LoanCapitalizedIncomeAmortizationProcessingService {
 

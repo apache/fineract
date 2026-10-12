@@ -19,17 +19,16 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
-@AllArgsConstructor
-@Getter
-public class TransactionPortionsForForeclosure {
+public interface TransactionPortionsForForeclosure {
 
-    private LoanTransactionType transactionType;
-    private BigDecimal interestPortion;
-    private BigDecimal feeChargesPortion;
-    private BigDecimal penaltyChargesPortion;
+    LoanTransactionType getTransactionType();
+
+    BigDecimal getInterestPortion();
+
+    BigDecimal getFeeChargesPortion();
+
+    BigDecimal getPenaltyChargesPortion();
 
 }

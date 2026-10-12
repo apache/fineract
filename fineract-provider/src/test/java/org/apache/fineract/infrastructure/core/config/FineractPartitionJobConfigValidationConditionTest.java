@@ -82,6 +82,9 @@ class FineractPartitionJobConfigValidationConditionTest {
         partitionedJobProperty.setJobName("LOAN_COB");
         partitionedJobProperty.setPartitionSize(100);
         partitionedJobProperty.setChunkSize(10);
+        partitionedJobProperty.setThreadPoolCorePoolSize(10);
+        partitionedJobProperty.setThreadPoolMaxPoolSize(20);
+        partitionedJobProperty.setThreadPoolQueueCapacity(10);
         jobProperties.add(partitionedJobProperty);
         partitionedJob.setPartitionedJobProperties(jobProperties);
         return partitionedJob;
@@ -94,6 +97,9 @@ class FineractPartitionJobConfigValidationConditionTest {
         partitionedJobProperty.setJobName("LOAN_COB");
         partitionedJobProperty.setPartitionSize(0);
         partitionedJobProperty.setChunkSize(1);
+        partitionedJobProperty.setThreadPoolCorePoolSize(1);
+        partitionedJobProperty.setThreadPoolMaxPoolSize(1);
+        partitionedJobProperty.setThreadPoolQueueCapacity(1);
         jobProperties.add(partitionedJobProperty);
         partitionedJob.setPartitionedJobProperties(jobProperties);
         return partitionedJob;

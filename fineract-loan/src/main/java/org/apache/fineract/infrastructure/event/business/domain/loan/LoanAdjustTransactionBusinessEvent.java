@@ -18,21 +18,13 @@
  */
 package org.apache.fineract.infrastructure.event.business.domain.loan;
 
-import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.DependentExternalEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionTypeExternalEvents;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
-/**
- * One event type covers the adjustment of every kind of transaction, so it also follows the switch of the adjusted
- * transaction type's own event (see {@link DependentExternalEvent}).
- */
-public class LoanAdjustTransactionBusinessEvent extends AbstractBusinessEvent<LoanAdjustTransactionBusinessEvent.Data>
-        implements DependentExternalEvent {
+public class LoanAdjustTransactionBusinessEvent extends AbstractBusinessEvent<LoanAdjustTransactionBusinessEvent.Data> {
 
     private static final String TYPE = "LoanAdjustTransactionBusinessEvent";
     private static final String CATEGORY = "Loan";
@@ -54,11 +46,6 @@ public class LoanAdjustTransactionBusinessEvent extends AbstractBusinessEvent<Lo
     @Override
     public Long getAggregateRootId() {
         return get().getTransactionToAdjust().getLoan().getId();
-    }
-
-    @Override
-    public Optional<String> getGoverningExternalEventType() {
-        return LoanTransactionTypeExternalEvents.externalEventTypeFor(get().getTransactionToAdjust().getTypeOf());
     }
 
     @RequiredArgsConstructor

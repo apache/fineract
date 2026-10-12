@@ -35,7 +35,6 @@ import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.RollbackException;
 import jakarta.ws.rs.core.UriInfo;
 import java.time.Duration;
 import java.util.List;
@@ -57,19 +56,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 
 @ExtendWith(MockitoExtension.class)
-public class BatchApiServiceImplTest {
+class BatchApiServiceImplTest {
 
     @Mock
     private CommandStrategyProvider strategyProvider;
@@ -105,7 +100,7 @@ public class BatchApiServiceImplTest {
     private BatchResponse response;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         batchApiService = new BatchApiServiceImpl(strategyProvider, resolutionHelper, errorHandler, List.of(), batchPreprocessors,
                 retryConfigurationAssembler);
         batchApiService.setTransactionManager(transactionManager);
@@ -131,7 +126,7 @@ public class BatchApiServiceImplTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         Mockito.reset(resolutionHelper);
         Mockito.reset(batchPreprocessors);
         Mockito.reset(entityManager);
@@ -140,43 +135,8 @@ public class BatchApiServiceImplTest {
         Mockito.reset(transactionManager);
     }
 
-    /**
-     * A commit that fails is a concurrency failure the caller can retry, so it must still be reported as one. Spring's
-     * JPA transaction manager reports it as a TransactionSystemException; ExtendedJpaTransactionManager rewraps that in
-     * an UnexpectedRollbackException so synchronizations learn the rollback is confirmed, and this must not lose the
-     * classification.
-     */
     @Test
-    public void commitFailureIsReportedAsAConcurrencyFailure() {
-        Throwable commitFailure = new UnexpectedRollbackException("JPA transaction rolled back during commit",
-                new TransactionSystemException("Could not commit JPA transaction", new RollbackException()));
-
-        assertEquals(ConcurrencyFailureException.class, exceptionReportedAfterCommitThrows(commitFailure));
-    }
-
-    @Test
-    public void aBareTransactionSystemExceptionIsStillReportedAsAConcurrencyFailure() {
-        Throwable commitFailure = new TransactionSystemException("Could not commit JPA transaction", new RollbackException());
-
-        assertEquals(ConcurrencyFailureException.class, exceptionReportedAfterCommitThrows(commitFailure));
-    }
-
-    /**
-     * Maker-checker lands here with every sub-response reporting 200: its mapper answers 200 while the participating
-     * transaction that threw has marked the enclosing one rollback-only, so the commit raises Spring's own causeless
-     * UnexpectedRollbackException. Rewriting that into a retryable conflict would make callers retry a command that is
-     * waiting for a checker and can never succeed on its own, so it must pass through untouched.
-     */
-    @Test
-    public void aTransactionMarkedRollbackOnlyIsNotReportedAsAConcurrencyFailure() {
-        Throwable rollbackOnly = new UnexpectedRollbackException(
-                "Transaction silently rolled back because it has been marked as " + "rollback-only");
-
-        assertEquals(UnexpectedRollbackException.class, exceptionReportedAfterCommitThrows(rollbackOnly));
-    }
-
-    @Test
-    public void testHandleBatchRequestsWithEnclosingTransactionResult200WithRetryOnTransactionFailure() {
+    void testHandleBatchRequestsWithEnclosingTransactionResult200WithRetryOnTransactionFailure() {
 
         List<BatchRequest> requestList = List.of(request);
         when(strategyProvider.getCommandStrategy(any())).thenReturn(commandStrategy);
@@ -200,7 +160,7 @@ public class BatchApiServiceImplTest {
     }
 
     @Test
-    public void testHandleBatchRequestsWithEnclosingTransactionResult200WithRetry() {
+    void testHandleBatchRequestsWithEnclosingTransactionResult200WithRetry() {
 
         ErrorInfo errorInfo = mock(ErrorInfo.class);
         when(errorInfo.getMessage()).thenReturn("Failed");
@@ -221,7 +181,7 @@ public class BatchApiServiceImplTest {
     }
 
     @Test
-    public void testHandleBatchRequestsWithEnclosingTransactionFailsWithRetry() {
+    void testHandleBatchRequestsWithEnclosingTransactionFailsWithRetry() {
 
         List<BatchRequest> requestList = List.of(request);
         when(strategyProvider.getCommandStrategy(any())).thenReturn(commandStrategy);
@@ -244,7 +204,7 @@ public class BatchApiServiceImplTest {
     }
 
     @Test
-    public void testHandleBatchRequestsWithEnclosingTransaction() {
+    void testHandleBatchRequestsWithEnclosingTransaction() {
         List<BatchRequest> requestList = List.of(request);
         when(strategyProvider.getCommandStrategy(any())).thenReturn(commandStrategy);
         when(commandStrategy.execute(any(), any())).thenReturn(response);
@@ -259,7 +219,7 @@ public class BatchApiServiceImplTest {
     }
 
     @Test
-    public void testHandleBatchRequestsWithEnclosingTransactionReadOnly() {
+    void testHandleBatchRequestsWithEnclosingTransactionReadOnly() {
         List<BatchRequest> requestList = List.of(request);
         when(strategyProvider.getCommandStrategy(any())).thenReturn(commandStrategy);
         when(commandStrategy.execute(any(), any())).thenReturn(response);
@@ -275,7 +235,7 @@ public class BatchApiServiceImplTest {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    public void testCallInTransactionReadOnlyFlag(boolean isReadOnly) {
+    void testCallInTransactionReadOnlyFlag(boolean isReadOnly) {
         // Given
         ExtendedJpaTransactionManager extendedJpaTransactionManager = mock(ExtendedJpaTransactionManager.class);
 
@@ -312,21 +272,4 @@ public class BatchApiServiceImplTest {
 
     private static final class RetryException extends RuntimeException {}
 
-    private Class<? extends Throwable> exceptionReportedAfterCommitThrows(Throwable commitFailure) {
-        ErrorInfo errorInfo = mock(ErrorInfo.class);
-        when(errorInfo.getMessage()).thenReturn("Rolled back");
-        when(errorInfo.getStatusCode()).thenReturn(500);
-        when(errorHandler.handle(any())).thenReturn(errorInfo);
-        when(strategyProvider.getCommandStrategy(any())).thenReturn(commandStrategy);
-        when(commandStrategy.execute(any(), any())).thenReturn(response);
-        when(transactionManager.getTransaction(any()))
-                .thenReturn(new DefaultTransactionStatus("txn_name", null, true, true, false, false, false, null));
-        doThrow(commitFailure).when(transactionManager).commit(any());
-
-        batchApiService.handleBatchRequestsWithEnclosingTransaction(List.of(request), uriInfo);
-
-        ArgumentCaptor<RuntimeException> reported = ArgumentCaptor.forClass(RuntimeException.class);
-        verify(errorHandler).handle(reported.capture());
-        return reported.getValue().getClass();
-    }
 }

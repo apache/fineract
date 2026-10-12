@@ -21,10 +21,11 @@ package org.apache.fineract.portfolio.shareaccounts.jobs.postdividentsforshares;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountDividendReadPlatformService;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountSchedularService;
-import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -51,7 +52,8 @@ public class PostDividentsForSharesConfig {
 
     @Bean
     public Job postDividentsForSharesJob() {
-        return new JobBuilder(JobName.POST_DIVIDENTS_FOR_SHARES.name(), jobRepository).start(postDividentsForSharesStep()).build();
+        return new JobBuilder(JobName.POST_DIVIDENTS_FOR_SHARES.name(), jobRepository).start(postDividentsForSharesStep())
+                .incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

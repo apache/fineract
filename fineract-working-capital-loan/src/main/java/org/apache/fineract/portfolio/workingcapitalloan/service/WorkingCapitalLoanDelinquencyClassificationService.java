@@ -33,7 +33,7 @@ public interface WorkingCapitalLoanDelinquencyClassificationService {
     boolean applyDelinquencyTagForRange(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyRangeSchedule range,
             DelinquencyRange currentRange, LocalDate businessDate);
 
-    boolean isDelinquencyDisabled(WorkingCapitalLoan loan);
+    boolean isDelinquencyDisabled(WorkingCapitalLoan loan, LocalDate date);
 
     void liftDelinquencyClassification(WorkingCapitalLoan loan, LocalDate businessDate);
 

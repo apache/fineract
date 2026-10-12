@@ -46,11 +46,6 @@
         <property name="format" value="(?s:\r\n.*)"/>
         <property name="message" value="File has Windows (CR+LF) instead of UNIX (LF) end of line (EOL) delimiters."/>
     </module>
-    <!-- Exempt the files that still import REST Assured from the FeignNoRestAssured check.
-         The list only shrinks: migration PRs remove entries, nothing adds them. -->
-    <module name="SuppressionFilter">
-        <property name="file" value="${config_loc}/restassured-baseline.xml"/>
-    </module>
     <module name="SuppressWarningsFilter"/>
 
 
@@ -105,15 +100,6 @@
             <property name="forbiddenImportsRegexp" value="com.google.common.base.Charsets" />
             <property name="forbiddenImportsExcludesRegexp" value="" />
             <message key="forbid.certain.imports" value="Use ''java.nio.charset.StandardCharsets'' instead of ''{0}''" />
-        </module>
-        <!-- Forbid REST Assured; integration tests use the generated Feign client.
-             Files listed in restassured-baseline.xml are exempt until they are migrated. -->
-        <module name="IllegalImport">
-            <property name="id" value="FeignNoRestAssured" />
-            <property name="regexp" value="true" />
-            <property name="illegalPkgs" value="^io\.restassured" />
-            <message key="import.illegal"
-                     value="Integration tests must call the server through the generated Feign client, not REST Assured: ''{0}''. Do not add this file to restassured-baseline.xml." />
         </module>
         <!-- Forbid JetBrains annotations in Java sources; prefer Jakarta or Spring annotations -->
         <module name="com.github.sevntu.checkstyle.checks.coding.ForbidCertainImportsCheck">

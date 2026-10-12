@@ -73,19 +73,10 @@ public class WorkingCapitalLoanProductApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "createWorkingCapitalLoanProduct", summary = "Create a Working Capital Loan Product", description = "Creates a new Working Capital Loan Product.\n\n"
             + "Mandatory Fields: name, shortName, currencyCode, digitsAfterDecimal, inMultiplesOf, amortizationType, npvDayCount, "
-            + "principal, repaymentEvery, repaymentFrequencyType\n\n"
-            + "Payment amount calculation strategy (paymentAmountCalculationStrategy, default TPV):\n"
-            + "- TPV: periodPaymentRate is mandatory; annualEir, minAnnualEir and maxAnnualEir are not allowed; "
-            + "minPeriodPaymentRate and maxPeriodPaymentRate are optional\n"
-            + "- ANNUAL_EIR: annualEir and discount (> 0) are mandatory; periodPaymentRate, minPeriodPaymentRate and "
-            + "maxPeriodPaymentRate are not allowed; minAnnualEir and maxAnnualEir are optional\n"
-            + "- PAYMENT_AMOUNT: paymentAmount and discount (> 0) are mandatory; periodPaymentRate, minPeriodPaymentRate, "
-            + "maxPeriodPaymentRate, annualEir, minAnnualEir and maxAnnualEir are not allowed; minPaymentAmount and "
-            + "maxPaymentAmount are optional\n\n"
-            + "Optional Fields: externalId, fundId, startDate, closeDate, description, paymentAmountCalculationStrategy, "
+            + "principal, periodPaymentRate, repaymentEvery, repaymentFrequencyType\n\n"
+            + "Optional Fields: externalId, fundId, startDate, closeDate, description, "
             + "delinquencyBucketClassification, minPrincipal, maxPrincipal, minPeriodPaymentRate, maxPeriodPaymentRate, "
-            + "annualEir, minAnnualEir, maxAnnualEir, paymentAmount, minPaymentAmount, maxPaymentAmount, discount, "
-            + "paymentAllocation, allowAttributeOverrides")
+            + "discount, paymentAllocation, allowAttributeOverrides")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanProductApiResourceSwagger.PostWorkingCapitalLoanProductsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanProductApiResourceSwagger.PostWorkingCapitalLoanProductsResponse.class))) })

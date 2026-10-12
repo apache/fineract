@@ -90,7 +90,6 @@ public class FineractProperties {
 
     private FineractSqlValidationProperties sqlValidation;
     private FineractInputValidationProperties inputValidation;
-    private FineractPhoneProperties phone;
 
     private FineractCache cache;
 
@@ -192,18 +191,11 @@ public class FineractProperties {
         private String jobName;
         private Integer chunkSize;
         private Integer partitionSize;
-        // No thread-pool settings here on purpose. COB item processing is sequential by construction - the worker
-        // steps register no task executor at all - because concurrent item processing takes COB business step writes
-        // out of the chunk transaction (see FINERACT-2621). Exposing a pool size would offer an override for a
-        // correctness invariant, so the knob does not exist. Scale via partition-size and worker instances.
+        private Integer threadPoolCorePoolSize;
+        private Integer threadPoolMaxPoolSize;
+        private Integer threadPoolQueueCapacity;
         private Integer retryLimit;
         private Integer pollInterval;
-        /**
-         * Maximum number of skipped items tolerated per step execution (per partition). Independent of chunk size on
-         * purpose - deriving it from chunk-size made fault tolerance a side effect of a sizing knob. Falls back to
-         * {@code chunkSize + 1} when unset, which is the historical behaviour.
-         */
-        private Integer skipLimit;
 
     }
 
@@ -747,13 +739,6 @@ public class FineractProperties {
 
     @Getter
     @Setter
-    public static class FineractPhoneProperties {
-
-        private String regex = "^\\+?[0-9]{7,15}$";
-    }
-
-    @Getter
-    @Setter
     public static class FineractCache {
 
         private FineractCacheDetails defaultTemplate;
@@ -780,29 +765,15 @@ public class FineractProperties {
 
             private ExecuteCommandProperties executeCommand;
 
-            /**
-             * Pacing of the inline COB retry. It has no {@code retryExceptions}: an inline COB failure is recorded on
-             * the account lock, which makes that lock overrulable, so the next attempt can take the accounts over and
-             * re-run the job whatever went wrong - there is no failure there that is worth singling out as final.
-             */
-            private RetryInstanceProperties inlineCob;
-
             @Getter
             @Setter
-            public static class RetryInstanceProperties {
+            public static class ExecuteCommandProperties {
 
+                private Class<? extends Throwable>[] retryExceptions;
                 private Integer maxAttempts;
                 private Boolean enableExponentialBackoff;
                 private Double exponentialBackoffMultiplier;
                 private Duration waitDuration;
-
-            }
-
-            @Getter
-            @Setter
-            public static class ExecuteCommandProperties extends RetryInstanceProperties {
-
-                private Class<? extends Throwable>[] retryExceptions;
 
             }
         }

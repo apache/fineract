@@ -93,7 +93,7 @@ dependencies {
 }
 
 tasks.withType(Tar) {
-    compression = Compression.GZIP
+    compression Compression.GZIP
     archiveExtension = 'tar.gz'
     
     // Enable caching for all tar tasks
@@ -124,10 +124,7 @@ distributions {
                 exclude 'fineract-provider-*-plain.jar'
             }
             from war
-            // Taken from the task rather than from the path, so the merged dependency licence
-            // report is a declared input of the distribution and is regenerated on demand instead
-            // of being whatever happens to be sitting in $rootDir/licenses.
-            from(rootProject.tasks.named('aggregateLicenseReport')) {
+            from("$rootDir/licenses/") {
                 into "licenses/"
             }
             from "$rootDir/LICENSE_RELEASE"
@@ -185,5 +182,5 @@ tasks.named('srcDistTar') {
 }
 
 // Disable zip distributions as they're not needed
-binaryDistZip.enabled = false
-srcDistZip.enabled = false
+binaryDistZip.enabled false
+srcDistZip.enabled false

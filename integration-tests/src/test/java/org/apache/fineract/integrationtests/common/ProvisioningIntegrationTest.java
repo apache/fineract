@@ -18,17 +18,20 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GetProvisioningCriteriaCriteriaIdResponse;
 import org.apache.fineract.client.models.PageLoanProductProvisioningEntryData;
 import org.apache.fineract.client.models.PageProvisioningEntryData;
-import org.apache.fineract.client.models.PostLoansLoanIdRequest;
-import org.apache.fineract.client.models.PostLoansRequest;
-import org.apache.fineract.client.models.PostLoansRequestCollateralData;
 import org.apache.fineract.client.models.PostProvisioningCriteriaRequest;
 import org.apache.fineract.client.models.PostProvisioningCriteriaResponse;
 import org.apache.fineract.client.models.PostProvisioningEntriesResponse;
@@ -39,35 +42,44 @@ import org.apache.fineract.client.models.ProvisioningEntryData;
 import org.apache.fineract.client.models.PutProvisioningCriteriaRequest;
 import org.apache.fineract.client.models.PutProvisioningCriteriaResponse;
 import org.apache.fineract.client.models.PutProvisioningEntriesRequest;
-import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
-import org.apache.fineract.integrationtests.client.feign.modules.ClientTestData;
-import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
-import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
+import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
+import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.provisioning.ProvisioningHelper;
 import org.apache.fineract.integrationtests.common.provisioning.ProvisioningTransactionHelper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ProvisioningIntegrationTest extends FeignLoanTestBase {
+@ExtendWith(LoanTestLifecycleExtension.class)
+public class ProvisioningIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProvisioningIntegrationTest.class);
     private static final String NONE = "1";
     private static final int LOANPRODUCTS_SIZE = 2;
-    private static final String LOAN_DATE = "20 September 2011";
 
-    private FeignCollateralHelper collateralHelper;
+    private RequestSpecification requestSpec;
+    private ResponseSpecification responseSpec;
+    private AccountHelper accountHelper;
+    private LoanTransactionHelper loanTransactionHelper;
 
     @BeforeEach
     public void setup() throws ParseException {
-        this.collateralHelper = new FeignCollateralHelper(fineractClient());
+        Utils.initializeRESTAssured();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.requestSpec.header("Fineract-Platform-TenantId", "default");
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         Assumptions.assumeTrue(!isAlreadyProvisioningEntriesCreated());
     }
 
@@ -75,27 +87,31 @@ public class ProvisioningIntegrationTest extends FeignLoanTestBase {
     public void testCreateProvisioningCriteria() {
         ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper();
         ArrayList<Integer> loanProducts = new ArrayList<>(LOANPRODUCTS_SIZE);
-        final Long clientID = createClient(ClientTestData.DEFAULT_ACTIVATION_DATE);
-        Assertions.assertEquals(clientID, clientHelper.getClient(clientID).getId());
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         for (int i = 0; i < LOANPRODUCTS_SIZE; i++) {
-            final Long loanProductID = createLoanProduct(false, NONE);
-            loanProducts.add(loanProductID.intValue());
+            final Integer loanProductID = createLoanProduct(false, NONE);
+            loanProducts.add(loanProductID);
             Assertions.assertNotNull(loanProductID);
-            final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+            List<HashMap> collaterals = new ArrayList<>();
+            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
             Assertions.assertNotNull(collateralId);
-            final Long clientCollateralId = collateralHelper.createClientCollateral(clientID, collateralId).getResourceId();
+            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                    String.valueOf(clientID), collateralId);
             Assertions.assertNotNull(clientCollateralId);
-            final Long loanID = applyForLoanApplication(clientID, loanProductID, "1,00,000.00", clientCollateralId);
-            verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
-            approveLoan(loanID, new PostLoansLoanIdRequest().approvedOnDate(LOAN_DATE).locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN));
-            verifyLoanStatus(loanID, LoanStatus.APPROVED);
-            verifyLoanStatus(getLoanDetails(loanID), GetLoansLoanIdStatus::getWaitingForDisbursal);
+            addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+            final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "1,00,000.00", collaterals);
+            HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+            loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
+            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+            LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
             LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
-            disburseLoan(loanID, LoanRequestBuilders
-                    .disburseLoanWithNetDisbursalAmount(LOAN_DATE, getLoanDetails(loanID).getNetDisbursalAmount()).note("DISBURSE NOTE"));
-            verifyLoanStatus(getLoanDetails(loanID), GetLoansLoanIdStatus::getActive);
+            String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+            loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID,
+                    JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
             Assertions.assertNotNull(loanID);
         }
 
@@ -142,6 +158,17 @@ public class ProvisioningIntegrationTest extends FeignLoanTestBase {
         Assertions.assertTrue(provisioningEntry.getPageItems().size() > 0);
     }
 
+    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
+        HashMap<String, String> collateral = new HashMap<String, String>(2);
+        collateral.put("clientCollateralId", collateralId.toString());
+        collateral.put("quantity", quantity.toString());
+        return collateral;
+    }
+
+    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
+        collaterals.add(collaterals(collateralId, quantity));
+    }
+
     private void validateProvisioningCriteria(PostProvisioningCriteriaRequest request, GetProvisioningCriteriaCriteriaIdResponse response) {
         Assertions.assertEquals(request.getCriteriaName(), response.getCriteriaName());
         Assertions.assertEquals(request.getLoanProducts().size(), response.getLoanProducts().size());
@@ -170,7 +197,7 @@ public class ProvisioningIntegrationTest extends FeignLoanTestBase {
         }
     }
 
-    private Long createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
+    private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder() //
                 .withPrincipal("1,00,000.00") //
@@ -186,15 +213,29 @@ public class ProvisioningIntegrationTest extends FeignLoanTestBase {
         if (multiDisburseLoan) {
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
         }
-        return createLoanProduct(builder.buildRequest());
+        final String loanProductJSON = builder.build(null);
+
+        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private Long applyForLoanApplication(final Long clientID, final Long loanProductID, String principal, Long clientCollateralId) {
+    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
+            final String savingsId, String principal, List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        final PostLoansRequest loanApplication = LoanRequestBuilders
-                .legacyIndividualApplication(clientID, loanProductID, principal, 4, BigDecimal.valueOf(2), LOAN_DATE)//
-                .collateral(List.of(new PostLoansRequestCollateralData().clientCollateralId(clientCollateralId).quantity(BigDecimal.ONE)));
-        return applyForLoan(loanApplication);
+        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
+                .withPrincipal(principal) //
+                .withLoanTermFrequency("4") //
+                .withLoanTermFrequencyAsMonths() //
+                .withNumberOfRepayments("4") //
+                .withRepaymentEveryAfter("1") //
+                .withRepaymentFrequencyTypeAsMonths() //
+                .withInterestRatePerPeriod("2") //
+                .withAmortizationTypeAsEqualInstallments() //
+                .withInterestTypeAsDecliningBalance() //
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
+                .withExpectedDisbursementDate("20 September 2011") //
+                .withSubmittedOnDate("20 September 2011") //
+                .withCollaterals(collaterals).withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
+        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private boolean isAlreadyProvisioningEntriesCreated() throws ParseException {

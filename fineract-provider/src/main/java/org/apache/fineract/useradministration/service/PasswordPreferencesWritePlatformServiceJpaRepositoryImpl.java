@@ -81,7 +81,7 @@ public class PasswordPreferencesWritePlatformServiceJpaRepositoryImpl implements
                     .with(changes) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            log.error("Error occurred.", dve);
+            log.error("Error occured.", dve);
             throw ErrorHandler.getMappable(dve, "error.msg.password.validation.policy.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
         }

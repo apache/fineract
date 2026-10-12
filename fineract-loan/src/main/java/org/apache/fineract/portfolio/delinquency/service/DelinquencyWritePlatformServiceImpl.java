@@ -412,48 +412,42 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
             delinquencyBucket.setName(data.getName());
             changes.put(DelinquencyApiConstants.NAME_PARAM_NAME, data.getName());
         }
-        if (data.getBucketType() != null && !Objects.equals(data.getBucketType(), delinquencyBucket.getBucketType())) {
-            if (isDelinquencyBucketInUse(delinquencyBucket)) {
-                throw new PlatformDataIntegrityException("error.msg.data.integrity.issue.entity.linked",
-                        String.format("Data integrity issue with resource: %d", delinquencyBucket.getId()));
-            }
+        if (!data.getBucketType().equals(delinquencyBucket.getBucketType())) {
             changes.put(DelinquencyApiConstants.BUCKET_TYPE_PARAM_NAME, data.getBucketType());
             delinquencyBucket.setBucketType(data.getBucketType());
         }
         final Optional<DelinquencyMinimumPaymentPeriodAndRule> existingRule = delinquencyMinimumPaymentPeriodAndRuleRepository
                 .findByBucketId(delinquencyBucket.getId());
         if (delinquencyBucket.getBucketType().equals(DelinquencyBucketType.WORKING_CAPITAL)) {
-            if (data.getMinimumPaymentPeriodAndRule() != null) {
-                DelinquencyMinimumPaymentPeriodAndRule minimumPaymentPeriodAndRule = existingRule.orElse(null);
-                if (minimumPaymentPeriodAndRule == null) {
-                    minimumPaymentPeriodAndRule = new DelinquencyMinimumPaymentPeriodAndRule();
-                    minimumPaymentPeriodAndRule.setBucket(delinquencyBucket);
-                }
-                if (!Objects.equals(data.getMinimumPaymentPeriodAndRule().getFrequency(), minimumPaymentPeriodAndRule.getFrequency())) {
-                    minimumPaymentPeriodAndRule.setFrequency(data.getMinimumPaymentPeriodAndRule().getFrequency());
-                    changes.put(DelinquencyApiConstants.FREQUENCY_PARAM_NAME, minimumPaymentPeriodAndRule.getFrequency());
-                }
-                if (!Objects.equals(data.getMinimumPaymentPeriodAndRule().getFrequencyType(),
-                        minimumPaymentPeriodAndRule.getFrequencyType())) {
-                    minimumPaymentPeriodAndRule.setFrequencyType(data.getMinimumPaymentPeriodAndRule().getFrequencyType());
-                    changes.put(DelinquencyApiConstants.FREQUENCY_TYPE_PARAM_NAME, minimumPaymentPeriodAndRule.getFrequencyType());
-                }
-                if (!Objects.equals(data.getMinimumPaymentPeriodAndRule().getMinimumPaymentType(),
-                        minimumPaymentPeriodAndRule.getMinimumPaymentType())) {
-                    changes.put(DelinquencyApiConstants.MINIMUM_PAYMENT_TYPE_PARAM_NAME,
-                            minimumPaymentPeriodAndRule.getMinimumPaymentType());
-                    minimumPaymentPeriodAndRule.setMinimumPaymentType(data.getMinimumPaymentPeriodAndRule().getMinimumPaymentType());
-                }
-                if (!MathUtil.isEqualTo(data.getMinimumPaymentPeriodAndRule().getMinimumPayment(),
-                        minimumPaymentPeriodAndRule.getMinimumPayment())) {
-                    changes.put(DelinquencyApiConstants.MINIMUM_PAYMENT_PARAM_NAME, minimumPaymentPeriodAndRule.getMinimumPayment());
-                    minimumPaymentPeriodAndRule.setMinimumPayment(data.getMinimumPaymentPeriodAndRule().getMinimumPayment());
-                }
-                delinquencyMinimumPaymentPeriodAndRuleRepository.save(minimumPaymentPeriodAndRule);
+            DelinquencyMinimumPaymentPeriodAndRule minimumPaymentPeriodAndRule = existingRule.orElse(null);
+            if (minimumPaymentPeriodAndRule == null) {
+                minimumPaymentPeriodAndRule = new DelinquencyMinimumPaymentPeriodAndRule();
+                minimumPaymentPeriodAndRule.setBucket(delinquencyBucket);
             }
-        } else if (existingRule.isPresent()) {
-            changes.put(DelinquencyApiConstants.MINIMUM_PAYMENT_PERIOD_AND_RULE_PARAM_NAME, null);
-            delinquencyMinimumPaymentPeriodAndRuleRepository.delete(existingRule.get());
+            if (!Objects.equals(data.getMinimumPaymentPeriodAndRule().getFrequency(), minimumPaymentPeriodAndRule.getFrequency())) {
+                minimumPaymentPeriodAndRule.setFrequency(data.getMinimumPaymentPeriodAndRule().getFrequency());
+                changes.put(DelinquencyApiConstants.FREQUENCY_PARAM_NAME, minimumPaymentPeriodAndRule.getFrequency());
+            }
+            if (!Objects.equals(data.getMinimumPaymentPeriodAndRule().getFrequencyType(), minimumPaymentPeriodAndRule.getFrequencyType())) {
+                minimumPaymentPeriodAndRule.setFrequencyType(data.getMinimumPaymentPeriodAndRule().getFrequencyType());
+                changes.put(DelinquencyApiConstants.FREQUENCY_TYPE_PARAM_NAME, minimumPaymentPeriodAndRule.getFrequencyType());
+            }
+            if (!Objects.equals(data.getMinimumPaymentPeriodAndRule().getMinimumPaymentType(),
+                    minimumPaymentPeriodAndRule.getMinimumPaymentType())) {
+                changes.put(DelinquencyApiConstants.MINIMUM_PAYMENT_TYPE_PARAM_NAME, minimumPaymentPeriodAndRule.getMinimumPaymentType());
+                minimumPaymentPeriodAndRule.setMinimumPaymentType(data.getMinimumPaymentPeriodAndRule().getMinimumPaymentType());
+            }
+            if (!MathUtil.isEqualTo(data.getMinimumPaymentPeriodAndRule().getMinimumPayment(),
+                    minimumPaymentPeriodAndRule.getMinimumPayment())) {
+                changes.put(DelinquencyApiConstants.MINIMUM_PAYMENT_PARAM_NAME, minimumPaymentPeriodAndRule.getMinimumPayment());
+                minimumPaymentPeriodAndRule.setMinimumPayment(data.getMinimumPaymentPeriodAndRule().getMinimumPayment());
+            }
+            delinquencyMinimumPaymentPeriodAndRuleRepository.save(minimumPaymentPeriodAndRule);
+        } else {
+            if (existingRule.isPresent()) {
+                changes.put(DelinquencyApiConstants.MINIMUM_PAYMENT_PERIOD_AND_RULE_PARAM_NAME, null);
+                delinquencyMinimumPaymentPeriodAndRuleRepository.delete(existingRule.get());
+            }
         }
         if (!changes.isEmpty()) {
             delinquencyBucket = repositoryBucket.save(delinquencyBucket);
@@ -462,24 +456,10 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         return delinquencyBucket;
     }
 
-    private boolean isDelinquencyBucketInUse(final DelinquencyBucket delinquencyBucket) {
-        if (this.loanProductRepository.countByDelinquencyBucket(delinquencyBucket) > 0) {
-            return true;
-        }
-        for (final DelinquencyBucketUsageChecker checker : this.delinquencyBucketUsageCheckers) {
-            if (checker.hasUsages(delinquencyBucket)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void setDelinquencyBucketMappings(DelinquencyBucket delinquencyBucket, DelinquencyBucketData data) {
         List<Long> rangeIds = new ArrayList<>();
         data.getRanges().forEach(dataRange -> rangeIds.add(dataRange.getId()));
-        if (data.getBucketType() != null) {
-            delinquencyBucket.setBucketType(data.getBucketType());
-        }
+        delinquencyBucket.setBucketType(data.getBucketType());
         List<DelinquencyRange> ranges = repositoryRange.findAllById(rangeIds);
         validateDelinquencyRanges(ranges);
         List<DelinquencyBucketMappings> bucketMappings = repositoryBucketMappings.findByDelinquencyBucket(delinquencyBucket);

@@ -45,12 +45,6 @@ import org.apache.fineract.batch.command.internal.CreateLoanRescheduleRequestCom
 import org.apache.fineract.batch.command.internal.CreateSavingsAccountChargeCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionByLoanExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
-import org.apache.fineract.batch.command.internal.CreateWorkingCapitalLoanBreachActionByLoanExternalIdCommandStrategy;
-import org.apache.fineract.batch.command.internal.CreateWorkingCapitalLoanBreachActionCommandStrategy;
-import org.apache.fineract.batch.command.internal.CreateWorkingCapitalLoanDelinquencyActionByLoanExternalIdCommandStrategy;
-import org.apache.fineract.batch.command.internal.CreateWorkingCapitalLoanDelinquencyActionCommandStrategy;
-import org.apache.fineract.batch.command.internal.CreateWorkingCapitalLoanNearBreachActionByLoanExternalIdCommandStrategy;
-import org.apache.fineract.batch.command.internal.CreateWorkingCapitalLoanNearBreachActionCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateWorkingCapitalTransactionByLoanExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateWorkingCapitalTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.DeleteWorkingCapitalLoanApplicationByExternalIdCommandStrategy;
@@ -68,10 +62,8 @@ import org.apache.fineract.batch.command.internal.GetLoanTransactionByExternalId
 import org.apache.fineract.batch.command.internal.GetLoanTransactionByIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetReagePreviewByLoanExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetReagePreviewByLoanIdCommandStrategy;
-import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanByExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanByIdCommandStrategy;
-import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanTransactionByExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanTransactionByExternalLoanIdAndTransactionIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanTransactionByIdCommandStrategy;
@@ -329,37 +321,7 @@ public class CommandStrategyProviderTest {
                 Arguments.of(
                         "working-capital-loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/transactions/external-id/7dfad438-2319-48ce-8520-10a62801e9ab?fields=id",
                         HttpMethod.GET, "getWorkingCapitalLoanTransactionByExternalIdCommandStrategy",
-                        mock(GetWorkingCapitalLoanTransactionByExternalIdCommandStrategy.class)),
-                Arguments.of("working-capital-loans/123/breach-schedule", HttpMethod.GET,
-                        "getWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategy",
-                        mock(GetWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategy.class)),
-                Arguments.of("working-capital-loans/123/breach-schedule?fields=id", HttpMethod.GET,
-                        "getWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategy",
-                        mock(GetWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategy.class)),
-                Arguments.of("working-capital-loans/123/delinquency-range-schedule", HttpMethod.GET,
-                        "getWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy",
-                        mock(GetWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy.class)),
-                Arguments.of("working-capital-loans/123/delinquency-range-schedule?fields=id", HttpMethod.GET,
-                        "getWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy",
-                        mock(GetWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy.class)),
-                Arguments.of("working-capital-loans/123/breach-actions", HttpMethod.POST,
-                        "createWorkingCapitalLoanBreachActionCommandStrategy",
-                        mock(CreateWorkingCapitalLoanBreachActionCommandStrategy.class)),
-                Arguments.of("working-capital-loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/breach-actions", HttpMethod.POST,
-                        "createWorkingCapitalLoanBreachActionByLoanExternalIdCommandStrategy",
-                        mock(CreateWorkingCapitalLoanBreachActionByLoanExternalIdCommandStrategy.class)),
-                Arguments.of("working-capital-loans/123/delinquency-actions", HttpMethod.POST,
-                        "createWorkingCapitalLoanDelinquencyActionCommandStrategy",
-                        mock(CreateWorkingCapitalLoanDelinquencyActionCommandStrategy.class)),
-                Arguments.of("working-capital-loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/delinquency-actions", HttpMethod.POST,
-                        "createWorkingCapitalLoanDelinquencyActionByLoanExternalIdCommandStrategy",
-                        mock(CreateWorkingCapitalLoanDelinquencyActionByLoanExternalIdCommandStrategy.class)),
-                Arguments.of("working-capital-loans/123/near-breach-actions", HttpMethod.POST,
-                        "createWorkingCapitalLoanNearBreachActionCommandStrategy",
-                        mock(CreateWorkingCapitalLoanNearBreachActionCommandStrategy.class)),
-                Arguments.of("working-capital-loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/near-breach-actions", HttpMethod.POST,
-                        "createWorkingCapitalLoanNearBreachActionByLoanExternalIdCommandStrategy",
-                        mock(CreateWorkingCapitalLoanNearBreachActionByLoanExternalIdCommandStrategy.class)));
+                        mock(GetWorkingCapitalLoanTransactionByExternalIdCommandStrategy.class)));
     }
 
     /**

@@ -75,7 +75,6 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
     private final ExternalIdFactory externalIdFactory;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
     private final BusinessEventNotifierService businessEventNotifierService;
-    private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
 
     @Transactional
@@ -127,9 +126,9 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
 
         // Post charge-off journal entries: write off the outstanding receivables against charge-off expense / income
         // reversal. No portfolio or schedule impact -- pure accounting tag.
-        this.accountingProcessor.postJournalEntries(loan, chargeOffTransaction, allocation, loan.isChargedOff());
-
-        this.discountFeeAmortizationService.processFinalDiscountFeeAmortization(loan, chargeOffTransaction);
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            this.accountingProcessor.postJournalEntries(loan, chargeOffTransaction, allocation, loan.isChargedOff());
+        }
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(WorkingCapitalLoanConstants.transactionDateParamName, transactionDate);
@@ -162,8 +161,6 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
                 .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.charge.off.transaction.not.found",
                         "No active charge-off transaction found for loan " + loanId, loanId));
 
-        this.discountFeeAmortizationService.undoFinalDiscountFeeAmortization(loan, chargeOffTransaction);
-
         final ExternalId reversalExternalId = this.externalIdFactory
                 .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.reversalExternalIdParamName));
         chargeOffTransaction.setReversed(true);
@@ -178,7 +175,9 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
         this.adjustTransactionEventPublisher.publishReversal(loan.getId(), chargeOffTransaction);
 
         // Reverse the charge-off journal entries. No schedule reprocessing -- pure tag.
-        this.accountingProcessor.postReversalJournalEntries(loan, chargeOffTransaction);
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            this.accountingProcessor.postReversalJournalEntries(loan, chargeOffTransaction);
+        }
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put("reversalExternalId", reversalExternalId);

@@ -261,20 +261,15 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
             if (chargeTimeType != null) {
                 baseDataValidator.reset().parameter(CHARGE_TIME_TYPE).value(chargeTimeType)
-                        .isOneOfTheseValues(ChargeTimeType.validWorkingCapitalLoanProductValues());
+                        .isOneOfTheseValues(ChargeTimeType.validWorkingCapitalLoanValues());
             }
 
             if (chargeCalculationType != null) {
-                baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE).value(chargeCalculationType)
-                        .isOneOfTheseValues(ChargeCalculationType.validValuesForWorkingCapitalLoan(chargeTimeType));
-            }
-
-            if (this.fromApiJsonHelper.parameterExists(CHARGE_PAYMENT_MODE, element)) {
-                final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CHARGE_PAYMENT_MODE, element);
-                if (chargePaymentMode != null) {
-                    baseDataValidator.reset().parameter(CHARGE_PAYMENT_MODE).value(chargePaymentMode)
-                            .isOneOfTheseValues(ChargePaymentMode.validValuesForWorkingCapitalLoan());
+                Object[] validValues = new Object[] {};
+                if (ChargeTimeType.SPECIFIED_DUE_DATE.getValue().equals(chargeTimeType)) {
+                    validValues = ChargeCalculationType.validValuesForWorkingCapitalLoanSpecifiedDueDate();
                 }
+                baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE).value(chargeCalculationType).isOneOfTheseValues(validValues);
             }
         }
 
@@ -437,9 +432,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         }
 
         if (this.fromApiJsonHelper.parameterExists(CHARGE_PAYMENT_MODE, element)) {
-            // chargeAppliesTo is not updatable and absent here, so whether a null is allowed is decided by the entity.
             final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerNamed(CHARGE_PAYMENT_MODE, element, Locale.getDefault());
-            baseDataValidator.reset().parameter(CHARGE_PAYMENT_MODE).value(chargePaymentMode).inMinMaxRange(0, 1);
+            baseDataValidator.reset().parameter(CHARGE_PAYMENT_MODE).value(chargePaymentMode).notNull().inMinMaxRange(0, 1);
         }
 
         if (this.fromApiJsonHelper.parameterExists(PENALTY, element)) {

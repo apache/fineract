@@ -80,7 +80,6 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
     private final ExternalIdFactory externalIdFactory;
     private final PlatformSecurityContext context;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
-    private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
 
@@ -137,11 +136,9 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
         // Nothing else would do it - a CLOSED_WRITTEN_OFF loan is out of COB scope, so the tag would stay frozen.
         this.delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
-        this.accountingProcessor.postJournalEntries(loan, writeOffTransaction, allocation, loan.isChargedOff());
-
-        // Same final discount-fee amortization charge-off already posts: recognize any remaining deferred income on
-        // the write-off date (CLOSED_WRITTEN_OFF loans are out of COB, so otherwise it would stay parked forever).
-        this.discountFeeAmortizationService.processFinalDiscountFeeAmortization(loan, writeOffTransaction);
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            this.accountingProcessor.postJournalEntries(loan, writeOffTransaction, allocation, loan.isChargedOff());
+        }
         this.businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanWriteOffTransactionBusinessEvent(writeOffTransaction, loan.getId()));
         notifyBalanceChanged(loan);
@@ -175,10 +172,6 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
                 .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.write.off.transaction.not.found",
                         "No active write-off transaction found for loan " + loanId, loanId));
 
-        // Reverse the linked final amortization first (while the write-off transaction is still active), matching
-        // undo charge-off.
-        this.discountFeeAmortizationService.undoFinalDiscountFeeAmortization(loan, writeOffTransaction);
-
         // createFromCommand tolerates a bodiless request, which validateUndoWriteOff explicitly permits.
         final ExternalId reversalExternalId = this.externalIdFactory.createFromCommand(command,
                 WorkingCapitalLoanConstants.reversalExternalIdParamName);
@@ -206,8 +199,9 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
         // repayment history and reclassifies against the outstanding that is back on the books.
         this.delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
-        this.accountingProcessor.postReversalJournalEntries(loan, writeOffTransaction);
-
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            this.accountingProcessor.postReversalJournalEntries(loan, writeOffTransaction);
+        }
         this.businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent(writeOffTransaction, loan.getId()));
         notifyBalanceChanged(loan);

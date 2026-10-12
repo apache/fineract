@@ -18,61 +18,56 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.integrationtests.client.feign.modules.ClientTestData.CREATED_DATE_PLUS_ONE;
-import static org.apache.fineract.integrationtests.client.feign.modules.ClientTestData.DEFAULT_ACTIVATION_DATE;
-import static org.apache.fineract.integrationtests.client.feign.modules.ClientTestData.LEGAL_FORM_PERSON;
+import static org.apache.fineract.integrationtests.common.ClientHelper.DEFAULT_DATE;
+import static org.apache.fineract.integrationtests.common.ClientHelper.LEGALFORM_ID_PERSON;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AddressData;
 import org.apache.fineract.client.models.ClientAddressRequest;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
-import org.apache.fineract.client.models.GetClientsPageItemsResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
-import org.apache.fineract.client.models.PutClientsClientIdRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignCodeHelper;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
-import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
-import org.apache.fineract.integrationtests.client.feign.modules.ClientTestData;
-import org.apache.fineract.integrationtests.client.feign.modules.FeignErrors;
+import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.portfolio.client.domain.ClientStatus;
+import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ClientTest extends FeignIntegrationTest {
+public class ClientTest {
 
     private static final SecureRandom rand = new SecureRandom();
-    // TODO: figure out why Jakarta validation throws 403 instead of 400 (same note as StaffTest)
-    private static final int BAD_REQUEST = 400;
-    private static final String INVALID_MOBILE_NO = "validation.msg.client.mobileNo.does.not.match.regexp";
-    private static final String COUNTRY_CODE = "COUNTRY";
-    private static final String STATE_CODE = "STATE";
-    private static final String ADDRESS_TYPE_CODE = "ADDRESS_TYPE";
 
-    private FeignClientHelper clientHelper;
-    private FeignCodeHelper codeHelper;
-    private FeignGlobalConfigurationHelper globalConfigurationHelper;
+    private ResponseSpecification responseSpec;
+    private RequestSpecification requestSpec;
+    private ClientHelper clientHelper;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
-    @BeforeAll
+    @BeforeEach
     public void setup() {
-        clientHelper = new FeignClientHelper(fineractClient());
-        codeHelper = new FeignCodeHelper(fineractClient());
-        globalConfigurationHelper = new FeignGlobalConfigurationHelper(fineractClient());
+        Utils.initializeRESTAssured();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        clientHelper = new ClientHelper(requestSpec, responseSpec);
+        globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @AfterEach
@@ -82,59 +77,99 @@ public class ClientTest extends FeignIntegrationTest {
     }
 
     @Test
-    public void testClientCreateWithInvalidMobileNoValidationError() {
-        // given
-        PostClientsRequest request = ClientRequestBuilders.defaultClient().mobileNo("invalid-phone-###");
-
-        // when/then: expects 400 (validation error), not 500 (would indicate the
-        // FineractPhoneProperties NPE regression from FINERACT-405 has resurfaced)
-        assertInvalidMobileNo(clientHelper.createClientExpectingError(request));
-    }
-
-    @Test
-    public void testClientUpdateWithInvalidMobileNoValidationError() {
-        // given
-        final Long clientId = clientHelper.createClient(DEFAULT_ACTIVATION_DATE);
-        PutClientsClientIdRequest request = new PutClientsClientIdRequest().mobileNo("invalid-phone-###");
-
-        // when/then: expects 400 (validation error), not 500 (would indicate the
-        // FineractPhoneProperties NPE regression from FINERACT-405 has resurfaced)
-        assertInvalidMobileNo(clientHelper.updateClientExpectingError(clientId, request));
-    }
-
-    @Test
     public void testClientStatus() {
-        final Long clientId = clientHelper.createClient(DEFAULT_ACTIVATION_DATE);
-        verifyStatusTransitions(clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
+
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
+        ClientStatusChecker.verifyClientIsActive(status);
+
+        HashMap<String, Object> clientStatusHashMap = clientHelper.closeClient(clientId);
+        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
+        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.rejectClient(clientId);
+        ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.activateClient(clientId);
+        ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.closeClient(clientId);
+        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
+        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.withdrawClient(clientId);
+        ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
+
     }
 
     @Test
     public void testClientAsPersonStatus() {
-        final Long clientId = clientHelper.createClient(DEFAULT_ACTIVATION_DATE);
-        verifyStatusTransitions(clientId);
+        final Integer clientId = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
+
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
+        ClientStatusChecker.verifyClientIsActive(status);
+
+        HashMap<String, Object> clientStatusHashMap = clientHelper.closeClient(clientId);
+        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
+        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.rejectClient(clientId);
+        ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.activateClient(clientId);
+        ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.closeClient(clientId);
+        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
+        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.withdrawClient(clientId);
+        ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
+
     }
 
     @Test
     public void testClientAsEntityStatus() {
-        final Long clientId = createEntityClient();
-        verifyStatusTransitions(clientId);
+        final Integer clientId = ClientHelper.createClientAsEntity(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
+
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
+        ClientStatusChecker.verifyClientIsActive(status);
+
+        HashMap<String, Object> clientStatusHashMap = clientHelper.closeClient(clientId);
+        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
+        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.rejectClient(clientId);
+        ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.activateClient(clientId);
+        ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.closeClient(clientId);
+        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
+        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
+
+        clientStatusHashMap = clientHelper.withdrawClient(clientId);
+        ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
+
     }
 
-    @Test
-    public void testRetrieveEntityClientReturnsNonPersonDetails() {
-        // given
-        final Long constitutionId = codeHelper.retrieveOrCreateCodeValueId(ClientTestData.CONSTITUTION_CODE);
-        final Long clientId = clientHelper.createClient(ClientRequestBuilders.activeEntityClient(constitutionId)).getClientId();
-
-        // when
-        final GetClientsClientIdResponse client = clientHelper.getClient(clientId);
-
-        // then: the non-person details saved on create are returned (FINERACT-2907)
-        assertNotNull(client.getClientNonPersonDetails());
-        assertNotNull(client.getClientNonPersonDetails().getConstitution());
-        assertEquals(constitutionId, client.getClientNonPersonDetails().getConstitution().getId());
-    }
-
+    @SuppressWarnings("unchecked")
     @Test
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
@@ -142,24 +177,28 @@ public class ClientTest extends FeignIntegrationTest {
 
         // Add a few clients to the server and activate a random amount of them
         for (int i = 0; i < 15; i++) {
-            final Long clientId = createEntityClient();
+            final Integer clientId = ClientHelper.createClientAsEntity(requestSpec, responseSpec);
             if (rand.nextInt(10) % 2 == 0) {
                 // Takes Client to pending status
-                clientHelper.closeClient(clientId, CREATED_DATE_PLUS_ONE);
-                clientHelper.reactivateClient(clientId, ClientRequestBuilders.reactivateClient(CREATED_DATE_PLUS_ONE));
+                clientHelper.closeClient(clientId);
+                clientHelper.reactivateClient(clientId);
             }
             // Other clients stay in Active status
         }
-        List<GetClientsPageItemsResponse> clientsReceived = retrieveClientsWithStatus("pending");
-        assertNotEquals(0, clientsReceived.size());
-        for (GetClientsPageItemsResponse client : clientsReceived) {
-            assertClientStatus(client.getId(), ClientStatus.PENDING);
+        List<HashMap<String, Object>> clientsRecieved = (List<HashMap<String, Object>>) clientHelper.getClientWithStatus(50, "pending");
+        assertNotEquals(clientsRecieved.size(), 0);
+        for (int i = 0; i < clientsRecieved.size(); i++) {
+            HashMap<String, Object> clientStatus = ClientHelper.getClientStatus(requestSpec, responseSpec,
+                    String.valueOf(clientsRecieved.get(i).get("id")));
+            ClientStatusChecker.verifyClientPending(clientStatus);
         }
 
-        clientsReceived = retrieveClientsWithStatus("active");
-        assertNotEquals(0, clientsReceived.size());
-        for (GetClientsPageItemsResponse client : clientsReceived) {
-            assertClientStatus(client.getId(), ClientStatus.ACTIVE);
+        clientsRecieved = (List<HashMap<String, Object>>) clientHelper.getClientWithStatus(50, "active");
+        assertNotEquals(clientsRecieved.size(), 0);
+        for (int i = 0; i < clientsRecieved.size(); i++) {
+            HashMap<String, Object> clientStatus = ClientHelper.getClientStatus(requestSpec, responseSpec,
+                    String.valueOf(clientsRecieved.get(i).get("id")));
+            ClientStatusChecker.verifyClientIsActive(clientStatus);
         }
     }
 
@@ -168,9 +207,10 @@ public class ClientTest extends FeignIntegrationTest {
         // given
         enableAddress();
 
-        Long addressTypeId = codeHelper.createCodeValue(ADDRESS_TYPE_CODE, Utils.randomStringGenerator("Residential address", 4), 0);
-        Long countryId = codeHelper.createCodeValue(COUNTRY_CODE, Utils.randomStringGenerator("Hungary", 4), 0);
-        Long stateId = codeHelper.createCodeValue(STATE_CODE, Utils.randomStringGenerator("Budapest", 4), 0);
+        Integer addressTypeId = CodeHelper.createAddressTypeCodeValue(requestSpec, responseSpec,
+                Utils.randomStringGenerator("Residential address", 4), 0);
+        Integer countryId = CodeHelper.createCountryCodeValue(requestSpec, responseSpec, Utils.randomStringGenerator("Hungary", 4), 0);
+        Integer stateId = CodeHelper.createStateCodeValue(requestSpec, responseSpec, Utils.randomStringGenerator("Budapest", 4), 0);
         String city = "Budapest";
         boolean addressIsActive = true;
         String addressLine1 = "Pava Street 1";
@@ -181,19 +221,20 @@ public class ClientTest extends FeignIntegrationTest {
 
         // when
         ClientAddressRequest addressRequest = new ClientAddressRequest().street(street).townVillage(townVillage)
-                .countyDistrict(countyDistrict).addressLine1(addressLine1).postalCode(postalCode).city(city).countryId(countryId)
-                .stateProvinceId(stateId).addressTypeId(addressTypeId).isActive(addressIsActive);
-        PostClientsRequest request = ClientRequestBuilders.defaultClient().address(List.of(addressRequest));
-        final Long clientId = clientHelper.createClient(request).getClientId();
+                .countyDistrict(countyDistrict).addressLine1(addressLine1).postalCode(postalCode).city(city)
+                .countryId(Long.valueOf(countryId)).stateProvinceId(Long.valueOf(stateId)).addressTypeId(addressTypeId.longValue())
+                .isActive(addressIsActive);
+        PostClientsRequest request = ClientHelper.defaultClientCreationRequest().address(List.of(addressRequest));
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, request);
 
         // then
-        assertEquals(clientId, clientHelper.getClient(clientId).getId());
-        List<AddressData> clientAddresses = clientHelper.getClientAddresses(clientId);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
+        List<AddressData> clientAddresses = ClientHelper.getClientAddresses(requestSpec, responseSpec, clientId);
         AddressData addressResponse = clientAddresses.get(0);
         assertThat(addressResponse.getCity()).isEqualTo(city);
-        assertThat(addressResponse.getCountryId()).isEqualTo(countryId);
-        assertThat(addressResponse.getStateProvinceId()).isEqualTo(stateId);
-        assertThat(addressResponse.getAddressTypeId()).isEqualTo(addressTypeId);
+        assertThat(addressResponse.getCountryId()).isEqualTo((long) countryId);
+        assertThat(addressResponse.getStateProvinceId()).isEqualTo((long) stateId);
+        assertThat(addressResponse.getAddressTypeId()).isEqualTo((long) addressTypeId);
         assertThat(addressResponse.getIsActive()).isEqualTo(addressIsActive);
         assertThat(addressResponse.getPostalCode()).isEqualTo(postalCode);
         assertThat(addressResponse.getStreet()).isEqualTo(street);
@@ -206,9 +247,10 @@ public class ClientTest extends FeignIntegrationTest {
         // given
         enableAddress();
 
-        Long addressTypeId = codeHelper.createCodeValue(ADDRESS_TYPE_CODE, Utils.randomStringGenerator("Residential address", 4), 0);
-        Long countryId = codeHelper.createCodeValue(COUNTRY_CODE, Utils.randomStringGenerator("Hungary", 4), 0);
-        Long stateId = codeHelper.createCodeValue(STATE_CODE, Utils.randomStringGenerator("Budapest", 4), 0);
+        Integer addressTypeId = CodeHelper.createAddressTypeCodeValue(requestSpec, responseSpec,
+                Utils.randomStringGenerator("Residential address", 4), 0);
+        Integer countryId = CodeHelper.createCountryCodeValue(requestSpec, responseSpec, Utils.randomStringGenerator("Hungary", 4), 0);
+        Integer stateId = CodeHelper.createStateCodeValue(requestSpec, responseSpec, Utils.randomStringGenerator("Budapest", 4), 0);
         String city = "Budapest";
         boolean addressIsActive = true;
         String addressLine1 = "Rakoczi Street 1";
@@ -217,20 +259,22 @@ public class ClientTest extends FeignIntegrationTest {
         String townVillage = "Belvaros";
         String countyDistrict = "Buda District";
 
-        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
+        PostClientsRequest clientRequest = ClientHelper.defaultClientCreationRequest();
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, clientRequest);
         // when
         ClientAddressRequest request = new ClientAddressRequest().street(street).townVillage(townVillage).countyDistrict(countyDistrict)
-                .addressLine1(addressLine1).postalCode(postalCode).city(city).countryId(countryId).stateProvinceId(stateId)
-                .isActive(addressIsActive);
-        PostClientClientIdAddressesResponse response = clientHelper.createClientAddress(clientId, addressTypeId, request);
+                .addressLine1(addressLine1).postalCode(postalCode).city(city).countryId(Long.valueOf(countryId))
+                .stateProvinceId(Long.valueOf(stateId)).isActive(addressIsActive);
+        PostClientClientIdAddressesResponse response = ClientHelper.createClientAddress(requestSpec, responseSpec, clientId.longValue(),
+                addressTypeId, request);
         // then
         assertThat(response.getResourceId()).isNotNull();
-        List<AddressData> clientAddresses = clientHelper.getClientAddresses(clientId);
+        List<AddressData> clientAddresses = ClientHelper.getClientAddresses(requestSpec, responseSpec, clientId);
         AddressData addressResponse = clientAddresses.get(0);
         assertThat(addressResponse.getCity()).isEqualTo(city);
-        assertThat(addressResponse.getCountryId()).isEqualTo(countryId);
-        assertThat(addressResponse.getStateProvinceId()).isEqualTo(stateId);
-        assertThat(addressResponse.getAddressTypeId()).isEqualTo(addressTypeId);
+        assertThat(addressResponse.getCountryId()).isEqualTo((long) countryId);
+        assertThat(addressResponse.getStateProvinceId()).isEqualTo((long) stateId);
+        assertThat(addressResponse.getAddressTypeId()).isEqualTo((long) addressTypeId);
         assertThat(addressResponse.getIsActive()).isEqualTo(addressIsActive);
         assertThat(addressResponse.getPostalCode()).isEqualTo(postalCode);
         assertThat(addressResponse.getStreet()).isEqualTo(street);
@@ -240,10 +284,11 @@ public class ClientTest extends FeignIntegrationTest {
         String updatedStreet = "Andrassy Avenue";
         String updatedTownVillage = "Terezvaros";
         String updatedCountyDistrict = "Central District";
-        clientHelper.updateClientAddress(clientId, new ClientAddressRequest().addressId(addressResponse.getAddressId())
-                .street(updatedStreet).townVillage(updatedTownVillage).countyDistrict(updatedCountyDistrict));
+        ClientHelper.updateClientAddress(requestSpec, responseSpec, clientId.longValue(),
+                new ClientAddressRequest().addressId(addressResponse.getAddressId()).street(updatedStreet).townVillage(updatedTownVillage)
+                        .countyDistrict(updatedCountyDistrict));
 
-        List<AddressData> updatedClientAddresses = clientHelper.getClientAddresses(clientId);
+        List<AddressData> updatedClientAddresses = ClientHelper.getClientAddresses(requestSpec, responseSpec, clientId);
         AddressData updatedAddressResponse = updatedClientAddresses.get(0);
         assertThat(updatedAddressResponse.getStreet()).isEqualTo(updatedStreet);
         assertThat(updatedAddressResponse.getTownVillage()).isEqualTo(updatedTownVillage);
@@ -265,69 +310,24 @@ public class ClientTest extends FeignIntegrationTest {
         String lastName = Utils.randomLastNameGenerator();
         String fullName = firstName + ' ' + middleName + ' ' + lastName;
 
-        PostClientsRequest request = new PostClientsRequest().officeId(1L).legalFormId(LEGAL_FORM_PERSON).firstname(firstName)
+        PostClientsRequest request = new PostClientsRequest().officeId(1L).legalFormId(LEGALFORM_ID_PERSON).firstname(firstName)
                 .middlename(middleName).lastname(lastName).externalId(UUID.randomUUID().toString()).dateFormat(Utils.DATE_FORMAT)
-                .locale("en").active(true).activationDate(DEFAULT_ACTIVATION_DATE);
-        Long clientId = clientHelper.createClient(request).getClientId();
+                .locale("en").active(true).activationDate(DEFAULT_DATE);
+        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, request);
         assertNotNull(clientId);
 
-        GetClientsClientIdResponse client = clientHelper.getClient(clientId);
+        GetClientsClientIdResponse client = ClientHelper.getClient(requestSpec, responseSpec, clientId);
         assertNotNull(client);
         assertEquals(fullName, client.getDisplayName());
 
-        request = new PostClientsRequest().officeId(1L).legalFormId(LEGAL_FORM_PERSON).fullname(fullName)
+        request = new PostClientsRequest().officeId(1L).legalFormId(LEGALFORM_ID_PERSON).fullname(fullName)
                 .externalId(UUID.randomUUID().toString()).dateFormat(Utils.DATE_FORMAT).locale("en").active(true)
-                .activationDate(DEFAULT_ACTIVATION_DATE);
-        clientId = clientHelper.createClient(request).getClientId();
+                .activationDate(DEFAULT_DATE);
+        clientId = ClientHelper.createClient(requestSpec, responseSpec, request);
         assertNotNull(clientId);
 
-        client = clientHelper.getClient(clientId);
+        client = ClientHelper.getClient(requestSpec, responseSpec, clientId);
         assertNotNull(client);
         assertEquals(fullName, client.getDisplayName());
-    }
-
-    private static void assertInvalidMobileNo(CallFailedRuntimeException error) {
-        assertEquals(BAD_REQUEST, error.getStatus());
-        assertEquals(INVALID_MOBILE_NO, FeignErrors.errorGlobalisationCode(error));
-    }
-
-    private Long createEntityClient() {
-        Long constitutionId = codeHelper.retrieveOrCreateCodeValueId(ClientTestData.CONSTITUTION_CODE);
-        return clientHelper.createClient(ClientRequestBuilders.activeEntityClient(constitutionId)).getClientId();
-    }
-
-    private void verifyStatusTransitions(Long clientId) {
-        GetClientsClientIdResponse client = clientHelper.getClient(clientId);
-        assertEquals(clientId, client.getId());
-        ClientStatusChecker.verifyClientStatus(ClientStatus.ACTIVE, client);
-
-        clientHelper.closeClient(clientId, CREATED_DATE_PLUS_ONE);
-        assertClientStatus(clientId, ClientStatus.CLOSED);
-
-        clientHelper.reactivateClient(clientId, ClientRequestBuilders.reactivateClient(CREATED_DATE_PLUS_ONE));
-        assertClientStatus(clientId, ClientStatus.PENDING);
-
-        clientHelper.rejectClient(clientId, CREATED_DATE_PLUS_ONE);
-        assertClientStatus(clientId, ClientStatus.REJECTED);
-
-        clientHelper.activateClient(clientId, ClientRequestBuilders.activateClient(CREATED_DATE_PLUS_ONE));
-        assertClientStatus(clientId, ClientStatus.ACTIVE);
-
-        clientHelper.closeClient(clientId, CREATED_DATE_PLUS_ONE);
-        assertClientStatus(clientId, ClientStatus.CLOSED);
-
-        clientHelper.reactivateClient(clientId, ClientRequestBuilders.reactivateClient(CREATED_DATE_PLUS_ONE));
-        assertClientStatus(clientId, ClientStatus.PENDING);
-
-        clientHelper.withdrawClient(clientId, CREATED_DATE_PLUS_ONE);
-        assertClientStatus(clientId, ClientStatus.WITHDRAWN);
-    }
-
-    private List<GetClientsPageItemsResponse> retrieveClientsWithStatus(String status) {
-        return clientHelper.retrieveClients(Map.of("paged", true, "status", status, "limit", 50)).getPageItems();
-    }
-
-    private void assertClientStatus(Long clientId, ClientStatus expected) {
-        ClientStatusChecker.verifyClientStatus(expected, clientHelper.getClient(clientId));
     }
 }

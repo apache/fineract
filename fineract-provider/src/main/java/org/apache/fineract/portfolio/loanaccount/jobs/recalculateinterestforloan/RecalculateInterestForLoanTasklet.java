@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -38,11 +39,11 @@ import org.apache.fineract.organisation.office.service.OfficeReadPlatformService
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.RecalculateInterestPoster;
-import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.infrastructure.repeat.RepeatStatus;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -60,9 +61,9 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        JobParameters jobParameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
+        Map<String, JobParameter<?>> jobParameters = chunkContext.getStepContext().getStepExecution().getJobParameters().getParameters();
         if (!jobParameters.isEmpty()) {
-            final String officeId = jobParameters.getString("officeId");
+            final String officeId = (String) jobParameters.get("officeId").getValue();
             log.debug("recalculateInterest: officeId={}", officeId);
             Long officeIdLong = Long.valueOf(officeId);
 
@@ -70,8 +71,8 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
             if (office == null) {
                 throw new OfficeNotFoundException(officeIdLong);
             }
-            final int threadPoolSize = Integer.parseInt(jobParameters.getString("thread-pool-size"));
-            final int batchSize = Integer.parseInt(jobParameters.getString("batch-size"));
+            final int threadPoolSize = Integer.parseInt((String) jobParameters.get("thread-pool-size").getValue());
+            final int batchSize = Integer.parseInt((String) jobParameters.get("batch-size").getValue());
 
             recalculateInterest(office, threadPoolSize, batchSize);
         } else {

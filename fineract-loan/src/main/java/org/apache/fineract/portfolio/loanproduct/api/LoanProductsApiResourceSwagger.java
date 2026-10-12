@@ -148,18 +148,6 @@ public final class LoanProductsApiResourceSwagger {
         public Boolean isLinkedToFloatingInterestRates;
         @Schema(example = "false")
         public Boolean allowVariableInstallments;
-        @Schema(example = "0", description = "Minimum days between two installments of a variable installment loan")
-        public Integer minimumGap;
-        @Schema(example = "90", description = "Maximum days between two installments of a variable installment loan")
-        public Integer maximumGap;
-        @Schema(example = "false", description = "Force the actual disbursement date to match the expected disbursement date")
-        public Boolean syncExpectedWithDisbursementDate;
-        @Schema(example = "50", description = "Percentage of the loan that guarantors must cover")
-        public BigDecimal mandatoryGuarantee;
-        @Schema(example = "20", description = "Minimum percentage of the guarantee an external guarantor must provide")
-        public BigDecimal minimumGuaranteeFromGuarantor;
-        @Schema(example = "20", description = "Minimum percentage of the guarantee the borrower must provide from own funds")
-        public BigDecimal minimumGuaranteeFromOwnFunds;
         @Schema(example = "30")
         public Integer minimumDaysBetweenDisbursalAndFirstRepayment;
         @Schema(example = "true")
@@ -1426,8 +1414,6 @@ public final class LoanProductsApiResourceSwagger {
         public Boolean useBorrowerCycle;
         @Schema(example = "loanProduct.active")
         public String status;
-        @Schema(example = "2075e308-d4a8-44d9-8203-f5a947b8c2f4")
-        public String externalId;
         public GetLoanProductsResponse.GetLoanProductsCurrency currency;
         @Schema(example = "10000.000000")
         public Double principal;

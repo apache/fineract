@@ -77,7 +77,6 @@ public interface WorkingCapitalLoanSummaryMapper {
         timeline.setClosedOnDate(loan.getClosedOnDate());
         timeline.setExpectedMaturityDate(loan.getExpectedMaturityDate());
         timeline.setActualMaturityDate(loan.getMaturedOnDate());
-        timeline.setOverpaidOnDate(loan.getOverpaidOnDate());
         return timeline;
     }
 }

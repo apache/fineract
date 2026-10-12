@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -389,17 +388,6 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return loanHelper.moveLoanState(loanId, request, command);
     }
 
-    protected PostLoansLoanIdResponse applyContractTermination(Long loanId, String transactionDate) {
-        return moveLoanState(loanId,
-                new PostLoansLoanIdRequest().transactionDate(transactionDate).dateFormat(LoanTestData.DATETIME_PATTERN)
-                        .locale(LoanTestData.LOCALE).note("Contract Termination").externalId(Utils.randomStringGenerator("", 20)),
-                "contractTermination");
-    }
-
-    protected PostLoansLoanIdResponse undoContractTermination(Long loanId) {
-        return moveLoanState(loanId, new PostLoansLoanIdRequest().note("Undo Contract Termination"), "undoContractTermination");
-    }
-
     protected PostLoansLoanIdTransactionsResponse closeLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return loanHelper.closeLoan(loanId, request);
     }
@@ -690,15 +678,6 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         journalHelper.checkJournalEntryForExpenseAccount(account, date, entries);
     }
 
-    /**
-     * Codes the server puts at the top of an error body purely as an envelope; the code that names the actual failure
-     * is then the first entry of the nested {@code errors} array. A resource-not-found reply is one of these: every
-     * {@code AbstractPlatformResourceNotFoundException} reports {@code error.msg.resource.not.found} at the top and the
-     * entity-specific code underneath.
-     */
-    private static final Set<String> GENERIC_ERROR_ENVELOPE_CODES = Set.of("validation.msg.validation.errors.exist",
-            "validation.msg.domain.rule.violation", "error.msg.resource.not.found");
-
     protected static void assertErrorGlobalisationCode(CallFailedRuntimeException exception, String expectedCode) {
         assertEquals(expectedCode, extractErrorGlobalisationCode(exception));
     }
@@ -708,7 +687,8 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
             return exception.getUserMessageGlobalisationCode();
         }
         String topLevelCode = feignException.getUserMessageGlobalisationCode();
-        if (topLevelCode != null && !GENERIC_ERROR_ENVELOPE_CODES.contains(topLevelCode)) {
+        if (topLevelCode != null && !topLevelCode.equals("validation.msg.validation.errors.exist")
+                && !topLevelCode.equals("validation.msg.domain.rule.violation")) {
             return topLevelCode;
         }
         try {
@@ -722,23 +702,6 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
             // fall through to top-level code
         }
         return topLevelCode;
-    }
-
-    /**
-     * The number of entries in the failed response's {@code errors} array. A validation failure reports one entry per
-     * rejected field, so a test that pinned the count with a REST Assured body matcher keeps that assertion here.
-     */
-    protected static int extractErrorCount(CallFailedRuntimeException exception) {
-        if (!(exception.getCause() instanceof FeignException feignException)) {
-            return 0;
-        }
-        try {
-            Map<String, Object> body = ObjectMapperFactory.getShared().readValue(feignException.responseBodyAsString(),
-                    new TypeReference<Map<String, Object>>() {});
-            return body.get("errors") instanceof List<?> errorList ? errorList.size() : 0;
-        } catch (Exception e) {
-            throw new IllegalStateException("Could not read the errors array from: " + feignException.responseBodyAsString(), e);
-        }
     }
 
     protected LoanTestData.Journal journalEntry(double amount, Account account, String type) {
@@ -906,7 +869,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     /**
      * Runs the given action with batch requests issued as a user that lacks the loan-checker bypass permission, so
-     * loan-lock enforcement is not bypassed.
+     * loan-lock enforcement is not bypassed. Mirrors {@code BaseLoanIntegrationTest.runAsNonByPass}.
      */
     protected void runAsNonByPass(Runnable runnable) {
         FineractFeignClient previous = activeBatchClient;
@@ -1576,12 +1539,6 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
     protected void verifyRepaymentSchedule(Long loanId, LoanTestData.Installment... installments) {
         GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
         LoanTestValidators.verifyRepaymentSchedule(loanDetails, installments);
-    }
-
-    protected void verifyTransactionPortions(Long loanId, String type, String date, double amount, double principalPortion,
-            double interestPortion, double feePortion, double penaltyPortion) {
-        LoanTestValidators.verifyTransactionPortions(getLoanDetails(loanId), type, date, amount, principalPortion, interestPortion,
-                feePortion, penaltyPortion);
     }
 
     protected PostLoanProductsRequest createOnePeriod30DaysPeriodicAccrualProductWithAdvancedPaymentAllocationAndInterestRecalculation(

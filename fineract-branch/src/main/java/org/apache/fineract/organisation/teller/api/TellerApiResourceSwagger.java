@@ -57,12 +57,8 @@ final class TellerApiResourceSwagger {
         public Long creditAccountId;
         @Schema(example = "Teller3")
         public String name;
-        @Schema(example = "cash handling")
-        public String description;
-        @Schema(example = "2015-02-01")
+        @Schema(example = "[2015,2,1]")
         public LocalDate startDate;
-        @Schema(example = "2015-02-28")
-        public LocalDate endDate;
         @Schema(example = "ACTIVE")
         public TellerStatus status;
         @Schema(example = "Head Office")
@@ -82,16 +78,14 @@ final class TellerApiResourceSwagger {
         public String name;
         @Schema(example = "cash handling")
         public String description;
-        @Schema(description = "Teller status code: 100 (pending), 300 (active), 400 (inactive), 600 (closed)", example = "300")
-        public Integer status;
+        @Schema(example = "ACTIVE")
+        public TellerStatus status;
         @Schema(example = "en")
         public String locale;
         @Schema(example = "dd-MM-yyyy")
         public String dateFormat;
         @Schema(example = "01 February 2015")
         public LocalDate startDate;
-        @Schema(example = "28 February 2015")
-        public LocalDate endDate;
 
     }
 
@@ -121,8 +115,8 @@ final class TellerApiResourceSwagger {
         public Long officeId;
         @Schema(example = "teller cash handling")
         public String description;
-        @Schema(description = "Teller status code: 100 (pending), 300 (active), 400 (inactive), 600 (closed)", example = "300")
-        public Integer status;
+        @Schema(example = "ACTIVE")
+        public TellerStatus status;
         @Schema(example = "28 February 2015")
         public LocalDate endDate;
         @Schema(example = "01 February 2015")

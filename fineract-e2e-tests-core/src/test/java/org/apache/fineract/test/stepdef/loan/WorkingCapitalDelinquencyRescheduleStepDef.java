@@ -39,8 +39,6 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
-import org.apache.fineract.client.models.DelinquencyRangeRequest;
-import org.apache.fineract.client.models.DelinquencyRangeResponse;
 import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
@@ -114,27 +112,8 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
     @When("Admin creates WC Delinquency Bucket with frequency {int} {word} and minimumPayment {int} {word}")
     public void createWcDelinquencyBucket(final int frequency, final String frequencyType, final int minimumPayment,
             final String minimumPaymentType) {
-        createWcDelinquencyBucket(frequency, frequencyType, minimumPayment, minimumPaymentType, null);
-    }
-
-    @When("Admin creates WC Delinquency Bucket with frequency {int} {word}, minimumPayment {int} {word} and the following ranges:")
-    public void createWcDelinquencyBucketWithRanges(final int frequency, final String frequencyType, final int minimumPayment,
-            final String minimumPaymentType, final DataTable table) {
-        createWcDelinquencyBucket(frequency, frequencyType, minimumPayment, minimumPaymentType, table);
-    }
-
-    /**
-     * Creates a working capital delinquency bucket. A null or empty range table falls back to the ranges of the seeded
-     * bucket, which is what the scenarios that only need a shorter period rely on; a populated table builds a custom
-     * classification ladder instead.
-     */
-    private void createWcDelinquencyBucket(final int frequency, final String frequencyType, final int minimumPayment,
-            final String minimumPaymentType, final DataTable table) {
-        final List<Long> rangeIds = table == null || table.isEmpty()
-                ? workingCapitalRequestFactory.seededWorkingCapitalDelinquencyRangeIds()
-                : table.asMaps().stream().map(this::resolveDelinquencyRange).toList();
         final DelinquencyBucketRequest request = new DelinquencyBucketRequest().name("DB-WCL-" + Utils.randomStringGenerator(12))
-                .bucketType("WORKING_CAPITAL").ranges(rangeIds)
+                .bucketType("WORKING_CAPITAL").ranges(List.of(1L))
                 .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule().frequency(frequency).frequencyType(frequencyType)
                         .minimumPayment(new BigDecimal(minimumPayment)).minimumPaymentType(minimumPaymentType));
 
@@ -143,39 +122,8 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
         assertThat(result).isNotNull();
         assertThat(result.getResourceId()).isNotNull();
         TestContext.GLOBAL.set(TestContextKey.DELINQUENCY_BUCKET_ID, result.getResourceId());
-        // also published scenario-scoped, so a step that needs a bucket built in its own scenario cannot silently
-        // pick up one left behind by an earlier scenario: the global context is never reset between scenarios
-        testContext().set(TestContextKey.DELINQUENCY_BUCKET_ID, result.getResourceId());
         log.info("Created WC delinquency bucket id={} with frequency={} {} minimumPayment={} {}", result.getResourceId(), frequency,
                 frequencyType, minimumPayment, minimumPaymentType);
-    }
-
-    /**
-     * Resolves one delinquency range row to a range id, creating the range when no range carries that classification
-     * yet. Ranges are global and shared by every bucket, so reusing a classification with different bounds would
-     * silently re-band every scenario that already relies on it; that is rejected here rather than quietly accepted.
-     */
-    private Long resolveDelinquencyRange(final Map<String, String> row) {
-        final String classification = row.get("classification");
-        final Integer minimumAgeDays = Integer.valueOf(row.get("minimumAgeDays"));
-        final String maximumAgeDaysValue = row.get("maximumAgeDays");
-        final Integer maximumAgeDays = maximumAgeDaysValue == null || maximumAgeDaysValue.isBlank() ? null
-                : Integer.valueOf(maximumAgeDaysValue);
-
-        final Optional<DelinquencyRangeResponse> existing = ok(() -> fineractFeignClient.delinquencyRangeAndBucketsManagement().getRanges())
-                .stream().filter(range -> classification.equals(range.getClassification())).findFirst();
-        if (existing.isPresent()) {
-            final DelinquencyRangeResponse range = existing.get();
-            assertThat(range.getMinimumAgeDays()).as("delinquency range %s already exists with a different minimumAgeDays", classification)
-                    .isEqualTo(minimumAgeDays);
-            assertThat(range.getMaximumAgeDays()).as("delinquency range %s already exists with a different maximumAgeDays", classification)
-                    .isEqualTo(maximumAgeDays);
-            return range.getId();
-        }
-
-        final DelinquencyRangeRequest rangeRequest = new DelinquencyRangeRequest().classification(classification).locale("en")
-                .minimumAgeDays(minimumAgeDays).maximumAgeDays(maximumAgeDays);
-        return ok(() -> fineractFeignClient.delinquencyRangeAndBucketsManagement().createRange(rangeRequest)).getResourceId();
     }
 
     @When("Admin creates a Working Capital delinquency reset")
@@ -217,6 +165,18 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
         Optional.ofNullable(params.get("frequency")).ifPresent(v -> request.setFrequency(Integer.parseInt(v)));
         Optional.ofNullable(params.get("frequencyType")).ifPresent(request::setFrequencyType);
         executeRescheduleAction(request);
+    }
+
+    @Then("Admin fails to create WC delinquency reschedule action with minimumPayment {int} {word} and frequency {int} {word}")
+    public void failToCreateRescheduleAction(final int minimumPayment, final String minimumPaymentType, final int frequency,
+            final String frequencyType) {
+        final Long loanId = getLoanId();
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = buildRescheduleRequest(new BigDecimal(minimumPayment),
+                minimumPaymentType, frequency, frequencyType);
+        log.info("Attempting to create RESCHEDULE action for WC loan {} (expecting failure): minimumPayment={} {}, frequency={} {}", loanId,
+                minimumPayment, minimumPaymentType, frequency, frequencyType);
+
+        fail(() -> fineractFeignClient.workingCapitalLoanDelinquencyActions().createDelinquencyAction(loanId, request));
     }
 
     @Then("Admin fails to create WC delinquency reschedule action with minimumPayment {int} {word} and frequency {int} {word} with error containing {string}")

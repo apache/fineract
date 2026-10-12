@@ -81,9 +81,6 @@ public class RepaymentPeriod {
     @Getter
     @Setter
     private boolean interestPaymentGrace = false;
-    @Getter
-    @Setter
-    private boolean principalPaymentGrace = false;
 
     @Setter
     private Money totalDisbursedAmount;
@@ -165,7 +162,6 @@ public class RepaymentPeriod {
         newRepaymentPeriod.setTotalCapitalizedIncomeAmount(repaymentPeriod.getTotalCapitalizedIncomeAmount());
         newRepaymentPeriod.setInterestMovedUpward(repaymentPeriod.isInterestMovedUpward());
         newRepaymentPeriod.setInterestPaymentGrace(repaymentPeriod.isInterestPaymentGrace());
-        newRepaymentPeriod.setPrincipalPaymentGrace(repaymentPeriod.isPrincipalPaymentGrace());
         newRepaymentPeriod.setCurrency(repaymentPeriod.getCurrency());
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.getInterestPeriods()) {
@@ -189,7 +185,6 @@ public class RepaymentPeriod {
         newRepaymentPeriod.setTotalCapitalizedIncomeAmount(repaymentPeriod.getTotalCapitalizedIncomeAmount());
         newRepaymentPeriod.setInterestMovedUpward(repaymentPeriod.isInterestMovedUpward());
         newRepaymentPeriod.setInterestPaymentGrace(repaymentPeriod.isInterestPaymentGrace());
-        newRepaymentPeriod.setPrincipalPaymentGrace(repaymentPeriod.isPrincipalPaymentGrace());
         newRepaymentPeriod.setCurrency(repaymentPeriod.getCurrency());
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.getInterestPeriods()) {
@@ -237,48 +232,21 @@ public class RepaymentPeriod {
         return calculatedDueInterestCalculation.get();
     }
 
-    /**
-     * Day-prorated fixed interest, where the elapsed part of the period is taken from the interest periods this period
-     * currently holds. Suitable for a model whose interest periods have already been truncated to the date of interest.
-     */
     public Money calculateFixedInterestTillDate() {
-        if (getFixedInterest().isZero()) {
-            return getZero();
+        Money calculatedFixedInterest = getZero();
+        if (!getFixedInterest().isZero()) {
+            long length = DateUtils.getDifferenceInDays(getFromDate(), getDueDate());
+            if (length == 0 || getInterestPeriods() == null || getInterestPeriods().isEmpty()) {
+                // if the repayment period length is zero. return reAgedInterest.
+                calculatedFixedInterest = getFixedInterest();
+            } else {
+                long interestCalculationLength = DateUtils.getDifferenceInDays(getInterestPeriods().getFirst().getFromDate(),
+                        getInterestPeriods().getLast().getDueDate());
+                calculatedFixedInterest = Money.of(getZero().getCurrencyData(), BigDecimal.valueOf(interestCalculationLength)
+                        .divide(BigDecimal.valueOf(length), getMc()).multiply(getFixedInterest().getAmount(), getMc()));
+            }
         }
-        if (getInterestPeriods() == null || getInterestPeriods().isEmpty()) {
-            return getFixedInterest();
-        }
-        return prorateFixedInterest(
-                DateUtils.getDifferenceInDays(getInterestPeriods().getFirst().getFromDate(), getInterestPeriods().getLast().getDueDate()));
-    }
-
-    /**
-     * Day-prorated fixed interest as of the given date, for a model whose interest periods cannot be relied on to mark
-     * the elapsed part of the period. Shares its arithmetic with {@link #calculateFixedInterestTillDate()} so that the
-     * two cannot drift apart: a period that has not started yet yields nothing, one already at or past its due date
-     * yields the full fixed interest, and anything in between is prorated by elapsed days.
-     */
-    public Money calculateFixedInterestTillDate(LocalDate targetDate) {
-        if (getFixedInterest().isZero()) {
-            return getZero();
-        }
-        return prorateFixedInterest(DateUtils.getDifferenceInDays(getFromDate(), targetDate));
-    }
-
-    private Money prorateFixedInterest(final long elapsedDays) {
-        final long length = DateUtils.getDifferenceInDays(getFromDate(), getDueDate());
-        if (length == 0) {
-            // if the repayment period length is zero. return reAgedInterest.
-            return getFixedInterest();
-        }
-        if (elapsedDays <= 0) {
-            return getZero();
-        }
-        if (elapsedDays >= length) {
-            return getFixedInterest();
-        }
-        return Money.of(getZero().getCurrencyData(), BigDecimal.valueOf(elapsedDays).divide(BigDecimal.valueOf(length), getMc())
-                .multiply(getFixedInterest().getAmount(), getMc()));
+        return calculatedFixedInterest;
     }
 
     public Money calculateCalculatedDueInterest() {

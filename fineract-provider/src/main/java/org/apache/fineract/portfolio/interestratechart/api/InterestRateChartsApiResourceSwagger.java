@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.interestratechart.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -62,9 +61,7 @@ final class InterestRateChartsApiResourceSwagger {
             @Schema(example = "1")
             public Integer fromPeriod;
             @Schema(example = "6")
-            public Integer toPeriod;
-            @Schema(example = "4.5")
-            public BigDecimal annualInterestRate;
+            public Integer annualInterestRate;
             public GetInterestRateChartsCurrency currency;
         }
 

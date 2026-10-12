@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -40,10 +39,6 @@ public interface NonPagedListingApi {
 
     @RequestLine("GET /v1/centers?limit=-1&orderBy=id&sortOrder=asc")
     List<GetCentersPageItems> listCentersOrdered();
-
-    @RequestLine("GET /v1/centers?officeId={officeId}&staffId={staffId}&meetingDate={meetingDate}&dateFormat=yyyy-MM-dd&locale=en")
-    List<JsonNode> listCentersByMeetingDate(@Param("officeId") Long officeId, @Param("staffId") Long staffId,
-            @Param("meetingDate") String meetingDate);
 
     @RequestLine("GET /v1/groups?officeId={officeId}&orphansOnly=true")
     List<GetGroupsPageItems> listOrphanGroups(@Param("officeId") Long officeId);

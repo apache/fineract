@@ -23,7 +23,6 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.portfolio.client.data.ClientAddressRequest;
 
 /**
@@ -124,9 +123,6 @@ final class ClientsApiResourceSwagger {
         public Set<GetClientsOfficeOptions> officeOptions;
         public Set<GetClientsStaffOptions> staffOptions;
         public Set<GetClientsSavingProductOptions> savingProductOptions;
-        public List<CodeValueData> genderOptions;
-        public List<CodeValueData> clientTypeOptions;
-        public List<CodeValueData> clientClassificationOptions;
         public Set<GetClientsDataTables> datatables;
     }
 
@@ -229,20 +225,6 @@ final class ClientsApiResourceSwagger {
             public Long externalId;
         }
 
-        static final class GetClientsClientIdNonPersonDetails {
-
-            private GetClientsClientIdNonPersonDetails() {}
-
-            public CodeValueData constitution;
-            @Schema(example = "INC-12345")
-            public String incorpNumber;
-            @Schema(example = "[2030, 1, 31]")
-            public LocalDate incorpValidityTillDate;
-            public CodeValueData mainBusinessLine;
-            @Schema(example = "Wholesale trader")
-            public String remarks;
-        }
-
         @Schema(example = "27")
         public Long id;
         @Schema(example = "000000027")
@@ -275,7 +257,6 @@ final class ClientsApiResourceSwagger {
         public String externalId;
         @Schema(example = "1")
         public Long staffId;
-        public GetClientsClientIdNonPersonDetails clientNonPersonDetails;
     }
 
     @Schema(description = "PostClientsRequest")
@@ -318,14 +299,6 @@ final class ClientsApiResourceSwagger {
             public Boolean isActive;
         }
 
-        static final class PostClientsNonPersonDetails {
-
-            private PostClientsNonPersonDetails() {}
-
-            @Schema(example = "17")
-            public Long constitutionId;
-        }
-
         @Schema(example = "1")
         public Long officeId;
         @Schema(example = "1")
@@ -362,7 +335,6 @@ final class ClientsApiResourceSwagger {
         public List<ClientAddressRequest> address;
         @Schema(example = "test@test.com")
         public String emailAddress;
-        public PostClientsNonPersonDetails clientNonPersonDetails;
     }
 
     @Schema(description = "PostClientsResponse")
@@ -395,8 +367,6 @@ final class ClientsApiResourceSwagger {
         public String firstname;
         @Schema(example = "Client_LastName")
         public String lastname;
-        @Schema(example = "+353851239876")
-        public String mobileNo;
     }
 
     @Schema(description = "PutClientsClientIdResponse")
@@ -498,27 +468,33 @@ final class ClientsApiResourceSwagger {
         public LocalDate proposedTransferDate;
     }
 
-    @Schema(description = "GetObligeeData")
-    public static final class GetObligeeData {
+    @Schema(description = "GetClientObligeeDetailsResponse")
+    public static final class GetClientObligeeDetailsResponse {
 
-        private GetObligeeData() {}
+        static final class GetObligeeData {
 
-        @Schema(example = "John")
-        public String firstName;
-        @Schema(example = "Doe")
-        public String lastName;
-        @Schema(example = "John Doe")
-        public String displayName;
-        @Schema(example = "00000002")
-        public String accountNumber;
-        @Schema(example = "12000.00")
-        public Double loanAmount;
-        @Schema(example = "100.00")
-        public Double guaranteeAmount;
-        @Schema(example = "10000.00")
-        public Double amountReleased;
-        @Schema(example = "1000.00")
-        public Double amountTransferred;
+            private GetObligeeData() {}
+
+            @Schema(example = "John")
+            public String firstName;
+            @Schema(example = "Doe")
+            public String lastName;
+            @Schema(example = "John Doe")
+            public String displayName;
+            @Schema(example = "00000002")
+            public String accountNumber;
+            @Schema(example = "12000.00")
+            public Double loanAmount;
+            @Schema(example = "100.00")
+            public Double guaranteeAmount;
+            @Schema(example = "10000.00")
+            public Double amountReleased;
+            @Schema(example = "1000.00")
+            public Double amountTransferred;
+
+        }
+
+        public Set<GetObligeeData> obligees;
     }
 
     @Schema(description = "GetClientsClientIdAccountsResponse")

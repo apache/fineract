@@ -80,20 +80,14 @@ public interface WorkingCapitalLoanMapper {
     @Mapping(target = "breachGraceDays", source = "loanProductRelatedDetails.breachGraceDays")
     @Mapping(target = "breachStartType", source = "loanProductRelatedDetails", qualifiedByName = "breachStartTypeData")
     @Mapping(target = "breachStartDate", ignore = true)
-    @Mapping(target = "breachEffectiveStartDate", ignore = true)
     @Mapping(target = "delinquencyStartDate", ignore = true)
-    @Mapping(target = "delinquencyEffectiveStartDate", ignore = true)
     @Mapping(target = "delinquent", ignore = true)
     @Mapping(target = "numberOfRepayments", ignore = true)
     @Mapping(target = "periodPaymentAmount", ignore = true)
+    @Mapping(target = "dailyEir", ignore = true)
     @Mapping(target = "calculatedAnnualEir", ignore = true)
-    @Mapping(target = "periodPaymentRateHistory", ignore = true)
-    @Mapping(target = "effectivePaymentRate", ignore = true)
     @Mapping(target = "summary", source = ".", qualifiedByName = "toSummaryData")
     @Mapping(target = "totalPaymentVolume", source = "totalPaymentVolume")
-    @Mapping(target = "annualEir", source = "loanProductRelatedDetails.annualEir")
-    @Mapping(target = "paymentAmount", source = "loanProductRelatedDetails.paymentAmount")
-    @Mapping(target = "paymentAmountCalculationStrategy", source = "loanProductRelatedDetails", qualifiedByName = "paymentAmountCalculationStrategyData")
     @Mapping(target = "principal", source = "loanProductRelatedDetails.principal")
     @Mapping(target = "amortizationType", source = "loanProductRelatedDetails", qualifiedByName = "amortizationTypeData")
     @Mapping(target = "npvDayCount", source = "loanProductRelatedDetails.npvDayCount")
@@ -152,13 +146,6 @@ public interface WorkingCapitalLoanMapper {
                 : null;
     }
 
-    @Named("paymentAmountCalculationStrategyData")
-    default StringEnumOptionData paymentAmountCalculationStrategyData(final WorkingCapitalLoanProductRelatedDetails detail) {
-        return (detail != null && detail.getPaymentAmountCalculationStrategy() != null)
-                ? detail.getPaymentAmountCalculationStrategy().getValueAsStringEnumOptionData()
-                : null;
-    }
-
     @Named("installmentLevelDelinquencyEnabled")
     default Boolean installmentLevelDelinquencyEnabled(final WorkingCapitalLoanProductRelatedDetails detail) {
         return detail != null && detail.getDelinquencyBucket() != null;
@@ -206,7 +193,6 @@ public interface WorkingCapitalLoanMapper {
             timelineData.setChargedOffByLastname(loan.getChargedOffBy().getLastname());
             timelineData.setChargedOffOnDate(loan.getChargedOffOnDate());
         }
-        timelineData.setOverpaidOnDate(loan.getOverpaidOnDate());
         return timelineData;
     }
 }

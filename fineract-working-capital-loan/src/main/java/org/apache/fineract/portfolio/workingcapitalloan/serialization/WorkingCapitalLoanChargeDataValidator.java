@@ -33,7 +33,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
-import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -76,23 +75,6 @@ public class WorkingCapitalLoanChargeDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    /**
-     * An amount is rejected as an unsupported parameter rather than silently ignored - that is what makes "no partial
-     * waiver option" enforceable.
-     */
-    public void validateChargeWaiverRequest(final String json) {
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
-
-        final Set<String> allowedParameters = new HashSet<>(
-                Arrays.asList(WorkingCapitalLoanChargeConstants.externalIdParamName, WorkingCapitalLoanChargeConstants.localeParamName,
-                        WorkingCapitalLoanChargeConstants.dateFormatParamName, WorkingCapitalLoanChargeConstants.noteParamName));
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromJsonHelper.checkForUnsupportedParameters(typeOfMap, json, allowedParameters);
-    }
-
     public void validateCreateLoanCharge(final String json) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
@@ -129,15 +111,14 @@ public class WorkingCapitalLoanChargeDataValidator {
     }
 
     /**
-     * The WC add-charge path never checks {@code chargeAppliesTo}, so this time-type guard is also what stops a
-     * term-loan charge product from being attached to a WC account; removing it requires adding that check instead.
+     * Validates a specified-due-date charge against the target loan: the due date is mandatory, cannot fall in the past
+     * and the loan must be active, closed (obligations met) or overpaid so a charge can be raised after the loan
+     * matured. Non specified-due-date charges carry no due date and are unaffected.
      */
     public void validateCreateLoanChargeAgainstLoan(final LoanStatus loanStatus, final ChargeTimeType chargeTimeType,
             final LocalDate dueDate, final LocalDate businessDate) {
-        if (chargeTimeType == null || !ChargeTimeType.validWorkingCapitalLoanAccount().contains(chargeTimeType)) {
-            final String chargeTimeCode = chargeTimeType == null ? null : chargeTimeType.getCode();
-            throw new GeneralPlatformDomainRuleException("error.msg.wc.loan.charge.time.type.not.supported",
-                    "Charge time type " + chargeTimeType + " is not supported on a Working Capital Loan.", chargeTimeCode);
+        if (chargeTimeType != ChargeTimeType.SPECIFIED_DUE_DATE) {
+            return;
         }
         if (dueDate == null) {
             throw new PlatformApiDataValidationException("field.is.mandatory", "Field is mandatory",

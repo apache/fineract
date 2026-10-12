@@ -18,117 +18,173 @@
  */
 package org.apache.fineract.integrationtests;
 
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
-import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.DeleteSavingsAccountsAccountIdResponse;
+import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
+import org.apache.fineract.client.models.PostSavingsAccountsRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.client.models.PutSavingsAccountsAccountIdRequest;
+import org.apache.fineract.client.models.PutSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
-import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
-import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
-import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
-import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.BeforeAll;
+import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import retrofit2.Response;
 
-/**
- * The eight tests are one ordered chain over a single account, so this cannot extend {@code FeignSavingsTestBase}:
- * {@code FeignSavingsLifecycleExtension} rejects every submitted account after each test, which would take the account
- * away before the next test could act on it. The chain deletes the account itself, so nothing is left behind.
- */
-public class SavingsAccountsExternalIdTest extends FeignIntegrationTest {
+@ExtendWith({ SavingsTestLifecycleExtension.class })
+public class SavingsAccountsExternalIdTest extends IntegrationTest {
 
-    private static FeignSavingsHelper savingsHelper;
-    private static FeignSavingsProductHelper savingsProductHelper;
-    private static FeignClientHelper clientHelper;
-
-    @BeforeAll
-    public static void setupHelpers() {
-        FineractFeignClient client = FineractFeignClientHelper.getFineractFeignClient();
-        savingsHelper = new FeignSavingsHelper(client);
-        savingsProductHelper = new FeignSavingsProductHelper(client);
-        clientHelper = new FeignClientHelper(client);
-    }
-
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountsExternalIdTest.class);
     public static final String EXTERNAL_ID = UUID.randomUUID().toString();
-    private static final BigDecimal UPDATED_INTEREST_RATE = BigDecimal.valueOf(5.999);
-
-    private final String formattedDate = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
+    private final String dateFormat = "dd MMMM yyyy";
+    private final String locale = "en";
+    private final String formattedDate = Utils.getLocalDateOfTenant().format(DateTimeFormatter.ofPattern(dateFormat));
 
     @Test
     @Order(1)
     void submitSavingsAccountsApplication() {
-        Long clientId = clientHelper.createClient();
+        LOG.info("------------------------------ CREATING NEW SAVINGS ACCOUNT APPLICATION ---------------------------------------");
+        PostSavingsAccountsRequest request = new PostSavingsAccountsRequest();
+        final PostClientsResponse client = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        request.setClientId(client.getClientId());
         // create a dedicated savings product instead of assuming product id 1 was created by another test class in the
         // same shard: shard membership is round-robin over every test class in the repository, so it changes whenever a
         // test is added anywhere
-        Long productId = savingsProductHelper
-                .createSavingsProduct(SavingsRequestBuilders.savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY,
-                        SavingsTestData.InterestPostingPeriodType.QUARTERLY, SavingsTestData.InterestCalculationType.DAILY_BALANCE))
-                .getResourceId();
+        final RequestSpecification requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily()
+                .withInterestPostingPeriodTypeAsQuarterly().withInterestCalculationPeriodTypeAsDailyBalance().build();
+        final long productId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+        request.setProductId(productId);
+        request.setLocale(locale);
+        request.setDateFormat(dateFormat);
+        request.setSubmittedOnDate(formattedDate);
+        request.setExternalId(EXTERNAL_ID);
 
-        Long savingsId = savingsHelper
-                .submitApplication(
-                        SavingsRequestBuilders.submitSavingsApplication(clientId, productId, formattedDate).externalId(EXTERNAL_ID))
-                .getSavingsId();
+        Response<PostSavingsAccountsResponse> response = okR(fineractClient().savingsAccounts.submitSavingsApplication(request));
 
-        assertThat(savingsId).isNotNull();
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.body()).isNotNull();
     }
 
     @Test
     @Order(2)
     void updateSavingsAccountWithExternalId() {
-        PutSavingsAccountsAccountIdRequest request = new PutSavingsAccountsAccountIdRequest()//
-                .locale(SavingsTestData.LOCALE)//
-                .nominalAnnualInterestRate(UPDATED_INTEREST_RATE.doubleValue());
+        LOG.info("------------------------------ UPDATING SAVINGS ACCOUNT ---------------------------------------");
+        PutSavingsAccountsAccountIdRequest request = new PutSavingsAccountsAccountIdRequest();
+        request.setLocale(locale);
+        request.setNominalAnnualInterestRate(5.999);
+        Response<PutSavingsAccountsAccountIdResponse> response = okR(
+                fineractClient().savingsAccounts.updateSavingsAccountByExternalId(EXTERNAL_ID, request, ""));
 
-        assertThat(savingsHelper.updateSavingsByExternalId(EXTERNAL_ID, request)).isNotNull();
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.body()).isNotNull();
     }
 
     @Test
     @Order(3)
     void approveSavingsAccount() {
-        assertThat(savingsHelper.approveSavingsByExternalId(EXTERNAL_ID, formattedDate)).isNotNull();
+        LOG.info("------------------------------ APPROVING SAVINGS ACCOUNT ---------------------------------------");
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        request.dateFormat(dateFormat);
+        request.setLocale(locale);
+        request.setApprovedOnDate(formattedDate);
+        Response<PostSavingsAccountsAccountIdResponse> response = okR(
+                fineractClient().savingsAccounts.handleCommandsSavingsAccountByExternalId(EXTERNAL_ID, request, "approve"));
+
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.body()).isNotNull();
     }
 
     @Test
     @Order(4)
     void retrieveSavingsAccountWithExternalId() {
-        SavingsAccountData savingsAccount = savingsHelper.getSavingsDetailsByExternalId(EXTERNAL_ID, "all");
+        LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT ---------------------------------------");
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        request.dateFormat(dateFormat);
+        request.setLocale(locale);
+        request.setActivatedOnDate(formattedDate);
+        Response<SavingsAccountData> response = okR(
+                fineractClient().savingsAccounts.retrieveSavingsAccountByExternalId(EXTERNAL_ID, false, null, "all"));
 
-        assertThat(savingsAccount).isNotNull();
-        assertThat(savingsAccount.getStatus().getCode()).isEqualTo("savingsAccountStatusType.approved");
-        assertThat(savingsAccount.getNominalAnnualInterestRate()).isEqualByComparingTo(UPDATED_INTEREST_RATE);
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.body()).isNotNull();
+        assertThat(response.body().getStatus().getCode()).isEqualTo("savingsAccountStatusType.approved");
+        assertThat(response.body().getNominalAnnualInterestRate()).isEqualByComparingTo(BigDecimal.valueOf(5.999));
     }
 
     @Test
     @Order(5)
     void undoApprovalSavingsAccountWithExternalId() {
-        assertThat(savingsHelper.undoApprovalByExternalId(EXTERNAL_ID)).isNotNull();
+        LOG.info("------------------------------ UNDO APPROVAL SAVINGS ACCOUNT ---------------------------------------");
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        Response<PostSavingsAccountsAccountIdResponse> response = okR(
+                fineractClient().savingsAccounts.handleCommandsSavingsAccountByExternalId(EXTERNAL_ID, request, "undoapproval"));
+
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.body()).isNotNull();
     }
 
     @Test
     @Order(6)
     void retrieveSavingsAccountWithExternalIdSecondTime() {
-        SavingsAccountData savingsAccount = savingsHelper.getSavingsDetailsByExternalId(EXTERNAL_ID, "all");
+        LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT - SECOND TIME ---------------------------------------");
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        request.dateFormat(dateFormat);
+        request.setLocale(locale);
+        request.setActivatedOnDate(formattedDate);
+        Response<SavingsAccountData> response = okR(
+                fineractClient().savingsAccounts.retrieveSavingsAccountByExternalId(EXTERNAL_ID, false, null, "all"));
 
-        assertThat(savingsAccount).isNotNull();
-        assertThat(savingsAccount.getStatus().getCode()).isEqualTo("savingsAccountStatusType.submitted.and.pending.approval");
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.body()).isNotNull();
+        assertThat(response.body().getStatus().getCode()).isEqualTo("savingsAccountStatusType.submitted.and.pending.approval");
     }
 
     @Test
     @Order(7)
     void deleteSavingsAccountWithExternalId() {
-        assertThat(savingsHelper.deleteSavingsByExternalId(EXTERNAL_ID)).isNotNull();
+        LOG.info("------------------------------ DELETING SAVINGS ACCOUNT ---------------------------------------");
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        request.dateFormat(dateFormat);
+        request.setLocale(locale);
+        request.setActivatedOnDate(formattedDate);
+        Response<DeleteSavingsAccountsAccountIdResponse> response = okR(
+                fineractClient().savingsAccounts.deleteSavingsAccountByExternalId(EXTERNAL_ID));
+
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.body()).isNotNull();
     }
 
     @Test
     @Order(8)
     void retrieveSavingsAccountWithExternalIdThirdTime() {
-        assertThat(savingsHelper.getSavingsDetailsByExternalIdExpectingError(EXTERNAL_ID).getStatus()).isEqualTo(404);
+        LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT - THIRD TIME ---------------------------------------");
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        request.dateFormat(dateFormat);
+        request.setLocale(locale);
+        request.setActivatedOnDate(formattedDate);
+        Response<SavingsAccountData> response = Calls
+                .executeU(fineractClient().savingsAccounts.retrieveSavingsAccountByExternalId(EXTERNAL_ID, false, null, "all"));
+
+        assertThat(response.raw().code()).isEqualTo(404);
     }
 }

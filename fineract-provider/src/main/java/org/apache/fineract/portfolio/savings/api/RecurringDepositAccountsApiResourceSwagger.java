@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -85,8 +84,6 @@ final class RecurringDepositAccountsApiResourceSwagger {
             public Boolean transferInProgress;
             @Schema(example = "false")
             public Boolean transferOnHold;
-            @Schema(example = "false")
-            public Boolean matured;
         }
 
         static final class GetRecurringDepositAccountsTimeline {
@@ -177,13 +174,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
             public GetRecurringDepositAccountsCurrency currency;
             @Schema(example = "0")
-            public BigDecimal accountBalance;
-            @Schema(example = "5000")
-            public BigDecimal totalDeposits;
-            @Schema(example = "140.25")
-            public BigDecimal totalInterestPosted;
-            @Schema(example = "14.02")
-            public BigDecimal totalWithholdTax;
+            public Float accountBalance;
         }
 
         static final class GetRecurringDepositAccountsMinDepositTermType {
@@ -257,16 +248,16 @@ final class RecurringDepositAccountsApiResourceSwagger {
         public GetRecurringDepositAccountsInterestCalculationDaysInYearType interestCalculationDaysInYearType;
         public GetRecurringDepositAccountsSummary summary;
         @Schema(example = "1150")
-        public BigDecimal depositAmount;
+        public Float depositAmount;
         @Schema(example = "252.59")
-        public BigDecimal maturityAmount;
+        public Float maturityAmount;
         @Schema(example = "[2014, 4, 3]")
         public LocalDate maturityDate;
         @Schema(example = "100")
-        public BigDecimal mandatoryRecommendedDepositAmount;
+        public Integer recurringDepositAmount;
         @Schema(example = "1")
-        public Integer recurringFrequency;
-        public GetRecurringDepositAccountsRecurringDepositFrequencyType recurringFrequencyType;
+        public Integer recurringDepositFrequency;
+        public GetRecurringDepositAccountsRecurringDepositFrequencyType recurringDepositFrequencyType;
         @Schema(example = "false")
         public Boolean preClosurePenalApplicable;
         @Schema(example = "3")
@@ -293,8 +284,6 @@ final class RecurringDepositAccountsApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @Schema(example = "dd MMMM")
-        public String monthDayFormat;
         @Schema(example = "02 June 2014")
         public String submittedOnDate;
         @Schema(example = "20")
@@ -302,7 +291,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
         @Schema(example = "1")
         public Integer depositPeriodFrequencyId;
         @Schema(example = "10000")
-        public BigDecimal depositAmount;
+        public Float depositAmount;
         @Schema(example = "false")
         public Boolean isCalendarInherited;
         @Schema(example = "2")
@@ -310,39 +299,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
         @Schema(example = "1")
         public Integer recurringFrequencyType;
         @Schema(example = "2000")
-        public BigDecimal mandatoryRecommendedDepositAmount;
-        @Schema(example = "02 June 2014")
-        public String expectedFirstDepositOnDate;
-        @Schema(example = "1")
-        public Integer interestCompoundingPeriodType;
-        @Schema(example = "4")
-        public Integer interestPostingPeriodType;
-        @Schema(example = "1")
-        public Integer interestCalculationType;
-        @Schema(example = "365")
-        public Integer interestCalculationDaysInYearType;
-        @Schema(example = "1")
-        public Integer lockinPeriodFrequency;
-        @Schema(example = "2")
-        public Integer lockinPeriodFrequencyType;
-        @Schema(example = "true")
-        public Boolean preClosurePenalApplicable;
-        @Schema(example = "1.75")
-        public BigDecimal preClosurePenalInterest;
-        @Schema(example = "1")
-        public Integer preClosurePenalInterestOnTypeId;
-        @Schema(example = "1")
-        public Integer minDepositTerm;
-        @Schema(example = "2")
-        public Integer minDepositTermTypeId;
-        @Schema(example = "5")
-        public Integer maxDepositTerm;
-        @Schema(example = "3")
-        public Integer maxDepositTermTypeId;
-        @Schema(example = "2")
-        public Integer inMultiplesOfDepositTerm;
-        @Schema(example = "2")
-        public Integer inMultiplesOfDepositTermTypeId;
+        public Long mandatoryRecommendedDepositAmount;
     }
 
     @Schema(description = "PostRecurringDepositAccountsResponse")
@@ -462,29 +419,21 @@ final class RecurringDepositAccountsApiResourceSwagger {
         public GetRecurringDepositAccountsResponse.GetRecurringDepositAccountsInterestPostingPeriodType interestPostingPeriodType;
         public GetRecurringDepositAccountsResponse.GetRecurringDepositAccountsInterestCalculationType interestCalculationType;
         public GetRecurringDepositAccountsResponse.GetRecurringDepositAccountsInterestCalculationDaysInYearType interestCalculationDaysInYearType;
-        @Schema(example = "5")
-        public BigDecimal nominalAnnualInterestRate;
         @Schema(example = "false")
         public Boolean preClosurePenalApplicable;
-        @Schema(example = "1.75")
-        public BigDecimal preClosurePenalInterest;
         @Schema(example = "3")
         public Integer minDepositTerm;
         @Schema(example = "4")
         public Integer maxDepositTerm;
         public GetRecurringDepositAccountsResponse.GetRecurringDepositAccountsMinDepositTermType minDepositTermType;
         public GetRecurringDepositAccountsResponse.GetRecurringDepositAccountsMaxDepositTermType maxDepositTermType;
-        @Schema(example = "1150")
-        public BigDecimal depositAmount;
-        @Schema(example = "252.59")
-        public BigDecimal maturityAmount;
         @Schema(example = "100")
-        public BigDecimal mandatoryRecommendedDepositAmount;
+        public Integer recurringDepositAmount;
         @Schema(example = "1")
-        public Integer recurringFrequency;
+        public Integer recurringDepositFrequency;
         @Schema(example = "[2014, 4, 2]")
         public LocalDate expectedFirstDepositOnDate;
-        public GetRecurringDepositAccountsResponse.GetRecurringDepositAccountsRecurringDepositFrequencyType recurringFrequencyType;
+        public GetRecurringDepositAccountsResponse.GetRecurringDepositAccountsRecurringDepositFrequencyType recurringDepositFrequencyType;
         @Schema(example = "6")
         public Integer depositPeriod;
         public GetRecurringDepositAccountsResponse.GetRecurringDepositAccountsDepositPeriodFrequency depositPeriodFrequency;
@@ -497,64 +446,10 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         private PutRecurringDepositAccountsAccountIdRequest() {}
 
-        @Schema(example = "1")
-        public Long clientId;
-        @Schema(example = "1")
-        public Long productId;
         @Schema(example = "en")
         public String locale;
-        @Schema(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @Schema(example = "dd MMMM")
-        public String monthDayFormat;
-        @Schema(example = "02 June 2014")
-        public String submittedOnDate;
-        @Schema(example = "20")
-        public Integer depositPeriod;
-        @Schema(example = "1")
-        public Integer depositPeriodFrequencyId;
-        @Schema(example = "10000")
-        public BigDecimal depositAmount;
-        @Schema(example = "false")
-        public Boolean isCalendarInherited;
-        @Schema(example = "2")
-        public Integer recurringFrequency;
-        @Schema(example = "1")
-        public Integer recurringFrequencyType;
-        @Schema(example = "2000")
-        public BigDecimal mandatoryRecommendedDepositAmount;
-        @Schema(example = "02 June 2014")
-        public String expectedFirstDepositOnDate;
-        @Schema(example = "1")
-        public Integer interestCompoundingPeriodType;
-        @Schema(example = "4")
-        public Integer interestPostingPeriodType;
-        @Schema(example = "1")
-        public Integer interestCalculationType;
-        @Schema(example = "365")
-        public Integer interestCalculationDaysInYearType;
-        @Schema(example = "1")
-        public Integer lockinPeriodFrequency;
-        @Schema(example = "2")
-        public Integer lockinPeriodFrequencyType;
-        @Schema(example = "true")
-        public Boolean preClosurePenalApplicable;
-        @Schema(example = "1.75")
-        public BigDecimal preClosurePenalInterest;
-        @Schema(example = "1")
-        public Integer preClosurePenalInterestOnTypeId;
-        @Schema(example = "1")
-        public Integer minDepositTerm;
-        @Schema(example = "2")
-        public Integer minDepositTermTypeId;
-        @Schema(example = "5")
-        public Integer maxDepositTerm;
-        @Schema(example = "3")
-        public Integer maxDepositTermTypeId;
-        @Schema(example = "2")
-        public Integer inMultiplesOfDepositTerm;
-        @Schema(example = "2")
-        public Integer inMultiplesOfDepositTermTypeId;
+        @Schema(example = "6000")
+        public Integer depositAmount;
     }
 
     @Schema(description = "PutRecurringDepositAccountsAccountIdResponse")
@@ -567,11 +462,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
             private PutRecurringDepositAccountsChanges() {}
 
             @Schema(example = "6000")
-            public BigDecimal depositAmount;
+            public Integer depositAmount;
             @Schema(example = "en")
             public String locale;
-            @Schema(example = "02 June 2014")
-            public String submittedOnDate;
         }
 
         @Schema(example = "2")
@@ -589,29 +482,6 @@ final class RecurringDepositAccountsApiResourceSwagger {
     public static final class PostRecurringDepositAccountsAccountIdRequest {
 
         private PostRecurringDepositAccountsAccountIdRequest() {}
-
-        @Schema(example = "en")
-        public String locale;
-        @Schema(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @Schema(example = "02 June 2014", description = "command=approve")
-        public String approvedOnDate;
-        @Schema(example = "02 June 2014", description = "command=activate")
-        public String activatedOnDate;
-        @Schema(example = "02 June 2014", description = "command=reject")
-        public String rejectedOnDate;
-        @Schema(example = "02 June 2014", description = "command=withdrawnByApplicant")
-        public String withdrawnOnDate;
-        @Schema(example = "02 June 2014", description = "command=prematureClose, calculatePrematureAmount")
-        public String closedOnDate;
-        @Schema(example = "100", description = "command=prematureClose")
-        public Integer onAccountClosureId;
-        @Schema(example = "1", description = "command=prematureClose, transfer to savings")
-        public Long toSavingsAccountId;
-        @Schema(example = "Transfer to savings", description = "command=prematureClose, transfer to savings")
-        public String transferDescription;
-        @Schema(example = "Approved by the branch manager")
-        public String note;
     }
 
     @Schema(description = "PostRecurringDepositAccountsAccountIdResponse")

@@ -21,6 +21,9 @@ package org.apache.fineract.integrationtests.common;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -28,15 +31,14 @@ import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.PostProvisioningCriteriaRequest;
 import org.apache.fineract.client.models.PostProvisioningCriteriaResponse;
 import org.apache.fineract.client.models.ProvisioningCategoryData;
-import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.provisioning.ProvisioningHelper;
 import org.apache.fineract.integrationtests.common.provisioning.ProvisioningTransactionHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -44,15 +46,20 @@ import org.junit.jupiter.api.Test;
  * (create-validation run on a body-less DELETE, a transient entity with a null id, and an in-use check querying a
  * non-existent table); these tests exercise both the success and the in-use-rejected paths end to end.
  */
-public class ProvisioningCategoryDeleteIntegrationTest extends FeignIntegrationTest {
+public class ProvisioningCategoryDeleteIntegrationTest {
 
-    private FeignAccountHelper accountHelper;
-    private FeignLoanHelper loanHelper;
+    private AccountHelper accountHelper;
+    private LoanTransactionHelper loanTransactionHelper;
 
-    @BeforeAll
+    @BeforeEach
     public void setup() {
-        this.accountHelper = new FeignAccountHelper(fineractClient());
-        this.loanHelper = new FeignLoanHelper(fineractClient());
+        Utils.initializeRESTAssured();
+        var requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec.header("Fineract-Platform-TenantId", "default");
+        var responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -83,10 +90,10 @@ public class ProvisioningCategoryDeleteIntegrationTest extends FeignIntegrationT
         assertNotNull(createResult.getResourceId());
         final Long categoryId = createResult.getResourceId();
 
-        final Long loanProductId = createLoanProduct();
+        final Integer loanProductId = createLoanProduct();
         assertNotNull(loanProductId);
         final List<Integer> loanProducts = new ArrayList<>();
-        loanProducts.add(loanProductId.intValue());
+        loanProducts.add(loanProductId);
         final Account liability = accountHelper.createLiabilityAccount();
         final Account expense = accountHelper.createExpenseAccount();
 
@@ -111,8 +118,8 @@ public class ProvisioningCategoryDeleteIntegrationTest extends FeignIntegrationT
         Assertions.assertEquals(categoryId, deleteResult.getResourceId());
     }
 
-    private Long createLoanProduct() {
-        return loanHelper.createLoanProduct(new LoanProductTestBuilder() //
+    private Integer createLoanProduct() {
+        final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("100000.00") //
                 .withNumberOfRepayments("4") //
                 .withRepaymentAfterEvery("1") //
@@ -123,6 +130,7 @@ public class ProvisioningCategoryDeleteIntegrationTest extends FeignIntegrationT
                 .withInterestTypeAsDecliningBalance() //
                 .withTranches(false) //
                 .withAccountingRuleAsNone() //
-                .buildRequest()).getResourceId();
+                .build(null);
+        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 }

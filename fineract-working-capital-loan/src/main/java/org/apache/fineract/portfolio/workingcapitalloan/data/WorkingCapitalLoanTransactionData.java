@@ -42,7 +42,6 @@ public class WorkingCapitalLoanTransactionData implements Serializable {
 
     private Long id;
     private Long wcLoanId;
-    private ExternalId externalLoanId;
     private CurrencyData currency;
     private LoanTransactionEnumData type;
     private LocalDate transactionDate;

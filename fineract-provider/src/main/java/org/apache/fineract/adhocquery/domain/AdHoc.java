@@ -77,7 +77,7 @@ public class AdHoc extends AbstractAuditableCustom {
         return new AdHoc().setName(StringUtils.defaultIfEmpty(name, null)).setQuery(StringUtils.defaultIfEmpty(query, null))
                 .setTableName(StringUtils.defaultIfEmpty(tableName, null)).setTableFields(StringUtils.defaultIfEmpty(tableFields, null))
                 .setEmail(StringUtils.defaultIfEmpty(email, null)).setReportRunFrequency(reportRunFrequency)
-                .setReportRunEvery(reportRunEvery).setActive(active);
+                .setReportRunEvery(reportRunEvery).setActive(false);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -127,11 +127,11 @@ public class AdHoc extends AbstractAuditableCustom {
             actualChanges.put(reportRunEvery, newValue);
             this.reportRunEvery = newValue;
         }
-        final String paramisActive = AdHocJsonInputParams.ACTIVE.getValue();
+        final String paramisActive = "active";
         if (command.isChangeInBooleanParameterNamed(paramisActive, this.active)) {
             final Boolean newValue = command.booleanObjectValueOfParameterNamed(paramisActive);
             actualChanges.put(paramisActive, newValue);
-            this.active = Boolean.TRUE.equals(newValue);
+            this.active = newValue;
         }
         return actualChanges;
     }

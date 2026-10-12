@@ -35,6 +35,14 @@ public class EventStepDef extends AbstractStepDef {
     @Autowired
     private EventAssertion eventAssertion;
 
+    @Then("{string} event has been raised for the loan")
+    public void assertEventRaisedForLoan(String eventType) {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+        Class<? extends Event> eventTypeClazz = resolveEventType(eventType);
+        eventAssertion.assertEventRaised(eventTypeClazz, loanId);
+    }
+
     @Then("No new event with type {string} has been raised for the loan")
     public void assertEventNotRaisedForLoan(String eventType) {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);

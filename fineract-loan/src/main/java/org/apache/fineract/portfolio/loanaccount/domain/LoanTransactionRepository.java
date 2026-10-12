@@ -28,7 +28,6 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.data.CumulativeIncomeFromIncomePosting;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionOwnerTaggingData;
 import org.apache.fineract.portfolio.loanaccount.data.TransactionPortionsForForeclosure;
 import org.apache.fineract.portfolio.loanaccount.data.UnpaidChargeData;
 import org.springframework.data.domain.Pageable;
@@ -74,10 +73,6 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
 
     @Query("SELECT lt.loan.id FROM LoanTransaction lt WHERE lt.id = :id")
     Optional<Long> findLoanIdById(@Param("id") Long id);
-
-    @Query("SELECT new org.apache.fineract.portfolio.loanaccount.data.LoanTransactionOwnerTaggingData("
-            + "lt.loan.id, lt.loan.loanProduct.id, lt.typeOf) FROM LoanTransaction lt WHERE lt.id = :id")
-    Optional<LoanTransactionOwnerTaggingData> findOwnerTaggingDataById(@Param("id") Long id);
 
     @Query("""
                 SELECT COALESCE(SUM(lt.unrecognizedIncomePortion), 0)
@@ -156,11 +151,11 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
     List<Long> findReversedTransactionIdsByLoan(@Param("loan") Loan loan);
 
     @Query("""
-            SELECT new org.apache.fineract.portfolio.loanaccount.data.TransactionPortionsForForeclosure(
-                lt.typeOf,
-                lt.interestPortion,
-                lt.feeChargesPortion,
-                lt.penaltyChargesPortion)
+            SELECT
+                lt.typeOf AS transactionType,
+                lt.interestPortion AS interestPortion,
+                lt.feeChargesPortion AS feeChargesPortion,
+                lt.penaltyChargesPortion AS penaltyChargesPortion
             FROM LoanTransaction lt
             WHERE lt.loan = :loan
                 AND lt.reversed = false

@@ -25,11 +25,10 @@ import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryData;
 import org.apache.fineract.portfolio.delinquency.data.LoanInstallmentDelinquencyTagData;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketType;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 public interface DelinquencyReadPlatformService {
 
@@ -38,8 +37,6 @@ public interface DelinquencyReadPlatformService {
     DelinquencyRangeData retrieveDelinquencyRange(Long delinquencyRangeId);
 
     List<DelinquencyBucketData> retrieveAllDelinquencyBuckets();
-
-    List<DelinquencyBucketData> retrieveDelinquencyBucketsByType(DelinquencyBucketType bucketType);
 
     DelinquencyBucketData retrieveDelinquencyBucket(Long delinquencyBucketId);
 

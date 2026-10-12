@@ -21,10 +21,11 @@ package org.apache.fineract.portfolio.savings.jobs.transferinteresttosavings;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
-import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -51,7 +52,8 @@ public class TransferInterestToSavingsConfig {
 
     @Bean
     public Job transferInterestToSavingsJob() {
-        return new JobBuilder(JobName.TRANSFER_INTEREST_TO_SAVINGS.name(), jobRepository).start(transferInterestToSavingsStep()).build();
+        return new JobBuilder(JobName.TRANSFER_INTEREST_TO_SAVINGS.name(), jobRepository).start(transferInterestToSavingsStep())
+                .incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

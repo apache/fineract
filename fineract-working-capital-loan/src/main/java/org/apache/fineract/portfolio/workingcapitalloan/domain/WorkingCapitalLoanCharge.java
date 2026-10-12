@@ -84,9 +84,6 @@ public class WorkingCapitalLoanCharge extends AbstractAuditableWithUTCDateTimeCu
     @Column(name = "amount_written_off", scale = 6, precision = 19, nullable = false)
     private BigDecimal amountWrittenOff = BigDecimal.ZERO;
 
-    @Column(name = "amount_waived", scale = 6, precision = 19, nullable = false)
-    private BigDecimal amountWaived = BigDecimal.ZERO;
-
     @Column(name = "is_penalty", nullable = false)
     private boolean penaltyCharge = false;
 
@@ -109,14 +106,14 @@ public class WorkingCapitalLoanCharge extends AbstractAuditableWithUTCDateTimeCu
 
         return WorkingCapitalLoanChargeData.builder().id(getId()).chargeId(getCharge().getId()).name(getCharge().getName())
                 .currency(getCharge().toData().getCurrency()).amount(amount).amountPaid(amountPaid).amountWrittenOff(amountWrittenOff)
-                .amountWaived(amountWaived).amountOutstanding(getAmountOutstanding()).chargeTimeType(chargeTimeTypeData)
-                .submittedOnDate(submittedOnDate).dueDate(dueDate).chargeCalculationType(chargeCalculationTypeData).penalty(penaltyCharge)
+                .amountOutstanding(getAmountOutstanding()).chargeTimeType(chargeTimeTypeData).submittedOnDate(submittedOnDate)
+                .dueDate(dueDate).chargeCalculationType(chargeCalculationTypeData).penalty(penaltyCharge)
                 .chargePaymentMode(chargePaymentModeData).paid(paid).loanId(loan.getId()).externalId(externalId)
                 .externalLoanId(loan.getExternalId()).build();
     }
 
     public BigDecimal getAmountOutstanding() {
-        return MathUtil.subtract(getAmount(), getAmountPaid(), getAmountWrittenOff(), getAmountWaived());
+        return MathUtil.subtract(getAmount(), getAmountPaid(), getAmountWrittenOff());
     }
 
     public static WorkingCapitalLoanCharge build(WorkingCapitalLoan loan, ExternalId externalId, Charge charge, BigDecimal amount,
@@ -136,7 +133,6 @@ public class WorkingCapitalLoanCharge extends AbstractAuditableWithUTCDateTimeCu
         res.setAmount(amount);
         res.setAmountPaid(BigDecimal.ZERO);
         res.setAmountWrittenOff(BigDecimal.ZERO);
-        res.setAmountWaived(BigDecimal.ZERO);
         return res;
     }
 }

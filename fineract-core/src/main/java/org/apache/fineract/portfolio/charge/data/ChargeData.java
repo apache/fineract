@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.charge.data;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.MonthDay;
@@ -65,7 +64,6 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
     private final EnumOptionData chargeAppliesTo;
     private final EnumOptionData chargeCalculationType;
     private final EnumOptionData chargePaymentMode;
-    @Schema(type = "string", example = "--03-04", description = "The recurring day the fee falls due, as an ISO-8601 month-day")
     private final MonthDay feeOnMonthDay;
     private final Integer feeInterval;
     private final BigDecimal minCap;

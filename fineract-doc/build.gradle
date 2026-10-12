@@ -38,11 +38,6 @@ plugins {
 apply plugin: 'org.asciidoctor.jvm.convert'
 apply plugin: 'org.asciidoctor.jvm.pdf'
 
-// Tasks marked incompatible make Gradle run that build without the configuration cache instead of failing.
-tasks.withType(org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask).configureEach {
-    notCompatibleWithConfigurationCache('asciidoctor-gradle-jvm 4.0.5 cannot serialize its asciidoctorj configuration')
-}
-
 // Configure resolution strategy for all configurations
 configurations.all {
     resolutionStrategy {
@@ -101,29 +96,29 @@ task copyDiagrams(type: Copy) {
 asciidoctor {
     languages 'en'
 
-    baseDir = 'src/docs'
+    baseDir 'src/docs'
     sourceDir 'src/docs'
     sources {
         include('index.adoc')
     }
-    outputDir = 'build/docs/html'
+    outputDir 'build/docs/html'
 
     logging.captureStandardError LogLevel.INFO
 
     dependsOn copyImages, copyDiagrams
 
-    dependsOn(':fineract-client:buildAsciidoc')
+    dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
 }
 
 asciidoctorPdf {
     languages 'en'
 
-    baseDir = 'src/docs'
+    baseDir 'src/docs'
     sourceDir 'src/docs'
     sources {
         include('index.adoc')
     }
-    outputDir = 'build/docs/pdf'
+    outputDir 'build/docs/pdf'
 
     logging.captureStandardError LogLevel.INFO
 
@@ -137,12 +132,11 @@ asciidoctorPdf {
     //     }
     // }
     // fontsDir "$projectDir/src/resources/fonts"
-    dependsOn(':fineract-client:buildAsciidoc')
+    dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
 }
 
 task doc(type: Zip) {
     dependsOn(asciidoctor, asciidoctorPdf)
-    def pdfName = "fineract-${project.version}.pdf".toString()
 
     into("fineract-${project.version}/html") {
         from("$buildDir/docs/html") {
@@ -155,7 +149,7 @@ task doc(type: Zip) {
             include "**/index.pdf"
             exclude "**/.asciidoctor"
             rename {
-                pdfName
+                "fineract-${project.version}.pdf"
             }
         }
     }

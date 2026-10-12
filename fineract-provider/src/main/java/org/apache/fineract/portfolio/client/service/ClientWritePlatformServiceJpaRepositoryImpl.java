@@ -157,7 +157,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            log.error("Error occurred.", throwable);
+            log.error("Error occured.", throwable);
             throw ErrorHandler.getMappable(dve, "error.msg.client.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
         }
@@ -749,7 +749,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        log.error("Error occurred.", dve);
+        log.error("Error occured.", dve);
     }
 
     @Transactional

@@ -189,7 +189,7 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
             msgCode += ".unknown.data.integrity.issue";
             msgArgs = new Object[] { dae };
         }
-        log.error("Error occurred.", dae);
+        log.error("Error occured.", dae);
         throw ErrorHandler.getMappable(dae, msgCode, msg, param, msgArgs);
     }
 }

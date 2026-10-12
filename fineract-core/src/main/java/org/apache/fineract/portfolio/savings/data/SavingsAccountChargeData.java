@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -44,7 +43,6 @@ public class SavingsAccountChargeData implements Serializable {
     private final String name;
     private final EnumOptionData chargeTimeType;
     private final LocalDate dueDate;
-    @Schema(type = "string", example = "--01-15", description = "The recurring day the fee falls due, as an ISO-8601 month-day")
     private final MonthDay feeOnMonthDay;
     private final Integer feeInterval;
     private final EnumOptionData chargeCalculationType;

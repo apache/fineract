@@ -118,8 +118,6 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
     @Mock
     private WorkingCapitalLoanAccountingProcessor accountingProcessor;
     @Mock
-    private WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
-    @Mock
     private BusinessEventNotifierService businessEventNotifierService;
     @Mock
     private WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
@@ -167,7 +165,6 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
         writeOffService.writeOff(LOAN_ID, command);
 
         verify(delinquencyRangeScheduleService).reprocessDelinquencySchedule(loan);
-        verify(discountFeeAmortizationService).processFinalDiscountFeeAmortization(any(), any());
         final List<BusinessEvent<?>> events = publishedEvents(3);
         assertThat(events.get(0)).isInstanceOf(WorkingCapitalLoanWriteOffTransactionBusinessEvent.class);
         assertThat(events.get(1)).isInstanceOf(WorkingCapitalLoanBalanceChangedBusinessEvent.class);
@@ -183,7 +180,6 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
         writeOffService.undoWriteOff(LOAN_ID, command);
 
         verify(delinquencyRangeScheduleService).reprocessDelinquencySchedule(loan);
-        verify(discountFeeAmortizationService).undoFinalDiscountFeeAmortization(any(), any());
         final List<BusinessEvent<?>> events = publishedEvents(3);
         assertThat(events.get(0)).isInstanceOf(WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent.class);
         assertThat(events.get(1)).isInstanceOf(WorkingCapitalLoanBalanceChangedBusinessEvent.class);

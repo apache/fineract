@@ -702,7 +702,6 @@ public class DatatableIntegrationTest extends IntegrationTest {
         assertEquals(datatableName, datatableUpdateResponse.getResourceIdentifier());
 
         GetDataTablesResponse dataTable = datatableHelper.getDataTableDetails(datatableName);
-        assertEquals(CLIENT_PERSON_SUBTYPE_NAME, dataTable.getEntitySubType());
         List<ResultsetColumnHeaderData> columnHeaders = dataTable.getColumnHeaderData();
         assertEquals(5, columnHeaders.size());
         ResultsetColumnHeaderData stringColumn = columnHeaders.get(1);

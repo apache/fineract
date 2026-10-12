@@ -54,21 +54,16 @@ public final class FinanicalFunctions {
         return payment;
     }
 
-    /**
-     * Returns the closest whole number of payments for the supplied payment amount.
-     */
     public static int nop(final double interestRateFraction, final double emiAmount, final double principal, final double futureValue,
             final boolean type) {
-        final double numberOfPayments;
+        double numberOfPayments = 0;
         if (interestRateFraction == 0) {
-            numberOfPayments = -1 * (futureValue + principal) / emiAmount;
+            numberOfPayments = ((Double) (-1 * (futureValue + principal) / emiAmount)).intValue();
         } else {
             final double r1 = interestRateFraction + 1;
-            final double adjustedPayment = emiAmount * (type ? r1 : 1);
-            final double growthFactor = (adjustedPayment - interestRateFraction * futureValue)
-                    / (adjustedPayment + interestRateFraction * principal);
-            numberOfPayments = Math.log(growthFactor) / Math.log1p(interestRateFraction);
+            numberOfPayments = (futureValue + principal * Math.pow(r1, emiAmount)) * interestRateFraction
+                    / ((type ? r1 : 1) * (1 - Math.pow(r1, emiAmount)));
         }
-        return (int) Math.round(numberOfPayments);
+        return Double.valueOf(numberOfPayments).intValue();
     }
 }

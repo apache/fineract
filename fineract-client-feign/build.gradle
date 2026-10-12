@@ -16,10 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import org.gradle.api.file.FileSystemOperations
-
-import javax.inject.Inject
-
 apply plugin: 'org.openapi.generator'
 apply plugin: 'jacoco'
 description = 'Fineract Client with Feign'
@@ -33,7 +29,7 @@ openApiMeta {
 }
 
 openApiValidate {
-    inputSpec = file(rootProject.ext.swaggerFile)
+    inputSpec = file(swaggerFile)
     recommend = true
 }
 
@@ -44,7 +40,7 @@ tasks.register('buildJavaSdk', org.openapitools.generator.gradle.plugin.tasks.Ge
     validateSpec = false
     skipValidateSpec = true
     cleanupOutput = true
-    inputSpec = file(rootProject.ext.swaggerFile)
+    inputSpec = file(swaggerFile)
     outputDir = file("$buildDir/generated/temp-java")
     templateDir = file("$projectDir/src/main/resources/templates/java")
     groupId = 'org.apache.fineract'
@@ -95,18 +91,9 @@ tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-// Project.copy() is unsupported in a task action under the configuration cache; the injected
-// FileSystemOperations service is the supported replacement (same reasoning as ExecOperations
-// for Project.javaexec() in static-weaving.gradle).
-interface CleanupGeneratedJavaFilesOperations {
-    @Inject
-    FileSystemOperations getFileSystemOperations()
-}
-
 task cleanupGeneratedJavaFiles() {
     def tempDir = file("$buildDir/generated/temp-java")
     def targetDir = file("$buildDir/generated/java")
-    def fileSystemOperations = objects.newInstance(CleanupGeneratedJavaFilesOperations).fileSystemOperations
 
     inputs.dir(tempDir).optional()
     outputs.dir(targetDir)
@@ -114,7 +101,7 @@ task cleanupGeneratedJavaFiles() {
 
     doLast {
         if (tempDir.exists()) {
-            fileSystemOperations.copy {
+            copy {
                 from tempDir
                 into targetDir
                 filter { line ->
@@ -132,8 +119,8 @@ task cleanupGeneratedJavaFiles() {
 
 tasks.named('compileJava') {
     outputs.cacheIf { true }
-    dependsOn(buildJavaSdk, cleanupGeneratedJavaFiles, spotlessMiscApply)
-    mustRunAfter(cleanupGeneratedJavaFiles)
+    dependsOn(buildJavaSdk, cleanupGeneratedJavaFiles, licenseFormatMain, spotlessMiscApply)
+    mustRunAfter(licenseFormatMain, cleanupGeneratedJavaFiles)
 }
 
 tasks.named('sourcesJar') {
@@ -143,6 +130,17 @@ tasks.named('sourcesJar') {
     from(sourceSets.main.java.srcDirs) {
         include "**/*.java"
     }
+}
+
+tasks.named('licenseFormatMain') {
+    dependsOn(cleanupGeneratedJavaFiles)
+    mustRunAfter(cleanupGeneratedJavaFiles)
+    source = sourceSets.main.java.srcDirs
+}
+
+tasks.named('licenseMain') {
+    dependsOn(licenseFormatMain)
+    mustRunAfter(licenseFormatMain)
 }
 
 tasks.withType(JavaCompile).configureEach {

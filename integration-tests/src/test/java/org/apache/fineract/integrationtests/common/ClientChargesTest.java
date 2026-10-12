@@ -18,15 +18,18 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import java.math.BigDecimal;
-import org.apache.fineract.client.models.PostClientsClientIdChargesChargeIdRequest;
-import org.apache.fineract.client.models.PostClientsClientIdChargesRequest;
-import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
-import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -38,32 +41,29 @@ import org.junit.jupiter.api.Test;
  * @author lenovo
  *
  */
-public class ClientChargesTest extends FeignIntegrationTest {
+public class ClientChargesTest {
 
-    private static final int BAD_REQUEST = 400;
-    private static final int FORBIDDEN = 403;
-    private static final double CHARGE_AMOUNT = 100.0;
-    private static final BigDecimal CLIENT_CHARGE_AMOUNT = BigDecimal.valueOf(200);
-    private static final String CHARGE_DUE_DATE = "29 October 2011";
+    private ResponseSpecification responseSpec;
+    private RequestSpecification requestSpec;
 
-    private FeignClientHelper clientHelper;
-    private FeignChargesHelper chargesHelper;
-
-    @BeforeAll
+    @BeforeEach
     public void setup() {
-        clientHelper = new FeignClientHelper(fineractClient());
-        chargesHelper = new FeignChargesHelper(fineractClient());
+        Utils.initializeRESTAssured();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     public void clientChargeTest() {
 
         // Creates clientCharge
-        final Long chargeId = chargesHelper.createClientSpecifiedDueDateCharge(CHARGE_AMOUNT).getResourceId();
+        final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getChargeSpecifiedDueDateJSON());
         Assertions.assertNotNull(chargeId);
 
         // creates client with activation date
-        final Long clientId = clientHelper.createClient("01 October 2011");
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 October 2011");
         Assertions.assertNotNull(clientId);
 
         /**
@@ -71,71 +71,82 @@ public class ClientChargesTest extends FeignIntegrationTest {
          * scenario the reason is client is not allowed to have only client charge.
          *
          */
-        final Long loanChargeId = chargesHelper.createLoanSpecifiedDueDatePenalty(CHARGE_AMOUNT).getResourceId();
+        final Integer loanChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON());
         Assertions.assertNotNull(loanChargeId);
-        Assertions.assertEquals(FORBIDDEN, chargesHelper.addClientChargeExpectingError(clientId, clientCharge(loanChargeId)).getStatus());
+        ResponseSpecification responseLoanChargeFailure = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final Integer clientLoanChargeId = ClientHelper.addChargesForClient(this.requestSpec, responseLoanChargeFailure, clientId,
+                ClientHelper.getSpecifiedDueDateChargesClientAsJSON(loanChargeId.toString(), "29 October 2011"));
+        Assertions.assertNull(clientLoanChargeId);
 
         /**
          * associates a clientCharge to a client and pay client charge for 10 USD--success scenario
          **/
-        final Long clientChargeId = chargesHelper.addClientCharge(clientId, clientCharge(chargeId)).getResourceId();
+        final Integer clientChargeId = ClientHelper.addChargesForClient(this.requestSpec, this.responseSpec, clientId,
+                ClientHelper.getSpecifiedDueDateChargesClientAsJSON(chargeId.toString(), "29 October 2011"));
         Assertions.assertNotNull(clientChargeId);
-        final Long clientChargePaidTransactionId = chargesHelper
-                .payClientCharge(clientId, clientChargeId, ChargeRequestBuilders.payClientCharge("25 AUGUST 2015", 10)).getTransactionId();
+        final String clientChargePaidTransactionId = ClientHelper.payChargesForClients(this.requestSpec, this.responseSpec, clientId,
+                clientChargeId, ClientHelper.getPayChargeJSON("25 AUGUST 2015", "10"));
         Assertions.assertNotNull(clientChargePaidTransactionId);
-        isValidOutstandingAmount(clientId, clientChargeId, BigDecimal.valueOf(190));
+        isValidOutstandingAmount(ClientHelper.getClientCharge(requestSpec, responseSpec, clientId.toString(), clientChargeId.toString()),
+                (float) 190.0);
 
         /**
          * Revert the paid client charge transaction by passing the clientChargePaidTransactionId and ensure the same is
          * reverted.
          */
-        final Long undoTrxnId = clientHelper.undoClientTransaction(clientId, clientChargePaidTransactionId).getResourceId();
+        final Integer undoTrxnId = ClientHelper.revertClientChargeTransaction(this.requestSpec, this.responseSpec, clientId.toString(),
+                clientChargePaidTransactionId);
         Assertions.assertNotNull(undoTrxnId);
-        isReversedTransaction(clientId, undoTrxnId);
+        isReversedTransaction(clientId.toString(), undoTrxnId.toString());
         /**
          * Now pay client charge for 20 USD and ensure the outstanding amount is updated properly
          */
-        final String futureDate = Utils.getLocalDateOfTenant().plusDays(2).format(Utils.dateFormatter);
-        assertPaymentRejected(clientId, clientChargeId, ChargeRequestBuilders.payClientCharge(futureDate, 20));
+        ResponseSpecification responseSpecFailure = new ResponseSpecBuilder().expectStatusCode(400).build();
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
+        Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        today.add(Calendar.DAY_OF_MONTH, 2);
+        final String responseId_futureDate_failure = ClientHelper.payChargesForClients(this.requestSpec, responseSpecFailure, clientId,
+                clientChargeId, ClientHelper.getPayChargeJSON(dateFormat.format(today.getTime()), "20"));
+        Assertions.assertNull(responseId_futureDate_failure);
 
         // waived off the outstanding client charge
-        final Long waiveOffClientChargeTransactionId = chargesHelper
-                .waiveClientCharge(clientId, clientChargeId, ChargeRequestBuilders.waiveClientCharge(100)).getTransactionId();
+        final String waiveOffClientChargeTransactionId = ClientHelper.waiveChargesForClients(this.requestSpec, this.responseSpec, clientId,
+                clientChargeId, ClientHelper.getWaiveChargeJSON("100", clientChargeId.toString()));
         Assertions.assertNotNull(waiveOffClientChargeTransactionId);
 
         /**
          * Revert the waived off client charge transaction by passing the waiveOffClientChargeTransactionId and ensured
          * the transaction is reversed.
          */
-        final Long undoWaiveTrxnId = clientHelper.undoClientTransaction(clientId, waiveOffClientChargeTransactionId).getResourceId();
+        final Integer undoWaiveTrxnId = ClientHelper.revertClientChargeTransaction(this.requestSpec, this.responseSpec, clientId.toString(),
+                waiveOffClientChargeTransactionId);
         Assertions.assertNotNull(undoWaiveTrxnId);
-        isReversedTransaction(clientId, undoWaiveTrxnId);
+        isReversedTransaction(clientId.toString(), undoWaiveTrxnId.toString());
         /**
          * pay client charge before client activation date and ensured its a failure test case
          */
 
-        assertPaymentRejected(clientId, clientChargeId, ChargeRequestBuilders.payClientCharge("30 September 2011", 20));
+        final String responseId_activationDate_failure = ClientHelper.payChargesForClients(this.requestSpec, responseSpecFailure, clientId,
+                clientChargeId, ClientHelper.getPayChargeJSON("30 September 2011", "20"));
+        Assertions.assertNull(responseId_activationDate_failure);
         /**
          * pay client charge more than outstanding amount amount and ensured its a failure test case
          */
-        assertPaymentRejected(clientId, clientChargeId, ChargeRequestBuilders.payClientCharge("25 AUGUST 2015", 300));
+        final String responseId_moreAmount_failure = ClientHelper.payChargesForClients(this.requestSpec, responseSpecFailure, clientId,
+                clientChargeId, ClientHelper.getPayChargeJSON("25 AUGUST 2015", "300"));
+        Assertions.assertNull(responseId_moreAmount_failure);
         /**
          * pay client charge for 10 USD and ensure outstanding amount is updated properly
          */
-        final Long chargePaidResponseId = chargesHelper
-                .payClientCharge(clientId, clientChargeId, ChargeRequestBuilders.payClientCharge("25 AUGUST 2015", 100)).getTransactionId();
-        Assertions.assertNotNull(chargePaidResponseId);
+        final String chargePaid_responseId = ClientHelper.payChargesForClients(this.requestSpec, this.responseSpec, clientId,
+                clientChargeId, ClientHelper.getPayChargeJSON("25 AUGUST 2015", "100"));
+        Assertions.assertNotNull(chargePaid_responseId);
 
-        isValidOutstandingAmount(clientId, clientChargeId, BigDecimal.valueOf(100));
+        isValidOutstandingAmount(ClientHelper.getClientCharge(requestSpec, responseSpec, clientId.toString(), clientChargeId.toString()),
+                (float) 100.0);
 
-    }
-
-    private static PostClientsClientIdChargesRequest clientCharge(Long chargeId) {
-        return ChargeRequestBuilders.clientCharge(chargeId, CHARGE_DUE_DATE, CLIENT_CHARGE_AMOUNT);
-    }
-
-    private void assertPaymentRejected(Long clientId, Long clientChargeId, PostClientsClientIdChargesChargeIdRequest request) {
-        Assertions.assertEquals(BAD_REQUEST, chargesHelper.payClientChargeExpectingError(clientId, clientChargeId, request).getStatus());
     }
 
     /**
@@ -144,22 +155,21 @@ public class ClientChargesTest extends FeignIntegrationTest {
      * @param clientId
      * @param transactionId
      */
-    private void isReversedTransaction(Long clientId, Long transactionId) {
-        Assertions.assertTrue(clientHelper.getClientTransaction(clientId, transactionId).getReversed());
+    private void isReversedTransaction(String clientId, String transactionId) {
+        final Boolean isReversed = ClientHelper.getClientTransactions(this.requestSpec, this.responseSpec, clientId.toString(),
+                transactionId);
+        Assertions.assertTrue(isReversed);
     }
 
     /**
      * Check whether the outStandingAmount is equal to expected Amount or not after paying or after waiving off the
      * client charge.
      *
-     * @param clientId
-     * @param clientChargeId
+     * @param outStandingAmount
      * @param expectedAmount
      */
-    private void isValidOutstandingAmount(Long clientId, Long clientChargeId, BigDecimal expectedAmount) {
-        BigDecimal outstandingAmount = chargesHelper.getClientCharge(clientId, clientChargeId).getAmountOutstanding();
-        Assertions.assertEquals(0, expectedAmount.compareTo(outstandingAmount),
-                () -> "Expected outstanding amount " + expectedAmount + " but was " + outstandingAmount);
+    private void isValidOutstandingAmount(Object outStandingAmount, Object expectedAmount) {
+        Assertions.assertEquals(expectedAmount, (float) outStandingAmount);
     }
 
 }

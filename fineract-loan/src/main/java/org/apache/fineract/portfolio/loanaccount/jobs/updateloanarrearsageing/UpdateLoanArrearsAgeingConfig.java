@@ -20,10 +20,11 @@ package org.apache.fineract.portfolio.loanaccount.jobs.updateloanarrearsageing;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,7 +47,8 @@ public class UpdateLoanArrearsAgeingConfig {
 
     @Bean
     public Job updateLoanArrearsAgeingJob() {
-        return new JobBuilder(JobName.UPDATE_LOAN_ARREARS_AGEING.name(), jobRepository).start(updateLoanArrearsAgeingStep()).build();
+        return new JobBuilder(JobName.UPDATE_LOAN_ARREARS_AGEING.name(), jobRepository).start(updateLoanArrearsAgeingStep())
+                .incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

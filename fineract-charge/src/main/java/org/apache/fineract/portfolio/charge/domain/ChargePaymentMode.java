@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.portfolio.charge.domain;
 
-import java.util.List;
-
 public enum ChargePaymentMode {
 
     REGULAR(0, "chargepaymentmode.regular"), //
@@ -43,14 +41,6 @@ public enum ChargePaymentMode {
 
     public static Object[] validValues() {
         return new Integer[] { ChargePaymentMode.REGULAR.getValue(), ChargePaymentMode.ACCOUNT_TRANSFER.getValue() };
-    }
-
-    public static List<ChargePaymentMode> validEnumsForWorkingCapitalLoan() {
-        return List.of(ChargePaymentMode.REGULAR);
-    }
-
-    public static Object[] validValuesForWorkingCapitalLoan() {
-        return validEnumsForWorkingCapitalLoan().stream().map(ChargePaymentMode::getValue).toArray();
     }
 
     public static ChargePaymentMode fromInt(final Integer paymentMode) {

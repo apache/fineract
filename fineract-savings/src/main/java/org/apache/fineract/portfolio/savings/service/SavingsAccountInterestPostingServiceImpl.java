@@ -48,7 +48,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.service.TaxUtils;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 @RequiredArgsConstructor
 public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountInterestPostingService {
@@ -363,7 +363,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             final LocalDateInterval periodInterval) {
         List<SavingsAccountTransactionData> overdraftTransactionsInPeriod = new ArrayList<>();
         for (SavingsAccountTransactionData lists : retreiveOrderedNonInterestPostingTransactions(savingsAccountData)) {
-            if (MathUtil.isLessThanZero(lists.getRunningBalance()) && hasBalanceWithin(lists, periodInterval)) {
+            if (MathUtil.isLessThanZero(lists.getRunningBalance()) && periodInterval.startDate().getMonth() == lists.getDate().getMonth()) {
                 overdraftTransactionsInPeriod.add(lists);
 
             }
@@ -378,7 +378,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         final List<SavingsAccountTransactionData> nonOverdraftTransactions = new ArrayList<>();
 
         for (final SavingsAccountTransactionData tx : retreiveOrderedNonInterestPostingTransactions(savingsAccountData)) {
-            if (hasBalanceWithin(tx, periodInterval)) {
+            if (periodInterval.startDate().getMonth() == tx.getDate().getMonth()) {
                 final Money runningBalance = Money.of(currency, tx.getRunningBalance());
 
                 if (runningBalance.isGreaterThanZero() && !runningBalance.isZero()) {
@@ -393,9 +393,9 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             final MonetaryCurrency currency) {
 
         for (SavingsAccountTransactionData tx : retreiveOrderedNonInterestPostingTransactions(savingsAccountData)) {
-            if (MathUtil.isLessThanZero(tx.getRunningBalance()) && hasBalanceWithin(tx, periodInterval)) {
+            if (MathUtil.isLessThanZero(tx.getRunningBalance()) && periodInterval.startDate().getMonth() == tx.getDate().getMonth()) {
                 return true;
-            } else if (hasBalanceWithin(tx, periodInterval)) {
+            } else if (periodInterval.startDate().getMonth() == tx.getDate().getMonth()) {
                 final Money runningBalance = Money.of(currency, tx.getRunningBalance());
                 if (!runningBalance.isZero()) {
                     return false;
@@ -403,11 +403,6 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             }
         }
         return false;
-    }
-
-    // same criteria PostingPeriod#createFromDTO uses to pick the transactions whose balance contributes to a period
-    private static boolean hasBalanceWithin(final SavingsAccountTransactionData tx, final LocalDateInterval periodInterval) {
-        return tx.fallsWithin(periodInterval) || tx.spansAnyPortionOf(periodInterval);
     }
 
     private List<SavingsAccountTransactionData> retreiveOrderedNonInterestPostingTransactions(final SavingsAccountData savingsAccountData) {

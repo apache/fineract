@@ -22,9 +22,5 @@ import org.apache.fineract.cob.COBBusinessStep;
 
 public interface BusinessStepCategoryService {
 
-    BusinessStepCategory getCategory();
-
-    String getCobJobName();
-
-    Class<? extends COBBusinessStep<?>> getBusinessStepClass();
+    Class<? extends COBBusinessStep> getBusinessStepByCategory(String category);
 }

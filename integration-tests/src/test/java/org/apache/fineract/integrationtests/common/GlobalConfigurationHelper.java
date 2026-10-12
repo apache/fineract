@@ -701,14 +701,6 @@ public class GlobalConfigurationHelper {
         isDisallowBackdatedTransactions.put("trapDoor", false);
         defaults.add(isDisallowBackdatedTransactions);
 
-        HashMap<String, Object> wclChargeAccrualTime = new HashMap<>();
-        wclChargeAccrualTime.put("name", GlobalConfigurationConstants.WCL_CHARGE_ACCRUAL_TIME);
-        wclChargeAccrualTime.put("value", 0L);
-        wclChargeAccrualTime.put("enabled", true);
-        wclChargeAccrualTime.put("trapDoor", false);
-        wclChargeAccrualTime.put("string_value", "EOD");
-        defaults.add(wclChargeAccrualTime);
-
         return defaults;
     }
 

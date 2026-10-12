@@ -29,24 +29,20 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.client.models.AccountTransferRequest;
-import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
-import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignFinancialActivityAccountHelper;
-import org.apache.fineract.integrationtests.client.feign.modules.AccountTransferRequestBuilders;
-import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
-import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.Account.AccountType;
-import org.apache.fineract.portfolio.account.PortfolioAccountType;
-import org.junit.jupiter.api.BeforeAll;
+import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
+import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
+import org.apache.fineract.integrationtests.savings.base.BaseSavingsIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-class AccountTransferOverdraftTest extends FeignSavingsTestBase {
+class AccountTransferOverdraftTest extends BaseSavingsIntegrationTest {
 
     private static final String ACTIVATION_DATE = "01 January 2013";
     private static final String BACKDATED_DEPOSIT_DATE = "27 February 2013";
@@ -56,16 +52,8 @@ class AccountTransferOverdraftTest extends FeignSavingsTestBase {
     private static final BigDecimal BACKDATED_DEPOSIT_AMOUNT = BigDecimal.valueOf(5);
     private static final BigDecimal ORIGINAL_OVERDRAFT_AMOUNT = BigDecimal.TEN;
     private static final BigDecimal RECALCULATED_OVERDRAFT_AMOUNT = BigDecimal.valueOf(5);
-    private static final BigDecimal OVERDRAFT_LIMIT = new BigDecimal("1000.0");
     private static final String DEBIT = "DEBIT";
     private static final String CREDIT = "CREDIT";
-
-    private static FeignFinancialActivityAccountHelper financialActivityAccountHelper;
-
-    @BeforeAll
-    public static void setupFinancialActivityAccountHelper() {
-        financialActivityAccountHelper = new FeignFinancialActivityAccountHelper(FineractFeignClientHelper.getFineractFeignClient());
-    }
 
     @Test
     void preserveTransferLinkWhenBackdatedDepositRecalculatesOverdraft() {
@@ -73,20 +61,19 @@ class AccountTransferOverdraftTest extends FeignSavingsTestBase {
             final var accounting = createAccountingFixture();
             try {
                 final var savingsProductId = createOverdraftSavingsProduct(accounting);
-                final var sourceClientId = createClient();
-                final var destinationClientId = createClient();
-                final var sourceSavingsId = createApproveActivateSavings(sourceClientId, savingsProductId, ACTIVATION_DATE);
-                final var destinationSavingsId = createApproveActivateSavings(destinationClientId, savingsProductId, ACTIVATION_DATE);
+                final var sourceClientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+                final var destinationClientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+                final var sourceSavingsId = createActiveSavingsAccount(sourceClientId, savingsProductId);
+                final var destinationSavingsId = createActiveSavingsAccount(destinationClientId, savingsProductId);
 
-                deposit(sourceSavingsId, OPENING_BALANCE.toPlainString(), ACTIVATION_DATE);
-                transfer(sourceClientId, sourceSavingsId, destinationClientId, destinationSavingsId);
+                deposit(sourceSavingsId, ACTIVATION_DATE, OPENING_BALANCE);
+                final var accountTransferId = transfer(sourceClientId, sourceSavingsId, destinationClientId, destinationSavingsId);
 
                 final var originalWithdrawal = findActiveWithdrawal(sourceSavingsId);
                 assertNotNull(originalWithdrawal.getTransfer());
                 final var transferId = originalWithdrawal.getTransfer().getId();
 
-                final var backdatedDepositId = deposit(sourceSavingsId, BACKDATED_DEPOSIT_AMOUNT.toPlainString(), BACKDATED_DEPOSIT_DATE)
-                        .getResourceId();
+                final var backdatedDepositId = deposit(sourceSavingsId, BACKDATED_DEPOSIT_DATE, BACKDATED_DEPOSIT_AMOUNT).getResourceId();
 
                 assertRecalculationHistory(sourceSavingsId);
                 final var recalculatedWithdrawal = findActiveWithdrawal(sourceSavingsId);
@@ -99,7 +86,7 @@ class AccountTransferOverdraftTest extends FeignSavingsTestBase {
                 assertBackdatedDepositJournalEntries(backdatedDepositId, accounting);
                 assertNoJournalEntries(auditOnlyReversal.getId());
 
-                accountTransferHelper.undoTransfer(transferId);
+                ok(fineractClient().accountTransfers.accountTransferOperation(accountTransferId, "undo"));
                 assertBalance(sourceSavingsId, BigDecimal.valueOf(105));
                 assertBalance(destinationSavingsId, BigDecimal.ZERO);
             } finally {
@@ -109,26 +96,33 @@ class AccountTransferOverdraftTest extends FeignSavingsTestBase {
     }
 
     private Long createOverdraftSavingsProduct(final AccountingFixture accounting) {
-        final PostSavingsProductsRequest request = SavingsRequestBuilders.withCashBasedAccounting(
-                SavingsRequestBuilders.defaultSavingsProduct()//
-                        .minRequiredOpeningBalance(BigDecimal.ZERO)//
-                        .allowOverdraft(true)//
-                        .overdraftLimit(OVERDRAFT_LIMIT),
-                accounting.savingsReferenceAccount(), accounting.savingsControlAccount(), accounting.incomeAccount(),
-                accounting.expenseAccount());
-        return savingsProductHelper.createSavingsProduct(request).getResourceId();
+        final var product = new SavingsProductHelper().withCurrencyCode("USD").withInterestCompoundingPeriodTypeAsDaily()
+                .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance().withMinimumOpenningBalance("0")
+                .withOverDraft("1000.0").withAccountingRuleAsCashBased(new Account[] { accounting.savingsReferenceAccount(),
+                        accounting.incomeAccount(), accounting.expenseAccount(), accounting.savingsControlAccount() })
+                .build();
+        return SavingsProductHelper.createSavingsProduct(product, requestSpec, responseSpec).longValue();
+    }
+
+    private Long createActiveSavingsAccount(final Long clientId, final Long productId) {
+        final var savingsId = applySavingsAccount(applySavingsRequest(clientId, productId, ACTIVATION_DATE)).getSavingsId();
+        approveSavingsAccount(savingsId, ACTIVATION_DATE);
+        activateSavingsAccount(savingsId, ACTIVATION_DATE);
+        return savingsId;
     }
 
     private Long transfer(final Long sourceClientId, final Long sourceSavingsId, final Long destinationClientId,
             final Long destinationSavingsId) {
-        final AccountTransferRequest request = AccountTransferRequestBuilders.transfer(TRANSFER_DATE, sourceClientId, sourceSavingsId,
-                PortfolioAccountType.SAVINGS, destinationClientId, destinationSavingsId, PortfolioAccountType.SAVINGS,
-                TRANSFER_AMOUNT.toPlainString());
-        return accountTransferHelper.createAccountTransfer(request).getResourceId();
+        return ok(fineractClient().accountTransfers.createAccountTransfer(new AccountTransferRequest()
+                .fromClientId(sourceClientId.toString()).fromAccountId(sourceSavingsId.toString()).fromAccountType("2").fromOfficeId("1")
+                .toClientId(destinationClientId.toString()).toAccountId(destinationSavingsId.toString()).toAccountType("2").toOfficeId("1")
+                .transferDate(TRANSFER_DATE).transferAmount(TRANSFER_AMOUNT.toPlainString()).transferDescription("Transfer")
+                .dateFormat(DATETIME_PATTERN).locale("en_GB"))).getResourceId();
     }
 
     private void assertBalance(final Long savingsId, final BigDecimal expectedBalance) {
-        assertEquals(0, expectedBalance.compareTo(savingsHelper.getSavingsSummary(savingsId).getAccountBalance()));
+        final var account = ok(fineractClient().savingsAccounts.retrieveSavingsAccount(savingsId, false, null, "summary"));
+        assertEquals(0, expectedBalance.compareTo(account.getSummary().getAccountBalance()));
     }
 
     private SavingsAccountTransactionData findActiveWithdrawal(final Long savingsId) {
@@ -137,7 +131,7 @@ class AccountTransferOverdraftTest extends FeignSavingsTestBase {
     }
 
     private SavingsAccountTransactionData findAuditOnlyReversal(final Long savingsId, final Long originalTransactionId) {
-        final var auditOnlyReversals = savingsTransactionHelper.getTransactions(savingsId).stream()
+        final var auditOnlyReversals = getTransactions(savingsId).stream()
                 .filter(transaction -> Boolean.TRUE.equals(transaction.getIsReversal()))
                 .filter(transaction -> originalTransactionId.equals(transaction.getOriginalTransactionId())).toList();
         assertEquals(1, auditOnlyReversals.size());
@@ -152,41 +146,43 @@ class AccountTransferOverdraftTest extends FeignSavingsTestBase {
     }
 
     private List<SavingsAccountTransactionData> transferWithdrawals(final Long savingsId) {
-        return savingsTransactionHelper.getTransactions(savingsId).stream()
-                .filter(transaction -> !Boolean.TRUE.equals(transaction.getIsReversal()))
+        return getTransactions(savingsId).stream().filter(transaction -> !Boolean.TRUE.equals(transaction.getIsReversal()))
                 .filter(transaction -> Boolean.TRUE.equals(transaction.getTransactionType().getWithdrawal()))
                 .filter(transaction -> TRANSFER_AMOUNT.compareTo(transaction.getAmount()) == 0)
                 .filter(transaction -> LocalDate.of(2013, 2, 28).equals(transaction.getDate())).toList();
     }
 
     private AccountingFixture createAccountingFixture() {
+        final var accountHelper = new AccountHelper(requestSpec, responseSpec);
         final var savingsReferenceAccount = accountHelper.createAssetAccount();
         final var savingsControlAccount = accountHelper.createLiabilityAccount();
         final var incomeAccount = accountHelper.createIncomeAccount();
         final var expenseAccount = accountHelper.createExpenseAccount();
+        final var financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
         final var financialActivityId = AccountingConstants.FinancialActivity.LIABILITY_TRANSFER.getValue();
-        final var existingMapping = financialActivityAccountHelper.getAllMappings().stream()
+        final var existingMapping = financialActivityAccountHelper.getAllFinancialActivityAccounts().stream()
                 .filter(mapping -> mapping.getFinancialActivityData() != null
                         && financialActivityId.equals(mapping.getFinancialActivityData().getId()))
                 .findFirst();
 
         if (existingMapping.isPresent()) {
-            final GetFinancialActivityAccountsResponse mapping = existingMapping.orElseThrow();
+            final var glAccountId = existingMapping.orElseThrow().getGlAccountData().getId();
             return new AccountingFixture(savingsReferenceAccount, savingsControlAccount, incomeAccount, expenseAccount,
-                    new Account(Math.toIntExact(mapping.getGlAccountData().getId()), AccountType.LIABILITY), null);
+                    new Account(Math.toIntExact(glAccountId), Account.AccountType.LIABILITY), financialActivityAccountHelper, null);
         }
 
         final var liabilityTransferAccount = accountHelper.createLiabilityAccount();
-        final var createdMapping = financialActivityAccountHelper.createMapping(financialActivityId, liabilityTransferAccount);
-        assertNotNull(createdMapping.getResourceId());
+        final var mapping = financialActivityAccountHelper.createFinancialActivityAccount(new PostFinancialActivityAccountsRequest()
+                .financialActivityId(financialActivityId.longValue()).glAccountId(liabilityTransferAccount.getAccountID().longValue()));
+        assertNotNull(mapping.getResourceId());
         return new AccountingFixture(savingsReferenceAccount, savingsControlAccount, incomeAccount, expenseAccount,
-                liabilityTransferAccount, createdMapping.getResourceId());
+                liabilityTransferAccount, financialActivityAccountHelper, mapping.getResourceId());
     }
 
     private void runWithPostReversalTransactions(final Runnable action) {
         final var configurationName = GlobalConfigurationConstants.ENABLE_POST_REVERSAL_TXNS_FOR_REVERSE_TRANSACTIONS;
-        final var originallyEnabled = Boolean.TRUE
-                .equals(globalConfigurationHelper.getGlobalConfigurationByName(configurationName).getEnabled());
+        final var configuration = globalConfigurationHelper.getGlobalConfigurationByName(configurationName);
+        final var originallyEnabled = Boolean.TRUE.equals(configuration.getEnabled());
         try {
             globalConfigurationHelper.updateGlobalConfiguration(configurationName, new PutGlobalConfigurationsRequest().enabled(true));
             action.run();
@@ -257,12 +253,13 @@ class AccountTransferOverdraftTest extends FeignSavingsTestBase {
     }
 
     private record AccountingFixture(Account savingsReferenceAccount, Account savingsControlAccount, Account incomeAccount,
-            Account expenseAccount, Account liabilityTransferAccount, Long createdFinancialActivityMappingId) {
+            Account expenseAccount, Account liabilityTransferAccount, FinancialActivityAccountHelper financialActivityAccountHelper,
+            Long createdFinancialActivityMappingId) {
 
         private void deleteCreatedFinancialActivityMapping() {
             if (createdFinancialActivityMappingId != null) {
-                assertEquals(createdFinancialActivityMappingId,
-                        financialActivityAccountHelper.deleteMapping(createdFinancialActivityMappingId).getResourceId());
+                final var response = financialActivityAccountHelper.deleteFinancialActivityAccount(createdFinancialActivityMappingId);
+                assertEquals(createdFinancialActivityMappingId, response.getResourceId());
             }
         }
     }

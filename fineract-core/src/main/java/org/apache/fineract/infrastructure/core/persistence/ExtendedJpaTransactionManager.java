@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.core.persistence;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.FlushModeType;
-import jakarta.persistence.RollbackException;
 import java.sql.Connection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -33,8 +32,6 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -97,21 +94,7 @@ public class ExtendedJpaTransactionManager extends JpaTransactionManager {
             }
         }
 
-        try {
-            super.doCommit(status);
-        } catch (TransactionSystemException exception) {
-            if (exception.getCause() instanceof RollbackException) {
-                // JPA has confirmed rollback. Report it as such to Spring's synchronizations, rather than UNKNOWN,
-                // so transactional resources (including Batch's in-memory checkpoint) can restore their state.
-                //
-                // Keeping `exception` as the cause is load-bearing, not decoration. AbstractPlatformTransactionManager
-                // raises its own UnexpectedRollbackException - for a transaction merely marked rollback-only, which is
-                // how maker-checker surfaces - with NO cause, so the cause is the only thing that tells a failed commit
-                // apart from a deliberate rollback. BatchApiServiceImpl#isCommitFailure relies on exactly that.
-                throw new UnexpectedRollbackException("JPA transaction rolled back during commit", exception);
-            }
-            throw exception;
-        }
+        super.doCommit(status);
         invokeLifecycleCallbacks(TransactionLifecycleCallback::afterCommit);
     }
 

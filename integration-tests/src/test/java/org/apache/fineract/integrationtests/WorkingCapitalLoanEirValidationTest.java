@@ -19,7 +19,6 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -60,16 +59,7 @@ public class WorkingCapitalLoanEirValidationTest {
 
     private static final String EXPECTED_EIR_ERROR_MESSAGE = "Please check the input values - unable to calculate a valid EIR.";
     private static final String EXPECTED_EIR_ERROR_CODE = "unable.to.calculate.valid.eir";
-    private static final String EXPECTED_SCHEDULE_ERROR_MESSAGE = "Please check the input values - "
-            + "unable to calculate a valid amortization schedule.";
-    private static final String EXPECTED_SCHEDULE_ERROR_CODE = "unable.to.calculate.valid.schedule";
-    private static final String FLAT = "FLAT";
     private static final BigDecimal OVER_CAP_PRODUCT_DISCOUNT = BigDecimal.valueOf(300000);
-    /**
-     * Equal to the principal below, not above it: a discount worth more than the principal is refused by a rule of its
-     * own before the feasibility check is ever reached, and this fixture is here to exercise the feasibility check.
-     */
-    private static final BigDecimal OVER_CAP_INHERITED_DISCOUNT = BigDecimal.valueOf(5000);
     private static final BigDecimal DISCOUNT_FEE = BigDecimal.valueOf(1000);
 
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
@@ -327,14 +317,13 @@ public class WorkingCapitalLoanEirValidationTest {
     /**
      * The submit-time feasibility check must evaluate the discount the loan will inherit from the product, not the
      * (absent) requested one: these inputs are calculable alone but breach the Total Days cap with the inherited
-     * default discount. A payment volume of 55 bills 55 * 18 / 360 / 100 = 0.0275 a day, rounded to 0.03, which takes
-     * over 330,000 days to repay the 10,000 the principal and the inherited discount add up to.
+     * default discount.
      */
     @Test
     @Order(8)
     public void testSubmitWithNonCalculableEirInputsViaProductDefaultDiscountIsRejectedWith400() {
         final Long productId = createProduct(builder -> builder //
-                .withDiscount(OVER_CAP_INHERITED_DISCOUNT) //
+                .withDiscount(OVER_CAP_PRODUCT_DISCOUNT) //
                 .withAllowAttributeOverrides(Map.of("discountDefault", Boolean.FALSE)));
         final Long clientId = createClient();
         final var json = new WorkingCapitalLoanApplicationTestBuilder() //
@@ -342,7 +331,7 @@ public class WorkingCapitalLoanEirValidationTest {
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
                 .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) // 18%
-                .withTotalPaymentVolume(BigDecimal.valueOf(55)) //
+                .withTotalPaymentVolume(BigDecimal.valueOf(5500)) //
                 .buildSubmitRequest();
 
         final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
@@ -390,37 +379,6 @@ public class WorkingCapitalLoanEirValidationTest {
      * (~250,000 days) exceeds the calculable cap while the EIR solver itself would return cleanly via its zero-rate
      * shortcut - only the cap guard stands between this input and a persisted quarter-million-row schedule.
      */
-    /**
-     * The same inherited discount, now worth more than the principal it would be charged on. That is refused by the
-     * discount rule rather than by the feasibility check, because the fee the borrower would owe exceeds the money they
-     * receive - so the caller is told which amount is wrong instead of being told the rate cannot be computed.
-     */
-    @Test
-    @Order(13)
-    public void testSubmitWithProductDefaultDiscountAboveThePrincipalIsRejectedWith400() {
-        final Long productId = createProduct(builder -> builder //
-                .withDiscount(OVER_CAP_PRODUCT_DISCOUNT) //
-                .withAllowAttributeOverrides(Map.of("discountDefault", Boolean.FALSE)));
-        final Long clientId = createClient();
-        final var json = new WorkingCapitalLoanApplicationTestBuilder() //
-                .withClientId(clientId) //
-                .withProductId(productId) //
-                .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) // 18%
-                .withTotalPaymentVolume(BigDecimal.valueOf(5500)) //
-                .buildSubmitRequest();
-
-        final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
-        assertEquals(400, ex.getStatus(), "A discount above the principal must be rejected with 400, got: " + ex.getStatus());
-        assertEquals("Validation errors: [discount] Failed data validation due to: amount.cannot.exceed.principal.",
-                ex.getDeveloperMessage());
-        assertNotNull(ex.getResponseBody());
-        assertTrue(ex.getResponseBody().contains("amount.cannot.exceed.principal"),
-                "Expected the discount-above-principal validation code in: " + ex.getResponseBody());
-
-        productHelper.deleteWorkingCapitalLoanProductById(productId);
-    }
-
     @Test
     @Order(10)
     public void testRateChangeIntoOverCapTermIsRejectedWith403() {
@@ -432,67 +390,8 @@ public class WorkingCapitalLoanEirValidationTest {
         assertRateChangeRejectedAndLoanStaysActive(loanId, ex);
     }
 
-    /**
-     * A FLAT loan solves no EIR, so the same structural failure - a daily payment too small to close the gross payable
-     * within the calculable cap - is reported under the schedule-level code, never the EIR-worded one.
-     */
-    @Test
-    @Order(11)
-    public void testSubmitWithNonCalculableInputsOnFlatProductIsRejectedWithScheduleCode() {
-        final Long productId = createProduct(
-                builder -> builder.withAmortizationType(FLAT).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)));
-        final Long clientId = createClient();
-        final var json = new WorkingCapitalLoanApplicationTestBuilder() //
-                .withClientId(clientId) //
-                .withProductId(productId) //
-                .withPrincipal(BigDecimal.valueOf(9000)) //
-                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) // 18%
-                .withTotalPaymentVolume(BigDecimal.valueOf(17)) // 0.01 a day against a 10000 gross payable
-                .withDiscount(BigDecimal.valueOf(1000)) //
-                .buildSubmitRequest();
-
-        final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
-        assertEquals(400, ex.getStatus(), "Non-calculable FLAT inputs must be rejected with 400 validation error, got: " + ex.getStatus());
-        assertEquals("Validation errors: [principalAmount] " + EXPECTED_SCHEDULE_ERROR_MESSAGE, ex.getDeveloperMessage());
-        assertNotNull(ex.getResponseBody());
-        assertTrue(ex.getResponseBody().contains(EXPECTED_SCHEDULE_ERROR_CODE),
-                "Expected validation code containing `" + EXPECTED_SCHEDULE_ERROR_CODE + "` in: " + ex.getResponseBody());
-        assertFalse(ex.getResponseBody().contains(EXPECTED_EIR_ERROR_CODE),
-                "A FLAT loan must not be rejected under the EIR code: " + ex.getResponseBody());
-
-        productHelper.deleteWorkingCapitalLoanProductById(productId);
-    }
-
-    @Test
-    @Order(12)
-    public void testRateChangeIntoOverCapTermOnFlatLoanIsRejectedWithScheduleCode() {
-        final Long loanId = createActiveLoan(builder -> builder.withAmortizationType(FLAT));
-
-        final CallFailedRuntimeException ex = applicationHelper.runUpdateRateExpectingFailure(loanId, WorkingCapitalLoanRequestBuilders
-                .updateRate(new BigDecimal("0.1"), Utils.dateFormatter.format(Utils.getLocalDateOfTenant())));
-
-        assertEquals(403, ex.getStatus(),
-                "Rate change into an over-cap FLAT term must fail with a clean 403 domain-rule error, got: " + ex.getStatus());
-        assertNotNull(ex.getResponseBody());
-        assertTrue(ex.getResponseBody().contains("error.msg.workingcapitalloan.schedule.not.calculable"),
-                "Expected schedule-not-calculable error code in: " + ex.getResponseBody());
-        assertFalse(ex.getResponseBody().contains("error.msg.workingcapitalloan.eir.not.calculable"),
-                "A FLAT loan must not be rejected under the EIR code: " + ex.getResponseBody());
-        final String detail = ex.getDeveloperMessage() != null ? ex.getDeveloperMessage() : ex.getMessage();
-        assertTrue(detail.contains("unable to calculate a valid amortization schedule"),
-                "Error must reference the schedule calculation problem, got: " + detail);
-
-        final GetWorkingCapitalLoansLoanIdResponse loan = applicationHelper.retrieveLoan(loanId);
-        assertNotNull(loan.getStatus());
-        assertEquals("loanStatusType.active", loan.getStatus().getCode(), "Loan must remain active after the rejected rate change");
-    }
-
     private Long createActiveLoan() {
-        return createActiveLoan(UnaryOperator.identity());
-    }
-
-    private Long createActiveLoan(final UnaryOperator<WorkingCapitalLoanProductTestBuilder> customizeProduct) {
-        final Long productId = createProduct(customizeProduct);
+        final Long productId = createProduct();
         final Long clientId = createClient();
         final LocalDate today = Utils.getLocalDateOfTenant();
         final String todayStr = Utils.dateFormatter.format(today);

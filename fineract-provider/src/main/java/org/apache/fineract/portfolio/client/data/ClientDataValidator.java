@@ -40,7 +40,6 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.validator.PhoneNumberValidationService;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecks;
@@ -57,17 +56,15 @@ public final class ClientDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final EntityDatatableChecksRepository entityDatatableChecksRepository;
-    private final PhoneNumberValidationService phoneNumberValidationService;
+    private static final String MOBILE_NUMBER_REGEX = "^\\+?[0-9]{7,15}$";
 
     @Autowired
     public ClientDataValidator(final FromJsonHelper fromApiJsonHelper,
             final ConfigurationReadPlatformService configurationReadPlatformService,
-            final EntityDatatableChecksRepository entityDatatableChecksRepository,
-            final PhoneNumberValidationService phoneNumberValidationService) {
+            final EntityDatatableChecksRepository entityDatatableChecksRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.configurationReadPlatformService = configurationReadPlatformService;
         this.entityDatatableChecksRepository = entityDatatableChecksRepository;
-        this.phoneNumberValidationService = phoneNumberValidationService;
     }
 
     public void validateForCreate(final String json) {
@@ -176,7 +173,7 @@ public final class ClientDataValidator {
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mobileNoParamName, element)) {
             final String mobileNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.mobileNoParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.mobileNoParamName).value(mobileNo).ignoreIfNull()
-                    .matchesRegularExpression(phoneNumberValidationService.getRegex()).notExceedingLengthOf(50);
+                    .matchesRegularExpression(MOBILE_NUMBER_REGEX).notExceedingLengthOf(50);
         }
 
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(ClientApiConstants.activeParamName, element);
@@ -464,7 +461,7 @@ public final class ClientDataValidator {
             atLeastOneParameterPassedForUpdate = true;
             final String mobileNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.mobileNoParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.mobileNoParamName).value(mobileNo).ignoreIfNull()
-                    .matchesRegularExpression(phoneNumberValidationService.getRegex()).notExceedingLengthOf(50);
+                    .matchesRegularExpression(MOBILE_NUMBER_REGEX).notExceedingLengthOf(50);
         }
 
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(ClientApiConstants.activeParamName, element);

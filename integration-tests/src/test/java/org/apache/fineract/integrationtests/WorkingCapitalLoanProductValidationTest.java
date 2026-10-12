@@ -363,7 +363,8 @@ public class WorkingCapitalLoanProductValidationTest {
                 () -> wclProductHelper.createWorkingCapitalLoanProduct(request));
         assertEquals(400, exception.getStatus());
         assertNotNull(exception.getDeveloperMessage());
-        assertEquals("Validation errors: [maxPrincipal] The parameter `maxPrincipal` must be greater than 0.",
+        assertEquals(
+                "Validation errors: [maxPrincipal] The parameter `maxPrincipal` must be greater than 0.; [principal] Failed data validation due to: must.be.less.than.or.equal.to.max.",
                 exception.getDeveloperMessage());
     }
 
@@ -425,7 +426,8 @@ public class WorkingCapitalLoanProductValidationTest {
                 () -> wclProductHelper.createWorkingCapitalLoanProduct(request));
         assertEquals(400, exception.getStatus());
         assertNotNull(exception.getDeveloperMessage());
-        assertEquals("Validation errors: [maxPeriodPaymentRate] The parameter `maxPeriodPaymentRate` must be greater than or equal to 0.",
+        assertEquals(
+                "Validation errors: [maxPeriodPaymentRate] The parameter `maxPeriodPaymentRate` must be greater than or equal to 0.; [periodPaymentRate] Failed data validation due to: must.be.less.than.or.equal.to.max.",
                 exception.getDeveloperMessage());
     }
 

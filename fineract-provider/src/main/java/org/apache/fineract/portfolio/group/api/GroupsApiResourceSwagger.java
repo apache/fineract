@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.group.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -292,10 +291,6 @@ final class GroupsApiResourceSwagger {
 
         @Schema(example = "First Group (changed)")
         public String name;
-        @Schema(example = "externalId1")
-        public String externalId;
-        @Schema(example = "1")
-        public Long staffId;
     }
 
     @Schema(description = "PutGroupsGroupIdResponse")
@@ -309,10 +304,6 @@ final class GroupsApiResourceSwagger {
 
             @Schema(example = "First Group (changed)")
             public String name;
-            @Schema(example = "externalId1")
-            public String externalId;
-            @Schema(example = "1")
-            public Long staffId;
         }
 
         @Schema(example = "1")
@@ -595,23 +586,5 @@ final class GroupsApiResourceSwagger {
         @Schema(example = "1")
         public Long resourceId;
         public PostGroupsGroupIdChanges changes;
-    }
-
-    @Schema(description = "GetGroupsGroupIdGsimAccountsResponse")
-    public static final class GetGroupsGroupIdGsimAccountsResponse {
-
-        private GetGroupsGroupIdGsimAccountsResponse() {}
-
-        static final class GetGroupsGsimChildAccount {
-
-            private GetGroupsGsimChildAccount() {}
-
-            @Schema(example = "1")
-            public Long id;
-        }
-
-        @Schema(example = "1")
-        public BigDecimal gsimId;
-        public List<GetGroupsGsimChildAccount> childGSIMAccounts;
     }
 }

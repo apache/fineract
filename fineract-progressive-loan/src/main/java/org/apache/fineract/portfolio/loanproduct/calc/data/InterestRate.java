@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.loanproduct.calc.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 public record InterestRate(//
         LocalDate effectiveFrom, //

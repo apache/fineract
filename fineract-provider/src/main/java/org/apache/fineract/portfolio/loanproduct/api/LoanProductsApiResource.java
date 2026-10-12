@@ -79,7 +79,6 @@ import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketType;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadService;
@@ -423,8 +422,7 @@ public class LoanProductsApiResource {
             fundOptions = null;
         }
 
-        Collection<DelinquencyBucketData> delinquencyBucketOptions = this.delinquencyReadPlatformService
-                .retrieveDelinquencyBucketsByType(DelinquencyBucketType.REGULAR);
+        Collection<DelinquencyBucketData> delinquencyBucketOptions = this.delinquencyReadPlatformService.retrieveAllDelinquencyBuckets();
         if (delinquencyBucketOptions.isEmpty()) {
             delinquencyBucketOptions = null;
         }

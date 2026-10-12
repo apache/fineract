@@ -27,6 +27,4 @@ public interface WorkingCapitalLoanChargeWritePlatformService {
     CommandProcessingResult createLoanCharge(Long loanId, JsonCommand command);
 
     CommandProcessingResult adjustmentForLoanCharge(Long loanId, Long wcLoanChargeId, JsonCommand command);
-
-    CommandProcessingResult waiveLoanCharge(Long loanId, Long wcLoanChargeId, JsonCommand command);
 }

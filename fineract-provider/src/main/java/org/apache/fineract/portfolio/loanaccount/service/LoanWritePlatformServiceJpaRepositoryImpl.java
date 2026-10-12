@@ -418,7 +418,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
             }
             disburseLoan(command, isPaymentTypeApplicableForDisbursementCharge, paymentDetail, loan, currentUser, changes,
-                    scheduleGeneratorDTO, isAccountTransfer);
+                    scheduleGeneratorDTO);
             loan.adjustNetDisbursalAmount(amountToDisburse.getAmount());
 
             loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
@@ -569,8 +569,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void disburseLoan(JsonCommand command, boolean isPaymentTypeApplicableForDisbursementCharge, PaymentDetail paymentDetail,
-            Loan loan, AppUser currentUser, Map<String, Object> changes, ScheduleGeneratorDTO scheduleGeneratorDTO,
-            boolean isAccountTransfer) {
+            Loan loan, AppUser currentUser, Map<String, Object> changes, ScheduleGeneratorDTO scheduleGeneratorDTO) {
         final PaymentDetail paymentDetail1 = isPaymentTypeApplicableForDisbursementCharge ? paymentDetail : null;
         final LocalDate actualDisbursementDate1 = command.localDateValueOfParameterNamed(ACTUAL_DISBURSEMENT_DATE);
 
@@ -594,7 +593,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loan.updateLoanRepaymentPeriodsDerivedFields(actualDisbursementDate1);
         loanTransactionValidator.validateActivityNotBeforeClientOrGroupTransferDate(loan, LoanEvent.LOAN_DISBURSED,
                 actualDisbursementDate1);
-        loanDisbursementService.handleDisbursementTransaction(loan, actualDisbursementDate1, paymentDetail1, isAccountTransfer);
+        loanDisbursementService.handleDisbursementTransaction(loan, actualDisbursementDate1, paymentDetail1);
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
         final Money interestApplied = Money.of(loan.getCurrency(), loan.getSummary().getTotalInterestCharged());
 
@@ -812,7 +811,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
                 }
                 disburseLoan(command, configurationDomainService.isPaymentTypeApplicableForDisbursementCharge(), paymentDetail, loan,
-                        currentUser, changes, scheduleGeneratorDTO, isAccountTransfer);
+                        currentUser, changes, scheduleGeneratorDTO);
                 if (disbursementTransaction != null) {
                     final long termsAfter = loan.getTermsCount();
                     final LoanTransactionFlagsData additionalDisbursalFlags = new LoanTransactionFlagsData(termsAfter != termsBefore);
@@ -1272,11 +1271,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final String errorMessage = "Loan transaction: " + transactionId + " update not allowed as loan transaction is a "
                     + transactionToAdjust.getTypeOf().getCode();
             throw new InvalidLoanTransactionTypeException("transaction", "error.msg.loan.transaction.update.not.allowed", errorMessage);
-        }
-
-        if (transactionToAdjust.isChargeback() && !loan.isProgressiveSchedule()) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.update.not.allowed",
-                    "Chargeback transaction: " + transactionId + " reversal is only supported for progressive loans", transactionId);
         }
 
         // We dont need auto generation for reversal external id... if it is not provided, it remains null (empty)

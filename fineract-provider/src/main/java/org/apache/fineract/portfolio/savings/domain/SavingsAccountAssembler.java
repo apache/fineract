@@ -357,10 +357,8 @@ public class SavingsAccountAssembler {
                     savingsAccountTransactions = this.savingsAccountRepository.findTransactionsAfterPivotDate(account,
                             interestPostedTillDate.minusDays(relaxingDaysForPivotDate));
 
-                    if (savingsAccountTransactions != null && !savingsAccountTransactions.isEmpty()) {
-                        savingsAccountTransactions.get(0).getSavingsAccount()
-                                .setStartInterestCalculationDate(interestPostedTillDate.minusDays(relaxingDaysForPivotDate));
-                    }
+                    savingsAccountTransactions.get(0).getSavingsAccount()
+                            .setStartInterestCalculationDate(interestPostedTillDate.minusDays(relaxingDaysForPivotDate));
                     List<SavingsAccountTransaction> pivotDateTransaction = this.savingsAccountRepository
                             .findTransactionRunningBalanceBeforePivotDate(account,
                                     interestPostedTillDate.minusDays(relaxingDaysForPivotDate + 1));

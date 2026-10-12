@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.command.jdbc.store.domain;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
@@ -28,7 +29,6 @@ import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
-import tools.jackson.databind.JsonNode;
 
 @Getter
 @Setter

@@ -18,12 +18,16 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.integrationtests.client.feign.modules.ClientTestData.CREATED_DATE_PLUS_ONE;
-import static org.apache.fineract.integrationtests.client.feign.modules.ClientTestData.DEFAULT_ACTIVATION_DATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -36,28 +40,28 @@ import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PutClientsClientIdRequest;
 import org.apache.fineract.client.models.PutClientsClientIdResponse;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignCodeHelper;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
-import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
-import org.apache.fineract.integrationtests.client.feign.modules.ClientTestData;
+import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class ClientExternalIdTest extends FeignIntegrationTest {
+public class ClientExternalIdTest {
 
-    private FeignClientHelper clientHelper;
-    private FeignCodeHelper codeHelper;
-    private FeignGlobalConfigurationHelper globalConfigurationHelper;
+    private ResponseSpecification responseSpec;
+    private RequestSpecification requestSpec;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
-    @BeforeAll
+    @BeforeEach
     public void setup() {
-        clientHelper = new FeignClientHelper(fineractClient());
-        codeHelper = new FeignCodeHelper(fineractClient());
-        globalConfigurationHelper = new FeignGlobalConfigurationHelper(fineractClient());
+        Utils.initializeRESTAssured();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @Test
@@ -65,7 +69,8 @@ public class ClientExternalIdTest extends FeignIntegrationTest {
         // given
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, false);
         // when
-        final PostClientsResponse clientResponse = addClientAsPerson(null);
+        final PostClientsResponse clientResponse = ClientHelper.addClientAsPerson(ClientHelper.DEFAULT_OFFICE_ID,
+                ClientHelper.LEGALFORM_ID_PERSON, null);
         // then
         assertNotNull(clientResponse);
         assertNull(clientResponse.getResourceExternalId());
@@ -76,7 +81,8 @@ public class ClientExternalIdTest extends FeignIntegrationTest {
         // given
         final String externalId = UUID.randomUUID().toString();
         // when
-        final PostClientsResponse clientResponse = addClientAsPerson(externalId);
+        final PostClientsResponse clientResponse = ClientHelper.addClientAsPerson(ClientHelper.DEFAULT_OFFICE_ID,
+                ClientHelper.LEGALFORM_ID_PERSON, externalId);
         // then
         assertNotNull(clientResponse);
         assertNotNull(clientResponse.getResourceExternalId());
@@ -90,7 +96,8 @@ public class ClientExternalIdTest extends FeignIntegrationTest {
         // given
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
         // when
-        final PostClientsResponse clientResponse = addClientAsPerson(null);
+        final PostClientsResponse clientResponse = ClientHelper.addClientAsPerson(ClientHelper.DEFAULT_OFFICE_ID,
+                ClientHelper.LEGALFORM_ID_PERSON, null);
         // then
         assertNotNull(clientResponse);
         assertNotNull(clientResponse.getResourceExternalId());
@@ -107,7 +114,8 @@ public class ClientExternalIdTest extends FeignIntegrationTest {
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
         final String externalId = UUID.randomUUID().toString();
         // when
-        final PostClientsResponse clientResponse = addClientAsPerson(externalId);
+        final PostClientsResponse clientResponse = ClientHelper.addClientAsPerson(ClientHelper.DEFAULT_OFFICE_ID,
+                ClientHelper.LEGALFORM_ID_PERSON, externalId);
         // then
         assertNotNull(clientResponse);
         assertNotNull(clientResponse.getResourceExternalId());
@@ -121,65 +129,70 @@ public class ClientExternalIdTest extends FeignIntegrationTest {
     @Test
     public void testClientStatusUsingExternalId() {
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
-        final PostClientsResponse addClientResponse = addClientAsPerson(null);
+        final PostClientsResponse addClientResponse = ClientHelper.addClientAsPerson(ClientHelper.DEFAULT_OFFICE_ID,
+                ClientHelper.LEGALFORM_ID_PERSON, null);
         final String clientExternalId = addClientResponse.getResourceExternalId();
         final Long clientId = addClientResponse.getClientId();
         assertNotNull(clientExternalId);
         log.info("Client data id {} and external Id {}", clientId, clientExternalId);
 
-        GetClientsClientIdResponse clientResponse = clientHelper.getClient(clientExternalId);
+        GetClientsClientIdResponse clientResponse = ClientHelper.getClientByExternalId(clientExternalId);
         ClientStatusChecker.verifyClientStatus(ClientStatus.ACTIVE, clientResponse);
         log.info("Client data id {} and status {}", clientExternalId, clientResponse.getStatus().getCode());
 
         // Close Client action
-        Long closureReasonId = codeHelper.retrieveOrCreateCodeValueId(ClientTestData.CLOSURE_REASON_CODE);
-        PostClientsClientIdResponse commandResponse = clientHelper.closeClient(clientExternalId,
-                ClientRequestBuilders.closeClient(closureReasonId, CREATED_DATE_PLUS_ONE));
+        String codeName = "ClientClosureReason";
+        HashMap<String, Object> code = CodeHelper.getCodeByName(requestSpec, responseSpec, codeName);
+        Integer closureReasonId = (Integer) CodeHelper.retrieveOrCreateCodeValue((Integer) code.get("id"), requestSpec, responseSpec)
+                .get("id");
+        PostClientsClientIdResponse commandResponse = ClientHelper.closeClient(clientExternalId, closureReasonId);
         assertNotNull(commandResponse);
         assertNotNull(commandResponse.getResourceExternalId());
         assertEquals(clientExternalId, commandResponse.getResourceExternalId());
         log.info("Client data id {} and external Id {}", commandResponse.getResourceId(), clientExternalId);
-        assertEquals(clientId, commandResponse.getResourceId());
+        assertEquals(clientId.intValue(), commandResponse.getResourceId());
 
-        clientResponse = clientHelper.getClient(clientExternalId);
+        clientResponse = ClientHelper.getClientByExternalId(clientExternalId);
         ClientStatusChecker.verifyClientStatus(ClientStatus.CLOSED, clientResponse);
         log.info("Client data id {} and status {}", clientExternalId, clientResponse.getStatus().getCode());
 
         // Reactivate Client action
-        commandResponse = clientHelper.reactivateClient(clientExternalId, ClientRequestBuilders.reactivateClient(CREATED_DATE_PLUS_ONE));
+        commandResponse = ClientHelper.reactivateClient(clientExternalId);
         assertNotNull(commandResponse);
         assertNotNull(commandResponse.getResourceExternalId());
         assertEquals(clientExternalId, commandResponse.getResourceExternalId());
         log.info("Client data id {} and external Id {}", commandResponse.getResourceId(), clientExternalId);
-        assertEquals(clientId, commandResponse.getResourceId());
+        assertEquals(clientId.intValue(), commandResponse.getResourceId());
 
-        clientResponse = clientHelper.getClient(clientExternalId);
+        clientResponse = ClientHelper.getClientByExternalId(clientExternalId);
         ClientStatusChecker.verifyClientStatus(ClientStatus.PENDING, clientResponse);
         log.info("Client data id {} and status {}", clientExternalId, clientResponse.getStatus().getCode());
 
         // Reject Client action
-        Long rejectionReasonId = codeHelper.retrieveOrCreateCodeValueId(ClientTestData.REJECTION_REASON_CODE);
-        commandResponse = clientHelper.rejectClient(clientExternalId,
-                ClientRequestBuilders.rejectClient(rejectionReasonId, CREATED_DATE_PLUS_ONE));
+        codeName = "ClientRejectReason";
+        code = CodeHelper.getCodeByName(requestSpec, responseSpec, codeName);
+        Integer rejectionReasonId = (Integer) CodeHelper.retrieveOrCreateCodeValue((Integer) code.get("id"), requestSpec, responseSpec)
+                .get("id");
+        commandResponse = ClientHelper.rejectClient(clientExternalId, rejectionReasonId);
         assertNotNull(commandResponse);
         assertNotNull(commandResponse.getResourceExternalId());
         assertEquals(clientExternalId, commandResponse.getResourceExternalId());
         log.info("Client data id {} and external Id {}", commandResponse.getResourceId(), clientExternalId);
-        assertEquals(clientId, commandResponse.getResourceId());
+        assertEquals(clientId.intValue(), commandResponse.getResourceId());
 
-        clientResponse = clientHelper.getClient(clientExternalId);
+        clientResponse = ClientHelper.getClientByExternalId(clientExternalId);
         ClientStatusChecker.verifyClientStatus(ClientStatus.REJECTED, clientResponse);
         log.info("Client data id {} and status {}", clientExternalId, clientResponse.getStatus().getCode());
 
         // Activate Client action
-        commandResponse = clientHelper.activateClient(clientExternalId, ClientRequestBuilders.activateClient(DEFAULT_ACTIVATION_DATE));
+        commandResponse = ClientHelper.activateClient(clientExternalId, ClientHelper.DEFAULT_DATE);
         assertNotNull(commandResponse);
         assertNotNull(commandResponse.getResourceExternalId());
         assertEquals(clientExternalId, commandResponse.getResourceExternalId());
         log.info("Client data id {} and external Id {}", commandResponse.getResourceId(), clientExternalId);
-        assertEquals(clientId, commandResponse.getResourceId());
+        assertEquals(clientId.intValue(), commandResponse.getResourceId());
 
-        clientResponse = clientHelper.getClient(clientExternalId);
+        clientResponse = ClientHelper.getClientByExternalId(clientExternalId);
         ClientStatusChecker.verifyClientStatus(ClientStatus.ACTIVE, clientResponse);
         log.info("Client data id {} and status {}", clientExternalId, clientResponse.getStatus().getCode());
 
@@ -191,10 +204,11 @@ public class ClientExternalIdTest extends FeignIntegrationTest {
         // given
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
         // when
-        final PostClientsResponse clientResponse = addClientAsPerson(null);
+        final PostClientsResponse clientResponse = ClientHelper.addClientAsPerson(ClientHelper.DEFAULT_OFFICE_ID,
+                ClientHelper.LEGALFORM_ID_PERSON, null);
         final String clientExternalId = clientResponse.getResourceExternalId();
         PutClientsClientIdRequest updateRequest = new PutClientsClientIdRequest().externalId(clientExternalId);
-        final PutClientsClientIdResponse clientUpdateResponse = clientHelper.updateClient(clientExternalId, updateRequest);
+        final PutClientsClientIdResponse clientUpdateResponse = ClientHelper.updateClientByExternalId(clientExternalId, updateRequest);
         // then
         assertNotNull(clientUpdateResponse);
         assertNotNull(clientUpdateResponse.getResourceExternalId());
@@ -208,13 +222,17 @@ public class ClientExternalIdTest extends FeignIntegrationTest {
         // given
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
         // when
-        final PostClientsResponse clientResponse = addClientAsPerson(null);
+        final PostClientsResponse clientResponse = ClientHelper.addClientAsPerson(ClientHelper.DEFAULT_OFFICE_ID,
+                ClientHelper.LEGALFORM_ID_PERSON, null);
         final String clientExternalId = clientResponse.getResourceExternalId();
-        Long closureReasonId = codeHelper.retrieveOrCreateCodeValueId(ClientTestData.CLOSURE_REASON_CODE);
-        clientHelper.closeClient(clientExternalId, ClientRequestBuilders.closeClient(closureReasonId, CREATED_DATE_PLUS_ONE));
-        clientHelper.reactivateClient(clientExternalId, ClientRequestBuilders.reactivateClient(CREATED_DATE_PLUS_ONE));
+        String codeName = "ClientClosureReason";
+        HashMap<String, Object> code = CodeHelper.getCodeByName(requestSpec, responseSpec, codeName);
+        Integer closureReasonId = (Integer) CodeHelper.retrieveOrCreateCodeValue((Integer) code.get("id"), requestSpec, responseSpec)
+                .get("id");
+        ClientHelper.closeClient(clientExternalId, closureReasonId);
+        ClientHelper.reactivateClient(clientExternalId);
 
-        final DeleteClientsClientIdResponse clientDeleteResponse = clientHelper.deleteClient(clientExternalId);
+        final DeleteClientsClientIdResponse clientDeleteResponse = ClientHelper.deleteClientByExternalId(clientExternalId);
         assertNotNull(clientDeleteResponse);
         assertNotNull(clientDeleteResponse.getResourceExternalId());
         assertEquals(clientExternalId, clientDeleteResponse.getResourceExternalId());
@@ -227,10 +245,11 @@ public class ClientExternalIdTest extends FeignIntegrationTest {
         // given
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
         // when
-        final PostClientsResponse clientResponse = addClientAsPerson(null);
+        final PostClientsResponse clientResponse = ClientHelper.addClientAsPerson(ClientHelper.DEFAULT_OFFICE_ID,
+                ClientHelper.LEGALFORM_ID_PERSON, null);
         final String clientExternalId = clientResponse.getResourceExternalId();
 
-        GetClientsClientIdAccountsResponse clientAccountsResponse = clientHelper.getClientAccounts(clientExternalId);
+        GetClientsClientIdAccountsResponse clientAccountsResponse = ClientHelper.getClientAccounts(clientExternalId);
 
         // then
         assertNotNull(clientAccountsResponse);
@@ -242,11 +261,12 @@ public class ClientExternalIdTest extends FeignIntegrationTest {
     public void testGetClientTransferProposalDate() {
         // given
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
-        final PostClientsResponse clientResponse = addClientAsPerson(null);
+        final PostClientsResponse clientResponse = ClientHelper.addClientAsPerson(ClientHelper.DEFAULT_OFFICE_ID,
+                ClientHelper.LEGALFORM_ID_PERSON, null);
 
         // when
         final String clientExternalId = clientResponse.getResourceExternalId();
-        clientHelper.getProposedTransferDate(clientExternalId);
+        ClientHelper.getProposedTransferDate(clientExternalId);
 
         fetchClientByExternalId(clientResponse.getResourceExternalId());
 
@@ -258,9 +278,10 @@ public class ClientExternalIdTest extends FeignIntegrationTest {
         // given
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
         // when
-        final PostClientsResponse clientResponse = addClientAsPerson(null);
+        final PostClientsResponse clientResponse = ClientHelper.addClientAsPerson(ClientHelper.DEFAULT_OFFICE_ID,
+                ClientHelper.LEGALFORM_ID_PERSON, null);
         final String clientExternalId = clientResponse.getResourceExternalId();
-        final List<GetObligeeData> obligeeDataResponse = clientHelper.getObligeeData(clientExternalId);
+        final List<GetObligeeData> obligeeDataResponse = ClientHelper.getObligeeData(clientExternalId);
 
         // then
         assertNotNull(obligeeDataResponse);
@@ -270,12 +291,8 @@ public class ClientExternalIdTest extends FeignIntegrationTest {
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, false);
     }
 
-    private PostClientsResponse addClientAsPerson(final String externalId) {
-        return clientHelper.createClient(ClientRequestBuilders.defaultClient().externalId(externalId));
-    }
-
     private void fetchClientByExternalId(final String externalId) {
-        GetClientsClientIdResponse clientResponse = clientHelper.getClient(externalId);
+        GetClientsClientIdResponse clientResponse = ClientHelper.getClientByExternalId(externalId);
         assertNotNull(clientResponse);
         assertEquals(externalId, clientResponse.getExternalId());
     }

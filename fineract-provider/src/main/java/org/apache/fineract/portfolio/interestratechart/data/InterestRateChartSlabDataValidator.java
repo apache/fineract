@@ -155,8 +155,7 @@ public class InterestRateChartSlabDataValidator {
 
         if (amountRangeFrom != null && amountRangeTo != null) {
             if (amountRangeFrom.compareTo(amountRangeTo) > 0) {
-                baseDataValidator.reset().parameter(amountRangeFromParamName).value(amountRangeFrom)
-                        .failWithCode("from.amount.greater.than.to.amount");
+                baseDataValidator.parameter(amountRangeFromParamName).value(fromPeriod).failWithCode("from.amount.greater.than.to.amount");
             }
         }
 

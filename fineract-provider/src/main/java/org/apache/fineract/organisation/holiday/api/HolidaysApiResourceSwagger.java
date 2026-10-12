@@ -43,8 +43,6 @@ final class HolidaysApiResourceSwagger {
         public Long id;
         @Schema(example = "Good Friday")
         public String name;
-        @Schema(example = "Good Friday")
-        public String description;
         @Schema(example = "[2013, 10, 26]")
         public LocalDate fromDate;
         @Schema(example = "[2013, 10, 26]")
@@ -54,8 +52,6 @@ final class HolidaysApiResourceSwagger {
         @Schema(example = "1")
         public Long officeId;
         public EnumOptionData status;
-        @Schema(description = "Rescheduling type id, see GET /holidays/template", example = "2")
-        public Integer reschedulingType;
     }
 
     @Schema(description = "PostHolidaysRequest")

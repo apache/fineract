@@ -23,7 +23,7 @@ import org.apache.fineract.cob.processor.AbstractItemProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 public abstract class AbstractLoanItemProcessor extends AbstractItemProcessor<Loan> {
 
@@ -38,7 +38,7 @@ public abstract class AbstractLoanItemProcessor extends AbstractItemProcessor<Lo
     @Override
     public Loan process(@NonNull Loan loan) throws Exception {
         if (needToRebuildModel(loan)) {
-            progressiveLoanModelProcessingService.recalculateModelAndSave(loan);
+            progressiveLoanModelProcessingService.recalculateModelAndSave(loan.getId());
         }
         return super.process(loan);
     }

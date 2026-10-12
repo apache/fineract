@@ -23,7 +23,7 @@ import java.util.Optional;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 public interface ProjectedAmortizationScheduleRepositoryWrapper {
 

@@ -20,6 +20,7 @@ package org.apache.fineract.investor.data.attribute;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public enum SettlementModelExternalAssetOwnerLoanProductAttribute implements ExternalAssetOwnerLoanProductAttribute {
 
@@ -49,7 +50,7 @@ public enum SettlementModelExternalAssetOwnerLoanProductAttribute implements Ext
 
     @Override
     public boolean validate(String attributeValue) {
-        return this.getAttributeValue().equals(attributeValue);
+        return this.getAttributeValue().equals(attributeValue.toUpperCase(Locale.ROOT));
     }
 
     @Override

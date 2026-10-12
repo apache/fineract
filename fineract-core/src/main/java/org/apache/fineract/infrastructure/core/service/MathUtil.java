@@ -23,7 +23,7 @@ import java.math.MathContext;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 public final class MathUtil {
 

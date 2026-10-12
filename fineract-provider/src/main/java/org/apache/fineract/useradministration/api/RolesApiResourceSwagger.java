@@ -45,8 +45,6 @@ final class RolesApiResourceSwagger {
         public String name;
         @Schema(example = "This role provides all application permissions.")
         public String description;
-        @Schema(example = "false")
-        public Boolean disabled;
 
     }
 
@@ -63,8 +61,6 @@ final class RolesApiResourceSwagger {
         public String name;
         @Schema(example = "This role provides all application permissions.")
         public String description;
-        @Schema(example = "false")
-        public Boolean disabled;
 
     }
 
@@ -170,8 +166,6 @@ final class RolesApiResourceSwagger {
         public String name;
         @Schema(example = "This role provides all application permissions.")
         public String description;
-        @Schema(example = "false")
-        public Boolean disabled;
         public Collection<GetRolesRoleIdPermissionsResponsePermissionData> permissionUsageData;
 
     }

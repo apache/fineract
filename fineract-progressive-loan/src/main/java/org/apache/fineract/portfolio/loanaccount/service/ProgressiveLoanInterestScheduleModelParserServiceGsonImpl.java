@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.loanproduct.calc.data.InterestPeriod;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.calc.data.RepaymentPeriod;
 import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 @Slf4j
 @RequiredArgsConstructor

@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -34,11 +33,10 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.DependentExternalEvent;
 import org.apache.fineract.infrastructure.event.business.domain.NoExternalEvent;
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventService;
-import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionExecution;
 import org.springframework.transaction.TransactionExecutionListener;
@@ -52,7 +50,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     private final Map<Class, List<BusinessEventListener>> preListeners = new HashMap<>();
     private final Map<Class, List<BusinessEventListener>> postListeners = new HashMap<>();
 
-    private final ThreadLocal<Integer> eventRecordingDepth = ThreadLocal.withInitial(() -> 0);
+    private final ThreadLocal<Boolean> eventRecordingEnabled = ThreadLocal.withInitial(() -> false);
     private final ThreadLocal<List<BusinessEvent<?>>> recordedEvents = ThreadLocal.withInitial(ArrayList::new);
 
     private final ExternalEventService externalEventService;
@@ -113,20 +111,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     @Override
     public boolean isExternalEventPostingEnabled(final BusinessEvent<?> businessEvent) {
         return !(businessEvent instanceof NoExternalEvent) && isExternalEventPostingEnabled()
-                && externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(businessEvent)
-                && isGoverningExternalEventTypeEnabled(businessEvent);
-    }
-
-    /**
-     * A {@link DependentExternalEvent} is also held back while the event type governing it is disabled, so switching
-     * off one transaction type's event silences the adjustments of that transaction type too.
-     */
-    private boolean isGoverningExternalEventTypeEnabled(final BusinessEvent<?> businessEvent) {
-        if (!(businessEvent instanceof DependentExternalEvent dependentEvent)) {
-            return true;
-        }
-        return dependentEvent.getGoverningExternalEventType()
-                .map(externalBusinessEventConfigurationService::isExternalEventTypeConfiguredForPosting).orElse(true);
+                && externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(businessEvent);
     }
 
     @Override
@@ -157,7 +142,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     }
 
     private boolean isExternalEventRecordingEnabled() {
-        return eventRecordingDepth.get() > 0;
+        return eventRecordingEnabled.get();
     }
 
     private boolean isExternalEventPostingEnabled() {
@@ -171,47 +156,13 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     }
 
     @Override
-    public void withExternalEventRecording(final Runnable action) {
-        withExternalEventRecording(() -> {
-            action.run();
-            return null;
-        });
+    public void startExternalEventRecording() {
+        eventRecordingEnabled.set(true);
     }
 
     @Override
-    public <T> T withExternalEventRecording(final Supplier<T> action) {
-        int recordedBeforeThisWindow = recordedEvents.get().size();
-        startExternalEventRecording();
-        boolean completed = false;
-        try {
-            T result = action.get();
-            completed = true;
-            return result;
-        } finally {
-            if (completed) {
-                stopExternalEventRecording();
-            } else {
-                abandonExternalEventRecording(recordedBeforeThisWindow);
-            }
-        }
-    }
-
-    private void startExternalEventRecording() {
-        eventRecordingDepth.set(eventRecordingDepth.get() + 1);
-    }
-
-    /**
-     * Closes one recording window. Only the outermost one posts: a nested window leaves its events in the buffer for
-     * the window enclosing it, so the whole nest reaches the consumer as one bulk event.
-     */
-    private void stopExternalEventRecording() {
-        int remainingDepth = eventRecordingDepth.get() - 1;
-        eventRecordingDepth.set(remainingDepth);
-        if (remainingDepth > 0) {
-            log.debug("Keeping {} recorded events for the enclosing recording window", recordedEvents.get().size());
-            return;
-        }
-        eventRecordingDepth.remove();
+    public void stopExternalEventRecording() {
+        eventRecordingEnabled.set(false);
         try {
             List<BusinessEvent<?>> recordedBusinessEvents = recordedEvents.get();
             if (isExternalEventPostingEnabled()) {
@@ -232,24 +183,9 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
         }
     }
 
-    /**
-     * Abandons one recording window whose action did not finish, without posting anything for it. This is the mirror
-     * image of {@link #stopExternalEventRecording()} and unwinds exactly one level, so an enclosing window is left
-     * intact: whether the exception actually propagates past it is the caller's business, not something this class can
-     * know. Only the events this window recorded are discarded - the enclosing window keeps its own.
-     */
-    private void abandonExternalEventRecording(final int recordedBeforeThisWindow) {
-        int remainingDepth = eventRecordingDepth.get() - 1;
-        if (remainingDepth > 0) {
-            eventRecordingDepth.set(remainingDepth);
-            List<BusinessEvent<?>> recordedBusinessEvents = recordedEvents.get();
-            recordedBusinessEvents.subList(recordedBeforeThisWindow, recordedBusinessEvents.size()).clear();
-            log.debug("Abandoned a nested recording window, leaving {} recorded events for the enclosing one",
-                    recordedBusinessEvents.size());
-            return;
-        }
-        // Removed rather than zeroed so nothing is left behind on a pooled thread.
-        eventRecordingDepth.remove();
+    @Override
+    public void resetEventRecording() {
+        eventRecordingEnabled.set(false);
         recordedEvents.remove();
     }
 

@@ -55,24 +55,25 @@ import org.mockito.quality.Strictness;
 import org.quartz.JobExecutionException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.job.Job;
-import org.springframework.batch.core.job.JobExecution;
-import org.springframework.batch.core.job.parameters.InvalidJobParametersException;
-import org.springframework.batch.core.job.parameters.JobParameters;
-import org.springframework.batch.core.launch.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.launch.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.batch.core.launch.JobRestartException;
-import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersIncrementer;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class JobStarterTest {
 
     @Mock
-    private JobRepository jobRepository;
+    private JobExplorer jobExplorer;
     @Mock
-    private JobOperator jobOperator;
+    private JobLauncher jobLauncher;
     @Mock
     private JobParameterRepository jobParameterRepository;
     @Mock
@@ -99,8 +100,8 @@ public class JobStarterTest {
         when(scheduledJobDetail.getId()).thenReturn(1L);
         when(jobParameterRepository.findJobParametersByJobId(1L))
                 .thenReturn(List.of(new JobParameter().setJobId(1L).setParameterName("testParamKey").setParameterValue("testParamValue")));
-        Map<String, org.springframework.batch.core.job.parameters.JobParameter<?>> result = underTest.getJobParameter(scheduledJobDetail);
-        Assertions.assertEquals("testParamValue", result.get("testParamKey").value());
+        Map<String, org.springframework.batch.core.JobParameter<?>> result = underTest.getJobParameter(scheduledJobDetail);
+        Assertions.assertEquals("testParamValue", result.get("testParamKey").getValue());
     }
 
     @Test
@@ -114,7 +115,7 @@ public class JobStarterTest {
 
     @Test
     public void runWithComplete() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException,
-            InvalidJobParametersException, JobRestartException, JobExecutionException {
+            JobParametersInvalidException, JobRestartException, JobExecutionException {
         JobExecution jobExecution = Mockito.mock(JobExecution.class);
         Job job = Mockito.mock(Job.class);
         ScheduledJobDetail scheduledJobDetail = Mockito.mock(ScheduledJobDetail.class);
@@ -126,7 +127,7 @@ public class JobStarterTest {
 
     @Test
     public void runWithFailed() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException,
-            InvalidJobParametersException, JobRestartException, JobExecutionException {
+            JobParametersInvalidException, JobRestartException, JobExecutionException {
         JobExecution jobExecution = Mockito.mock(JobExecution.class);
         Job job = Mockito.mock(Job.class);
         ScheduledJobDetail scheduledJobDetail = Mockito.mock(ScheduledJobDetail.class);
@@ -137,17 +138,19 @@ public class JobStarterTest {
             when(jobExecution.getExitStatus()).thenReturn(new ExitStatus(failedStatus.name(), "testException"));
             JobExecutionException exception = Assertions.assertThrows(JobExecutionException.class,
                     () -> underTest.run(job, scheduledJobDetail, Set.of(), "default"));
-            Assertions.assertEquals(
-                    String.format("exitCode=%s;exitDescription=%s;exitException=null", failedStatus.name(), "testException"),
+            Assertions.assertEquals(String.format("exitCode=%s;exitDescription=%s", failedStatus.name(), "testException"),
                     exception.getMessage());
         }
     }
 
-    private void setupMocks(JobExecution jobExecution, Job job, ScheduledJobDetail scheduledJobDetail) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, InvalidJobParametersException, JobRestartException {
+    private void setupMocks(JobExecution jobExecution, Job job, ScheduledJobDetail scheduledJobDetail) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
         when(scheduledJobDetail.getId()).thenReturn(1L);
         when(scheduledJobDetail.getJobName()).thenReturn("testJobName");
         when(jobParameterRepository.findJobParametersByJobId(1L)).thenReturn(List.of(new JobParameter().setJobId(1L).setParameterName("testParamKey").setParameterValue("testParamValue")));
-        when(jobOperator.start(any(Job.class), any(JobParameters.class))).thenReturn(jobExecution);
+        when(jobLauncher.run(any(Job.class), any(JobParameters.class))).thenReturn(jobExecution);
+        JobParametersIncrementer jobParametersIncrementer = Mockito.mock(JobParametersIncrementer.class);
+        when(jobParametersIncrementer.getNext(any(JobParameters.class))).thenReturn(new JobParameters());
+        when(job.getJobParametersIncrementer()).thenReturn(jobParametersIncrementer);
         JobParameterProvider<?> jobParameterProvider = Mockito.mock(JobParameterProvider.class);
         when(jobParameterProvider.canProvideParametersForJob("testJobName")).thenReturn(true);
         when(jobParameterProviders.stream()).thenReturn(Stream.of(jobParameterProvider));

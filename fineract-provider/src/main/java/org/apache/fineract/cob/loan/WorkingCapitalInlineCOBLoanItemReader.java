@@ -23,9 +23,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.fineract.cob.COBConstant;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
-import org.jspecify.annotations.NonNull;
-import org.springframework.batch.core.step.StepExecution;
-import org.springframework.batch.infrastructure.item.ExecutionContext;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.lang.NonNull;
 
 public class WorkingCapitalInlineCOBLoanItemReader extends AbstractLoanItemReader<WorkingCapitalLoan> {
 
@@ -33,7 +34,7 @@ public class WorkingCapitalInlineCOBLoanItemReader extends AbstractLoanItemReade
         super(loanRepository);
     }
 
-    @Override
+    @BeforeStep
     @SuppressWarnings({ "unchecked" })
     public void beforeStep(@NonNull StepExecution stepExecution) {
         ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();

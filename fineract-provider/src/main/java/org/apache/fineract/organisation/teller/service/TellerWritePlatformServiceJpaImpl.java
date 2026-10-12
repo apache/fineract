@@ -188,7 +188,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     "name", name);
         }
 
-        log.error("Error occurred.", dve);
+        log.error("Error occured.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.teller.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

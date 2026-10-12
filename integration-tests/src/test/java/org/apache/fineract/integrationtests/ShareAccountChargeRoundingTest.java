@@ -23,16 +23,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.Gson;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.accounting.journalentry.service.AccountingProcessorHelper;
-import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.AccountChargesRequest;
 import org.apache.fineract.client.models.AccountRequest;
 import org.apache.fineract.client.models.ChargeRequest;
@@ -41,39 +44,37 @@ import org.apache.fineract.client.models.GetAccountsPurchasedShares;
 import org.apache.fineract.client.models.GetAccountsTypeAccountIdResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
+import org.apache.fineract.client.models.PostAccountsTypeAccountIdRequest;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostProductsTypeRequest;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
-import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignShareAccountHelper;
-import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
-import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
+import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareAccountTransactionHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareProductHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareProductTransactionHelper;
+import org.apache.fineract.integrationtests.savings.base.BaseSavingsIntegrationTest;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountStatusType;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
+public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
 
+    private Long clientId;
+    private ChargesHelper chargesHelper;
     private static final String DATE = "01 January 2026";
     private static final String LATER_DATE = "01 June 2026";
 
-    private static FeignShareAccountHelper shareAccountHelper;
-
-    private Long clientId;
-
-    @BeforeAll
-    public static void setupShareAccountHelper() {
-        shareAccountHelper = new FeignShareAccountHelper(FineractFeignClientHelper.getFineractFeignClient());
-    }
-
     @BeforeEach
     public void setup() {
-        clientId = createClient();
+        clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        chargesHelper = new ChargesHelper();
     }
 
     /** ACTIVATION CHARGE - FLAT **/
@@ -132,7 +133,7 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 0.5, DATE));
 
-            assertEquals(400, exception.getStatus());
+            assertEquals(400, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.share.charge.amount.rounded.to.zero"));
         });
     }
@@ -154,7 +155,8 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
             BigDecimal expectedChargeAmount = applyRoundingRules(new BigDecimal("19.8"), 0, 1);
             assertBigDecimalEquals(expectedChargeAmount, actualChargeAmount);
 
-            GetAccountsTypeAccountIdResponse accountData = getShareAccount(shareAccountId);
+            GetAccountsTypeAccountIdResponse accountData = ok(
+                    fineractClient().shareAccounts.retrieveOneShareAccount(shareAccountId, "share"));
             assertShareAccountActive(accountData);
 
             // Find the charge payment transaction
@@ -228,7 +230,7 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 0.5, DATE));
 
-            assertEquals(400, exception.getStatus());
+            assertEquals(400, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.share.charge.amount.rounded.to.zero"));
         });
     }
@@ -285,7 +287,7 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 0.5, DATE));
 
-            assertEquals(400, exception.getStatus());
+            assertEquals(400, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.share.charge.amount.rounded.to.zero"));
         });
     }
@@ -433,39 +435,23 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
     // -----------------------------
 
     private Long createSavingsProduct(int digitsAfterDecimal, int inMultiplesOf) {
-        return savingsProductHelper.createSavingsProduct(baseSavingsProduct(digitsAfterDecimal, inMultiplesOf)).getResourceId();
+        return createProduct(baseSavingsProduct(digitsAfterDecimal, inMultiplesOf)).getResourceId();
     }
 
-    /** The daily-interest product the RestAssured base built, in USD and with the rounding under test. */
     private PostSavingsProductsRequest baseSavingsProduct(int digitsAfterDecimal, int inMultiplesOf) {
-        return new PostSavingsProductsRequest()//
-                .locale(SavingsTestData.LOCALE)//
-                .name(Utils.uniqueRandomStringGenerator("DAILY_INTEREST", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
-                .description("Daily interest posting product")//
-                .nominalAnnualInterestRate(10.0)//
-                .digitsAfterDecimal(digitsAfterDecimal)//
-                .inMultiplesOf(inMultiplesOf)//
-                .currencyCode("USD")//
-                .accountingRule(SavingsTestData.AccountingRule.NONE)//
-                .interestCalculationDaysInYearType(SavingsTestData.InterestCalculationDaysInYearType.DAYS_365)//
-                .interestCompoundingPeriodType(SavingsTestData.InterestCompoundingPeriodType.DAILY)//
-                .interestCalculationType(SavingsTestData.InterestCalculationType.AVERAGE_DAILY_BALANCE)//
-                .interestPostingPeriodType(SavingsTestData.InterestPostingPeriodType.DAILY)//
-                .withdrawalFeeForTransfers(false)//
-                .enforceMinRequiredBalance(false)//
-                .allowOverdraft(false)//
-                .withHoldTax(false)//
-                .isDormancyTrackingActive(false);
+        return dailyInterestPostingProduct().digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf).currencyCode("USD");
     }
 
     private Long createAndActivateSavingsAccount(Long productId, String date) {
-        return createApproveActivateSavings(clientId, productId, date);
+        Long savingsId = applySavingsAccount(applySavingsRequest(clientId, productId, date)).getSavingsId();
+        approveSavingsAccount(savingsId, date);
+        activateSavingsAccount(savingsId, date);
+        return savingsId;
     }
 
     private PostChargesResponse createActivationFeeFlatCharge(double amount) {
         String uniqueChargeName = "Share Account Activation Fee Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(13) // ACTIVATION
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
@@ -473,7 +459,7 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
 
     private PostChargesResponse createPurchaseFeeFlatCharge(double amount) {
         String uniqueChargeName = "Share Account Purchase Fee Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(14) // PURCHASE
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
@@ -481,7 +467,7 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
 
     private PostChargesResponse createPurchaseFeePercentCharge(double amount) {
         String uniqueChargeName = "Share Account Purchase Fee Percent " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(14) // PURCHASE
                 .chargeCalculationType(2) // PERCENT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
@@ -489,7 +475,7 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
 
     private PostChargesResponse createRedeemFeeFlatCharge(double amount) {
         String uniqueChargeName = "Share Account Redeem Fee Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(15) // REDEEM
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
@@ -497,7 +483,7 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
 
     private PostChargesResponse createRedeemFeePercentCharge(double amount) {
         String uniqueChargeName = "Share Account Redeem Fee Percent " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(15) // REDEEM
                 .chargeCalculationType(2) // PERCENT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
@@ -508,70 +494,70 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
         PostProductsTypeRequest request = new PostProductsTypeRequest().name("Share Product " + UUID.randomUUID()).shortName("SP")
                 .description("Description").currencyCode("USD").digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf)
                 .locale("en").totalShares(1000).unitPrice(1).nominalShares(20).allowDividendCalculationForInactiveClients(true)
-                .accountingRule(SavingsTestData.AccountingRule.NONE);
+                .accountingRule(1);
 
-        return shareAccountHelper.createShareProduct(request);
+        return ok(fineractClient().shareProducts.createShareProduct("share", request)).getResourceId();
     }
 
-    /** Mirrors the RestAssured {@code ShareProductHelper} defaults, which differ from the plain share product above. */
     private Long createShareProductWithAccountingRule2(int digitsAfterDecimal, int inMultiplesOf) {
         String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+
+        FineractFeignClient feignClient = FineractFeignClientHelper.getFineractFeignClient();
+        FeignAccountHelper accountHelper = new FeignAccountHelper(feignClient);
 
         Account shareReference = accountHelper.createAssetAccount("Share Reference " + suffix);
         Account shareSuspense = accountHelper.createLiabilityAccount("Share Suspense " + suffix);
         Account feeIncome = accountHelper.createIncomeAccount("Share Fee Income " + suffix);
         Account shareEquity = accountHelper.createEquityAccount("Share Equity " + suffix);
 
-        return shareAccountHelper.createShareProduct(new PostProductsTypeRequest()//
-                .name(Utils.uniqueRandomStringGenerator("SHARE_PRODUCT_", 6))//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
-                .description(Utils.randomStringGenerator("", 20))//
-                .currencyCode("USD")//
-                .locale("en_GB")//
-                .digitsAfterDecimal(digitsAfterDecimal)//
-                .inMultiplesOf(inMultiplesOf)//
-                .totalShares(10000)//
-                .sharesIssued(10000)//
-                .unitPrice(2)//
-                .minimumShares(10)//
-                .nominalShares(20)//
-                .maximumShares(3000)//
-                .allowDividendCalculationForInactiveClients(true)//
-                .minimumActivePeriodForDividends(1)//
-                .minimumactiveperiodFrequencyType(0)//
-                .lockinPeriodFrequency(1)//
-                .lockinPeriodFrequencyType(0)//
-                .accountingRule(SavingsTestData.AccountingRule.CASH_BASED)//
-                .shareReferenceId(SavingsRequestBuilders.accountId(shareReference))//
-                .shareSuspenseId(SavingsRequestBuilders.accountId(shareSuspense))//
-                .shareEquityId(SavingsRequestBuilders.accountId(shareEquity))//
-                .incomeFromFeeAccountId(SavingsRequestBuilders.accountId(feeIncome)));
+        Account[] accounts = { shareReference, shareSuspense, shareEquity, feeIncome };
+
+        String shareProductJson = new ShareProductHelper().withCashBasedAccounting(accounts).withDigitsAfterDecimal(digitsAfterDecimal)
+                .withInMultiplesOf(inMultiplesOf).build();
+
+        return ShareProductTransactionHelper.createShareProduct(shareProductJson, requestSpec, responseSpec).longValue();
     }
 
     private Long applyShareAccount(Long clientId, Long productId, Long savingsAccountId, Long chargeId, double chargeAmount, String date) {
         AccountChargesRequest charge = new AccountChargesRequest().chargeId(chargeId).amount(new BigDecimal(chargeAmount));
 
         AccountRequest request = new AccountRequest().clientId(clientId).productId(productId).submittedDate(date).locale("en")
-                .dateFormat(SavingsTestData.DATETIME_PATTERN).savingsAccountId(savingsAccountId).requestedShares(100L).applicationDate(date)
+                .dateFormat(DATETIME_PATTERN).savingsAccountId(savingsAccountId).requestedShares(100L).applicationDate(date)
                 .charges(List.of(charge));
 
-        return shareAccountHelper.applyShareAccount(request);
+        return ok(fineractClient().shareAccounts.createShareAccount("share", request)).getResourceId();
     }
 
     private void approveShareAccount(Long shareAccountId) {
-        shareAccountHelper.approve(shareAccountId);
+        ok(fineractClient().shareAccounts.handleCommandsShareAccount("share", shareAccountId, new PostAccountsTypeAccountIdRequest(),
+                "approve"));
     }
 
     private void activateShareAccount(Long shareAccountId, String activationDate) {
-        shareAccountHelper.activate(shareAccountId, activationDate, SavingsTestData.DATETIME_PATTERN, "en");
+        Map<String, Object> activateMap = new HashMap<>();
+        activateMap.put("dateFormat", "dd MMMM yyyy");
+        activateMap.put("activatedDate", activationDate);
+        activateMap.put("locale", "en");
+
+        String activateJson = new Gson().toJson(activateMap);
+
+        ShareAccountTransactionHelper.postCommand("activate", shareAccountId.intValue(), activateJson, requestSpec, responseSpec);
     }
 
     private void redeemShares(Long shareAccountId, long shares, String requestedDate) {
-        shareAccountHelper.redeemShares(shareAccountId, shares, requestedDate, SavingsTestData.DATETIME_PATTERN, "en");
+        Map<String, Object> redeemMap = new HashMap<>();
+        redeemMap.put("requestedDate", requestedDate);
+        redeemMap.put("dateFormat", "dd MMMM yyyy");
+        redeemMap.put("locale", "en");
+        redeemMap.put("requestedShares", String.valueOf(shares));
+
+        String redeemJson = new Gson().toJson(redeemMap);
+
+        ShareAccountTransactionHelper.postCommand("redeemshares", shareAccountId.intValue(), redeemJson, requestSpec, responseSpec);
     }
 
     private GetAccountsTypeAccountIdResponse getShareAccount(Long shareAccountId) {
-        return shareAccountHelper.getShareAccount(shareAccountId);
+        return ok(fineractClient().shareAccounts.retrieveOneShareAccount(shareAccountId, "share"));
     }
 
     private BigDecimal getShareChargeAmount(Long shareAccountId, Long chargeId) {
@@ -644,7 +630,10 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
     }
 
     private GetJournalEntriesTransactionIdResponse getJournalEntriesForShareTransaction(Long id) {
-        return journalEntryHelper.getJournalEntriesByTransactionId(AccountingProcessorHelper.SHARE_TRANSACTION_IDENTIFIER + id);
+        String transactionId = AccountingProcessorHelper.SHARE_TRANSACTION_IDENTIFIER + id;
+        FineractFeignClient feignClient = FineractFeignClientHelper.getFineractFeignClient();
+        FeignJournalEntryHelper feignJournalEntryHelper = new FeignJournalEntryHelper(feignClient);
+        return feignJournalEntryHelper.getJournalEntriesByTransactionId(transactionId);
     }
 
     private JournalEntryTransactionItem getDebitEntry(List<JournalEntryTransactionItem> entries) {

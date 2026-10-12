@@ -29,11 +29,11 @@ import org.apache.fineract.cob.common.CommonPartitioner;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.cob.workingcapitalloan.businessstep.WorkingCapitalLoanCOBBusinessStep;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
-import org.jspecify.annotations.NonNull;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.batch.core.partition.Partitioner;
-import org.springframework.batch.core.step.StepExecution;
-import org.springframework.batch.infrastructure.item.ExecutionContext;
+import org.springframework.batch.core.partition.support.Partitioner;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.lang.NonNull;
 
 @Slf4j
 public class WorkingCapitalLoanCOBPartitioner extends CommonPartitioner implements Partitioner {

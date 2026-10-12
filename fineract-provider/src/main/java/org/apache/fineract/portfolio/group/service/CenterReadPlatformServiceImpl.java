@@ -509,16 +509,14 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         validateForGenerateCollectionSheet(staffId);
         final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
         String sql = centerCalendarMapper.schema();
-        final String groupBy = " group by ce.id, ce.display_name, g.office_id, g.staff_id, s.display_name, c.id, ci.id, g.account_no, g.external_id, g.status_enum, g.activation_date, g.hierarchy";
         Collection<CenterData> centerDataArray;
         if (staffId != null) {
             sql += " and g.staff_id = ? ";
             sql += " and lrs.duedate <= ? "; // and l.loan_type_enum = 3 ";
-            sql += groupBy;
+            sql += " group by c.id, ci.id, g.account_no, g.external_id, g.status_enum, g.activation_date, g.hierarchy";
             centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, // NOSONAR
                     meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, officeId, staffId, meetingDate);
         } else {
-            sql += groupBy;
             centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, // NOSONAR
                     meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, officeId);
         }

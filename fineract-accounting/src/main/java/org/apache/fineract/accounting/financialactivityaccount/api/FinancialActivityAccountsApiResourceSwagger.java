@@ -87,9 +87,9 @@ final class FinancialActivityAccountsApiResourceSwagger {
 
         }
 
-        public static final class PutFinancialActivityAccountsChanges {
+        public static final class PutFinancialActivityAccountscommentsSwagger {
 
-            private PutFinancialActivityAccountsChanges() {}
+            private PutFinancialActivityAccountscommentsSwagger() {}
 
             @Schema(example = "1")
             public Long glAccountId;
@@ -97,7 +97,7 @@ final class FinancialActivityAccountsApiResourceSwagger {
 
         @Schema(example = "1")
         public Long resourceId;
-        public PutFinancialActivityAccountsChanges changes;
+        public PutFinancialActivityAccountscommentsSwagger comments;
     }
 
     @Schema(description = "DeleteFinancialActivityAccountsResponse")

@@ -72,7 +72,8 @@ public class TaxComponent extends AbstractAuditableCustom {
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
-    @OneToMany(mappedBy = "taxComponent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "tax_component_id", referencedColumnName = "id", nullable = false)
     private Set<TaxComponentHistory> taxComponentHistories = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.DETACH, mappedBy = "taxComponent", orphanRemoval = false, fetch = FetchType.EAGER)
@@ -119,7 +120,7 @@ public class TaxComponent extends AbstractAuditableCustom {
             updateStartDate(command, changes, true);
             LocalDate newStartDate = this.startDate;
 
-            TaxComponentHistory history = TaxComponentHistory.createTaxComponentHistory(this, this.percentage, oldStartDate, newStartDate);
+            TaxComponentHistory history = TaxComponentHistory.createTaxComponentHistory(this.percentage, oldStartDate, newStartDate);
             this.taxComponentHistories.add(history);
             this.percentage = newValue;
 

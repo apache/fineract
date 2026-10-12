@@ -27,9 +27,7 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.investor.config.InvestorModuleIsEnabledCondition;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMappingRepository;
-import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMappingRepository;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionOwnerTaggingData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
@@ -44,35 +42,20 @@ public class ExternalAssetOwnerJournalEntryServiceImpl implements ExternalAssetO
     private final ExternalAssetOwnerJournalEntryMappingRepository externalAssetOwnerJournalEntryMappingRepository;
     private final ExternalAssetOwnerTransferLoanMappingRepository externalAssetOwnerTransferLoanMappingRepository;
     private final LoanTransactionRepository loanTransactionRepository;
-    private final ExcludedTransactionTypesService excludedTransactionTypesService;
 
     @PostConstruct
     public void addListeners() {
-        businessEventNotifierService.addPostBusinessEventListener(LoanJournalEntryCreatedBusinessEvent.class,
-                event -> handleJournalEntryCreated(event.get()));
-    }
+        businessEventNotifierService.addPostBusinessEventListener(LoanJournalEntryCreatedBusinessEvent.class, event -> {
+            JournalEntry journalEntry = event.get();
 
-    // Package-private for testing purposes.
-    void handleJournalEntryCreated(final JournalEntry journalEntry) {
-        LoanTransactionOwnerTaggingData taggingData = loanTransactionRepository
-                .findOwnerTaggingDataById(journalEntry.getLoanTransactionId()).orElseThrow();
+            Long loanId = loanTransactionRepository.findLoanIdById(journalEntry.getLoanTransactionId()).orElseThrow();
 
-        externalAssetOwnerTransferLoanMappingRepository.findByLoanId(taggingData.getLoanId())
-                .ifPresent(transferLoanMapping -> attributeToOwner(journalEntry, taggingData, transferLoanMapping));
-    }
-
-    private void attributeToOwner(final JournalEntry journalEntry, final LoanTransactionOwnerTaggingData taggingData,
-            final ExternalAssetOwnerTransferLoanMapping transferLoanMapping) {
-        if (excludedTransactionTypesService.isExcluded(taggingData.getLoanProductId(), taggingData.getTransactionType())) {
-            log.debug(
-                    "Skipping external asset owner attribution of journal entry of loan transaction {}: transaction type {} is excluded for loan product {}",
-                    journalEntry.getLoanTransactionId(), taggingData.getTransactionType(), taggingData.getLoanProductId());
-            return;
-        }
-
-        ExternalAssetOwnerJournalEntryMapping mapping = new ExternalAssetOwnerJournalEntryMapping();
-        mapping.setJournalEntry(journalEntry);
-        mapping.setOwner(transferLoanMapping.getOwnerTransfer().getOwner());
-        externalAssetOwnerJournalEntryMappingRepository.saveAndFlush(mapping);
+            externalAssetOwnerTransferLoanMappingRepository.findByLoanId(loanId).ifPresent(transferLoanMapping -> {
+                ExternalAssetOwnerJournalEntryMapping mapping = new ExternalAssetOwnerJournalEntryMapping();
+                mapping.setJournalEntry(journalEntry);
+                mapping.setOwner(transferLoanMapping.getOwnerTransfer().getOwner());
+                externalAssetOwnerJournalEntryMappingRepository.saveAndFlush(mapping);
+            });
+        });
     }
 }

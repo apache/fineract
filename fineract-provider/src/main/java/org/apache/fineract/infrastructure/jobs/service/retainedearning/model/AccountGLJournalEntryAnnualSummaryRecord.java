@@ -32,6 +32,5 @@ public class AccountGLJournalEntryAnnualSummaryRecord {
     private String glAcct;
     private ExternalId assetOwner;
     private BigDecimal endingBalance;
-    private String originatorExternalIds;
 
 }

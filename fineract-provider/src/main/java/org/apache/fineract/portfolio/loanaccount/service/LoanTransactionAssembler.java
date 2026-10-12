@@ -35,7 +35,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 @RequiredArgsConstructor
 public class LoanTransactionAssembler {
@@ -73,7 +73,7 @@ public class LoanTransactionAssembler {
             @NonNull LocalDate transactionDate) {
         ExternalId externalId = externalIdFactory.create();
 
-        BigDecimal interestPortion = MathUtil.subtractToZero(installment.getInterestCharged(), installment.getCreditedInterest());
+        BigDecimal interestPortion = installment.getInterestCharged();
         BigDecimal feeChargesPortion = installment.getFeeChargesCharged();
         BigDecimal penaltyChargesPortion = installment.getPenaltyCharges();
         BigDecimal transactionAmount = MathUtil.add(interestPortion, feeChargesPortion, penaltyChargesPortion);

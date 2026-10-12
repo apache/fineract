@@ -59,8 +59,6 @@ public final class WorkingCapitalLoanChargeData {
 
     private final BigDecimal amountWrittenOff;
 
-    private final BigDecimal amountWaived;
-
     private final BigDecimal amountOutstanding;
 
     private final List<ChargeData> chargeOptions;
@@ -80,8 +78,8 @@ public final class WorkingCapitalLoanChargeData {
     public WorkingCapitalLoanChargeData(Long id, Long chargeId, String name, ChargeTimeType chargeTimeType, LocalDate submittedOnDate,
             LocalDate dueDate, ChargeCalculationType chargeCalculationType, String cCode, String cName, Integer cDecimalPlaces,
             Integer cInMultiplesOf, String cDisplaySymbol, String cNameCode, BigDecimal amount, BigDecimal amountPaid,
-            BigDecimal amountWrittenOff, BigDecimal amountWaived, boolean penalty, ChargePaymentMode chargePaymentMode, boolean paid,
-            Long loanId, ExternalId externalId, ExternalId externalLoanId) {
+            BigDecimal amountWrittenOff, boolean penalty, ChargePaymentMode chargePaymentMode, boolean paid, Long loanId,
+            ExternalId externalId, ExternalId externalLoanId) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -93,8 +91,7 @@ public final class WorkingCapitalLoanChargeData {
         this.amount = amount;
         this.amountPaid = amountPaid;
         this.amountWrittenOff = amountWrittenOff;
-        this.amountWaived = amountWaived;
-        this.amountOutstanding = MathUtil.subtract(amount, amountPaid, amountWrittenOff, amountWaived);
+        this.amountOutstanding = MathUtil.subtract(amount, amountPaid, amountWrittenOff);
         this.chargeOptions = null;
         this.penalty = penalty;
         this.chargePaymentMode = ChargeEnumerations.chargePaymentMode(chargePaymentMode);

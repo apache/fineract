@@ -27,21 +27,17 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
-import org.apache.fineract.portfolio.delinquency.helper.InstallmentDelinquencyAggregator;
 import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
-import org.apache.fineract.portfolio.loanaccount.data.InstallmentLevelDelinquency;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCollectionData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyTagHistoryData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanRangeScheduleDelinquencyData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeScheduleTagHistory;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
@@ -59,22 +55,27 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImpl implements Wor
     private final WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository delinquencyRangeScheduleTagHistoryRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository delinquencyRangeScheduleRepository;
     private final WorkingCapitalLoanDelinquencyActionRepository delinquencyActionRepository;
-    private final WorkingCapitalLoanTransactionFinder transactionFinder;
 
     @Override
     public WorkingCapitalLoanCollectionData getCollectionData(Long loanId, LocalDate businessDate) {
         final WorkingCapitalLoanCollectionData template = WorkingCapitalLoanCollectionData.initializeEmptyData();
         List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> byLoanIdOrderByAddedOnDateDesc = delinquencyRangeScheduleTagHistoryRepository
                 .findByLoanIdOrderByAddedOnDateDesc(loanId);
-        List<WorkingCapitalLoanRangeScheduleDelinquencyData> list = aggregateActiveTagsByRange(byLoanIdOrderByAddedOnDateDesc);
+        List<WorkingCapitalLoanRangeScheduleDelinquencyData> list = byLoanIdOrderByAddedOnDateDesc.stream()
+                // get active delinquency tags
+                .filter(x -> x.getLiftedOnDate() == null).map(delinquencyRangeScheduleTagHistoryMapper::mapForCollectionData).toList();
 
-        findDelinquencyStartDate(byLoanIdOrderByAddedOnDateDesc).ifPresent(delinquencyStartDate -> {
-            template.setDelinquentDays(DateUtils.getDifferenceInDays(delinquencyStartDate, businessDate) + 1);
-            template.setDelinquentDate(delinquencyStartDate);
+        Optional<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> oldestDelinquentTag = byLoanIdOrderByAddedOnDateDesc.stream()
+                .filter(x -> x.getLiftedOnDate() == null)
+                .min(Comparator.comparing(WorkingCapitalLoanDelinquencyRangeScheduleTagHistory::getAddedOnDate));
+
+        if (oldestDelinquentTag.isPresent()) {
+            template.setDelinquentDays(DateUtils.getDifferenceInDays(oldestDelinquentTag.get().getAddedOnDate(), businessDate) + 1);
+            template.setDelinquentDate(oldestDelinquentTag.get().getAddedOnDate());
             BigDecimal delinquentAmount = delinquencyRangeScheduleRepository.getTotalDelinquentAmount(loanId);
             template.setDelinquentAmount(delinquentAmount);
             template.setDelinquentPrincipal(delinquentAmount);
-        });
+        }
 
         delinquencyRangeScheduleRepository.findTopByLoanIdAndMinPaymentCriteriaMetFalseOrderByFromDateAsc(loanId)
                 .map(WorkingCapitalLoanDelinquencyRangeSchedule::getDelinquentDays).ifPresent(template::setPastDueDays);
@@ -82,52 +83,7 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImpl implements Wor
         template.setInstallmentLevelDelinquency(list);
         template.setDelinquencyPausePeriods(retrieveDelinquencyPausePeriods(loanId, businessDate));
 
-        // Unlike everything above, the last payment / repayment are not evaluated as of businessDate: they answer
-        // "when was this loan last paid" over the whole ledger, the way Loan#getLastPaymentTransaction() does for
-        // core loans, rather than describing the delinquency picture on a given day.
-        transactionFinder.findLastPayment(loanId).ifPresent(lastPayment -> {
-            template.setLastPaymentDate(lastPayment.transactionDate());
-            template.setLastPaymentAmount(lastPayment.transactionAmount());
-        });
-        transactionFinder.findLastRepayment(loanId).ifPresent(lastRepayment -> {
-            template.setLastRepaymentDate(lastRepayment.transactionDate());
-            template.setLastRepaymentAmount(lastRepayment.transactionAmount());
-        });
-
         return template;
-    }
-
-    private List<WorkingCapitalLoanRangeScheduleDelinquencyData> aggregateActiveTagsByRange(
-            final List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> tags) {
-        final List<InstallmentLevelDelinquency> activeTags = tags.stream().filter(tag -> tag.getLiftedOnDate() == null)
-                .map(delinquencyRangeScheduleTagHistoryMapper::mapToInstallmentLevelDelinquency).toList();
-        return InstallmentDelinquencyAggregator.aggregateAndSortInstallmentLevels(activeTags).stream()
-                .map(delinquencyRangeScheduleTagHistoryMapper::mapForCollectionData).toList();
-    }
-
-    /**
-     * Escalating a period lifts its previous tag on the day the next one is added, so the delinquency start of a period
-     * is the first tag of that unbroken chain; a lift before the next add (reset, cure) breaks it.
-     */
-    private Optional<LocalDate> findDelinquencyStartDate(final List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> tagsNewestFirst) {
-        return tagsNewestFirst.stream().collect(Collectors.groupingBy(tag -> tag.getRangeSchedule().getId())).values().stream()
-                .map(WorkingCapitalLoanDelinquencyReadPlatformServiceImpl::findPeriodDelinquencyStartDate).flatMap(Optional::stream)
-                .min(Comparator.naturalOrder());
-    }
-
-    private static Optional<LocalDate> findPeriodDelinquencyStartDate(
-            final List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> periodTagsNewestFirst) {
-        LocalDate startDate = null;
-        for (WorkingCapitalLoanDelinquencyRangeScheduleTagHistory tag : periodTagsNewestFirst) {
-            if (startDate == null && tag.getLiftedOnDate() != null) {
-                continue;
-            }
-            if (startDate != null && tag.getLiftedOnDate() != null && tag.getLiftedOnDate().isBefore(startDate)) {
-                break;
-            }
-            startDate = tag.getAddedOnDate();
-        }
-        return Optional.ofNullable(startDate);
     }
 
     private List<DelinquencyPausePeriod> retrieveDelinquencyPausePeriods(final Long loanId, final LocalDate businessDate) {

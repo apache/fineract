@@ -250,7 +250,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                     "Report mailing job with name `" + name + "` already exists", ReportMailingJobConstants.NAME_PARAM_NAME, name);
         }
 
-        LOG.error("Error occurred.", dve);
+        LOG.error("Error occured.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.charge.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

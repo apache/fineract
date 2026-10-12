@@ -130,7 +130,6 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
         validateStartBeforeEnd(dataValidator, startDate, endDate);
         validateNotBeforeScheduleStart(dataValidator, startDate, workingCapitalLoan);
-        validateNotBeforeBreachReset(dataValidator, startDate, existing);
         validateNoOverlap(dataValidator, startDate, endDate, existing);
 
         throwExceptionIfValidationWarningsExist(dataValidator);
@@ -264,7 +263,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     }
 
     private void validateDisableState(final DataValidatorBuilder dataValidator, final Long loanId, final boolean isEnable) {
-        final boolean alreadyDisabled = breachActionRepository.isBreachDisabled(loanId);
+        final boolean alreadyDisabled = breachActionRepository.isBreachDisabledAsOf(loanId, DateUtils.getBusinessLocalDate());
         if (isEnable && !alreadyDisabled) {
             failGeneralValidation(dataValidator, "no.active.breach.disable.to.enable",
                     "There is no active breach disable to enable for this Working Capital loan.");
@@ -361,7 +360,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     }
 
     private void validateBreachNotDisabled(final DataValidatorBuilder dataValidator, final Long loanId) {
-        if (breachActionRepository.isBreachDisabled(loanId)) {
+        if (breachActionRepository.isBreachDisabledAsOf(loanId, DateUtils.getBusinessLocalDate())) {
             failGeneralValidation(dataValidator, "breach.is.disabled",
                     "Breach pause, resume, reschedule and reset actions are not allowed while breach evaluation is disabled.");
         }
@@ -400,28 +399,6 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     private int getBreachGraceDays(final WorkingCapitalLoan workingCapitalLoan) {
         final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
         return (details == null || details.getBreachGraceDays() == null) ? 0 : details.getBreachGraceDays();
-    }
-
-    /**
-     * A reset closes the breach period it lands on and restarts the evaluation from its own date. A pause that starts
-     * before that date would re-date periods the reset already settled, so backdating a pause behind the latest active
-     * reset is rejected. Resets that were undone are not considered: their split is restored by the undo, so there is
-     * nothing left to protect.
-     *
-     * The boundary is the reset on top of the resolver stack, which replays the actions on their own timeline. Scanning
-     * the active resets here for the highest date would be a second definition of "latest" to keep in step with the
-     * resolver, for an answer the resolver already holds.
-     */
-    private void validateNotBeforeBreachReset(final DataValidatorBuilder dataValidator, final LocalDate startDate,
-            final List<WorkingCapitalLoanBreachAction> existing) {
-        if (startDate == null) {
-            return;
-        }
-        Optional.ofNullable(activeBreachResetResolver.activeResets(existing).peek()) //
-                .map(WorkingCapitalLoanBreachAction::getStartDate) //
-                .filter(startDate::isBefore) //
-                .ifPresent(latestResetDate -> failParameterValidation(dataValidator, START_DATE, "must.not.be.before.breach.reset.date",
-                        "Breach pause cannot start before the latest breach reset date: " + latestResetDate));
     }
 
     private void validateNoOverlap(final DataValidatorBuilder dataValidator, final LocalDate startDate, final LocalDate endDate,
@@ -463,19 +440,15 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
     /**
      * Rejects a frequency change whose resulting period end date falls before the business date. The candidate end date
-     * is derived exactly as the re-date derives it: from the current open period fromDate, carrying the breach grace
-     * days when that period is the first one, and extended by the pauses.
+     * is derived exactly as the re-date derives it: from the current open period fromDate, extended by the pauses.
      */
     private void validateFrequencyDoesNotEndBeforeBusinessDate(final WorkingCapitalLoanBreachAction action,
             final WorkingCapitalLoan workingCapitalLoan, final List<WorkingCapitalLoanBreachAction> existing,
             final DataValidatorBuilder dataValidator) {
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
-        final Integer breachGraceDays = details == null ? null : details.getBreachGraceDays();
         final Optional<LocalDate> candidateToDate = breachScheduleRepository.findCurrentOpenPeriod(workingCapitalLoan.getId(), businessDate)
                 .map(currentPeriod -> WorkingCapitalLoanBreachScheduleEvaluationUtils.calculateRescheduledToDate(
-                        currentPeriod.getFromDate(), currentPeriod.getPeriodNumber(), action.getFrequency(), action.getFrequencyType(),
-                        breachGraceDays, existing, activeBreachResetResolver.activeRestartResetDates(existing)));
+                        currentPeriod.getFromDate(), action.getFrequency(), action.getFrequencyType(), existing));
         if (candidateToDate.filter(toDate -> toDate.isBefore(businessDate)).isPresent()) {
             failGeneralValidation(dataValidator, "reschedule.frequency.results.endDate.before.businessDate",
                     "Frequency change results a breach period endDate before current businessDate is not allowed");

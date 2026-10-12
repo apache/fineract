@@ -69,25 +69,19 @@ public class WorkingCapitalLoanBreachActionWriteServiceImpl implements WorkingCa
         log.debug("Created WC loan breach action {} for loan {}", breachAction.getAction(), workingCapitalLoanId);
 
         if (WorkingCapitalLoanBreachActionType.PAUSE.equals(breachAction.getAction())
-                || WorkingCapitalLoanBreachActionType.RESUME.equals(breachAction.getAction())
-                || WorkingCapitalLoanBreachActionType.RESCHEDULE.equals(breachAction.getAction())) {
-            breachScheduleService.replayForBreachAction(workingCapitalLoan, saved);
+                || WorkingCapitalLoanBreachActionType.RESUME.equals(breachAction.getAction())) {
+            breachScheduleService.recalculatePeriodsForPauses(workingCapitalLoan);
+        } else if (WorkingCapitalLoanBreachActionType.RESCHEDULE.equals(breachAction.getAction())) {
+            breachScheduleService.rescheduleMinimumPayment(workingCapitalLoan, breachAction);
         } else if (WorkingCapitalLoanBreachActionType.RESET.equals(breachAction.getAction())) {
             breachResetService.resetBreach(workingCapitalLoan, saved);
         } else if (WorkingCapitalLoanBreachActionType.UNDO_RESET.equals(breachAction.getAction())) {
-            breachResetService.undoResetBreach(workingCapitalLoan, saved, existing);
+            breachResetService.undoResetBreach(workingCapitalLoan, saved);
         } else if (WorkingCapitalLoanBreachActionType.ENABLE.equals(breachAction.getAction())) {
             existing.stream().filter(action -> WorkingCapitalLoanBreachActionType.DISABLE == action.getAction())
                     .reduce((first, second) -> second).ifPresent(action -> {
                         action.setEndDate(breachAction.getStartDate().minusDays(1));
-                        actionRepository.saveAndFlush(action);
                     });
-            // Nothing was evaluated or updated while disabled, so every period is recalculated as if the loan had never
-            // been disabled.
-            if (!breachScheduleService.hasSchedule(workingCapitalLoanId)) {
-                breachScheduleService.generateInitialPeriod(workingCapitalLoan);
-            }
-            breachScheduleService.recalculateMinimumPayment(workingCapitalLoan);
             breachScheduleService.reprocessBreachSchedule(workingCapitalLoan);
         }
 

@@ -102,7 +102,7 @@ public class PostDatedChecks extends AbstractPersistableCustom<Long> {
             changes.put("accountNo", newAccountNo);
         }
 
-        if (command.isChangeInLongParameterNamed("checkNo", this.checkNo)) {
+        if (command.isChangeInLongParameterNamed("checkNo", this.accountNo)) {
             final Long newCheckNo = command.longValueOfParameterNamed("checkNo");
             this.checkNo = newCheckNo;
             changes.put("checkNo", newCheckNo);

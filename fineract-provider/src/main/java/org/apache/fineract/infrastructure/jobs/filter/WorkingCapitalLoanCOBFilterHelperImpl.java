@@ -19,6 +19,10 @@
 
 package org.apache.fineract.infrastructure.jobs.filter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,16 +50,17 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.LoanIdsHardLockedException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.JsonNode;
 
 @RequiredArgsConstructor
 @Component
 @Conditional(LoanCOBEnabledCondition.class)
-public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher implements WorkingCapitalLoanCOBFilterHelper {
+public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher
+        implements WorkingCapitalLoanCOBFilterHelper, InitializingBean {
 
     private final AbstractAccountLockService<WorkingCapitalLoanAccountLock> loanAccountLockService;
     private final PlatformSecurityContext context;
@@ -64,29 +69,30 @@ public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher i
     private final FineractProperties fineractProperties;
     private final WorkingCapitalLoanRetrieveIdService retrieveIdService;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
 
     public static final Pattern IGNORE_LOAN_PATH_PATTERN = Pattern.compile("/v[1-9][0-9]*/working-capital-loans/catch-up");
-    public static final Pattern LOAN_PATH_PATTERN = Pattern.compile("/v[1-9][0-9]*/working-capital-loans/([^/?]+).*");
-
-    public static final Pattern EXTERNAL_ID_LOAN_PATH_PATTERN = Pattern
-            .compile("/v[1-9][0-9]*/working-capital-loans/external-id/([^/?]+).*");
+    public static final Pattern LOAN_PATH_PATTERN = Pattern
+            .compile("/v[1-9][0-9]*/(?:reschedule)?working-capital-loans/(?:external-id/)?([^/?]+).*");
     private static final Predicate<String> URL_FUNCTION = s -> LOAN_PATH_PATTERN.matcher(s).find();
 
     private Long getLoanId(String pathInfo) {
-        if (isExternal(pathInfo)) {
-            String externalId = EXTERNAL_ID_LOAN_PATH_PATTERN.matcher(pathInfo).replaceAll("$1");
-            return loanRepository.findIdByExternalId(new ExternalId(externalId));
-        }
         String id = LOAN_PATH_PATTERN.matcher(pathInfo).replaceAll("$1");
-        if (StringUtils.isNumeric(id)) {
+        if (isExternal(pathInfo)) {
+            String externalId = id;
+            return loanRepository.findIdByExternalId(new ExternalId(externalId));
+        } else if (StringUtils.isNumeric(id)) {
             return Long.valueOf(id);
+        } else {
+            return null;
         }
-        return null;
+
     }
 
     private boolean isExternal(String pathInfo) {
-        return EXTERNAL_ID_LOAN_PATH_PATTERN.matcher(pathInfo).matches();
+        return LOAN_PATH_PATTERN.matcher(pathInfo).matches() && pathInfo.contains("external-id");
     }
 
     @Override
@@ -152,28 +158,25 @@ public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher i
                 loanIds.addAll(getLoanIdsFromApi(relativeUrl));
             }
 
-            if (isApiMatching(batchRequest.getMethod(), relativeUrl)) {
-                Long loanId = getTopLevelLoanIdFromBatchRequest(batchRequest);
-                if (loanId != null) {
-                    if (isLoanHardLocked(loanId) && !isLockOverrulable(loanId)) {
-                        throw new LoanIdsHardLockedException(loanId);
-                    } else {
-                        loanIds.add(loanId);
-                    }
+            // check the body for Loan ID
+            Long loanId = getTopLevelLoanIdFromBatchRequest(batchRequest);
+            if (loanId != null) {
+                if (isLoanHardLocked(loanId) && !isLockOverrulable(loanId)) {
+                    throw new LoanIdsHardLockedException(loanId);
+                } else {
+                    loanIds.add(loanId);
                 }
             }
         }
-        return loanIds.stream().distinct().toList();
+        return loanIds;
     }
 
-    private Long getTopLevelLoanIdFromBatchRequest(BatchRequest batchRequest) {
+    private Long getTopLevelLoanIdFromBatchRequest(BatchRequest batchRequest) throws JsonProcessingException {
         String body = batchRequest.getBody();
         if (StringUtils.isNotBlank(body)) {
             JsonNode jsonNode = objectMapper.readTree(body);
             if (jsonNode.has("loanId")) {
-                // the body may hold an unresolved batch reference like "$.loanId"; Jackson 3 asLong() throws on
-                // non-numeric values while Jackson 2 returned 0, so keep the lenient behavior explicitly
-                return jsonNode.get("loanId").asLong(0);
+                return jsonNode.get("loanId").asLong();
             }
         }
         return null;
@@ -181,9 +184,6 @@ public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher i
 
     private List<Long> getLoanIdsFromApi(String pathInfo) {
         List<Long> loanIds = getLoanIdList(pathInfo);
-        if (loanIds.isEmpty()) {
-            return loanIds;
-        }
         if (isLoanHardLocked(loanIds) && !isLockOverrulable(loanIds)) {
             throw new LoanIdsHardLockedException(loanIds.getFirst());
         } else {
@@ -202,6 +202,11 @@ public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher i
     @Override
     public void executeInlineCob(List<Long> loanIds) {
         inlineLoanCOBExecutorService.execute(loanIds, WorkingCapitalLoanCOBConstant.INLINE_WORKING_CAPITAL_LOAN_COB_JOB_NAME);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        objectMapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
     }
 
 }

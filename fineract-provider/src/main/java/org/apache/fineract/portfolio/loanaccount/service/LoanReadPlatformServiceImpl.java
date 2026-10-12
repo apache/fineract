@@ -991,7 +991,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final Long chargeOffReasonId = JdbcSupport.getLong(rs, "chargeOffReasonId");
             final String chargeOffReason = rs.getString("chargeOffReason");
             final boolean isChargedOff = rs.getBoolean("isChargedOff");
-            final LocalDate overpaidOnDate = JdbcSupport.getLocalDate(rs, "overpaidOnDate");
 
             final LoanApplicationTimelineData timeline = new LoanApplicationTimelineData(submittedOnDate, submittedByUsername,
                     submittedByFirstname, submittedByLastname, rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname,
@@ -999,7 +998,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     approvedByFirstname, approvedByLastname, expectedDisbursementDate, actualDisbursementDate, disbursedByUsername,
                     disbursedByFirstname, disbursedByLastname, closedOnDate, closedByUsername, closedByFirstname, closedByLastname,
                     actualMaturityDate, expectedMaturityDate, writtenOffOnDate, closedByUsername, closedByFirstname, closedByLastname,
-                    chargedOffOnDate, chargedOffByUsername, chargedOffByFirstname, chargedOffByLastname, overpaidOnDate);
+                    chargedOffOnDate, chargedOffByUsername, chargedOffByFirstname, chargedOffByLastname);
 
             final BigDecimal principal = rs.getBigDecimal("principal");
             final BigDecimal approvedPrincipal = rs.getBigDecimal("approvedPrincipal");
@@ -1226,6 +1225,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
             final boolean isFraud = rs.getBoolean("isFraud");
             final LocalDate lastClosedBusinessDate = JdbcSupport.getLocalDate(rs, "lastClosedBusinessDate");
+            final LocalDate overpaidOnDate = JdbcSupport.getLocalDate(rs, "overpaidOnDate");
 
             final boolean enableDownPayment = rs.getBoolean("enableDownPayment");
             final BigDecimal disbursedAmountPercentageForDownPayment = rs.getBigDecimal("disbursedAmountPercentageForDownPayment");

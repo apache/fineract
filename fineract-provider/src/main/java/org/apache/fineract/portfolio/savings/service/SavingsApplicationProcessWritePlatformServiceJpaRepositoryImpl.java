@@ -710,7 +710,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             msgCode += ".unknown.data.integrity.issue";
             msgArgs = new Object[] { dve };
         }
-        log.error("Error occurred.", dve);
+        log.error("Error occured.", dve);
         throw ErrorHandler.getMappable(dve, msgCode, msg, param, msgArgs);
     }
 }

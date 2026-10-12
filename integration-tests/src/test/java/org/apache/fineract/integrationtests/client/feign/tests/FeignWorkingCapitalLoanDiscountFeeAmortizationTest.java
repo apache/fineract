@@ -60,13 +60,6 @@ import org.junit.jupiter.api.Test;
  * <li>Idempotency: repeated COB without new payments creates no duplicate transactions</li>
  * <li>Incremental amortization after additional repayments</li>
  * </ul>
- *
- * <p>
- * Note on dates: the COB date trails the business date by one day, and the step only amortizes payments dated on or
- * before the COB date it is running for. So a repayment is recognized by the COB run made on the <em>following</em>
- * business date, never by one made on the same day - which is why the repayments and COB runs below are staggered.
- * Recognition that ran ahead of the cash is the defect covered by
- * {@link FeignWorkingCapitalLoanCobCatchUpAmortizationTest}.
  */
 public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignIntegrationTest {
 
@@ -147,10 +140,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
             // Make a repayment
             wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(3000), "01 January 2026"));
 
-            // Run WC COB — this triggers the discount fee amortization business step. The business date moves to the
-            // 2nd first, because the COB date trails it by a day: a COB run on the 1st would process 31 December and
-            // find nothing, the repayment not having happened yet on the day being closed.
-            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-02");
+            // Run WC COB — this triggers the discount fee amortization business step
             wcLoanHelper.executeInlineWCCOB(loanId);
 
             // Verify amortization transaction was created
@@ -249,9 +239,8 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
                     WorkingCapitalLoanRequestBuilders.approveWithDiscount("01 April 2026", principal, "01 April 2026", discount));
             wcLoanHelper.disburse(loanId, WorkingCapitalLoanRequestBuilders.disburseWithDiscount("01 April 2026", principal, discount));
 
-            // Make a repayment, then COB the day it fell on — which is the run made on the following business date.
+            // Make a repayment and run COB
             wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(3000), "01 April 2026"));
-            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-04-02");
             wcLoanHelper.executeInlineWCCOB(loanId);
 
             final List<GetWorkingCapitalLoanTransactionIdResponse> firstRunTxns = filterByType(wcLoanHelper.getTransactions(loanId),
@@ -260,7 +249,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
             final BigDecimal firstAmount = firstRunTxns.get(0).getTransactionAmount();
 
             // Advance business date and run COB again — no new payments
-            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-04-03");
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-04-02");
             wcLoanHelper.executeInlineWCCOB(loanId);
 
             final List<GetWorkingCapitalLoanTransactionIdResponse> secondRunTxns = filterByType(wcLoanHelper.getTransactions(loanId),
@@ -288,9 +277,8 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
                     WorkingCapitalLoanRequestBuilders.approveWithDiscount("01 May 2026", principal, "01 May 2026", discount));
             wcLoanHelper.disburse(loanId, WorkingCapitalLoanRequestBuilders.disburseWithDiscount("01 May 2026", principal, discount));
 
-            // First repayment, then the COB that closes the day it fell on → first partial amortization
+            // First repayment + COB → first partial amortization
             wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(50), "01 May 2026"));
-            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-05-02");
             wcLoanHelper.executeInlineWCCOB(loanId);
 
             final List<GetWorkingCapitalLoanTransactionIdResponse> firstRun = filterByType(wcLoanHelper.getTransactions(loanId),
@@ -300,9 +288,9 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
             assertTrue(firstAmount.compareTo(BigDecimal.ZERO) > 0, "First amortization should be positive");
             assertTrue(firstAmount.compareTo(discount) < 0, "First amortization should be less than full discount — was: " + firstAmount);
 
-            // Second repayment on the 2nd, then the COB that closes that day → second incremental amortization
+            // Second repayment + COB → second incremental amortization
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-05-02");
             wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(50), "02 May 2026"));
-            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-05-03");
             wcLoanHelper.executeInlineWCCOB(loanId);
 
             final List<GetWorkingCapitalLoanTransactionIdResponse> secondRun = filterByType(wcLoanHelper.getTransactions(loanId),
@@ -516,10 +504,9 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
                     WorkingCapitalLoanRequestBuilders.approveWithDiscount("01 September 2026", principal, "01 September 2026", discount));
             wcLoanHelper.disburse(loanId, WorkingCapitalLoanRequestBuilders.disburseWithDiscount("01 September 2026", principal, discount));
 
-            // Repayment on Sep 5, then the COB that closes Sep 5 → first partial amortization
+            // Repayment on Sep 5, then COB → first partial amortization
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-09-05");
             wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(3000), "05 September 2026"));
-            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-09-06");
             wcLoanHelper.executeInlineWCCOB(loanId);
 
             final List<GetWorkingCapitalLoanTransactionIdResponse> afterFirst = filterByType(wcLoanHelper.getTransactions(loanId),
@@ -529,10 +516,8 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
             assertTrue(totalAfterFirst.compareTo(BigDecimal.ZERO) > 0, "First amortization should be positive");
 
             // Backdated repayment on Sep 2, then COB: net amortization must stay non-decreasing and bounded by the
-            // discount. The business date moves on again so the loan is genuinely behind — a COB run whose date the
-            // loan has already closed processes nothing at all, and the backdated payment would go unnoticed.
+            // discount.
             wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(2000), "02 September 2026"));
-            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-09-07");
             wcLoanHelper.executeInlineWCCOB(loanId);
 
             final BigDecimal netAfterBackdated = netAmortization(loanId);

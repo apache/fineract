@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -33,17 +33,19 @@ public interface WorkingCapitalLoanBreachActionRepository extends JpaRepository<
     List<WorkingCapitalLoanBreachAction> findByWorkingCapitalLoanIdAndActionOrderByIdDesc(Long workingCapitalLoanId,
             WorkingCapitalLoanBreachActionType action);
 
-    /**
-     * True while a Breach Disable is active: a DISABLE action that has not been closed by an enable (no end date).
-     */
     @Query("""
             SELECT CASE WHEN COUNT(action) > 0 THEN TRUE ELSE FALSE END FROM WorkingCapitalLoanBreachAction action
             WHERE action.action = org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.DISABLE
-            AND action.workingCapitalLoan.id = :loanId AND action.endDate IS NULL
+            AND action.workingCapitalLoan.id = :loanId AND action.startDate <= :date AND (action.endDate IS NULL OR action.endDate >= :date)
             """)
-    boolean isBreachDisabled(@Param("loanId") Long loanId);
+    boolean isBreachDisabledAsOf(@Param("loanId") Long loanId, @Param("date") LocalDate date);
 
-    @Modifying(flushAutomatically = true)
-    @Query("delete from WorkingCapitalLoanBreachAction action where action.workingCapitalLoan.id = :loanId")
-    void deleteByWorkingCapitalLoanId(@Param("loanId") Long loanId);
+    @Query("""
+            SELECT ba FROM WorkingCapitalLoanBreachAction ba
+            WHERE ba.workingCapitalLoan.id= :workingCapitalLoanId
+            AND ba.action IN :actionTypes
+            ORDER BY ba.startDate, ba.id
+            """)
+    List<WorkingCapitalLoanBreachAction> findByLoanAndActionType(@Param("workingCapitalLoanId") Long workingCapitalLoanId,
+            @Param("actionTypes") List<WorkingCapitalLoanBreachActionType> actionTypes);
 }

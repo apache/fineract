@@ -53,8 +53,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -215,8 +215,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
             if (!installment.isDownPayment()) { // Exclude downpayment installments
                 feeChargesPortion = MathUtil.add(feeChargesPortion, installment.getFeeChargesCharged());
                 penaltyChargesPortion = MathUtil.add(penaltyChargesPortion, installment.getPenaltyCharges());
-                interestPortion = MathUtil.add(interestPortion,
-                        MathUtil.subtractToZero(installment.getInterestCharged(), installment.getCreditedInterest()));
+                interestPortion = MathUtil.add(interestPortion, installment.getInterestCharged());
             }
         }
 
@@ -329,7 +328,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
                     isReset.set(true);
                 }
                 final Money principalPortion = Money.zero(currency);
-                Money interestPortion = currentInstallment.getInterestCharged(currency).minus(currentInstallment.getCreditedInterest());
+                Money interestPortion = currentInstallment.getInterestCharged(currency);
                 Money feeChargesPortion = currentInstallment.getFeeChargesCharged(currency);
                 Money penaltyChargesPortion = currentInstallment.getPenaltyChargesCharged(currency);
 
@@ -411,8 +410,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
     private boolean validateActivityTransaction(final @NonNull LoanRepaymentScheduleInstallment installment,
             final @NonNull LoanTransaction transaction) {
         return DateUtils.isEqual(installment.getDueDate(), transaction.getDateOf())
-                && MathUtil.isEqualTo(transaction.getInterestPortion(),
-                        MathUtil.subtractToZero(installment.getInterestCharged(), installment.getCreditedInterest()))
+                && MathUtil.isEqualTo(transaction.getInterestPortion(), installment.getInterestCharged())
                 && MathUtil.isEqualTo(transaction.getFeeChargesPortion(), installment.getFeeChargesCharged())
                 && MathUtil.isEqualTo(transaction.getPenaltyChargesPortion(), installment.getPenaltyCharges());
     }

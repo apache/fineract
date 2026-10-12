@@ -51,7 +51,6 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPausePeriodUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -134,7 +133,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
     }
 
     private void validateDisableState(final DataValidatorBuilder dataValidator, final Long loanId, final boolean isEnable) {
-        final boolean alreadyDisabled = actionRepository.isDelinquencyDisabled(loanId);
+        final boolean alreadyDisabled = actionRepository.isDelinquencyDisabledAsOf(loanId, DateUtils.getBusinessLocalDate());
         if (isEnable && !alreadyDisabled) {
             failGeneralValidation(dataValidator, "no.active.delinquency.disable.to.enable",
                     "There is no active delinquency disable to enable for this Working Capital loan.");
@@ -145,7 +144,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
     }
 
     private void validateDelinquencyNotDisabled(final Long loanId, final DataValidatorBuilder dataValidator) {
-        if (actionRepository.isDelinquencyDisabled(loanId)) {
+        if (actionRepository.isDelinquencyDisabledAsOf(loanId, DateUtils.getBusinessLocalDate())) {
             failGeneralValidation(dataValidator, "delinquency.is.disabled",
                     "Delinquency pause, resume and reschedule actions are not allowed while delinquency evaluation is disabled for this Working Capital loan.");
         }
@@ -179,26 +178,12 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
                 resume -> !pause.getStartDate().isAfter(resume.getStartDate()) && !resume.getStartDate().isAfter(pause.getEndDate()));
     }
 
-    void validatePause(final WorkingCapitalLoanDelinquencyAction action, final WorkingCapitalLoan workingCapitalLoan,
+    private void validatePause(final WorkingCapitalLoanDelinquencyAction action, final WorkingCapitalLoan workingCapitalLoan,
             final List<WorkingCapitalLoanDelinquencyAction> existing, final DataValidatorBuilder dataValidator) {
         validateBothDatesProvided(action, dataValidator);
         validateStartBeforeEnd(action, dataValidator);
         validateNotBeforeDisbursement(action, workingCapitalLoan, dataValidator);
         validateNoOverlap(action, existing, dataValidator);
-        validateNotBeforeReset(action, existing, dataValidator);
-    }
-
-    private void validateNotBeforeReset(WorkingCapitalLoanDelinquencyAction action, List<WorkingCapitalLoanDelinquencyAction> existing,
-            DataValidatorBuilder dataValidator) {
-        if (action.getStartDate() == null) {
-            // start date is mandatory if it is missing, validator already should fail properly.
-            return;
-        }
-        existing.stream()
-                .filter(existingAction -> existingAction.getAction().equals(DelinquencyAction.RESET) && existingAction.getEndDate() == null
-                        && existingAction.getStartDate().isAfter(action.getStartDate()))
-                .findAny().ifPresent(existingAction -> failParameterValidation(dataValidator, START_DATE, "reset.exists.after.pause",
-                        "Delinquency pause cannot start before the latest delinquency reset date: " + existingAction.getStartDate()));
     }
 
     private void validateResume(final WorkingCapitalLoanDelinquencyAction action, final List<WorkingCapitalLoanDelinquencyAction> existing,
@@ -273,19 +258,15 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
 
     /**
      * Rejects a frequency change whose resulting period end date falls before the business date. The candidate end date
-     * is derived exactly as the re-date derives it: from the current open period fromDate, carrying the delinquency
-     * grace days when that period is the first one, and extended by the pauses.
+     * is derived exactly as the re-date derives it: from the current open period fromDate, extended by the pauses.
      */
     private void validateFrequencyDoesNotEndBeforeBusinessDate(final WorkingCapitalLoanDelinquencyAction action,
             final WorkingCapitalLoan workingCapitalLoan, final List<WorkingCapitalLoanDelinquencyAction> existing,
             final DataValidatorBuilder dataValidator) {
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
-        final Integer delinquencyGraceDays = details == null ? null : details.getDelinquencyGraceDays();
         final Optional<LocalDate> candidateToDate = rangeScheduleRepository.findCurrentOpenPeriod(workingCapitalLoan.getId(), businessDate)
                 .map(currentPeriod -> WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils.calculateRescheduledToDate(
-                        currentPeriod.getFromDate(), currentPeriod.getPeriodNumber(), action.getFrequency(), action.getFrequencyType(),
-                        delinquencyGraceDays, existing));
+                        currentPeriod.getFromDate(), action.getFrequency(), action.getFrequencyType(), existing));
         if (candidateToDate.filter(toDate -> toDate.isBefore(businessDate)).isPresent()) {
             failGeneralValidation(dataValidator, "reschedule.frequency.results.endDate.before.businessDate",
                     "Frequency change results a delinquency period endDate before current businessDate is not allowed");

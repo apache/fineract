@@ -20,8 +20,6 @@ package org.apache.fineract.portfolio.tax.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,10 +29,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 @Entity
 @Table(name = "m_tax_component_history")
 public class TaxComponentHistory extends AbstractAuditableCustom {
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "tax_component_id", referencedColumnName = "id", nullable = false)
-    private TaxComponent taxComponent;
 
     @Column(name = "percentage", scale = 6, precision = 19, nullable = false)
     private BigDecimal percentage;
@@ -49,17 +43,15 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
 
     }
 
-    private TaxComponentHistory(final TaxComponent taxComponent, final BigDecimal percentage, final LocalDate startDate,
-            final LocalDate endDate) {
-        this.taxComponent = taxComponent;
+    private TaxComponentHistory(final BigDecimal percentage, final LocalDate startDate, final LocalDate endDate) {
         this.percentage = percentage;
         this.startDate = startDate;
         this.endDate = endDate;
     }
 
-    public static TaxComponentHistory createTaxComponentHistory(final TaxComponent taxComponent, final BigDecimal percentage,
-            final LocalDate startDate, final LocalDate endDate) {
-        return new TaxComponentHistory(taxComponent, percentage, startDate, endDate);
+    public static TaxComponentHistory createTaxComponentHistory(final BigDecimal percentage, final LocalDate startDate,
+            final LocalDate endDate) {
+        return new TaxComponentHistory(percentage, startDate, endDate);
     }
 
     public LocalDate startDate() {

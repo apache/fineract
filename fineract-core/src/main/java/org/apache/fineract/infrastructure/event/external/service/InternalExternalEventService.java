@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.infrastructure.event.external.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -35,18 +37,12 @@ import org.apache.fineract.infrastructure.event.external.repository.domain.Exter
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Profile(FineractProfiles.TEST)
 @Slf4j
 @AllArgsConstructor
 public class InternalExternalEventService {
-
-    /** Key under which a bulk event's recorded items are rendered. */
-    public static final String BULK_ITEMS_KEY = "datas";
 
     private final ObjectMapper mapper;
     private final ExternalEventRepository externalEventRepository;
@@ -80,7 +76,8 @@ public class InternalExternalEventService {
 
         try {
             return convertToReadableFormat(externalEvents);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException | JacksonException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException
+                | JsonProcessingException e) {
             throw new RuntimeException("Error while converting external events to readable format", e);
         }
     }
@@ -101,8 +98,8 @@ public class InternalExternalEventService {
         return (root, query, cb) -> cb.equal(root.get("aggregateRootId"), aggregateRootId);
     }
 
-    private List<ExternalEventResponse> convertToReadableFormat(List<ExternalEvent> externalEvents)
-            throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JacksonException {
+    private List<ExternalEventResponse> convertToReadableFormat(List<ExternalEvent> externalEvents) throws ClassNotFoundException,
+            NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException {
         var eventMessages = new ArrayList<ExternalEventResponse>();
         for (var externalEvent : externalEvents) {
             var payLoadClass = Class.forName(externalEvent.getSchema());
@@ -117,17 +114,17 @@ public class InternalExternalEventService {
                     throw new IllegalStateException("Expected List from getDatas method");
                 }
 
-                // One entry per recorded event, under a single key: a bulk event carries many payloads and the
-                // response holds one JSON object, so they cannot be rendered side by side at the top level.
-                var bulkItems = new ArrayList<Map<String, Object>>();
+                var bulkMessagePayload = new StringBuilder();
                 for (var bulkMessage : bulkMessages) {
                     if (!(bulkMessage instanceof BulkMessageItemV1 bulkMessageItem)) {
                         throw new IllegalStateException("Expected BulkMessageItemV1 from getDatas method");
                     }
-                    bulkItems.add(retrieveBulkMessage(bulkMessageItem));
+                    var bulkMessageData = retrieveBulkMessage(bulkMessageItem, externalEvent);
+                    bulkMessagePayload.append(bulkMessageData);
+                    bulkMessagePayload.append(System.lineSeparator());
                 }
                 eventMessages.add(new ExternalEventResponse(externalEvent.getId(), externalEvent.getType(), externalEvent.getCategory(),
-                        externalEvent.getCreatedAt(), Map.of(BULK_ITEMS_KEY, bulkItems), externalEvent.getBusinessDate(),
+                        externalEvent.getCreatedAt(), toJsonMap(bulkMessagePayload.toString()), externalEvent.getBusinessDate(),
                         externalEvent.getSchema(), externalEvent.getAggregateRootId()));
 
             } else {
@@ -140,21 +137,18 @@ public class InternalExternalEventService {
         return eventMessages;
     }
 
-    private Map<String, Object> retrieveBulkMessage(BulkMessageItemV1 messageItem)
-            throws ClassNotFoundException, InvocationTargetException, IllegalAccessException, NoSuchMethodException, JacksonException {
+    private ExternalEventResponse retrieveBulkMessage(BulkMessageItemV1 messageItem, ExternalEvent externalEvent)
+            throws ClassNotFoundException, InvocationTargetException, IllegalAccessException, NoSuchMethodException,
+            JsonProcessingException {
         var messageBulkMessagePayLoad = Class.forName(messageItem.getDataschema());
         var methodForPayLoad = messageBulkMessagePayLoad.getMethod("fromByteBuffer", ByteBuffer.class);
         var payLoadBulkItem = methodForPayLoad.invoke(null, messageItem.getData());
-        // Avro's CharSequence fields do not serialize as plain strings, hence the explicit conversion.
-        var item = new LinkedHashMap<String, Object>();
-        item.put("id", messageItem.getId());
-        item.put("type", String.valueOf(messageItem.getType()));
-        item.put("category", String.valueOf(messageItem.getCategory()));
-        item.put("payLoad", toJsonMap(payLoadBulkItem.toString()));
-        return item;
+        return new ExternalEventResponse(messageItem.getId(), messageItem.getType(), messageItem.getCategory(),
+                externalEvent.getCreatedAt(), toJsonMap(payLoadBulkItem.toString()), externalEvent.getBusinessDate(),
+                externalEvent.getSchema(), externalEvent.getAggregateRootId());
     }
 
-    private Map<String, Object> toJsonMap(String json) throws JacksonException {
+    private Map<String, Object> toJsonMap(String json) throws JsonProcessingException {
         return mapper.readValue(json, new TypeReference<>() {});
     }
 

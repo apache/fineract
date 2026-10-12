@@ -57,8 +57,9 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
         if (period.getNearBreach() != null) {
             return false;
         }
-        if (breachActionRepository.isBreachDisabled(loan.getId())) {
-            log.debug("Skipping near breach evaluation for WC loan {} - breach evaluation is disabled", loan.getId());
+        if (isBreachEvaluationDisabled(loan.getId(), effectiveDate)) {
+            log.debug("Skipping near breach evaluation for WC loan {} - breach evaluation is disabled as of {}", loan.getId(),
+                    effectiveDate);
             return false;
         }
         final WorkingCapitalNearBreach config = loan.getLoanProductRelatedDetails().getNearBreach();
@@ -163,6 +164,10 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
             return 0;
         }
         return loan.getLoanProductRelatedDetails().getBreachGraceDays();
+    }
+
+    private boolean isBreachEvaluationDisabled(final Long loanId, final LocalDate date) {
+        return breachActionRepository.isBreachDisabledAsOf(loanId, date);
     }
 
 }

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.investor.service;
 
+import static org.reflections.scanners.Scanners.SubTypes;
+
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -38,16 +40,15 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.investor.data.ExternalAssetOwnerLoanProductAttributeRequestParameters;
 import org.apache.fineract.investor.data.attribute.ExternalAssetOwnerLoanProductAttribute;
-import org.apache.fineract.investor.data.attribute.SettlementModelExternalAssetOwnerLoanProductAttribute;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttributes;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttributesRepository;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeAlreadyExistsException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeInvalidSettlementAttributeException;
-import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeInvalidValueException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeNotFoundException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributesException;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
+import org.reflections.Reflections;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,15 +58,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements ExternalAssetOwnerLoanProductAttributesWriteService {
 
-    private static final int ATTRIBUTE_VALUE_MAX_LENGTH = 2000;
+    private static final String INVESTOR_PATH = "org.apache.fineract.investor";
 
     private final FromJsonHelper fromApiJsonHelper;
     private final ExternalAssetOwnerLoanProductAttributesRepository externalAssetOwnerLoanProductAttributesRepository;
     private final LoanProductRepository loanProductRepository;
-    private final ExternalAssetOwnerLoanProductAttributeProvider attributeProvider;
+    private final Set<Class<?>> implementingClasses = new Reflections(INVESTOR_PATH)
+            .get(SubTypes.of(ExternalAssetOwnerLoanProductAttribute.class).asClass());
 
     @Override
-    @CacheEvict(cacheNames = "externalAssetOwnerLoanProductAttributes", allEntries = true)
     public CommandProcessingResult createExternalAssetOwnerLoanProductAttribute(JsonCommand command) {
         final JsonElement json = fromApiJsonHelper.parse(command.json());
         String attributeKey = fromApiJsonHelper.extractStringNamed(ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_KEY,
@@ -74,10 +75,10 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
                 .extractStringNamed(ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_VALUE, json);
         Long loanProductId = command.getProductId();
         validateLoanProductAttributeRequest(command.json(), attributeKey, attributeValue);
-        String normalizedAttributeValue = validateAndNormalizeExternalAssetOwnerLoanProductAttribute(attributeKey, attributeValue);
+        validateExternalAssetOwnerLoanProductAttribute(attributeKey, attributeValue);
         validateLoanProductExistsAndAttributeDoesNotExist(loanProductId, attributeKey);
         ExternalAssetOwnerLoanProductAttributes newAttribute = createExternalAssetOwnerLoanProductAttribute(loanProductId, attributeKey,
-                normalizedAttributeValue);
+                attributeValue);
         externalAssetOwnerLoanProductAttributesRepository.saveAndFlush(newAttribute);
         return buildResponseData(newAttribute);
     }
@@ -89,28 +90,15 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
         Long loanProductId = command.getProductId();
         Long attributeId = command.entityId();
         validateLoanProductAttributeRequest(command.json(), attributeKey, attributeValue);
-        String normalizedAttributeValue = validateAndNormalizeExternalAssetOwnerLoanProductAttribute(attributeKey, attributeValue);
+        validateExternalAssetOwnerLoanProductAttribute(attributeKey, attributeValue);
         validateLoanProductExists(loanProductId);
         ExternalAssetOwnerLoanProductAttributes attributeToUpdate = getLoanProductAttribute(attributeId);
-        validateLoanProductAttributeBelongsToLoanProduct(loanProductId, attributeToUpdate);
         validateLoanProductAttributeKeysMatch(attributeKey, attributeToUpdate.getAttributeKey());
-        if (!attributeToUpdate.getAttributeValue().equals(normalizedAttributeValue)) {
-            attributeToUpdate.setAttributeValue(normalizedAttributeValue);
+        if (!attributeToUpdate.getAttributeValue().equals(attributeValue)) {
+            attributeToUpdate.setAttributeValue(attributeValue);
             externalAssetOwnerLoanProductAttributesRepository.saveAndFlush(attributeToUpdate);
         }
         return buildResponseData(attributeToUpdate);
-    }
-
-    @Override
-    @CacheEvict(cacheNames = "externalAssetOwnerLoanProductAttributes", allEntries = true)
-    public CommandProcessingResult deleteExternalAssetOwnerLoanProductAttribute(JsonCommand command) {
-        Long loanProductId = command.getProductId();
-        Long attributeId = command.entityId();
-        validateLoanProductExists(loanProductId);
-        ExternalAssetOwnerLoanProductAttributes attributeToDelete = getLoanProductAttribute(attributeId);
-        validateLoanProductAttributeBelongsToLoanProduct(loanProductId, attributeToDelete);
-        externalAssetOwnerLoanProductAttributesRepository.delete(attributeToDelete);
-        return buildResponseData(attributeToDelete);
     }
 
     private void validateLoanProductAttributeRequest(String apiRequestBodyAsJson, String attributeKey, String attributeValue) {
@@ -127,7 +115,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
                 .notBlank().notExceedingLengthOf(255);
 
         baseDataValidator.reset().parameter(ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_VALUE).value(attributeValue)
-                .notBlank().notExceedingLengthOf(ATTRIBUTE_VALUE_MAX_LENGTH);
+                .notBlank().notExceedingLengthOf(255);
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
@@ -153,13 +141,6 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
         }
     }
 
-    private void validateLoanProductAttributeBelongsToLoanProduct(Long loanProductId, ExternalAssetOwnerLoanProductAttributes attribute) {
-        if (!attribute.getLoanProductId().equals(loanProductId)) {
-            throw new ExternalAssetOwnerLoanProductAttributesException(
-                    "The requested attribute does not belong to the loanProductId: " + loanProductId + ".");
-        }
-    }
-
     private void validateLoanProductAttributeKeysMatch(String attributeKeyFromRequest, String attributeKeyFromDB) {
         if (!attributeKeyFromRequest.equals(attributeKeyFromDB)) {
             throw new ExternalAssetOwnerLoanProductAttributesException(
@@ -167,19 +148,17 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
         }
     }
 
-    private String validateAndNormalizeExternalAssetOwnerLoanProductAttribute(String attributeKey, String attributeValue) {
-        List<ExternalAssetOwnerLoanProductAttribute> attributesWithKey = attributeProvider.retrieveAll().stream()
-                .filter(attribute -> attribute.getAttributeKey().equals(attributeKey)).toList();
-        for (ExternalAssetOwnerLoanProductAttribute attribute : attributesWithKey) {
-            if (attribute.validate(attributeValue)) {
-                return attribute.normalize(attributeValue);
+    private void validateExternalAssetOwnerLoanProductAttribute(String attributeKey, String attributeValue) {
+        for (Class<?> implementingClass : implementingClasses) {
+            if (implementingClass.isEnum()) {
+                for (Object obj : implementingClass.getEnumConstants()) {
+                    ExternalAssetOwnerLoanProductAttribute objEnum = (ExternalAssetOwnerLoanProductAttribute) obj;
+                    if (objEnum.getAttributeKey().equals(attributeKey) && objEnum.validate(attributeValue)) {
+                        return;
+                    }
+                }
             }
         }
-        if (attributesWithKey.stream()
-                .anyMatch(attribute -> !(attribute instanceof SettlementModelExternalAssetOwnerLoanProductAttribute))) {
-            throw new ExternalAssetOwnerLoanProductAttributeInvalidValueException(attributeKey);
-        }
-        // unknown keys and invalid settlement models keep their original error code for backward compatibility
         throw new ExternalAssetOwnerLoanProductAttributeInvalidSettlementAttributeException(
                 "The given attribute key or attribute value is not valid.");
     }

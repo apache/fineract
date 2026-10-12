@@ -59,21 +59,8 @@ public class WorkingCapitalLoanPeriodPaymentRateChange extends AbstractAuditable
     @Column(name = "reversed_on_date")
     private LocalDate reversedOnDate;
 
-    @Column(name = "submitted_on_date", nullable = false)
+    @Column(name = "submitted_on_date")
     private LocalDate submittedOnDate;
-
-    /**
-     * Snapshot taken when the change was booked, never restated; null for changes booked before it existed. The annual
-     * EIR is a percentage, like the rates.
-     */
-    @Column(name = "calculated_annual_eir", scale = 6, precision = 19)
-    private BigDecimal calculatedAnnualEir;
-
-    @Column(name = "daily_payment_amount", scale = 6, precision = 19)
-    private BigDecimal dailyPaymentAmount;
-
-    @Column(name = "segment_term")
-    private Integer segmentTerm;
 
     @Version
     private int version;
@@ -93,12 +80,5 @@ public class WorkingCapitalLoanPeriodPaymentRateChange extends AbstractAuditable
     public void reverse(final LocalDate reversalDate) {
         this.reversed = true;
         this.reversedOnDate = reversalDate;
-    }
-
-    public void applyCalculatedValues(final BigDecimal calculatedAnnualEir, final BigDecimal dailyPaymentAmount,
-            final Integer segmentTerm) {
-        this.calculatedAnnualEir = calculatedAnnualEir;
-        this.dailyPaymentAmount = dailyPaymentAmount;
-        this.segmentTerm = segmentTerm;
     }
 }

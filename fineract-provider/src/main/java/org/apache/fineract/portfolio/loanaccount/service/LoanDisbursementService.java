@@ -59,7 +59,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDisbursementValidator;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -215,8 +215,7 @@ public class LoanDisbursementService {
         return disburseAmount;
     }
 
-    public void handleDisbursementTransaction(final Loan loan, final LocalDate disbursedOn, final PaymentDetail paymentDetail,
-            final boolean isAccountTransfer) {
+    public void handleDisbursementTransaction(final Loan loan, final LocalDate disbursedOn, final PaymentDetail paymentDetail) {
         // add repayment transaction to track incoming money from client to mfi
         // for (charges due at time of disbursement)
 
@@ -275,7 +274,7 @@ public class LoanDisbursementService {
             chargesPayment.updateLoan(loan);
             loan.addLoanTransaction(chargesPayment);
             loanTransactionRepository.saveAndFlush(chargesPayment);
-            loanJournalEntryPoster.postJournalEntriesForLoanTransaction(chargesPayment, isAccountTransfer, false);
+            loanJournalEntryPoster.postJournalEntriesForLoanTransaction(chargesPayment, false, false);
             loanBalanceService.updateLoanOutstandingBalances(loan);
         }
 

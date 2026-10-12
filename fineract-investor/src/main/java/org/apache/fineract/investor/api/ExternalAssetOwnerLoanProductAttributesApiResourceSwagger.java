@@ -30,10 +30,10 @@ final class ExternalAssetOwnerLoanProductAttributesApiResourceSwagger {
 
         private PostExternalAssetOwnerLoanProductAttributeRequest() {}
 
-        @Schema(example = "SETTLEMENT_MODEL", description = "Attribute key, one of the keys returned by the loan product attributes template endpoint, e.g. SETTLEMENT_MODEL or EXCLUDED_TRANSACTION_TYPES.")
+        @Schema(example = "SETTLEMENT_MODEL")
         public String attributeKey;
 
-        @Schema(example = "DELAYED_SETTLEMENT", description = "Attribute value. For multi value attributes such as EXCLUDED_TRANSACTION_TYPES this is a comma separated list, e.g. BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT.")
+        @Schema(example = "DELAYED_SETTLEMENT")
         public String attributeValue;
     }
 
@@ -42,10 +42,10 @@ final class ExternalAssetOwnerLoanProductAttributesApiResourceSwagger {
 
         private PutExternalAssetOwnerLoanProductAttributeRequest() {}
 
-        @Schema(example = "SETTLEMENT_MODEL", description = "Attribute key, one of the keys returned by the loan product attributes template endpoint, e.g. SETTLEMENT_MODEL or EXCLUDED_TRANSACTION_TYPES.")
+        @Schema(example = "SETTLEMENT_MODEL")
         public String attributeKey;
 
-        @Schema(example = "DELAYED_SETTLEMENT_DISABLED", description = "Attribute value. For multi value attributes such as EXCLUDED_TRANSACTION_TYPES this is a comma separated list, e.g. BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT.")
+        @Schema(example = "DELAYED_SETTLEMENT_DISABLED")
         public String attributeValue;
     }
 

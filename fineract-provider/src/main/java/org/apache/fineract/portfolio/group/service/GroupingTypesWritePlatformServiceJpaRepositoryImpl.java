@@ -77,7 +77,6 @@ import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.GroupTypes;
 import org.apache.fineract.portfolio.group.exception.GroupAccountExistsException;
 import org.apache.fineract.portfolio.group.exception.GroupHasNoStaffException;
-import org.apache.fineract.portfolio.group.exception.GroupLevelNotFoundException;
 import org.apache.fineract.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
 import org.apache.fineract.portfolio.group.exception.GroupMustBePendingToBeDeletedException;
 import org.apache.fineract.portfolio.group.exception.InvalidGroupLevelException;
@@ -143,8 +142,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final Office groupOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
 
             final LocalDate activationDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
-            final GroupLevel groupLevel = this.groupLevelRepository.findById(groupingType.getId())
-                    .orElseThrow(() -> new GroupLevelNotFoundException(groupingType.getId()));
+            final GroupLevel groupLevel = this.groupLevelRepository.findById(groupingType.getId()).orElse(null);
 
             validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(groupOffice, groupLevel, activationDate);
 
@@ -386,8 +384,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 groupForUpdate.updateStaff(newStaff);
             }
 
-            final GroupLevel groupLevel = this.groupLevelRepository.findById(groupForUpdate.getGroupLevel().getId())
-                    .orElseThrow(() -> new GroupLevelNotFoundException(groupForUpdate.getGroupLevel().getId()));
+            final GroupLevel groupLevel = this.groupLevelRepository.findById(groupForUpdate.getGroupLevel().getId()).orElse(null);
 
             /*
              * Ignoring parentId param, if group for update is super parent. TODO Need to check: Ignoring is correct or
@@ -574,7 +571,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            log.error("Error occurred.", throwable);
+            log.error("Error occured.", throwable);
             throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
         }
@@ -763,7 +760,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     name);
         }
 
-        log.error("Error occurred.", dve);
+        log.error("Error occured.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 

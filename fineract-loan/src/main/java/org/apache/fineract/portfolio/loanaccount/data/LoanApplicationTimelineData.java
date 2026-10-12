@@ -71,8 +71,6 @@ public class LoanApplicationTimelineData {
     private String chargedOffByFirstname;
     private String chargedOffByLastname;
 
-    private LocalDate overpaidOnDate;
-
     public LocalDate getDisbursementDate() {
         LocalDate disbursementDate = this.expectedDisbursementDate;
         if (this.actualDisbursementDate != null) {

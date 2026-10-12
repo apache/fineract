@@ -171,10 +171,6 @@ public final class ErrorMessageHelper {
                 loanIdStr);
     }
 
-    public static String writeOffBeforeLastTransactionFailure() {
-        return "The date of the writeoff transaction must occur on or after previous transactions.";
-    }
-
     public static String notChargedOffFailure(Long loanId) {
         String loanIdStr = String.valueOf(loanId);
         return String.format("Loan: %s is not charged-off", loanIdStr);
@@ -198,7 +194,7 @@ public final class ErrorMessageHelper {
     }
 
     public static String addCapitalizedIncomeUndoFailureTransactionTypeNonReversal() {
-        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee, buy down fee adjustment or chargeback can be adjusted.";
+        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee or buy down fee adjustment can be adjusted.";
     }
 
     public static String addCapitalizedIncomeUndoFailureAdjustmentExists() {
@@ -501,13 +497,19 @@ public final class ErrorMessageHelper {
                 expected);
     }
 
-    public static String wrongValueInInJournalEntries(List<List<String>> expected, List<List<String>> actual) {
-        return String.format("%nWrong values in Journal entries." //
-                + "%nActual values are: %n%s %nExpected values are: %n%s", actual, expected);
+    public static String wrongValueInLineInJournalEntries(int line, List<List<List<String>>> actual, List<String> expected) {
+        return wrongValueInLineInJournalEntries(null, line, actual, expected);
     }
 
     public static String wrongValueInLineInJournalEntries(String resourceId, int line, List<List<List<String>>> actualList,
             List<String> expected) {
+        String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
+        return String.format("%nWrong value in Journal entries of resource %s line %s." //
+                + "%nActual values for the possible transactions in line (with the same date) are: %n%s %nExpected values in line: %n%s",
+                resourceId, line, actual, expected);
+    }
+
+    public static String wrongValueInLineInJournalEntry(String resourceId, int line, List<List<String>> actualList, List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Journal entries of resource %s line %s." //
                 + "%nActual values for the possible transactions in line (with the same date) are: %n%s %nExpected values in line: %n%s",
@@ -1023,14 +1025,6 @@ public final class ErrorMessageHelper {
         return "Validation errors: [id] Loan reamortization can only be done once a day. There has already been a reamortization done for today";
     }
 
-    public static String contractTerminationBeforeBusinessDateFailure() {
-        return "[transactionDate] Failed data validation due to: cannot.be.before.business.date.";
-    }
-
-    public static String contractTerminationNotBeforeMaturityDateFailure() {
-        return "[transactionDate] Failed data validation due to: must.be.before.maturity.date.";
-    }
-
     public static String incorrectExpectedValueInResponse() {
         return "The parameter is not matching to expected.";
     }
@@ -1062,10 +1056,6 @@ public final class ErrorMessageHelper {
 
     public static String paymentAllocationRulesWithoutDefaultFailure() {
         return "At least one DEFAULT payment allocation must be provided";
-    }
-
-    public static String invalidTrnTypeDuplicatedForPaymentAllocationFailure() {
-        return "The same transaction type must be provided only once";
     }
 
     public static String workingCapitalLoanProductIdentifiedDoesNotExistFailure(String identifierId) {
@@ -1120,12 +1110,12 @@ public final class ErrorMessageHelper {
         return "Failed data validation due to: override.not.allowed.by.product.";
     }
 
-    public static String overrideDisallowedByProductFailure(String disallowedOverrideSettingName) {
-        return String.format("validation.msg.WORKINGCAPITALLOAN.%s.override.not.allowed.by.product", disallowedOverrideSettingName);
-    }
-
     public static String discountAlreadySetBeforeDisburseFailure() {
         return "Discount was already set before disbursement and cannot be added again";
+    }
+
+    public static String discountDiffDateFromDisburseFailure() {
+        return "Failed data validation due to: transaction.date.must.be.equal.disbursement.date.";
     }
 
     public static String discountAdjustmentExceedFailure() {
@@ -1156,9 +1146,8 @@ public final class ErrorMessageHelper {
         return "Undo is not supported for transaction type";
     }
 
-    public static String workingCapitalLoanTransactionNotFoundFailure(final long transactionId, final long loanId) {
-        return String.format("Working Capital Loan transaction with identifier %s does not exist for loan with identifier %s.",
-                transactionId, loanId);
+    public static String discountAdjustmentUndoTransactionNotFoundFailure() {
+        return "Working capital loan transaction not found";
     }
 
     public static String discountAdjustmentUndoNotActiveLoanFailure() {
@@ -1195,10 +1184,6 @@ public final class ErrorMessageHelper {
 
     public static String workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure() {
         return "validation.msg.WORKINGCAPITALLOAN.principalAmount.unable.to.calculate.valid.eir";
-    }
-
-    public static String workingCapitalInputDiscountExceedsPrincipalFailure() {
-        return "validation.msg.WORKINGCAPITALLOAN.discount.amount.cannot.exceed.principal";
     }
 
     public static String workingCapitalPeriodPaymentRateAfterMaturityDateFailure() {

@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 public interface COBBusinessStepService {
 

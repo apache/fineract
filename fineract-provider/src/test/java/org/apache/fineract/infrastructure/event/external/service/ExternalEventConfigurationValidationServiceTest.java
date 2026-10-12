@@ -97,7 +97,7 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "SavingsPostInterestBusinessEvent", "SavingsRejectBusinessEvent", "SavingsWithdrawalBusinessEvent",
                 "ShareAccountApproveBusinessEvent", "ShareAccountCreateBusinessEvent", "ShareProductDividentsCreateBusinessEvent",
                 "LoanChargeAdjustmentPostBusinessEvent", "LoanChargeAdjustmentPreBusinessEvent", "LoanDelinquencyRangeChangeBusinessEvent",
-                "LoanAccountsStayedLockedBusinessEvent", "MockBusinessEvent", "MockDependentBusinessEvent", "LoanChargeOffPreBusinessEvent",
+                "LoanAccountsStayedLockedBusinessEvent", "MockBusinessEvent", "LoanChargeOffPreBusinessEvent",
                 "LoanChargeOffPostBusinessEvent", "LoanUndoChargeOffBusinessEvent", "LoanAccrualTransactionCreatedBusinessEvent",
                 "LoanRescheduledDueAdjustScheduleBusinessEvent", "LoanOwnershipTransferBusinessEvent", "LoanAccountSnapshotBusinessEvent",
                 "LoanTransactionDownPaymentPostBusinessEvent", "LoanTransactionDownPaymentPreBusinessEvent",
@@ -118,23 +118,22 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "SavingsAccountsStayedLockedBusinessEvent", "SavingsAccountForceWithdrawalBusinessEvent",
                 "WorkingCapitalLoanDisbursalTransactionBusinessEvent", "WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent",
                 "WorkingCapitalLoanRepaymentTransactionBusinessEvent", "WorkingCapitalLoanDiscountFeeTransactionBusinessEvent",
-                "WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent", "WorkingCapitalLoanChargeAdjustmentPreBusinessEvent",
-                "WorkingCapitalLoanChargeAdjustmentPostBusinessEvent", "WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent",
+                "WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent",
+                "WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent",
                 "WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent", "WorkingCapitalLoanCreatedBusinessEvent",
                 "WorkingCapitalLoanApplicationModifiedBusinessEvent", "WorkingCapitalLoanApprovedBusinessEvent",
                 "WorkingCapitalLoanUndoApprovalBusinessEvent", "WorkingCapitalLoanRejectedBusinessEvent",
                 "WorkingCapitalLoanDisbursalBusinessEvent", "WorkingCapitalLoanUndoDisbursalBusinessEvent",
                 "WorkingCapitalLoanStatusChangedBusinessEvent", "WorkingCapitalLoanBalanceChangedBusinessEvent",
                 "WorkingCapitalLoanDelinquencyRangeChangeBusinessEvent", "WorkingCapitalLoanWriteOffTransactionBusinessEvent",
-                "WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent", "WorkingCapitalLoanWrittenOffBusinessEvent",
-                "WorkingCapitalLoanUndoWrittenOffBusinessEvent", "WorkingCapitalLoanRecoveryPaymentTransactionBusinessEvent",
-                "WorkingCapitalLoanPeriodPaymentRateChangedBusinessEvent", "WorkingCapitalLoanDelinquencyScheduleChangedBusinessEvent",
-                "WorkingCapitalLoanDelinquencyDisableBusinessEvent", "WorkingCapitalLoanDelinquencyEnableBusinessEvent",
-                "WorkingCapitalLoanBreachScheduleChangedBusinessEvent", "WorkingCapitalLoanBreachDisableBusinessEvent",
-                "WorkingCapitalLoanBreachEnableBusinessEvent", "WorkingCapitalLoanChargeOffBusinessEvent",
-                "WorkingCapitalLoanFraudChangedBusinessEvent", "WorkingCapitalLoanPayoutRefundTransactionBusinessEvent",
-                "WorkingCapitalLoanGoodwillCreditTransactionBusinessEvent", "WorkingCapitalLoanAdjustTransactionBusinessEvent",
-                "WorkingCapitalLoanChargeOffTransactionBusinessEvent", "WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent",
+                "WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent", "WorkingCapitalLoanPeriodPaymentRateChangedBusinessEvent",
+                "WorkingCapitalLoanDelinquencyScheduleChangedBusinessEvent", "WorkingCapitalLoanDelinquencyDisableBusinessEvent",
+                "WorkingCapitalLoanDelinquencyEnableBusinessEvent", "WorkingCapitalLoanBreachScheduleChangedBusinessEvent",
+                "WorkingCapitalLoanBreachDisableBusinessEvent", "WorkingCapitalLoanBreachEnableBusinessEvent",
+                "WorkingCapitalLoanChargeOffBusinessEvent", "WorkingCapitalLoanFraudChangedBusinessEvent",
+                "WorkingCapitalLoanPayoutRefundTransactionBusinessEvent", "WorkingCapitalLoanGoodwillCreditTransactionBusinessEvent",
+                "WorkingCapitalLoanAdjustTransactionBusinessEvent", "WorkingCapitalLoanChargeOffTransactionBusinessEvent",
+                "WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent",
                 "WorkingCapitalLoanDiscountFeeAmortizationAdjustmentTransactionBusinessEvent", "WorkingCapitalLoanAddChargeBusinessEvent",
                 "WorkingCapitalLoanJournalEntryCreatedBusinessEvent", "WorkingCapitalLoanBreachPastDueChangeBusinessEvent",
                 "WorkingCapitalLoanUndoChargeOffBusinessEvent", "WorkingCapitalLoanBreachChangeBusinessEvent",
@@ -144,7 +143,7 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "WorkingCapitalLoanDelinquencyPauseBusinessEvent", "WorkingCapitalLoanDelinquencyResumeBusinessEvent",
                 "WorkingCapitalLoanDelinquencyRescheduleBusinessEvent", "WorkingCapitalLoanDelinquencyResetBusinessEvent",
                 "WorkingCapitalLoanDelinquencyUndoResetBusinessEvent", "WorkingCapitalLoanAccrualTransactionBusinessEvent",
-                "WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent", "WorkingCapitalLoanChargeWaiverTransactionBusinessEvent");
+                "WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent");
 
         List<FineractPlatformTenant> tenants = List
                 .of(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));
@@ -192,7 +191,7 @@ public class ExternalEventConfigurationValidationServiceTest {
     public void givenMissingEventConfigurationWhenValidatedThenThrowException() throws Exception {
 
         // given
-        List<String> configurationWithMissingCentersCreateBusinessEvent = Arrays.asList("MockBusinessEvent", "MockDependentBusinessEvent",
+        List<String> configurationWithMissingCentersCreateBusinessEvent = Arrays.asList("MockBusinessEvent", "MockBusinessEvent",
                 "ClientActivateBusinessEvent", "ClientCloseBusinessEvent", "ClientCreateBusinessEvent", "ClientReactivateBusinessEvent",
                 "ClientRejectBusinessEvent", "ClientUndoRejectionBusinessEvent", "ClientUndoWithdrawalBusinessEvent",
                 "ClientWithdrawBusinessEvent", "DocumentCreatedBusinessEvent", "DocumentDeletedBusinessEvent",

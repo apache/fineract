@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -136,23 +135,6 @@ public final class LoanTransactionsApiResourceSwagger {
         public LocalDate nextInstallmentDueDate;
         @Schema(example = "[2009, 8, 1]")
         public LocalDate calculatedStartDate;
-        @Schema(description = "Disburse template only: the repayment schedule installments the disbursement will produce")
-        public List<GetLoansLoanIdRepaymentScheduleInstallment> loanRepaymentScheduleInstallments;
-
-        @Schema(description = "A repayment schedule installment of a loan transaction template")
-        static final class GetLoansLoanIdRepaymentScheduleInstallment {
-
-            private GetLoansLoanIdRepaymentScheduleInstallment() {}
-
-            @Schema(example = "1")
-            public Long id;
-            @Schema(example = "1")
-            public Integer installmentId;
-            @Schema(example = "[2012, 5, 4]")
-            public LocalDate date;
-            @Schema(example = "1600.00")
-            public BigDecimal amount;
-        }
     }
 
     public static final class GetLoanCurrency {

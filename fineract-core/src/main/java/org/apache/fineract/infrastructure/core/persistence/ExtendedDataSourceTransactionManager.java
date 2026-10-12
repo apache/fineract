@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import lombok.Getter;
-import org.jspecify.annotations.NonNull;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 

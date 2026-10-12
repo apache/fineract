@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.exception;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -38,23 +37,13 @@ public class HttpMessageNotReadableErrorController implements ExceptionMapper<Ht
 
     @Override
     public Response toResponse(HttpMessageNotReadableException exception) {
-        final Throwable mostSpecificException = ErrorHandler.findMostSpecificException(exception);
-        log.warn("Exception occurred", mostSpecificException);
+        final String globalisationMessageCode = "error.msg.invalid.json.data";
+        final String defaultUserMessage = "The referenced JSON data is invalid, validate date format as yyyy-MM-dd or other cases like String instead of Number";
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
 
-        final ApiParameterError error = mostSpecificException instanceof InvalidFormatException invalidFormatException
-                && Number.class.isAssignableFrom(invalidFormatException.getTargetType()) ? numericFormatError(invalidFormatException)
-                        : ApiParameterError.generalError("error.msg.invalid.json.data",
-                                "The referenced JSON data is invalid, validate date format as yyyy-MM-dd or other cases like String instead of Number");
+        final ApiParameterError error = ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage);
 
         return Response.status(Response.Status.BAD_REQUEST).entity(error).type(MediaType.APPLICATION_JSON).build();
-    }
-
-    private ApiParameterError numericFormatError(final InvalidFormatException exception) {
-        final String parameterName = exception.getPath().isEmpty() ? null
-                : exception.getPath().get(exception.getPath().size() - 1).getFieldName();
-        return ApiParameterError.parameterErrorWithValue("validation.msg.invalid.decimal.format",
-                "The parameter `" + parameterName + "` has value: " + exception.getValue() + " which is not a valid number.", parameterName,
-                String.valueOf(exception.getValue()));
     }
 
     @Override

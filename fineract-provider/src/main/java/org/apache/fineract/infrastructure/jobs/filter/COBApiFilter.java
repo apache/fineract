@@ -61,24 +61,22 @@ public abstract class COBApiFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        request = new BodyCachingHttpServletRequestWrapper(request);
 
-        BodyCachingHttpServletRequestWrapper cachingRequest = request instanceof BodyCachingHttpServletRequestWrapper wrapper ? wrapper
-                : new BodyCachingHttpServletRequestWrapper(request);
-
-        if (!helper.isOnApiList(cachingRequest)) {
-            proceed(filterChain, cachingRequest, response);
+        if (!helper.isOnApiList((BodyCachingHttpServletRequestWrapper) request)) {
+            proceed(filterChain, request, response);
         } else {
             try {
                 boolean bypassUser = helper.isBypassUser();
                 if (bypassUser) {
-                    proceed(filterChain, cachingRequest, response);
+                    proceed(filterChain, request, response);
                 } else {
                     try {
-                        List<Long> loanIds = helper.calculateRelevantLoanIds(cachingRequest);
+                        List<Long> loanIds = helper.calculateRelevantLoanIds((BodyCachingHttpServletRequestWrapper) request);
                         if (!loanIds.isEmpty() && helper.isLoanBehind(loanIds)) {
                             helper.executeInlineCob(loanIds);
                         }
-                        proceed(filterChain, cachingRequest, response);
+                        proceed(filterChain, request, response);
                     } catch (LoanIdsHardLockedException e) {
                         Reject.reject(e.getLoanIdFromRequest(), HttpStatus.SC_CONFLICT).toServletResponse(response);
                     }

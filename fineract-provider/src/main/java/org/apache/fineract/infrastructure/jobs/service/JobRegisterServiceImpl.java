@@ -48,8 +48,9 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
-import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.configuration.JobLocator;
+import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
@@ -83,7 +84,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     private FineractProperties fineractProperties;
 
     @Autowired
-    private JobRegistry jobRegistry;
+    private JobLocator jobLocator;
 
     @Autowired
     private JobStarter jobStarter;
@@ -188,7 +189,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                                     }
                                 }
                             } catch (final SchedulerException e) {
-                                log.error("Error occurred.", e);
+                                log.error("Error occured.", e);
                             }
                         }
                         jobDetail.setTriggerMisfired(false);
@@ -276,7 +277,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             try {
                 scheduler.shutdown();
             } catch (final SchedulerException e) {
-                log.error("Error occurred.", e);
+                log.error("Error occured.", e);
             }
         }
     }
@@ -334,9 +335,11 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 
         JobNameData jobName = jobNameService.getJobByHumanReadableName(scheduledJobDetail.getJobName());
-        Job job = jobRegistry.getJob(jobName.getEnumStyleName());
-        if (job == null) {
-            throw new JobIsNotFoundOrNotEnabledException(jobName.getEnumStyleName());
+        Job job;
+        try {
+            job = jobLocator.getJob(jobName.getEnumStyleName());
+        } catch (NoSuchJobException e) {
+            throw new JobIsNotFoundOrNotEnabledException(e, jobName.getEnumStyleName());
         }
 
         final MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();

@@ -21,7 +21,6 @@ package org.apache.fineract.integrationtests.common.products;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,6 @@ import org.apache.fineract.client.models.DelinquencyRangeData;
 import org.apache.fineract.client.models.DelinquencyRangeRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencySummary;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PutDelinquencyBucketResponse;
 import org.apache.fineract.client.util.Calls;
@@ -54,27 +52,18 @@ public class DelinquencyBucketsHelper {
     }
 
     public static Long createDefaultBucket() {
-        return createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(createDefaultRanges()))
-                .getResourceId();
-    }
-
-    public static Long createDefaultWorkingCapitalBucket() {
-        final MinimumPaymentPeriodAndRule rule = new MinimumPaymentPeriodAndRule().frequency(30).frequencyType("DAYS")
-                .minimumPayment(BigDecimal.valueOf(3.0)).minimumPaymentType("PERCENTAGE");
-        return createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("WC_DLQ_B_", 10)).ranges(createDefaultRanges())
-                .bucketType("WORKING_CAPITAL").minimumPaymentPeriodAndRule(rule)).getResourceId();
-    }
-
-    private static List<Long> createDefaultRanges() {
-        final Long range1Id = Calls
+        Long range1Id = Calls
                 .ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.createRange(new DelinquencyRangeRequest()
                         .classification(Utils.randomStringGenerator("DLQ_R_", 10)).minimumAgeDays(1).maximumAgeDays(3).locale("en")))
                 .getResourceId();
-        final Long range2Id = Calls
+        Long range2Id = Calls
                 .ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.createRange(new DelinquencyRangeRequest()
                         .classification(Utils.randomStringGenerator("DLQ_R_", 10)).minimumAgeDays(4).maximumAgeDays(60).locale("en")))
                 .getResourceId();
-        return List.of(range1Id, range2Id);
+        return Calls
+                .ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.createBucket(
+                        new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(List.of(range1Id, range2Id))))
+                .getResourceId();
     }
 
     public static PostDelinquencyBucketResponse createBucket(DelinquencyBucketRequest bucket) {

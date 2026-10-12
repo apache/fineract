@@ -23,10 +23,11 @@ import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.gcm.service.NotificationSenderService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageRepository;
-import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -60,7 +61,8 @@ public class SendMessageToSmsGatewayConfig {
 
     @Bean
     public Job sendMessageToSmsGatewayJob() {
-        return new JobBuilder(JobName.SEND_MESSAGES_TO_SMS_GATEWAY.name(), jobRepository).start(sendMessageToSmsGatewayStep()).build();
+        return new JobBuilder(JobName.SEND_MESSAGES_TO_SMS_GATEWAY.name(), jobRepository).start(sendMessageToSmsGatewayStep())
+                .incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

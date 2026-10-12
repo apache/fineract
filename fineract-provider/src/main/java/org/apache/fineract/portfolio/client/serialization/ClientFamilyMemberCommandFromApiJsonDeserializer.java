@@ -63,6 +63,7 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
             Arrays.asList(ID, CLIENT_ID, FIRST_NAME, MIDDLE_NAME, LAST_NAME, QUALIFICATION, MOBILE_NUMBER, AGE, IS_DEPENDENT,
                     RELATIONSHIP_ID, MARITAL_STATUS_ID, GENDER_ID, DATE_OF_BIRTH, PROFESSION_ID, LOCALE, DATE_FORMAT, FAMILY_MEMBERS));
     public static final String FAMILY_MEMBERS1 = "FamilyMembers";
+    public static final String RELATION_SHIP_ID = "relationShipId";
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -147,12 +148,12 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter(IS_DEPENDENT).value(isDependent).notNull().notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractLongNamed(RELATIONSHIP_ID, element) != null) {
-            final long relationshipId = this.fromApiJsonHelper.extractLongNamed(RELATIONSHIP_ID, element);
-            baseDataValidator.reset().parameter(RELATIONSHIP_ID).value(relationshipId).notBlank().longGreaterThanZero();
+        if (this.fromApiJsonHelper.extractLongNamed(RELATION_SHIP_ID, element) != null) {
+            final long relationShipId = this.fromApiJsonHelper.extractLongNamed(RELATION_SHIP_ID, element);
+            baseDataValidator.reset().parameter(RELATION_SHIP_ID).value(relationShipId).notBlank().longGreaterThanZero();
 
         } else {
-            baseDataValidator.reset().parameter(RELATIONSHIP_ID).value(this.fromApiJsonHelper.extractLongNamed(RELATIONSHIP_ID, element))
+            baseDataValidator.reset().parameter(RELATION_SHIP_ID).value(this.fromApiJsonHelper.extractLongNamed(RELATION_SHIP_ID, element))
                     .notBlank().longGreaterThanZero();
         }
 
@@ -227,9 +228,9 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter(QUALIFICATION).value(qualification).notNull().notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractLongNamed(RELATIONSHIP_ID, element) != null) {
-            final long relationshipId = this.fromApiJsonHelper.extractLongNamed(RELATIONSHIP_ID, element);
-            baseDataValidator.reset().parameter(RELATIONSHIP_ID).value(relationshipId).notBlank().longGreaterThanZero();
+        if (this.fromApiJsonHelper.extractLongNamed(RELATION_SHIP_ID, element) != null) {
+            final long relationShipId = this.fromApiJsonHelper.extractLongNamed(RELATION_SHIP_ID, element);
+            baseDataValidator.reset().parameter(RELATION_SHIP_ID).value(relationShipId).notBlank().longGreaterThanZero();
 
         }
 

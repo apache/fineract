@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Optional;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
@@ -79,6 +80,8 @@ class NoteWritePlatformServiceImplTest {
     @Mock
     private Client client;
     @Mock
+    private Office office;
+    @Mock
     private Note note;
 
     private NoteWritePlatformServiceImpl subject;
@@ -111,7 +114,8 @@ class NoteWritePlatformServiceImplTest {
         when(savingsAccountTransactionRepository.findById(22L)).thenReturn(Optional.of(savingsAccountTransaction));
         when(savingsAccountTransaction.getSavingsAccount()).thenReturn(savingsAccount);
         when(savingsAccount.getClient()).thenReturn(client);
-        when(savingsAccount.officeId()).thenReturn(8L);
+        when(client.getOffice()).thenReturn(office);
+        when(office.getId()).thenReturn(8L);
         when(noteRepository.saveAndFlush(any(Note.class))).thenReturn(note);
         when(note.getId()).thenReturn(202L);
 
@@ -145,75 +149,13 @@ class NoteWritePlatformServiceImplTest {
         when(savingsAccountTransactionRepository.findById(22L)).thenReturn(Optional.of(savingsAccountTransaction));
         when(noteRepository.findBySavingsTransactionAndId(savingsAccountTransaction, 3L)).thenReturn(note);
         when(savingsAccountTransaction.getSavingsAccount()).thenReturn(savingsAccount);
-        when(savingsAccount.officeId()).thenReturn(8L);
+        when(savingsAccount.getClient()).thenReturn(client);
+        when(client.getOffice()).thenReturn(office);
+        when(office.getId()).thenReturn(8L);
 
         NoteDeleteResponse response = subject.deleteNote(request);
 
         assertEquals(3L, response.getResourceId());
-        verify(noteRepository).delete(note);
-    }
-
-    @Test
-    void createNoteShouldSupportGroupSavingsAccount() {
-        NoteCreateRequest request = NoteCreateRequest.builder().resourceId(30L).type(NoteType.SAVING_ACCOUNT).note("group savings note")
-                .build();
-        when(savingsAccountRepository.findById(30L)).thenReturn(Optional.of(savingsAccount));
-        when(savingsAccount.officeId()).thenReturn(5L);
-        when(noteRepository.saveAndFlush(any(Note.class))).thenReturn(note);
-        when(note.getId()).thenReturn(303L);
-
-        NoteCreateResponse response = subject.createNote(request);
-
-        assertEquals(303L, response.getResourceId());
-        assertEquals(5L, response.getOfficeId());
-        verify(noteRepository).saveAndFlush(any(Note.class));
-    }
-
-    @Test
-    void createNoteShouldSupportGroupSavingsTransaction() {
-        NoteCreateRequest request = NoteCreateRequest.builder().resourceId(31L).type(NoteType.SAVINGS_TRANSACTION)
-                .note("group savings transaction note").build();
-        when(savingsAccountTransactionRepository.findById(31L)).thenReturn(Optional.of(savingsAccountTransaction));
-        when(savingsAccountTransaction.getSavingsAccount()).thenReturn(savingsAccount);
-        when(savingsAccount.officeId()).thenReturn(5L);
-        when(noteRepository.saveAndFlush(any(Note.class))).thenReturn(note);
-        when(note.getId()).thenReturn(313L);
-
-        NoteCreateResponse response = subject.createNote(request);
-
-        assertEquals(313L, response.getResourceId());
-        assertEquals(5L, response.getOfficeId());
-        verify(noteRepository).saveAndFlush(any(Note.class));
-    }
-
-    @Test
-    void updateNoteShouldSupportGroupSavingsAccount() {
-        NoteUpdateRequest request = NoteUpdateRequest.builder().id(4L).resourceId(30L).type(NoteType.SAVING_ACCOUNT).note("updated")
-                .build();
-        when(savingsAccountRepository.findById(30L)).thenReturn(Optional.of(savingsAccount));
-        when(savingsAccount.officeId()).thenReturn(5L);
-        when(noteRepository.findBySavingsAccountAndId(savingsAccount, 4L)).thenReturn(note);
-        when(note.getNote()).thenReturn("old");
-        when(note.update("updated")).thenReturn(Map.of("note", "updated"));
-
-        NoteUpdateResponse response = subject.updateNote(request);
-
-        assertEquals(30L, response.getResourceId());
-        assertEquals(5L, response.getOfficeId());
-        verify(noteRepository).saveAndFlush(note);
-    }
-
-    @Test
-    void deleteNoteShouldSupportGroupSavingsTransaction() {
-        NoteDeleteRequest request = NoteDeleteRequest.builder().id(5L).resourceId(31L).type(NoteType.SAVINGS_TRANSACTION).build();
-        when(savingsAccountTransactionRepository.findById(31L)).thenReturn(Optional.of(savingsAccountTransaction));
-        when(noteRepository.findBySavingsTransactionAndId(savingsAccountTransaction, 5L)).thenReturn(note);
-        when(savingsAccountTransaction.getSavingsAccount()).thenReturn(savingsAccount);
-        when(savingsAccount.officeId()).thenReturn(5L);
-
-        NoteDeleteResponse response = subject.deleteNote(request);
-
-        assertEquals(5L, response.getResourceId());
         verify(noteRepository).delete(note);
     }
 }

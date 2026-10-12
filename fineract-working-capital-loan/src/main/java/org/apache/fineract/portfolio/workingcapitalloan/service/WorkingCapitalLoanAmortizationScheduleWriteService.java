@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
-import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.data.ProjectedAmortizationScheduleGenerateRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 
@@ -52,6 +51,8 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
 
     void generateAndSaveAmortizationScheduleOnApproval(WorkingCapitalLoan loan);
 
+    void regenerateAmortizationScheduleOnUndoDisbursal(WorkingCapitalLoan loan);
+
     void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
 
     void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
@@ -69,23 +70,7 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
      * reconstructed by replaying every non-reversed rate change in effective-date order, so it is read back from the
      * loan's rate-change history along with the ones already there.
      */
-    ProjectedAmortizationScheduleModel regenerateAmortizationScheduleOnRateChange(WorkingCapitalLoan loan);
-
-    /**
-     * Rebuilds the stored model from the loan's own record of what happened - its transactions, the principal each of
-     * them was allocated, and the rate changes booked against it - and saves the result.
-     *
-     * <p>
-     * For a model persisted by an earlier version of the calculation. Such a model still parses, so nothing fails: the
-     * fields the current shape no longer knows are dropped, and the schedule is quietly missing whatever they carried
-     * until something writes it back that way for good.
-     *
-     * <p>
-     * Nothing is read out of the model being replaced, which is what makes this safe for a version bump of any size:
-     * the model is suspect by definition here, so a rebuild that consulted it would inherit whatever the older shape
-     * had lost. Every input comes from a table the model does not own.
-     */
-    void rebuildScheduleModelFromRecordedHistory(WorkingCapitalLoan loan);
+    void regenerateAmortizationScheduleOnRateChange(WorkingCapitalLoan loan);
 
     /**
      * After a discount fee adjustment: regenerates the projected schedule with the new loan-level discount (as on

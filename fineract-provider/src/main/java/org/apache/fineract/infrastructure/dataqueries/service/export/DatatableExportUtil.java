@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.jspecify.annotations.NonNull;
+import org.springframework.lang.NonNull;
 
 public final class DatatableExportUtil {
 
