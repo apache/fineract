@@ -44,7 +44,8 @@ public interface ScheduledJobDetailRepository
     @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.isMismatchedJob = :isMismatchedJob")
     List<ScheduledJobDetail> findAllMismatchedJobs(@Param("isMismatchedJob") boolean isMismatchedJob);
 
-    @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.nodeId = :nodeId or jobDetail.nodeId = 0")
+    @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.nodeId = :nodeId or jobDetail.nodeId = 0 "
+            + "order by jobDetail.taskPriority desc, jobDetail.id")
     List<ScheduledJobDetail> findAllJobs(@Param("nodeId") Integer nodeId);
 
     ScheduledJobDetail findByJobName(String jobName);

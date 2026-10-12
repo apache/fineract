@@ -303,13 +303,24 @@ The replay happens in two places:
 
 `next_run_time` is the instant of a Quartz fire time and is compared as an instant, so neither the tenant's nor the JVM's time zone changes what counts as missed. The cron expression itself is evaluated in the tenant's time zone. The column has no zone, a `Date` is mapped with the JVM's default zone, so keep the same default zone (the shipped images use `-Duser.timezone=UTC`) across restarts.
 
-Jobs run in the order Quartz fires them, there is no dependency between jobs. A replayed run executes on the day of the catch-up, not on the day it was missed, so a job that depends on the real clock or on a business date that has not caught up yet sees the current state. Known limits:
+There is no dependency between jobs in general. The jobs that have to run in order are `Increase Business Date by 1 day`, `Increase COB Date by 1 day`, `Loan COB` and `Working Capital Loan COB`: the COB reads the COB date when it starts, so it must not start before the business date has caught up. They are in `scheduler_group` 1, which has a Quartz scheduler of its own with a single thread, so they never run concurrently. Jobs are registered by `task_priority` (highest first, then by id), and when several fires are due the one with the oldest fire time goes first, so the replayed business date runs come before the COB runs. Every other job is in `scheduler_group` 0, the shared scheduler with several threads. The group of a job cannot be changed through the API. The consequence of the single thread is that a long Loan COB delays the Working Capital COB and the next midnight fires of the group; the business date job still fires once per missed day.
+
+A replayed run executes on the day of the catch-up, not on the day it was missed, so a job that depends on the real clock or on a business date that has not caught up yet sees the current state. Known limits:
 
 * Periodic standing instructions lose the skipped dates, because they match the exact business date.
 * Retained Earning is wrong if the business date jumps over a year end in one step.
 * Jobs outside COB date their postings on the catch-up day.
 * Report mailing sends duplicates after a long gap.
-* Loans that are more than one day behind are not caught up by a single replayed COB run. Run the COB catch-up (`/loans/catch-up`) after the business date has caught up.
+
+=== COB catch-up after a replayed COB run
+
+A regular `Loan COB` run only closes the loans that are exactly one day behind (or have never been closed), so a loan that is further behind is not reached by a single replayed run. With `fineract.job.execute-missed-runs` on, when a `Loan COB` or `Working Capital Loan COB` run finishes `COMPLETED`, the same catch-up that `POST /loans/catch-up` (`/working-capital-loans/catch-up`) starts is started:
+
+* It runs one COB per day, from the day after the oldest closed loan up to the current COB date.
+* On a normal night, when all loans are up to date, nothing is started.
+* It is not started when a catch-up is already running.
+* It is never started at the end of a catch-up run itself (a run whose `IS_CATCH_UP` parameter is `true`). The final status of a run is saved before the listener runs, so at the end of each day of a catch-up no catch-up is seen as running, and the catch-up thread still holds the COB date. Starting another one there would queue a catch-up per day, and one loan that keeps failing would keep the queue growing.
+* Like the catch-up endpoint, it first unlocks loans that are hard locked by a COB that failed, so with the property on such loans are retried every night. One loan that is stuck far in the past makes the catch-up run every day since its last closed date.
 
 == Global Configuration for enabling/disabling jobs
 

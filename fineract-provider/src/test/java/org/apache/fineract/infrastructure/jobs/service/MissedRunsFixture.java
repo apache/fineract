@@ -154,14 +154,19 @@ final class MissedRunsFixture implements AutoCloseable {
     }
 
     ScheduledJobDetail addJob(JobName jobName, String cronExpression, Date nextRunTime) {
+        return addJob(jobName, cronExpression, nextRunTime, 5, 0);
+    }
+
+    /** Jobs are registered in the order they are added, as {@code findAllJobs} returns them. */
+    ScheduledJobDetail addJob(JobName jobName, String cronExpression, Date nextRunTime, int taskPriority, int schedulerGroup) {
         final ScheduledJobDetail job = new ScheduledJobDetail();
         job.setId(JOB_IDS.getAndIncrement());
         job.setJobName(jobName.toString());
         job.setShortName(jobName.name());
         job.setGroupName("group");
         job.setCronExpression(cronExpression);
-        job.setTaskPriority((short) 5);
-        job.setSchedulerGroup((short) 0);
+        job.setTaskPriority((short) taskPriority);
+        job.setSchedulerGroup((short) schedulerGroup);
         job.setNodeId(0);
         job.setActiveSchedular(true);
         job.setNextRunTime(nextRunTime);

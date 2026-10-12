@@ -27,6 +27,8 @@ import static org.awaitility.Awaitility.await;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.junit.jupiter.api.Test;
@@ -35,6 +37,7 @@ class JobSchedulerServiceImplTest {
 
     private static final int DAYS_DOWN = 3;
     private static final Duration TIMEOUT = Duration.ofSeconds(10);
+    private static final int COB_GROUP = 1;
 
     @Test
     void bootReplaysEveryMissedBusinessDateRunWhenEnabled() throws Exception {
@@ -120,6 +123,31 @@ class JobSchedulerServiceImplTest {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+    }
+
+    @Test
+    void cobRunsAfterEveryReplayedBusinessDateRunWhenTheJobsShareASchedulerGroup() throws Exception {
+        try (MissedRunsFixture fixture = new MissedRunsFixture(true)) {
+            final List<String> order = new CopyOnWriteArrayList<>();
+            fixture.jobBody = job -> {
+                order.add(job.getJobName());
+                sleep(100);
+            };
+            // priorities and group of the seed data once the changeset has put them in one single-thread group,
+            // registered the way findAllJobs returns them: by task_priority desc
+            fixture.addJob(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY, DAILY_AT_MIDNIGHT, midnightDaysAgo(DAYS_DOWN), 99, COB_GROUP);
+            fixture.addJob(JobName.LOAN_COB, DAILY_AT_MIDNIGHT, midnightDaysAgo(DAYS_DOWN), 5, COB_GROUP);
+            fixture.addJob(JobName.WORKING_CAPITAL_LOAN_COB_JOB, DAILY_AT_MIDNIGHT, midnightDaysAgo(DAYS_DOWN), 5, COB_GROUP);
+
+            fixture.boot();
+
+            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(order).hasSize(missedDailyRuns(DAYS_DOWN) + 2));
+            assertThat(order.subList(0, missedDailyRuns(DAYS_DOWN))).as("every replayed business date run goes first")
+                    .containsOnly(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY.toString());
+            assertThat(order.subList(missedDailyRuns(DAYS_DOWN), order.size())).containsExactlyInAnyOrder(JobName.LOAN_COB.toString(),
+                    JobName.WORKING_CAPITAL_LOAN_COB_JOB.toString());
+            assertThat(fixture.maxConcurrentExecutions.get()).as("one thread serves the group").isEqualTo(1);
         }
     }
 }
