@@ -25,7 +25,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.organisation.office.data.OfficeData;
+import org.apache.fineract.portfolio.client.data.ClientData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -152,6 +155,49 @@ public class StandingInstructionDataSerializationTest {
         assertNotNull(deletedNode.get("status"), "status field should be present for DELETED state");
         assertEquals(3L, deletedNode.get("status").get("id").asLong());
         assertEquals("DELETED", deletedNode.get("status").get("code").asText());
+    }
+
+    /**
+     * Verify that every *Options collection returned by GET /standinginstructions/template is serialized. The "Create
+     * Standing Instruction" screen populates its dropdowns from these collections, so a missing getter leaves the
+     * corresponding dropdown empty.
+     */
+    @Test
+    public void testTemplateOptionsFieldSerialization() throws Exception {
+        List<OfficeData> officeOptions = List.of(OfficeData.testInstance(1L, "Head Office"));
+        List<ClientData> clientOptions = List.of(ClientData.lookup(1L, "Test Client", 1L, "Head Office"));
+        List<PortfolioAccountData> accountOptions = List.of(PortfolioAccountData.lookup(1L, "000000001"));
+        List<EnumOptionData> enumOptions = List.of(new EnumOptionData(1L, "code", "Value"));
+
+        StandingInstructionData template = StandingInstructionData.template(officeOptions, clientOptions, enumOptions, accountOptions,
+                officeOptions, clientOptions, enumOptions, accountOptions, enumOptions, enumOptions, enumOptions, enumOptions, enumOptions,
+                enumOptions);
+
+        JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(template));
+
+        for (String field : List.of("fromOfficeOptions", "fromClientOptions", "fromAccountTypeOptions", "fromAccountOptions",
+                "toOfficeOptions", "toClientOptions", "toAccountTypeOptions", "toAccountOptions", "transferTypeOptions", "statusOptions",
+                "instructionTypeOptions", "priorityOptions", "recurrenceTypeOptions", "recurrenceFrequencyOptions")) {
+            assertNotNull(jsonNode.get(field), field + " should be present in the template JSON");
+            assertEquals(1, jsonNode.get(field).size(), field + " should contain one option");
+        }
+    }
+
+    /**
+     * Verify that fromOffice and toOffice are serialized for GET /standinginstructions/{id}.
+     */
+    @Test
+    public void testOfficeFieldsSerialization() throws Exception {
+        StandingInstructionData standingInstruction = StandingInstructionData.instance(1L, 100L, "Test Standing Instruction",
+                OfficeData.testInstance(1L, "Head Office"), OfficeData.testInstance(2L, "Branch Office"), null, null, null, null, null,
+                null, null, null, null, null, BigDecimal.valueOf(1000), LocalDate.of(2026, 1, 1), null, null, null, null, null);
+
+        JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(standingInstruction));
+
+        assertNotNull(jsonNode.get("fromOffice"), "fromOffice should be present in JSON");
+        assertEquals(1L, jsonNode.get("fromOffice").get("id").asLong());
+        assertNotNull(jsonNode.get("toOffice"), "toOffice should be present in JSON");
+        assertEquals(2L, jsonNode.get("toOffice").get("id").asLong());
     }
 
     /**
