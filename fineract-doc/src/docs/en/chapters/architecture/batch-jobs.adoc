@@ -331,3 +331,9 @@ If the job is disabled with the global configuration then it cannot be scheduled
 |true
 
 |===
+
+== Keeping the scheduler suspended across restarts
+
+`POST /scheduler?command=stop` suspends the scheduler of a tenant (`scheduler_detail.is_suspended`). The `reset_scheduler_on_bootup` column of the same row is `true` by default and un-suspends the tenant again when Fineract boots, so a restart silently starts the scheduler that was stopped. There is no REST endpoint for this column.
+
+When `fineract.job.reset-scheduler-on-bootup-enabled` (environment variable `FINERACT_JOB_RESET_SCHEDULER_ON_BOOTUP_ENABLED`, default `true`) is `false`, boot ignores `reset_scheduler_on_bootup` and a suspended scheduler stays suspended until `POST /scheduler?command=start`. With the default the behaviour is unchanged.
