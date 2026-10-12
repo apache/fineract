@@ -546,6 +546,12 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
+    public boolean isPlChargeAccrualRealTime() {
+        final String value = getGlobalConfigurationPropertyData(GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME).getStringValue();
+        return GlobalConfigurationConstants.CHARGE_ACCRUAL_TIME_REAL_TIME.equalsIgnoreCase(StringUtils.trimToEmpty(value));
+    }
+
+    @Override
     public String getAssetOwnerTransferOustandingInterestStrategy() {
         return getGlobalConfigurationPropertyData(
                 GlobalConfigurationConstants.ASSET_OWNER_TRANSFER_OUTSTANDING_INTEREST_CALCULATION_STRATEGY).getStringValue();

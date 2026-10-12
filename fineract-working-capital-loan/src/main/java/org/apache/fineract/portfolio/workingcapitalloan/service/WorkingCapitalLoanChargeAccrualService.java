@@ -51,7 +51,7 @@ public class WorkingCapitalLoanChargeAccrualService {
     private static final String DUE_DATE = "due-date";
     private static final String DEFAULT_ACCRUAL_DATE_CONFIG = DUE_DATE;
 
-    private static final String REAL_TIME = "real-time";
+    private static final String REAL_TIME = GlobalConfigurationConstants.CHARGE_ACCRUAL_TIME_REAL_TIME;
     private static final String EOD = "eod";
     private static final String DEFAULT_WC_CHARGE_ACCRUAL_TIME_CONFIG = EOD;
 

@@ -702,6 +702,14 @@ public class GlobalConfigurationHelper {
         wclChargeAccrualTime.put("string_value", "EOD");
         defaults.add(wclChargeAccrualTime);
 
+        HashMap<String, Object> plChargeAccrualTime = new HashMap<>();
+        plChargeAccrualTime.put("name", GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME);
+        plChargeAccrualTime.put("value", 0L);
+        plChargeAccrualTime.put("enabled", true);
+        plChargeAccrualTime.put("trapDoor", false);
+        plChargeAccrualTime.put("string_value", "EOD");
+        defaults.add(plChargeAccrualTime);
+
         return defaults;
     }
 

@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -294,12 +295,16 @@ public class LoanRepositoryWrapper {
         return repository.findLoanIdByStatus(LoanStatus.fromInt(statusId));
     }
 
-    public List<Loan> findLoansForPeriodicAccrual(AccountingRuleType accountingType, LocalDate tillDate, boolean futureCharges) {
-        return repository.findLoansForPeriodicAccrual(accountingType, tillDate, futureCharges, LoanStatus.ACTIVE);
+    public List<Loan> findLoansForPeriodicAccrual(AccountingRuleType accountingType, LocalDate tillDate, boolean futureCharges,
+            boolean progressiveFutureCharges) {
+        return repository.findLoansForPeriodicAccrual(accountingType, tillDate, futureCharges, progressiveFutureCharges,
+                LoanScheduleType.PROGRESSIVE, LoanStatus.ACTIVE);
     }
 
-    public List<Loan> findLoansForAddAccrual(AccountingRuleType accountingType, LocalDate tillDate, boolean futureCharges) {
-        return repository.findLoansForAddAccrual(accountingType, tillDate, futureCharges, LoanStatus.ACTIVE);
+    public List<Loan> findLoansForAddAccrual(AccountingRuleType accountingType, LocalDate tillDate, boolean futureCharges,
+            boolean progressiveFutureCharges) {
+        return repository.findLoansForAddAccrual(accountingType, tillDate, futureCharges, progressiveFutureCharges,
+                LoanScheduleType.PROGRESSIVE, LoanStatus.ACTIVE);
     }
 
     public List<Long> findIdByExternalIds(List<ExternalId> externalIds) {
