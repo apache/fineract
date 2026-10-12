@@ -158,7 +158,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                             defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
                         }
 
-                        defaultUserMessage = defaultUserMessage + " is already exist as a guarantor for this loan";
+                        defaultUserMessage = defaultUserMessage + " already exists as a guarantor for this loan";
                         final String action = loan.client() != null ? "client.guarantor" : "group.guarantor";
                         throw new DuplicateGuarantorException(action, "is.already.exist.same.loan", defaultUserMessage, entityId,
                                 loan.getId());
@@ -248,7 +248,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                         } else {
                             defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
                         }
-                        defaultUserMessage = defaultUserMessage + " is already exist as a guarantor for this loan";
+                        defaultUserMessage = defaultUserMessage + " already exists as a guarantor for this loan";
                         final String action = loan.client() != null ? "client.guarantor" : "group.guarantor";
                         throw new DuplicateGuarantorException(action, "is.already.exist.same.loan", defaultUserMessage, entityId, loanId);
                     }
