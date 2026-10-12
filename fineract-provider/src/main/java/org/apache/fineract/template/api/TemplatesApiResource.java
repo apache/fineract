@@ -174,6 +174,8 @@ public class TemplatesApiResource {
     @Operation(summary = "Update a UGD", description = "")
     public TemplateUpdateResponse saveTemplate(@PathParam("templateId") @Parameter(description = "templateId") final Long templateId,
             @RequestBody(required = true) @Valid final TemplateUpdateRequest request) {
+        request.setId(templateId);
+
         final var command = new TemplateUpdateCommand();
         command.setPayload(request);
 

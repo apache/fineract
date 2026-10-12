@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.template.data;
 
-import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
@@ -36,7 +35,6 @@ public class TemplateUpdateRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @NotNull(message = "{org.apache.fineract.infrastructure.template.id.not-null}")
     private Long id;
     private String name;
     private String text;
