@@ -100,7 +100,22 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleRepository
 
     List<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(Long loanId, LocalDate toDate);
 
-    Optional<WorkingCapitalLoanDelinquencyRangeSchedule> findTopByLoanIdAndMinPaymentCriteriaMetFalseOrderByFromDateAsc(Long loanId);
+    /**
+     * Still-open past periods that already carry a positive classified {@code delinquentDays} value, earliest first.
+     * Includes {@code minPaymentCriteriaMet IS NULL} because instant classification can populate delinquent days before
+     * COB evaluates the period. Reset periods are excluded: they are skipped by classification and must not drive
+     * pastDueDays / delinquency start dates.
+     */
+    @Query("""
+            SELECT s FROM WorkingCapitalLoanDelinquencyRangeSchedule s
+            WHERE s.loan.id = :loanId
+              AND s.toDate <= :businessDate
+              AND (s.minPaymentCriteriaMet IS NULL OR s.minPaymentCriteriaMet = FALSE)
+              AND s.reset = false
+              AND s.delinquentDays > 0
+            ORDER BY s.fromDate ASC""")
+    List<WorkingCapitalLoanDelinquencyRangeSchedule> findOpenPastDuePeriodsOrderByFromDateAsc(@Param("loanId") Long loanId,
+            @Param("businessDate") LocalDate businessDate);
 
     List<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndResetIsNotAndToDateBeforeOrderByPeriodNumberAsc(Long id, Boolean reset,
             LocalDate startDate);
