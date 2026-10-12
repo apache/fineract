@@ -63,6 +63,8 @@ final class TaxGroupApiResourceSwagger {
         @Schema(example = "tax group 1")
         public String name;
         public Set<GetTaxesGroupTaxAssociations> taxAssociations;
+        @Schema(example = "[2016, 4, 11]")
+        public LocalDate businessDate;
     }
 
     @Schema(description = "PostTaxesGroupRequest")
