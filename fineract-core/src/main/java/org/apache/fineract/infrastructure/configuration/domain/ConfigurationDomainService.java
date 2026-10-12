@@ -150,6 +150,8 @@ public interface ConfigurationDomainService {
 
     boolean isImmediateChargeAccrualPostMaturityEnabled();
 
+    boolean isPlChargeAccrualRealTime();
+
     String getAssetOwnerTransferOustandingInterestStrategy();
 
     boolean isForceWithdrawalOnSavingsAccountEnabled();
