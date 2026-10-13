@@ -1470,6 +1470,24 @@ public class EventCheckHelper {
                 .map(WorkingCapitalLoanJournalEntryDataV1::getAmount).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    public void workingCapitalLoanAdjustTransactionEventNotRaisedCheck(final Long transactionId) {
+        waitForTransactionCommit();
+        eventAssertion.assertEventNotRaised(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transactionId);
+    }
+
+    public void workingCapitalLoanAdjustTransactionEventRaisedOnceCheck(final Long transactionId) {
+        waitForTransactionCommit();
+        // Asserting the event consumes it, so any second one for the same transaction is still there to be caught.
+        eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transactionId);
+        eventAssertion.assertEventNotRaised(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transactionId);
+    }
+
+    public void workingCapitalLoanStatusChangedEventNotRaisedOnCheck(final Long loanId, final LocalDate businessDate) {
+        waitForTransactionCommit();
+        eventAssertion.assertEventNotRaised(WorkingCapitalLoanStatusChangedEvent.class,
+                eventMessage -> loanId.equals(eventMessage.getData().getId()) && businessDate.equals(eventMessage.getBusinessDate()));
+    }
+
     public void workingCapitalLoanStatusChangedEventNotRaisedCheck(final Long loanId) {
         waitForTransactionCommit();
         eventAssertion.assertEventNotRaised(WorkingCapitalLoanStatusChangedEvent.class, loanId);
