@@ -2,7 +2,7 @@
 
 == Description
 
-The RM should, if one doesn't already exist, first create a new release umbrella issue in JIRA. This issue is dedicated to tracking (a summary of) any discussion related to the planned new release. An example of such an issue is https://issues.apache.org/jira/browse/FINERACT-873[FINERACT-873].
+The RM should, if one doesn't already exist, first create a new release umbrella issue in JIRA. This issue is dedicated to tracking (a summary of) any discussion related to the planned new release. An example of such an issue is https://issues.apache.org/jira/browse/FINERACT-2943[FINERACT-2943].
 
 Next, the RM logs in to https://releases.apache.org[the ATR (ASF Trusted Releases)] tool and clicks "+ Start a new release", naming the release `{revnumber}`.
 
