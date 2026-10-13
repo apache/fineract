@@ -163,7 +163,7 @@ Feature: Loan Withdrawal
     When Admin sets the business date to "01 February 2024"
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.01 EUR transaction amount
     When Admin sets the business date to "01 March 2024"
-    Then Admin fails to apply loan withdrawal on "29 February 2024" because the date is before the business date
+    Then Admin fails to apply loan withdrawal on "31 January 2024" because the date is before the last transaction date
     Then Admin fails to apply loan withdrawal on "01 July 2024" because the date is not before the maturity date
     Then Admin fails to apply loan withdrawal on "02 July 2024" because the date is not before the maturity date
     Then Loan has no sub status
@@ -425,7 +425,7 @@ Feature: Loan Withdrawal
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    |
       | 01 March 2024    | Loan Withdrawal  | 84.06  | 83.57     | 0.49     | 0.0  | 0.0       | 0.0          | true     |
-      | 01 March 2024    | Repayment        | 17.01  | 17.01     | 0.0      | 0.0  | 0.0       | 66.56        | true     |
+      | 01 March 2024    | Repayment        | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 67.05        | true     |
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -454,7 +454,7 @@ Feature: Loan Withdrawal
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
-      | 01 March 2024    | Loan Withdrawal  | 67.05  | 67.05     | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 01 March 2024    | Loan Withdrawal  | 84.06  | 83.57     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Repayment        | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 67.05        | false    | false    |
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |

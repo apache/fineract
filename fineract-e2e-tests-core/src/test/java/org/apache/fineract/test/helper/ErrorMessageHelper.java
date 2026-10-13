@@ -1039,8 +1039,12 @@ public final class ErrorMessageHelper {
         return String.format("Loan: %s is not contract terminated", loanId);
     }
 
-    public static String loanWithdrawalBeforeBusinessDateFailure() {
-        return "[transactionDate] Failed data validation due to: cannot.be.before.business.date.";
+    public static String loanWithdrawalBeforeLastTransactionDateFailure() {
+        return "[transactionDate] Failed data validation due to: cannot.be.before.last.transaction.date.";
+    }
+
+    public static String loanWithdrawalBeforeChargeSubmittedOnDateFailure() {
+        return "[transactionDate] Failed data validation due to: cannot.be.before.charge.submitted.on.date.";
     }
 
     public static String loanWithdrawalNotBeforeMaturityDateFailure() {
