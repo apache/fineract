@@ -35,7 +35,7 @@ public interface EntityDatatableChecksRepository
                 INNER JOIN RegisteredDatatable rdt ON rdt.datatableName = dt.datatableName
                 WHERE dt.entity = :entity
                 AND dt.status = :status
-                AND rdt.subtype = :subtype
+                AND UPPER(rdt.subtype) = UPPER(:subtype)
             """)
     List<EntityDatatableChecks> findByEntityAndStatusAndSubtype(@Param("entity") String entity, @Param("status") Integer status,
             @Param("subtype") String subtype);

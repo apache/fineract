@@ -75,12 +75,15 @@ public final class EntityDatatableChecksDataValidator {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final String entity = this.fromApiJsonHelper.extractStringNamed(ENTITY, element);
-        baseDataValidator.reset().parameter(ENTITY).value(entity).notBlank().isOneOfTheseStringValues(EntityTables.getEntityNames());
+        baseDataValidator.reset().parameter(ENTITY).value(entity).notBlank()
+                .isOneOfTheseStringValues(EntityTables.getCheckableEntityNames());
 
         final Integer status = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(STATUS, element);
-        final Object[] entityTablesStatuses = EntityTables.getCheckStatusCodes(entity).toArray();
-
-        baseDataValidator.reset().parameter(STATUS).value(status).isOneOfTheseValues(entityTablesStatuses);
+        final EntityTables entityTable = EntityTables.fromEntityName(entity);
+        if (entityTable != null && entityTable.hasCheck()) {
+            final Object[] entityTablesStatuses = EntityTables.getCheckStatusCodes(entity).toArray();
+            baseDataValidator.reset().parameter(STATUS).value(status).isOneOfTheseValues(entityTablesStatuses);
+        }
 
         final String datatableName = this.fromApiJsonHelper.extractStringNamed(API_PARAM_DATATABLE_NAME, element);
         baseDataValidator.reset().parameter(API_PARAM_DATATABLE_NAME).value(datatableName).notBlank();

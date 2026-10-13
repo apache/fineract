@@ -56,6 +56,9 @@ public enum EntityTables {
 
     private static final List<String> ENTITY_NAMES = Arrays.stream(ENTITY_VALUES).map(EntityTables::getName).toList();
 
+    private static final List<String> CHECKABLE_ENTITY_NAMES = Arrays.stream(ENTITY_VALUES).filter(EntityTables::hasCheck)
+            .map(EntityTables::getName).toList();
+
     private static final Map<String, EntityTables> BY_ENTITY_NAME = Arrays.stream(ENTITY_VALUES)
             .collect(Collectors.toMap(EntityTables::getName, e -> e));
 
@@ -123,6 +126,10 @@ public enum EntityTables {
 
     public static List<String> getEntityNames() {
         return ENTITY_NAMES;
+    }
+
+    public static List<String> getCheckableEntityNames() {
+        return CHECKABLE_ENTITY_NAMES;
     }
 
     public static EntityTables fromEntityName(String name) {
