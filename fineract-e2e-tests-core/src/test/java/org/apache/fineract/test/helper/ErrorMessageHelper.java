@@ -1031,6 +1031,38 @@ public final class ErrorMessageHelper {
         return "[transactionDate] Failed data validation due to: must.be.before.maturity.date.";
     }
 
+    public static String contractTerminationOnWithdrawnLoanFailure() {
+        return "Contract termination can not be applied, Loan withdrawal has been applied to the loan account.";
+    }
+
+    public static String undoContractTerminationNotAppliedFailure(final Long loanId) {
+        return String.format("Loan: %s is not contract terminated", loanId);
+    }
+
+    public static String loanWithdrawalBeforeBusinessDateFailure() {
+        return "[transactionDate] Failed data validation due to: cannot.be.before.business.date.";
+    }
+
+    public static String loanWithdrawalNotBeforeMaturityDateFailure() {
+        return "[transactionDate] Failed data validation due to: must.be.before.maturity.date.";
+    }
+
+    public static String loanWithdrawalOnTerminatedLoanFailure() {
+        return "Loan withdrawal can not be applied, Loan Account is already terminated.";
+    }
+
+    public static String loanWithdrawalAlreadyAppliedFailure() {
+        return "Loan withdrawal can not be applied, Loan withdrawal has been applied to the loan account.";
+    }
+
+    public static String undoLoanWithdrawalNotAppliedFailure(final Long loanId) {
+        return String.format("Loan: %s has no loan withdrawal applied", loanId);
+    }
+
+    public static String undoLoanWithdrawalNotLastTransactionFailure(final Long loanId) {
+        return String.format("Loan: %s loan withdrawal cannot be undone. User transaction was found after loan withdrawal!", loanId);
+    }
+
     public static String incorrectExpectedValueInResponse() {
         return "The parameter is not matching to expected.";
     }
