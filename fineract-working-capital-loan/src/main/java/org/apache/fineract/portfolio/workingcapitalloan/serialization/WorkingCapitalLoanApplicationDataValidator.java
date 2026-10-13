@@ -890,7 +890,10 @@ public class WorkingCapitalLoanApplicationDataValidator {
         return Stream.of(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName,
                 WorkingCapitalLoanProductConstants.repaymentEveryParamName,
                 WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName, WorkingCapitalLoanProductConstants.discountParamName,
-                WorkingCapitalLoanProductConstants.breachIdParamName, WorkingCapitalLoanProductConstants.nearBreachIdParamName)
+                WorkingCapitalLoanProductConstants.breachIdParamName, WorkingCapitalLoanProductConstants.nearBreachIdParamName,
+                WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName,
+                WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName,
+                WorkingCapitalLoanProductConstants.breachGraceDaysParamName, WorkingCapitalLoanProductConstants.breachStartTypeParamName)
                 .anyMatch(param -> this.fromApiJsonHelper.parameterExists(param, element));
     }
 
@@ -977,6 +980,24 @@ public class WorkingCapitalLoanApplicationDataValidator {
         }
         if (breachId != null && nearBreachId != null) {
             workingCapitalNearBreachValidator.validateNearBreachAgainstBreach(baseDataValidator, breachId, nearBreachId);
+        }
+        // Grace days and start type follow the same override switch as their bucket / breach
+        rejectIfNotOverridable(element, baseDataValidator, config.isDelinquencyBucketClassification(),
+                WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName,
+                WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName);
+        rejectIfNotOverridable(element, baseDataValidator, config.isBreach(), WorkingCapitalLoanProductConstants.breachGraceDaysParamName,
+                WorkingCapitalLoanProductConstants.breachStartTypeParamName);
+    }
+
+    private void rejectIfNotOverridable(final JsonElement element, final DataValidatorBuilder baseDataValidator, final boolean overridable,
+            final String... paramNames) {
+        if (overridable) {
+            return;
+        }
+        for (final String paramName : paramNames) {
+            if (this.fromApiJsonHelper.parameterExists(paramName, element)) {
+                baseDataValidator.reset().parameter(paramName).failWithCode("override.not.allowed.by.product");
+            }
         }
     }
 

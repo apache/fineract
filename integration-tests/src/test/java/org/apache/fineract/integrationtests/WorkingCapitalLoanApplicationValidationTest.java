@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -525,6 +526,61 @@ public class WorkingCapitalLoanApplicationValidationTest {
 
         productHelper.deleteWorkingCapitalLoanProductById(productId);
         breachHelper.delete(breachId);
+    }
+
+    @Test
+    public void testSubmitWithGraceDaysAndStartTypesNotAllowedByProduct() {
+        final Long productId = createProductWithoutOverrides();
+        final Long clientId = createClient();
+
+        final var json = new WorkingCapitalLoanApplicationTestBuilder() //
+                .withClientId(clientId) //
+                .withProductId(productId) //
+                .withPrincipal(BigDecimal.valueOf(5000)) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
+                .withTotalPaymentVolume(BigDecimal.valueOf(5500)) //
+                .withDelinquencyGraceDays(5) //
+                .withDelinquencyStartType("DISBURSEMENT") //
+                .withBreachGraceDays(3) //
+                .withBreachStartType("LOAN_CREATION") //
+                .buildSubmitRequest();
+
+        final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
+        assertEquals(400, ex.getStatus());
+        assertNotNull(ex.getDeveloperMessage());
+        assertTrue(ex.getDeveloperMessage().contains("override.not.allowed.by.product"),
+                "Expected override.not.allowed.by.product in: " + ex.getDeveloperMessage());
+        for (final String parameter : List.of("delinquencyGraceDays", "delinquencyStartType", "breachGraceDays", "breachStartType")) {
+            assertTrue(ex.getDeveloperMessage().contains(parameter), "Expected " + parameter + " in: " + ex.getDeveloperMessage());
+        }
+
+        productHelper.deleteWorkingCapitalLoanProductById(productId);
+    }
+
+    @Test
+    public void testSubmitWithDelinquencyGraceDaysNotAllowedWhileBreachOverrideIsAllowed() {
+        final Long productId = createProductWithBreachOverride();
+        final Long clientId = createClient();
+
+        final var json = new WorkingCapitalLoanApplicationTestBuilder() //
+                .withClientId(clientId) //
+                .withProductId(productId) //
+                .withPrincipal(BigDecimal.valueOf(5000)) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
+                .withTotalPaymentVolume(BigDecimal.valueOf(5500)) //
+                .withDelinquencyGraceDays(5) //
+                .withBreachGraceDays(3) //
+                .buildSubmitRequest();
+
+        final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
+        assertEquals(400, ex.getStatus());
+        assertNotNull(ex.getDeveloperMessage());
+        assertTrue(ex.getDeveloperMessage().contains("delinquencyGraceDays"),
+                "Expected delinquencyGraceDays in: " + ex.getDeveloperMessage());
+        assertFalse(ex.getDeveloperMessage().contains("breachGraceDays"),
+                "breachGraceDays is overridable on this product: " + ex.getDeveloperMessage());
+
+        productHelper.deleteWorkingCapitalLoanProductById(productId);
     }
 
     @Test
