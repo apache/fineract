@@ -220,9 +220,11 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .findFirst();
         final LocalDate firstDisbursedPeriodStartDate = firstDisbursedPeriod.isPresent() ? firstDisbursedPeriod.get().getFromDate()
                 : scheduleModel.getMaturityDate();
+        // Use original schedule seed (e.g. 31st), not a month-end-shortened period fromDate.
+        final LocalDate seedDate = scheduleModel.getStartDate() != null ? scheduleModel.getStartDate() : firstDisbursedPeriodStartDate;
 
         final LoanApplicationTerms loanApplicationTerms = buildLoanApplicationTerms(loanProductRelatedDetail, firstDisbursedPeriodStartDate,
-                disbursedAmount, mc);
+                seedDate, disbursedAmount, mc);
 
         final ProgressiveLoanInterestScheduleModel temporaryReAgedScheduleModel = generateTemporaryScheduleModel(loanApplicationTerms, mc,
                 firstDisbursedPeriodStartDate, disbursementDate);
@@ -231,12 +233,12 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     private LoanApplicationTerms buildLoanApplicationTerms(final ILoanConfigurationDetails loanProductRelatedDetail,
-            final LocalDate firstDisbursedPeriodStartDate, final Money disbursedAmount, final MathContext mc) {
+            final LocalDate firstDisbursedPeriodStartDate, final LocalDate seedDate, final Money disbursedAmount, final MathContext mc) {
         return new LoanApplicationTerms.Builder()
                 // Loan basics
                 .currency(loanProductRelatedDetail.getCurrencyData()).principal(disbursedAmount)
-                .repaymentsStartingFromDate(firstDisbursedPeriodStartDate).downPaymentPercentage(ZERO)
-                .seedDate(firstDisbursedPeriodStartDate).inArrearsTolerance(Money.zero(loanProductRelatedDetail.getCurrencyData()))
+                .repaymentsStartingFromDate(firstDisbursedPeriodStartDate).downPaymentPercentage(ZERO).seedDate(seedDate)
+                .inArrearsTolerance(Money.zero(loanProductRelatedDetail.getCurrencyData()))
                 // Term & frequency
                 .loanTermFrequency(loanProductRelatedDetail.getNumberOfRepayments())
                 .loanTermPeriodFrequencyType(loanProductRelatedDetail.getRepaymentPeriodFrequencyType())

@@ -672,3 +672,225 @@ Feature: Full Term Tranche - Schedule handling and Calculations - Part2
     When Loan Pay-off is made on "01 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+
+  Scenario: Verify full term tranche late disbursement on month-end anchored loan (31st) merges schedule - no duplicate periods
+    When Admin sets the business date to "31 August 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_FULL_TERM_TRANCHE | 31 August 2026    | 2676.62        | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 48                | MONTHS                | 1              | MONTHS                 | 48                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "31 August 2026" with "2676.62" amount and expected disbursement date on "31 August 2026"
+    When Admin successfully disburse the loan on "31 August 2026" with "1997.62" EUR transaction amount
+    Then Loan has 48 active number of terms
+    Then Loan Repayment schedule has 48 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 31 August 2026    |           | 1997.62         |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 30   | 30 September 2026 |           | 1956.0          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 2  | 31   | 31 October 2026   |           | 1914.38         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 3  | 30   | 30 November 2026  |           | 1872.76         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 4  | 31   | 31 December 2026  |           | 1831.14         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 5  | 31   | 31 January 2027   |           | 1789.52         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 6  | 28   | 28 February 2027  |           | 1747.9          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 7  | 31   | 31 March 2027     |           | 1706.28         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 8  | 30   | 30 April 2027     |           | 1664.66         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 9  | 31   | 31 May 2027       |           | 1623.04         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 10 | 30   | 30 June 2027      |           | 1581.42         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 11 | 31   | 31 July 2027      |           | 1539.8          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 12 | 31   | 31 August 2027    |           | 1498.18         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 13 | 30   | 30 September 2027 |           | 1456.56         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 14 | 31   | 31 October 2027   |           | 1414.94         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 15 | 30   | 30 November 2027  |           | 1373.32         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 16 | 31   | 31 December 2027  |           | 1331.7          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 17 | 31   | 31 January 2028   |           | 1290.08         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 18 | 29   | 29 February 2028  |           | 1248.46         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 19 | 31   | 31 March 2028     |           | 1206.84         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 20 | 30   | 30 April 2028     |           | 1165.22         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 21 | 31   | 31 May 2028       |           | 1123.6          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 22 | 30   | 30 June 2028      |           | 1081.98         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 23 | 31   | 31 July 2028      |           | 1040.36         | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 24 | 31   | 31 August 2028    |           | 998.74          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 25 | 30   | 30 September 2028 |           | 957.12          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 26 | 31   | 31 October 2028   |           | 915.5           | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 27 | 30   | 30 November 2028  |           | 873.88          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 28 | 31   | 31 December 2028  |           | 832.26          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 29 | 31   | 31 January 2029   |           | 790.64          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 30 | 28   | 28 February 2029  |           | 749.02          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 31 | 31   | 31 March 2029     |           | 707.4           | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 32 | 30   | 30 April 2029     |           | 665.78          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 33 | 31   | 31 May 2029       |           | 624.16          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 34 | 30   | 30 June 2029      |           | 582.54          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 35 | 31   | 31 July 2029      |           | 540.92          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 36 | 31   | 31 August 2029    |           | 499.3           | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 37 | 30   | 30 September 2029 |           | 457.68          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 38 | 31   | 31 October 2029   |           | 416.06          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 39 | 30   | 30 November 2029  |           | 374.44          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 40 | 31   | 31 December 2029  |           | 332.82          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 41 | 31   | 31 January 2030   |           | 291.2           | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 42 | 28   | 28 February 2030  |           | 249.58          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 43 | 31   | 31 March 2030     |           | 207.96          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 44 | 30   | 30 April 2030     |           | 166.34          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 45 | 31   | 31 May 2030       |           | 124.72          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 46 | 30   | 30 June 2030      |           | 83.1            | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 47 | 31   | 31 July 2030      |           | 41.48           | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      | 48 | 31   | 31 August 2030    |           | 0.0             | 41.48         | 0.0      | 0.0  | 0.0       | 41.48 | 0.0  | 0.0        | 0.0  | 41.48       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1997.62       | 0.0      | 0.0  | 0.0       | 1997.62 | 0.0  | 0.0        | 0.0  | 1997.62     |
+    When Admin sets the business date to "10 October 2026"
+    When Admin successfully disburse the loan on "10 October 2026" with "679" EUR transaction amount
+    Then Loan has 49 active number of terms
+    Then Loan Repayment schedule has 49 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 31 August 2026    |           | 1997.62         |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 30   | 30 September 2026 |           | 1956.0          | 41.62         | 0.0      | 0.0  | 0.0       | 41.62 | 0.0  | 0.0        | 0.0  | 41.62       |
+      |    |      | 10 October 2026   |           | 679.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 2  | 31   | 31 October 2026   |           | 2579.23         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 3  | 30   | 30 November 2026  |           | 2523.46         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 4  | 31   | 31 December 2026  |           | 2467.69         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 5  | 31   | 31 January 2027   |           | 2411.92         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 6  | 28   | 28 February 2027  |           | 2356.15         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 7  | 31   | 31 March 2027     |           | 2300.38         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 8  | 30   | 30 April 2027     |           | 2244.61         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 9  | 31   | 31 May 2027       |           | 2188.84         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 10 | 30   | 30 June 2027      |           | 2133.07         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 11 | 31   | 31 July 2027      |           | 2077.3          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 12 | 31   | 31 August 2027    |           | 2021.53         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 13 | 30   | 30 September 2027 |           | 1965.76         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 14 | 31   | 31 October 2027   |           | 1909.99         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 15 | 30   | 30 November 2027  |           | 1854.22         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 16 | 31   | 31 December 2027  |           | 1798.45         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 17 | 31   | 31 January 2028   |           | 1742.68         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 18 | 29   | 29 February 2028  |           | 1686.91         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 19 | 31   | 31 March 2028     |           | 1631.14         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 20 | 30   | 30 April 2028     |           | 1575.37         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 21 | 31   | 31 May 2028       |           | 1519.6          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 22 | 30   | 30 June 2028      |           | 1463.83         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 23 | 31   | 31 July 2028      |           | 1408.06         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 24 | 31   | 31 August 2028    |           | 1352.29         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 25 | 30   | 30 September 2028 |           | 1296.52         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 26 | 31   | 31 October 2028   |           | 1240.75         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 27 | 30   | 30 November 2028  |           | 1184.98         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 28 | 31   | 31 December 2028  |           | 1129.21         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 29 | 31   | 31 January 2029   |           | 1073.44         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 30 | 28   | 28 February 2029  |           | 1017.67         | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 31 | 31   | 31 March 2029     |           | 961.9           | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 32 | 30   | 30 April 2029     |           | 906.13          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 33 | 31   | 31 May 2029       |           | 850.36          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 34 | 30   | 30 June 2029      |           | 794.59          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 35 | 31   | 31 July 2029      |           | 738.82          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 36 | 31   | 31 August 2029    |           | 683.05          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 37 | 30   | 30 September 2029 |           | 627.28          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 38 | 31   | 31 October 2029   |           | 571.51          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 39 | 30   | 30 November 2029  |           | 515.74          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 40 | 31   | 31 December 2029  |           | 459.97          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 41 | 31   | 31 January 2030   |           | 404.2           | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 42 | 28   | 28 February 2030  |           | 348.43          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 43 | 31   | 31 March 2030     |           | 292.66          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 44 | 30   | 30 April 2030     |           | 236.89          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 45 | 31   | 31 May 2030       |           | 181.12          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 46 | 30   | 30 June 2030      |           | 125.35          | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 47 | 31   | 31 July 2030      |           | 69.58           | 55.77         | 0.0      | 0.0  | 0.0       | 55.77 | 0.0  | 0.0        | 0.0  | 55.77       |
+      | 48 | 31   | 31 August 2030    |           | 13.95           | 55.63         | 0.0      | 0.0  | 0.0       | 55.63 | 0.0  | 0.0        | 0.0  | 55.63       |
+      | 49 | 30   | 30 September 2030 |           | 0.0             | 13.95         | 0.0      | 0.0  | 0.0       | 13.95 | 0.0  | 0.0        | 0.0  | 13.95       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 2676.62       | 0.0      | 0.0  | 0.0       | 2676.62 | 0.0  | 0.0        | 0.0  | 2676.62     |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 31 August 2026   | Disbursement     | 1997.62 | 0.0       | 0.0      | 0.0  | 0.0       | 1997.62      | false    | false    |
+      | 10 October 2026  | Disbursement     | 679.0   | 0.0       | 0.0      | 0.0  | 0.0       | 2676.62      | false    | false    |
+    When Loan Pay-off is made on "10 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  Scenario: Verify full term tranche late disbursement on month-end shortened fromDate (31st, 6 terms) merges schedule
+    When Admin sets the business date to "31 August 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_FULL_TERM_TRANCHE | 31 August 2026    | 600            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "31 August 2026" with "600" amount and expected disbursement date on "31 August 2026"
+    When Admin successfully disburse the loan on "31 August 2026" with "300" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
+      |    |      | 31 August 2026    |           | 300.0           |               |          | 0.0  |           | 0.0  | 0.0  |            |      |             |
+      | 1  | 30   | 30 September 2026 |           | 250.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0 | 0.0  | 0.0        | 0.0  | 50.0        |
+      | 2  | 31   | 31 October 2026   |           | 200.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0 | 0.0  | 0.0        | 0.0  | 50.0        |
+      | 3  | 30   | 30 November 2026  |           | 150.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0 | 0.0  | 0.0        | 0.0  | 50.0        |
+      | 4  | 31   | 31 December 2026  |           | 100.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0 | 0.0  | 0.0        | 0.0  | 50.0        |
+      | 5  | 31   | 31 January 2027   |           | 50.0            | 50.0          | 0.0      | 0.0  | 0.0       | 50.0 | 0.0  | 0.0        | 0.0  | 50.0        |
+      | 6  | 28   | 28 February 2027  |           | 0.0             | 50.0          | 0.0      | 0.0  | 0.0       | 50.0 | 0.0  | 0.0        | 0.0  | 50.0        |
+    When Admin sets the business date to "10 October 2026"
+    When Admin successfully disburse the loan on "10 October 2026" with "300" EUR transaction amount
+    Then Loan has 7 active number of terms
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 31 August 2026    |           | 300.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 30   | 30 September 2026 |           | 250.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0  | 0.0  | 0.0        | 0.0  | 50.0        |
+      |    |      | 10 October 2026   |           | 300.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 2  | 31   | 31 October 2026   |           | 450.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 3  | 30   | 30 November 2026  |           | 350.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 4  | 31   | 31 December 2026  |           | 250.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 5  | 31   | 31 January 2027   |           | 150.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 6  | 28   | 28 February 2027  |           | 50.0            | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 7  | 31   | 31 March 2027     |           | 0.0             | 50.0          | 0.0      | 0.0  | 0.0       | 50.0  | 0.0  | 0.0        | 0.0  | 50.0        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      | 600.0         | 0.0      | 0.0  | 0.0       | 600.0 | 0.0  | 0.0        | 0.0  | 600.0       |
+    When Loan Pay-off is made on "10 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  Scenario: Verify full term tranche late disbursement after Feb 28 shortened fromDate (29th anchor) merges schedule
+    When Admin sets the business date to "29 January 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_FULL_TERM_TRANCHE | 29 January 2026   | 600            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "29 January 2026" with "600" amount and expected disbursement date on "29 January 2026"
+    When Admin successfully disburse the loan on "29 January 2026" with "300" EUR transaction amount
+    When Admin sets the business date to "10 March 2026"
+    When Admin successfully disburse the loan on "10 March 2026" with "300" EUR transaction amount
+    Then Loan has 7 active number of terms
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 29 January 2026  |           | 300.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 30   | 28 February 2026 |           | 250.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0  | 0.0  | 0.0        | 0.0  | 50.0        |
+      |    |      | 10 March 2026    |           | 300.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 2  | 29   | 29 March 2026    |           | 450.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 3  | 31   | 29 April 2026    |           | 350.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 4  | 30   | 29 May 2026      |           | 250.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 5  | 31   | 29 June 2026     |           | 150.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 6  | 30   | 29 July 2026     |           | 50.0            | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 7  | 31   | 29 August 2026   |           | 0.0             | 50.0          | 0.0      | 0.0  | 0.0       | 50.0  | 0.0  | 0.0        | 0.0  | 50.0        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      | 600.0         | 0.0      | 0.0  | 0.0       | 600.0 | 0.0  | 0.0        | 0.0  | 600.0       |
+    When Loan Pay-off is made on "10 March 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  Scenario: Verify full term tranche late disbursement after Feb 28 shortened fromDate (30th anchor) merges schedule
+    When Admin sets the business date to "30 January 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_FULL_TERM_TRANCHE | 30 January 2026   | 600            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "30 January 2026" with "600" amount and expected disbursement date on "30 January 2026"
+    When Admin successfully disburse the loan on "30 January 2026" with "300" EUR transaction amount
+    When Admin sets the business date to "10 March 2026"
+    When Admin successfully disburse the loan on "10 March 2026" with "300" EUR transaction amount
+    Then Loan has 7 active number of terms
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 30 January 2026  |           | 300.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 29   | 28 February 2026 |           | 250.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0  | 0.0  | 0.0        | 0.0  | 50.0        |
+      |    |      | 10 March 2026    |           | 300.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 2  | 30   | 30 March 2026    |           | 450.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 3  | 31   | 30 April 2026    |           | 350.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 4  | 30   | 30 May 2026      |           | 250.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 5  | 31   | 30 June 2026     |           | 150.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 6  | 30   | 30 July 2026     |           | 50.0            | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+      | 7  | 31   | 30 August 2026   |           | 0.0             | 50.0          | 0.0      | 0.0  | 0.0       | 50.0  | 0.0  | 0.0        | 0.0  | 50.0        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      | 600.0         | 0.0      | 0.0  | 0.0       | 600.0 | 0.0  | 0.0        | 0.0  | 600.0       |
+    When Loan Pay-off is made on "10 March 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
