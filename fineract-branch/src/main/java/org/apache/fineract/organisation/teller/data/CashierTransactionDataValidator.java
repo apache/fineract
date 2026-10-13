@@ -18,11 +18,15 @@
  */
 package org.apache.fineract.organisation.teller.data;
 
+import com.google.common.base.Splitter;
 import java.math.BigDecimal;
+import java.time.DateTimeException;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -37,7 +41,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -82,52 +86,100 @@ public class CashierTransactionDataValidator {
             throw new CashierDateRangeOutOfTellerDateRangeException();
         }
 
-        // Validate cashier has not been assigned for the same duration
-        String sql = "SELECT COUNT(*) FROM m_cashiers c WHERE c.staff_id = :staffId AND "
-                + "((:fromDate BETWEEN c.start_date AND c.end_date OR :endDate BETWEEN c.start_date AND c.end_date) "
-                + "OR (c.start_date BETWEEN :fromDate AND :endDate OR c.end_date BETWEEN :fromDate AND :endDate))";
-
-        if (!cashier.getIsFullDay()) {
-            sql += " AND (TIME(c.start_time) BETWEEN TIME(:startTime) AND TIME(:endTime) "
-                    + "OR TIME(c.end_time) BETWEEN TIME(:startTime) AND TIME(:endTime))";
-        }
+        // Validate the staff member has no other cashier assignment whose dates and hours overlap with this one. The
+        // times are compared here rather than in SQL, because TIME() does not exist on PostgreSQL
+        String sql = "SELECT c.full_day, c.start_time, c.end_time FROM m_cashiers c WHERE c.staff_id = :staffId "
+                + "AND c.start_date <= :endDate AND c.end_date >= :fromDate";
 
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("staffId", staffId);
         paramMap.put("fromDate", fromDate);
         paramMap.put("endDate", endDate);
-
-        if (!cashier.getIsFullDay()) {
-            paramMap.put("startTime", cashier.getStartTime());
-            paramMap.put("endTime", cashier.getEndTime());
+        if (cashier.getId() != null) {
+            // When an existing assignment is updated, it must not be compared with itself
+            sql += " AND c.id <> :cashierId";
+            paramMap.put("cashierId", cashier.getId());
         }
 
-        Integer count = jdbcTemplate.queryForObject(sql, paramMap, Integer.class);
-        if (count != null && count > 0) {
+        List<ExistingShift> overlappingDates = jdbcTemplate.query(sql, paramMap,
+                (rs, rowNum) -> new ExistingShift(rs.getBoolean("full_day"), rs.getString("start_time"), rs.getString("end_time")));
+
+        final boolean fullDay = Boolean.TRUE.equals(cashier.getIsFullDay());
+        final LocalTime startTime = parseTime(cashier.getStartTime());
+        final LocalTime endTime = parseTime(cashier.getEndTime());
+        boolean allocated = overlappingDates.stream().anyMatch(existing -> fullDay || existing.fullDay()
+                || timesOverlap(startTime, endTime, parseTime(existing.startTime()), parseTime(existing.endTime())));
+        if (allocated) {
             throw new CashierAlreadyAllocated();
         }
     }
 
+    /** A cashier assignment of the same staff member whose dates overlap with the one being validated. */
+    record ExistingShift(boolean fullDay, String startTime, String endTime) {
+    }
+
     public void validateOnLoanDisbursal(AppUser user, String currencyCode, BigDecimal transactionAmount) {
         LocalDate tenantDate = DateUtils.getLocalDateOfTenant();
-        OffsetDateTime tenantDateTime = DateUtils.getOffsetDateTimeOfTenant();
+        LocalTime tenantTime = DateUtils.getOffsetDateTimeOfTenant().toLocalTime();
         if (user.getStaff() != null) {
-            String sql = "SELECT c.id FROM m_cashiers c WHERE c.staff_id = :staffId "
-                    + "AND (CASE WHEN c.full_day THEN :tenantDate BETWEEN c.start_date AND c.end_date "
-                    + "ELSE (:tenantDate BETWEEN c.start_date AND c.end_date AND "
-                    + "TIME(:tenantDateTime) BETWEEN TIME(c.start_time) AND TIME(c.end_time)) END)";
+            // The cashier on duty: full day, or now within its hours (compared here, as TIME() does not exist on
+            // PostgreSQL)
+            String sql = "SELECT c.id, c.full_day, c.start_time, c.end_time FROM m_cashiers c WHERE c.staff_id = :staffId "
+                    + "AND :tenantDate BETWEEN c.start_date AND c.end_date";
 
             Map<String, Object> paramMap = new HashMap<>();
             paramMap.put("staffId", user.getStaff().getId());
             paramMap.put("tenantDate", tenantDate);
-            paramMap.put("tenantDateTime", tenantDateTime);
 
-            try {
-                Long cashierId = jdbcTemplate.queryForObject(sql, paramMap, Long.class);
-                validateSettleCashAndCashOutTransactions(cashierId, currencyCode, transactionAmount);
-            } catch (EmptyResultDataAccessException e) {
-                LOG.error("Problem occurred in validateOnLoanDisbursal function", e);
+            List<Long> onDuty = jdbcTemplate.query(sql, paramMap, (rs, rowNum) -> {
+                boolean onDutyNow = rs.getBoolean("full_day")
+                        || isBetween(tenantTime, parseTime(rs.getString("start_time")), parseTime(rs.getString("end_time")));
+                return onDutyNow ? rs.getLong("id") : null;
+            }).stream().filter(Objects::nonNull).toList();
+
+            Long cashierId = DataAccessUtils.singleResult(onDuty);
+            if (cashierId == null) {
+                LOG.error("Problem occurred in validateOnLoanDisbursal function: no cashier on duty for staff {}", user.getStaff().getId());
+                return;
             }
+            validateSettleCashAndCashOutTransactions(cashierId, currencyCode, transactionAmount);
         }
+    }
+
+    /**
+     * Parses a cashier time as stored in m_cashiers ("hour:minute", e.g. "09:30" or "9:5"); null when blank or invalid,
+     * as for a full day cashier.
+     */
+    static LocalTime parseTime(final String time) {
+        if (time == null || time.isBlank()) {
+            return null;
+        }
+        try {
+            final List<String> parts = Splitter.on(':').trimResults().splitToList(time);
+            if (parts.size() < 2) {
+                return null;
+            }
+            final int seconds = parts.size() > 2 ? Integer.parseInt(parts.get(2)) : 0;
+            return LocalTime.of(Integer.parseInt(parts.get(0)), Integer.parseInt(parts.get(1)), seconds);
+        } catch (NumberFormatException | DateTimeException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Whether two shifts overlap: one starts no later than the other ends, end times included (a shift ending at 12:00
+     * and one starting at 12:00 overlap). A time that is missing or cannot be read counts as an overlap, so a bad
+     * record never lets a second assignment through.
+     */
+    static boolean timesOverlap(final LocalTime start, final LocalTime end, final LocalTime otherStart, final LocalTime otherEnd) {
+        if (start == null || end == null || otherStart == null || otherEnd == null) {
+            return true;
+        }
+        return !start.isAfter(otherEnd) && !otherStart.isAfter(end);
+    }
+
+    /** Same as SQL BETWEEN: inclusive, and false when any value is null. */
+    static boolean isBetween(final LocalTime time, final LocalTime from, final LocalTime to) {
+        return time != null && from != null && to != null && !time.isBefore(from) && !time.isAfter(to);
     }
 }

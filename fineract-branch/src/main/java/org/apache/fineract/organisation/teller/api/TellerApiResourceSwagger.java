@@ -205,6 +205,14 @@ final class TellerApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "01 February 2015")
         public LocalDate startDate;
+        @Schema(example = "9", description = "Start hour of a part-day assignment; only used when isFullDay is false")
+        public Long hourStartTime;
+        @Schema(example = "0", description = "Start minute of a part-day assignment; only used when isFullDay is false")
+        public Long minStartTime;
+        @Schema(example = "13", description = "End hour of a part-day assignment; only used when isFullDay is false")
+        public Long hourEndTime;
+        @Schema(example = "30", description = "End minute of a part-day assignment; only used when isFullDay is false")
+        public Long minEndTime;
 
     }
 
@@ -275,6 +283,14 @@ final class TellerApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "01 February 2015")
         public LocalDate startDate;
+        @Schema(example = "9", description = "Start hour of a part-day assignment; only used when isFullDay is false")
+        public Long hourStartTime;
+        @Schema(example = "0", description = "Start minute of a part-day assignment; only used when isFullDay is false")
+        public Long minStartTime;
+        @Schema(example = "13", description = "End hour of a part-day assignment; only used when isFullDay is false")
+        public Long hourEndTime;
+        @Schema(example = "30", description = "End minute of a part-day assignment; only used when isFullDay is false")
+        public Long minEndTime;
 
     }
 

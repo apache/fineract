@@ -269,6 +269,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             // TODO - check if staff office and teller office match
 
             final Map<String, Object> changes = cashier.update(command);
+            // The new staff member, dates or hours must not overlap with another assignment
+            this.cashierTransactionDataValidator.validateCashierAllowedDateAndTime(cashier, cashier.getTeller());
 
             if (!changes.isEmpty()) {
                 this.cashierRepository.saveAndFlush(cashier);

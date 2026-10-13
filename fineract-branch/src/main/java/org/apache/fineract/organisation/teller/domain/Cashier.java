@@ -184,7 +184,7 @@ public class Cashier extends AbstractPersistableCustom<Long> {
     }
 
     public Long getHourFromStartTime() {
-        return (this.startTime != null && !this.startTime.isEmpty()) ? Long.parseLong(Splitter.on(':').splitToList(this.startTime).get(1))
+        return (this.startTime != null && !this.startTime.isEmpty()) ? Long.parseLong(Splitter.on(':').splitToList(this.startTime).get(0))
                 : null;
     }
 
