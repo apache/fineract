@@ -307,4 +307,5 @@
     <include file="parts/0285_add_amortization_configuration_to_charge.xml" relativeToChangelogFile="true" />
     <include file="parts/0286_add_enable_charge_amortization_to_loan_product.xml" relativeToChangelogFile="true" />
     <include file="parts/0287_add_permissions_for_api_authorization_rules.xml" relativeToChangelogFile="true" />
+    <include file="parts/0288_add_is_force_transaction_to_savings_transaction.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
