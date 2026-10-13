@@ -28,6 +28,7 @@ import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -321,18 +322,18 @@ public class TellerWritePlatformServiceJpaImplTest {
     @Nested
     class UpdateCashierAllocation {
 
+        private Staff staff;
+        private Cashier cashier;
+
         @BeforeEach
         void setUp() {
             doNothing().when(fromApiJsonDeserializer).validateForAllocateCashier(any());
             when(command.longValueOfParameterNamed("staffId")).thenReturn(1L);
+            staff = mock(Staff.class);
+            cashier = mock(Cashier.class);
         }
 
-        @Test
-        void shouldUpdateCashierAllocation() {
-            Staff staff = mock(Staff.class);
-            Cashier cashier = mock(Cashier.class);
-            Map<String, Object> simulatedChanges = Map.of("isFullDay", "false");
-
+        private CommandProcessingResult update(final Staff currentStaff, final Map<String, Object> changes) {
             when(staffRepository.findById(anyLong())).thenReturn(Optional.of(staff));
             when(currentUser.getOffice()).thenReturn(office);
             when(office.getId()).thenReturn(1L);
@@ -340,21 +341,62 @@ public class TellerWritePlatformServiceJpaImplTest {
             when(tellerRepositoryWrapper.findOneWithNotFoundDetection(anyLong())).thenReturn(teller);
             when(teller.officeId()).thenReturn(1L);
             when(cashierRepository.findById(anyLong())).thenReturn(Optional.of(cashier));
-            when(cashier.update(any(JsonCommand.class))).thenReturn(simulatedChanges);
-            when(cashierRepository.saveAndFlush(any(Cashier.class))).thenReturn(cashier);
+            when(cashier.getStaff()).thenReturn(currentStaff);
+            when(cashier.update(any(JsonCommand.class))).thenReturn(changes);
+            lenient().when(cashierRepository.saveAndFlush(any(Cashier.class))).thenReturn(cashier);
             when(command.commandId()).thenReturn(1L);
             when(cashier.getTeller()).thenReturn(teller);
             when(teller.getId()).thenReturn(1L);
             when(cashier.getId()).thenReturn(1L);
+            return underTest.updateCashierAllocation(1L, 1L, command);
+        }
 
-            CommandProcessingResult result = underTest.updateCashierAllocation(1L, 1L, command);
+        @Test
+        void shouldUpdateCashierAllocation() {
+            when(staff.getId()).thenReturn(1L);
+
+            CommandProcessingResult result = update(staff, Map.of("isFullDay", "false"));
 
             verify(fromApiJsonDeserializer, times(1)).validateForAllocateCashier(any());
+            verify(cashierTransactionDataValidator).validateCashierAllowedDateAndTime(cashier, teller);
             verify(cashierRepository, times(1)).saveAndFlush(any(Cashier.class));
             assertNotNull(result);
             assertEquals(1L, result.getCommandId());
             assertEquals(1L, result.getResourceId());
             assertEquals(1L, result.getSubResourceId());
+        }
+
+        @Test
+        void shouldNotValidateTheScheduleWhenOnlyTheDescriptionChanges() {
+            // An assignment that predates the overlap check can still be edited
+            when(staff.getId()).thenReturn(1L);
+
+            update(staff, Map.of("description", "Morning counter"));
+
+            verify(cashierTransactionDataValidator, never()).validateCashierAllowedDateAndTime(any(Cashier.class), any(Teller.class));
+            verify(cashierRepository, times(1)).saveAndFlush(any(Cashier.class));
+        }
+
+        @Test
+        void shouldNotValidateTheScheduleWhenNothingChanges() {
+            when(staff.getId()).thenReturn(1L);
+
+            update(staff, Map.of());
+
+            verify(cashierTransactionDataValidator, never()).validateCashierAllowedDateAndTime(any(Cashier.class), any(Teller.class));
+            verify(cashierRepository, never()).saveAndFlush(any(Cashier.class));
+        }
+
+        @Test
+        void shouldValidateTheScheduleWhenTheStaffChanges() {
+            // The staff member is not part of the changes returned by Cashier.update
+            Staff previousStaff = mock(Staff.class);
+            when(previousStaff.getId()).thenReturn(2L);
+            when(staff.getId()).thenReturn(1L);
+
+            update(previousStaff, Map.of());
+
+            verify(cashierTransactionDataValidator).validateCashierAllowedDateAndTime(cashier, teller);
         }
 
         @Test

@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.teller.service;
 
 import jakarta.persistence.PersistenceException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -62,6 +63,12 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 @Slf4j
 public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformService {
+
+    /** The cashier fields that decide when the assignment applies, see {@link #updateCashierAllocation}. */
+    private static final Set<String> CASHIER_SCHEDULE_PARAMETERS = Set.of(TellerCommandFromApiJsonDeserializer.START_DATE,
+            TellerCommandFromApiJsonDeserializer.END_DATE, TellerCommandFromApiJsonDeserializer.IS_FULL_DAY,
+            TellerCommandFromApiJsonDeserializer.HOUR_START_TIME, TellerCommandFromApiJsonDeserializer.MIN_START_TIME,
+            TellerCommandFromApiJsonDeserializer.HOUR_END_TIME, TellerCommandFromApiJsonDeserializer.MIN_END_TIME);
 
     private final PlatformSecurityContext context;
     private final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -264,11 +271,18 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
             final Cashier cashier = validateUserPriviledgeOnCashierAndRetrieve(currentUser, tellerId, cashierId);
 
+            final boolean staffChanged = !staff.getId().equals(cashier.getStaff().getId());
             cashier.setStaff(staff);
 
             // TODO - check if staff office and teller office match
 
             final Map<String, Object> changes = cashier.update(command);
+            // Only a new staff member, dates or hours can create an overlap, so other changes (e.g. the description)
+            // still
+            // work on an existing assignment that predates the overlap check
+            if (staffChanged || !Collections.disjoint(changes.keySet(), CASHIER_SCHEDULE_PARAMETERS)) {
+                this.cashierTransactionDataValidator.validateCashierAllowedDateAndTime(cashier, cashier.getTeller());
+            }
 
             if (!changes.isEmpty()) {
                 this.cashierRepository.saveAndFlush(cashier);

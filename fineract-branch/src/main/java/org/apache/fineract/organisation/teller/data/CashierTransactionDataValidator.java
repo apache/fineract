@@ -19,11 +19,20 @@
 package org.apache.fineract.organisation.teller.data;
 
 import java.math.BigDecimal;
+import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Supplier;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -32,12 +41,13 @@ import org.apache.fineract.organisation.teller.domain.Teller;
 import org.apache.fineract.organisation.teller.exception.CashierAlreadyAllocated;
 import org.apache.fineract.organisation.teller.exception.CashierDateRangeOutOfTellerDateRangeException;
 import org.apache.fineract.organisation.teller.exception.CashierInsufficientAmountException;
+import org.apache.fineract.organisation.teller.serialization.TellerCommandFromApiJsonDeserializer;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -82,52 +92,127 @@ public class CashierTransactionDataValidator {
             throw new CashierDateRangeOutOfTellerDateRangeException();
         }
 
-        // Validate cashier has not been assigned for the same duration
-        String sql = "SELECT COUNT(*) FROM m_cashiers c WHERE c.staff_id = :staffId AND "
-                + "((:fromDate BETWEEN c.start_date AND c.end_date OR :endDate BETWEEN c.start_date AND c.end_date) "
-                + "OR (c.start_date BETWEEN :fromDate AND :endDate OR c.end_date BETWEEN :fromDate AND :endDate))";
-
-        if (!cashier.getIsFullDay()) {
-            sql += " AND (TIME(c.start_time) BETWEEN TIME(:startTime) AND TIME(:endTime) "
-                    + "OR TIME(c.end_time) BETWEEN TIME(:startTime) AND TIME(:endTime))";
+        // A part-day shift must end after it starts on the same day. Shifts past midnight (e.g. 22:00-02:00) were never
+        // supported: the cashier on duty check only compares the time of day
+        final boolean fullDay = isFullDay(cashier);
+        final LocalTime startTime = fullDay ? null : startTimeOf(cashier);
+        final LocalTime endTime = fullDay ? null : endTimeOf(cashier);
+        if (!fullDay && (startTime == null || endTime == null || !endTime.isAfter(startTime))) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            new DataValidatorBuilder(dataValidationErrors).resource(TellerCommandFromApiJsonDeserializer.TELLER)
+                    .parameter(TellerCommandFromApiJsonDeserializer.HOUR_END_TIME).value(cashier.getEndTime())
+                    .failWithCodeAndMessage("must.be.after.start.time", "The end time of a part-day cashier must be after its start time.");
+            throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("staffId", staffId);
-        paramMap.put("fromDate", fromDate);
-        paramMap.put("endDate", endDate);
-
-        if (!cashier.getIsFullDay()) {
-            paramMap.put("startTime", cashier.getStartTime());
-            paramMap.put("endTime", cashier.getEndTime());
-        }
-
-        Integer count = jdbcTemplate.queryForObject(sql, paramMap, Integer.class);
-        if (count != null && count > 0) {
+        // Validate the staff member has no other cashier assignment whose dates and hours overlap with this one: either
+        // of them full day, or hours overlapping (end times included). An updated assignment is not compared with
+        // itself
+        final boolean allocated = findCashiersOfStaff(staffId, fromDate, endDate).stream()
+                .filter(existing -> !Objects.equals(existing.getId(), cashier.getId()))
+                .anyMatch(existing -> fullDay || isFullDay(existing) || hoursOverlap(startTime, endTime, existing));
+        if (allocated) {
             throw new CashierAlreadyAllocated();
         }
     }
 
     public void validateOnLoanDisbursal(AppUser user, String currencyCode, BigDecimal transactionAmount) {
-        LocalDate tenantDate = DateUtils.getLocalDateOfTenant();
-        OffsetDateTime tenantDateTime = DateUtils.getOffsetDateTimeOfTenant();
         if (user.getStaff() != null) {
-            String sql = "SELECT c.id FROM m_cashiers c WHERE c.staff_id = :staffId "
-                    + "AND (CASE WHEN c.full_day THEN :tenantDate BETWEEN c.start_date AND c.end_date "
-                    + "ELSE (:tenantDate BETWEEN c.start_date AND c.end_date AND "
-                    + "TIME(:tenantDateTime) BETWEEN TIME(c.start_time) AND TIME(c.end_time)) END)";
+            final Long staffId = user.getStaff().getId();
+            // One "now", so the date and the time of day cannot disagree around midnight
+            final OffsetDateTime tenantDateTime = DateUtils.getOffsetDateTimeOfTenant();
+            final LocalDate tenantDate = tenantDateTime.toLocalDate();
+            final LocalTime tenantTime = tenantDateTime.toLocalTime();
 
-            Map<String, Object> paramMap = new HashMap<>();
-            paramMap.put("staffId", user.getStaff().getId());
-            paramMap.put("tenantDate", tenantDate);
-            paramMap.put("tenantDateTime", tenantDateTime);
-
-            try {
-                Long cashierId = jdbcTemplate.queryForObject(sql, paramMap, Long.class);
-                validateSettleCashAndCashOutTransactions(cashierId, currencyCode, transactionAmount);
-            } catch (EmptyResultDataAccessException e) {
-                LOG.error("Problem occurred in validateOnLoanDisbursal function", e);
+            final List<Long> onDuty = findCashiersOfStaff(staffId, tenantDate, tenantDate).stream()
+                    .filter(cashier -> isOnDuty(cashier, tenantTime)).map(Cashier::getId).toList();
+            final Long cashierId = DataAccessUtils.singleResult(onDuty);
+            if (cashierId == null) {
+                // Normal when the user is not on duty as a cashier: there is no cashier balance to check
+                LOG.debug("No cashier on duty for staff {}, cash disbursal not checked against a cashier balance", staffId);
+                return;
             }
+            validateSettleCashAndCashOutTransactions(cashierId, currencyCode, transactionAmount);
         }
+    }
+
+    /**
+     * The cashier assignments of a staff member whose dates overlap with the given ones. Only the id, full day flag and
+     * times are read; the times are compared in Java with the {@link Cashier} getters, as TIME() does not exist on
+     * PostgreSQL. Plain SQL rather than JPQL, so the query does not flush pending changes (of the cashier being
+     * updated, or of the loan being disbursed).
+     */
+    private List<Cashier> findCashiersOfStaff(final Long staffId, final LocalDate fromDate, final LocalDate toDate) {
+        final String sql = "SELECT c.id, c.full_day, c.start_time, c.end_time FROM m_cashiers c WHERE c.staff_id = :staffId "
+                + "AND c.start_date <= :toDate AND c.end_date >= :fromDate";
+        final Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("staffId", staffId);
+        paramMap.put("fromDate", fromDate);
+        paramMap.put("toDate", toDate);
+        return jdbcTemplate.query(sql, paramMap, (rs, rowNum) -> {
+            final Cashier cashier = new Cashier().setIsFullDay(rs.getBoolean("full_day")).setStartTime(rs.getString("start_time"))
+                    .setEndTime(rs.getString("end_time"));
+            cashier.setId(rs.getLong("id"));
+            return cashier;
+        });
+    }
+
+    private static boolean isFullDay(final Cashier cashier) {
+        return Boolean.TRUE.equals(cashier.getIsFullDay());
+    }
+
+    /**
+     * Full day, or the time within its hours (inclusive). A part-day cashier whose times cannot be read is not on duty.
+     */
+    private static boolean isOnDuty(final Cashier cashier, final LocalTime time) {
+        if (isFullDay(cashier)) {
+            return true;
+        }
+        final LocalTime startTime = startTimeOf(cashier);
+        final LocalTime endTime = endTimeOf(cashier);
+        return startTime != null && endTime != null && !time.isBefore(startTime) && !time.isAfter(endTime);
+    }
+
+    /**
+     * Whether the hours of an existing part-day assignment overlap with the given ones, end times included (a shift
+     * ending at 12:00 and one starting at 12:00 overlap). Times that cannot be read count as an overlap, so a bad
+     * record never lets a second assignment through; the warning logged names the record to fix.
+     */
+    private static boolean hoursOverlap(final LocalTime startTime, final LocalTime endTime, final Cashier existing) {
+        final LocalTime existingStart = startTimeOf(existing);
+        final LocalTime existingEnd = endTimeOf(existing);
+        if (existingStart == null || existingEnd == null) {
+            return true;
+        }
+        return !startTime.isAfter(existingEnd) && !existingStart.isAfter(endTime);
+    }
+
+    private static LocalTime startTimeOf(final Cashier cashier) {
+        return timeOf(cashier, "start", cashier.getStartTime(), cashier::getHourFromStartTime, cashier::getMinFromStartTime);
+    }
+
+    private static LocalTime endTimeOf(final Cashier cashier) {
+        return timeOf(cashier, "end", cashier.getEndTime(), cashier::getHourFromEndTime, cashier::getMinFromEndTime);
+    }
+
+    /**
+     * The time of a part-day cashier, or null when it cannot be read. For a saved cashier a warning names the record to
+     * fix; a new one is rejected by the caller.
+     */
+    private static LocalTime timeOf(final Cashier cashier, final String which, final String storedTime, final Supplier<Long> hour,
+            final Supplier<Long> minute) {
+        try {
+            final Long hourValue = hour.get();
+            final Long minuteValue = minute.get();
+            if (hourValue != null && minuteValue != null) {
+                return LocalTime.of(Math.toIntExact(hourValue), Math.toIntExact(minuteValue));
+            }
+        } catch (NumberFormatException | IndexOutOfBoundsException | DateTimeException | ArithmeticException e) {
+            LOG.debug("Cannot read {} time '{}' of cashier {}", which, storedTime, cashier.getId(), e);
+        }
+        if (cashier.getId() != null) {
+            LOG.warn("Cashier {} is part day but its {} time '{}' cannot be read", cashier.getId(), which, storedTime);
+        }
+        return null;
     }
 }
