@@ -44,7 +44,6 @@ public class MeetingAttendanceUpdateRequest implements Serializable {
     private Long entityId;
     @Hidden
     private CalendarEntityType entityType;
-    @Hidden
     // @NotNull(message = "{org.apache.fineract.portfolio.meeting.attendance.id.not-null}")
     @Valid
     @JsonAlias("clientsAttendance")
