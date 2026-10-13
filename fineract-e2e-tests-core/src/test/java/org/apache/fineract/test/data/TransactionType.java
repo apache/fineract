@@ -49,6 +49,8 @@ public enum TransactionType {
     DISCOUNT_FEE_ADJUSTMENT("discountFeeAdjustment"), //
     DISCOUNT_FEE_AMORTIZATION("discountFeeAmortization"), //
     DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT("discountFeeAmortizationAdjustment"), //
+    CONTRACT_TERMINATION("contractTermination"), //
+    LOAN_WITHDRAWAL("loanWithdrawal"), //
     ;
 
     public final String value;
