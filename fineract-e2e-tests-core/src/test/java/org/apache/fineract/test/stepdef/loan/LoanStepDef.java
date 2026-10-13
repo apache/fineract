@@ -5513,9 +5513,14 @@ public class LoanStepDef extends AbstractStepDef {
                 .extractingData(LoanTransactionDataV1::getDate).isEqualTo(FORMATTER_EVENTS.format(FORMATTER.parse(transactionDate)));
     }
 
-    @Then("Admin fails to apply loan withdrawal on {string} because the date is before the business date")
-    public void loanWithdrawalBeforeBusinessDateFailure(final String transactionDate) {
-        assertLoanWithdrawalRejected(transactionDate, ErrorMessageHelper.loanWithdrawalBeforeBusinessDateFailure());
+    @Then("Admin fails to apply loan withdrawal on {string} because the date is before the last transaction date")
+    public void loanWithdrawalBeforeLastTransactionDateFailure(final String transactionDate) {
+        assertLoanWithdrawalRejected(transactionDate, ErrorMessageHelper.loanWithdrawalBeforeLastTransactionDateFailure());
+    }
+
+    @Then("Admin fails to apply loan withdrawal on {string} because the date is before the submitted on date of a charge")
+    public void loanWithdrawalBeforeChargeSubmittedOnDateFailure(final String transactionDate) {
+        assertLoanWithdrawalRejected(transactionDate, ErrorMessageHelper.loanWithdrawalBeforeChargeSubmittedOnDateFailure());
     }
 
     @Then("Admin fails to apply loan withdrawal on {string} because the date is not before the maturity date")
