@@ -796,6 +796,17 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     @Then("Creating a working capital loan using created product with input values that cause unable to calculate a valid EIR will result into an error:")
     public void creatingAWorkingCapitalLoanUsingLpWithInvalidInputValuesCauseUnableToCalculateEIrResultAnError(final DataTable table) {
+        creatingAWorkingCapitalLoanUsingLpWillResultAnError(
+                ErrorMessageHelper.workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure(), table);
+    }
+
+    @Then("Creating a working capital loan using created product with discount that exceeds principal amount will result into an error:")
+    public void creatingAWorkingCapitalLoanWithDiscountExceedsPrincipalAmountResultAnError(final DataTable table) {
+        creatingAWorkingCapitalLoanUsingLpWillResultAnError(ErrorMessageHelper.workingCapitalInputDiscountExceedsPrincipalFailure(), table);
+    }
+
+    @Then("Creating a working capital loan using created product will result an error {string}:")
+    public void creatingAWorkingCapitalLoanUsingLpWillResultAnError(final String errorMessage, final DataTable table) {
         final List<List<String>> data = table.asLists();
         final List<String> loanData = data.get(1);
         final Long clientId = extractClientId();
@@ -825,10 +836,28 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
 
         assertHttpStatus(exception, 400);
-        String errorMessage = ErrorMessageHelper.workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure();
         assertValidationError(exception, errorMessage);
 
-        log.info("Verified working capital loan creation failed with principal amount exceeding max");
+        log.info("Verified working capital loan creation failed with error message '{}'", errorMessage);
+    }
+
+    @Then("Creating a working capital loan with discount that exceeds principal and the following data will result into an error:")
+    public void creatingAWorkingCapitalLoanWithDiscountExceedsPrincipalResultAnError(final DataTable table) {
+        final List<List<String>> data = table.asLists();
+        List<String> loanData = data.get(1);
+
+        final String loanProduct = loanData.getFirst();
+        final Long clientId = extractClientId();
+        final Long loanProductId = resolveLoanProductId(loanProduct);
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequest(clientId, loanProductId, loanData);
+        testContext().set(TestContextKey.LOAN_CREATE_REQUEST, loansRequest);
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
+
+        assertHttpStatus(exception, 400);
+        assertValidationError(exception, ErrorMessageHelper.workingCapitalInputDiscountExceedsPrincipalFailure());
     }
 
     @Then("Creating a working capital loan with missing mandatory fields will result an error:")
@@ -903,23 +932,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertThat(exception.getStatus()).as("HTTP status").isEqualTo(404);
     }
 
-    @Then("Admin creates working capital loan with breach override allowed with breach override and the following data:")
-    public void createLoanWithBreachOverrideAllowedWithBreach(final DataTable table) {
-        final List<List<String>> data = table.asLists();
-        final List<String> loanData = data.get(1);
-        final Long overrideBreachId = createBreachAndGetId();
-        createWorkingCapitalLoanAccountWithBreachNearBreachData(loanData, overrideBreachId, null);
-    }
-
-    @Then("Admin creates working capital loan with breach override allowed with breach and near breach override and the following data:")
-    public void createLoanWithBreachOverrideAllowedWithBreachAndNearBreachOverride(final DataTable table) {
-        final List<List<String>> data = table.asLists();
-        final List<String> loanData = data.get(1);
-        final Long overrideBreachId = createBreachAndGetId();
-        final Long overrideNearBreachId = createNearBreachAndGetId();
-        createWorkingCapitalLoanAccountWithBreachNearBreachData(loanData, overrideBreachId, overrideNearBreachId);
-    }
-
     @Then("Admin creates working capital loan with {int} {string} breach override and the following data:")
     public void createLoanWithBreachOverrideAllowedWithBreachOverrideData(int breachFrequency, String breachFrequencyType,
             final DataTable table) {
@@ -932,15 +944,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("Admin creates working capital loan with {int} {string} breach and {int} {string} near breach override and the following data:")
     public void createLoanWithBreachOverrideAllowedWithBreachAndNearBreachOverrideData(int breachFrequency, String breachFrequencyType,
             int nearBreachFrequency, String nearBreachFrequencyType, final DataTable table) {
-        final List<List<String>> data = table.asLists();
-        final Long overrideBreachId = createBreachOverrideAndGetId(breachFrequency, breachFrequencyType);
-        final Long overrideNearBreachId = createNearBreachOverrideAndGetId(nearBreachFrequency, nearBreachFrequencyType);
-        createWorkingCapitalLoanAccountWithBreachNearBreachData(data.get(1), overrideBreachId, overrideNearBreachId);
-    }
-
-    @Then("Admin creates working capital loan with breach override allowed with {int} {string} breach and the following data:")
-    public void createLoanWithBreachOverrideAllowedWithBreachhData(final DataTable table, int breachFrequency, String breachFrequencyType,
-            int nearBreachFrequency, String nearBreachFrequencyType) {
         final List<List<String>> data = table.asLists();
         final Long overrideBreachId = createBreachOverrideAndGetId(breachFrequency, breachFrequencyType);
         final Long overrideNearBreachId = createNearBreachOverrideAndGetId(nearBreachFrequency, nearBreachFrequencyType);
@@ -1060,18 +1063,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertThat(loanAccountResponse.getNearBreach()).isNull();
     }
 
-    @Then("Admin failed to create working capital loan while breach override disallowed with breach override and the following data:")
-    public void createLoanWithBreachOverrideDisallowedWithBreachFailure(final DataTable table) {
-        final List<List<String>> data = table.asLists();
-        final List<String> loanData = data.get(1);
-        final Long overrideBreachId = createBreachOverrideAndGetId();
-
-        final PostWorkingCapitalLoansRequest loansRequest = createWorkingCapitalLoanAccountWithBreachNearBreachRequest(loanData,
-                overrideBreachId, null);
-        String message = ErrorMessageHelper.overrideDisallowedByProductFailure();
-        verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, message);
-    }
-
     @Then("Admin failed to create working capital loan while breach override disallowed with breach override and default following data:")
     public void createLoanWithBreachOverrideDisallowedWithBreachDefaultFailure(final DataTable table) {
         final List<String> loanData = table.asLists().get(1);
@@ -1081,19 +1072,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final Long overrideBreachId = createBreachOverrideAndGetId();
         final PostWorkingCapitalLoansRequest loansRequest = createWorkingCapitalLoanAccountDefaultRequest(loanProduct, submittedOnDate)
                 .breachId(overrideBreachId);
-        String message = ErrorMessageHelper.overrideDisallowedByProductFailure();
-        verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, message);
-    }
-
-    @Then("Admin failed to create working capital loan while breach override disallowed with breach and near breach override and the following data:")
-    public void createLoanWithBreachOverrideDisallowedWithBreachAndNearBreachFailure(final DataTable table) {
-        final List<List<String>> data = table.asLists();
-        final List<String> loanData = data.get(1);
-        final Long overrideBreachId = createBreachOverrideAndGetId();
-        final Long overrideNearBreachId = createNearBreachOverrideAndGetId();
-
-        final PostWorkingCapitalLoansRequest loansRequest = createWorkingCapitalLoanAccountWithBreachNearBreachRequest(loanData,
-                overrideBreachId, overrideNearBreachId);
         String message = ErrorMessageHelper.overrideDisallowedByProductFailure();
         verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, message);
     }
@@ -1998,20 +1976,10 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         log.info("Verified working capital loan undo disbursal failed with expected error");
     }
 
-    @Then("Working Capital disbursal transaction business event is raised")
-    public void workingCapitalDisbursalTransactionBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanDisbursalTransactionEventCheck(getCreatedLoanId());
-    }
-
     @Then("Working Capital disbursal transaction business event is raised with {string} amount and reversed {string}")
     public void workingCapitalDisbursalTransactionBusinessEventIsRaisedWithAmountAndReversed(final String amount, final String reversed) {
         eventCheckHelper.workingCapitalLoanDisbursalTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
         assertThat(Boolean.parseBoolean(reversed)).isFalse();
-    }
-
-    @Then("Working Capital undo disbursal transaction business event is raised")
-    public void workingCapitalUndoDisbursalTransactionBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanUndoDisbursalTransactionEventCheck(getCreatedLoanId());
     }
 
     @Then("Working Capital undo disbursal transaction business event is raised with {string} amount and reversed {string}")
@@ -2058,11 +2026,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("a Working Capital Loan Rejected business event is raised")
     public void aWorkingCapitalLoanRejectedBusinessEventIsRaised() {
         eventCheckHelper.workingCapitalLoanRejectedEventCheck(getCreatedLoanId());
-    }
-
-    @Then("a Working Capital Loan Disbursal business event is raised")
-    public void aWorkingCapitalLoanDisbursalBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanDisbursalEventCheck(getCreatedLoanId());
     }
 
     @Then("a Working Capital Loan Undo Disbursal business event is raised")
@@ -2369,16 +2332,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         eventCheckHelper.workingCapitalLoanStatusChangedEventNotRaisedCheck(getCreatedLoanId());
     }
 
-    @Then("no Working Capital Loan Delinquency Schedule Changed business event is raised")
-    public void noWorkingCapitalLoanDelinquencyScheduleChangedBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanDelinquencyScheduleChangedEventNotRaisedCheck(getCreatedLoanId());
-    }
-
-    @Then("no Working Capital Loan Breach Schedule Changed business event is raised")
-    public void noWorkingCapitalLoanBreachScheduleChangedBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanBreachScheduleChangedEventNotRaisedCheck(getCreatedLoanId());
-    }
-
     @Then("no Working Capital Loan Breach Past Due Change business event is raised")
     public void noWorkingCapitalLoanBreachPastDueChangeBusinessEventIsRaised() {
         eventCheckHelper.workingCapitalLoanBreachPastDueChangeEventNotRaisedCheck(getCreatedLoanId());
@@ -2683,6 +2636,44 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
         final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionByExternalId(loanExternalId, "discountFee", request));
+        verifyErrorResponse(exception, table);
+    }
+
+    @When("Admin adds Discount fee with {string} amount on transaction date {string} on Working Capital loan account")
+    public void addDiscountFeeWCLoanOnTransactionDate(final String discountAmount, final String transactionDate) {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionAmount(new BigDecimal(discountAmount))
+                .transactionDate(transactionDate);
+
+        final PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFee", request));
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_DISCOUNT_FEE_RESPONSE, response);
+    }
+
+    @Then("Adding Discount fee with {string} amount on transaction date {string} on Working Capital loan account for last disbursement results an error with the following data:")
+    public void addingDiscountFeeWCLoanDisbursementOnTransactionDateResultsAnError(final String discountAmount,
+            final String transactionDate, final DataTable table) {
+        final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
+        Assertions.assertNotNull(lastDisbursementResponse);
+
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().relatedResourceId(lastDisbursementResponse.getResourceId())
+                .transactionAmount(new BigDecimal(discountAmount)).transactionDate(transactionDate);
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFee", request));
+        verifyErrorResponse(exception, table);
+    }
+
+    @Then("Adding Discount fee with {string} amount on transaction date {string} on Working Capital loan account results an error with the following data:")
+    public void addingDiscountFeeWCLoanOnTransactionDateResultsAnError(final String discountAmount, final String transactionDate,
+            final DataTable table) {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionAmount(new BigDecimal(discountAmount))
+                .transactionDate(transactionDate);
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFee", request));
         verifyErrorResponse(exception, table);
     }
 
@@ -3232,30 +3223,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         }
     }
 
-    @Then("Add discount with {string} amount on Working Capital loan account failed due to date diff from disbursement date")
-    public void updateDiscountWithAmountOnWorkingCapitalLoanAccountFailedDueToDateDiffFromDisbursementDate(String discountAmount) {
-        String errorMessage = ErrorMessageHelper.discountDiffDateFromDisburseFailure();
-        addDiscountFeeFailedCheck(discountAmount, errorMessage);
-    }
-
-    @Then("Add discount with {string} amount on Working Capital loan account failed due to already added discount before disbursement")
-    public void addDiscountWithAmountOnWorkingCapitalLoanAccountFailedDueToAlreadyAddedDiscountBeforeDisbursement(String discountAmount) {
-        String errorMessage = ErrorMessageHelper.discountAlreadySetBeforeDisburseFailure();
-        addDiscountFeeFailedCheck(discountAmount, errorMessage);
-    }
-
-    @Then("Add discount with {string} amount on Working Capital loan account failed due to override disallowed by product")
-    public void updateDiscountWithAmountOnWorkingCapitalLoanAccountFailedDueToOverrideDisallowedByProduct(String discountAmount) {
-        String errorMessage = ErrorMessageHelper.overrideDisallowedByProductFailure();
-        addDiscountFeeFailedCheck(discountAmount, errorMessage);
-    }
-
-    @Then("Add discount with {string} amount on Working Capital loan account failed due to exceed discount amount")
-    public void updateDiscountWithAmountOnWorkingCapitalLoanAccountFailedDueToExceedDiscountAmount(String discountAmount) {
-        String errorMessage = ErrorMessageHelper.discountExceedProductDiscountFailure();
-        addDiscountFeeFailedCheck(discountAmount, errorMessage);
-    }
-
     @When("Admin update Working Capital period payment rate with {string} value")
     public void adminAddWorkingCapitalPeriodPaymentRate(String periodPaymentRate) {
         final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -3314,13 +3281,13 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     }
 
     /**
-     * Asserts the rate the loan is actually being billed at on {@code asOf}, derived from the rate-change history
-     * rather than read off the loan.
+     * Asserts the rate the loan is actually being billed at on {@code asOf}, derived from the rate-change history.
      *
      * <p>
-     * The loan resource reports the rate the loan was created with and does not move when a rate change is booked, so
-     * the two answers differ for any loan with a change in force. The rate in force is the newest non-reversed change
-     * effective on or before the date, and the loan's own rate when none has taken effect yet.
+     * {@code paymentRate} on the loan resource is the rate the loan was created with and does not move when a rate
+     * change is booked; {@code effectivePaymentRate} does move and should match this answer on the business date. The
+     * rate in force is the newest non-reversed change effective on or before the date, and the loan's own
+     * {@code paymentRate} when none has taken effect yet.
      *
      * <p>
      * Ranked by effective date, not by id: a backdated change is created after the changes it precedes, so insertion
@@ -3524,7 +3491,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertHttpStatus(exception, 400);
         assertValidationError(exception, errorMessage);
 
-        log.info("Verified working capital loan creation failed with error message '{}'", errorMessage);
+        log.info("Verified working capital loan creation with invalid data failed with error message '{}'", errorMessage);
     }
 
     private void modifyWorkingCapitalLoanAccount(final List<String> loanData) {
@@ -4343,8 +4310,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         loanWCStatus("CLOSED_OBLIGATIONS_MET");
     }
 
-    @Then("Admin closes the Working Capital loan with a full repayment by loan external ID on {string}")
-    public void closeWorkingCapitalLoanWithFullRepaymentByExternalId(final String transactionDate) {
+    private void closeWorkingCapitalLoanWithFullRepaymentByExternalId(final String transactionDate) {
         final Long loanId = getCreatedLoanId();
         final String loanExternalId = retrieveLoanExternalId(loanId);
         final WorkingCapitalLoanTransactionTemplateResponse templateResponse = fetchPrepaymentTemplateByExternalId(loanExternalId,
@@ -4506,10 +4472,51 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     public void workingCapitalLoanTransactionHasPaymentType(final String transactionTypeInput, final String expectedPaymentTypeName) {
         final String expectedTransactionType = TransactionType.valueOf(transactionTypeInput).getValue();
         final String expectedTypeCode = "loanTransactionType." + expectedTransactionType;
-        final Long loanId = getCreatedLoanId();
-        final String lastTransactionType = testContext().get(WC_LAST_TRANSACTION_TYPE);
         final String lastTransactionDate = testContext().get(WC_LAST_TRANSACTION_DATE);
         final BigDecimal lastTransactionAmount = testContext().get(WC_LAST_TRANSACTION_AMOUNT);
+
+        final GetWorkingCapitalLoanTransactionIdResponse txn = getLastStoredTransactionDetailsByTrnType(transactionTypeInput,
+                lastTransactionDate, lastTransactionAmount);
+        checkTransactionPaymentDataPresent(txn, transactionTypeInput, expectedTypeCode);
+
+        assert txn.getPaymentDetailData() != null;
+        assert txn.getPaymentDetailData().getPaymentType() != null;
+        assertThat(txn.getPaymentDetailData().getPaymentType().getName()).as("payment type name on %s transaction", transactionTypeInput)
+                .isEqualTo(expectedPaymentTypeName);
+    }
+
+    @Then("Working Capital loan transaction with type {string} has payment details:")
+    public void workingCapitalLoanTransactionHasPaymentDetails(final String transactionType, final DataTable dataTable) {
+        final String expectedTransactionType = TransactionType.valueOf(transactionType).getValue();
+        final String expectedTypeCode = "loanTransactionType." + expectedTransactionType;
+        final String lastTransactionDate = testContext().get(WC_LAST_TRANSACTION_DATE);
+        final BigDecimal lastTransactionAmount = testContext().get(WC_LAST_TRANSACTION_AMOUNT);
+        final GetWorkingCapitalLoanTransactionIdResponse txn = getLastStoredTransactionDetailsByTrnType(transactionType,
+                lastTransactionDate, lastTransactionAmount);
+        checkTransactionPaymentDataPresent(txn, transactionType, expectedTypeCode);
+
+        checkPaymentDetailData(txn, dataTable);
+    }
+
+    @Then("Working Capital loan transaction with type {string} with date {string} and amount {string} has payment details:")
+    public void workingCapitalLoanTransactionHasPaymentDetails(final String transactionType, final String transactionDate,
+            final String amount, final DataTable dataTable) {
+        final String expectedTransactionType = TransactionType.valueOf(transactionType).getValue();
+        final String expectedTypeCode = "loanTransactionType." + expectedTransactionType;
+        final BigDecimal transactionAmount = new BigDecimal(amount);
+        final GetWorkingCapitalLoanTransactionIdResponse txn = getLastStoredTransactionDetailsByTrnType(transactionType, transactionDate,
+                transactionAmount);
+        checkTransactionPaymentDataPresent(txn, transactionType, expectedTypeCode);
+
+        checkPaymentDetailData(txn, dataTable);
+    }
+
+    private GetWorkingCapitalLoanTransactionIdResponse getLastStoredTransactionDetailsByTrnType(final String transactionTypeInput,
+            String lastTransactionDate, BigDecimal lastTransactionAmount) {
+        final String expectedTransactionType = TransactionType.valueOf(transactionTypeInput).getValue();
+        final String expectedTypeCode = "loanTransactionType." + expectedTransactionType;
+        final Long loanId = getCreatedLoanId();
+        final String lastTransactionType = testContext().get(WC_LAST_TRANSACTION_TYPE);
         Assertions.assertNotNull(lastTransactionType,
                 String.format("WC transaction type must be present before asserting payment type for %s", transactionTypeInput));
         Assertions.assertNotNull(lastTransactionDate,
@@ -4532,14 +4539,41 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
         final GetWorkingCapitalLoanTransactionIdResponse txn = ok(
                 () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTransactionById(loanId, transactionId));
+        return txn;
+    }
+
+    private void checkTransactionPaymentDataPresent(GetWorkingCapitalLoanTransactionIdResponse txn, String transactionTypeInput,
+            String expectedTypeCode) {
         Assertions.assertNotNull(txn.getType(), String.format("transaction type must be present on %s transaction", transactionTypeInput));
         assertThat(txn.getType().getCode()).as("transaction type code").isEqualTo(expectedTypeCode);
         Assertions.assertNotNull(txn.getPaymentDetailData(),
                 String.format("paymentDetailData must be present on %s transaction", transactionTypeInput));
         Assertions.assertNotNull(txn.getPaymentDetailData().getPaymentType(),
                 String.format("paymentType must be present on %s transaction", transactionTypeInput));
-        assertThat(txn.getPaymentDetailData().getPaymentType().getName()).as("payment type name on %s transaction", transactionTypeInput)
-                .isEqualTo(expectedPaymentTypeName);
+
+    }
+
+    private void checkPaymentDetailData(GetWorkingCapitalLoanTransactionIdResponse txn, DataTable dataTable) {
+        final List<List<String>> data = dataTable.asLists();
+        final List<String> paymentDetailsExpected = data.get(1);
+
+        final String paymentType = paymentDetailsExpected.get(0);
+        final String accountNumber = paymentDetailsExpected.get(1);
+        final String checkNumber = paymentDetailsExpected.get(2);
+        final String routingCode = paymentDetailsExpected.get(3);
+        final String receiptNumber = paymentDetailsExpected.get(4);
+        final String bankNumber = paymentDetailsExpected.get(5);
+
+        final SoftAssertions assertions = new SoftAssertions();
+        assert txn.getPaymentDetailData() != null;
+        assert txn.getPaymentDetailData().getPaymentType() != null;
+        assertions.assertThat(txn.getPaymentDetailData().getPaymentType().getName()).isEqualTo(paymentType);
+        assertions.assertThat(txn.getPaymentDetailData().getAccountNumber()).isEqualTo(accountNumber);
+        assertions.assertThat(txn.getPaymentDetailData().getCheckNumber()).isEqualTo(checkNumber);
+        assertions.assertThat(txn.getPaymentDetailData().getRoutingCode()).isEqualTo(routingCode);
+        assertions.assertThat(txn.getPaymentDetailData().getReceiptNumber()).isEqualTo(receiptNumber);
+        assertions.assertThat(txn.getPaymentDetailData().getBankNumber()).isEqualTo(bankNumber);
+        assertions.assertAll();
     }
 
     private PostWorkingCapitalLoanTransactionsRequest buildCreditBalanceRefundRequest(final String transactionDate,
@@ -5165,6 +5199,16 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         verifyTransactionsJournalEntries(transactionType, transactionDate, true, null, table);
     }
 
+    @Then("Working Capital Loan Transactions tab has a {string} transaction with date {string} which has no Journal entries")
+    public void verifyWorkingCapitalLoanTransactionHasNoJournalEntries(final String transactionType, final String transactionDate) {
+        verifyTransactionHasNoJournalEntries(transactionType, transactionDate, false);
+    }
+
+    @Then("Working Capital Loan Transactions tab has a reversed {string} transaction with date {string} which has no Journal entries")
+    public void verifyReversedWorkingCapitalLoanTransactionHasNoJournalEntries(final String transactionType, final String transactionDate) {
+        verifyTransactionHasNoJournalEntries(transactionType, transactionDate, true);
+    }
+
     @When("Customer undo {string}th working capital transaction made on {string}")
     public void undoNthTransaction(String nthItemStr, String transactionDate) throws IOException {
         final GetWorkingCapitalLoanTransactionsResponse getWorkingCapitalLoansLoanIdResponse = retrieveLoanTransactions(getCreatedLoanId());
@@ -5185,6 +5229,177 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         Assertions.assertNotNull(undo);
     }
 
+    @When("Customer adjust {string}th {string} transaction made on {string} on Working Capital loan with amount {string}")
+    public void adjustNthWorkingCapitalLoanTransaction(final String nthItemStr, final String transactionType, final String transactionDate,
+            final String amount) {
+        adjustNthWorkingCapitalLoanTransactionByType(nthItemStr, transactionType, transactionDate, transactionDate, amount, null);
+    }
+
+    @When("Customer adjust {string}th {string} transaction made on {string} on Working Capital loan with amount {string} and date {string}")
+    public void adjustNthWorkingCapitalLoanTransactionWithDate(final String nthItemStr, final String transactionType,
+            final String transactionDate, final String amount, final String adjustTransactionDate) {
+        adjustNthWorkingCapitalLoanTransactionByType(nthItemStr, transactionType, transactionDate, adjustTransactionDate, amount, null);
+    }
+
+    @When("Customer adjust {string}th {string} transaction made on {string} on Working Capital loan with amount {string} and payment details:")
+    public void adjustNthWorkingCapitalLoanTransactionWithPaymentDetails(final String nthItemStr, final String transactionType,
+            final String transactionDate, final String amount, final DataTable table) {
+        adjustNthWorkingCapitalLoanTransactionByType(nthItemStr, transactionType, transactionDate, transactionDate, amount,
+                buildPaymentDetailsFromTable(table));
+    }
+
+    @When("Customer adjust {string}th {string} transaction made on {string} on Working Capital loan with amount {string} and date {string} and payment details:")
+    public void adjustNthWorkingCapitalLoanTransactionWithPaymentDetails(final String nthItemStr, final String transactionType,
+            final String transactionDate, final String amount, final String adjustTransactionDate, final DataTable table) {
+        adjustNthWorkingCapitalLoanTransactionByType(nthItemStr, transactionType, transactionDate, adjustTransactionDate, amount,
+                buildPaymentDetailsFromTable(table));
+    }
+
+    @When("Customer adjust already undone {string}th {string} transaction made on {string} on Working Capital loan with amount {string} and date {string} is failed")
+    public void adjustAlreadyUndoneNthWorkingCapitalLoanTransactionFailed(final String nthItemStr, final String transactionType,
+            final String transactionDate, final String amount, final String adjustTransactionDate) {
+        CallFailedRuntimeException exception = adjustAlreadyUndoneNthWorkingCapitalLoanTransactionByTypeFailure(nthItemStr, transactionType,
+                transactionDate, adjustTransactionDate, amount);
+        assertHttpStatus(exception, 400);
+        assertValidationError(exception, "validation.msg.WORKINGCAPITALLOAN.transaction.transaction.already.undone");
+    }
+
+    @When("Customer adjust {string}th {string} transaction made on {string} on Working Capital loan with amount {string} and date {string} is failed:")
+    public void adjustNthWorkingCapitalLoanTransactionFailed(final String nthItemStr, final String transactionType,
+            final String transactionDate, final String amount, final String adjustTransactionDate, final DataTable table) {
+        adjustNthWorkingCapitalLoanTransactionByTypeFailure(nthItemStr, transactionType, transactionDate, adjustTransactionDate, amount,
+                table);
+    }
+
+    @When("Customer adjust {string}th {string} transaction type made on {string} on Working Capital loan with amount {string} and date {string} is failed")
+    public void adjustNthWorkingCapitalLoanTransactionTypeFailed(final String nthItemStr, final String transactionType,
+            final String transactionDate, final String amount, final String adjustTransactionDate) {
+        CallFailedRuntimeException exception = adjustNthWorkingCapitalLoanTransactionByTypeFailure(nthItemStr, transactionType,
+                transactionDate, adjustTransactionDate, amount);
+        assertHttpStatus(exception, 400);
+        String transactionTypeExpected = transactionType;
+        if (transactionType.equals(TransactionType.WRITE_OFF.name())) {
+            transactionTypeExpected = "WRITEOFF";
+        }
+        assertValidationError(exception, String.format("Adjust is not supported for transaction type %s", transactionTypeExpected));
+    }
+
+    private GetWorkingCapitalLoanTransactionIdResponse getTargetTransactionByType(final String nthItemStr, final Long loanId,
+            final String transactionDate, final TransactionType resolvedType, final Boolean isReversed) {
+        final GetWorkingCapitalLoanTransactionsResponse response = retrieveLoanTransactions(loanId);
+        final String expectedCode = "loanTransactionType." + resolvedType.getValue();
+        final int nthItem = Integer.parseInt(nthItemStr) - 1;
+
+        assert response.getContent() != null;
+        return response.getContent().stream().filter(t -> {
+            if (t.getType() == null || !expectedCode.equals(t.getType().getCode())) {
+                return false;
+            }
+            assert t.getTransactionDate() != null;
+            return transactionDate.equals(FORMATTER.format(t.getTransactionDate())) && isReversed.equals(t.getReversed());
+        }).toList().get(nthItem);
+    }
+
+    private GetWorkingCapitalLoanTransactionIdResponse getTargetTransactionByType(final String nthItemStr, final Long loanId,
+            final String transactionDate, final TransactionType resolvedType) {
+        return getTargetTransactionByType(nthItemStr, loanId, transactionDate, resolvedType, Boolean.FALSE);
+    }
+
+    private GetWorkingCapitalLoanTransactionIdResponse getTargetTransactionByTypeReversed(final String nthItemStr, final Long loanId,
+            final String transactionDate, final TransactionType resolvedType) {
+        return getTargetTransactionByType(nthItemStr, loanId, transactionDate, resolvedType, Boolean.TRUE);
+    }
+
+    private ExecuteWorkingCapitalLoanTransactionCommandRequest buildAdjustWorkingCapitalTransactionRequest(
+            final String adjustTransactionDate, final BigDecimal amountValue,
+            final PostWorkingCapitalLoanTransactionsPaymentDetailRequest paymentDetails) {
+        final String reversalExternalId = Utils.randomStringGenerator("wcl-adjust-reversal-ext-id", 8);
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest()
+                .locale(WorkingCapitalLoanRequestFactory.DEFAULT_LOCALE).dateFormat(DATE_FORMAT).transactionDate(adjustTransactionDate)
+                .transactionAmount(amountValue).note("working capital transaction adjustment").reversalExternalId(reversalExternalId);
+        if (paymentDetails != null) {
+            request.paymentDetails(paymentDetails);
+        }
+        return request;
+    }
+
+    private ExecuteWorkingCapitalLoanTransactionCommandRequest buildAdjustWorkingCapitalTransactionRequest(
+            final String adjustTransactionDate, final BigDecimal amountValue) {
+        return buildAdjustWorkingCapitalTransactionRequest(adjustTransactionDate, amountValue, null);
+    }
+
+    private void adjustNthWorkingCapitalLoanTransactionByType(final String nthItemStr, final String transactionType,
+            final String transactionDate, String adjustTransactionDate, final String amount,
+            final PostWorkingCapitalLoanTransactionsPaymentDetailRequest paymentDetails) {
+        final Long loanId = getCreatedLoanId();
+        final TransactionType resolvedType = resolveTransactionType(transactionType);
+        final GetWorkingCapitalLoanTransactionIdResponse target = getTargetTransactionByType(nthItemStr, loanId, transactionDate,
+                resolvedType);
+
+        final BigDecimal amountValue = new BigDecimal(amount);
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = buildAdjustWorkingCapitalTransactionRequest(
+                adjustTransactionDate, amountValue, paymentDetails);
+
+        final ExecuteWorkingCapitalLoanTransactionCommandResponse adjustResponse = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, target.getId(), "adjust", request));
+        Assertions.assertNotNull(adjustResponse);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_ADJUST_TRANSACTION_RESPONSE, adjustResponse);
+        if (amountValue.compareTo(BigDecimal.ZERO) > 0) {
+            rememberLastWorkingCapitalTransaction(resolvedType.getValue(), transactionDate, amountValue);
+        }
+    }
+
+    private CallFailedRuntimeException adjustAlreadyUndoneNthWorkingCapitalLoanTransactionByTypeFailure(final String nthItemStr,
+            final String transactionType, final String transactionDate, String adjustTransactionDate, final String amount) {
+        final Long loanId = getCreatedLoanId();
+        final TransactionType resolvedType = resolveTransactionType(transactionType);
+        final GetWorkingCapitalLoanTransactionIdResponse target = getTargetTransactionByTypeReversed(nthItemStr, loanId, transactionDate,
+                resolvedType);
+
+        final BigDecimal amountValue = new BigDecimal(amount);
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = buildAdjustWorkingCapitalTransactionRequest(
+                adjustTransactionDate, amountValue);
+
+        CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, target.getId(), "adjust", request));
+        return exception;
+    }
+
+    private CallFailedRuntimeException adjustNthWorkingCapitalLoanTransactionByTypeFailure(final String nthItemStr,
+            final String transactionType, final String transactionDate, String adjustTransactionDate, final String amount) {
+        final Long loanId = getCreatedLoanId();
+        final TransactionType resolvedType = resolveTransactionType(transactionType);
+        final GetWorkingCapitalLoanTransactionIdResponse target = getTargetTransactionByType(nthItemStr, loanId, transactionDate,
+                resolvedType);
+
+        final BigDecimal amountValue = new BigDecimal(amount);
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = buildAdjustWorkingCapitalTransactionRequest(
+                adjustTransactionDate, amountValue);
+
+        CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, target.getId(), "adjust", request));
+        return exception;
+    }
+
+    private void adjustNthWorkingCapitalLoanTransactionByTypeFailure(final String nthItemStr, final String transactionType,
+            final String transactionDate, final String adjustTransactionDate, final String amount, final DataTable table) {
+        CallFailedRuntimeException exception = adjustNthWorkingCapitalLoanTransactionByTypeFailure(nthItemStr, transactionType,
+                transactionDate, adjustTransactionDate, amount);
+
+        if (table != null) {
+            verifyErrorResponse(exception, table);
+        }
+    }
+
+    @Then("a Working Capital Loan Adjust Transaction business event is raised for the adjusted {string} with new amount {string}")
+    public void aWorkingCapitalLoanAdjustTransactionBusinessEventIsRaisedForPartialAdjust(final String transactionType,
+            final String newAmount) {
+        final ExecuteWorkingCapitalLoanTransactionCommandResponse adjustResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_ADJUST_TRANSACTION_RESPONSE);
+        eventCheckHelper.workingCapitalLoanAdjustTransactionPartialEventCheck(getCreatedLoanId(), transactionType,
+                new BigDecimal(newAmount), adjustResponse.getResourceId());
+    }
+
     private void verifyTransactionsJournalEntries(final String transactionType, final String transactionDate, final boolean reversed,
             final Integer expectedCount, final DataTable table) {
         final Long loanId = getCreatedLoanId();
@@ -5196,6 +5411,15 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                     + expectedCount + ", Actual: " + transactionsMatch.size()).isEqualTo(expectedCount);
         }
         verifyJournalEntries(transactionsMatch, table);
+    }
+
+    private void verifyTransactionHasNoJournalEntries(final String transactionType, final String transactionDate, final boolean reversed) {
+        final List<GetWorkingCapitalLoanTransactionIdResponse> transactionsMatch = findMatchingTransactions(getCreatedLoanId(),
+                resolveTransactionType(transactionType), transactionDate, reversed);
+        assertThat(transactionsMatch).as("No %s transaction found on %s", transactionType, transactionDate).isNotEmpty();
+        assertThat(getWorkingCapitalJournalLinesActualList(transactionsMatch))
+                .as("Journal entries of the %s transaction on %s", transactionType, transactionDate)
+                .allSatisfy(journalLines -> assertThat(journalLines).isEmpty());
     }
 
     private TransactionType resolveTransactionType(String transactionType) {

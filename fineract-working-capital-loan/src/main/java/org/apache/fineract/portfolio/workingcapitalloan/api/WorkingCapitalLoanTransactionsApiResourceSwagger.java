@@ -203,9 +203,9 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @Schema(example = "28 June 2024", description = "Transaction date")
+        @Schema(example = "28 June 2024", description = "Transaction date. For command=discountFee it is optional, defaults to the date of the related disbursement and, when sent, must be equal to it")
         public String transactionDate;
-        @Schema(example = "42", description = "Disbursement transaction id for discountFee; discount fee transaction id for discountFeeAdjustment. Cannot be combined with relatedExternalResourceId. Not accepted on transactions/{transactionId} and transactions/external-id/{transactionExternalId}, where the path names the related transaction")
+        @Schema(example = "42", description = "Disbursement transaction id for discountFee, optional when transactionDate is sent (the active disbursement on that date is used); discount fee transaction id for discountFeeAdjustment. Cannot be combined with relatedExternalResourceId. Not accepted on transactions/{transactionId} and transactions/external-id/{transactionExternalId}, where the path names the related transaction")
         public Long relatedResourceId;
         @Schema(example = "txn-ext-001", description = "External id of the same transaction that relatedResourceId names: the disbursement for discountFee, the discount fee for discountFeeAdjustment. Cannot be combined with relatedResourceId. Not accepted on transactions/{transactionId} and transactions/external-id/{transactionExternalId}, where the path names the related transaction")
         public String relatedExternalResourceId;
@@ -244,8 +244,9 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String resourceExternalId;
     }
 
-    @Schema(description = "Request for transaction command executed on a transaction named in the path: undo, discountFee "
-            + "or discountFeeAdjustment")
+    @Schema(description = "Request for transaction command executed on a transaction named in the path: undo, adjust, discountFee "
+            + "or discountFeeAdjustment. For command=undo use only note and reversalExternalId. "
+            + "For command=adjust dateFormat / locale / transactionDate / transactionAmount / classificationId / externalId / paymentDetails are accepted.")
     public static final class ExecuteWorkingCapitalLoanTransactionCommandRequest {
 
         private ExecuteWorkingCapitalLoanTransactionCommandRequest() {}
@@ -256,17 +257,22 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @Schema(example = "28 June 2024", description = "Transaction date (command=discountFeeAdjustment); command=discountFee uses the date of the related disbursement")
+        @Schema(example = "28 June 2024", description = "Transaction date (command=discountFeeAdjustment); for command=discountFee it defaults to the date of the related disbursement and, when sent, must be equal to it; "
+                + "command=adjust required when transactionAmount > 0: date of the replacement transaction. "
+                + "Optional when transactionAmount is 0 (undo).")
         public String transactionDate;
-        @Schema(example = "100.0", description = "Transaction amount (command=discountFee, discountFeeAdjustment)")
+        @Schema(example = "100.0", description = "Transaction amount (command=discountFee, discountFeeAdjustment); command=adjust zero reverses the existing transaction (same as undo). A positive amount reverses it and creates a replacement")
         public BigDecimal transactionAmount;
-        @Schema(example = "12", description = "Optional code value id for transaction classification (command=discountFee, discountFeeAdjustment)")
+        @Schema(example = "12", description = "Optional code value id for transaction classification (command=discountFee, discountFeeAdjustment, adjust)")
         public Long classificationId;
         @Schema(example = "Discount applied")
         public String note;
-        @Schema(example = "discount-fee-ext-001", description = "Optional external id for the created transaction (command=discountFee, discountFeeAdjustment)")
+        @Schema(example = "replacement-ext-001", description = "Optional external id for the created transaction. For command=adjust this is the id of the replacement when transactionAmount > 0 "
+                + "(same as term-loan adjust). The reversed transaction keeps its original external id. "
+                + "If omitted and auto-generation is enabled, a new id is generated for the replacement.")
         public String externalId;
-        @Schema(description = "Payment details (command=discountFee, discountFeeAdjustment)")
+        @Schema(description = "Optional nested payment details. If command=adjust then it is for the replacement when transactionAmount > 0. "
+                + "If omitted / null, the original transaction's PaymentDetail is reused.")
         public PostWorkingCapitalLoanTransactionsPaymentDetailRequest paymentDetails;
     }
 

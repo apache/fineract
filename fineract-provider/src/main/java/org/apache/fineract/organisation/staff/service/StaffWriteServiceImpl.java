@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.staff.service;
 
 import jakarta.persistence.PersistenceException;
 import java.util.HashMap;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +36,7 @@ import org.apache.fineract.organisation.staff.data.StaffUpdateResponse;
 import org.apache.fineract.organisation.staff.domain.StaffRepository;
 import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.organisation.staff.mapper.StaffCreateRequestMapper;
+import org.apache.fineract.organisation.staff.mapper.StaffDateMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,7 @@ public class StaffWriteServiceImpl implements StaffWriteService {
     private final StaffRepository staffRepository;
     private final OfficeRepository officeRepository;
     private final StaffCreateRequestMapper staffCreateRequestMapper;
+    private final StaffDateMapper dateMapper = new StaffDateMapper();
 
     @Transactional
     @Override
@@ -115,6 +118,13 @@ public class StaffWriteServiceImpl implements StaffWriteService {
             if (request.getIsActive() != null) {
                 staff.setActive(request.getIsActive());
                 changes.put(StaffUpdateRequest.Fields.isActive, request.getIsActive());
+            }
+            if (StringUtils.isNotEmpty(request.getJoiningDate())) {
+                var joiningDate = dateMapper.map(request.getJoiningDate(), request.getDateFormat());
+                if (!Objects.equals(joiningDate, staff.getJoiningDate())) {
+                    staff.setJoiningDate(joiningDate);
+                    changes.put(StaffUpdateRequest.Fields.joiningDate, request.getJoiningDate());
+                }
             }
 
             var response = StaffUpdateResponse.builder().officeId(staff.getOffice().getId()).resourceId(staff.getId());

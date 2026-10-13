@@ -451,8 +451,6 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         String reccuringString;
         Calendar currentCalendar = loanApplicationTerms.getLoanCalendar();
         LocalDate dueRepaymentPeriodDate = lastRepaymentDate;
-        dueRepaymentPeriodDate = (LocalDate) CalendarUtils.adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
-                loanApplicationTerms.getRepaymentPeriodFrequencyType());
         if (currentCalendar != null) {
             // If we have currentCalendar object, this means there is a
             // calendar associated with

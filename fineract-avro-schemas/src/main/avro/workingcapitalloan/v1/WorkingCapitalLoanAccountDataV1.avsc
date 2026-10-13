@@ -439,6 +439,15 @@
                     "items": "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanPeriodPaymentRateChangeDataV1"
                 }
             ]
+        },
+        {
+            "default": null,
+            "name": "effectivePaymentRate",
+            "doc": "Currently effective period payment rate for TPV strategy loans: the rate in force on the business date from rate-change history, or paymentRate when none has taken effect yet. Null when the loan uses a non-TPV payment amount calculation strategy.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
         }
     ]
 }

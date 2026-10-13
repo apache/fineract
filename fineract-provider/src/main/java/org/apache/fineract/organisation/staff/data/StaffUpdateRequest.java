@@ -68,5 +68,7 @@ public class StaffUpdateRequest implements Serializable {
     private Boolean isActive;
     // @NotBlank(message = "{org.apache.fineract.organisation.staff.joining-date.not-blank}")
     private String joiningDate;
+    private String locale;
+    private String dateFormat;
     private Boolean forceStatus;
 }

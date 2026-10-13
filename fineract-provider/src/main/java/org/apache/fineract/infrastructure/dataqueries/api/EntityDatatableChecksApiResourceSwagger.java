@@ -72,6 +72,7 @@ final class EntityDatatableChecksApiResourceSwagger {
         public List<String> entities;
         public List<DatatableCheckStatusData> statusClient;
         public List<DatatableCheckStatusData> statusGroup;
+        public List<DatatableCheckStatusData> statusLoanProduct;
         public List<DatatableCheckStatusData> statusSavings;
         public List<DatatableCheckStatusData> statusLoans;
         public List<DatatableChecksData> datatables;

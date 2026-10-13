@@ -18,17 +18,24 @@
  */
 package org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction;
 
+import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.DependentExternalEvent;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
 
 /**
  * Carries data snapshots rather than the transaction entity: external events are serialized in {@code beforeCommit}, by
  * which time reprocessing has already mutated the allocation in place.
+ * <p>
+ * One event type covers the adjustment of every kind of transaction, so it also follows the switch of the adjusted
+ * transaction type's own event (see {@link DependentExternalEvent}).
  */
 public class WorkingCapitalLoanAdjustTransactionBusinessEvent
-        extends AbstractBusinessEvent<WorkingCapitalLoanAdjustTransactionBusinessEvent.Data> {
+        extends AbstractBusinessEvent<WorkingCapitalLoanAdjustTransactionBusinessEvent.Data> implements DependentExternalEvent {
 
     public static final String TYPE = "WorkingCapitalLoanAdjustTransactionBusinessEvent";
     private static final String CATEGORY = "WorkingCapitalLoan";
@@ -53,6 +60,15 @@ public class WorkingCapitalLoanAdjustTransactionBusinessEvent
     @Override
     public Long getAggregateRootId() {
         return aggregateRootId;
+    }
+
+    @Override
+    public Optional<String> getGoverningExternalEventType() {
+        final LoanTransactionEnumData type = get().getTransactionToAdjust().getType();
+        if (type == null || type.getId() == null) {
+            return Optional.empty();
+        }
+        return WorkingCapitalLoanTransactionTypeExternalEvents.externalEventTypeFor(LoanTransactionType.fromInt(type.getId().intValue()));
     }
 
     @RequiredArgsConstructor

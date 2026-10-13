@@ -51,6 +51,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
@@ -62,6 +63,7 @@ import org.springframework.stereotype.Service;
 public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements WorkingCapitalLoanDelinquencyRangeScheduleService {
 
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository loanDelinquencyRangeScheduleRepository;
+    private final WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository delinquencyRangeScheduleTagHistoryRepository;
     private final WorkingCapitalLoanDelinquencyActionRepository loanDelinquencyActionRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleMapper capitalLoanDelinquencyRangeScheduleMapper;
     private final DelinquencyMinimumPaymentPeriodAndRuleRepository minimumPaymentPeriodAndRuleRepository;
@@ -71,7 +73,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
     @Override
     public boolean generateInitialPeriod(WorkingCapitalLoan loan) {
         final DelinquencyMinimumPaymentPeriodAndRule rule = getMinimumPaymentRule(loan);
-        if (rule == null) {
+        if (rule == null || isDelinquencyDisabled(loan)) {
             return false;
         }
 
@@ -99,6 +101,15 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
     }
 
     @Override
+    public void deleteScheduleAndActions(final Long loanId) {
+        // Tag history references the periods, so it has to go first.
+        delinquencyRangeScheduleTagHistoryRepository.deleteByLoanId(loanId);
+        loanDelinquencyRangeScheduleRepository.deleteByLoanId(loanId);
+        loanDelinquencyActionRepository.deleteByWorkingCapitalLoanId(loanId);
+        log.debug("Deleted delinquency range schedule and actions for WC loan {}", loanId);
+    }
+
+    @Override
     public List<WorkingCapitalLoanDelinquencyRangeSchedule> generateNextPeriodIfNeeded(WorkingCapitalLoan loan, LocalDate businessDate) {
         List<WorkingCapitalLoanDelinquencyRangeSchedule> result = new ArrayList<>();
         final DelinquencyMinimumPaymentPeriodAndRule rule = getMinimumPaymentRule(loan);
@@ -108,7 +119,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
 
         final Optional<WorkingCapitalLoanDelinquencyRangeSchedule> latestPeriodOpt = loanDelinquencyRangeScheduleRepository
                 .findTopByLoanIdOrderByPeriodNumberDesc(loan.getId());
-        if (latestPeriodOpt.isEmpty() || latestPeriodOpt.get().getToDate().isAfter(businessDate)) {
+        if (latestPeriodOpt.isEmpty() || latestPeriodOpt.get().getToDate().isAfter(businessDate) || isDelinquencyDisabled(loan)) {
             return result;
         }
 
@@ -133,6 +144,10 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
 
     @Override
     public void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal amount) {
+        if (isDelinquencyDisabled(loan)) {
+            log.debug("Skipping delinquency range schedule repayment for WC loan {} - delinquency is disabled", loan.getId());
+            return;
+        }
         allocateRepayment(loan, transactionDate, amount);
         applyRemainingBalanceCap(loan);
         delinquencyClassificationService.instantClassifyDelinquency(loan, DateUtils.getBusinessLocalDate());
@@ -140,6 +155,10 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
 
     @Override
     public void reprocessDelinquencySchedule(final WorkingCapitalLoan loan) {
+        if (isDelinquencyDisabled(loan)) {
+            log.debug("Skipping delinquency range schedule reprocessing for WC loan {} - delinquency is disabled", loan.getId());
+            return;
+        }
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         generateNextPeriodIfNeeded(loan, businessDate);
         List<WorkingCapitalLoanDelinquencyRangeSchedule> delinquencyRangePeriods = resetAllPeriodsForReprocessing(loan.getId());
@@ -164,7 +183,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         // One cap pass suffices here: the cascade pays oldest-first, so only the trailing period(s) can
         // still exceed the balance once the whole replay is done.
         applyRemainingBalanceCap(loan);
-        evaluateExpiredPeriods(loan, businessDate);
+        evaluateUnevaluatedExpiredPeriods(loan, businessDate);
         delinquencyClassificationService.classifyDelinquency(loan, businessDate);
     }
 
@@ -188,10 +207,6 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
 
     private void allocateRepayment(final WorkingCapitalLoan loan, final LocalDate transactionDate, final BigDecimal amount) {
         final Long loanId = loan.getId();
-        // While delinquency evaluation is disabled the payment bookkeeping (paid/outstanding/criteria met) still
-        // happens, but the delinquency data (delinquentAmount/delinquentDays) is frozen; it is recomputed when the
-        // disable is reversed.
-        final boolean delinquencyDisabled = delinquencyClassificationService.isDelinquencyDisabled(loan, transactionDate);
         List<WorkingCapitalLoanDelinquencyRangeSchedule> pastOpenPeriods = loanDelinquencyRangeScheduleRepository
                 .findPastOpenPeriodsForRepayment(loanId, transactionDate);
         Optional<WorkingCapitalLoanDelinquencyRangeSchedule> currentPeriod = loanDelinquencyRangeScheduleRepository
@@ -204,10 +219,8 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
             period.setOutstandingAmount(MathUtil.nullToZero(period.getOutstandingAmount()).subtract(payAmount));
             if (period.getOutstandingAmount().compareTo(BigDecimal.ZERO) <= 0) {
                 period.setMinPaymentCriteriaMet(true);
-                if (!delinquencyDisabled) {
-                    period.setDelinquentAmount(BigDecimal.ZERO);
-                    period.setDelinquentDays(0L);
-                }
+                period.setDelinquentAmount(BigDecimal.ZERO);
+                period.setDelinquentDays(0L);
             }
             loanDelinquencyRangeScheduleRepository.saveAndFlush(period);
             log.debug("Applied repayment of {} to delinquency range schedule period {} for WC loan {}", payAmount, period.getPeriodNumber(),
@@ -223,10 +236,8 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
             period.setOutstandingAmount(MathUtil.nullToZero(period.getExpectedAmount()).subtract(newPaidAmount).max(BigDecimal.ZERO));
             if (newPaidAmount.compareTo(MathUtil.nullToZero(period.getExpectedAmount())) >= 0) {
                 period.setMinPaymentCriteriaMet(true);
-                if (!delinquencyDisabled) {
-                    period.setDelinquentAmount(BigDecimal.ZERO);
-                    period.setDelinquentDays(0L);
-                }
+                period.setDelinquentAmount(BigDecimal.ZERO);
+                period.setDelinquentDays(0L);
             }
             loanDelinquencyRangeScheduleRepository.saveAndFlush(period);
             log.debug("Applied repayment of {} to delinquency range schedule period {} for WC loan {}", amount, period.getPeriodNumber(),
@@ -238,24 +249,20 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         // future) and lift tags with a wrong date.
     }
 
-    private BigDecimal unpayPeriod(WorkingCapitalLoanDelinquencyRangeSchedule period, BigDecimal transactionAmount, boolean isCurrentPeriod,
-            boolean delinquencyDisabled) {
+    private BigDecimal unpayPeriod(WorkingCapitalLoanDelinquencyRangeSchedule period, BigDecimal transactionAmount,
+            boolean isCurrentPeriod) {
         BigDecimal unpayAmount = period.getPaidAmount().min(transactionAmount);
         period.setPaidAmount(period.getPaidAmount().subtract(unpayAmount));
         period.setOutstandingAmount(period.getExpectedAmount().subtract(period.getPaidAmount()).max(BigDecimal.ZERO));
         if (period.getOutstandingAmount().compareTo(BigDecimal.ZERO) > 0) {
             if (!isCurrentPeriod) {
                 period.setMinPaymentCriteriaMet(false);
-                if (!delinquencyDisabled) {
-                    period.setDelinquentAmount(period.getOutstandingAmount());
-                    period.setDelinquentDays(DateUtils.getDifferenceInDays(period.getToDate(), DateUtils.getBusinessLocalDate()));
-                }
+                period.setDelinquentAmount(period.getOutstandingAmount());
+                period.setDelinquentDays(DateUtils.getDifferenceInDays(period.getToDate(), DateUtils.getBusinessLocalDate()));
             } else {
                 period.setMinPaymentCriteriaMet(null);
-                if (!delinquencyDisabled) {
-                    period.setDelinquentAmount(null);
-                    period.setDelinquentDays(null);
-                }
+                period.setDelinquentAmount(null);
+                period.setDelinquentDays(null);
             }
         }
         return unpayAmount;
@@ -263,15 +270,17 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
 
     @Override
     public void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate businessDate, BigDecimal amount) {
+        if (isDelinquencyDisabled(loan)) {
+            log.debug("Skipping delinquency range schedule repayment undo for WC loan {} - delinquency is disabled", loan.getId());
+            return;
+        }
         final Long loanId = loan.getId();
-        // See applyRepayment: delinquency data is frozen while a delinquency disable is in effect.
-        final boolean delinquencyDisabled = delinquencyClassificationService.isDelinquencyDisabled(loan, businessDate);
         Optional<WorkingCapitalLoanDelinquencyRangeSchedule> currentPeriod = loanDelinquencyRangeScheduleRepository
                 .findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loanId, businessDate, businessDate);
         BigDecimal transactionAmount = amount;
         if (currentPeriod.isPresent()) {
             WorkingCapitalLoanDelinquencyRangeSchedule period = currentPeriod.get();
-            BigDecimal unpayAmount = unpayPeriod(period, transactionAmount, true, delinquencyDisabled);
+            BigDecimal unpayAmount = unpayPeriod(period, transactionAmount, true);
             transactionAmount = transactionAmount.subtract(unpayAmount);
         }
 
@@ -281,7 +290,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
             List<WorkingCapitalLoanDelinquencyRangeSchedule> pastPeriods = loanDelinquencyRangeScheduleRepository
                     .findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(loanId, businessDate);
             for (WorkingCapitalLoanDelinquencyRangeSchedule period : pastPeriods.reversed()) {
-                BigDecimal unpayAmount = unpayPeriod(period, transactionAmount, false, delinquencyDisabled);
+                BigDecimal unpayAmount = unpayPeriod(period, transactionAmount, false);
                 transactionAmount = transactionAmount.subtract(unpayAmount);
                 if (transactionAmount.compareTo(BigDecimal.ZERO) <= 0) {
                     break;
@@ -293,6 +302,13 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
 
     @Override
     public boolean evaluateExpiredPeriods(WorkingCapitalLoan loan, LocalDate businessDate) {
+        if (isDelinquencyDisabled(loan)) {
+            return false;
+        }
+        return evaluateUnevaluatedExpiredPeriods(loan, businessDate);
+    }
+
+    private boolean evaluateUnevaluatedExpiredPeriods(final WorkingCapitalLoan loan, final LocalDate businessDate) {
         List<WorkingCapitalLoanDelinquencyRangeSchedule> unevaluatedPeriods = loanDelinquencyRangeScheduleRepository
                 .findByLoanIdAndToDateLessThanEqualAndMinPaymentCriteriaMetIsNull(loan.getId(), businessDate);
         boolean evaluated = false;
@@ -347,11 +363,32 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
                 params.minimumPayment(), params.minimumPaymentType(), params.frequency(), params.frequencyType());
     }
 
+    @Override
+    public void recalculateBaseExpectedAmount(final WorkingCapitalLoan loan) {
+        final DelinquencyMinimumPaymentPeriodAndRule rule = getMinimumPaymentRule(loan);
+        if (rule == null || isDelinquencyDisabled(loan)) {
+            return;
+        }
+        final BigDecimal expectedAmount = calculateExpectedAmount(loan, resolveEffectiveRescheduleParams(loan.getId(), rule));
+        final List<WorkingCapitalLoanDelinquencyRangeSchedule> periods = loanDelinquencyRangeScheduleRepository
+                .findNotEndedPeriods(loan.getId(), DateUtils.getBusinessLocalDate());
+        periods.forEach(period -> period.setBaseExpectedAmount(expectedAmount));
+        loanDelinquencyRangeScheduleRepository.saveAll(periods);
+    }
+
     private LocalDate resolveRescheduledToDate(final WorkingCapitalLoan loan,
             final WorkingCapitalLoanDelinquencyRangeSchedule currentPeriod, final Integer frequency,
             final DelinquencyFrequencyType frequencyType) {
         return WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils.calculateRescheduledToDate(currentPeriod.getFromDate(),
                 currentPeriod.getPeriodNumber(), frequency, frequencyType, getDelinquencyGraceDays(loan), findAllActions(loan.getId()));
+    }
+
+    /**
+     * While a Delinquency Disable is active the range schedule is neither evaluated nor updated; the enable
+     * recalculates every period as if the loan had never been disabled.
+     */
+    private boolean isDelinquencyDisabled(final WorkingCapitalLoan loan) {
+        return delinquencyClassificationService.isDelinquencyDisabled(loan);
     }
 
     private Integer getDelinquencyGraceDays(final WorkingCapitalLoan loan) {

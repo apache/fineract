@@ -23,6 +23,9 @@ import java.util.Optional;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.NearBreachActionType;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanNearBreachAction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -32,4 +35,8 @@ public interface WorkingCapitalLoanNearBreachActionRepository extends JpaReposit
 
     Optional<WorkingCapitalLoanNearBreachAction> findTopByWorkingCapitalLoanIdAndActionOrderByIdDesc(Long loanId,
             NearBreachActionType action);
+
+    @Modifying(flushAutomatically = true)
+    @Query("delete from WorkingCapitalLoanNearBreachAction action where action.workingCapitalLoan.id = :loanId")
+    void deleteByWorkingCapitalLoanId(@Param("loanId") Long loanId);
 }

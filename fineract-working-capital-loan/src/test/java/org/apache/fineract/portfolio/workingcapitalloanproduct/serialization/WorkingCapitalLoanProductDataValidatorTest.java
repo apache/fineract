@@ -28,6 +28,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAdvancedPaymentAllocationsJsonParser;
@@ -420,6 +422,29 @@ class WorkingCapitalLoanProductDataValidatorTest {
                 WCLP + "minPaymentAmount.not.allowed.for.annual.eir.strategy");
         assertCodes(annualEirJsonWith(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName, BigDecimal.valueOf(60)),
                 WCLP + "maxPaymentAmount.not.allowed.for.annual.eir.strategy");
+    }
+
+    /** An annual EIR above the calculable cap can never produce a schedule, so the product refuses it as entered. */
+    @Test
+    void annualEirStrategy_WithValuesAboveTheEirCap_ShouldReportGreaterThanMax() {
+        final BigDecimal aboveCap = ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR.add(BigDecimal.ONE);
+        assertCodes(annualEirJsonWith(WorkingCapitalLoanProductConstants.annualEirParamName, aboveCap),
+                WCLP + "annualEir.is.greater.than.max");
+        // The fixture's annualEir now sits below that min as well, which is reported on its own
+        assertCodes(annualEirJsonWith(WorkingCapitalLoanProductConstants.minAnnualEirParamName, aboveCap),
+                WCLP + "annualEir.must.be.greater.than.or.equal.to.min", WCLP + "minAnnualEir.is.greater.than.max");
+        assertCodes(annualEirJsonWith(WorkingCapitalLoanProductConstants.maxAnnualEirParamName, aboveCap),
+                WCLP + "maxAnnualEir.is.greater.than.max");
+    }
+
+    /**
+     * The cap rounded down to cents. The shared {@code notGreaterThanMax} compares through a {@code double}, which at
+     * this magnitude only resolves steps of about 0.002, so a value within that of the cap reads as 10^13 and fails.
+     */
+    @Test
+    void annualEirStrategy_WithAnnualEirAtTheEirCap_ShouldNotThrow() {
+        assertDoesNotThrow(() -> validator.validateForCreate(annualEirJsonWith(WorkingCapitalLoanProductConstants.annualEirParamName,
+                ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR.setScale(2, RoundingMode.DOWN))));
     }
 
     @Test

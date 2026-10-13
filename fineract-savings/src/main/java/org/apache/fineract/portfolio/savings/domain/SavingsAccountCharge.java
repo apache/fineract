@@ -19,13 +19,13 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeCalculationTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dateFormatParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeIntervalParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localeParamName;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -37,11 +37,16 @@ import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.temporal.ChronoField;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -51,8 +56,6 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeWithoutMandatoryFieldException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author dv6
@@ -61,8 +64,6 @@ import org.slf4j.LoggerFactory;
 @Entity
 @Table(name = "m_savings_account_charge")
 public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountCharge.class);
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id", referencedColumnName = "id", nullable = false)
@@ -263,12 +264,15 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountWrittenOff = null;
             break;
             case FLAT:
-                Money money = Money.of(this.savingsAccount().getCurrency(), chargeAmount);
+                // A charge built by createNewWithoutSavingsAccount has no account (and so no currency) yet; its amount
+                // is rounded when it is attached to the account, see update(SavingsAccount).
+                final BigDecimal flatAmount = this.savingsAccount == null ? chargeAmount
+                        : Money.of(this.savingsAccount.getCurrency(), chargeAmount).getAmount();
                 this.percentage = null;
-                this.amount = money.getAmount();
+                this.amount = flatAmount;
                 this.amountPercentageAppliedTo = null;
                 this.amountPaid = null;
-                this.amountOutstanding = money.getAmount();
+                this.amountOutstanding = flatAmount;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
             break;
@@ -390,7 +394,18 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
     }
 
     public void update(final SavingsAccount savingsAccount) {
+        final boolean firstAttachment = this.savingsAccount == null && savingsAccount != null;
         this.savingsAccount = savingsAccount;
+        if (firstAttachment && ChargeCalculationType.fromInt(this.chargeCalculation).isFlat()) {
+            // Apply the currency rounding that populateDerivedFields could not apply before the account was known
+            final MonetaryCurrency currency = savingsAccount.getCurrency();
+            if (this.amount != null) {
+                this.amount = Money.of(currency, this.amount).getAmount();
+            }
+            if (this.amountOutstanding != null) {
+                this.amountOutstanding = Money.of(currency, this.amountOutstanding).getAmount();
+            }
+        }
     }
 
     public void update(final BigDecimal amount, final LocalDate dueDate, final MonthDay feeOnMonthDay, final Integer feeInterval) {
@@ -412,38 +427,19 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
         }
 
         if (amount != null) {
-            switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
-                case INVALID:
-                break;
-                case FLAT:
-                    this.amount = amount;
-                break;
-                case PERCENT_OF_AMOUNT:
-                    this.percentage = amount;
-                    this.amountPercentageAppliedTo = transactionAmount;
-                    this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
-                    this.amountOutstanding = calculateOutstanding();
-                break;
-                case PERCENT_OF_AMOUNT_AND_INTEREST:
-                    this.percentage = amount;
-                    this.amount = null;
-                    this.amountPercentageAppliedTo = null;
-                    this.amountOutstanding = null;
-                break;
-                case PERCENT_OF_INTEREST:
-                    this.percentage = amount;
-                    this.amount = null;
-                    this.amountPercentageAppliedTo = null;
-                    this.amountOutstanding = null;
-                break;
-                case PERCENT_OF_DISBURSEMENT_AMOUNT:
-                    LOG.error("TODO Implement update ChargeCalculationType for PERCENT_OF_DISBURSEMENT_AMOUNT");
-                break;
+            final ChargeCalculationType calculationType = ChargeCalculationType.fromInt(this.chargeCalculation);
+            assertSupportedSavingsChargeCalculationType(calculationType);
+            if (calculationType.isFlat()) {
+                this.amount = amount;
+            } else {
+                this.percentage = amount;
+                this.amountPercentageAppliedTo = transactionAmount;
+                this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
+                this.amountOutstanding = calculateOutstanding();
             }
         }
     }
 
-    @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF_NONVIRTUAL") // https://issues.apache.org/jira/browse/FINERACT-987
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
@@ -483,41 +479,33 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
 
         if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
+            final ChargeCalculationType calculationType = ChargeCalculationType.fromInt(this.chargeCalculation);
+            assertSupportedSavingsChargeCalculationType(calculationType);
+
             actualChanges.put(amountParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
 
-            switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
-                case INVALID:
-                break;
-                case FLAT:
-                    this.amount = newValue;
-                    this.amountOutstanding = calculateOutstanding();
-                break;
-                case PERCENT_OF_AMOUNT:
-                    this.percentage = newValue;
-                    this.amountPercentageAppliedTo = null;
-                    this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
-                    this.amountOutstanding = calculateOutstanding();
-                break;
-                case PERCENT_OF_AMOUNT_AND_INTEREST:
-                    this.percentage = newValue;
-                    this.amount = null;
-                    this.amountPercentageAppliedTo = null;
-                    this.amountOutstanding = null;
-                break;
-                case PERCENT_OF_INTEREST:
-                    this.percentage = newValue;
-                    this.amount = null;
-                    this.amountPercentageAppliedTo = null;
-                    this.amountOutstanding = null;
-                break;
-                case PERCENT_OF_DISBURSEMENT_AMOUNT:
-                    LOG.error("TODO Implement update ChargeCalculationType for PERCENT_OF_DISBURSEMENT_AMOUNT");
-                break;
+            if (calculationType.isFlat()) {
+                this.amount = newValue;
+            } else {
+                this.percentage = newValue;
+                this.amountPercentageAppliedTo = BigDecimal.ZERO;
+                this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
             }
+            this.amountOutstanding = calculateOutstanding();
         }
 
         return actualChanges;
+    }
+
+    private void assertSupportedSavingsChargeCalculationType(final ChargeCalculationType calculationType) {
+        if (!calculationType.isAllowedSavingsChargeCalculationType()) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            new DataValidatorBuilder(dataValidationErrors).resource("charges").parameter(chargeCalculationTypeParamName)
+                    .value(this.chargeCalculation)
+                    .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private boolean isGreaterThanZero(final BigDecimal value) {

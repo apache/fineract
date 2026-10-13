@@ -84,8 +84,8 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
             log.debug("Skipping... Delinquency bucket is not configured for Working Capital Loan {}.", loan.getId());
             return;
         }
-        if (isDelinquencyDisabled(loan, businessDate)) {
-            log.debug("Skipping... Delinquency evaluation is disabled for Working Capital Loan {} as of {}.", loan.getId(), businessDate);
+        if (isDelinquencyDisabled(loan)) {
+            log.debug("Skipping... Delinquency evaluation is disabled for Working Capital Loan {}.", loan.getId());
             return;
         }
         log.debug("Evaluate {} Working Capital Delinquency bucket", loan.getLoanProductRelatedDetails().getDelinquencyBucket());
@@ -122,12 +122,12 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
     }
 
     /**
-     * Returns true when an active Delinquency Disable action (one that has not yet been reversed) is in effect on the
-     * given date for the loan. While disabled, delinquency evaluation is skipped from the disable date onward.
+     * Returns true while the loan has an active Delinquency Disable action (one that has not yet been reversed by an
+     * enable). While disabled, delinquency is neither evaluated nor updated; the enable recalculates everything.
      */
     @Override
-    public boolean isDelinquencyDisabled(final WorkingCapitalLoan loan, final LocalDate date) {
-        return delinquencyActionRepository.isDelinquencyDisabledAsOf(loan.getId(), date);
+    public boolean isDelinquencyDisabled(final WorkingCapitalLoan loan) {
+        return delinquencyActionRepository.isDelinquencyDisabled(loan.getId());
     }
 
     /**

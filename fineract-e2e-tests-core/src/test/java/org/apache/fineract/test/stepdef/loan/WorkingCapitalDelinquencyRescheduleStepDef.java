@@ -219,18 +219,6 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
         executeRescheduleAction(request);
     }
 
-    @Then("Admin fails to create WC delinquency reschedule action with minimumPayment {int} {word} and frequency {int} {word}")
-    public void failToCreateRescheduleAction(final int minimumPayment, final String minimumPaymentType, final int frequency,
-            final String frequencyType) {
-        final Long loanId = getLoanId();
-        final PostWorkingCapitalLoansDelinquencyActionRequest request = buildRescheduleRequest(new BigDecimal(minimumPayment),
-                minimumPaymentType, frequency, frequencyType);
-        log.info("Attempting to create RESCHEDULE action for WC loan {} (expecting failure): minimumPayment={} {}, frequency={} {}", loanId,
-                minimumPayment, minimumPaymentType, frequency, frequencyType);
-
-        fail(() -> fineractFeignClient.workingCapitalLoanDelinquencyActions().createDelinquencyAction(loanId, request));
-    }
-
     @Then("Admin fails to create WC delinquency reschedule action with minimumPayment {int} {word} and frequency {int} {word} with error containing {string}")
     public void failToCreateRescheduleActionWithMessage(final int minimumPayment, final String minimumPaymentType, final int frequency,
             final String frequencyType, final String expectedMessage) {

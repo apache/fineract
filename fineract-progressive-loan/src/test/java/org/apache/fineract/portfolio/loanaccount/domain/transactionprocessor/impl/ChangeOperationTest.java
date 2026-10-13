@@ -141,6 +141,25 @@ public class ChangeOperationTest {
         }
     }
 
+    /**
+     * Charges submitted on the same day but due on different dates must replay in due-date order, whatever order they
+     * were created in.
+     */
+    @Test
+    public void testChargesSubmittedOnTheSameDayAreOrderedByDueDateNotByCreation() {
+        ChangeOperation dueLaterCreatedFirst = createCharge("2027-02-14", "2026-09-15", "2026-09-15T07:32:55.566137+00:00");
+        ChangeOperation dueSoonerCreatedLater = createCharge("2026-10-14", "2026-09-15", "2026-09-15T07:32:55.566655+00:00");
+        ChangeOperation paymentBeforeBoth = createTransaction("2026-03-14", "2026-03-14", "2026-09-15T07:32:56.103699+00:00");
+        Collection<List<ChangeOperation>> permutations = Collections2
+                .permutations(List.of(dueLaterCreatedFirst, dueSoonerCreatedLater, paymentBeforeBoth));
+        List<ChangeOperation> expected = List.of(paymentBeforeBoth, dueSoonerCreatedLater, dueLaterCreatedFirst);
+        for (List<ChangeOperation> permutation : permutations) {
+            Assertions.assertEquals(expected, permutation.stream().sorted().toList());
+        }
+        Assertions.assertEquals(-1, dueSoonerCreatedLater.compareTo(dueLaterCreatedFirst));
+        Assertions.assertEquals(1, dueLaterCreatedFirst.compareTo(dueSoonerCreatedLater));
+    }
+
     private ChangeOperation createInterestRateChange(String submittedDate) {
         LoanTermVariationsData interestRateChange = Mockito.mock(LoanTermVariationsData.class);
         Mockito.when(interestRateChange.getTermVariationApplicableFrom()).thenReturn(LocalDate.parse(submittedDate));

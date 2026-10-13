@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestSc
 import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.EMI_RECALCULATION;
 import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.INTEREST_PAUSE_FOR_EMI_CALCULATION;
 import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.INTEREST_RECALCULATION_ENABLED;
+import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.PRINCIPAL_GRACE_LIFTED;
 
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -131,14 +132,33 @@ public class ProgressiveLoanInterestScheduleModel {
         final ProgressiveLoanInterestScheduleModel copy = new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates,
                 loanProductRelatedDetail, installmentAmountInMultiplesOf, mc, false);
         copy.overdueCorrections = new ArrayList<>(this.overdueCorrections);
+        copy.copyPrincipalGraceLiftFrom(this);
         return copy;
     }
 
     public ProgressiveLoanInterestScheduleModel copyWithoutPaidAmounts() {
         final List<RepaymentPeriod> repaymentPeriodCopies = copyRepaymentPeriods(repaymentPeriods,
                 (previousPeriod, repaymentPeriod) -> RepaymentPeriod.copyWithoutPaidAmounts(previousPeriod, repaymentPeriod, mc));
-        return new ProgressiveLoanInterestScheduleModel(repaymentPeriodCopies, interestRates, loanProductRelatedDetail,
-                installmentAmountInMultiplesOf, mc, true);
+        final ProgressiveLoanInterestScheduleModel copy = new ProgressiveLoanInterestScheduleModel(repaymentPeriodCopies, interestRates,
+                loanProductRelatedDetail, installmentAmountInMultiplesOf, mc, true);
+        copy.copyPrincipalGraceLiftFrom(this);
+        return copy;
+    }
+
+    /**
+     * Re-amortization and re-aging replace principal grace. Later recalculations must not rebuild it from the product
+     * grace setting.
+     */
+    public void liftPrincipalGrace() {
+        modifiers.put(PRINCIPAL_GRACE_LIFTED, true);
+    }
+
+    public boolean isPrincipalGraceLifted() {
+        return Boolean.TRUE.equals(modifiers.get(PRINCIPAL_GRACE_LIFTED));
+    }
+
+    private void copyPrincipalGraceLiftFrom(final ProgressiveLoanInterestScheduleModel source) {
+        modifiers.put(PRINCIPAL_GRACE_LIFTED, source.isPrincipalGraceLifted());
     }
 
     private List<RepaymentPeriod> copyRepaymentPeriods(final List<RepaymentPeriod> repaymentPeriods,

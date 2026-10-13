@@ -121,6 +121,21 @@ public class ClientTest extends FeignIntegrationTest {
     }
 
     @Test
+    public void testRetrieveEntityClientReturnsNonPersonDetails() {
+        // given
+        final Long constitutionId = codeHelper.retrieveOrCreateCodeValueId(ClientTestData.CONSTITUTION_CODE);
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.activeEntityClient(constitutionId)).getClientId();
+
+        // when
+        final GetClientsClientIdResponse client = clientHelper.getClient(clientId);
+
+        // then: the non-person details saved on create are returned (FINERACT-2907)
+        assertNotNull(client.getClientNonPersonDetails());
+        assertNotNull(client.getClientNonPersonDetails().getConstitution());
+        assertEquals(constitutionId, client.getClientNonPersonDetails().getConstitution().getId());
+    }
+
+    @Test
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public void testPendingOnlyClientRequest() {

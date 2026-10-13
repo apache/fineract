@@ -50,8 +50,7 @@ public class MeetingAttendanceWriteServiceImpl implements MeetingAttendanceWrite
 
     @Override
     public MeetingAttendanceUpdateResponse updateMeetingAttendance(final MeetingAttendanceUpdateRequest request) {
-        var meeting = meetingRepository.findById(request.getEntityId())
-                .orElseThrow(() -> new MeetingNotFoundException(request.getEntityId()));
+        var meeting = meetingRepository.findById(request.getId()).orElseThrow(() -> new MeetingNotFoundException(request.getId()));
         var clientsAttendance = writeService.getClientsAttendance(meeting, request.getMeetingAttendance());
         var changes = updateAttendance(meeting, clientsAttendance);
 
@@ -100,7 +99,7 @@ public class MeetingAttendanceWriteServiceImpl implements MeetingAttendanceWrite
         actualChanges.put(clientsAttendanceParamName, clientAttendanceChanges);
 
         if (!result.isEmpty()) {
-            clientsAttendance.addAll(result);
+            meeting.getClientsAttendance().addAll(result);
         }
 
         return actualChanges;

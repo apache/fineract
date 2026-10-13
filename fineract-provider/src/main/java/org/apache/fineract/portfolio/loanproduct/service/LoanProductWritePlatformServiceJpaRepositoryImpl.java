@@ -38,6 +38,9 @@ import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.product.LoanProductCreateBusinessEvent;
@@ -102,6 +105,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private final CreditAllocationsJsonParser creditAllocationsJsonParser;
     private final LoanProductAssembler loanProductAssembler;
     private final LoanProductUpdateUtil loanProductUpdateUtil;
+    private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final LoanProductPaymentAllocationRuleMerger loanProductPaymentAllocationRuleMerger = new LoanProductPaymentAllocationRuleMerger();
     private final LoanProductCreditAllocationRuleMerger loanProductCreditAllocationRuleMerger = new LoanProductCreditAllocationRuleMerger();
 
@@ -153,6 +157,14 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             // i.e. this savings product is specific for this office.
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
                     FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, loanProduct.getId());
+
+            if (command.parameterExists(LoanProductDataValidator.DATATABLES)) {
+                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getValue(),
+                        EntityTables.LOAN_PRODUCT.getName(), loanProduct.getId(), null,
+                        command.arrayOfParameterNamed(LoanProductDataValidator.DATATABLES));
+            }
+            this.entityDatatableChecksWritePlatformService.runTheCheck(loanProduct.getId(), EntityTables.LOAN_PRODUCT.getName(),
+                    StatusEnum.CREATE.getValue(), EntityTables.LOAN_PRODUCT.getForeignKeyColumnNameOnDatatable(), null);
 
             businessEventNotifierService.notifyPostBusinessEvent(new LoanProductCreateBusinessEvent(loanProduct));
 

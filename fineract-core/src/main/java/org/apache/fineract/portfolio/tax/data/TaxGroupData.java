@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.tax.data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,21 +36,28 @@ public final class TaxGroupData implements Serializable {
     @SuppressWarnings("unused")
     private final Collection<TaxComponentData> taxComponents;
 
+    // System business date, exposed so clients can validate a new tax component's start date client-side
+    private final LocalDate businessDate;
+
     public static TaxGroupData lookup(final Long id, final String name) {
         final Collection<TaxComponentData> taxComponents = null;
         final Collection<TaxGroupMappingsData> taxAssociations = null;
-        return new TaxGroupData(id, name, taxAssociations, taxComponents);
+        return new TaxGroupData(id, name, taxAssociations, taxComponents, null);
     }
 
     public static TaxGroupData template(final Collection<TaxComponentData> taxComponents) {
         final Long id = null;
         final String name = null;
         final Collection<TaxGroupMappingsData> taxAssociations = null;
-        return new TaxGroupData(id, name, taxAssociations, taxComponents);
+        return new TaxGroupData(id, name, taxAssociations, taxComponents, null);
     }
 
     public static TaxGroupData template(final TaxGroupData taxGroupData, final Collection<TaxComponentData> taxComponents) {
-        return new TaxGroupData(taxGroupData.id, taxGroupData.name, taxGroupData.taxAssociations, taxComponents);
+        return new TaxGroupData(taxGroupData.id, taxGroupData.name, taxGroupData.taxAssociations, taxComponents, taxGroupData.businessDate);
+    }
+
+    public static TaxGroupData withBusinessDate(final TaxGroupData taxGroupData, final LocalDate businessDate) {
+        return new TaxGroupData(taxGroupData.id, taxGroupData.name, taxGroupData.taxAssociations, taxGroupData.taxComponents, businessDate);
     }
 
 }

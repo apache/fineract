@@ -374,43 +374,6 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                 .isTrue();
     }
 
-    @Then("Loan Transactions tab has a {string} transaction with date {string} has no the Journal entries")
-    public void journalEntryNoDataCheck(String transactionType, String transactionDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        long loanId = loanResponse.getLoanId();
-
-        Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put("staffInSelectedOfficeOnly", false);
-        queryParams.put("associations", "transactions");
-        GetLoansLoanIdResponse loanDetailsResponse = loansApi().retrieveOneLoan(loanId, queryParams);
-        TransactionType transactionType1 = TransactionType.valueOf(transactionType);
-        String transactionTypeExpected = transactionType1.getValue();
-
-        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
-        List<GetLoansLoanIdTransactions> transactionsMatch = transactions.stream()
-                .filter(t -> transactionDate.equals(formatter.format(t.getDate()))
-                        && transactionTypeExpected.equals(t.getType().getCode().substring(20)))
-                .collect(Collectors.toList());
-
-        List<List<JournalEntryTransactionItem>> journalLinesActualList = transactionsMatch.stream().map(t -> {
-            String transactionId = "L" + t.getId();
-            GetJournalEntriesTransactionIdResponse journalEntryDataResponse = null;
-            try {
-                Map<String, Object> journalQueryParams = new HashMap<>();
-                journalQueryParams.put("transactionId", transactionId);
-                journalQueryParams.put("runningBalance", true);
-                journalEntryDataResponse = journalEntriesApi().retrieveAllJournalEntries(journalQueryParams);
-            } catch (Exception e) {
-                log.error("Exception", e);
-            }
-
-            return journalEntryDataResponse.getPageItems();
-        }).collect(Collectors.toList());
-
-        assertThat(journalLinesActualList.stream().findFirst().get().size()).isZero();
-    }
-
     public PostJournalEntriesResponse addManualJournalEntryWithoutExternalAssetOwner(String amount, String date) {
         LocalDate transactionDate = LocalDate.parse(date, FORMATTER_EN);
         JournalEntryCommand journalEntriesRequest = loanRequestFactory.defaultManualJournalEntryRequest(new BigDecimal(amount))
@@ -440,13 +403,6 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         String ownerExternalIdStored = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID);
         PostJournalEntriesResponse journalEntriesResponse = addManualJournalEntryWithExternalAssetOwner(amount, date,
                 ownerExternalIdStored);
-
-        testContext().set(TestContextKey.MANUAL_JOURNAL_ENTRIES_RESPONSE, journalEntriesResponse);
-    }
-
-    @Then("Admin creates manual Journal entry with {string} amount and {string} date and empty External Asset Owner")
-    public void createManualJournalEntryWithEmptyExternalAssetOwner(String amount, String date) {
-        PostJournalEntriesResponse journalEntriesResponse = addManualJournalEntryWithExternalAssetOwner(amount, date, "");
 
         testContext().set(TestContextKey.MANUAL_JOURNAL_ENTRIES_RESPONSE, journalEntriesResponse);
     }

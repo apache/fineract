@@ -143,6 +143,14 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
             }
             int submittedDate = DateUtils.compareWithNullsLast(getSubmittedOnDate(), o.getSubmittedOnDate());
             if (submittedDate == 0) {
+                // Charges submitted on the same day replay in due-date order, so that an earlier payment reprocessed
+                // against them pays the charge due first rather than the one created first.
+                if (this.isCharge() && o.isCharge()) {
+                    int dueDate = DateUtils.compareWithNullsLast(this.loanCharge.get().getDueDate(), o.loanCharge.get().getDueDate());
+                    if (dueDate != 0) {
+                        return dueDate;
+                    }
+                }
                 return DateUtils.compareWithNullsLast(getCreatedDateTime(), o.getCreatedDateTime());
             }
             return submittedDate;

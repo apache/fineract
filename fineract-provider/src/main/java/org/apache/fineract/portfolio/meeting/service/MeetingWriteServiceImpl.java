@@ -203,24 +203,26 @@ public class MeetingWriteServiceImpl implements MeetingWriteService {
     HashSet<MeetingAttendance> getClientsAttendance(Meeting meeting, List<MeetingAttendanceData> attendances) {
         var meetingAttendances = new HashSet<MeetingAttendance>();
 
+        if (attendances == null) {
+            return meetingAttendances;
+        }
+
         for (var attendance : attendances) {
             var client = clientRepository.findById(attendance.getClientId())
                     .orElseThrow(() -> new ClientNotFoundException(attendance.getClientId()));
 
             if (CalendarEntityType.isGroup(meeting.getCalendarInstance().getEntityTypeId())
                     && !client.isChildOfGroup(meeting.getCalendarInstance().getEntityId())) {
-                throw new ClientNotInGroupException(attendance.getId(), meeting.getCalendarInstance().getEntityId());
+                throw new ClientNotInGroupException(attendance.getClientId(), meeting.getCalendarInstance().getEntityId());
             } else if (CalendarEntityType.isCenter(meeting.getCalendarInstance().getEntityTypeId())) {
-                if (CalendarEntityType.isCenter(meeting.getCalendarInstance().getEntityTypeId())) {
-                    var size = groupRepository.findByParentId(meeting.getCalendarInstance().getEntityId()).stream()
-                            .filter(group -> group.isChildClient(attendance.getId())).count();
+                var size = groupRepository.findByParentId(meeting.getCalendarInstance().getEntityId()).stream()
+                        .filter(group -> group.isChildClient(attendance.getClientId())).count();
 
-                    if (size == 0L) {
-                        throw new ClientNotInGroupException("client.not.in.center",
-                                "Client with identifier " + attendance.getId() + " is not in center "
-                                        + meeting.getCalendarInstance().getEntityId(),
-                                attendance.getId(), meeting.getCalendarInstance().getEntityId());
-                    }
+                if (size == 0L) {
+                    throw new ClientNotInGroupException("client.not.in.center",
+                            "Client with identifier " + attendance.getClientId() + " is not in center "
+                                    + meeting.getCalendarInstance().getEntityId(),
+                            attendance.getClientId(), meeting.getCalendarInstance().getEntityId());
                 }
             }
 

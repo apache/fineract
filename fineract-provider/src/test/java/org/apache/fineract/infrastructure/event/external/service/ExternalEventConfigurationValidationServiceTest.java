@@ -97,7 +97,7 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "SavingsPostInterestBusinessEvent", "SavingsRejectBusinessEvent", "SavingsWithdrawalBusinessEvent",
                 "ShareAccountApproveBusinessEvent", "ShareAccountCreateBusinessEvent", "ShareProductDividentsCreateBusinessEvent",
                 "LoanChargeAdjustmentPostBusinessEvent", "LoanChargeAdjustmentPreBusinessEvent", "LoanDelinquencyRangeChangeBusinessEvent",
-                "LoanAccountsStayedLockedBusinessEvent", "MockBusinessEvent", "LoanChargeOffPreBusinessEvent",
+                "LoanAccountsStayedLockedBusinessEvent", "MockBusinessEvent", "MockDependentBusinessEvent", "LoanChargeOffPreBusinessEvent",
                 "LoanChargeOffPostBusinessEvent", "LoanUndoChargeOffBusinessEvent", "LoanAccrualTransactionCreatedBusinessEvent",
                 "LoanRescheduledDueAdjustScheduleBusinessEvent", "LoanOwnershipTransferBusinessEvent", "LoanAccountSnapshotBusinessEvent",
                 "LoanTransactionDownPaymentPostBusinessEvent", "LoanTransactionDownPaymentPreBusinessEvent",
@@ -192,7 +192,7 @@ public class ExternalEventConfigurationValidationServiceTest {
     public void givenMissingEventConfigurationWhenValidatedThenThrowException() throws Exception {
 
         // given
-        List<String> configurationWithMissingCentersCreateBusinessEvent = Arrays.asList("MockBusinessEvent", "MockBusinessEvent",
+        List<String> configurationWithMissingCentersCreateBusinessEvent = Arrays.asList("MockBusinessEvent", "MockDependentBusinessEvent",
                 "ClientActivateBusinessEvent", "ClientCloseBusinessEvent", "ClientCreateBusinessEvent", "ClientReactivateBusinessEvent",
                 "ClientRejectBusinessEvent", "ClientUndoRejectionBusinessEvent", "ClientUndoWithdrawalBusinessEvent",
                 "ClientWithdrawBusinessEvent", "DocumentCreatedBusinessEvent", "DocumentDeletedBusinessEvent",

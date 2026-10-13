@@ -33,6 +33,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -990,6 +991,77 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
         // then
         Assertions.assertEquals(originalTransaction, repayment2);
+    }
+
+    @Test
+    public void useOldTransactionIfApplicableKeepsOriginalWaiveChargesWhenSameDayTransactionWasReplaced() {
+        // given
+        final LoanTransaction replacedRepayment = mock(LoanTransaction.class);
+        when(replacedRepayment.getId()).thenReturn(1L);
+        final LoanTransaction replayedRepayment = mock(LoanTransaction.class);
+
+        final LoanTransaction originalWaive = mock(LoanTransaction.class);
+        when(originalWaive.getId()).thenReturn(2L);
+        when(originalWaive.getTypeOf()).thenReturn(LoanTransactionType.WAIVE_CHARGES);
+        final LoanTransaction replayedWaive = mock(LoanTransaction.class);
+
+        final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
+        changedTransactionDetail.addTransactionChange(new TransactionChangeData(replacedRepayment, replayedRepayment));
+        changedTransactionDetail.addTransactionChange(new TransactionChangeData(originalWaive, replayedWaive));
+        final TransactionCtx ctx = mock(TransactionCtx.class);
+        when(ctx.getCurrency()).thenReturn(MONETARY_CURRENCY);
+        when(ctx.getChangedTransactionDetail()).thenReturn(changedTransactionDetail);
+
+        // when
+        final LoanTransaction result = AdvancedPaymentScheduleTransactionProcessor.useOldTransactionIfApplicable(originalWaive,
+                replayedWaive, ctx);
+
+        // then
+        Assertions.assertSame(originalWaive, result);
+        Assertions.assertEquals(1, changedTransactionDetail.getTransactionChanges().size());
+        Assertions.assertSame(replayedRepayment, changedTransactionDetail.getTransactionChanges().get(0).getNewTransaction());
+        Mockito.verify(originalWaive, never()).updateLoanChargePaidMappings(any());
+    }
+
+    @Test
+    public void useOldTransactionIfApplicableReplacesRepaymentWhenSameDayTransactionWasReplaced() {
+        // given
+        final LoanTransaction replacedRepayment = mock(LoanTransaction.class);
+        when(replacedRepayment.getId()).thenReturn(1L);
+        final LoanTransaction replayedRepayment = mock(LoanTransaction.class);
+        when(replayedRepayment.getTransactionDate()).thenReturn(transactionDate);
+
+        final LoanTransaction originalRepayment = mock(LoanTransaction.class);
+        when(originalRepayment.getId()).thenReturn(2L);
+        when(originalRepayment.getTypeOf()).thenReturn(LoanTransactionType.REPAYMENT);
+        when(originalRepayment.getTransactionDate()).thenReturn(transactionDate);
+        final Money amount = Money.of(MONETARY_CURRENCY, BigDecimal.TEN);
+        when(originalRepayment.getAmount(MONETARY_CURRENCY)).thenReturn(amount);
+        final LoanTransaction replayedOriginalRepayment = mock(LoanTransaction.class);
+        when(replayedOriginalRepayment.getAmount(MONETARY_CURRENCY)).thenReturn(amount);
+        final Money zero = Money.zero(MONETARY_CURRENCY);
+        for (LoanTransaction transaction : List.of(originalRepayment, replayedOriginalRepayment)) {
+            when(transaction.getPrincipalPortion(MONETARY_CURRENCY)).thenReturn(zero);
+            when(transaction.getInterestPortion(MONETARY_CURRENCY)).thenReturn(zero);
+            when(transaction.getFeeChargesPortion(MONETARY_CURRENCY)).thenReturn(zero);
+            when(transaction.getPenaltyChargesPortion(MONETARY_CURRENCY)).thenReturn(zero);
+            when(transaction.getOverPaymentPortion(MONETARY_CURRENCY)).thenReturn(zero);
+        }
+
+        final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
+        changedTransactionDetail.addTransactionChange(new TransactionChangeData(replacedRepayment, replayedRepayment));
+        changedTransactionDetail.addTransactionChange(new TransactionChangeData(originalRepayment, replayedOriginalRepayment));
+        final TransactionCtx ctx = mock(TransactionCtx.class);
+        when(ctx.getCurrency()).thenReturn(MONETARY_CURRENCY);
+        when(ctx.getChangedTransactionDetail()).thenReturn(changedTransactionDetail);
+
+        // when
+        final LoanTransaction result = AdvancedPaymentScheduleTransactionProcessor.useOldTransactionIfApplicable(originalRepayment,
+                replayedOriginalRepayment, ctx);
+
+        // then
+        Assertions.assertNull(result);
+        Assertions.assertEquals(2, changedTransactionDetail.getTransactionChanges().size());
     }
 
     @Test

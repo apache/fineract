@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -75,6 +76,7 @@ public class TaxGroup extends AbstractAuditableCustom {
         for (TaxGroupMappings groupMappings : taxGroupMappings) {
             TaxGroupMappings mappings = findOneBy(groupMappings);
             if (mappings == null) {
+                groupMappings.setTaxGroup(this);
                 this.taxGroupMappings.add(groupMappings);
                 taxComponentList.add(groupMappings.getTaxComponent().getId());
             } else {
@@ -93,15 +95,17 @@ public class TaxGroup extends AbstractAuditableCustom {
     }
 
     public TaxGroupMappings findOneBy(final TaxGroupMappings groupMapping) {
-        if (groupMapping.getId() != null) {
-            for (TaxGroupMappings groupMappings : this.taxGroupMappings) {
-                if (groupMappings.getId().equals(groupMapping.getId())) {
-                    return groupMappings;
-                }
-            }
-            throw new TaxMappingNotFoundException(groupMapping.getId());
+        if (groupMapping.getId() == null) {
+            return null;
         }
-        return null;
+
+        for (TaxGroupMappings existing : this.taxGroupMappings) {
+            if (Objects.equals(existing.getId(), groupMapping.getId())) {
+                return existing;
+            }
+        }
+
+        throw new TaxMappingNotFoundException(groupMapping.getId());
     }
 
     public Set<TaxGroupMappings> getTaxGroupMappings() {

@@ -210,7 +210,7 @@ Each delinquency bucket used with Working Capital loans must have an entry in `m
 
 [NOTE]
 ====
-When `minimumPaymentType` is `PERCENTAGE`, the base amount is the loan's approved principal plus the loan discount, if a discount is configured. When `FLAT`, the `minimumPayment` value is used directly.
+When `minimumPaymentType` is `PERCENTAGE`, the base amount is the loan's approved principal plus the loan discount, if a discount is configured. When `FLAT`, the `minimumPayment` value is used directly. A Discount Fee added after disbursement recalculates the expected amount of the period covering the business date and of later periods; periods that have already ended keep theirs.
 ====
 
 === System Configuration

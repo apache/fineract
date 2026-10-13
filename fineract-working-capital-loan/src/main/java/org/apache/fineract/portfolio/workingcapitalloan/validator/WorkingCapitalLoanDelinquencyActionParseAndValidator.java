@@ -134,7 +134,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
     }
 
     private void validateDisableState(final DataValidatorBuilder dataValidator, final Long loanId, final boolean isEnable) {
-        final boolean alreadyDisabled = actionRepository.isDelinquencyDisabledAsOf(loanId, DateUtils.getBusinessLocalDate());
+        final boolean alreadyDisabled = actionRepository.isDelinquencyDisabled(loanId);
         if (isEnable && !alreadyDisabled) {
             failGeneralValidation(dataValidator, "no.active.delinquency.disable.to.enable",
                     "There is no active delinquency disable to enable for this Working Capital loan.");
@@ -145,7 +145,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
     }
 
     private void validateDelinquencyNotDisabled(final Long loanId, final DataValidatorBuilder dataValidator) {
-        if (actionRepository.isDelinquencyDisabledAsOf(loanId, DateUtils.getBusinessLocalDate())) {
+        if (actionRepository.isDelinquencyDisabled(loanId)) {
             failGeneralValidation(dataValidator, "delinquency.is.disabled",
                     "Delinquency pause, resume and reschedule actions are not allowed while delinquency evaluation is disabled for this Working Capital loan.");
         }

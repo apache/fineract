@@ -78,6 +78,11 @@ public class WorkingCapitalLoanData implements Serializable {
 
     private CurrencyData currency;
     private BigDecimal paymentRate;
+    /**
+     * Currently effective period payment rate for TPV-strategy loans (rate in force on the business date). Null when
+     * the loan does not use TPV.
+     */
+    private BigDecimal effectivePaymentRate;
     private Integer repaymentEvery;
     private StringEnumOptionData repaymentFrequencyType;
     private BigDecimal discountFee;

@@ -43,6 +43,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
@@ -539,6 +540,9 @@ public class WorkingCapitalLoanProductDataValidator {
                         detail != null ? detail.getAnnualEir() : null),
                 constraints != null ? constraints.getMinAnnualEir() : null, constraints != null ? constraints.getMaxAnnualEir() : null,
                 false, null);
+        validateAnnualEirWithinCap(element, baseDataValidator, WorkingCapitalLoanProductConstants.annualEirParamName);
+        validateAnnualEirWithinCap(element, baseDataValidator, WorkingCapitalLoanProductConstants.minAnnualEirParamName);
+        validateAnnualEirWithinCap(element, baseDataValidator, WorkingCapitalLoanProductConstants.maxAnnualEirParamName);
         validateBoundedValue(element, baseDataValidator, WorkingCapitalLoanProductConstants.paymentAmountParamName,
                 WorkingCapitalLoanProductConstants.minPaymentAmountParamName, WorkingCapitalLoanProductConstants.maxPaymentAmountParamName,
                 effectiveBigDecimal(element, WorkingCapitalLoanProductConstants.paymentAmountParamName,
@@ -577,6 +581,18 @@ public class WorkingCapitalLoanProductDataValidator {
         if (effectiveValue != null && max != null && MathUtil.isGreaterThan(effectiveValue, max)) {
             baseDataValidator.reset().parameter(valueParamName).failWithCode("must.be.less.than.or.equal.to.max");
         }
+    }
+
+    /**
+     * An annual EIR above {@link ProjectedAmortizationScheduleModel#MAX_CALCULABLE_ANNUAL_EIR} can never produce a
+     * schedule, so it is refused where it is entered rather than on every loan that later inherits it. Only values in
+     * the request are checked, so an unrelated update is not rejected because of what is already stored.
+     */
+    private void validateAnnualEirWithinCap(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            final String paramName) {
+        final BigDecimal value = extractBigDecimalIfPresent(element, paramName);
+        baseDataValidator.reset().parameter(paramName).value(value)
+                .notGreaterThanMax(ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR);
     }
 
     private static boolean isOutOfDomain(final BigDecimal bound, final boolean mustBePositive) {

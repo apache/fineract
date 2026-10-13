@@ -380,3 +380,62 @@ Feature: Working Capital Loan Charge Waiver
       | 01 June 2026    | Waive loan charges | 10.0              | 0.0              | 10.0              | 0.0                   | false    |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 June 2026"
 
+  @TestRailId:C111087
+  Scenario: Verify charge is cleared after undo disbursal and does not reappear after re-disbursal - UC15
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "due-date"
+    And Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "15 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "20 January 2026"
+    And Admin waives the last added charge on working capital loan
+    Then a Working Capital Loan Charge Waiver transaction business event is raised with "100.0" EUR amount
+    When Customer makes repayment on "20 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital Loan has transactions:
+      | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 20 January 2026 | Repayment          | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+    And Working Capital Loan has charges with the following data:
+      | Charge Name              | Due Date        | Amount | Amount Paid | Amount Waived | Amount Outstanding |
+      | Working Capital Loan Fee | 15 January 2026 | 100.0  | 0.0         | 100.0         | 0.0                |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 0.0      | 0.0            | 0.0                 | 0.0          |
+# --- undo repayment -> charge waiver and then disbursal --- #
+    When Customer undo "1"th "REPAYMENT" transaction made on "20 January 2026" on Working Capital loan
+    And Admin reverts the last charge waiver on working capital loan
+    And Admin successfully undo Working Capital disbursal
+    Then Working Capital loan status will be "APPROVED"
+    Then Working Capital Loan has transactions:
+      | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+      | 15 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
+      | 20 January 2026 | Repayment          | 50.0              | 50.0             | 0.0               | 0.0                   | true     |
+# Undo disbursal deactivates every charge; the old fee must not stay outstanding on an approved loan.
+    And Working Capital Loan has no charges
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 0.0        | 0.0             | 0.0      | 0.0            | 0.0                 | 0.0          |
+# --- disburse again: the deactivated charge must not come back, so no waive can land before the new disbursement --- #
+    Then Admin successfully disburse the Working Capital loan on "20 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working Capital loan status will be "ACTIVE"
+    Then Verify Working Capital loan disbursement was successful
+    And Working Capital Loan has no charges
+    Then Working Capital Loan has transactions:
+      | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+      | 15 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
+      | 20 January 2026 | Repayment          | 50.0              | 50.0             | 0.0               | 0.0                   | true     |
+      | 20 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 20 January 2026 | Discount Fee       | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 0.0        | 0.0             | 0.0      | 0.0            | 0.0                 | 0.0          |
+    Then Waiving the last added charge on working capital loan results an error with the following data:
+      | httpCode | errorMessage                                        |
+      | 403      | Charge waiver is not supported for inactive charges |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"

@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.portfolio.client.data.ClientAddressRequest;
 
 /**
@@ -123,6 +124,9 @@ final class ClientsApiResourceSwagger {
         public Set<GetClientsOfficeOptions> officeOptions;
         public Set<GetClientsStaffOptions> staffOptions;
         public Set<GetClientsSavingProductOptions> savingProductOptions;
+        public List<CodeValueData> genderOptions;
+        public List<CodeValueData> clientTypeOptions;
+        public List<CodeValueData> clientClassificationOptions;
         public Set<GetClientsDataTables> datatables;
     }
 
@@ -225,6 +229,20 @@ final class ClientsApiResourceSwagger {
             public Long externalId;
         }
 
+        static final class GetClientsClientIdNonPersonDetails {
+
+            private GetClientsClientIdNonPersonDetails() {}
+
+            public CodeValueData constitution;
+            @Schema(example = "INC-12345")
+            public String incorpNumber;
+            @Schema(example = "[2030, 1, 31]")
+            public LocalDate incorpValidityTillDate;
+            public CodeValueData mainBusinessLine;
+            @Schema(example = "Wholesale trader")
+            public String remarks;
+        }
+
         @Schema(example = "27")
         public Long id;
         @Schema(example = "000000027")
@@ -257,6 +275,7 @@ final class ClientsApiResourceSwagger {
         public String externalId;
         @Schema(example = "1")
         public Long staffId;
+        public GetClientsClientIdNonPersonDetails clientNonPersonDetails;
     }
 
     @Schema(description = "PostClientsRequest")

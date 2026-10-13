@@ -37,6 +37,8 @@ public class CashierSummaryAndTransactionsTest {
 
     private ResponseSpecification responseSpecification;
     private RequestSpecification requestSpecification;
+    private Long tellerId;
+    private Long cashierId;
 
     @BeforeEach
     public void setup() {
@@ -46,17 +48,15 @@ public class CashierSummaryAndTransactionsTest {
         requestSpecification.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpecification = new ResponseSpecBuilder().expectStatusCode(200).build();
         cashierTransactionsHelper = new CashierTransactionsHelper(requestSpecification, responseSpecification);
-        StaffHelper.createStaff(requestSpecification, responseSpecification);
-        cashierTransactionsHelper.createTeller(requestSpecification, responseSpecification);
-        cashierTransactionsHelper.createCashier(requestSpecification, responseSpecification);
+        final Integer staffId = StaffHelper.createStaff(requestSpecification, responseSpecification);
+        tellerId = Long.valueOf(CashierTransactionsHelper.createTeller(requestSpecification, responseSpecification));
+        cashierId = Long.valueOf(
+                CashierTransactionsHelper.createCashier(requestSpecification, responseSpecification, tellerId, staffId.longValue()));
 
     }
 
     @Test
     public void testGetCashierTransactions() {
-        Long tellerId = 1L;
-        Long cashierId = 1L;
-
         final GetTellersTellerIdCashiersCashiersIdTransactionsResponse result = cashierTransactionsHelper
                 .getTellersTellerIdCashiersCashiersIdTransactionsResponse(tellerId, cashierId, "UGX", 0, 0, null, null);
         assertNotNull(result);

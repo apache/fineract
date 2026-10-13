@@ -55,7 +55,10 @@ public class LoanCollateralManagementReadServiceImpl implements LoanCollateralMa
         BigDecimal quantity = loanCollateralManagement.getQuantity();
         BigDecimal total = quantity.multiply(collateralManagementDomain.getBasePrice());
         BigDecimal totalCollateral = total.multiply(collateralManagementDomain.getPctToBase()).divide(BigDecimal.valueOf(100));
-        return LoanCollateralResponseData.instanceOf(loanCollateralManagement, total, totalCollateral);
+        String name = collateralManagementDomain.getName();
+        BigDecimal unitPrice = collateralManagementDomain.getBasePrice();
+        BigDecimal pctToBase = collateralManagementDomain.getPctToBase();
+        return LoanCollateralResponseData.instanceOf(loanCollateralManagement, total, totalCollateral, name, unitPrice, pctToBase);
     }
 
     @Override
@@ -69,8 +72,11 @@ public class LoanCollateralManagementReadServiceImpl implements LoanCollateralMa
             BigDecimal quantity = loanCollateralManagement.getQuantity();
             BigDecimal total = quantity.multiply(collateralManagementDomain.getBasePrice());
             BigDecimal totalCollateral = total.multiply(collateralManagementDomain.getPctToBase()).divide(BigDecimal.valueOf(100));
-            loanCollateralResponseDataCollection
-                    .add(LoanCollateralResponseData.instanceOf(loanCollateralManagement, total, totalCollateral));
+            String name = collateralManagementDomain.getName();
+            BigDecimal unitPrice = collateralManagementDomain.getBasePrice();
+            BigDecimal pctToBase = collateralManagementDomain.getPctToBase();
+            loanCollateralResponseDataCollection.add(
+                    LoanCollateralResponseData.instanceOf(loanCollateralManagement, total, totalCollateral, name, unitPrice, pctToBase));
         }
         return loanCollateralResponseDataCollection;
     }

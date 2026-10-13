@@ -31,6 +31,7 @@ import org.apache.fineract.infrastructure.event.external.data.ExternalEventRespo
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +40,13 @@ public class LoanNextPaymentDueAmountIntegrationTest extends FeignLoanTestBase {
 
     ObjectMapper objectMapper = new ObjectMapper();
     private static final String LOAN_ACCOUNT_DATA_V_1 = "org.apache.fineract.avro.loan.v1.LoanAccountDataV1";
+
+    @AfterEach
+    void disableBusinessEvents() {
+        externalEventHelper.disableBusinessEvent("LoanApprovedBusinessEvent");
+        externalEventHelper.disableBusinessEvent("LoanBalanceChangedBusinessEvent");
+        externalEventHelper.disableBusinessEvent("LoanDisbursalBusinessEvent");
+    }
 
     @Test
     void test_progressive_interest_noRecalculation() {

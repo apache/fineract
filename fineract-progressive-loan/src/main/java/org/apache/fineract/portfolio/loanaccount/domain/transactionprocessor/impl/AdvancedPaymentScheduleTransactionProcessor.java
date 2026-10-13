@@ -1526,10 +1526,16 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     @Nullable
-    private static LoanTransaction useOldTransactionIfApplicable(LoanTransaction oldTransaction, LoanTransaction newTransaction,
+    static LoanTransaction useOldTransactionIfApplicable(LoanTransaction oldTransaction, LoanTransaction newTransaction,
             TransactionCtx ctx) {
         MonetaryCurrency currency = ctx.getCurrency();
         ChangedTransactionDetail changedTransactionDetail = ctx.getChangedTransactionDetail();
+        if (oldTransaction.getTypeOf().isWaiveCharges()) {
+            // WAIVE_CHARGES is not reprocessed, so there is nothing to replace it with. A replacement would lose the
+            // charge paid-by mappings, and with them the ability to undo the waiver.
+            changedTransactionDetail.removeTransactionChange(newTransaction);
+            return oldTransaction;
+        }
         /*
          * Check if the transaction amounts have changed or was there any transaction for the same date which was
          * reverse-replayed. If so, reverse the original transaction and update changedTransactionDetail accordingly to
@@ -1539,11 +1545,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .anyMatch(lt -> !lt.equals(newTransaction) && lt.getTransactionDate().equals(oldTransaction.getTransactionDate()));
         boolean amountMatch = LoanTransaction.transactionAmountsMatch(currency, oldTransaction, newTransaction);
         if ((!alreadyProcessed && amountMatch) || newTransaction.isAccrualActivity()) {
-            if (!oldTransaction.getTypeOf().isWaiveCharges()) { // WAIVE_CHARGES is not reprocessed
-                oldTransaction
-                        .updateLoanTransactionToRepaymentScheduleMappings(newTransaction.getLoanTransactionToRepaymentScheduleMappings());
-                oldTransaction.updateLoanChargePaidMappings(newTransaction.getLoanChargesPaid());
-            }
+            oldTransaction.updateLoanTransactionToRepaymentScheduleMappings(newTransaction.getLoanTransactionToRepaymentScheduleMappings());
+            oldTransaction.updateLoanChargePaidMappings(newTransaction.getLoanChargesPaid());
             changedTransactionDetail.removeTransactionChange(newTransaction);
             return oldTransaction;
         }
@@ -2020,8 +2023,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         return loanTransactionToRepaymentScheduleMapping;
     }
 
-    private Money processPaymentAllocation(PaymentAllocationType paymentAllocationType, LoanRepaymentScheduleInstallment currentInstallment,
-            LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
+    protected Money processPaymentAllocation(PaymentAllocationType paymentAllocationType,
+            LoanRepaymentScheduleInstallment currentInstallment, LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
             LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping, Set<LoanCharge> chargesOfInstallment,
             Balances balances, LoanRepaymentScheduleInstallment.PaymentAction action) {
         AllocationType allocationType = paymentAllocationType.getAllocationType();
@@ -3276,7 +3279,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     @AllArgsConstructor
     @Getter
     @Setter
-    private static final class Balances {
+    protected static final class Balances {
 
         private Money aggregatedPrincipalPortion;
         private Money aggregatedFeeChargesPortion;
@@ -3620,21 +3623,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             previousDueDate.set(i.getDueDate());
         });
         installments.sort(LoanRepaymentScheduleInstallment::compareToByFromDueDate);
-    }
-
-    private LocalDate calculateReAgedInstallmentDueDate(final LoanReAgeParameter reAgeParameter, final LocalDate dueDate) {
-        return calculateReAgedNextDate(reAgeParameter.getFrequencyType(), dueDate, reAgeParameter.getFrequencyNumber());
-    }
-
-    private LocalDate calculateReAgedNextDate(final PeriodFrequencyType frequencyType, final LocalDate dueDate,
-            final Integer frequencyNumber) {
-        return switch (frequencyType) {
-            case DAYS -> dueDate.plusDays(frequencyNumber);
-            case WEEKS -> dueDate.plusWeeks(frequencyNumber);
-            case MONTHS -> dueDate.plusMonths(frequencyNumber);
-            case YEARS -> dueDate.plusYears(frequencyNumber);
-            default -> throw new UnsupportedOperationException();
-        };
     }
 
     @NotNull
@@ -4170,9 +4158,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         createChargeMappingsForInstallment(reAgedInstallment, calculatedCharges, reAgedInstallmentIndex);
         reAgedInstallmentIndex++;
         for (int i = 1; i < numberOfReAgeInstallments; i++) {
-            LocalDate calculatedDueDate = scheduledDateGenerator.getRepaymentPeriodDate(loanReAgeParameter.getFrequencyType(),
-                    loanReAgeParameter.getFrequencyNumber(), reAgedInstallment.getDueDate());
-            calculateReAgedInstallmentDueDate(loanReAgeParameter, reAgedInstallment.getDueDate());
+            final LocalDate calculatedDueDate = scheduledDateGenerator.getRepaymentPeriodDate(loanReAgeParameter.getFrequencyType(),
+                    loanReAgeParameter.getFrequencyNumber() * i, loanReAgeParameter.getStartDate());
             int nextReAgedInstallmentNumber = firstReAgeInstallmentProps.reAgedInstallmentNumber + i;
 
             reAgedInstallment = LoanRepaymentScheduleInstallment.newReAgedInstallment(reAgedInstallment.getLoan(),

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,8 +31,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -40,7 +43,10 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.client.data.ClientNonPersonData;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientNonPerson;
+import org.apache.fineract.portfolio.client.domain.ClientNonPersonRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.client.mapper.ClientMapper;
@@ -75,6 +81,8 @@ class ClientReadPlatformServiceImplTest {
     @Mock
     private ClientRepositoryWrapper clientRepositoryWrapper;
     @Mock
+    private ClientNonPersonRepositoryWrapper clientNonPersonRepositoryWrapper;
+    @Mock
     private ClientMapper clientMapper;
 
     @InjectMocks
@@ -105,6 +113,51 @@ class ClientReadPlatformServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(clientId, result.getId());
+        assertNull(result.getClientNonPersonDetails());
+    }
+
+    @Test
+    void testRetrieveOne_EntityClient_ReturnsNonPersonDetails() {
+        // Arrange
+        Long clientId = 2L;
+        String mockHierarchy = "Root/";
+        Client mockClientEntity = mock(Client.class);
+        ClientData mockClientData = ClientData.lookup(clientId, "Acme Traders", 1L, "Test Office");
+
+        CodeValue constitution = mock(CodeValue.class);
+        when(constitution.getId()).thenReturn(24L);
+        when(constitution.getLabel()).thenReturn("Partnership");
+        CodeValue mainBusinessLine = mock(CodeValue.class);
+        when(mainBusinessLine.getId()).thenReturn(26L);
+        when(mainBusinessLine.getLabel()).thenReturn("Retail");
+
+        ClientNonPerson clientNonPerson = mock(ClientNonPerson.class);
+        when(clientNonPerson.getConstitution()).thenReturn(constitution);
+        when(clientNonPerson.getMainBusinessLine()).thenReturn(mainBusinessLine);
+        when(clientNonPerson.getIncorpNumber()).thenReturn("INC-123");
+        when(clientNonPerson.getIncorpValidityTill()).thenReturn(LocalDate.of(2030, 1, 31));
+        when(clientNonPerson.getRemarks()).thenReturn("Wholesale");
+
+        when(context.officeHierarchy()).thenReturn(mockHierarchy);
+        when(clientRepositoryWrapper.getClientByClientIdAndHierarchy(clientId, mockHierarchy + "%")).thenReturn(mockClientEntity);
+        when(clientMapper.map(mockClientEntity)).thenReturn(mockClientData);
+        when(clientNonPersonRepositoryWrapper.findOneByClientId(clientId)).thenReturn(clientNonPerson);
+        when(collateralRepoWrapper.getCollateralsPerClient(clientId)).thenReturn(Collections.emptyList());
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyLong())).thenReturn(Collections.emptyList());
+
+        // Act
+        ClientData result = clientReadPlatformService.retrieveOne(clientId);
+
+        // Assert
+        ClientNonPersonData details = result.getClientNonPersonDetails();
+        assertNotNull(details);
+        assertEquals(24L, details.getConstitution().getId());
+        assertEquals("Partnership", details.getConstitution().getName());
+        assertEquals(26L, details.getMainBusinessLine().getId());
+        assertEquals("Retail", details.getMainBusinessLine().getName());
+        assertEquals("INC-123", details.getIncorpNumber());
+        assertEquals(LocalDate.of(2030, 1, 31), details.getIncorpValidityTillDate());
+        assertEquals("Wholesale", details.getRemarks());
     }
 
     @Test

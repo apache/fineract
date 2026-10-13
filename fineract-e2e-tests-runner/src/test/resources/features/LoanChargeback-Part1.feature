@@ -16,6 +16,7 @@ Feature: LoanChargeback - Part1
     When Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 250 EUR transaction amount
     Then Loan has 250 outstanding amount
     Then Loan status will be "ACTIVE"
+    Then Customer undo "1"th transaction made on "25 February 2022" results a 403 error and "reversal is only supported for progressive loans" error message
 
   @TestRailId:C2442
   Scenario: As an admin I would like to check chargeback function is working properly on a closed loan in case of payment type: REPAYMENT_ADJUSTMENT_REFUND

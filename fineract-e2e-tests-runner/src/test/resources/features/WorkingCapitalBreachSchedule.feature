@@ -84,7 +84,7 @@ Feature: Working Capital Breach Schedule
       | 2            | 2026-01-07 | 2026-01-12 | 6            | 110.70           | 110.70            | null       | null   |
 
   @TestRailId:C74544
-  Scenario: Verify working capital loan breach schedule - multiple periods
+  Scenario: Verify working capital loan breach schedule - multiple periods, a discount fee added later re-derives only the current period
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
@@ -104,6 +104,13 @@ Feature: Working Capital Breach Schedule
       | 2            | 2026-01-07 | 2026-01-12 | 6            | 110.70           | 110.70            | null       | true   |
       | 3            | 2026-01-13 | 2026-01-18 | 6            | 110.70           | 110.70            | null       | true   |
       | 4            | 2026-01-19 | 2026-01-24 | 6            | 110.70           | 110.70            | null       | null   |
+    When Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-01-06 | 6            | 110.70           | 110.70            | null       | true   |
+      | 2            | 2026-01-07 | 2026-01-12 | 6            | 110.70           | 110.70            | null       | true   |
+      | 3            | 2026-01-13 | 2026-01-18 | 6            | 110.70           | 110.70            | null       | true   |
+      | 4            | 2026-01-19 | 2026-01-24 | 6            | 123.00           | 123.00            | null       | null   |
 
   @TestRailId:C74545
   Scenario: Verify working capital loan breach schedule - with discount affects minPayment

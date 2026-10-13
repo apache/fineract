@@ -21,8 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.validator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.JsonElement;
@@ -99,7 +97,7 @@ class WorkingCapitalLoanBreachPauseResetValidatorTest {
         when(loan.isOpen()).thenReturn(true);
         when(loan.getLoanProductRelatedDetails()).thenReturn(productRelatedDetails);
         when(productRelatedDetails.getBreach()).thenReturn(breachConfiguration);
-        when(breachActionRepository.isBreachDisabledAsOf(eq(LOAN_ID), any())).thenReturn(false);
+        when(breachActionRepository.isBreachDisabled(LOAN_ID)).thenReturn(false);
 
         final WorkingCapitalLoanBreachSchedule firstPeriod = new WorkingCapitalLoanBreachSchedule();
         firstPeriod.setFromDate(scheduleStart);

@@ -60,7 +60,7 @@ public class ProvisioningEntriesDefinitionJsonDeserializer implements Provisioni
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("provisioningcriteria");
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
-        baseDataValidator.reset().parameter(JSON_DATEFORMAT_PARAM).value(locale).notNull();
+        baseDataValidator.reset().parameter(JSON_LOCALE_PARAM).value(locale).notNull();
         final String dateformat = this.fromApiJsonHelper.extractDateFormatParameter(element.getAsJsonObject());
         baseDataValidator.reset().parameter(JSON_DATEFORMAT_PARAM).value(dateformat).notBlank();
         LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed(JSON_DATE_PARAM, element);

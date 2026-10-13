@@ -701,6 +701,10 @@ public class ExternalBusinessEventTest extends FeignLoanTestBase {
     public void testInterestBearingProgressiveInterestRecalculationReopenDueReverseRepayment() {
         runAt("17 January 2025", () -> {
             externalEventHelper.enableBusinessEvent("LoanAdjustTransactionBusinessEvent");
+            // FINERACT-2684: the adjustment of a transaction is only posted while that transaction type's own event
+            // is enabled too. The reversal below adjusts a repayment and an accrual activity.
+            externalEventHelper.enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanTransactionAccrualActivityPostBusinessEvent");
             final PostLoanProductsResponse loanProductsResponse = loanHelper.createLoanProduct(create4IProgressive() //
                     .description("Interest bearing Progressive Loan USD, Accrual Activity Posting, NO InterestRecalculation") //
                     .enableAccrualActivityPosting(true) //
@@ -858,6 +862,10 @@ public class ExternalBusinessEventTest extends FeignLoanTestBase {
 
             configureLoanAdjustTransactionBusinessEvent(true);
             configureLoanAccrualTransactionCreatedBusinessEvent(true);
+            // FINERACT-2684: the adjustment of a transaction is only posted while that transaction type's own event
+            // is enabled too, so the charge-off and repayment events must be on for their adjustments to show up.
+            externalEventHelper.enableBusinessEvent("LoanChargeOffPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
             deleteAllExternalEvents();
 
             reverseLoanTransaction(loanId, repaymentTransactionIdRef.get(), "01 February 2025");

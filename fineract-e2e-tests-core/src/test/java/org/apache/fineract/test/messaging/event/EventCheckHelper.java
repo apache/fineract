@@ -1102,8 +1102,10 @@ public class EventCheckHelper {
     }
 
     public void workingCapitalLoanPeriodPaymentRateChangedEventCheck(final Long loanId) {
-        workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanPeriodPaymentRateChangedEvent.class, loanId,
-                (event, body) -> assertAmountEquals("paymentRate", event.getPaymentRate(), body.getPaymentRate()));
+        workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanPeriodPaymentRateChangedEvent.class, loanId, (event, body) -> {
+            assertAmountEquals("paymentRate", event.getPaymentRate(), body.getPaymentRate());
+            assertAmountEquals("effectivePaymentRate", event.getEffectivePaymentRate(), body.getEffectivePaymentRate());
+        });
     }
 
     public void workingCapitalLoanDelinquencyScheduleChangedEventCheck(final Long loanId) {
@@ -1293,6 +1295,20 @@ public class EventCheckHelper {
                 .extractingData(data -> data.getTransactionToAdjust().getType().getCode()).isEqualTo(transaction.getType().getCode())//
                 .extractingData(data -> data.getTransactionToAdjust().getReversed()).isEqualTo(true)//
                 .extractingData(WorkingCapitalLoanTransactionAdjustmentDataV1::getNewTransactionDetail).isEqualTo(null);
+    }
+
+    public void workingCapitalLoanAdjustTransactionPartialEventCheck(final Long loanId, final String transactionType,
+            final BigDecimal newAmount, final Long newTransactionId) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse reversedTransaction = findLastWorkingCapitalLoanTransaction(loanId,
+                transactionType, true, "Reversed " + transactionType + " transaction not found");
+        eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, reversedTransaction.getId())//
+                .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
+                .extractingData(data -> data.getTransactionToAdjust().getId()).isEqualTo(reversedTransaction.getId())//
+                .extractingData(data -> data.getTransactionToAdjust().getReversed()).isEqualTo(true)//
+                .extractingData(data -> data.getNewTransactionDetail().getId()).isEqualTo(newTransactionId)//
+                .extractingBigDecimal(data -> data.getNewTransactionDetail().getTransactionAmount()).isEqualTo(newAmount)//
+                .extractingData(data -> data.getNewTransactionDetail().getReversed()).isEqualTo(false);
     }
 
     public void workingCapitalLoanAdjustTransactionReprocessEventCheck(final Long loanId, final String transactionType,

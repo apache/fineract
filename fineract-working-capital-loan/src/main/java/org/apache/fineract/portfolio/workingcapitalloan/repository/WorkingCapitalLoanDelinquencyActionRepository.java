@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -38,11 +38,17 @@ public interface WorkingCapitalLoanDelinquencyActionRepository extends JpaReposi
     List<WorkingCapitalLoanDelinquencyAction> findByWorkingCapitalLoanIdAndActionOrderByStartDateAsc(Long workingCapitalLoanId,
             DelinquencyAction action);
 
+    /**
+     * True while a Delinquency Disable is active: a DISABLE action that has not been closed by an enable (no end date).
+     */
     @Query("""
             select case when count(action) > 0 then true else false end from WorkingCapitalLoanDelinquencyAction action
             where action.action = org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.DISABLE
-            and action.workingCapitalLoan.id = :loanId and action.startDate <= :date and (action.endDate is null or action.endDate >= :date)
+            and action.workingCapitalLoan.id = :loanId and action.endDate is null
             """)
-    boolean isDelinquencyDisabledAsOf(@Param("loanId") Long loanId, @Param("date") LocalDate date);
+    boolean isDelinquencyDisabled(@Param("loanId") Long loanId);
 
+    @Modifying(flushAutomatically = true)
+    @Query("delete from WorkingCapitalLoanDelinquencyAction action where action.workingCapitalLoan.id = :loanId")
+    void deleteByWorkingCapitalLoanId(@Param("loanId") Long loanId);
 }

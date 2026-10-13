@@ -74,7 +74,7 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
     }
 
     public void update(final LocalDate endDate, final List<Map<String, Object>> changes) {
-        if (endDate != null && this.endDate == null) {
+        if (endDate != null && !DateUtils.isEqual(endDate, this.endDate)) {
             this.endDate = endDate;
             Map<String, Object> map = new HashMap<>(2);
             map.put(TaxApiConstants.endDateParamName, endDate);

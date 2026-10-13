@@ -135,7 +135,7 @@ final class PlanCursor {
         this.billed = BigDecimal.ZERO;
         this.previousEarned = BigDecimal.ZERO;
         this.previousBilled = BigDecimal.ZERO;
-        this.solved = solved;
+        this.solved = AmortizationParams.requireAnnualEirWithinCap(solved);
         this.stepsInSolve = 0;
         this.exhausted = false;
     }
@@ -180,8 +180,8 @@ final class PlanCursor {
         this.previousBilled = collectedSoFar;
         this.stepsInSolve = 0;
         this.exhausted = false;
-        this.solved = AmortizationParams.solve(amortizationType, this.balance, MathUtil.negativeToZero(unearnedFee), totalPaymentVolume,
-                periodPaymentRate, npvDayCount, currencyScale, mc);
+        this.solved = AmortizationParams.requireAnnualEirWithinCap(AmortizationParams.solve(amortizationType, this.balance,
+                MathUtil.negativeToZero(unearnedFee), totalPaymentVolume, periodPaymentRate, npvDayCount, currencyScale, mc));
     }
 
     /**

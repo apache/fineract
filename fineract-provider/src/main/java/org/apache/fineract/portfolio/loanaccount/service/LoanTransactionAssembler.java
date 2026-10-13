@@ -73,7 +73,7 @@ public class LoanTransactionAssembler {
             @NonNull LocalDate transactionDate) {
         ExternalId externalId = externalIdFactory.create();
 
-        BigDecimal interestPortion = installment.getInterestCharged();
+        BigDecimal interestPortion = MathUtil.subtractToZero(installment.getInterestCharged(), installment.getCreditedInterest());
         BigDecimal feeChargesPortion = installment.getFeeChargesCharged();
         BigDecimal penaltyChargesPortion = installment.getPenaltyCharges();
         BigDecimal transactionAmount = MathUtil.add(interestPortion, feeChargesPortion, penaltyChargesPortion);

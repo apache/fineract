@@ -81,9 +81,14 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
             // disable is guaranteed to be present here - mirroring the breach action flow.
             final WorkingCapitalLoanDelinquencyAction activeDisable = validator.findActiveDisable(existing);
             activeDisable.setEndDate(enableDate.minusDays(1));
-            // As in breach, the disabled window is NOT treated as a pause - period dates are not shifted. Reprocessing
-            // re-evaluates and reclassifies delinquency as of the current business date, so the disabled days are not
-            // excluded from the schedule.
+            actionRepository.saveAndFlush(activeDisable);
+            // Nothing was evaluated or updated while disabled, so every period is recalculated as if the loan had never
+            // been disabled. As in breach, the disabled window is NOT treated as a pause - period dates are not
+            // shifted.
+            if (!rangeScheduleService.hasSchedule(workingCapitalLoanId)) {
+                rangeScheduleService.generateInitialPeriod(workingCapitalLoan);
+            }
+            rangeScheduleService.recalculateBaseExpectedAmount(workingCapitalLoan);
             rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
         } else if (DelinquencyAction.PAUSE.equals(action.getAction())) {
             rangeScheduleService.extendPeriodsForPause(workingCapitalLoan, action.getStartDate(), action.getEndDate());

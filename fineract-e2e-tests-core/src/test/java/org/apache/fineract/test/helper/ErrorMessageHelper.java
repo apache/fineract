@@ -198,7 +198,7 @@ public final class ErrorMessageHelper {
     }
 
     public static String addCapitalizedIncomeUndoFailureTransactionTypeNonReversal() {
-        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee or buy down fee adjustment can be adjusted.";
+        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee, buy down fee adjustment or chargeback can be adjusted.";
     }
 
     public static String addCapitalizedIncomeUndoFailureAdjustmentExists() {
@@ -1128,10 +1128,6 @@ public final class ErrorMessageHelper {
         return "Discount was already set before disbursement and cannot be added again";
     }
 
-    public static String discountDiffDateFromDisburseFailure() {
-        return "Failed data validation due to: transaction.date.must.be.equal.disbursement.date.";
-    }
-
     public static String discountAdjustmentExceedFailure() {
         return "Failed data validation due to: cannot.be.more.than.discount.fee.";
     }
@@ -1199,6 +1195,10 @@ public final class ErrorMessageHelper {
 
     public static String workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure() {
         return "validation.msg.WORKINGCAPITALLOAN.principalAmount.unable.to.calculate.valid.eir";
+    }
+
+    public static String workingCapitalInputDiscountExceedsPrincipalFailure() {
+        return "validation.msg.WORKINGCAPITALLOAN.discount.amount.cannot.exceed.principal";
     }
 
     public static String workingCapitalPeriodPaymentRateAfterMaturityDateFailure() {

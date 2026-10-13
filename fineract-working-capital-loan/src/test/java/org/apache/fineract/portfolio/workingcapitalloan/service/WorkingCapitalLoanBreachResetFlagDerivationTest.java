@@ -50,6 +50,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNearBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.domain.WorkingCapitalBreach;
@@ -80,6 +81,8 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
     @Mock
     private WorkingCapitalLoanBreachActionRepository breachActionRepository;
     @Mock
+    private WorkingCapitalLoanNearBreachActionRepository nearBreachActionRepository;
+    @Mock
     private WorkingCapitalLoanTransactionRepository transactionRepository;
     @Mock
     private WorkingCapitalLoanBalanceRepository balanceRepository;
@@ -101,13 +104,13 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
         final WorkingCapitalLoanActiveBreachResetResolver resolver = new WorkingCapitalLoanActiveBreachResetResolver(
                 breachActionRepository);
         scheduleService = new WorkingCapitalLoanBreachScheduleServiceImpl(repository, mapper, loanRepository, breachActionRepository,
-                transactionRepository, balanceRepository, businessEventNotifierService, resolver);
+                nearBreachActionRepository, transactionRepository, balanceRepository, businessEventNotifierService, resolver);
         resetService = new WorkingCapitalLoanBreachResetServiceImpl(scheduleService, resolver);
         loan = new WorkingCapitalLoan();
         loan.setId(LOAN_ID);
         balance = WorkingCapitalLoanBalance.createFor(loan);
         balance.setPrincipal(BigDecimal.valueOf(10_000));
-        lenient().when(breachActionRepository.isBreachDisabledAsOf(anyLong(), any())).thenReturn(false);
+        lenient().when(breachActionRepository.isBreachDisabled(anyLong())).thenReturn(false);
         when(breachActionRepository.findByWorkingCapitalLoanIdAndActionOrderByIdDesc(anyLong(), any())).thenReturn(List.of());
         when(balanceRepository.findByWcLoan_Id(LOAN_ID)).thenReturn(Optional.of(balance));
         when(repository.findByLoanIdOrderByPeriodNumberAsc(LOAN_ID)).thenAnswer(inv -> sorted());

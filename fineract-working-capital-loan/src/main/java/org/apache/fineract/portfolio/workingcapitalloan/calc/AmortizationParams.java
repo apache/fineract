@@ -167,6 +167,29 @@ final class AmortizationParams {
     }
 
     /**
+     * {@code solved}, provided the annual EIR it carries is within
+     * {@link ProjectedAmortizationScheduleModel#MAX_CALCULABLE_ANNUAL_EIR}.
+     *
+     * <p>
+     * Applied only where the loan's EIR is set - the plan written at creation and the re-rating at a rate change - and
+     * deliberately not inside the solver. The walk also solves a projection rate after an off-plan payment, purely so
+     * the days still to come bill what is owed; that rate is never the loan's EIR, is neither stored nor published, and
+     * capping it would only leave those days billing off what the borrower owes.
+     *
+     * @throws IllegalStateException
+     *             when the annual EIR is above the cap
+     */
+    static Solved requireAnnualEirWithinCap(final Solved solved) {
+        final BigDecimal calculatedAnnualEir = solved.calculatedAnnualEir();
+        if (calculatedAnnualEir != null
+                && calculatedAnnualEir.abs().compareTo(ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR) > 0) {
+            throw new IllegalStateException("schedule solves to an annual EIR of " + calculatedAnnualEir
+                    + " %, above the calculable cap of " + ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR + " %");
+        }
+        return solved;
+    }
+
+    /**
      * Finds the currency-rounded daily payment whose NPV at the compounded daily rate from {@code annualEirPercent}
      * equals {@code netDisbursement}, then derives term / closing / IRR exactly as TPV does for the same daily payment
      * — so the walk produces the same schedule as an equivalent period-payment-rate product. FLAT amortization still

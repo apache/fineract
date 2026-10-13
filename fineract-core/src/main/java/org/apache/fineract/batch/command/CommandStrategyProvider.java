@@ -318,6 +318,26 @@ public class CommandStrategyProvider {
         commandStrategies.put(CommandContext
                 .resource("v1\\/working-capital-loans\\/" + NUMBER_REGEX + "\\/delinquency-range-schedule" + OPTIONAL_QUERY_PARAM_REGEX)
                 .method(GET).build(), "getWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy");
+        // Breach, delinquency and near breach actions name the action in the body rather than in a command query
+        // parameter, so each pair registers the bare path - one form for the loan id, one for the loan external id.
+        commandStrategies.put(
+                CommandContext.resource("v1\\/working-capital-loans\\/" + NUMBER_REGEX + "\\/breach-actions").method(POST).build(),
+                "createWorkingCapitalLoanBreachActionCommandStrategy");
+        commandStrategies.put(CommandContext
+                .resource("v1\\/working-capital-loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/breach-actions").method(POST).build(),
+                "createWorkingCapitalLoanBreachActionByLoanExternalIdCommandStrategy");
+        commandStrategies.put(
+                CommandContext.resource("v1\\/working-capital-loans\\/" + NUMBER_REGEX + "\\/delinquency-actions").method(POST).build(),
+                "createWorkingCapitalLoanDelinquencyActionCommandStrategy");
+        commandStrategies.put(CommandContext
+                .resource("v1\\/working-capital-loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/delinquency-actions").method(POST).build(),
+                "createWorkingCapitalLoanDelinquencyActionByLoanExternalIdCommandStrategy");
+        commandStrategies.put(
+                CommandContext.resource("v1\\/working-capital-loans\\/" + NUMBER_REGEX + "\\/near-breach-actions").method(POST).build(),
+                "createWorkingCapitalLoanNearBreachActionCommandStrategy");
+        commandStrategies.put(CommandContext
+                .resource("v1\\/working-capital-loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/near-breach-actions").method(POST).build(),
+                "createWorkingCapitalLoanNearBreachActionByLoanExternalIdCommandStrategy");
     }
 
 }

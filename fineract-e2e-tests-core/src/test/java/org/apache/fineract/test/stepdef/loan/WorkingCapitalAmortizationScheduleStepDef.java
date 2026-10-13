@@ -345,12 +345,6 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
                 firstPayment.getExpectedPaymentAmount()).isLessThan(firstPayment.getExpectedPaymentAmount());
     }
 
-    @Then("The retrieved amortization schedule has at least {int} payment rows")
-    public void verifyAmortizationScheduleHasAtLeastPaymentRows(final int minRows) {
-        final ProjectedAmortizationScheduleData response = getRetrievedSchedule();
-        assertThat(response.getPayments()).as("amortization schedule payment row count").hasSizeGreaterThanOrEqualTo(minRows);
-    }
-
     @Then("The retrieved amortization schedule has exactly {int} payment rows")
     public void verifyAmortizationScheduleHasExactlyPaymentRows(final int exactRows) {
         final ProjectedAmortizationScheduleData response = getRetrievedSchedule();

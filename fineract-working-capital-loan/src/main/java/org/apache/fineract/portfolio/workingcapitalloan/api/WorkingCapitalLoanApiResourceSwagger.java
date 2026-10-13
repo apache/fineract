@@ -226,6 +226,10 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(example = "1.0", description = "The loan's own period payment rate. A rate change does not move it - the rate in force on "
                 + "a given date comes from the rate-change history")
         public BigDecimal paymentRate;
+        @Schema(example = "12.5", description = "Currently effective period payment rate for TPV strategy loans: the rate in force on the "
+                + "business date from rate-change history, or paymentRate when none has taken effect yet. Null when the loan uses a "
+                + "non-TPV payment amount calculation strategy")
+        public BigDecimal effectivePaymentRate;
         @Schema(example = "30")
         public Integer repaymentEvery;
         public StringEnumOptionData repaymentFrequencyType;

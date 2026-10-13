@@ -18,12 +18,18 @@
  */
 package org.apache.fineract.organisation.office.domain;
 
+import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface OfficeRepository extends JpaRepository<Office, Long>, JpaSpecificationExecutor<Office> {
 
     Optional<Office> findByExternalId(ExternalId externalId);
+
+    @Query("select o.id from Office o where o.hierarchy like :hierarchy")
+    List<Long> findIdsByHierarchyLike(@Param("hierarchy") String hierarchy);
 }

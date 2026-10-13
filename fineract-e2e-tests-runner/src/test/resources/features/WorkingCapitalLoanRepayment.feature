@@ -1769,7 +1769,7 @@ Feature: Working Capital Loan Repayment
     Then Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 50.0       | 220.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 50.0       | 250.0             | null                  | null             | null           |
     Then Working Capital loan amortization schedule has 201 periods, with the following data for periods:
       | paymentNo | paymentDate      | expectedPaymentAmount | actualPaymentAmount | expectedBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualDiscountFeeBalance |
       | 0         | 01 January 2026  | -9000.00              |                     | 9000.00         |                            |                          | 1000.00                    | 1000.00                  |

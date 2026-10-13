@@ -26,6 +26,7 @@ import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformServi
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
@@ -89,7 +90,8 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     @Override
     public TaxGroupData retrieveTaxGroupData(final Long id) {
-        return taxGroupMapper.map(taxGroupRepositoryWrapper.findOneWithNotFoundDetection(id));
+        final TaxGroupData taxGroupData = taxGroupMapper.map(taxGroupRepositoryWrapper.findOneWithNotFoundDetection(id));
+        return TaxGroupData.withBusinessDate(taxGroupData, DateUtils.getBusinessLocalDate());
     }
 
     @Override

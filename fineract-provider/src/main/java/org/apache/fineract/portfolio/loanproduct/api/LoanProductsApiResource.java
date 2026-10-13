@@ -71,6 +71,10 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
@@ -129,7 +133,7 @@ public class LoanProductsApiResource {
             "minInterestRatePerPeriod", "maxInterestRatePerPeriod", "interestRateFrequencyType", "annualInterestRate", "amortizationType",
             "interestType", "interestCalculationPeriodType", LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
             "inArrearsTolerance", "transactionProcessingStrategyCode", "transactionProcessingStrategyName", "charges", "accountingRule",
-            "externalId", "accountingMappings", "paymentChannelToFundSourceMappings", "fundOptions", "paymentTypeOptions",
+            "externalId", "datatables", "accountingMappings", "paymentChannelToFundSourceMappings", "fundOptions", "paymentTypeOptions",
             "currencyOptions", "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "amortizationTypeOptions",
             "interestTypeOptions", "interestCalculationPeriodTypeOptions", "transactionProcessingStrategyOptions", "chargeOptions",
             "accountingOptions", "accountingRuleOptions", "accountingMappingOptions", "floatingRateOptions",
@@ -173,6 +177,7 @@ public class LoanProductsApiResource {
     private final ConfigurationDomainService configurationDomainService;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final EntityDatatableChecksReadService entityDatatableChecksReadService;
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -250,6 +255,9 @@ public class LoanProductsApiResource {
 
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
         loanProduct = handleTemplate(loanProduct);
+        final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService.retrieveTemplates(StatusEnum.CREATE.getValue(),
+                EntityTables.LOAN_PRODUCT.getName(), null);
+        loanProduct.setDatatables(datatableTemplates);
 
         return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
     }

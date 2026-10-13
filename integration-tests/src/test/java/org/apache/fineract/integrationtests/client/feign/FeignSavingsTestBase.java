@@ -35,6 +35,8 @@ import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChar
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PostSavingsProductsResponse;
+import org.apache.fineract.client.models.PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest;
+import org.apache.fineract.client.models.PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.models.SavingsAccountStatusEnumData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
@@ -177,5 +179,10 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
 
     protected List<GetSavingsAccountsSavingsAccountIdChargesResponse> getSavingsCharges(Long savingsId) {
         return savingsHelper.getSavingsCharges(savingsId);
+    }
+
+    protected PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse updateSavingsAccountCharge(Long savingsId,
+            Long savingsAccountChargeId, PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest request) {
+        return savingsHelper.updateSavingsAccountCharge(savingsId, savingsAccountChargeId, request);
     }
 }

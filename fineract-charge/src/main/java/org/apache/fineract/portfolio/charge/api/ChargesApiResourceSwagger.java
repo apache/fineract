@@ -318,5 +318,6 @@ final class ChargesApiResourceSwagger {
         public Set<GetChargesTemplateLoanChargeCalculationTypeOptions> savingsChargeCalculationTypeOptions;
         public Set<GetChargesTemplateLoanChargeTimeTypeOptions> savingsChargeTimeTypeOptions;
         public Set<GetChargesTemplateFeeFrequencyOptions> feeFrequencyOptions;
+        public Set<GetChargesResponse.GetChargesTaxGroup> taxGroupOptions;
     }
 }

@@ -88,7 +88,7 @@ Feature: Working Capital Delinquency
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 January 2026"
 
   @TestRailId:C74466
-  Scenario: Verify working capital loan delinquency range schedule - UC5: delinquency range schedule on first day of 2nd range
+  Scenario: Verify working capital loan delinquency range schedule - UC5: delinquency range schedule on first day of 2nd range, a discount fee added later re-derives only the current range
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
@@ -117,6 +117,11 @@ Feature: Working Capital Delinquency
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
       | 2            | 2026-01-04 | 2026-01-06 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    When Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-03 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 2            | 2026-01-04 | 2026-01-06 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"
 
   @TestRailId:C74467
@@ -986,7 +991,6 @@ Feature: Working Capital Delinquency
       | 1            | 2026-01-01 | 2026-01-27 | 248.0          | 0.0        | 248.0             | null                  | null             | null           |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
 
-  @Skip
   @TestRailId:C106711
   Scenario: Verify that delinquency Id is overridable and applied on modify loan account with override allowed on WC loan product level - UC2
     When Admin sets the business date to "01 January 2026"
@@ -1012,7 +1016,7 @@ Feature: Working Capital Delinquency
     When Admin makes undo approval on the working capital loan
     Then Working capital loan undo approval was successful
     Then Working Capital loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
-# --- modify WC loan product with override delinquency bucket --- #
+# --- modify WC loan account with override delinquency bucket --- #
     And Admin modifies the working capital loan with delinquency override data
     And Admin successfully approves the working capital loan on "02 January 2026" with "9000" amount and expected disbursement date on "02 January 2026"
     When Admin successfully disburse the Working Capital loan on "02 January 2026" with "9000" EUR transaction amount
@@ -1020,7 +1024,7 @@ Feature: Working Capital Delinquency
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-27 | 248.0          | 0.0        | 248.0             | null                  | null             | null           |
+      | 1            | 2026-01-02 | 2026-01-28 | 248.0          | 0.0        | 248.0             | null                  | null             | null           |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 January 2026"
 
   @TestRailId:C106712

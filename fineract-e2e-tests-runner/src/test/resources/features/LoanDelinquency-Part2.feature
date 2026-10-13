@@ -492,6 +492,11 @@ Feature: LoanDelinquency - Part2
     Then Loan has the following LOAN level delinquency data:
       | classification | delinquentAmount | delinquentDate  | pastDueDate     | delinquentDays | pastDueDays |
       | RANGE_1        | 250.0            | 08 October 2023 | 05 October 2023 | 2              | 5           |
+    When Customer undo "1"th "Chargeback" transaction made on "05 October 2023"
+    Then Loan has the following LOAN level delinquency data:
+      | classification | delinquentAmount | delinquentDate | pastDueDate | delinquentDays | pastDueDays |
+      | NO_DELINQUENCY | 0.0              | null           | null        | 0              | 0           |
+    Then Loan has 750 outstanding amount
 
   @TestRailId:C4622
   Scenario: Verify that pastDueDate is present in LoanBalanceChangedBusinessEvent for overdue loan

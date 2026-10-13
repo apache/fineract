@@ -27,7 +27,6 @@ Feature: Working Capital Breach Disable
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 6            | 110.70           | 110.70            | null       | null   |
-      | 2            | 2026-01-07 | 2026-01-12 | 6            | 110.70           | 110.70            | null       | null   |
     When Admin sets the business date to "09 January 2026"
     And Admin initiate a Working Capital loan breach enable with startDate "09 January 2026"
     Then Working Capital loan breach disable action has the following data:
@@ -270,7 +269,6 @@ Feature: Working Capital Breach Disable
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 110.70           | 110.70            | null       | null   |
-      | 2            | 2026-01-07 | 2026-01-12 | 110.70           | 110.70            | null       | null   |
     When Admin initiate a Working Capital loan breach enable with startDate "09 January 2026"
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
@@ -443,7 +441,6 @@ Feature: Working Capital Breach Disable
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-06 | 110.70           | 110.70            | null       | null   |
-      | 2            | 2026-01-07 | 2026-01-12 | 110.70           | 110.70            | null       | null   |
     When Admin initiate a Working Capital loan breach enable with startDate "07 January 2026"
     And Admin sets the business date to "08 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId

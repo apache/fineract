@@ -249,8 +249,7 @@ public class TaxValidator {
                             SUPPORTED_TAX_GROUP_TAX_COMPONENTS_UPDATE_PARAMETERS);
                     final Long taxComponentId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.taxComponentIdParamName,
                             taxComponent);
-                    final Long taxMappingId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.taxComponentIdParamName,
-                            taxComponent);
+                    final Long taxMappingId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.idParamName, taxComponent);
                     if (taxMappingId == null) {
                         baseDataValidator.reset().parameter(
                                 TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.taxComponentIdParamName + AT_INDEX + i)
@@ -266,9 +265,14 @@ public class TaxValidator {
 
                     final LocalDate endDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.endDateParamName, taxComponent,
                             dateFormat, locale);
-                    baseDataValidator.reset()
-                            .parameter(TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.endDateParamName + AT_INDEX + i)
-                            .value(endDate).ignoreIfNull().validateDateAfter(DateUtils.getBusinessLocalDate());
+                    if (taxMappingId == null) {
+                        // Newly added component: its end date (if any) must be in the future.
+                        // Existing mappings are left to validateTaxGroupEndDateAndTaxComponent, which allows an
+                        // already-ended component to be resubmitted unchanged so the rest of the group can be edited.
+                        baseDataValidator.reset()
+                                .parameter(TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.endDateParamName + AT_INDEX + i)
+                                .value(endDate).ignoreIfNull().validateDateAfter(DateUtils.getBusinessLocalDate());
+                    }
                     final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.startDateParamName,
                             taxComponent, dateFormat, locale);
                     if (endDate != null && startDate != null) {
@@ -288,13 +292,8 @@ public class TaxValidator {
         for (TaxGroupMappings mapping : groupMappings) {
             if (mapping.getId() != null) {
                 TaxGroupMappings existing = taxGroup.findOneBy(mapping);
-                if (existing.endDate() != null && mapping.endDate() != null && !DateUtils.isEqual(existing.endDate(), mapping.endDate())) {
-                    baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName)
-                            .failWithCode("can.not.modify.end.date.once.updated");
-                } else {
-                    baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName).value(mapping.endDate()).ignoreIfNull()
-                            .validateDateAfter(existing.startDate());
-                }
+                baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName).value(mapping.endDate()).ignoreIfNull()
+                        .validateDateAfter(existing.startDate());
                 if (mapping.getTaxComponent() != null && !existing.getTaxComponent().getId().equals(mapping.getTaxComponent().getId())) {
                     baseDataValidator.reset().parameter(TaxApiConstants.taxComponentIdParamName).failWithCode("update.not.supported");
                 }

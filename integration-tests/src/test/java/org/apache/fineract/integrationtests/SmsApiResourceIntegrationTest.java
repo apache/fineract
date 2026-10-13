@@ -115,6 +115,22 @@ public class SmsApiResourceIntegrationTest {
     }
 
     /**
+     * Guards the HTTP contract of POST /sms for an explicit-null staffId.
+     *
+     * Note: this is NOT a regression test for SmsDataValidator's staffId null-check (see SmsDataValidatorTest for
+     * that). SmsApiResource binds the request body to the SmsCreationRequest record and re-serializes it with Gson
+     * before it reaches the validator; Gson drops null-valued fields by default, so "staffId" never actually reaches
+     * SmsDataValidator here - the validator sees an empty object and rejects it via the "no.entity.provided" check
+     * instead. This test exists purely to ensure the endpoint never regresses to a 5xx for this payload shape.
+     */
+    @Test
+    public void testCreateSms_withExplicitNullStaffId_returns400NotServerError() {
+        String smsJson = "{\"staffId\":null,\"message\":\"Integration test message\"}";
+        io.restassured.RestAssured.given().spec(requestSpec).body(smsJson).when().post("/fineract-provider/api/v1/sms").then()
+                .statusCode(400);
+    }
+
+    /**
      * Test retrieving SMS messages by status for an invalid status value.
      */
     @Test

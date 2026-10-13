@@ -97,6 +97,11 @@ public class WorkingCapitalLoanDataValidator {
 
     private static final Set<String> UNDO_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
             WorkingCapitalLoanConstants.reversalExternalIdParamName, WorkingCapitalLoanConstants.noteParamName));
+    private static final Set<String> ADJUST_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(
+            Arrays.asList("locale", "dateFormat", WorkingCapitalLoanConstants.transactionDateParamName,
+                    WorkingCapitalLoanConstants.transactionAmountParamName, WorkingCapitalLoanConstants.classificationIdParamName,
+                    WorkingCapitalLoanConstants.noteParamName, WorkingCapitalLoanConstants.reversalExternalIdParamName,
+                    WorkingCapitalLoanConstants.paymentDetailsParamName, WorkingCapitalLoanConstants.externalIdParameterName));
 
     private static final Set<String> PAYMENT_DETAILS_SUPPORTED_PARAMETERS = new HashSet<>(
             Arrays.asList(WorkingCapitalLoanConstants.paymentTypeIdParamName, WorkingCapitalLoanConstants.accountNumberParamName,
@@ -229,16 +234,12 @@ public class WorkingCapitalLoanDataValidator {
             validateDiscountAmountWithProductDiscount(discountAmount, loan.getLoanProduct().getRelatedDetail(), baseDataValidator);
         }
 
+        WorkingCapitalLoanDiscountValidation.validateDiscountDoesNotExceedPrincipal(discountAmount, loan.getFirstActualDisbursementAmount(),
+                WorkingCapitalLoanConstants.discountAmountParamName, baseDataValidator);
+
         if (loan.isNotDisbursed()) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.actualDisbursementDateParamName)
                     .failWithCode("loan.not.disbursed");
-        }
-
-        final LocalDate actualDisbursementDate = loan.getFirstActualDisbursementDate();
-        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        if (actualDisbursementDate != null && !actualDisbursementDate.equals(businessDate)) {
-            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.actualDisbursementDateParamName).value(businessDate)
-                    .failWithCode("transaction.date.must.be.equal.disbursement.date");
         }
 
         final Integer classificationId = this.fromApiJsonHelper
@@ -444,7 +445,55 @@ public class WorkingCapitalLoanDataValidator {
             }
         }
 
+        // Resolved rather than read off the request: approval can lower the principal without touching the discount,
+        // which is the other way the pair ends up inverted.
+        WorkingCapitalLoanDiscountValidation.validateDiscountDoesNotExceedPrincipal(effectiveDiscountForApproval(element, loan),
+                effectivePrincipalForApproval(element, loan), WorkingCapitalLoanConstants.discountAmountParamName, baseDataValidator);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    /**
+     * Mirrors the approval write path: the requested discount (an explicit null clears it), else the one proposed on
+     * submission when the product forbids overriding it, else nothing - an overridable product carries no approved
+     * discount unless the approval names one.
+     */
+    private BigDecimal effectiveDiscountForApproval(final JsonElement element, final WorkingCapitalLoan loan) {
+        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.discountAmountParamName, element)) {
+            return this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.discountAmountParamName, element,
+                    new HashSet<>());
+        }
+        if (isDiscountOverrideDisallowed(loan)) {
+            return loan.getLoanProductRelatedDetails() != null ? loan.getLoanProductRelatedDetails().getDiscountProposed() : null;
+        }
+        return null;
+    }
+
+    /** Mirrors the approval write path: the approved amount when positive, else the proposed principal. */
+    private BigDecimal effectivePrincipalForApproval(final JsonElement element, final WorkingCapitalLoan loan) {
+        if (this.fromApiJsonHelper.parameterHasValue(WorkingCapitalLoanConstants.approvedLoanAmountParamName, element)) {
+            final BigDecimal approvedLoanAmount = this.fromApiJsonHelper
+                    .extractBigDecimalNamed(WorkingCapitalLoanConstants.approvedLoanAmountParamName, element, new HashSet<>());
+            if (approvedLoanAmount != null && approvedLoanAmount.signum() > 0) {
+                return approvedLoanAmount;
+            }
+        }
+        return loan.getProposedPrincipal();
+    }
+
+    /**
+     * Mirrors the disbursement write path: the approved discount when the product forbids overriding it, else the
+     * requested one, else nothing - a loan disbursed without a discount books no discount fee transaction.
+     */
+    private BigDecimal effectiveDiscountForDisbursement(final JsonElement element, final WorkingCapitalLoan loan) {
+        if (isDiscountOverrideDisallowed(loan)) {
+            return loan.getLoanProductRelatedDetails() != null ? loan.getLoanProductRelatedDetails().getDiscountApproved() : null;
+        }
+        if (this.fromApiJsonHelper.parameterHasValue(WorkingCapitalLoanConstants.discountAmountParamName, element)) {
+            return this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.discountAmountParamName, element,
+                    new HashSet<>());
+        }
+        return null;
     }
 
     private void validateDiscountAmountWithProductDiscount(final BigDecimal discountAmount,
@@ -583,6 +632,11 @@ public class WorkingCapitalLoanDataValidator {
                 }
             }
         }
+
+        // Against the amount actually being disbursed, not the approved principal: disbursing less than approved is
+        // allowed above, and it is the disbursed amount the discount fee is charged on.
+        WorkingCapitalLoanDiscountValidation.validateDiscountDoesNotExceedPrincipal(effectiveDiscountForDisbursement(element, loan),
+                transactionAmount, WorkingCapitalLoanConstants.discountAmountParamName, baseDataValidator);
 
         final String note = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.noteParamName, element);
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.noteParamName).value(note).ignoreIfNull()
@@ -1072,7 +1126,7 @@ public class WorkingCapitalLoanDataValidator {
                     .failWithCodeNoParameterAddedToErrorCode("near.breach.action.not.allowed.loan.has.no.near.breach.configuration");
         }
 
-        if (breachActionRepository.isBreachDisabledAsOf(loan.getId(), DateUtils.getBusinessLocalDate())) {
+        if (breachActionRepository.isBreachDisabled(loan.getId())) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("breach.is.disabled");
         }
 
@@ -1255,6 +1309,83 @@ public class WorkingCapitalLoanDataValidator {
                     .failWithCode("undo.transaction.not.allowed.for.loan.status");
         }
 
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateAdjustTransaction(final JsonCommand command, final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transaction) {
+        final String json = command.getJsonCommand();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ADJUST_TRANSACTION_SUPPORTED_PARAMETERS);
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        validatePaymentDetailsParameters(typeOfMap, element);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+
+        if (transaction.isReversed()) {
+            baseDataValidator.reset().parameter("transaction").failWithCode("transaction.already.undone", transaction.getId());
+        }
+
+        final LoanStatus loanStatus = loan.getLoanStatus();
+        final boolean adjustAllowedForStatus = LoanStatus.ACTIVE.equals(loanStatus) || LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loanStatus)
+                || LoanStatus.OVERPAID.equals(loanStatus);
+        if (!adjustAllowedForStatus) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
+                    .failWithCode("adjust.transaction.not.allowed.for.loan.status");
+        }
+
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.transactionDateParamName,
+                element);
+        final BigDecimal transactionAmount = this.fromApiJsonHelper
+                .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, element, new HashSet<>());
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName).value(transactionAmount).notNull()
+                .zeroOrPositiveAmount();
+
+        // Zero amount is undo: transactionDate is unused. A positive amount creates a replacement and requires a date.
+        final boolean createsReplacement = MathUtil.isGreaterThanZero(transactionAmount);
+        if (createsReplacement) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate).notNull();
+        }
+        if (transactionDate != null) {
+            if (DateUtils.isDateInTheFuture(transactionDate)) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
+                        .failWithCode("cannot.be.a.future.date");
+            }
+            if (loan.getFirstActualDisbursementDate() != null
+                    && DateUtils.isBefore(transactionDate, loan.getFirstActualDisbursementDate())) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
+                        .failWithCode("cannot.be.before.disbursal.date");
+            }
+        }
+
+        final Integer classificationId = this.fromApiJsonHelper
+                .extractIntegerSansLocaleNamed(WorkingCapitalLoanConstants.classificationIdParamName, element);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.classificationIdParamName).value(classificationId).ignoreIfNull()
+                .integerGreaterThanZero();
+        if (classificationId != null) {
+            final CodeValue codeValue = this.codeValueRepository
+                    .findByCodeNameAndId(WorkingCapitalLoanConstants.REPAYMENT_CLASSIFICATION_CODE_NAME, classificationId.longValue());
+            if (codeValue == null) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.classificationIdParamName).failWithCode(
+                        "code.value.classification.not.exists",
+                        "Code value does not exist in code " + WorkingCapitalLoanConstants.REPAYMENT_CLASSIFICATION_CODE_NAME);
+            }
+        }
+
+        validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.reversalExternalIdParamName);
+        validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.externalIdParameterName);
+        final String note = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.noteParamName, element);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.noteParamName).value(note).ignoreIfNull()
+                .notExceedingLengthOf(NOTE_MAX_LENGTH);
+
+        validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

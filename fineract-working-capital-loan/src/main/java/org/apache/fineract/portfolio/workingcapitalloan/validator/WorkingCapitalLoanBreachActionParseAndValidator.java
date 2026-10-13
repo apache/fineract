@@ -264,7 +264,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     }
 
     private void validateDisableState(final DataValidatorBuilder dataValidator, final Long loanId, final boolean isEnable) {
-        final boolean alreadyDisabled = breachActionRepository.isBreachDisabledAsOf(loanId, DateUtils.getBusinessLocalDate());
+        final boolean alreadyDisabled = breachActionRepository.isBreachDisabled(loanId);
         if (isEnable && !alreadyDisabled) {
             failGeneralValidation(dataValidator, "no.active.breach.disable.to.enable",
                     "There is no active breach disable to enable for this Working Capital loan.");
@@ -361,7 +361,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     }
 
     private void validateBreachNotDisabled(final DataValidatorBuilder dataValidator, final Long loanId) {
-        if (breachActionRepository.isBreachDisabledAsOf(loanId, DateUtils.getBusinessLocalDate())) {
+        if (breachActionRepository.isBreachDisabled(loanId)) {
             failGeneralValidation(dataValidator, "breach.is.disabled",
                     "Breach pause, resume, reschedule and reset actions are not allowed while breach evaluation is disabled.");
         }
@@ -475,7 +475,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         final Optional<LocalDate> candidateToDate = breachScheduleRepository.findCurrentOpenPeriod(workingCapitalLoan.getId(), businessDate)
                 .map(currentPeriod -> WorkingCapitalLoanBreachScheduleEvaluationUtils.calculateRescheduledToDate(
                         currentPeriod.getFromDate(), currentPeriod.getPeriodNumber(), action.getFrequency(), action.getFrequencyType(),
-                        breachGraceDays, existing));
+                        breachGraceDays, existing, activeBreachResetResolver.activeRestartResetDates(existing)));
         if (candidateToDate.filter(toDate -> toDate.isBefore(businessDate)).isPresent()) {
             failGeneralValidation(dataValidator, "reschedule.frequency.results.endDate.before.businessDate",
                     "Frequency change results a breach period endDate before current businessDate is not allowed");

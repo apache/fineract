@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanproduct.starter;
 
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -82,11 +83,12 @@ public class LoanProductConfiguration {
             DelinquencyBucketRepository delinquencyBucketRepository,
             LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             AdvancedPaymentAllocationsJsonParser advancedPaymentJsonParser, CreditAllocationsJsonParser creditAllocationsJsonParser,
-            LoanProductAssembler loanProductAssembler, LoanProductUpdateUtil loanProductUpdateUtil) {
+            LoanProductAssembler loanProductAssembler, LoanProductUpdateUtil loanProductUpdateUtil,
+            EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService) {
         return new LoanProductWritePlatformServiceJpaRepositoryImpl(context, fromApiJsonDeserializer, loanProductRepository, aprCalculator,
                 fundRepository, chargeRepository, rateRepository, accountMappingWritePlatformService, fineractEntityAccessUtil,
                 floatingRateRepository, loanRepositoryWrapper, businessEventNotifierService, delinquencyBucketRepository,
                 loanRepaymentScheduleTransactionProcessorFactory, advancedPaymentJsonParser, creditAllocationsJsonParser,
-                loanProductAssembler, loanProductUpdateUtil);
+                loanProductAssembler, loanProductUpdateUtil, entityDatatableChecksWritePlatformService);
     }
 }

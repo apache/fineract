@@ -94,7 +94,7 @@ public final class SmsDataValidator {
             }
         } else if (this.fromApiJsonHelper.parameterExists(SmsApiConstants.staffIdParamName, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(SmsApiConstants.staffIdParamName, element);
-            baseDataValidator.reset().parameter(SmsApiConstants.staffIdParamName).value(staffId).ignoreIfNull().longGreaterThanZero();
+            baseDataValidator.reset().parameter(SmsApiConstants.staffIdParamName).value(staffId).notNull().longGreaterThanZero();
 
             // ensure groupId and clientId are not passed
             if (this.fromApiJsonHelper.parameterExists(SmsApiConstants.groupIdParamName, element)) {

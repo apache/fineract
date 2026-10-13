@@ -48,15 +48,12 @@ public enum PortfolioProductType {
             return null;
         }
 
-        return switch (v) {
-            case 1 -> LOAN;
-            case 2 -> SAVING;
-            case 3 -> CLIENT;
-            case 4 -> PROVISIONING;
-            case 5 -> SHARES;
-            case 6 -> WORKING_CAPITAL_LOAN;
-            default -> null;
-        };
+        for (PortfolioProductType type : values()) {
+            if (type.value.equals(v)) {
+                return type;
+            }
+        }
+        return null;
     }
 
     public boolean isSavingProduct() {

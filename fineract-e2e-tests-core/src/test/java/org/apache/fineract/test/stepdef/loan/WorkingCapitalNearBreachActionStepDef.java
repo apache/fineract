@@ -75,7 +75,6 @@ public class WorkingCapitalNearBreachActionStepDef extends AbstractStepDef {
                 expectedErrorMessage);
     }
 
-    @Then("Near breach action history has {int} entry")
     @Then("Near breach action history has {int} entries")
     public void verifyNearBreachActionHistorySize(final int expectedSize) {
         final Long loanId = extractLoanId();

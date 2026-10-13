@@ -19,21 +19,26 @@
 package org.apache.fineract.template.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.template.data.TemplateData;
 import org.apache.fineract.template.data.TemplateDetailsData;
 import org.apache.fineract.template.data.TemplateItemData;
 import org.apache.fineract.template.data.TemplateMapperData;
+import org.apache.fineract.template.data.TemplateUpdateRequest;
+import org.apache.fineract.template.data.TemplateUpdateResponse;
 import org.apache.fineract.template.domain.TemplateEntity;
 import org.apache.fineract.template.domain.TemplateType;
 import org.apache.fineract.template.service.TemplateDomainService;
 import org.apache.fineract.template.service.TemplateMergeServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -107,6 +112,19 @@ class TemplatesApiResourceTest {
         assertThat(response).isSameAs(template);
         assertThat(response.getEntity()).isEqualTo("loan");
         assertThat(response.getType()).isEqualTo("Document");
+    }
+
+    @Test
+    void saveTemplateAppliesPathTemplateIdToPayloadRegardlessOfRequestBodyId() {
+        TemplateUpdateRequest request = TemplateUpdateRequest.builder().id(99L).name("Loan Agreement Template").text("<p>hello</p>")
+                .entity(1).type(0).build();
+        when(dispatcher.dispatch(any())).thenReturn(TemplateUpdateResponse::new);
+
+        resource.saveTemplate(34L, request);
+
+        ArgumentCaptor<Command<TemplateUpdateRequest>> captor = ArgumentCaptor.forClass(Command.class);
+        verify(dispatcher).dispatch(captor.capture());
+        assertThat(captor.getValue().getPayload().getId()).isEqualTo(34L);
     }
 
     private TemplateData template() {

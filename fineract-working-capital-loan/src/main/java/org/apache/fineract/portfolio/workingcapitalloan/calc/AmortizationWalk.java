@@ -271,7 +271,23 @@ final class AmortizationWalk {
                     } catch (final IllegalArgumentException | IllegalStateException | ArithmeticException e) {
                         // A position no rate can be solved from keeps the one it had. The projection is then the stale
                         // one it would have been anyway, which is worse than re-priced but better than no schedule.
-                        log.debug("Could not re-price the projection from balance {} with {} of fee unearned", balance, unearnedFee, e);
+                        //
+                        // A warning, because the days ahead may then not bill exactly what is still owed, and with
+                        // everything needed to act on it. The walk knows no loan id: the tenant and correlation id in
+                        // the log context, the disbursement date and the amounts identify the loan, and the inputs,
+                        // rate changes and payments below replay it. Why the solve failed is the exception's own
+                        // message, logged with it.
+                        log.warn(
+                                "Could not re-price the projection on {} (day {}). The days ahead keep the previous"
+                                        + " projection (daily payment {}, term {} days, annual EIR {} %) and may not bill exactly the {}"
+                                        + " still owed. Position: balance {}, unearned fee {}, collected {}. Loan: {} strategy, {}"
+                                        + " amortization, net disbursement {} on {}, discount fee {}, total payment volume {}, period"
+                                        + " payment rate in force {}, annual EIR {}, payment amount {}, NPV day count {}, rate changes {},"
+                                        + " payments {}",
+                                date, dayIndex, projection.dailyPayment(), projection.term(), projection.calculatedAnnualEir(),
+                                normalize(balance.add(unearnedFee, mc)), balance, unearnedFee, collected, strategy, amortizationType,
+                                netDisbursement, expectedDisbursementDate, discountFee, totalPaymentVolume, rateInForce, annualEir,
+                                paymentAmount, npvDayCount, rateChanges, paymentsByDate, e);
                     }
                 }
                 projectionStale = false;

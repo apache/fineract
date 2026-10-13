@@ -39,7 +39,7 @@ public enum LoanScheduleProcessingType {
     }
 
     public EnumOptionData asEnumOptionData() {
-        return new EnumOptionData((long) this.ordinal(), this.name(), this.humanReadableName);
+        return new EnumOptionData((long) (this.ordinal() + 1), this.name(), this.humanReadableName);
     }
 
     public boolean isHorizontal() {

@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.meeting.data;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -50,5 +51,6 @@ public class MeetingCreateRequest implements Serializable {
     private String dateFormat;
     @NotNull(message = "{org.apache.fineract.portfolio.meeting.locale.not-null}")
     private String locale;
+    @Valid
     private List<MeetingAttendanceData> clientsAttendance;
 }

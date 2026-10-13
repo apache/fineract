@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -36,7 +35,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.loan.v1.LoanAccountDelinquencyRangeDataV1;
-import org.apache.fineract.avro.loan.v1.LoanInstallmentDelinquencyBucketDataV1;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.DelinquencyRangeData;
@@ -100,38 +98,6 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         assertThat(actualDelinquencyRangeValue)
                 .as(ErrorMessageHelper.delinquencyRangeError(actualDelinquencyRangeValue, expectedDelinquencyRangeValue))
                 .isEqualTo(expectedDelinquencyRangeValue);
-    }
-
-    @Then("Admin checks that {string}th delinquency range is: {string} and added on: {string} and has delinquentDate {string}")
-    public void checkDelinquencyRange(String nthInList, String range, String addedOnDate, String delinquentDateExpected) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        String delinquentDateExpectedValue = "".equals(delinquentDateExpected) ? null : delinquentDateExpected;
-        eventAssertion.assertEvent(LoanDelinquencyRangeChangeEvent.class, loanId)
-                .extractingData(LoanAccountDelinquencyRangeDataV1::getDelinquentDate).isEqualTo(delinquentDateExpectedValue);
-
-        DelinquencyRange expectedDelinquencyRange = DelinquencyRange.valueOf(range);
-        String expectedDelinquencyRangeValue = expectedDelinquencyRange.getValue();
-
-        List<GetDelinquencyTagHistoryResponse> delinquencyHistoryDetails = ok(
-                () -> fineractClient.loans().retrieveDelinquencyTagHistoryLoan(loanId));
-
-        String actualDelinquencyRangeValue = DelinquencyRange.NO_DELINQUENCY.value;
-        String actualDelinquencyAddedOnDate = "";
-        int i = Integer.parseInt(nthInList) - 1;
-        GetDelinquencyTagHistoryResponse delinquencyTag = delinquencyHistoryDetails.get(i);
-        if (delinquencyTag != null) {
-            actualDelinquencyRangeValue = delinquencyTag.getDelinquencyRange().getClassification();
-            actualDelinquencyAddedOnDate = formatter.format(delinquencyTag.getAddedOnDate());
-        }
-
-        assertThat(actualDelinquencyRangeValue)
-                .as(ErrorMessageHelper.delinquencyRangeError(actualDelinquencyRangeValue, expectedDelinquencyRangeValue))
-                .isEqualTo(expectedDelinquencyRangeValue);
-        assertThat(actualDelinquencyAddedOnDate).as(ErrorMessageHelper.delinquencyRangeError(actualDelinquencyAddedOnDate, addedOnDate))
-                .isEqualTo(addedOnDate);
     }
 
     @Then("Loan delinquency history has the following details:")
@@ -334,23 +300,6 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
         int errorCodeExpected = 400;
         String errorMessageExpected = "Invalid Delinquency Action: TEST";
-        errorMessageAssertationFeign(loanId, request, errorCodeExpected, errorMessageExpected);
-    }
-
-    @Then("Initiating a DELINQUENCY PAUSE with startDate before the actual business date results an error - startDate: {string}, endDate: {string}")
-    public void delinquencyPauseStartDateError(String startDate, String endDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("pause")//
-                .startDate(startDate)//
-                .endDate(endDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
-
-        int errorCodeExpected = 400;
-        String errorMessageExpected = "Start date of pause period must be in the future";
         errorMessageAssertationFeign(loanId, request, errorCodeExpected, errorMessageExpected);
     }
 
@@ -615,78 +564,6 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
                     assertThat(actualDelinquencyRangeValue)//
                             .as(ErrorMessageHelper.delinquencyRangeError(actualDelinquencyRangeValue, expectedDelinquencyRangeValue))//
                             .isEqualTo(expectedDelinquencyRangeValue);//
-                    return null;
-                });
-    }
-
-    @Then("LoanDelinquencyRangeChangeBusinessEvent has the same Delinquency range, date and amount as in LoanDetails on both loan- and installment-level")
-    public void checkDelinquencyRangeInEvent() {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("associations", "collection")));
-        DelinquencyRangeData delinquencyRange = loanDetails.getDelinquencyRange();
-        GetLoansLoanIdDelinquencySummary delinquent = loanDetails.getDelinquent();
-
-        eventAssertion.assertEvent(LoanDelinquencyRangeChangeEvent.class, loanId)//
-                .extractingData(loanAccountDelinquencyRangeDataV1 -> {
-
-                    Long loanLevelDelinquencyRangeId = loanAccountDelinquencyRangeDataV1.getDelinquencyRange().getId();
-                    String loanLevelDelinquencyRange = loanAccountDelinquencyRangeDataV1.getDelinquencyRange().getClassification();
-                    String loanLevelDelinquentDate = loanAccountDelinquencyRangeDataV1.getDelinquentDate();
-                    BigDecimal loanLevelTotalAmount = loanAccountDelinquencyRangeDataV1.getAmount().getTotalAmount();
-
-                    Long loanLevelDelinquencyRangeIdExpected = delinquencyRange.getId();
-                    String loanLevelDelinquencyRangeExpected = delinquencyRange.getClassification();
-                    String loanLevelDelinquentDateExpected = FORMATTER.format(delinquent.getDelinquentDate());
-                    BigDecimal loanLevelTotalAmountExpected = delinquent.getDelinquentAmount();
-
-                    assertThat(loanLevelDelinquencyRangeId)//
-                            .as(ErrorMessageHelper.wrongValueInLoanDelinquencyRangeChangeBusinessEvent4(loanLevelDelinquencyRangeId,
-                                    loanLevelDelinquencyRangeIdExpected))//
-                            .isEqualTo(loanLevelDelinquencyRangeIdExpected);//
-                    assertThat(loanLevelDelinquencyRange)//
-                            .as(ErrorMessageHelper.wrongValueInLoanDelinquencyRangeChangeBusinessEvent5(loanLevelDelinquencyRange,
-                                    loanLevelDelinquencyRangeExpected))//
-                            .isEqualTo(loanLevelDelinquencyRangeExpected);//
-                    assertThat(loanLevelDelinquentDate)//
-                            .as(ErrorMessageHelper.wrongValueInLoanDelinquencyRangeChangeBusinessEvent7(loanLevelDelinquentDate,
-                                    loanLevelDelinquentDateExpected))//
-                            .isEqualTo(loanLevelDelinquentDateExpected);//
-                    assertThat(loanLevelTotalAmount)//
-                            .as(ErrorMessageHelper.wrongValueInLoanDelinquencyRangeChangeBusinessEvent6(loanLevelTotalAmount,
-                                    loanLevelTotalAmountExpected))//
-                            .isEqualByComparingTo(loanLevelTotalAmountExpected);//
-
-                    List<GetLoansLoanIdLoanInstallmentLevelDelinquency> installmentLevelDelinquencyBucketsExpected = delinquent
-                            .getInstallmentLevelDelinquency();
-                    List<LoanInstallmentDelinquencyBucketDataV1> installmentDelinquencyBuckets = loanAccountDelinquencyRangeDataV1
-                            .getInstallmentDelinquencyBuckets();
-                    for (int i = 0; i < installmentDelinquencyBuckets.size(); i++) {
-                        Long installmentLevelDelinquencyRangeId = installmentDelinquencyBuckets.get(i).getDelinquencyRange().getId();
-                        String installmentLevelDelinquencyRange = installmentDelinquencyBuckets.get(i).getDelinquencyRange()
-                                .getClassification();
-                        BigDecimal installmentLevelTotalAmount = installmentDelinquencyBuckets.get(i).getAmount().getTotalAmount();
-
-                        Long installmentLevelDelinquencyRangeIdExpected = installmentLevelDelinquencyBucketsExpected.get(i).getRangeId();
-                        String installmentLevelDelinquencyRangeExpected = installmentLevelDelinquencyBucketsExpected.get(i)
-                                .getClassification();
-                        BigDecimal installmentLevelTotalAmountExpected = installmentLevelDelinquencyBucketsExpected.get(i)
-                                .getDelinquentAmount();
-
-                        assertThat(installmentLevelDelinquencyRangeId)//
-                                .as(ErrorMessageHelper.wrongValueInLoanDelinquencyRangeChangeBusinessEvent1(
-                                        installmentLevelDelinquencyRangeId, installmentLevelDelinquencyRangeIdExpected))//
-                                .isEqualTo(installmentLevelDelinquencyRangeIdExpected);//
-                        assertThat(installmentLevelDelinquencyRange)//
-                                .as(ErrorMessageHelper.wrongValueInLoanDelinquencyRangeChangeBusinessEvent2(
-                                        installmentLevelDelinquencyRange, installmentLevelDelinquencyRangeExpected))//
-                                .isEqualTo(installmentLevelDelinquencyRangeExpected);//
-                        assertThat(installmentLevelTotalAmount)//
-                                .as(ErrorMessageHelper.wrongValueInLoanDelinquencyRangeChangeBusinessEvent3(installmentLevelTotalAmount,
-                                        installmentLevelTotalAmountExpected))//
-                                .isEqualByComparingTo(installmentLevelTotalAmountExpected);//
-                    }
                     return null;
                 });
     }
