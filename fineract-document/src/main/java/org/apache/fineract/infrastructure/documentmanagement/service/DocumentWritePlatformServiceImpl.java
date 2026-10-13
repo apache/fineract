@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.documentmanagement.service;
 import static java.util.Objects.requireNonNull;
 
 import jakarta.validation.Valid;
+import java.io.InputStream;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.apache.fineract.infrastructure.contentstore.exception.ContentPolicyException;
 import org.apache.fineract.infrastructure.contentstore.service.ContentStoreService;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreateRequest;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreateResponse;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentDeleteRequest;
@@ -70,7 +73,7 @@ public class DocumentWritePlatformServiceImpl implements DocumentWritePlatformSe
             var path = getPath(STORE_PREFIX, request.getEntityType(), request.getEntityId(), request.getFileName(),
                     storeService.getDelimiter());
 
-            path = storeService.upload(path, request.getStream(), request.getType());
+            path = upload(path, request.getStream(), request.getType());
 
             final var doc = new Document().setParentEntityType(request.getEntityType()).setParentEntityId(request.getEntityId())
                     .setName(Optional.ofNullable(request.getName()).orElse(request.getFileName())).setFileName(request.getFileName())
@@ -113,12 +116,12 @@ public class DocumentWritePlatformServiceImpl implements DocumentWritePlatformSe
 
                 if (request.getStream() != null && StringUtils.isNotEmpty(path) && !Strings.CI.equals(doc.getLocation(), path)) {
                     storeService.delete(doc.getLocation());
-                    storeService.upload(path, request.getStream(), request.getType());
+                    upload(path, request.getStream(), request.getType());
                     doc.setLocation(path);
                     doc.setFileName(FilenameUtils.getName(path));
                 }
             } else if (request.getStream() != null) {
-                storeService.upload(doc.getLocation(), request.getStream(), request.getType());
+                upload(doc.getLocation(), request.getStream(), request.getType());
             }
             if (StringUtils.isNotEmpty(request.getDescription()) && !Strings.CI.equals(doc.getDescription(), request.getDescription())) {
                 doc.setDescription(request.getDescription());
@@ -165,6 +168,14 @@ public class DocumentWritePlatformServiceImpl implements DocumentWritePlatformSe
         } catch (final Exception e) {
             throw ErrorHandler.getMappable(e, "error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
+        }
+    }
+
+    private String upload(final String path, final InputStream stream, final String type) {
+        try {
+            return storeService.upload(path, stream, type);
+        } catch (final ContentPolicyException e) {
+            throw new PlatformApiDataValidationException("error.msg.content.policy", e.getDefaultUserMessage(), "file", e);
         }
     }
 
