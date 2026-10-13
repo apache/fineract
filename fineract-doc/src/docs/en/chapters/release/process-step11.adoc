@@ -2,7 +2,7 @@
 
 == Description
 
-Conclude voting with https://release-test.apache.org[the ATR (ASF Trusted Releases) tool].
+Conclude voting with https://releases.apache.org[the ATR (ASF Trusted Releases) tool].
 
 The ATR tally mechanism is not perfect. Manually confirm the tally and adjust as necessary before resolving the vote.
 

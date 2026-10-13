@@ -2,7 +2,7 @@
 
 == Description
 
-Initiate voting with https://release-test.apache.org[the ATR (ASF Trusted Releases) tool].
+Initiate voting with https://releases.apache.org[the ATR (ASF Trusted Releases) tool].
 
 == Gradle Task
 

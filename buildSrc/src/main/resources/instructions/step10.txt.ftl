@@ -24,6 +24,6 @@
 
 Initiate voting with the ATR (ASF Trusted Releases) tool.
 
-https://release-test.apache.org
+https://releases.apache.org
 
 [INSTRUCTIONS:END]
