@@ -1123,6 +1123,12 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public SavingsAccountTransaction withdraw(final SavingsAccountTransactionDTO transactionDTO, final boolean applyWithdrawFee,
             final boolean backdatedTxnsAllowedTill, final Long relaxingDaysConfigForPivotDate, String refNo) {
+        return withdraw(transactionDTO, applyWithdrawFee, backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate, refNo, false);
+    }
+
+    public SavingsAccountTransaction withdraw(final SavingsAccountTransactionDTO transactionDTO, final boolean applyWithdrawFee,
+            final boolean backdatedTxnsAllowedTill, final Long relaxingDaysConfigForPivotDate, String refNo,
+            final boolean isForceWithdrawal) {
         if (!isTransactionsAllowed()) {
 
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
@@ -1185,7 +1191,9 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         final Money transactionAmountMoney = Money.of(this.currency, transactionDTO.getTransactionAmount());
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, office(),
                 transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney, refNo);
-
+        if (isForceWithdrawal) {
+            transaction.markAsForceTransaction();
+        }
         if (backdatedTxnsAllowedTill) {
             addTransactionToExisting(transaction);
         } else {
@@ -1368,7 +1376,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             // enforceMinRequiredBalance
             if (!isException && transaction.canProcessBalanceCheck() && !isOverdraft()) {
                 if (violatesMinRequiredBalance(runningBalance, minRequiredBalance)
-                        && !isForceWithdrawalAllowed(isForceWithdrawal, runningBalance)) {
+                        && !isForceWithdrawalAllowed(transaction, isForceWithdrawal, runningBalance)) {
                     throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
                             transactionAmount);
                 }
@@ -1381,8 +1389,10 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         // interest posting
         // and should be checked after processing all transactions
         if (isOverdraft()) {
+            final SavingsAccountTransaction lastTransaction = transactionsSortedByDate.isEmpty() ? null
+                    : transactionsSortedByDate.get(transactionsSortedByDate.size() - 1);
             if (violatesMinRequiredBalance(runningBalance, minRequiredBalance)
-                    && !isForceWithdrawalAllowed(isForceWithdrawal, runningBalance)) {
+                    && !isForceWithdrawalAllowed(lastTransaction, isForceWithdrawal, runningBalance)) {
                 throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
             }
         }
@@ -1437,14 +1447,19 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
      * Checks whether a force withdrawal is allowed based on the global configuration and the configured negative
      * balance limit.
      *
-     * @param isForceWithdrawal
-     *            whether the current transaction is a force withdrawal
+     * @param transaction
+     *            the transaction currently being evaluated in the historical balance-recalculation loop; may be
+     *            {@code null} when evaluating the final overdraft-only check that runs after the loop
+     * @param isCurrentOperationForceWithdrawal
+     *            whether the transaction/operation currently being processed by the caller is a force withdrawal
      * @param runningBalance
-     *            the current running balance of the account
+     *            the running balance of the account at this point in the historical recalculation
      * @return true if force withdrawal is enabled and the running balance is within the allowed negative limit
      */
-    private boolean isForceWithdrawalAllowed(final boolean isForceWithdrawal, final Money runningBalance) {
-        if (!isForceWithdrawal || this.configurationDomainService == null) {
+    private boolean isForceWithdrawalAllowed(final SavingsAccountTransaction transaction, final boolean isCurrentOperationForceWithdrawal,
+            final Money runningBalance) {
+        final boolean isForcedContext = (transaction != null && transaction.isForceTransaction()) || isCurrentOperationForceWithdrawal;
+        if (!isForcedContext || this.configurationDomainService == null) {
             return false;
         }
         if (!this.configurationDomainService.isForceWithdrawalOnSavingsAccountEnabled()) {

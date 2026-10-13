@@ -87,6 +87,9 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed;
 
+    @Column(name = "is_force_transaction", nullable = false)
+    private boolean forceTransaction;
+
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private ExternalId externalId = ExternalId.empty();
 
@@ -525,6 +528,14 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
 
     public boolean isWithdrawal() {
         return getTransactionType().isWithdrawal();
+    }
+
+    public boolean isForceTransaction() {
+        return this.forceTransaction;
+    }
+
+    public void markAsForceTransaction() {
+        this.forceTransaction = true;
     }
 
     public boolean isPostInterestCalculationRequired() {
