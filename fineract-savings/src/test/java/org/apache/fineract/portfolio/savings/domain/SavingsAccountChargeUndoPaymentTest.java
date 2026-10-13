@@ -46,7 +46,9 @@ import org.mockito.Mockito;
 /**
  * Undoing a payment on a recurring (weekly/monthly/annual) savings fee. A partial payment leaves the cycle open - pay()
  * only advances the due date once the outstanding reaches zero - so undoing it must give the amount back to that cycle
- * without resetting the outstanding to the full fee or rolling the due date back a cycle.
+ * without resetting the outstanding to the full fee or rolling the due date back a cycle. Undoing the payment that
+ * closed a cycle reopens that cycle with the undone amount outstanding, and a payment of a cycle that later payments
+ * have moved past is an earlier-cycle payment the account refuses to undo on its own.
  */
 class SavingsAccountChargeUndoPaymentTest {
 
@@ -121,6 +123,85 @@ class SavingsAccountChargeUndoPaymentTest {
         assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo(FEE);
         assertThat(charge.getDueDate()).isEqualTo(DUE_DATE);
         assertThat(charge.isPaid()).isFalse();
+    }
+
+    @Test
+    void undoingTheCycleClosingPaymentReopensThatCycleWithOnlyThatAmountOutstanding() {
+        final SavingsAccountCharge charge = weeklyFee();
+        charge.pay(currency, money("40.00"));
+        charge.pay(currency, money("5.00"));
+        assertThat(charge.getDueDate()).isEqualTo(DUE_DATE.plusWeeks(1));
+
+        charge.undoPayment(currency, money("5.00"), money("0"));
+
+        assertThat(amountPaid(charge)).isEqualByComparingTo("40.00");
+        assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo("5.00");
+        assertThat(charge.getDueDate()).isEqualTo(DUE_DATE);
+    }
+
+    @Test
+    void aPaymentOfAClosedCycleFollowedByPaymentsOnTheOpenCycleIsAnEarlierCyclePayment() {
+        final SavingsAccountCharge charge = weeklyFee();
+        charge.pay(currency, money("40.00"));
+        charge.pay(currency, money("5.00"));
+        charge.pay(currency, money("10.00"));
+
+        assertThat(charge.isPaymentOfEarlierCycle(currency, money("10.00"))).isTrue();
+        assertThat(charge.isPaymentOfEarlierCycle(currency, money("15.00"))).isTrue();
+        assertThat(charge.isPaymentOfEarlierCycle(currency, money("0"))).isFalse();
+    }
+
+    @Test
+    void aClosingPaymentFollowedByAWholeLaterCycleIsAnEarlierCyclePayment() {
+        final SavingsAccountCharge charge = weeklyFee();
+        charge.pay(currency, money("45.00"));
+        charge.pay(currency, money("45.00"));
+
+        assertThat(charge.isPaymentOfEarlierCycle(currency, money("45.00"))).isTrue();
+        assertThat(charge.isPaymentOfEarlierCycle(currency, money("0"))).isFalse();
+    }
+
+    @Test
+    void undoingTheLatestPaymentOfTheOpenCycleLeavesTheClosedCycleAlone() {
+        final SavingsAccountCharge charge = weeklyFee();
+        charge.pay(currency, money("40.00"));
+        charge.pay(currency, money("5.00"));
+        charge.pay(currency, money("10.00"));
+
+        charge.undoPayment(currency, money("10.00"), money("0"));
+
+        assertThat(amountPaid(charge)).isEqualByComparingTo("45.00");
+        assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo(FEE);
+        assertThat(charge.getDueDate()).isEqualTo(DUE_DATE.plusWeeks(1));
+    }
+
+    @Test
+    void undoingAnEarlierPartialPaymentOfTheOpenCycleKeepsTheLaterOne() {
+        final SavingsAccountCharge charge = weeklyFee();
+        charge.pay(currency, money("3.00"));
+        charge.pay(currency, money("7.00"));
+
+        assertThat(charge.isPaymentOfEarlierCycle(currency, money("7.00"))).isFalse();
+        charge.undoPayment(currency, money("3.00"), money("7.00"));
+
+        assertThat(amountPaid(charge)).isEqualByComparingTo("7.00");
+        assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo("38.00");
+        assertThat(charge.getDueDate()).isEqualTo(DUE_DATE);
+    }
+
+    @Test
+    void undoingAWaiverThatClosedAPartlyPaidCycleReopensItWithTheWaivedAmountOutstanding() {
+        final SavingsAccountCharge charge = weeklyFee();
+        charge.pay(currency, money("10.00"));
+        final Money waived = charge.waive(currency);
+        assertThat(waived.getAmount()).isEqualByComparingTo("35.00");
+
+        charge.undoWaiver(currency, waived);
+
+        assertThat(amountPaid(charge)).isEqualByComparingTo("10.00");
+        assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo("35.00");
+        assertThat(charge.getDueDate()).isEqualTo(DUE_DATE);
+        assertThat(charge.isWaived()).isFalse();
     }
 
     private SavingsAccountCharge weeklyFee() {

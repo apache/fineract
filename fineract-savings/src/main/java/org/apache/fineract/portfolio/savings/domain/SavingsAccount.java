@@ -2299,12 +2299,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             // undo charge
             final Set<SavingsAccountChargePaidBy> chargesPaidBy = transactionToUndo.getSavingsAccountChargesPaid();
             for (final SavingsAccountChargePaidBy savingsAccountChargePaidBy : chargesPaidBy) {
-                final SavingsAccountCharge chargeToUndo = savingsAccountChargePaidBy.getSavingsAccountCharge();
-                if (transactionToUndo.isChargeTransaction()) {
-                    chargeToUndo.undoPayment(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
-                } else if (transactionToUndo.isWaiveCharge()) {
-                    chargeToUndo.undoWaiver(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
-                }
+                undoChargeTransaction(transactionToUndo, savingsAccountChargePaidBy.getSavingsAccountCharge());
             }
         }
     }
@@ -2329,12 +2324,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             // undo charge
             final Set<SavingsAccountChargePaidBy> chargesPaidBy = transactionToUndo.getSavingsAccountChargesPaid();
             for (final SavingsAccountChargePaidBy savingsAccountChargePaidBy : chargesPaidBy) {
-                final SavingsAccountCharge chargeToUndo = savingsAccountChargePaidBy.getSavingsAccountCharge();
-                if (transactionToUndo.isChargeTransaction()) {
-                    chargeToUndo.undoPayment(this.getCurrency(), transactionToUndo.getAmount(this.currency));
-                } else if (transactionToUndo.isWaiveCharge()) {
-                    chargeToUndo.undoWaiver(this.getCurrency(), transactionToUndo.getAmount(this.currency));
-                }
+                undoChargeTransaction(transactionToUndo, savingsAccountChargePaidBy.getSavingsAccountCharge());
             }
         }
     }
@@ -2352,14 +2342,61 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             // undo charge
             final Set<SavingsAccountChargePaidBy> chargesPaidBy = transactionToUndo.getSavingsAccountChargesPaid();
             for (final SavingsAccountChargePaidBy savingsAccountChargePaidBy : chargesPaidBy) {
-                final SavingsAccountCharge chargeToUndo = savingsAccountChargePaidBy.getSavingsAccountCharge();
-                if (transactionToUndo.isChargeTransaction()) {
-                    chargeToUndo.undoPayment(this.getCurrency(), transactionToUndo.getAmount(this.currency));
-                } else if (transactionToUndo.isWaiveCharge()) {
-                    chargeToUndo.undoWaiver(this.getCurrency(), transactionToUndo.getAmount(this.currency));
+                undoChargeTransaction(transactionToUndo, savingsAccountChargePaidBy.getSavingsAccountCharge());
+            }
+        }
+    }
+
+    private void undoChargeTransaction(final SavingsAccountTransaction transactionToUndo, final SavingsAccountCharge chargeToUndo) {
+        final Money transactionAmount = transactionToUndo.getAmount(this.currency);
+        if (!chargeToUndo.isRecurringFee()) {
+            if (transactionToUndo.isChargeTransaction()) {
+                chargeToUndo.undoPayment(this.currency, transactionAmount);
+            } else if (transactionToUndo.isWaiveCharge()) {
+                chargeToUndo.undoWaiver(this.currency, transactionAmount);
+            }
+            return;
+        }
+
+        // A recurring fee only tracks its current cycle, so its payments and waivers can only be undone latest first
+        Money paidAfterwards = Money.zero(this.currency);
+        boolean waivedAfterwards = false;
+        for (final SavingsAccountTransaction transaction : this.transactions) {
+            if (transaction.isNotReversed() && transaction.isPaymentForCurrentCharge(chargeToUndo)
+                    && isMadeAfter(transaction, transactionToUndo)) {
+                if (transaction.isWaiveCharge()) {
+                    waivedAfterwards = true;
+                } else if (transaction.isChargeTransaction()) {
+                    paidAfterwards = paidAfterwards.plus(transaction.getAmount(this.currency));
                 }
             }
         }
+
+        final boolean undoableAlone;
+        if (transactionToUndo.isWaiveCharge()) {
+            undoableAlone = !waivedAfterwards && paidAfterwards.isZero();
+        } else {
+            undoableAlone = !waivedAfterwards && !chargeToUndo.isPaymentOfEarlierCycle(this.currency, paidAfterwards);
+        }
+        if (!undoableAlone) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            new DataValidatorBuilder(dataValidationErrors).resource(SAVINGS_ACCOUNT_RESOURCE_NAME).reset()
+                    .failWithCodeNoParameterAddedToErrorCode("transaction.undo.recurring.charge.has.later.transactions");
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (transactionToUndo.isChargeTransaction()) {
+            chargeToUndo.undoPayment(this.currency, transactionAmount, paidAfterwards);
+        } else if (transactionToUndo.isWaiveCharge()) {
+            chargeToUndo.undoWaiver(this.currency, transactionAmount);
+        }
+    }
+
+    private static boolean isMadeAfter(final SavingsAccountTransaction transaction, final SavingsAccountTransaction other) {
+        if (transaction == other || transaction.getId() != null && transaction.getId().equals(other.getId())) {
+            return false;
+        }
+        return transaction.getId() == null || other.getId() != null && transaction.getId() > other.getId();
     }
 
     private LocalDate findLatestAnnualFeeTransactionDueDate() {
