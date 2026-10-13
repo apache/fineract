@@ -439,6 +439,7 @@ public class FineractProperties {
         private boolean loanCobEnabled;
         private FineractJournalEntryAggregationProperties journalEntryAggregation;
         private int retainedEarningChunkSize;
+        private boolean executeMissedRuns;
     }
 
     @Getter

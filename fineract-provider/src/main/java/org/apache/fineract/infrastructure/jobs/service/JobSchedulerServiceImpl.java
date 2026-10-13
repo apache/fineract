@@ -63,6 +63,11 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
             HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
             ThreadLocalContextUtil.setBusinessDates(businessDates);
+            final SchedulerDetail schedulerDetail = schedularWritePlatformService.retriveSchedulerDetail();
+            if (schedulerDetail.isResetSchedulerOnBootup()) {
+                schedulerDetail.setSuspended(false);
+                schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
+            }
             final List<ScheduledJobDetail> scheduledJobDetails = schedularWritePlatformService
                     .retrieveAllJobs(fineractProperties.getNodeId());
             for (final ScheduledJobDetail jobDetails : scheduledJobDetails) {
@@ -73,11 +78,6 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
                 }
                 jobDetails.setTriggerMisfired(false);
                 schedularWritePlatformService.saveOrUpdate(jobDetails);
-            }
-            final SchedulerDetail schedulerDetail = schedularWritePlatformService.retriveSchedulerDetail();
-            if (schedulerDetail.isResetSchedulerOnBootup()) {
-                schedulerDetail.setSuspended(false);
-                schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
             }
             ThreadLocalContextUtil.reset();
         }

@@ -286,6 +286,31 @@ POST /fineract-provider/api/v1/jobs/LOAN_COB/inline?tenantIdentifier={tenantId}
 ----
 In this case the Loan COB job will work only with the given loan IDs.
 
+== Executing missed runs
+
+The scheduler runs in memory and has no persistent job store. A cron fire that happens while Fineract is down never happens, and a fire that happens while the scheduler is suspended is vetoed. Both are lost by default.
+
+When `fineract.job.execute-missed-runs` (environment variable `FINERACT_JOB_EXECUTE_MISSED_RUNS`, default `false`) is `true`, the scheduler replays what was missed. The `next_run_time` of a job records the first run that never happened, because a vetoed fire never advances it, and this is used as the start of the job's trigger, so Quartz applies its own misfire handling:
+
+* By default a job fires once, as soon as the scheduler is up, however many runs it missed.
+* `Increase Business Date by 1 day` fires once per missed run, one after another, so the business date moves one day per missed run. `Increase COB Date by 1 day` fires once.
+* A job never runs concurrently with itself. Fires while the scheduler is suspended are still vetoed and do not advance `next_run_time`.
+
+The replay happens in two places:
+
+* On boot, for every active job whose `next_run_time` is in the past. A tenant with `reset_scheduler_on_bootup` is un-suspended before its jobs are registered, so the replayed fires are not vetoed.
+* On `POST /scheduler?command=start`, which registers each active job with a past `next_run_time` again in the same way and clears `is_misfired`. With the property off the existing `execute_misfired_jobs` replay is unchanged.
+
+`next_run_time` is the instant of a Quartz fire time and is compared as an instant, so neither the tenant's nor the JVM's time zone changes what counts as missed. The cron expression itself is evaluated in the tenant's time zone. The column has no zone, a `Date` is mapped with the JVM's default zone, so keep the same default zone (the shipped images use `-Duser.timezone=UTC`) across restarts.
+
+Jobs run in the order Quartz fires them, there is no dependency between jobs. A replayed run executes on the day of the catch-up, not on the day it was missed, so a job that depends on the real clock or on a business date that has not caught up yet sees the current state. Known limits:
+
+* Periodic standing instructions lose the skipped dates, because they match the exact business date.
+* Retained Earning is wrong if the business date jumps over a year end in one step.
+* Jobs outside COB date their postings on the catch-up day.
+* Report mailing sends duplicates after a long gap.
+* Loans that are more than one day behind are not caught up by a single replayed COB run. Run the COB catch-up (`/loans/catch-up`) after the business date has caught up.
+
 == Global Configuration for enabling/disabling jobs
 
 Some jobs can be enabled/disabled with global configuration.

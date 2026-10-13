@@ -71,7 +71,7 @@ public class SchedulerTriggerListener implements TriggerListener {
 
     @Override
     public void triggerMisfired(final Trigger trigger) {
-        log.error("triggerMisfired() trigger={}", trigger);
+        log.info("triggerMisfired() trigger={}", trigger);
     }
 
     @Override
