@@ -54,6 +54,11 @@ Most of the jobs are normal batch jobs with limited scalability because Fineract
 |Yes
 |TBD
 
+|SAVINGS_CLOSE_OF_BUSINESS
+|No
+|Yes
+|Savings Close of Business (job `SAVINGS_COB`, display name "Savings COB"). See <<Savings COB (Close of Business)>>.
+
 |===
 
 == Batch job execution
@@ -150,6 +155,7 @@ There's another type of distinction on the batch jobs. Some of them are configur
 The currently supported configurable batch jobs are the following:
 
 * LOAN_CLOSE_OF_BUSINESS
+* SAVINGS_CLOSE_OF_BUSINESS
 
 The behavior of these batch jobs are configurable. There's a new terminology we're introducing called *business steps*.
 
@@ -253,6 +259,35 @@ PUT /fineract-provider/api/v1/jobs/{jobName}/steps?tenantIdentifier={tenantId}
 }
 ----
 
+The update replaces the whole configured list of the job and answers `204 No Content`. It is validated per job, and a rejected update answers `400 Bad Request`:
+
+* The list must contain at least one business step.
+* Every business step must belong to the job being configured. A Loan COB step sent to `SAVINGS_CLOSE_OF_BUSINESS` is rejected, and so is a Savings COB step sent to `LOAN_CLOSE_OF_BUSINESS`.
+
+Retrieving the business steps that can be configured for a job:
+
+[source,text]
+----
+GET /fineract-provider/api/v1/jobs/{jobName}/available-steps?tenantIdentifier={tenantId}
+HTTP 200
+
+{
+  "jobName": "SAVINGS_CLOSE_OF_BUSINESS",
+  "availableBusinessSteps": [
+    {
+      "stepName": "POST_INTEREST_FOR_SAVINGS",
+      "stepDescription": "Post interest for savings"
+    },
+    {
+      "stepName": "PAY_DUE_SAVINGS_CHARGES",
+      "stepDescription": "Pay due savings charges"
+    }
+  ]
+}
+----
+
+Here `{jobName}` is either the job name (`LOAN_CLOSE_OF_BUSINESS`, `SAVINGS_CLOSE_OF_BUSINESS`) or the name of its business step category (`loan`, `savings`), and the response echoes the value that was sent. The example is shortened; the Savings COB steps are listed in <<savings-cob-business-step-configuration,the Savings COB chapter>>.
+
 The business step configuration for jobs are tracked within the database in the `m_batch_business_steps` table.
 
 == Inline Jobs
@@ -270,6 +305,9 @@ When the Inline job gets triggered then the corresponding existing job will run 
 |LOAN_COB
 |LOAN_CLOSE_OF_BUSINESS
 
+|SAVINGS_COB
+|SAVINGS_CLOSE_OF_BUSINESS
+
 |===
 
 Triggering the Inline Loan COB Job:
@@ -285,6 +323,22 @@ POST /fineract-provider/api/v1/jobs/LOAN_COB/inline?tenantIdentifier={tenantId}
 }
 ----
 In this case the Loan COB job will work only with the given loan IDs.
+
+Triggering the Inline Savings COB Job:
+
+[source,text]
+----
+POST /fineract-provider/api/v1/jobs/SAVINGS_COB/inline?tenantIdentifier={tenantId}
+
+{
+  "savingsIds": [
+      1, 2, 3
+  ]
+}
+----
+In this case the Savings COB job will work only with the given savings account IDs. Both inline jobs share the same request size limit (`fineract.api.body-item-size-limit.inline-loan-cob`, 1000 by default) and the same account-lock rules. A list over the limit is rejected with `400 Bad Request` and the globalisation code `error.msg.validation.request.body.item.limit.validation`.
+
+Both `loanIds` and `savingsIds` are declared on the `InlineJobRequest` schema of the OpenAPI specification, so the generated clients can trigger either job. See <<Inline Savings COB>> for the rules the Savings job follows.
 
 == Global Configuration for enabling/disabling jobs
 
