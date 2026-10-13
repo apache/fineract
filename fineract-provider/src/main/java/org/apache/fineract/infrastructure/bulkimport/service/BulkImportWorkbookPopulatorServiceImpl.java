@@ -23,7 +23,9 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
@@ -121,6 +123,11 @@ import org.springframework.stereotype.Service;
 public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkbookPopulatorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(BulkImportWorkbookPopulatorServiceImpl.class);
+    // Templates whose populators never format a date: they ignore dateFormat or only hand it to POI's
+    // createDateConstraint, which accepts null. Every other template needs it and fails without it.
+    private static final Set<GlobalEntityType> TEMPLATES_WITHOUT_DATE_FORMAT = EnumSet.of(GlobalEntityType.OFFICES, GlobalEntityType.STAFF,
+            GlobalEntityType.USERS, GlobalEntityType.CHART_OF_ACCOUNTS, GlobalEntityType.GL_JOURNAL_ENTRIES,
+            GlobalEntityType.SHARE_ACCOUNTS);
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final StaffReadService staffReadPlatformService;
@@ -180,7 +187,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
 
     @Override
     public Response getTemplate(String entityType, Long officeId, Long staffId, final String dateFormat, final LookupMode lookupMode) {
-        if (StringUtils.isBlank(dateFormat)) {
+        if (StringUtils.isBlank(dateFormat) && requiresDateFormat(entityType)) {
             throw new PlatformApiDataValidationException(List.of(ApiParameterError.parameterError("error.msg.dateformat.mandatory",
                     "The parameter dateFormat is mandatory", "dateFormat")));
         }
@@ -232,6 +239,11 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         } else {
             throw new GeneralPlatformDomainRuleException("error.msg.given.entity.type.null", "Given Entity type is null");
         }
+    }
+
+    private static boolean requiresDateFormat(final String entityType) {
+        return entityType != null
+                && TEMPLATES_WITHOUT_DATE_FORMAT.stream().noneMatch(type -> type.toString().equalsIgnoreCase(entityType.trim()));
     }
 
     private WorkbookPopulator populateClientWorkbook(final String entityType, final Long officeId, final Long staffId) {

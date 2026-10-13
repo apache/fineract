@@ -20,12 +20,14 @@ package org.apache.fineract.infrastructure.bulkimport.populator.loan;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.bulkimport.populator.ChargeSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ClientSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ExtrasSheetPopulator;
@@ -121,6 +123,8 @@ class LoanWorkbookPopulatorTest {
             assertDoesNotThrow(() -> populator.populate(workbook, DATE_FORMAT));
 
             assertEquals(1, definedNamesStartingWith(workbook, "Group_"), "colliding office names must yield a single Group_ defined name");
+            assertTrue(workbook.getAllNames().stream().allMatch(name -> StringUtils.isNotEmpty(name.getNameName())),
+                    "a skipped office must not leave an unnamed Name in the workbook");
         }
     }
 
