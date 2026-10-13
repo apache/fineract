@@ -47,6 +47,7 @@ import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants;
 import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetRequest;
+import org.apache.fineract.portfolio.collectionsheet.data.DisbursementTransactionsRequest;
 import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -73,6 +74,7 @@ public class CollectionSheetApiResource {
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollectionSheetApiResourceSwagger.PostCollectionSheetResponse.class)))
     public Response generateCollectionSheet(@QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) CollectionSheetRequest collectionSheetRequest) {
+        moveNestedTransactionsToTopLevel(collectionSheetRequest);
         final String payload = toApiJsonSerializer.serialize(collectionSheetRequest);
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(payload);
 
@@ -86,5 +88,23 @@ public class CollectionSheetApiResource {
             return Response.ok(this.commandsSourceWritePlatformService.logCommandSource(commandRequest)).build();
         }
         return Response.ok().build();
+    }
+
+    /**
+     * The save command reads bulkRepaymentTransactions and bulkSavingsDueTransactions at the top level of the request.
+     * Requests that send them inside bulkDisbursementTransactions are moved there, so both forms are processed.
+     */
+    private static void moveNestedTransactionsToTopLevel(final CollectionSheetRequest request) {
+        final DisbursementTransactionsRequest nested = request.getBulkDisbursementTransactions();
+        if (nested == null) {
+            return;
+        }
+        if (request.getBulkRepaymentTransactions() == null) {
+            request.setBulkRepaymentTransactions(nested.getBulkRepaymentTransactions());
+        }
+        if (request.getBulkSavingsDueTransactions() == null) {
+            request.setBulkSavingsDueTransactions(nested.getBulkSavingsDueTransactions());
+        }
+        request.setBulkDisbursementTransactions(null);
     }
 }

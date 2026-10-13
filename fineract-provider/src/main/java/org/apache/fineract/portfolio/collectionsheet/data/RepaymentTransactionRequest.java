@@ -38,6 +38,7 @@ public class RepaymentTransactionRequest implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long loanId;
+    private String externalId;
     private BigDecimal transactionAmount;
     private Long paymentTypeId;
     private String accountNumber;

@@ -100,7 +100,7 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer
                     if (paymentDetail == null) {
                         detail = this.paymentDetailAssembler.fetchPaymentDetail(loanTransactionElement);
                     }
-                    if (transactionAmount != null && transactionAmount.intValue() > 0) {
+                    if (transactionAmount != null && transactionAmount.compareTo(BigDecimal.ZERO) > 0) {
                         loanRepaymentTransactions[i] = new SingleRepaymentCommand(loanId, externalId, transactionAmount, transactionDate,
                                 detail);
                     }

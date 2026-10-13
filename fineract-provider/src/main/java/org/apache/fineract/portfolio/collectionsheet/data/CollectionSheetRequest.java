@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,10 +38,15 @@ public class CollectionSheetRequest implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long officeId;
+    private Long staffId;
     private String dateFormat;
     private String locale;
     private String actualDisbursementDate;
     private String transactionDate;
+    private String note;
     private DisbursementTransactionsRequest bulkDisbursementTransactions;
+    // The save command reads the repayment and savings lists at the top level of the request, as documented.
+    private List<RepaymentTransactionRequest> bulkRepaymentTransactions;
+    private List<SavingDueTransactionRequest> bulkSavingsDueTransactions;
 
 }
