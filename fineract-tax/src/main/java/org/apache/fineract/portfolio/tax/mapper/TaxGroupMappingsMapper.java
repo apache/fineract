@@ -23,10 +23,12 @@ import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.portfolio.tax.data.TaxGroupMappingsData;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupMappings;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(config = MapstructMapperConfig.class, uses = { TaxComponentMapper.class })
 public interface TaxGroupMappingsMapper {
 
+    @Mapping(target = "componentEditable", ignore = true)
     TaxGroupMappingsData map(TaxGroupMappings taxGroupMapping);
 
     List<TaxGroupMappingsData> map(List<TaxGroupMappings> taxGroupMappings);

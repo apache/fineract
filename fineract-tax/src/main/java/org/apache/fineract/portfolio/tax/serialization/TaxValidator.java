@@ -283,15 +283,37 @@ public class TaxValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateTaxGroupEndDateAndTaxComponent(final TaxGroup taxGroup, final Set<TaxGroupMappings> groupMappings) {
+    public void validateTaxGroupEndDateAndTaxComponent(final TaxGroup taxGroup, final Set<TaxGroupMappings> groupMappings,
+            final boolean linked) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_GROUP);
+        final LocalDate today = DateUtils.getBusinessLocalDate();
 
         for (TaxGroupMappings mapping : groupMappings) {
             if (mapping.getId() != null) {
                 TaxGroupMappings existing = taxGroup.findOneBy(mapping);
-                baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName).value(mapping.endDate()).ignoreIfNull()
-                        .validateDateAfter(existing.startDate());
+                LocalDate effectiveStartDate = existing.startDate();
+                if (mapping.startDate() != null && !DateUtils.isEqual(mapping.startDate(), existing.startDate())) {
+                    if (linked) {
+                        baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName)
+                                .failWithCode("cannot.be.modified.for.linked.tax.group");
+                    } else if (!DateUtils.isAfter(existing.startDate(), today)) {
+                        baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName)
+                                .failWithCode("cannot.be.modified.after.activation");
+                    } else {
+                        baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(mapping.startDate())
+                                .validateDateAfterOrEqual(today);
+                        effectiveStartDate = mapping.startDate();
+                    }
+                }
+                final LocalDate effectiveEndDate = mapping.endDate() != null ? mapping.endDate() : existing.endDate();
+                if (mapping.endDate() == null && effectiveEndDate != null && !DateUtils.isBefore(effectiveStartDate, effectiveEndDate)) {
+                    baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(effectiveStartDate)
+                            .failWithCode("must.be.before.end.date", effectiveEndDate);
+                } else {
+                    baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName).value(mapping.endDate()).ignoreIfNull()
+                            .validateDateAfter(effectiveStartDate);
+                }
                 if (mapping.getTaxComponent() != null && !existing.getTaxComponent().getId().equals(mapping.getTaxComponent().getId())) {
                     baseDataValidator.reset().parameter(TaxApiConstants.taxComponentIdParamName).failWithCode("update.not.supported");
                 }
