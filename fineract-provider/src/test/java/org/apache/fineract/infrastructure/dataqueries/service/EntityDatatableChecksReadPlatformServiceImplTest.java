@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
@@ -43,6 +44,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class EntityDatatableChecksReadPlatformServiceImplTest {
@@ -92,5 +94,14 @@ class EntityDatatableChecksReadPlatformServiceImplTest {
         assertEquals(1, statusLoanProduct.size());
         assertEquals(StatusEnum.CREATE.name(), statusLoanProduct.get(0).getAsJsonObject().get("name").getAsString());
         assertEquals(StatusEnum.CREATE.getValue(), statusLoanProduct.get(0).getAsJsonObject().get("code").getAsInt());
+    }
+
+    @Test
+    void templateOffersOnlyEntitiesThatSupportChecks() {
+        EntityDataTableChecksTemplateData template = underTest.retrieveTemplate();
+
+        @SuppressWarnings("unchecked")
+        List<String> entities = (List<String>) ReflectionTestUtils.getField(template, "entities");
+        assertEquals(List.of("m_client", "m_group", "m_product_loan", "m_loan", "m_savings_account", "m_wc_loan"), entities);
     }
 }
