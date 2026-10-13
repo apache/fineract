@@ -65,7 +65,8 @@ public class TwilioHookProcessor implements HookProcessor {
     private void sendRequest(final HookSmsProviderData smsProviderData, final String payload, String entityName, String actionName,
             final Hook hook, final FineractContext context) throws IOException {
 
-        final WebHookService service = processorHelper.createWebHookService(smsProviderData.getUrl());
+        final String url = smsProviderData.getUrl();
+        final WebHookService service = processorHelper.createWebHookService(url);
 
         @SuppressWarnings("rawtypes")
         final Callback callback = processorHelper.createCallback(smsProviderData.getUrl());
@@ -93,7 +94,7 @@ public class TwilioHookProcessor implements HookProcessor {
             } else {
                 json = JsonParser.parseString(payload).getAsJsonObject();
             }
-            service.sendSmsBridgeRequest(entityName, actionName, context.getTenantContext().getTenantIdentifier(), apiKey, json)
+            service.sendSmsBridgeRequest(url, entityName, actionName, context.getTenantContext().getTenantIdentifier(), apiKey, json)
                     .enqueue(callback);
         }
     }

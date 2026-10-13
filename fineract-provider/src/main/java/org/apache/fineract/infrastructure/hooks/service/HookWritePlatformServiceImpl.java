@@ -240,8 +240,8 @@ public class HookWritePlatformServiceImpl implements HookWritePlatformService {
             if (conf.getFieldName().equals(payloadURLName)) {
                 try {
                     var service = processorHelper.createWebHookService(fieldValue);
-                    service.sendEmptyRequest().execute();
-                } catch (IOException re) {
+                    service.sendEmptyRequest(fieldValue).execute();
+                } catch (IOException | IllegalArgumentException re) {
                     baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("url.invalid");
                 }
             }
