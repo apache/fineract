@@ -265,7 +265,7 @@ dependencyManagement {
 
         dependency 'io.cucumber:cucumber-java:7.34.3'
         dependency 'io.cucumber:cucumber-java8:7.34.3'
-        dependency 'io.cucumber:cucumber-junit-platform-engine:7.34.3'
+        dependency 'io.cucumber:cucumber-junit-platform-engine:8.0.4'
         dependency 'io.cucumber:cucumber-spring:7.34.3'
 
         dependency 'org.reflections:reflections:0.10.2'
