@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.tax.starter;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepository;
@@ -52,17 +53,19 @@ public class TaxConfiguration {
     public TaxReadPlatformService taxReadPlatformService(final TaxComponentRepository taxComponentRepository,
             final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper, final TaxComponentMapper taxComponentMapper,
             final TaxGroupRepository taxGroupRepository, final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper,
-            final TaxGroupMapper taxGroupMapper, AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
+            final TaxGroupMapper taxGroupMapper, AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
+            final ChargeRepository chargeRepository) {
         return new TaxReadPlatformServiceImpl(accountingDropdownReadPlatformService, taxComponentRepository, taxComponentRepositoryWrapper,
-                taxComponentMapper, taxGroupRepository, taxGroupRepositoryWrapper, taxGroupMapper);
+                taxComponentMapper, taxGroupRepository, taxGroupRepositoryWrapper, taxGroupMapper, chargeRepository);
     }
 
     @Bean
     @ConditionalOnMissingBean(TaxWritePlatformService.class)
     public TaxWritePlatformService taxWritePlatformService(TaxValidator validator, TaxAssembler taxAssembler,
             TaxComponentRepository taxComponentRepository, TaxGroupRepository taxGroupRepository,
-            TaxComponentRepositoryWrapper taxComponentRepositoryWrapper, TaxGroupRepositoryWrapper taxGroupRepositoryWrapper) {
+            TaxComponentRepositoryWrapper taxComponentRepositoryWrapper, TaxGroupRepositoryWrapper taxGroupRepositoryWrapper,
+            final ChargeRepository chargeRepository, final GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
         return new TaxWritePlatformServiceImpl(validator, taxAssembler, taxComponentRepository, taxComponentRepositoryWrapper,
-                taxGroupRepository, taxGroupRepositoryWrapper);
+                taxGroupRepository, taxGroupRepositoryWrapper, chargeRepository, glAccountRepositoryWrapper);
     }
 }
