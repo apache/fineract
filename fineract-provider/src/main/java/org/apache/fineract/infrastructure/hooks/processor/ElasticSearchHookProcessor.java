@@ -74,12 +74,12 @@ public class ElasticSearchHookProcessor implements HookProcessor {
 
         if (contentType.equalsIgnoreCase("json") || contentType.contains("json")) {
             final JsonObject json = new Gson().fromJson(payload, JsonObject.class);
-            service.sendJsonRequest(entityName, actionName, context.getTenantContext().getTenantIdentifier(), fineractEndpointUrl, json)
-                    .enqueue(callback);
+            service.sendJsonRequest(url, entityName, actionName, context.getTenantContext().getTenantIdentifier(), fineractEndpointUrl,
+                    json).enqueue(callback);
         } else {
             Map<String, String> map = new HashMap<>();
             map = new Gson().fromJson(payload, map.getClass());
-            service.sendFormRequest(entityName, actionName, context.getTenantContext().getTenantIdentifier(), fineractEndpointUrl, map)
+            service.sendFormRequest(url, entityName, actionName, context.getTenantContext().getTenantIdentifier(), fineractEndpointUrl, map)
                     .enqueue(callback);
         }
     }

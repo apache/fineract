@@ -28,6 +28,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.Url;
 
 public interface WebHookService {
 
@@ -37,24 +38,26 @@ public interface WebHookService {
     String ENDPOINT_HEADER = "X-Fineract-Endpoint";
     String API_KEY_HEADER = "X-Fineract-API-Key";
 
+    // The Payload URL is passed as the full request URL (@Url), so it doesn't have to end with "/".
+
     // Ping
-    @GET(".")
-    Call<Void> sendEmptyRequest();
+    @GET
+    Call<Void> sendEmptyRequest(@Url String url);
 
     // Template - Web
-    @POST(".")
-    Call<Void> sendJsonRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
+    @POST
+    Call<Void> sendJsonRequest(@Url String url, @Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
             @Header(TENANT_HEADER) String tenantHeader, @Header(ENDPOINT_HEADER) String endpointHeader, @Body JsonObject result);
 
     @FormUrlEncoded
-    @POST(".")
-    Call<Void> sendFormRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
+    @POST
+    Call<Void> sendFormRequest(@Url String url, @Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
             @Header(TENANT_HEADER) String tenantHeader, @Header(ENDPOINT_HEADER) String endpointHeader,
             @FieldMap Map<String, String> params);
 
     // Template - SMS Bridge
-    @POST(".")
-    Call<Void> sendSmsBridgeRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
+    @POST
+    Call<Void> sendSmsBridgeRequest(@Url String url, @Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
             @Header(TENANT_HEADER) String tenantHeader, @Header(API_KEY_HEADER) String apiKeyHeader, @Body JsonObject result);
 
     @POST("/configuration")

@@ -27,6 +27,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,10 +113,20 @@ public final class ProcessorHelper {
         };
     }
 
+    /**
+     * Creates the client for a hook URL. Requests pass the hook URL itself with {@code @Url}, so the base URL is only
+     * the scheme, host and port of the hook URL (Retrofit requires a base URL that ends with "/").
+     *
+     * @param url
+     *            the hook URL
+     * @return the client
+     * @throws IllegalArgumentException
+     *             if the URL is not a valid http or https URL
+     */
     public WebHookService createWebHookService(final String url) {
         final OkHttpClient client = createClient();
         final Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
-        retrofitBuilder.baseUrl(url);
+        retrofitBuilder.baseUrl(HttpUrl.get(url).resolve("/"));
         retrofitBuilder.client(client);
         retrofitBuilder.addConverterFactory(GsonConverterFactory.create());
         final Retrofit retrofit = retrofitBuilder.build();
