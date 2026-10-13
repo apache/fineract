@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanproduct.productmix.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,7 +120,8 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
                 return ProductMixUpdateResponse.builder().productId(productId).changes(changes).build();
             }
 
-            final Set<Long> restrictedIds = Set.copyOf(restrictedProducts);
+            // updateRestrictedIds removes the ids it keeps, so this set must be mutable
+            final Set<Long> restrictedIds = new HashSet<>(restrictedProducts);
             final List<ProductMix> productMixesToRemove = updateRestrictedIds(restrictedIds, existedProductMixes);
             final Map<Long, LoanProduct> restrictedProductsAsMap = getRestrictedProducts(restrictedIds);
             createNewProductMix(restrictedProductsAsMap, productId, existedProductMixes);
