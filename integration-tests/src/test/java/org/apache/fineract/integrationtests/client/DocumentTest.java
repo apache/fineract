@@ -25,6 +25,7 @@ import feign.Response;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.fineract.client.feign.FineractMultipartEncoder.MultipartData;
@@ -129,6 +130,17 @@ class DocumentTest extends FeignIntegrationTest {
     void createDocumentBadArgs() {
         CallFailedRuntimeException exception = fail(
                 () -> fineractClient().documentsFixed().createDocument("clients", 123L, new MultipartData().addText("name", "test.pdf")));
+        assertEquals(400, exception.getStatus());
+    }
+
+    @Test
+    @Order(10000)
+    void createDocumentNotAllowedFileType() {
+        MultipartData multipartData = new MultipartData()
+                .addFile("file", "test.txt", "Plain text is not allowed".getBytes(StandardCharsets.UTF_8), "text/plain")
+                .addText("name", "test.txt");
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient().documentsFixed().createDocument("clients", clientId, multipartData));
         assertEquals(400, exception.getStatus());
     }
 }
