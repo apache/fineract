@@ -26,6 +26,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 
 @Entity
 @Getter
-@Table(name = "m_tax_component")
+@Table(name = "m_tax_component", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "uq_m_tax_component_name") })
 public class TaxComponent extends AbstractAuditableCustom {
 
     @Column(name = "name", length = 100)
