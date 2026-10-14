@@ -117,9 +117,33 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
         if (comparsion == 0) {
             if (o.getTermVariationType().isDueDateVariation() || o.getTermVariationType().isInsertInstallment()) {
                 comparsion = 1;
+            } else {
+                comparsion = Integer.compare(sameDateOrder(getTermVariationType()), sameDateOrder(o.getTermVariationType()));
             }
         }
         return comparsion;
+    }
+
+    /**
+     * Deterministic order for variations sharing an applicable date. A reschedule request's variations reach the
+     * schedule generator from an unordered set, so without this the sort above (stable) kept whatever order that set
+     * happened to iterate in. The order matters: EXTEND_REPAYMENT_PERIOD recalculates the installment amount on the
+     * spot from the principal-grace periods registered so far. Applied before the GRACE_ON_PRINCIPAL it belongs to, it
+     * amortises the balance over the grace periods as well and leaves a balloon last installment. So grace goes first,
+     * then the extension, then everything else. Due-date and insert-installment variations keep their existing first
+     * place.
+     */
+    private static int sameDateOrder(final LoanTermVariationType type) {
+        if (type.isDueDateVariation() || type.isInsertInstallment()) {
+            return -1;
+        }
+        if (type.isGraceOnPrincipal() || type.isGraceOnInterest()) {
+            return 0;
+        }
+        if (type.isExtendRepaymentPeriod()) {
+            return 1;
+        }
+        return 2;
     }
 
     public void setApplicableFromDate(final LocalDate applicableFromDate) {
