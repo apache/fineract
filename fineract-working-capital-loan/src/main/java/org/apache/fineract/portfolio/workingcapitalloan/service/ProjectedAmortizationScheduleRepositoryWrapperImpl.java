@@ -61,6 +61,14 @@ public class ProjectedAmortizationScheduleRepositoryWrapperImpl implements Proje
         updateExpectedMaturityDate(loan, model);
     }
 
+    @Override
+    @Transactional
+    public void deleteModel(@NonNull final WorkingCapitalLoan loan) {
+        repository.findByLoanId(loan.getId()).ifPresent(repository::delete);
+        // The maturity date was derived from the projection being removed, so it goes with it.
+        loan.setExpectedMaturityDate(null);
+    }
+
     private void updateExpectedMaturityDate(final WorkingCapitalLoan loan, final ProjectedAmortizationScheduleModel model) {
         final LocalDate maturityDate = model.scheduledMaturityDate();
         if (maturityDate != null && !maturityDate.equals(loan.getExpectedMaturityDate())) {

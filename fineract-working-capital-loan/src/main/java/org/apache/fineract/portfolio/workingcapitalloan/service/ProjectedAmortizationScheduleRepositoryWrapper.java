@@ -31,4 +31,9 @@ public interface ProjectedAmortizationScheduleRepositoryWrapper {
 
     void writeModel(@NonNull WorkingCapitalLoan loan, @NonNull ProjectedAmortizationScheduleModel model);
 
+    /**
+     * Removes the loan's persisted model, if any, so the loan is left without a projection like a never approved one.
+     */
+    void deleteModel(@NonNull WorkingCapitalLoan loan);
+
 }
