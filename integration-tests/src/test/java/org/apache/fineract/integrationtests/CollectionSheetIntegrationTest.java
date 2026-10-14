@@ -26,11 +26,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import feign.Headers;
 import feign.RequestLine;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.StreamSupport;
 import org.apache.fineract.client.models.CollectionSheetRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.Test;
@@ -44,6 +47,11 @@ public class CollectionSheetIntegrationTest extends FeignLoanTestBase {
         @RequestLine("POST /v1/collectionsheet?command=generateCollectionSheet")
         @Headers({ "Content-Type: application/json", "Accept: application/json" })
         JsonNode generate(CollectionSheetRequest request);
+
+        // Raw body: the request as documented, independent of the generated client model.
+        @RequestLine("POST /v1/collectionsheet?command=saveCollectionSheet")
+        @Headers({ "Content-Type: application/json", "Accept: application/json" })
+        JsonNode save(Map<String, Object> request);
     }
 
     @Test
@@ -79,5 +87,45 @@ public class CollectionSheetIntegrationTest extends FeignLoanTestBase {
         assertNotNull(loan, "Loan with a due installment is missing from the collection sheet");
         assertTrue(loan.path("principalDue").decimalValue().signum() > 0);
         assertEquals(0, new BigDecimal("10").compareTo(loan.path("chargesDue").decimalValue()));
+    }
+
+    @Test
+    public void saveIndividualCollectionSheetCreatesTheLoanRepayments() {
+        final Long clientId = createClient("20 September 2011");
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder() //
+                .withPrincipal("12,000.00") //
+                .withNumberOfRepayments("4") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("1") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualInstallments() //
+                .withInterestTypeAsDecliningBalance() //
+                .withAccounting(NONE, new Account[0]) //
+                .buildRequest(null);
+        final Long loanProductId = createLoanProduct(loanProductRequest);
+        final Long loanId = applyForLoan(LoanRequestBuilders.legacyIndividualApplication(clientId, loanProductId, "12,000.00", 4,
+                new BigDecimal("2"), "20 September 2011"));
+        approveLoan(loanId, approveLoanRequest(12000.0, "20 September 2011"));
+        disburseLoanWithNetDisbursalAmount(loanId, "20 September 2011", "12000.00");
+
+        final JsonNode result = ok(() -> fineractClient().create(IndividualCollectionSheetApi.class)
+                .save(Map.of("dateFormat", "dd MMMM yyyy", "locale", "en", "transactionDate", "20 October 2011", "actualDisbursementDate",
+                        "20 October 2011", "bulkRepaymentTransactions",
+                        List.of(Map.of("loanId", loanId, "transactionAmount", 1000), Map.of("loanId", loanId, "transactionAmount", 0.5)),
+                        "bulkSavingsDueTransactions", List.of())));
+
+        assertEquals(2, result.path("changes").path("loanTransactions").size(), "Both repayments must be created");
+        assertEquals(1000.5, Utils.getDoubleValue(getLoanDetails(loanId).getSummary().getTotalRepayment()));
+
+        // The lists nested inside bulkDisbursementTransactions, as in the CollectionSheetRequest schema, are processed
+        // too.
+        final JsonNode nestedResult = ok(() -> fineractClient().create(IndividualCollectionSheetApi.class)
+                .save(Map.of("dateFormat", "dd MMMM yyyy", "locale", "en", "transactionDate", "20 October 2011", "actualDisbursementDate",
+                        "20 October 2011", "bulkDisbursementTransactions", Map.of("bulkRepaymentTransactions",
+                                List.of(Map.of("loanId", loanId, "transactionAmount", 200)), "bulkSavingsDueTransactions", List.of()))));
+
+        assertEquals(1, nestedResult.path("changes").path("loanTransactions").size(), "The nested repayment must be created");
+        assertEquals(1200.5, Utils.getDoubleValue(getLoanDetails(loanId).getSummary().getTotalRepayment()));
     }
 }
