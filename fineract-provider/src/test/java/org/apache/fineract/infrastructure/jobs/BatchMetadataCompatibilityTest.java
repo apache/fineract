@@ -44,6 +44,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.batch.core.repository.dao.JacksonExecutionContextStringSerializer;
 import org.springframework.jdbc.support.incrementer.AbstractDataFieldMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.jsontype.PolymorphicTypeValidator;
+import tools.jackson.databind.jsontype.PolymorphicTypeValidator.Validity;
 
 /**
  * Pins the two things that let a Spring Batch 5 and a Spring Batch 6 instance share one database, so that upgrading
@@ -87,6 +91,24 @@ public class BatchMetadataCompatibilityTest {
     @Test
     public void thisBuildCanReadWhatSpringBatch5Wrote() throws IOException {
         assertRestoresTheCobContext(deserialize(writeWithSpringBatch5Mapper(cobContext())));
+    }
+
+    @Test
+    public void restrictsAnnotatedTypesToTheExecutionContextAllowList() {
+        JsonMapper mapper = ScheduledJobRunnerConfig.executionContextMapper();
+        PolymorphicTypeValidator validator = mapper.deserializationConfig().getPolymorphicTypeValidator();
+        JavaType baseType = mapper.getTypeFactory().constructType(COBParameter.class);
+
+        assertThat(validator.validateSubClassName(null, baseType, COBParameter.class.getName())).isEqualTo(Validity.ALLOWED);
+        assertThat(validator.validateSubClassName(null, baseType, "com.example.Unlisted")).isNotEqualTo(Validity.ALLOWED);
+    }
+
+    @Test
+    public void resolvesFineractClassesNamedByAnnotatedTypes() {
+        String json = "{\"@class\":\"org.apache.fineract.cob.data.COBParameter\",\"minAccountId\":1,\"maxAccountId\":100}";
+
+        assertThat(ScheduledJobRunnerConfig.executionContextMapper().readValue(json, COBParameter.class))
+                .isEqualTo(new COBParameter(1L, 100L));
     }
 
     /**
