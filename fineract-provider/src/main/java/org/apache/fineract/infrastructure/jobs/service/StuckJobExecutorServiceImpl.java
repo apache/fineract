@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.data.partitionedjobs.PartitionedJob;
 import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
 import org.springframework.batch.core.job.JobExecution;
@@ -41,6 +44,7 @@ public class StuckJobExecutorServiceImpl implements StuckJobExecutorService {
     private final TransactionTemplate requiresNewTransactionJdbcTemplate;
     private final JobOperator jobOperator;
     private final JobRepository jobRepository;
+    private final FineractProperties fineractProperties;
 
     @Override
     public void resumeStuckJob(String jobName) {
@@ -117,14 +121,19 @@ public class StuckJobExecutorServiceImpl implements StuckJobExecutorService {
     }
 
     private void waitUntilAllPartitionsFinished(Long stuckJobId, String partitionerStepName) throws InterruptedException {
-        while (!areAllPartitionsCompleted(stuckJobId, partitionerStepName)) {
+        final Duration stuckPartitionTimeout = fineractProperties.getJob().getStuckPartitionTimeout();
+        while (true) {
+            int failedPartitions = jobExecutionRepository.failStalePartitions(stuckJobId, partitionerStepName,
+                    DateUtils.getLocalDateTimeOfSystem().minus(stuckPartitionTimeout));
+            if (failedPartitions > 0) {
+                log.warn("Marked {} partition(s) of job {} as FAILED: not updated for more than {}", failedPartitions, stuckJobId,
+                        stuckPartitionTimeout);
+            }
+            if (jobExecutionRepository.getActivePartitionsCount(stuckJobId, partitionerStepName) == 0L) {
+                return;
+            }
             log.info("Sleeping for a second to wait for the partitions to complete for job {}", stuckJobId);
             Thread.sleep(1000);
         }
-    }
-
-    private boolean areAllPartitionsCompleted(Long stuckJobId, String partitionerStepName) {
-        Long notCompletedPartitions = jobExecutionRepository.getNotCompletedPartitionsCount(stuckJobId, partitionerStepName);
-        return notCompletedPartitions == 0L;
     }
 }

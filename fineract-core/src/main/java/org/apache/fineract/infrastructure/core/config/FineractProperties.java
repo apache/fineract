@@ -436,6 +436,7 @@ public class FineractProperties {
     public static class FineractJobProperties {
 
         private int stuckRetryThreshold;
+        private Duration stuckPartitionTimeout;
         private boolean loanCobEnabled;
         private FineractJournalEntryAggregationProperties journalEntryAggregation;
         private int retainedEarningChunkSize;
