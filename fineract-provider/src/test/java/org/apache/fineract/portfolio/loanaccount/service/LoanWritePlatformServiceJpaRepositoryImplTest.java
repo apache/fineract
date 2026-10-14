@@ -21,11 +21,13 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -95,6 +97,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -666,6 +669,43 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         assertThrows(LoanOriginatorNotActiveException.class, () -> loanWritePlatformService.disburseLoan(LOAN_ID, fixture.command, false));
 
         verify(loanOriginatorLinkingService).processOriginatorsForLoanDisbursement(eq(LOAN_ID), eq(originators));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void disburseLoan_withOriginators_shouldLinkOriginatorsBeforeAnyLoanTransactionIsCreated() {
+        final JsonArray originators = new JsonArray();
+        final JsonObject originator = new JsonObject();
+        originator.addProperty("externalId", "ORIGINATOR-A");
+        originators.add(originator);
+        final DisbursementFixture fixture = setupHappyPathDisbursement(originators, originators);
+
+        loanWritePlatformService.disburseLoan(LOAN_ID, fixture.command, false);
+
+        // Every transaction (and event) created during disbursement must already see the originator link.
+        final InOrder inOrder = inOrder(loanOriginatorLinkingService, loanDisbursementService, loanTransactionRepository,
+                journalEntryPoster);
+        inOrder.verify(loanOriginatorLinkingService).processOriginatorsForLoanDisbursement(eq(LOAN_ID), eq(originators));
+        inOrder.verify(loanDisbursementService).adjustDisburseAmount(any(), any(), any());
+        inOrder.verify(loanTransactionRepository).saveAndFlush(any(LoanTransaction.class));
+        inOrder.verify(journalEntryPoster).postJournalEntriesForLoanTransaction(any(LoanTransaction.class), eq(false), eq(false));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void disburseLoan_whenOriginatorProcessingFails_shouldNotCreateAnyLoanTransaction() {
+        final JsonArray originators = new JsonArray();
+        final JsonObject originator = new JsonObject();
+        originator.addProperty("id", 999L);
+        originators.add(originator);
+        final DisbursementFixture fixture = setupHappyPathDisbursement(originators, originators);
+        doThrow(new LoanOriginatorNotFoundException(999L)).when(loanOriginatorLinkingService)
+                .processOriginatorsForLoanDisbursement(eq(LOAN_ID), eq(originators));
+
+        assertThrows(LoanOriginatorNotFoundException.class, () -> loanWritePlatformService.disburseLoan(LOAN_ID, fixture.command, false));
+
+        verify(loanTransactionRepository, never()).saveAndFlush(any(LoanTransaction.class));
+        verify(journalEntryPoster, never()).postJournalEntriesForLoanTransaction(any(LoanTransaction.class), anyBoolean(), anyBoolean());
     }
 
     private DisbursementFixture setupHappyPathDisbursement(final JsonElement originatorsElement, final JsonArray extractedOriginators) {
