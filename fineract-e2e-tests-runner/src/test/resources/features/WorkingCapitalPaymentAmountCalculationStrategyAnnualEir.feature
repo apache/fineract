@@ -841,6 +841,7 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
       | 01 January 2026 | Discount Fee      | 1000.0            | 1000.0           | 0.0               | 0.0                   | true     |
       | 02 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 02 January 2026 | Discount Fee      | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+    # The undone disbursement left no schedule behind, so the new one is anchored on the second disbursement date.
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-02 | 2026-01-31 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |

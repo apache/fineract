@@ -102,6 +102,7 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
     private final WorkingCapitalLoanRequestFactory workingCapitalLoanRequestFactory;
     private final WorkingCapitalDelinquencyStepDef workingCapitalDelinquencyStepDef;
     private final WorkingCapitalBreachScheduleStepDef workingCapitalBreachScheduleStepDef;
+    private final WorkingCapitalLoanAccountStepDef workingCapitalLoanAccountStepDef;
 
     // Individual operation steps implementation
 
@@ -909,28 +910,50 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
     public void verifyDelinquencyRangeScheduleViaBatchApi(final DataTable dataTable) {
         Long loanId = workingCapitalDelinquencyStepDef.extractLoanId();
         String url = WCL_BASE_URL + "/" + loanId + WCL_DELINQUENCY_RANGE_SCHEDULE_PATH;
-        BatchRequest request = buildBatchRequest(1L, null, url, BATCH_API_METHOD_GET, null);
+        List<BatchResponse> ok = handleBatchRequestByUrlForGetApi(url);
 
-        List<BatchResponse> ok = ok(() -> fineractFeignClient.batch().handleBatchRequests(List.of(request), false));
-        assertThat(ok).isNotNull();
-        assertThat(ok.get(0).getStatusCode()).isEqualTo(200);
         List<WorkingCapitalLoanDelinquencyRangeScheduleData> actualRangeSchedule = parseBatchResponse(ok, new TypeReference<>() {});
-
         workingCapitalDelinquencyStepDef.verifyDelinquencyRangeSchedule(actualRangeSchedule, dataTable);
+    }
+
+    @Then("Working Capital loan delinquency range schedule has no data via batch api")
+    public void verifyDelinquencyRangeScheduleIsEmpty() {
+        Long loanId = workingCapitalDelinquencyStepDef.extractLoanId();
+        String url = WCL_BASE_URL + "/" + loanId + WCL_DELINQUENCY_RANGE_SCHEDULE_PATH;
+
+        List<BatchResponse> ok = handleBatchRequestByUrlForGetApi(url);
+        List<WorkingCapitalLoanDelinquencyRangeScheduleData> actualRangeSchedule = parseBatchResponse(ok, new TypeReference<>() {});
+        assertThat(actualRangeSchedule).as("Range schedule should be empty when loan is not yet disbursed or approved").isEmpty();
     }
 
     @Then("Working Capital loan breach schedule has the following data via batch api:")
     public void verifyBreachScheduleViaBatchApi(final DataTable dataTable) {
         Long loanId = workingCapitalDelinquencyStepDef.extractLoanId();
         String url = WCL_BASE_URL + "/" + loanId + WCL_BREACH_SCHEDULE_PATH;
-        BatchRequest request = buildBatchRequest(1L, null, url, BATCH_API_METHOD_GET, null);
+        List<BatchResponse> ok = handleBatchRequestByUrlForGetApi(url);
 
-        List<BatchResponse> ok = ok(() -> fineractFeignClient.batch().handleBatchRequests(List.of(request), false));
-        assertThat(ok).isNotNull();
-        assertThat(ok.get(0).getStatusCode()).isEqualTo(200);
         List<WorkingCapitalLoanBreachScheduleData> actualRangeSchedule = parseBatchResponse(ok, new TypeReference<>() {});
-
         workingCapitalBreachScheduleStepDef.verifyBreachScheduleData(actualRangeSchedule, dataTable);
+    }
+
+    @Then("Working Capital loan breach schedule has no data via batch api")
+    public void verifyBreachRangeScheduleIsEmpty() {
+        Long loanId = workingCapitalDelinquencyStepDef.extractLoanId();
+        String url = WCL_BASE_URL + "/" + loanId + WCL_BREACH_SCHEDULE_PATH;
+        List<BatchResponse> ok = handleBatchRequestByUrlForGetApi(url);
+
+        List<WorkingCapitalLoanBreachScheduleData> actualRangeSchedule = parseBatchResponse(ok, new TypeReference<>() {});
+        assertThat(actualRangeSchedule).as("Range schedule should be empty when loan is not yet disbursed").isEmpty();
+    }
+
+    @Then("Working capital loan details has the following field values via batch api:")
+    public void verifyWorkingCapitalLoanDetailFieldValues(final DataTable table) {
+        Long loanId = workingCapitalDelinquencyStepDef.extractLoanId();
+        String url = WCL_BASE_URL + "/" + loanId;
+        List<BatchResponse> ok = handleBatchRequestByUrlForGetApi(url);
+
+        GetWorkingCapitalLoansLoanIdResponse response = parseBatchResponse(ok, new TypeReference<>() {});
+        workingCapitalLoanAccountStepDef.validateWorkingCapitalLoanDetailFieldValuesResponse(table, response);
     }
 
     private <T> T parseBatchResponse(List<BatchResponse> ok, TypeReference<T> typeReference) {
@@ -939,6 +962,15 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
             throw new RuntimeException("Error deserializing JSON to object", e);
         }
+    }
+
+    private List<BatchResponse> handleBatchRequestByUrlForGetApi(String url) {
+        BatchRequest request = buildBatchRequest(1L, null, url, BATCH_API_METHOD_GET, null);
+
+        List<BatchResponse> ok = ok(() -> fineractFeignClient.batch().handleBatchRequests(List.of(request), false));
+        assertThat(ok).isNotNull();
+        assertThat(ok.get(0).getStatusCode()).isEqualTo(200);
+        return ok;
     }
 
     // Step request helpers
