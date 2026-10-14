@@ -440,6 +440,7 @@ public class FineractProperties {
         private FineractJournalEntryAggregationProperties journalEntryAggregation;
         private int retainedEarningChunkSize;
         private boolean executeMissedRuns;
+        private boolean resetSchedulerOnBootupEnabled = true;
     }
 
     @Getter

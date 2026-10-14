@@ -64,7 +64,7 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
             ThreadLocalContextUtil.setBusinessDates(businessDates);
             final SchedulerDetail schedulerDetail = schedularWritePlatformService.retriveSchedulerDetail();
-            if (schedulerDetail.isResetSchedulerOnBootup()) {
+            if (fineractProperties.getJob().isResetSchedulerOnBootupEnabled() && schedulerDetail.isResetSchedulerOnBootup()) {
                 schedulerDetail.setSuspended(false);
                 schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
             }
