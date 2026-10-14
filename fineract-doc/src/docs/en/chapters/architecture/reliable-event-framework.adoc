@@ -316,6 +316,15 @@ When you stop recording using the method above, all the recorded events will be 
 
 From then on, the bulk event works just like any of the event. It'll be picked up by the processor to send it to a message channel.
 
+=== Bulk events on reverse-replay
+When a backdated transaction, a reversal or another change makes Fineract re-process the later transactions of a loan or a working capital loan, the adjustments it causes reach the consumer together, also when one command both reverses a transaction and books its replacement with a new amount. If there is nothing to report, nothing is sent. A single adjustment is sent as a regular `LoanAdjustTransactionBusinessEvent` or `WorkingCapitalLoanAdjustTransactionBusinessEvent`. Two or more are sent as one `BulkBusinessEvent` with one adjust event per transaction, in replay order. If a bulk event is already being recorded higher up, for example by a COB run with bulk events enabled, the adjustments join it.
+
+A charge-off that the re-processing reverses because nothing is left to charge off is one of the replayed transactions. The event of the operation that triggered the re-processing, such as the reversal of the transaction the user reversed, the event of the new backdated transaction or the adjust event that pairs an adjusted transaction with its replacement, is posted separately, and so are the undo charge-off event and the discount fee amortization adjustments of a working capital loan.
+
+A charge added to an overpaid loan is paid out of the overpayment of earlier repayments. A loan re-processes its transactions for that; a working capital loan moves the amount from the overpayment portion of those repayments to their fee or penalty portion in place, oldest repayment first. Either way, every repayment whose split changes is reported under the same rules, and the event of the added charge is posted separately.
+
+The payload differs between the two loan types. A loan replaces each replayed transaction: `transactionToAdjust` is the reversed original and `newTransactionDetail` is the new transaction, with a new id, or empty when the replay only reverses the transaction. A working capital loan updates the allocation in place and reports only the transactions whose split changed: `transactionToAdjust` and `newTransactionDetail` hold the state of the same transaction id before and after the re-processing. A working capital transaction that the re-processing reverses is reported like any other working capital reversal: `transactionToAdjust` is the reversed transaction and `newTransactionDetail` is empty.
+
 === Event categories [[event-categories]]
 TBD
 

@@ -930,15 +930,17 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         transactionToAdjust.setReversalExternalId(reversalExternalId);
         transactionToAdjust.setReversedOnDate(businessLocalDate);
 
-        processUndoTransaction(loan, transactionToAdjust);
-
-        if (!isReverseOnly) {
-
-            saveNewTransactionRelation(newTransaction, transactionToAdjust, LoanTransactionRelationTypeEnum.REPLAYED);
-
-            transactionProcessor.processRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
-                    newTransactionAmount);
-
+        if (isReverseOnly) {
+            processUndoTransaction(loan, transactionToAdjust);
+        } else {
+            if (undoRequiresReplay(loan, transactionToAdjust)) {
+                replaceInSingleReplay(loan, transactionToAdjust, newTransaction, newTransactionAmount);
+            } else {
+                processUndoTransaction(loan, transactionToAdjust);
+                saveNewTransactionRelation(newTransaction, transactionToAdjust, LoanTransactionRelationTypeEnum.REPLAYED);
+                transactionProcessor.processRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
+                        newTransactionAmount);
+            }
             final WorkingCapitalLoanTransaction overpaidOnDateProbe = DateUtils.isBefore(originalTransactionDate,
                     newTransaction.getTransactionDate()) ? transactionToAdjust : newTransaction;
             transactionProcessor.recalculateOverpaidOnDate(loan, overpaidOnDateProbe);
@@ -1438,16 +1440,50 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             transactionReprocessingService.reprocessTransactions(loan);
         }
 
-        if (!isAccountingOnly) {
-            breachScheduleService.applyRepaymentUndo(loan.getId(), transaction.getTransactionDate(), transaction.getTransactionAmount());
+        completeUndo(loan, transaction);
+    }
+
+    private void completeUndo(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
+        undoBreachAndAccounting(loan, transaction);
+        if (!isAccountingOnlyTransaction(transaction)) {
             delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
         }
-
-        accountingProcessor.postReversalJournalEntries(loan, transaction);
 
         stateMachine.determineAndTransition(loan, DateUtils.getBusinessLocalDate());
         transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
         transactionProcessor.recalculateSettlementDates(loan);
+    }
+
+    private void undoBreachAndAccounting(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
+        if (!isAccountingOnlyTransaction(transaction)) {
+            breachScheduleService.applyRepaymentUndo(loan.getId(), transaction.getTransactionDate(), transaction.getTransactionAmount());
+        }
+
+        accountingProcessor.postReversalJournalEntries(loan, transaction);
+    }
+
+    private boolean undoRequiresReplay(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
+        return !transactionProcessor.isLastMonetaryAction(transaction) || isChargesInvolved(loan);
+    }
+
+    private void replaceInSingleReplay(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction reversedTransaction,
+            final WorkingCapitalLoanTransaction newTransaction, final BigDecimal newTransactionAmount) {
+        saveNewTransactionRelation(newTransaction, reversedTransaction, LoanTransactionRelationTypeEnum.REPLAYED);
+        replayAdjustment(loan, reversedTransaction, newTransaction);
+        undoBreachAndAccounting(loan, reversedTransaction);
+        transactionProcessor.completeReplayedRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
+                newTransactionAmount);
+        breachScheduleService.recalculatePastDueAmount(loan);
+    }
+
+    private void replayAdjustment(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction reversedTransaction,
+            final WorkingCapitalLoanTransaction newTransaction) {
+        if (isChargesInvolved(loan)) {
+            transactionReprocessingService.reprocessTransactions(loan);
+        } else {
+            transactionReprocessingService.reprocessChargeFreeSuffix(loan,
+                    DateUtils.min(newTransaction.getTransactionDate(), reversedTransaction.getTransactionDate()), reversedTransaction);
+        }
     }
 
     private boolean isChargesInvolved(WorkingCapitalLoan loan) {

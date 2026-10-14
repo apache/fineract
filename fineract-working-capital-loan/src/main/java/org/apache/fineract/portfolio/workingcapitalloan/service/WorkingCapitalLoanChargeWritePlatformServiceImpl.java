@@ -61,6 +61,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapita
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationRequest;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
@@ -124,6 +125,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
     private final WorkingCapitalLoanTransactionFinder transactionFinder;
     private final WorkingCapitalLoanTransactionReprocessingService transactionReprocessingService;
+    private final WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
 
     @Transactional
     @Override
@@ -237,6 +239,8 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         // a real transaction to attribute it to: the paid-by row points at the repayment that funded it, and that
         // repayment's allocation grows by the same amount, keeping the two consistent with each other.
         final List<OverpaymentFunder> funders = loadOverpaymentFunders(loan);
+        final Map<Long, WorkingCapitalLoanTransactionData> preSnapshots = adjustTransactionEventPublisher
+                .snapshots(funders.stream().map(OverpaymentFunder::getTransaction).toList());
         final BigDecimal fundableTotal = funders.stream().map(OverpaymentFunder::getAvailable).reduce(BigDecimal.ZERO, BigDecimal::add);
         final List<WorkingCapitalLoanChargePaidBy> paidByRows = new ArrayList<>();
         final List<WorkingCapitalLoanTransactionAllocation> touchedAllocations = new ArrayList<>();
@@ -279,6 +283,9 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         loanChargeRepository.saveAll(charges);
         allocationRepository.saveAll(touchedAllocations);
         chargePaidByRepository.saveAll(paidByRows);
+        chargePaidByRepository.flush();
+        adjustTransactionEventPublisher.publishReprocessed(loan.getId(), preSnapshots, funders.stream()
+                .filter(funder -> touchedAllocations.contains(funder.getAllocation())).map(OverpaymentFunder::getTransaction).toList());
 
         balance.setOverpaymentAmount(BigDecimal.ZERO);
         balanceUpdater.apply(balance, plan);

@@ -85,34 +85,19 @@ public class WorkingCapitalLoanTransactionProcessor {
         final boolean reprocessRebuildsEverything = backdated
                 && (!charges.isEmpty() || isLoanOverpaidWithCurrentTransaction || affectsChargeOffSnapshot);
 
-        final WorkingCapitalLoanTransactionAllocation allocation;
         if (reprocessRebuildsEverything) {
             if (charges.isEmpty()) {
                 transactionReprocessingService.reprocessChargeFreeSuffix(loan, transactionDate, null);
             } else {
                 transactionReprocessingService.reprocessTransactions(loan);
             }
-            // A changed chronological order can redistribute principal across days in ways an incremental apply can't
-            // express, so the delinquency schedule needs a full rebuild too.
-            delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
-            // Reprocessing rebuilt this transaction's allocation from scratch and linked it back onto the transaction,
-            // so it is readable directly for the accounting posting - no separate lookup needed.
-            allocation = transaction.getAllocation();
-            if (allocation == null) {
-                // The replay allocates every transaction it is handed, so a missing allocation means it never ran -
-                // in practice because the loan has no balance row to recompute, which both entry points skip on. The
-                // transaction would otherwise be left with no allocation, no balance movement and no schedule entry,
-                // and would either fail further downstream in the accounting posting or, with accounting off, be
-                // committed in that broken state unnoticed.
-                throw new IllegalStateException("Reprocessing did not allocate WC loan transaction " + transaction.getId() + " on loan "
-                        + loanId + "; the loan most likely has no balance row, which reprocessing skips on");
-            }
+            completeReplayedRepaymentLikeTransaction(loan, transaction, transactionDate, transactionAmount);
         } else {
             // Decide and materialize the allocation for this single transaction against the current balance (the
             // charge-adjustment routing lives in the allocator), then persist the mutated aggregate.
             final WorkingCapitalLoanTransactionAllocator.Result allocated = transactionAllocator.allocate(loan, balance, charges,
                     transaction);
-            allocation = allocated.allocation();
+            final WorkingCapitalLoanTransactionAllocation allocation = allocated.allocation();
 
             chargeRepository.saveAll(charges);
             balanceRepository.saveAndFlush(balance);
@@ -134,10 +119,33 @@ public class WorkingCapitalLoanTransactionProcessor {
 
             accountingProcessor.postJournalEntries(loan, transaction, allocation,
                     transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, transaction));
+            completeRepaymentLikeTransaction(loan, transaction, transactionDate, transactionAmount);
         }
+    }
 
+    public void completeReplayedRepaymentLikeTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
+            final LocalDate transactionDate, final BigDecimal transactionAmount) {
+        // A changed chronological order can redistribute principal across days in ways an incremental apply can't
+        // express, so the delinquency schedule needs a full rebuild too.
+        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+        // Reprocessing rebuilt this transaction's allocation from scratch and linked it back onto the transaction,
+        // so it is readable directly for the accounting posting - no separate lookup needed.
+        if (transaction.getAllocation() == null) {
+            // The replay allocates every transaction it is handed, so a missing allocation means it never ran -
+            // in practice because the loan has no balance row to recompute, which both entry points skip on. The
+            // transaction would otherwise be left with no allocation, no balance movement and no schedule entry,
+            // and would either fail further downstream in the accounting posting or, with accounting off, be
+            // committed in that broken state unnoticed.
+            throw new IllegalStateException("Reprocessing did not allocate WC loan transaction " + transaction.getId() + " on loan "
+                    + loan.getId() + "; the loan most likely has no balance row, which reprocessing skips on");
+        }
+        completeRepaymentLikeTransaction(loan, transaction, transactionDate, transactionAmount);
+    }
+
+    private void completeRepaymentLikeTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
+            final LocalDate transactionDate, final BigDecimal transactionAmount) {
         // Breach schedule is maintained incrementally here; reprocessing does not rebuild it.
-        breachScheduleService.applyRepayment(loanId, transactionDate, transactionAmount);
+        breachScheduleService.applyRepayment(loan.getId(), transactionDate, transactionAmount);
 
         stateMachine.determineAndTransition(loan, transactionDate);
         recalculateOverpaidOnDate(loan, transaction);

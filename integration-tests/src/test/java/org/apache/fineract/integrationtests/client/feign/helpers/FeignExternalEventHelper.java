@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
+import org.apache.fineract.infrastructure.event.external.service.InternalExternalEventService;
 
 public class FeignExternalEventHelper {
 
@@ -57,6 +58,15 @@ public class FeignExternalEventHelper {
 
     public List<ExternalEventResponse> getAllExternalEvents() {
         return ok(() -> internalEventsApi.getAllExternalEvents(Map.of()));
+    }
+
+    public List<ExternalEventResponse> getExternalEvents(final String type, final Long aggregateRootId) {
+        return ok(() -> internalEventsApi.getAllExternalEvents(Map.of("type", type, "aggregateRootId", aggregateRootId)));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<Map<String, Object>> bulkEventItems(final ExternalEventResponse bulkEvent) {
+        return (List<Map<String, Object>>) bulkEvent.getPayLoad().get(InternalExternalEventService.BULK_ITEMS_KEY);
     }
 
     public void deleteAllExternalEvents() {
