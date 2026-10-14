@@ -73,7 +73,7 @@ jobs:
 
       - name: Archive Javadoc reports
         if: ${{ failure() || inputs.upload_artifacts }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: javadoc-reports-quality-checks
           path: '**/build/docs/javadoc/'
@@ -138,7 +138,7 @@ jobs:
 
       - name: Archive Checkstyle reports
         if: ${{ failure() || inputs.upload_artifacts }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: checkstyle-reports-quality-checks
           path: '**/build/reports/checkstyle/'
@@ -203,7 +203,7 @@ jobs:
 
       - name: Archive RAT reports
         if: ${{ failure() || inputs.upload_artifacts }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: rat-reports-quality-checks
           path: '**/build/reports/rat/'
@@ -268,7 +268,7 @@ jobs:
 
       - name: Archive SpotBugs reports
         if: ${{ failure() || inputs.upload_artifacts }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: spotbugs-reports-quality-checks
           path: '**/build/reports/spotbugs/'
@@ -375,7 +375,7 @@ jobs:
 
       - name: Archive license reports
         if: ${{ failure() || inputs.upload_artifacts }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: license-reports-quality-checks
           path: |
@@ -432,7 +432,7 @@ jobs:
 
       - name: Archive license reports
         if: ${{ failure() || inputs.upload_artifacts }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: license-artifact-reports-quality-checks
           path: |
