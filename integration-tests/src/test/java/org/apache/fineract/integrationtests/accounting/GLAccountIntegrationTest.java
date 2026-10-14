@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.accounting;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Calendar;
+import java.util.List;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetGLAccountsResponse;
@@ -122,8 +124,37 @@ public class GLAccountIntegrationTest extends FeignLoanTestBase {
         });
     }
 
+    @Test
+    public void searchGLAccountsBySearchParamTest() {
+        String uniqueNameOne = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME_NAME" + Calendar.getInstance().getTimeInMillis(), 5);
+        String uniqueGlCodeOne = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME_CODE" + Calendar.getInstance().getTimeInMillis(), 5);
+        final PostGLAccountsResponse accountOne = createGLAccount(uniqueNameOne, uniqueGlCodeOne);
+        String uniqueNameTwo = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME_NAME" + Calendar.getInstance().getTimeInMillis(), 5);
+        String uniqueGlCodeTwo = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME_CODE" + Calendar.getInstance().getTimeInMillis(), 5);
+        final PostGLAccountsResponse accountTwo = createGLAccount(uniqueNameTwo, uniqueGlCodeTwo);
+
+        try {
+            List<GetGLAccountsResponse> foundByName = accountHelper.searchGLAccounts(uniqueNameOne.substring(uniqueNameOne.length() - 5));
+            assertEquals(1, foundByName.size());
+            assertEquals(accountOne.getResourceId(), foundByName.getFirst().getId());
+            assertNull(foundByName.getFirst().getTagId());
+
+            List<GetGLAccountsResponse> foundByGlCode = accountHelper
+                    .searchGLAccounts(uniqueGlCodeTwo.substring(uniqueGlCodeTwo.length() - 5));
+            assertEquals(1, foundByGlCode.size());
+            assertEquals(accountTwo.getResourceId(), foundByGlCode.getFirst().getId());
+        } finally {
+            accountHelper.deleteGLAccount(accountOne.getResourceId());
+            accountHelper.deleteGLAccount(accountTwo.getResourceId());
+        }
+    }
+
     private PostGLAccountsResponse createGLAccount(String uniqueString) {
-        return accountHelper.createGLAccount(new PostGLAccountsRequest().type(GLAccountType.INCOME.getValue()).glCode(uniqueString)
-                .manualEntriesAllowed(true).usage(1).description(uniqueString).name(uniqueString));
+        return createGLAccount(uniqueString, uniqueString);
+    }
+
+    private PostGLAccountsResponse createGLAccount(String name, String glCode) {
+        return accountHelper.createGLAccount(new PostGLAccountsRequest().type(GLAccountType.INCOME.getValue()).glCode(glCode)
+                .manualEntriesAllowed(true).usage(1).description(name).name(name));
     }
 }
