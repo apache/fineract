@@ -58,12 +58,40 @@ public final class WorkingCapitalLoanDelinquencyPauseUtils {
     }
 
     /**
-     * Extends an inclusive period end date by the recorded pauses. See
-     * {@link WorkingCapitalLoanPausePeriodUtils#applyPauses} for the rule.
+     * Start dates of the resets that started a new period, undone or not. A reset that only flags the periods before it
+     * leaves the geometry untouched and is therefore not a cut.
+     *
+     * Unlike breach, an undo does not merge the cut period back: it only clears the reset flags, so the period the
+     * reset started still begins on the reset date and the boundary has to keep holding after the undo.
+     */
+    public static List<LocalDate> restartResetDates(final List<WorkingCapitalLoanDelinquencyAction> actions) {
+        if (actions == null) {
+            return List.of();
+        }
+        return actions.stream().filter(Objects::nonNull) //
+                .filter(action -> DelinquencyAction.RESET.equals(action.getAction())) //
+                .filter(action -> Boolean.TRUE.equals(action.getStartNewPeriod())) //
+                .map(WorkingCapitalLoanDelinquencyAction::getStartDate) //
+                .filter(Objects::nonNull) //
+                .toList();
+    }
+
+    /**
+     * The bounds of a period after the recorded pauses, holding its start in place when a reset began it. See
+     * {@link WorkingCapitalLoanPausePeriodUtils#applyPauses(LocalDate, LocalDate, List, List)} for the rule, shared
+     * with the breach schedule.
+     */
+    public static WorkingCapitalLoanPeriodBounds applyRecordedPauses(final LocalDate fromDate, final LocalDate baseToDate,
+            final List<WorkingCapitalLoanDelinquencyAction> actions) {
+        return WorkingCapitalLoanPausePeriodUtils.applyPauses(fromDate, baseToDate, toEffectivePauses(actions), restartResetDates(actions));
+    }
+
+    /**
+     * Extends an inclusive period end date by the recorded pauses. See {@link #applyRecordedPauses} for the rule.
      */
     public static LocalDate extendToDateByRecordedPauses(final LocalDate fromDate, final LocalDate baseToDate,
             final List<WorkingCapitalLoanDelinquencyAction> actions) {
-        return WorkingCapitalLoanPausePeriodUtils.extendToDate(fromDate, baseToDate, toEffectivePauses(actions));
+        return applyRecordedPauses(fromDate, baseToDate, actions).toDate();
     }
 
     /**

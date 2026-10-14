@@ -83,12 +83,38 @@ public final class WorkingCapitalLoanPausePeriodUtils {
     }
 
     /**
-     * End date of {@link #applyPauses}, so validation computing the date up front and the mutation applying it cannot
-     * disagree.
+     * The bounds of a period after the pauses, holding its start in place when a restart reset began it.
+     *
+     * A period's start falling inside a pause normally moves the whole period past the pause (see
+     * {@link #applyPauses(LocalDate, LocalDate, List)}). The reset date is a hard boundary, though: the restarted
+     * period begins on it even while a pause is active, so a pause that began before the reset only counts from the
+     * reset date on. Its earlier days stay with the period the reset cut.
+     */
+    public static WorkingCapitalLoanPeriodBounds applyPauses(final LocalDate fromDate, final LocalDate toDate,
+            final List<WorkingCapitalLoanPausePeriod> pauses, final List<LocalDate> restartResetDates) {
+        final List<WorkingCapitalLoanPausePeriod> applicablePauses = pauses != null && restartResetDates != null
+                && restartResetDates.contains(fromDate) ? pausesCountingFrom(fromDate, pauses) : pauses;
+        return applyPauses(fromDate, toDate, applicablePauses);
+    }
+
+    /**
+     * End date of {@link #applyPauses(LocalDate, LocalDate, List)}, so validation computing the date up front and the
+     * mutation applying it cannot disagree.
      */
     public static LocalDate extendToDate(final LocalDate fromDate, final LocalDate baseToDate,
             final List<WorkingCapitalLoanPausePeriod> pauses) {
         return applyPauses(fromDate, baseToDate, pauses).toDate();
+    }
+
+    /** The pauses as seen from a reset date: the ones that ended before it are dropped, the active one starts on it. */
+    private static List<WorkingCapitalLoanPausePeriod> pausesCountingFrom(final LocalDate resetDate,
+            final List<WorkingCapitalLoanPausePeriod> pauses) {
+        return pauses.stream() //
+                .filter(Objects::nonNull) //
+                .filter(WorkingCapitalLoanPausePeriod::isValid) //
+                .filter(pause -> !pause.endDate().isBefore(resetDate)) //
+                .map(pause -> pause.startDate().isBefore(resetDate) ? new WorkingCapitalLoanPausePeriod(resetDate, pause.endDate()) : pause) //
+                .toList();
     }
 
     private static List<WorkingCapitalLoanPausePeriod> sortedByStartDate(final List<WorkingCapitalLoanPausePeriod> pauses) {
