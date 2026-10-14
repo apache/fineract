@@ -150,6 +150,16 @@ public class ChargesTest extends FeignIntegrationTest {
     }
 
     @Test
+    public void testChargeCanBeDeactivated() {
+        final Long chargeId = chargesHelper.createLoanSpecifiedDueDateCharge(CHARGE_AMOUNT).getResourceId();
+        Assertions.assertNotNull(chargeId);
+        Assertions.assertTrue(chargesHelper.getCharge(chargeId).getActive(), "Charge must be active after creation.");
+        chargesHelper.updateCharge(chargeId, new ChargeRequest().locale(LOCALE).active(false));
+        Assertions.assertFalse(chargesHelper.getCharge(chargeId).getActive(), "Charge must be inactive after update.");
+        verifyDeletion(chargeId);
+    }
+
+    @Test
     public void testChargesForSavings() {
 
         // Testing Creation, Updation and Deletion of Specified due date Charge

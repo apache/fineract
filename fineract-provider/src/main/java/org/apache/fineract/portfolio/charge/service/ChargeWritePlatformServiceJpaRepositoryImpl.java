@@ -284,7 +284,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     }
 
     private boolean isAnySavingsProductsAssociateWithThisCharge(final Long chargeId) {
-        final String sql = "select (CASE WHEN (exists (select 1 from m_savings_product_charge sc where sc.charge_id = ?)) = 1 THEN 'true' ELSE 'false' END)";
+        final String sql = "select (CASE WHEN exists (select 1 from m_savings_product_charge sc where sc.charge_id = ?) THEN 'true' ELSE 'false' END)";
         final String isSavingsUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
         return Boolean.valueOf(isSavingsUsingCharge);
     }
