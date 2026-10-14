@@ -29,6 +29,7 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
 import org.apache.fineract.infrastructure.bulkimport.constants.ChartOfAccountsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.poi.hssf.usermodel.HSSFDataValidationHelper;
@@ -75,8 +76,9 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
     private void setAccountTypeToAccountNameAndTag() {
         accountTypeToAccountNameAndTag = new HashMap<>();
         for (GLAccountData glAccount : glAccounts) {
+            final CodeValueData tag = glAccount.getTagId();
             addToaccountTypeToAccountNameMap(glAccount.getType().getValue(), glAccount.getName() + "-" + glAccount.getId() + "-"
-                    + glAccount.getTagId().getName() + "-" + glAccount.getTagId().getId());
+                    + (tag == null ? "" : tag.getName()) + "-" + (tag == null ? "" : tag.getId()));
         }
     }
 
