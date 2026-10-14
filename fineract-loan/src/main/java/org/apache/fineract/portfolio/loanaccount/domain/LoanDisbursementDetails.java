@@ -77,13 +77,25 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom<Long> {
         if (!(obj instanceof LoanDisbursementDetails loanDisbursementDetails)) {
             return false;
         }
-        return loanDisbursementDetails.principal.equals(this.principal)
+        return isSamePrincipal(loanDisbursementDetails.principal, this.principal)
                 && DateUtils.isEqual(loanDisbursementDetails.expectedDisbursementDate, this.expectedDisbursementDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(expectedDisbursementDate, principal);
+        final BigDecimal normalizedPrincipal = principal == null ? null
+                : (principal.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : principal.stripTrailingZeros());
+        return Objects.hash(expectedDisbursementDate, normalizedPrincipal);
+    }
+
+    private static boolean isSamePrincipal(final BigDecimal first, final BigDecimal second) {
+        if (first == null) {
+            return second == null;
+        }
+        if (second == null) {
+            return false;
+        }
+        return first.compareTo(second) == 0;
     }
 
     public void copy(final LoanDisbursementDetails disbursementDetails) {
