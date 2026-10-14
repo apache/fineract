@@ -165,6 +165,98 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
         inOrder.verify(businessEventNotifierService).notifyPostBusinessEvent(any());
     }
 
+    @Test
+    void publishReprocessedFromSnapshotsDoesNothingWhenPostingIsDisabled() {
+        postingEnabled(false);
+
+        publisher.publishReprocessed(LOAN_ID, Map.of(1L, transaction(1L)), List.of(mock(WorkingCapitalLoanTransaction.class)));
+
+        verifyNoInteractions(transactionDataFactory);
+        verify(businessEventNotifierService, never()).withExternalEventRecording(any(Runnable.class));
+        verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any());
+    }
+
+    @Test
+    void publishReprocessedFromSnapshotsPairsTheStateBeforeAndAfterTheReplay() {
+        postingEnabled(true);
+        final WorkingCapitalLoanTransaction changed = changedTransaction(1L, false);
+        final WorkingCapitalLoanTransactionData before = transaction(1L);
+        final WorkingCapitalLoanTransactionData after = transaction(1L);
+        when(transactionDataFactory.create(List.of(changed))).thenReturn(List.of(after));
+
+        publisher.publishReprocessed(LOAN_ID, Map.of(1L, before), List.of(changed));
+
+        final WorkingCapitalLoanAdjustTransactionBusinessEvent event = publishedEvents(1).getFirst();
+        assertThat(event.getAggregateRootId()).isEqualTo(LOAN_ID);
+        assertThat(event.get().getTransactionToAdjust()).isSameAs(before);
+        assertThat(event.get().getNewTransactionDetail()).isSameAs(after);
+    }
+
+    @Test
+    void publishReprocessedFromSnapshotsReportsAReversedTransactionAsAReversalWithoutAPreSnapshot() {
+        postingEnabled(true);
+        final WorkingCapitalLoanTransaction reversed = changedTransaction(2L, true);
+        final WorkingCapitalLoanTransactionData after = transaction(2L);
+        when(transactionDataFactory.create(List.of(reversed))).thenReturn(List.of(after));
+
+        publisher.publishReprocessed(LOAN_ID, Map.of(), List.of(reversed));
+
+        final WorkingCapitalLoanAdjustTransactionBusinessEvent event = publishedEvents(1).getFirst();
+        assertThat(event.getAggregateRootId()).isEqualTo(LOAN_ID);
+        assertThat(event.get().getTransactionToAdjust()).isSameAs(after);
+        assertThat(event.get().getNewTransactionDetail()).isNull();
+    }
+
+    @Test
+    void publishReprocessedFromSnapshotsSkipsATransactionThatHasNoPreSnapshot() {
+        postingEnabled(true);
+        final WorkingCapitalLoanTransaction withoutPreSnapshot = changedTransaction(3L, false);
+        final WorkingCapitalLoanTransaction changed = changedTransaction(4L, false);
+        final WorkingCapitalLoanTransactionData before = transaction(4L);
+        final WorkingCapitalLoanTransactionData after = transaction(4L);
+        when(transactionDataFactory.create(List.of(changed))).thenReturn(List.of(after));
+
+        publisher.publishReprocessed(LOAN_ID, Map.of(4L, before), List.of(withoutPreSnapshot, changed));
+
+        final WorkingCapitalLoanAdjustTransactionBusinessEvent event = publishedEvents(1).getFirst();
+        assertThat(event.get().getTransactionToAdjust()).isSameAs(before);
+        assertThat(event.get().getNewTransactionDetail()).isSameAs(after);
+    }
+
+    @Test
+    void publishReprocessedFromSnapshotsDoesNotOpenARecordingWindowWhenNoTransactionIsLeft() {
+        postingEnabled(true);
+
+        publisher.publishReprocessed(LOAN_ID, Map.of(), List.of(changedTransaction(3L, false)));
+
+        verify(businessEventNotifierService, never()).withExternalEventRecording(any(Runnable.class));
+        verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any());
+    }
+
+    @Test
+    void publishReprocessedFromSnapshotsPostsInInputOrderInsideASingleRecordingWindow() {
+        postingEnabled(true);
+        final WorkingCapitalLoanTransaction changed = changedTransaction(1L, false);
+        final WorkingCapitalLoanTransaction reversed = changedTransaction(2L, true);
+        final WorkingCapitalLoanTransactionData changedBefore = transaction(1L);
+        final WorkingCapitalLoanTransactionData changedAfter = transaction(1L);
+        final WorkingCapitalLoanTransactionData reversedAfter = transaction(2L);
+        when(transactionDataFactory.create(List.of(changed, reversed))).thenReturn(List.of(reversedAfter, changedAfter));
+
+        publisher.publishReprocessed(LOAN_ID, Map.of(1L, changedBefore), List.of(changed, reversed));
+
+        final List<WorkingCapitalLoanAdjustTransactionBusinessEvent> events = publishedEvents(2);
+        assertThat(events.get(0).get().getTransactionToAdjust()).isSameAs(changedBefore);
+        assertThat(events.get(0).get().getNewTransactionDetail()).isSameAs(changedAfter);
+        assertThat(events.get(1).get().getTransactionToAdjust()).isSameAs(reversedAfter);
+        assertThat(events.get(1).get().getNewTransactionDetail()).isNull();
+
+        verify(businessEventNotifierService).withExternalEventRecording(any(Runnable.class));
+        final InOrder inOrder = inOrder(businessEventNotifierService);
+        inOrder.verify(businessEventNotifierService).withExternalEventRecording(any(Runnable.class));
+        inOrder.verify(businessEventNotifierService, times(2)).notifyPostBusinessEvent(any());
+    }
+
     private void postingEnabled(final boolean enabled) {
         when(businessEventNotifierService.isExternalEventPostingEnabled(WorkingCapitalLoanAdjustTransactionBusinessEvent.TYPE))
                 .thenReturn(enabled);
@@ -178,5 +270,12 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
 
     private WorkingCapitalLoanTransactionData transaction(final Long id) {
         return WorkingCapitalLoanTransactionData.builder().id(id).wcLoanId(LOAN_ID).build();
+    }
+
+    private WorkingCapitalLoanTransaction changedTransaction(final Long id, final boolean reversed) {
+        final WorkingCapitalLoanTransaction transaction = mock(WorkingCapitalLoanTransaction.class);
+        when(transaction.getId()).thenReturn(id);
+        when(transaction.isReversed()).thenReturn(reversed);
+        return transaction;
     }
 }

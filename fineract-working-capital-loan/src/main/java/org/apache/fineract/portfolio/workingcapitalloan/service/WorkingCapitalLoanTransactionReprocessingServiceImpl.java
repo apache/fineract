@@ -49,7 +49,6 @@ import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapita
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionAllocationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanAdjustTransactionEventPublisher.WorkingCapitalLoanTransactionAdjustment;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanAmortizationScheduleWriteService.PrincipalAdjustment;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanAmortizationScheduleWriteService.PrincipalPayment;
 import org.springframework.stereotype.Service;
@@ -154,7 +153,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         final boolean chargeOffInSuffix = replaySet.stream().anyMatch(this::isChargeOff);
         boolean afterChargeOff = loan.isChargedOff() && !chargeOffInSuffix;
         boolean afterLiftedChargeOff = false;
-        WorkingCapitalLoanTransaction liftedChargeOffTransaction = null;
+        boolean chargeOffLifted = false;
         final Map<Long, WorkingCapitalLoanCharge> chargesById = Map.of();
         final List<WorkingCapitalLoanTransactionAllocation> updatedAllocations = new ArrayList<>();
         // The replay mutates the allocations in place, so the "before" side of the adjustment pair must be read now.
@@ -165,9 +164,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
                 final boolean stillChargedOff = replayChargeOff(loan, balance, txn, updatedAllocations, adjustedTransactions);
                 afterChargeOff = stillChargedOff;
                 afterLiftedChargeOff = !stillChargedOff;
-                if (afterLiftedChargeOff) {
-                    liftedChargeOffTransaction = txn;
-                }
+                chargeOffLifted |= afterLiftedChargeOff;
                 continue;
             }
 
@@ -200,8 +197,8 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         allocationRepository.saveAll(updatedAllocations);
         balanceRepository.saveAndFlush(balance);
 
-        adjustTransactionEventPublisher.publishReprocessed(loan.getId(), buildAdjustments(preReplaySnapshots, adjustedTransactions));
-        notifyChargeOffLifted(loan, liftedChargeOffTransaction);
+        adjustTransactionEventPublisher.publishReprocessed(loan.getId(), preReplaySnapshots, adjustedTransactions);
+        notifyChargeOffLifted(loan, chargeOffLifted);
     }
 
     /**
@@ -271,15 +268,13 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         final List<WorkingCapitalLoanTransaction> adjustedTransactions = new ArrayList<>();
         boolean afterChargeOff = false;
         boolean afterLiftedChargeOff = false;
-        WorkingCapitalLoanTransaction liftedChargeOffTransaction = null;
+        boolean chargeOffLifted = false;
         for (final WorkingCapitalLoanTransaction txn : replayable) {
             if (isChargeOff(txn)) {
                 final boolean stillChargedOff = replayChargeOff(loan, balance, txn, updatedAllocations, adjustedTransactions);
                 afterChargeOff = stillChargedOff;
                 afterLiftedChargeOff = !stillChargedOff;
-                if (afterLiftedChargeOff) {
-                    liftedChargeOffTransaction = txn;
-                }
+                chargeOffLifted |= afterLiftedChargeOff;
                 continue;
             }
 
@@ -338,16 +333,15 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         // date of the refund that created it.
         amortizationScheduleWriteService.rebuildScheduleFromPrincipalPayments(loan, principalPayments, principalAdjustments);
 
-        adjustTransactionEventPublisher.publishReprocessed(loan.getId(), buildAdjustments(preReplaySnapshots, adjustedTransactions));
-        notifyChargeOffLifted(loan, liftedChargeOffTransaction);
+        adjustTransactionEventPublisher.publishReprocessed(loan.getId(), preReplaySnapshots, adjustedTransactions);
+        notifyChargeOffLifted(loan, chargeOffLifted);
     }
 
-    private void notifyChargeOffLifted(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction liftedChargeOffTransaction) {
-        if (liftedChargeOffTransaction == null) {
+    private void notifyChargeOffLifted(final WorkingCapitalLoan loan, final boolean chargeOffLifted) {
+        if (!chargeOffLifted) {
             return;
         }
         businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanUndoChargeOffBusinessEvent(loan));
-        adjustTransactionEventPublisher.publishReversal(loan.getId(), liftedChargeOffTransaction);
     }
 
     /**
@@ -357,16 +351,6 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
     private Map<Long, WorkingCapitalLoanTransactionData> captureSnapshots(final List<WorkingCapitalLoanTransaction> transactions) {
         return adjustTransactionEventPublisher
                 .snapshots(transactions.stream().filter(txn -> txn.getId() != null && txn.getAllocation() != null).toList());
-    }
-
-    private List<WorkingCapitalLoanTransactionAdjustment> buildAdjustments(
-            final Map<Long, WorkingCapitalLoanTransactionData> preReplaySnapshots,
-            final List<WorkingCapitalLoanTransaction> adjustedTransactions) {
-        final List<WorkingCapitalLoanTransaction> paired = adjustedTransactions.stream()
-                .filter(txn -> preReplaySnapshots.containsKey(txn.getId())).toList();
-        final Map<Long, WorkingCapitalLoanTransactionData> postReplaySnapshots = adjustTransactionEventPublisher.snapshots(paired);
-        return paired.stream().map(txn -> new WorkingCapitalLoanTransactionAdjustment(preReplaySnapshots.get(txn.getId()),
-                postReplaySnapshots.get(txn.getId()))).toList();
     }
 
     private boolean isCreditBalanceRefund(final WorkingCapitalLoanTransaction txn) {
@@ -424,6 +408,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
             loan.liftChargeOff();
             loanRepository.saveAndFlush(loan);
             accountingProcessor.postReversalJournalEntries(loan, chargeOffTransaction);
+            adjustedTransactions.add(chargeOffTransaction);
             return false;
         }
 

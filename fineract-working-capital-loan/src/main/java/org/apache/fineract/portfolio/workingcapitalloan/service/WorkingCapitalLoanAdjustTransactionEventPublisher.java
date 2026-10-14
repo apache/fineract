@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanAdjustTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanAdjustTransactionBusinessEvent.Data;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
@@ -49,8 +50,8 @@ public class WorkingCapitalLoanAdjustTransactionEventPublisher {
             return;
         }
         final WorkingCapitalLoanTransactionData snapshot = transactionDataFactory.create(reversedTransaction);
-        businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanAdjustTransactionBusinessEvent(
-                WorkingCapitalLoanAdjustTransactionBusinessEvent.Data.reversal(snapshot), wcLoanId));
+        businessEventNotifierService
+                .notifyPostBusinessEvent(new WorkingCapitalLoanAdjustTransactionBusinessEvent(Data.reversal(snapshot), wcLoanId));
     }
 
     public void publishAdjustment(final Long wcLoanId, final WorkingCapitalLoanTransaction reversedTransaction,
@@ -58,16 +59,20 @@ public class WorkingCapitalLoanAdjustTransactionEventPublisher {
         if (!isPostingEnabled()) {
             return;
         }
-        businessEventNotifierService
-                .notifyPostBusinessEvent(
-                        new WorkingCapitalLoanAdjustTransactionBusinessEvent(
-                                new WorkingCapitalLoanAdjustTransactionBusinessEvent.Data(
-                                        transactionDataFactory.create(reversedTransaction), transactionDataFactory.create(newTransaction)),
-                                wcLoanId));
+        businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanAdjustTransactionBusinessEvent(
+                new Data(transactionDataFactory.create(reversedTransaction), transactionDataFactory.create(newTransaction)), wcLoanId));
     }
 
-    private boolean isPostingEnabled() {
-        return businessEventNotifierService.isExternalEventPostingEnabled(WorkingCapitalLoanAdjustTransactionBusinessEvent.TYPE);
+    public void publishReprocessed(final Long wcLoanId, final Map<Long, WorkingCapitalLoanTransactionData> preSnapshots,
+            final List<WorkingCapitalLoanTransaction> changedTransactions) {
+        if (!isPostingEnabled()) {
+            return;
+        }
+        final List<WorkingCapitalLoanTransaction> reported = changedTransactions.stream()
+                .filter(txn -> txn.isReversed() || preSnapshots.containsKey(txn.getId())).toList();
+        final Map<Long, WorkingCapitalLoanTransactionData> postSnapshots = snapshots(reported);
+        publishInRecordingWindow(wcLoanId, reported.stream().map(txn -> txn.isReversed() ? Data.reversal(postSnapshots.get(txn.getId()))
+                : new Data(preSnapshots.get(txn.getId()), postSnapshots.get(txn.getId()))).toList());
     }
 
     /**
@@ -75,13 +80,20 @@ public class WorkingCapitalLoanAdjustTransactionEventPublisher {
      * window is already open further up the stack - a COB run, say - these events join that one instead.
      */
     public void publishReprocessed(final Long wcLoanId, final List<WorkingCapitalLoanTransactionAdjustment> adjustments) {
+        publishInRecordingWindow(wcLoanId,
+                adjustments.stream().map(adjustment -> new Data(adjustment.previousState(), adjustment.currentState())).toList());
+    }
+
+    private boolean isPostingEnabled() {
+        return businessEventNotifierService.isExternalEventPostingEnabled(WorkingCapitalLoanAdjustTransactionBusinessEvent.TYPE);
+    }
+
+    private void publishInRecordingWindow(final Long wcLoanId, final List<Data> adjustments) {
         if (adjustments.isEmpty()) {
             return;
         }
-        businessEventNotifierService.withExternalEventRecording(() -> adjustments.forEach(
-                adjustment -> businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanAdjustTransactionBusinessEvent(
-                        new WorkingCapitalLoanAdjustTransactionBusinessEvent.Data(adjustment.previousState(), adjustment.currentState()),
-                        wcLoanId))));
+        businessEventNotifierService.withExternalEventRecording(() -> adjustments.forEach(adjustment -> businessEventNotifierService
+                .notifyPostBusinessEvent(new WorkingCapitalLoanAdjustTransactionBusinessEvent(adjustment, wcLoanId))));
     }
 
     public record WorkingCapitalLoanTransactionAdjustment(WorkingCapitalLoanTransactionData previousState,

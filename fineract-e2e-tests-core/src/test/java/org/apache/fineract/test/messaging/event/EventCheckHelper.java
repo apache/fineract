@@ -88,6 +88,7 @@ import org.apache.fineract.test.data.LoanStatus;
 import org.apache.fineract.test.data.TransactionType;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.GlobalConfigurationHelper;
+import org.apache.fineract.test.messaging.BulkEventMessage;
 import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.EventMessage;
 import org.apache.fineract.test.messaging.event.assetexternalization.LoanAccountSnapshotEvent;
@@ -1346,6 +1347,34 @@ public class EventCheckHelper {
                 .extractingBigDecimal(data -> data.getTransactionToAdjust().getFeeChargesPortion()).isEqualTo(previousFeeChargesPortion)//
                 .extractingBigDecimal(data -> data.getNewTransactionDetail().getPrincipalPortion()).isEqualTo(newPrincipalPortion)//
                 .extractingBigDecimal(data -> data.getNewTransactionDetail().getFeeChargesPortion()).isEqualTo(newFeeChargesPortion);
+    }
+
+    public void workingCapitalLoanAdjustTransactionNotRaisedCheck(final Long loanId, final String transactionType,
+            final String transactionDate) {
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = workingCapitalLoanTransactionDetails(loanId, transactionType,
+                transactionDate);
+        eventAssertion.assertEventNotRaised(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transaction.getId());
+    }
+
+    public void workingCapitalLoanAdjustTransactionBulkEventCheck(final Long loanId, final LocalDate businessDate,
+            final int expectedCount) {
+        if (eventProperties.isEventVerificationDisabled()) {
+            return;
+        }
+        final List<BulkEventMessage> bulkEvents = eventAssertion.assertBulkEvent(bulkEvent -> businessDate.equals(bulkEvent.businessDate())
+                && bulkEvent.items().stream().anyMatch(item -> isWorkingCapitalLoanAdjustment(item, loanId)));
+        assertThat(bulkEvents).hasSize(1);
+        final List<EventMessage<?>> items = bulkEvents.getFirst().items();
+        assertThat(items).hasSize(expectedCount).allMatch(item -> isWorkingCapitalLoanAdjustment(item, loanId));
+        final List<WorkingCapitalLoanTransactionDataV1> adjustedTransactions = items.stream()
+                .map(item -> ((WorkingCapitalLoanTransactionAdjustmentDataV1) item.getData()).getTransactionToAdjust()).toList();
+        assertThat(adjustedTransactions).isSortedAccordingTo(Comparator.comparing(WorkingCapitalLoanTransactionDataV1::getTransactionDate)
+                .thenComparing(WorkingCapitalLoanTransactionDataV1::getId));
+    }
+
+    private static boolean isWorkingCapitalLoanAdjustment(final EventMessage<?> item, final Long loanId) {
+        return item.getData() instanceof WorkingCapitalLoanTransactionAdjustmentDataV1 adjustment
+                && loanId.equals(adjustment.getTransactionToAdjust().getWcLoanId());
     }
 
     public void workingCapitalLoanAccrualTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {

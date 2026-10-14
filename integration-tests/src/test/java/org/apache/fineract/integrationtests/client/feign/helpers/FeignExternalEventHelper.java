@@ -22,8 +22,11 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
+import org.apache.fineract.infrastructure.event.external.service.InternalExternalEventService;
 
 public class FeignExternalEventHelper {
 
@@ -41,6 +44,18 @@ public class FeignExternalEventHelper {
 
     public void disableBusinessEvent(String eventName) {
         configurationHelper.updateConfigurations(Map.of(eventName, false));
+    }
+
+    public Map<String, Boolean> enableBusinessEvents(final List<String> eventNames) {
+        final Map<String, Boolean> enabledByEventType = configurationHelper.retrieveEnabledByEventType();
+        final Map<String, Boolean> previousStates = eventNames.stream()
+                .collect(Collectors.toMap(Function.identity(), enabledByEventType::get));
+        configurationHelper.updateConfigurations(eventNames.stream().collect(Collectors.toMap(Function.identity(), eventName -> true)));
+        return previousStates;
+    }
+
+    public void restoreBusinessEvents(final Map<String, Boolean> previousStates) {
+        configurationHelper.updateConfigurations(previousStates);
     }
 
     public void configureBusinessEvent(String eventName, boolean enabled) {
@@ -61,6 +76,15 @@ public class FeignExternalEventHelper {
 
     public List<ExternalEventResponse> getAllExternalEvents() {
         return ok(() -> internalEventsApi.getAllExternalEvents(Map.of()));
+    }
+
+    public List<ExternalEventResponse> getExternalEvents(final String type, final Long aggregateRootId) {
+        return ok(() -> internalEventsApi.getAllExternalEvents(Map.of("type", type, "aggregateRootId", aggregateRootId)));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<Map<String, Object>> bulkEventItems(final ExternalEventResponse bulkEvent) {
+        return (List<Map<String, Object>>) bulkEvent.getPayLoad().get(InternalExternalEventService.BULK_ITEMS_KEY);
     }
 
     public void deleteAllExternalEvents() {

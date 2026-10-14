@@ -302,10 +302,13 @@ Feature: Working Capital Loan Transaction Adjustment
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 12 January 2026 | Repayment    | 270.0             | 230.0            | 15.0              | 25.0                  | false    |
+    When Admin sets the business date to "13 January 2026"
+    And Customer makes repayment on "13 January 2026" with 100.0 transaction amount on Working Capital loan
     When Admin sets the business date to "15 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Customer adjust "1"th "REPAYMENT" transaction made on "12 January 2026" on Working Capital loan with amount "50"
     Then a Working Capital Loan Adjust Transaction business event is raised for the adjusted "repayment" with new amount "50"
+    And a Working Capital Loan Adjust Transaction business event is not raised for the "repayment" transaction on "13 January 2026"
     And Working Capital Loan Transactions tab has a reversed "REPAYMENT" transaction with date "12 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 230.0  |
@@ -329,6 +332,7 @@ Feature: Working Capital Loan Transaction Adjustment
       | 12 January 2026 | Accrual      | 15.0              | 0.0              | 15.0              | 0.0                   | false    |
       | 12 January 2026 | Accrual      | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
       | 12 January 2026 | Repayment    | 50.0              | 10.0             | 15.0              | 25.0                  | false    |
+      | 13 January 2026 | Repayment    | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
      Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
   @TestRailId:C111007
@@ -1021,6 +1025,7 @@ Feature: Working Capital Loan Transaction Adjustment
     And Admin runs inline COB job for Working Capital Loan by loanId
     # Move the D1 overpayment to a later non-overpaying amount (still before D3); the D3 repayment keeps the loan overpaid
     When Customer adjust "1"th "REPAYMENT" transaction made on "04 January 2026" on Working Capital loan with amount "1000" and date "05 January 2026"
+    Then a Working Capital Loan Adjust Transaction business event is not raised for the "repayment" transaction on "06 January 2026"
     Then Working Capital loan status will be "OVERPAID"
     And Working capital loan details has the following field values:
       | overpaidOnDate | 2026-01-06 |

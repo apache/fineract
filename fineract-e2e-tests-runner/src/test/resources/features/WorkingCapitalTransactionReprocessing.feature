@@ -138,6 +138,8 @@ Feature: Working Capital Transaction Reprocessing
     # day 5: the backdated repayment stays principal-only, while the day-10 repayment settles the fee (fee-first order).
     When Admin sets the business date to "15 January 2026"
     And Customer makes repayment on "05 January 2026" with 2000 transaction amount on Working Capital loan
+    Then a Working Capital Loan Adjust Transaction business event is not raised for any "repayment" transaction
+    And BulkBusinessEvent is not raised on "15 January 2026"
     Then Working Capital loan balance payload contains the following fields:
       | field                | value  |
       | principalOutstanding | 4035.0 |
@@ -250,16 +252,22 @@ Feature: Working Capital Transaction Reprocessing
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Repayment    | 30.0              | 25.0             | 5.0               | 0.0                   | false    |
+    When Admin sets the business date to "12 January 2026"
+    And Customer makes repayment on "12 January 2026" with 9000 transaction amount on Working Capital loan
     # Backdated Txn#2 on day 5 takes the fee; Txn#1 is reprocessed to 30 principal
     When Admin sets the business date to "15 January 2026"
     And Customer makes repayment on "05 January 2026" with 25 transaction amount on Working Capital loan
     Then a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "10 January 2026" with principal portion changed from "25.0" to "30.0" and fee portion changed from "5.0" to "0.0"
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "12 January 2026" with principal portion changed from "8975.0" to "8950.0" and fee portion changed from "0.0" to "0.0"
+    And BulkBusinessEvent is raised on "15 January 2026" with 2 WorkingCapitalLoanAdjustTransactionBusinessEvent
     And Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Repayment    | 25.0              | 20.0             | 5.0               | 0.0                   | false    |
       | 10 January 2026 | Repayment    | 30.0              | 30.0             | 0.0               | 0.0                   | false    |
-    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
+      | 12 January 2026 | Repayment    | 9000.0            | 8950.0           | 0.0               | 0.0                   | false    |
+    When Customer makes credit balance refund on "15 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
   @TestRailId:C85217
   Scenario: Verify reversal of a transaction re-allocates the remaining transaction's fee portion

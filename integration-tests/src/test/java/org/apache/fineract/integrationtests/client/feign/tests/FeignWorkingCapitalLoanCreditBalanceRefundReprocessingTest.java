@@ -21,21 +21,26 @@ package org.apache.fineract.integrationtests.client.feign.tests;
 import static org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper.assertEqualBigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetBalance;
+import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdStatus;
 import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
 import org.apache.fineract.client.models.ProjectedAmortizationSchedulePaymentData;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEventHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -50,10 +55,15 @@ public class FeignWorkingCapitalLoanCreditBalanceRefundReprocessingTest extends 
     private static final String STATUS_ACTIVE = "loanStatusType.active";
     private static final String STATUS_OVERPAID = "loanStatusType.overpaid";
     private static final String STATUS_CLOSED_OBLIGATIONS_MET = "loanStatusType.closed.obligations.met";
+    private static final String BULK_BUSINESS_EVENT = "BulkBusinessEvent";
+    private static final String ADJUST_TRANSACTION_EVENT = "WorkingCapitalLoanAdjustTransactionBusinessEvent";
+    private static final List<String> REPROCESSING_EVENTS = List.of(ADJUST_TRANSACTION_EVENT,
+            "WorkingCapitalLoanRepaymentTransactionBusinessEvent", "WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent");
 
     private FeignWorkingCapitalLoanHelper wcLoanHelper;
     private FeignClientHelper clientHelper;
     private FeignBusinessDateHelper businessDateHelper;
+    private FeignExternalEventHelper externalEventHelper;
     private WorkingCapitalLoanProductHelper productHelper;
 
     private final List<Long> createdLoanIds = new ArrayList<>();
@@ -64,6 +74,7 @@ public class FeignWorkingCapitalLoanCreditBalanceRefundReprocessingTest extends 
         wcLoanHelper = new FeignWorkingCapitalLoanHelper(fineractClient());
         clientHelper = new FeignClientHelper(fineractClient());
         businessDateHelper = new FeignBusinessDateHelper(fineractClient());
+        externalEventHelper = new FeignExternalEventHelper(fineractClient());
         productHelper = new WorkingCapitalLoanProductHelper();
     }
 
@@ -175,7 +186,14 @@ public class FeignWorkingCapitalLoanCreditBalanceRefundReprocessingTest extends 
 
             // Reverse the first Repayment (25). This must trigger CBR-aware reprocessing.
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-20");
-            wcLoanHelper.reverseTransaction(loanId, firstRepaymentId, WorkingCapitalLoanRequestBuilders.reversal());
+            final Map<String, Boolean> previousEventStates = externalEventHelper.enableBusinessEvents(REPROCESSING_EVENTS);
+            try {
+                externalEventHelper.deleteAllExternalEvents();
+                wcLoanHelper.reverseTransaction(loanId, firstRepaymentId, WorkingCapitalLoanRequestBuilders.reversal());
+                assertReplayPostsOneBulkEvent(loanId, firstRepaymentId);
+            } finally {
+                externalEventHelper.restoreBusinessEvents(previousEventStates);
+            }
 
             GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
             GetBalance balance = requireBalance(loan);
@@ -315,6 +333,61 @@ public class FeignWorkingCapitalLoanCreditBalanceRefundReprocessingTest extends 
                 .filter(txn -> txn.getTransactionAmount() != null && amount.compareTo(txn.getTransactionAmount()) == 0)
                 .filter(txn -> txn.getType() != null && Boolean.TRUE.equals(txn.getType().getRepayment())).map(txn -> txn.getId())
                 .findFirst().orElseThrow(() -> new AssertionError("Repayment transaction of " + amount + " not found on loan " + loanId));
+    }
+
+    private Long findCreditBalanceRefundTransactionId(final Long loanId) {
+        return wcLoanHelper.getTransactions(loanId).stream().filter(txn -> !Boolean.TRUE.equals(txn.getReversed()))
+                .filter(txn -> txn.getType() != null && Boolean.TRUE.equals(txn.getType().getCreditBalanceRefund()))
+                .map(GetWorkingCapitalLoanTransactionIdResponse::getId).findFirst()
+                .orElseThrow(() -> new AssertionError("Credit balance refund transaction not found on loan " + loanId));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void assertReplayPostsOneBulkEvent(final Long loanId, final Long reversedRepaymentId) {
+        final List<ExternalEventResponse> bulkEvents = externalEventHelper.getExternalEvents(BULK_BUSINESS_EVENT, loanId);
+        assertEquals(1, bulkEvents.size(), "bulk events of the replay");
+        final List<Map<String, Object>> items = FeignExternalEventHelper.bulkEventItems(bulkEvents.getFirst());
+        assertEquals(2, items.size(), "items of the bulk event");
+        items.forEach(item -> assertEquals(ADJUST_TRANSACTION_EVENT, item.get("type"), "type of the bulk event item"));
+        assertReprocessedTransaction((Map<String, Object>) items.get(0).get("payLoad"),
+                findRepaymentTransactionId(loanId, BigDecimal.valueOf(75)), BigDecimal.valueOf(25), BigDecimal.valueOf(50),
+                BigDecimal.valueOf(50), BigDecimal.valueOf(25));
+        assertReprocessedTransaction((Map<String, Object>) items.get(1).get("payLoad"), findCreditBalanceRefundTransactionId(loanId),
+                BigDecimal.ZERO, BigDecimal.valueOf(25), BigDecimal.valueOf(50), BigDecimal.valueOf(25));
+
+        final List<ExternalEventResponse> adjustEvents = externalEventHelper.getExternalEvents(ADJUST_TRANSACTION_EVENT, loanId);
+        assertEquals(1, adjustEvents.size(), "adjust events posted outside the bulk event");
+        final Map<String, Object> reversal = adjustEvents.getFirst().getPayLoad();
+        final Map<String, Object> reversedTransaction = (Map<String, Object>) reversal.get("transactionToAdjust");
+        assertEquals(reversedRepaymentId, toLong(reversedTransaction.get("id")), "id of the reversed repayment");
+        assertEquals(Boolean.TRUE, reversedTransaction.get("reversed"), "reversed flag of the reversed repayment");
+        assertNull(reversal.get("newTransactionDetail"), "new transaction detail of the reversal");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void assertReprocessedTransaction(final Map<String, Object> adjustment, final Long transactionId,
+            final BigDecimal previousPrincipalPortion, final BigDecimal currentPrincipalPortion,
+            final BigDecimal previousOverpaymentPortion, final BigDecimal currentOverpaymentPortion) {
+        final Map<String, Object> previousState = (Map<String, Object>) adjustment.get("transactionToAdjust");
+        final Map<String, Object> currentState = (Map<String, Object>) adjustment.get("newTransactionDetail");
+        assertEquals(transactionId, toLong(previousState.get("id")), "id of the transaction before the replay");
+        assertEquals(transactionId, toLong(currentState.get("id")), "id of the transaction after the replay");
+        assertEqualBigDecimal(previousPrincipalPortion, toBigDecimal(previousState.get("principalPortion")),
+                "principal portion of transaction " + transactionId + " before the replay");
+        assertEqualBigDecimal(currentPrincipalPortion, toBigDecimal(currentState.get("principalPortion")),
+                "principal portion of transaction " + transactionId + " after the replay");
+        assertEqualBigDecimal(previousOverpaymentPortion, toBigDecimal(previousState.get("overpaymentPortion")),
+                "overpayment portion of transaction " + transactionId + " before the replay");
+        assertEqualBigDecimal(currentOverpaymentPortion, toBigDecimal(currentState.get("overpaymentPortion")),
+                "overpayment portion of transaction " + transactionId + " after the replay");
+    }
+
+    private static Long toLong(final Object value) {
+        return value instanceof Number number ? number.longValue() : null;
+    }
+
+    private static BigDecimal toBigDecimal(final Object value) {
+        return value == null ? null : new BigDecimal(value.toString());
     }
 
     private void assertStatus(Long loanId, String expectedCode) {

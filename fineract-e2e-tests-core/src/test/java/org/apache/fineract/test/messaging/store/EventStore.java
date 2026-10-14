@@ -26,12 +26,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.BulkMessageItemV1;
 import org.apache.fineract.avro.BulkMessagePayloadV1;
 import org.apache.fineract.avro.MessageV1;
+import org.apache.fineract.test.messaging.BulkEventMessage;
 import org.apache.fineract.test.messaging.EventMessage;
 import org.apache.fineract.test.messaging.event.Event;
 import org.springframework.stereotype.Component;
@@ -45,6 +47,7 @@ public class EventStore {
     private final List<EventMessage<?>> receivedEvents = new CopyOnWriteArrayList<>();
     // Events removed by a verification, kept so a later step can still inspect their payload
     private final List<EventMessage<?>> verifiedEvents = new CopyOnWriteArrayList<>();
+    private final List<BulkEventMessage> receivedBulkEvents = new CopyOnWriteArrayList<>();
 
     public <R, T extends Event<R>> boolean existsEventById(T type, Long id) {
         return findEventById(type, id).isPresent();
@@ -82,6 +85,10 @@ public class EventStore {
         return receivedEvents;
     }
 
+    public List<BulkEventMessage> findBulkEvents(final Predicate<BulkEventMessage> filter) {
+        return receivedBulkEvents.stream().filter(filter).toList();
+    }
+
     public void receive(byte[] message) throws Exception {
         MessageV1 msgObject = MessageV1.fromByteBuffer(ByteBuffer.wrap(message));
         String type = msgObject.getType();
@@ -98,6 +105,7 @@ public class EventStore {
                 });
             }
             receivedEvents.addAll(bulkEvents);
+            receivedBulkEvents.add(new BulkEventMessage(businessDate, List.copyOf(bulkEvents)));
         } else {
             EventMessage<Object> msg = new EventMessage<>(type, businessDate, dataObject, idempotencyKey);
             if (log.isDebugEnabled()) {
@@ -136,5 +144,6 @@ public class EventStore {
     public void reset() {
         receivedEvents.clear();
         verifiedEvents.clear();
+        receivedBulkEvents.clear();
     }
 }
