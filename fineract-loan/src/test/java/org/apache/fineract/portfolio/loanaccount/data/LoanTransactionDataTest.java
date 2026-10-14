@@ -89,12 +89,12 @@ public class LoanTransactionDataTest {
         LocalDate submittedOnDate = LocalDate.of(2023, 1, 1);
 
         // Collections
-        List<LoanTransactionRelationData> transactionRelations = mock(List.class);
-        List<LoanChargePaidByData> loanChargePaidByList = mock(List.class);
-        List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallments = mock(List.class);
-        Collection<CodeValueData> writeOffReasonOptions = mock(List.class);
-        Collection<CodeValueData> chargeOffReasonOptions = mock(List.class);
-        Collection<PaymentTypeData> paymentTypeOptions = mock(List.class);
+        List<LoanTransactionRelationData> transactionRelations = mock();
+        List<LoanChargePaidByData> loanChargePaidByList = mock();
+        List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallments = mock();
+        List<CodeValueData> writeOffReasonOptions = mock();
+        List<CodeValueData> chargeOffReasonOptions = mock();
+        List<PaymentTypeData> paymentTypeOptions = mock();
         AccountTransferData transfer = mock(AccountTransferData.class);
 
         // When
@@ -248,7 +248,7 @@ public class LoanTransactionDataTest {
     public void testTemplateOnTopWithPaymentOptions() {
         // Given
         LoanTransactionData original = createSampleTransactionData();
-        Collection<PaymentTypeData> newPaymentOptions = mock(Collection.class);
+        Collection<PaymentTypeData> newPaymentOptions = mock();
 
         // When
         LoanTransactionData result = LoanTransactionData.templateOnTop(original, newPaymentOptions);
@@ -278,9 +278,9 @@ public class LoanTransactionDataTest {
         LoanTransactionEnumData transactionType = new LoanTransactionEnumData(1L, "code", "CREDIT");
         LocalDate transactionDate = LocalDate.of(2023, 8, 1);
         BigDecimal transactionAmount = new BigDecimal("3000.00");
-        Collection<PaymentTypeData> paymentOptions = mock(Collection.class);
+        Collection<PaymentTypeData> paymentOptions = mock();
         CurrencyData currency = new CurrencyData("USD", "US Dollar", 2, 0, "$", "USD");
-        List<CodeValueData> classificationOptions = mock(List.class);
+        List<CodeValueData> classificationOptions = mock();
 
         // When
         LoanTransactionData result = LoanTransactionData.loanTransactionDataForCreditTemplate(transactionType, transactionDate,
@@ -306,7 +306,7 @@ public class LoanTransactionDataTest {
         LocalDate expectedDisbursedOn = LocalDate.of(2023, 8, 1);
         BigDecimal disburseAmount = new BigDecimal("5000.00");
         BigDecimal netDisbursalAmount = new BigDecimal("4950.00");
-        Collection<PaymentTypeData> paymentOptions = mock(Collection.class);
+        Collection<PaymentTypeData> paymentOptions = mock();
         BigDecimal fixedEmiAmount = new BigDecimal("500.00");
         LocalDate possibleNextRepaymentDate = LocalDate.of(2023, 9, 1);
         CurrencyData currency = new CurrencyData("USD", "US Dollar", 2, 0, "$", "USD");

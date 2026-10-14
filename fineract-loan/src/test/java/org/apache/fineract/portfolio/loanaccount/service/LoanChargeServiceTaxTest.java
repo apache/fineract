@@ -209,8 +209,9 @@ class LoanChargeServiceTaxTest {
         TaxGroup taxGroup = mock(TaxGroup.class);
 
         ChargeTaxApplicationService taxService = mock(ChargeTaxApplicationService.class);
-        when(taxService.computeTax(any(), any(), any(), anyInt())).thenReturn(
-                Map.of(comp1, new BigDecimal("10.000000"), comp2, new BigDecimal("5.000000")), Map.of(comp1, new BigDecimal("20.000000")));
+        when(taxService.computeTax(any(), any(), any(), anyInt()))
+                .thenReturn(Map.of(comp1, new BigDecimal("10.000000"), comp2, new BigDecimal("5.000000")))
+                .thenReturn(Map.of(comp1, new BigDecimal("20.000000")));
 
         LoanChargeService service = buildService(taxService);
         Charge charge = flatCharge(taxGroup);
