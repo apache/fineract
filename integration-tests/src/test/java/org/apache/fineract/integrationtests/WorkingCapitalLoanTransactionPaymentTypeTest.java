@@ -34,6 +34,7 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsRespon
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
@@ -242,7 +243,7 @@ public class WorkingCapitalLoanTransactionPaymentTypeTest {
 
     private Long createProduct() {
         final String name = "WCL-PaymentType-" + UUID.randomUUID().toString().substring(0, 8);
-        final String shortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+        final String shortName = Utils.uniqueRandomStringGenerator("", 4);
         final Long productId = productHelper
                 .createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(name).withShortName(shortName).build())
                 .getResourceId();
