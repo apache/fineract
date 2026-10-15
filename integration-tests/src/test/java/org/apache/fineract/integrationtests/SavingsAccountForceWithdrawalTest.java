@@ -111,6 +111,44 @@ public class SavingsAccountForceWithdrawalTest extends FeignSavingsTestBase {
                 "Balance after a regular withdrawal following a fully-recovered forced-withdrawal dip");
     }
 
+    @Test
+    public void testForceFlagSurvivesBalanceRecalculationReplacement() {
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT,
+                new PutGlobalConfigurationsRequest().value(1000L).enabled(true));
+
+        Long clientId = createClient();
+        assertNotNull(clientId);
+
+        PostSavingsProductsResponse savingsProduct = createSavingsProduct(
+                SavingsRequestBuilders.savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY,
+                        SavingsTestData.InterestPostingPeriodType.DAILY, SavingsTestData.InterestCalculationType.DAILY_BALANCE));
+        assertNotNull(savingsProduct.getResourceId());
+
+        Long savingsId = submitSavingsApplication(clientId, savingsProduct.getResourceId(), DEPOSIT_DATE).getSavingsId();
+        approveSavings(savingsId, DEPOSIT_DATE);
+        activateSavings(savingsId, DEPOSIT_DATE);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
+
+        deposit(savingsId, "100", DEPOSIT_DATE);
+
+        savingsTransactionHelper.forceWithdraw(savingsId, "110", WITHDRAWAL_DATE);
+        SavingsTestValidators.verifyAmount(new BigDecimal("-10"), savingsHelper.getSavingsSummary(savingsId).getAccountBalance(),
+                "Balance after the forced withdrawal");
+
+        deposit(savingsId, "3", DEPOSIT_DATE);
+        SavingsTestValidators.verifyAmount(new BigDecimal("-7"), savingsHelper.getSavingsSummary(savingsId).getAccountBalance(),
+                "Balance after the back-dated deposit");
+
+        deposit(savingsId, "60", WITHDRAWAL_DATE);
+
+        PostSavingsAccountTransactionsResponse regular = savingsTransactionHelper.withdraw(savingsId, "3", WITHDRAWAL_DATE);
+        assertNotNull(regular.getResourceId(), "Regular withdrawal failed after the forced withdrawal was replaced by a copy");
+        SavingsTestValidators.verifyAmount(new BigDecimal("50"), savingsHelper.getSavingsSummary(savingsId).getAccountBalance(),
+                "Balance after a regular withdrawal following the replaced forced withdrawal");
+    }
+
     @AfterEach
     public void resetForceWithdrawalConfiguration() {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
