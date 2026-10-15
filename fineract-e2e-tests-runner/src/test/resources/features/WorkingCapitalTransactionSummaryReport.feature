@@ -3,6 +3,7 @@
 @WorkingCapitalTransactionSummaryReportFeature
 Feature: Working Capital Transaction Summary Reports
 
+  @TestRailId:C115281
   Scenario: Verify Transaction Summary Reports for Working Capital loans show every transaction type with its allocation, payment type and sign
     Given Global config "charge-accrual-date" value set to "due-date"
     And A code value "REFUND_TO_CUSTOMER" exists for code name "working_capital_loan_credit_balance_refund_classification"
@@ -251,6 +252,7 @@ Feature: Working Capital Transaction Summary Reports
       | 2026-01-20      | WCLP_ACC_DEF_REV_AM | Credit Balance Refund |                  |            | 0        | Principal                |                      | 0.0                |
       | 2026-01-20      | WCLP_ACC_DEF_REV_AM | Credit Balance Refund |                  |            | 0        | Unallocated Credit (UNC) |                      | 30.0               |
 
+  @TestRailId:C115282
   Scenario: Verify Transaction Summary Reports for Working Capital loans show reversals on the reversal date with the opposite sign and a charge waiver with the full waived amount
     Given Global config "charge-accrual-date" value set to "due-date"
     When Admin sets the business date to "01 January 2026"
@@ -619,6 +621,7 @@ Feature: Working Capital Transaction Summary Reports
       | 2026-02-10      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |                          | 1        | Principal                |                      | -9000.0            |
       | 2026-02-10      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |                          | 1        | Unallocated Credit (UNC) |                      | 0.0                |
 
+  @TestRailId:C115283
   Scenario: Verify Transaction Summary Reports for Working Capital loans show the charge-off reason from the charge-off date on
     Given Global config "charge-accrual-date" value set to "due-date"
     And A code value "Fraud" exists for code name "ChargeOffReasons"
@@ -833,6 +836,7 @@ Feature: Working Capital Transaction Summary Reports
       | 2026-02-07      | WCLP_ACC_DEF_REV_AM | Charge Adjustment    |                  |            | 1        | Principal                | Fraud                | 0.0                |                |                     |                         |
       | 2026-02-07      | WCLP_ACC_DEF_REV_AM | Charge Adjustment    |                  |            | 1        | Unallocated Credit (UNC) | Fraud                | 0.0                |                |                     |                         |
 
+  @TestRailId:C115284
   Scenario: Verify Transaction Summary Report with Asset Owner for Working Capital loans gives the same rows as for a regular loan and keeps both loan types and offices apart
     Given Global config "charge-accrual-date" value set to "due-date"
     When Admin sets the business date to "01 January 2026"
@@ -1014,3 +1018,126 @@ Feature: Working Capital Transaction Summary Reports
       | 2026-01-06      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Penalty                  |                      | 0.0                |
       | 2026-01-06      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Principal                |                      | 1000.0             |
       | 2026-01-06      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |
+
+  @TestRailId:C115285
+  Scenario: Verify Transaction Summary Reports for Working Capital loans report a backdated repayment and its undo on their submitted dates and not on the transaction date
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "AUTOPAY" payment type
+    When Admin sets the business date to "03 January 2026"
+    And Customer makes repayment on "01 January 2026" with 100 transaction amount on Working Capital loan with the following payment details:
+      | paymentType |
+      | AUTOPAY     |
+    Then Transaction Summary Report with Asset Owner for Working Capital Loans for date "01 January 2026" has the following data:
+      | TransactionDate | Product             | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type          | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id | Originator_External_Ids |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Fees                     |                      | 0.0                |                |                     |                         |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Interest                 |                      | 0.0                |                |                     |                         |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Penalty                  |                      | 0.0                |                |                     |                         |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Principal                |                      | 9000.0             |                |                     |                         |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |                |                     |                         |
+    And Transaction Summary Report with Asset Owner for Working Capital Loans for date "03 January 2026" has the following data:
+      | TransactionDate | Product             | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type          | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id | Originator_External_Ids |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Fees                     |                      | 0.0                |                |                     |                         |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Interest                 |                      | 0.0                |                |                     |                         |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Penalty                  |                      | 0.0                |                |                     |                         |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Principal                |                      | -100.0             |                |                     |                         |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |                |                     |                         |
+    And Transaction Summary Report for Working Capital Loans for date "03 January 2026" has the following data:
+      | TransactionDate | Product             | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type          | Chargeoff_ReasonCode | Transaction_Amount |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Fees                     |                      | 0.0                |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Interest                 |                      | 0.0                |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Penalty                  |                      | 0.0                |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Principal                |                      | -100.0             |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |
+    When Admin sets the business date to "04 January 2026"
+    And Customer undo "1"th "REPAYMENT" transaction made on "01 January 2026" on Working Capital loan
+    Then Transaction Summary Report with Asset Owner for Working Capital Loans for date "04 January 2026" has the following data:
+      | TransactionDate | Product             | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type          | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id | Originator_External_Ids |
+      | 2026-01-04      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 1        | Fees                     |                      | 0.0                |                |                     |                         |
+      | 2026-01-04      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 1        | Interest                 |                      | 0.0                |                |                     |                         |
+      | 2026-01-04      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 1        | Penalty                  |                      | 0.0                |                |                     |                         |
+      | 2026-01-04      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 1        | Principal                |                      | 100.0              |                |                     |                         |
+      | 2026-01-04      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 1        | Unallocated Credit (UNC) |                      | 0.0                |                |                     |                         |
+    And Transaction Summary Report with Asset Owner for Working Capital Loans for date "03 January 2026" has the following data:
+      | TransactionDate | Product             | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type          | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id | Originator_External_Ids |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Fees                     |                      | 0.0                |                |                     |                         |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Interest                 |                      | 0.0                |                |                     |                         |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Penalty                  |                      | 0.0                |                |                     |                         |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Principal                |                      | -100.0             |                |                     |                         |
+      | 2026-01-03      | WCLP_ACC_DEF_REV_AM | Repayment            | AUTOPAY          |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |                |                     |                         |
+    And Transaction Summary Report with Asset Owner for Working Capital Loans for date "01 January 2026" has the following data:
+      | TransactionDate | Product             | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type          | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id | Originator_External_Ids |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Fees                     |                      | 0.0                |                |                     |                         |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Interest                 |                      | 0.0                |                |                     |                         |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Penalty                  |                      | 0.0                |                |                     |                         |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Principal                |                      | 9000.0             |                |                     |                         |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |                |                     |                         |
+
+  @TestRailId:C115286
+  Scenario: Verify Transaction Summary Reports for Working Capital loans sum same-day transactions of several loans into one row per product, payment type and originator set and list several originators sorted and comma-separated
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a new loan originator with external ID and name "WC Transaction Summary Report Originator A"
+    And Admin creates a second loan originator with external ID and name "WC Transaction Summary Report Originator B"
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin attaches the originator to the working capital loan
+    And Admin attaches the second originator to the working capital loan
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "AUTOPAY" payment type
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 1000            | 100000       | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "1000" EUR transaction amount and "CHECK_PAYMENT" payment type
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 500             | 100000       | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "500" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "500" EUR transaction amount and "CHECK_PAYMENT" payment type
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 2000            | 100000       | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "2000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "2000" EUR transaction amount and "AUTOPAY" payment type
+    Then Transaction Summary Report with Asset Owner for Working Capital Loans for date "01 January 2026" has originatorId, asset owner externalId and the following data:
+      | TransactionDate | Product             | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type          | Chargeoff_ReasonCode | Transaction_Amount | Asset_owner_id | From_asset_owner_id | Originator_External_Ids  |
+      | 2026-01-01      | WCLP                | Disbursement         | AUTOPAY          |            | 0        | Fees                     |                      | 0.0                |                |                     |                          |
+      | 2026-01-01      | WCLP                | Disbursement         | AUTOPAY          |            | 0        | Interest                 |                      | 0.0                |                |                     |                          |
+      | 2026-01-01      | WCLP                | Disbursement         | AUTOPAY          |            | 0        | Penalty                  |                      | 0.0                |                |                     |                          |
+      | 2026-01-01      | WCLP                | Disbursement         | AUTOPAY          |            | 0        | Principal                |                      | 2000.0             |                |                     |                          |
+      | 2026-01-01      | WCLP                | Disbursement         | AUTOPAY          |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |                |                     |                          |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Fees                     |                      | 0.0                |                |                     | originator_external_ids  |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Interest                 |                      | 0.0                |                |                     | originator_external_ids  |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Penalty                  |                      | 0.0                |                |                     | originator_external_ids  |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Principal                |                      | 9000.0             |                |                     | originator_external_ids  |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |                |                     | originator_external_ids  |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | CHECK_PAYMENT    |            | 0        | Fees                     |                      | 0.0                |                |                     |                          |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | CHECK_PAYMENT    |            | 0        | Interest                 |                      | 0.0                |                |                     |                          |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | CHECK_PAYMENT    |            | 0        | Penalty                  |                      | 0.0                |                |                     |                          |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | CHECK_PAYMENT    |            | 0        | Principal                |                      | 1500.0             |                |                     |                          |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | CHECK_PAYMENT    |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |                |                     |                          |
+    And Transaction Summary Report for Working Capital Loans for date "01 January 2026" has the following data:
+      | TransactionDate | Product             | TransactionType_Name | PaymentType_Name | chargetype | Reversed | Allocation_Type          | Chargeoff_ReasonCode | Transaction_Amount |
+      | 2026-01-01      | WCLP                | Disbursement         | AUTOPAY          |            | 0        | Fees                     |                      | 0.0                |
+      | 2026-01-01      | WCLP                | Disbursement         | AUTOPAY          |            | 0        | Interest                 |                      | 0.0                |
+      | 2026-01-01      | WCLP                | Disbursement         | AUTOPAY          |            | 0        | Penalty                  |                      | 0.0                |
+      | 2026-01-01      | WCLP                | Disbursement         | AUTOPAY          |            | 0        | Principal                |                      | 2000.0             |
+      | 2026-01-01      | WCLP                | Disbursement         | AUTOPAY          |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Fees                     |                      | 0.0                |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Interest                 |                      | 0.0                |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Penalty                  |                      | 0.0                |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Principal                |                      | 9000.0             |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | AUTOPAY          |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | CHECK_PAYMENT    |            | 0        | Fees                     |                      | 0.0                |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | CHECK_PAYMENT    |            | 0        | Interest                 |                      | 0.0                |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | CHECK_PAYMENT    |            | 0        | Penalty                  |                      | 0.0                |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | CHECK_PAYMENT    |            | 0        | Principal                |                      | 1500.0             |
+      | 2026-01-01      | WCLP_ACC_DEF_REV_AM | Disbursement         | CHECK_PAYMENT    |            | 0        | Unallocated Credit (UNC) |                      | 0.0                |
