@@ -291,6 +291,21 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
 
     // (0 - x) instead of -x: avoids EclipseLink concurrent unary-negation race in ArgumentListFunctionExpression
     @Query("""
+            SELECT COALESCE(SUM(CASE WHEN lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL_ADJUSTMENT THEN (0 - lcpb.amount)
+                 ELSE lcpb.amount END), 0)
+            FROM LoanChargePaidBy lcpb
+            JOIN lcpb.loanTransaction lt
+            WHERE lcpb.loanCharge = :loanCharge
+                AND lt.reversed = false
+                AND lt.id < :transactionId
+                AND lt.typeOf IN :types
+                AND lcpb.amount > 0
+            """)
+    BigDecimal findChargeAmountPaidByEarlierTransactions(@Param("loanCharge") LoanCharge loanCharge,
+            @Param("transactionId") Long transactionId, @Param("types") Set<LoanTransactionType> types);
+
+    // (0 - x) instead of -x: avoids EclipseLink concurrent unary-negation race in ArgumentListFunctionExpression
+    @Query("""
             SELECT COALESCE(SUM(CASE WHEN lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL THEN lcpb.amount
                  WHEN lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL_ADJUSTMENT THEN (0 - lcpb.amount)
                  ELSE 0 END), 0)
