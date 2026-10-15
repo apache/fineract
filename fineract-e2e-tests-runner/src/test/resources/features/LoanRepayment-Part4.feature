@@ -696,8 +696,8 @@ Feature: LoanRepayment - Part4
       | 0.9           | 0.0      | 0.0  | 0.0       | 0.9 | 0.9  | 0.9        | 0.0  | 0.0         |
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @TestRailId:C___01
-  Scenario: Verify that edit transaction can update payment type
+  @TestRailId:C115280
+  Scenario: Verify adjust transaction with specified payment type on progressive loan
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -716,16 +716,18 @@ Feature: LoanRepayment - Part4
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0    | 0         | 1000.0 | 1000.0 | 750        | 0    | 0           |
-
-    When Customer adjust 1th "REPAYMENT" transaction made on "01 October 2023" with "MONEY_TRANSFER" payment type on "01 October 2023" with 750 EUR transaction amount
+    When Customer adjust 1th "REPAYMENT" transaction made on "01 October 2023" with "MONEY_TRANSFER" payment type on "01 October 2023" with 250 EUR transaction amount
+    Then Adjusted transaction is created with 250.0 amount and "MONEY_TRANSFER" payment type
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 October 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 0    | 01 October 2023  | 01 October 2023 | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 250.0 | 0.0        | 0.0  | 0.0         |
       | 2  | 15   | 16 October 2023  | 01 October 2023 | 500.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 250.0 | 250.0      | 0.0  | 0.0         |
-      | 3  | 15   | 31 October 2023  | 01 October 2023 | 250.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 250.0 | 250.0      | 0.0  | 0.0         |
-      | 4  | 15   | 15 November 2023 | 01 October 2023 | 0.0             | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 250.0 | 250.0      | 0.0  | 0.0         |
+      | 3  | 15   | 31 October 2023  |                 | 250.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 0.0   | 0.0        | 0.0  | 250.0       |
+      | 4  | 15   | 15 November 2023 |                 | 0.0             | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 0.0   | 0.0        | 0.0  | 250.0       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
-      | 1000.0        | 0        | 0    | 0         | 1000.0 | 1000.0 | 750        | 0    | 0           |
+      | 1000.0        | 0        | 0    | 0         | 1000.0 | 500.0  | 250.0      | 0    | 500.0       |
+    When Loan Pay-off is made on "01 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 

@@ -661,6 +661,22 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         PostLoansLoanIdTransactionsResponse result = ok(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId,
                 targetTransaction.getId(), repaymentUndoRequest, Map.of("command", "adjust")));
         Assert.notNull(result, "Result of adjust loan transaction should be NOT null.");
+        testContext().set(TestContextKey.LOAN_ADJUST_TRANSACTION_RESPONSE, result);
+    }
+
+    @Then("Adjusted transaction is created with {double} amount and {string} payment type")
+    public void adjustedTransactionHasPaymentType(double transactionAmount, String paymentTypeString) {
+        PostLoansLoanIdTransactionsResponse adjustResponse = testContext().get(TestContextKey.LOAN_ADJUST_TRANSACTION_RESPONSE);
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+        long expectedPaymentTypeId = paymentTypeResolver.resolve(DefaultPaymentType.valueOf(paymentTypeString));
+
+        GetLoansLoanIdTransactionsTransactionIdResponse transactionResponse = ok(() -> fineractClient.loanTransactions()
+                .retrieveOneLoanTransaction(loanId, adjustResponse.getResourceId(), Map.<String, Object>of()));
+        assertThat(transactionResponse.getManuallyReversed()).as("Adjusted transaction should not be reversed").isFalse();
+        assertThat(transactionResponse.getAmount()).isEqualTo(transactionAmount);
+        assertThat(transactionResponse.getPaymentDetailData()).as("Payment details of the adjusted transaction").isNotNull();
+        assertThat(transactionResponse.getPaymentDetailData().getPaymentType().getId()).isEqualTo(expectedPaymentTypeId);
     }
 
     @Then("Customer undo {string}th transaction made on {string} results a {int} error and {string} error message")
