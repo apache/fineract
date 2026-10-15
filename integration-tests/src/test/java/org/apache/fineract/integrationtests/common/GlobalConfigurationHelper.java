@@ -709,6 +709,20 @@ public class GlobalConfigurationHelper {
         wclChargeAccrualTime.put("string_value", "EOD");
         defaults.add(wclChargeAccrualTime);
 
+        HashMap<String, Object> payoffSchedulePreviewMaxPayoffPeriods = new HashMap<>();
+        payoffSchedulePreviewMaxPayoffPeriods.put("name", GlobalConfigurationConstants.PAYOFF_SCHEDULE_PREVIEW_MAX_PAYOFF_PERIODS);
+        payoffSchedulePreviewMaxPayoffPeriods.put("value", 1200L);
+        payoffSchedulePreviewMaxPayoffPeriods.put("enabled", true);
+        payoffSchedulePreviewMaxPayoffPeriods.put("trapDoor", false);
+        defaults.add(payoffSchedulePreviewMaxPayoffPeriods);
+
+        HashMap<String, Object> payoffSchedulePreviewMaxTermPeriods = new HashMap<>();
+        payoffSchedulePreviewMaxTermPeriods.put("name", GlobalConfigurationConstants.PAYOFF_SCHEDULE_PREVIEW_MAX_TERM_PERIODS);
+        payoffSchedulePreviewMaxTermPeriods.put("value", 1200L);
+        payoffSchedulePreviewMaxTermPeriods.put("enabled", true);
+        payoffSchedulePreviewMaxTermPeriods.put("trapDoor", false);
+        defaults.add(payoffSchedulePreviewMaxTermPeriods);
+
         return defaults;
     }
 

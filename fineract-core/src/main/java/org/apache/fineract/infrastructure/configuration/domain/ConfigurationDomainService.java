@@ -183,4 +183,8 @@ public interface ConfigurationDomainService {
     boolean isBackdatedTransactionsDisallowed();
 
     Long retrieveBackdatedTransactionsToleranceDays();
+
+    Long retrievePayoffSchedulePreviewMaxPayoffPeriods();
+
+    Long retrievePayoffSchedulePreviewMaxTermPeriods();
 }
