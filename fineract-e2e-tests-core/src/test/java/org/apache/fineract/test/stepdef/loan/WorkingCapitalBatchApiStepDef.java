@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -45,6 +46,7 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.BatchRequest;
 import org.apache.fineract.client.models.BatchResponse;
+import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.Header;
@@ -285,6 +287,39 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
         final String url = resolveLoanUrlForGet() + WCL_TRANSACTIONS_PATH + COMMAND_DISCOUNT_ADJUSTMENT;
         final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
         final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
+    }
+
+    @When("Batch API adjusts by delta {string}th {string} transaction made on {string} on the working capital loan with amount {string}")
+    public void batchApiAdjustByDeltaNthWorkingCapitalLoanTransaction(final String nthItemStr, final String transactionType,
+            final String transactionDate, final String amount) throws IOException {
+        final Long loanId = getCreatedWCLoanId();
+        final TransactionType resolvedType = TransactionType.valueOf(transactionType.toUpperCase(Locale.ROOT).replace(' ', '_'));
+        final String expectedCode = "loanTransactionType." + resolvedType.getValue();
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
+        final List<GetWorkingCapitalLoanTransactionIdResponse> transactions = ok(
+                () -> fineractFeignClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTransactionsById(loanId)).getContent();
+        final int nthItem = Integer.parseInt(nthItemStr) - 1;
+        final GetWorkingCapitalLoanTransactionIdResponse target = transactions.stream().filter(t -> {
+            if (t.getType() == null || !expectedCode.equals(t.getType().getCode())) {
+                return false;
+            }
+            assert t.getTransactionDate() != null;
+            return transactionDate.equals(formatter.format(t.getTransactionDate())) && !Boolean.TRUE.equals(t.getReversed());
+        }).toList().get(nthItem);
+
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest()
+                .locale(WorkingCapitalLoanRequestFactory.DEFAULT_LOCALE).dateFormat(WorkingCapitalLoanRequestFactory.DATE_FORMAT)
+                .transactionDate(transactionDate).transactionAmount(new BigDecimal(amount))
+                .reversalExternalId(Utils.randomStringGenerator("wcl-batch-adjust-rev-ext-id", 8))
+                .note("working capital transaction adjustment via batch");
+        final String url = resolveLoanUrlForGet() + WCL_TRANSACTIONS_PATH + "/" + target.getId() + "?command=adjust-by-delta";
+        final BatchRequest batchRequest = buildBatchRequest(1L, null, url, BATCH_API_METHOD_POST, GSON.toJson(request));
+        final List<BatchResponse> responses = handleBatchRequests(List.of(batchRequest), false);
+        assertThat(responses).as("batch adjust-by-delta responses").hasSize(1);
+        final BatchResponse response = responses.getFirst();
+        assertThat(response.getStatusCode()).as("batch adjust-by-delta status, body=%s", response.getBody()).isEqualTo(200);
+        assertThat(response.getBody()).as("batch adjust-by-delta body").contains("\"resourceId\"");
         testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, responses);
     }
 
