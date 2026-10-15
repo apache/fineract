@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -156,12 +157,16 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     private SavingsAccountWritePlatformServiceJpaRepositoryImpl service;
 
     private Method validateTransactionsForTransfer;
+    private Method undoWithdrawalFee;
 
     @BeforeEach
     void setUp() throws Exception {
         validateTransactionsForTransfer = SavingsAccountWritePlatformServiceJpaRepositoryImpl.class
                 .getDeclaredMethod("validateTransactionsForTransfer", SavingsAccount.class, LocalDate.class);
         validateTransactionsForTransfer.setAccessible(true);
+        undoWithdrawalFee = SavingsAccountWritePlatformServiceJpaRepositoryImpl.class.getDeclaredMethod("undoWithdrawalFee",
+                SavingsAccount.class, SavingsAccountTransaction.class);
+        undoWithdrawalFee.setAccessible(true);
     }
 
     @AfterEach
@@ -480,5 +485,60 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
 
         // Then
         assertThat(result.getTransactionId()).isEqualTo(expectedTransactionId.toString());
+    }
+
+    @Test
+    void undoWithdrawalFee_feeSavedBeforeTheWithdrawal_isFoundByRefNo() throws Exception {
+        SavingsAccount savingsAccount = mock(SavingsAccount.class);
+        when(savingsAccount.getId()).thenReturn(1L);
+        SavingsAccountTransaction withdrawal = transaction(14L, "ref-1", savingsAccount, false);
+        SavingsAccountTransaction fee = transaction(13L, "ref-1", savingsAccount, true);
+        when(savingsAccountTransactionRepository.findByRefNo("ref-1")).thenReturn(List.of(fee, withdrawal));
+
+        undoWithdrawalFee.invoke(service, savingsAccount, withdrawal);
+
+        verify(savingsAccount).undoTransaction(13L);
+        verify(savingsAccount, never()).undoTransaction(14L);
+        verify(savingsAccountTransactionRepository, never()).findOneByIdAndSavingsAccountId(anyLong(), anyLong());
+    }
+
+    @Test
+    void undoWithdrawalFee_ignoresFeesOfOtherAccountsAndReversedFees() throws Exception {
+        SavingsAccount savingsAccount = mock(SavingsAccount.class);
+        when(savingsAccount.getId()).thenReturn(1L);
+        SavingsAccount otherAccount = mock(SavingsAccount.class);
+        when(otherAccount.getId()).thenReturn(2L);
+        SavingsAccountTransaction withdrawal = transaction(20L, "ref-2", savingsAccount, false);
+        SavingsAccountTransaction otherAccountFee = transaction(21L, "ref-2", otherAccount, true);
+        SavingsAccountTransaction reversedFee = transaction(19L, "ref-2", savingsAccount, false);
+        when(savingsAccountTransactionRepository.findByRefNo("ref-2")).thenReturn(List.of(withdrawal, otherAccountFee, reversedFee));
+
+        undoWithdrawalFee.invoke(service, savingsAccount, withdrawal);
+
+        verify(savingsAccount, never()).undoTransaction(anyLong());
+    }
+
+    @Test
+    void undoWithdrawalFee_withoutRefNo_usesTheNextTransaction() throws Exception {
+        SavingsAccount savingsAccount = mock(SavingsAccount.class);
+        when(savingsAccount.getId()).thenReturn(1L);
+        SavingsAccountTransaction withdrawal = transaction(30L, null, savingsAccount, false);
+        SavingsAccountTransaction fee = transaction(31L, null, savingsAccount, true);
+        when(savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(31L, 1L)).thenReturn(fee);
+
+        undoWithdrawalFee.invoke(service, savingsAccount, withdrawal);
+
+        verify(savingsAccount).undoTransaction(31L);
+        verify(savingsAccountTransactionRepository, never()).findByRefNo(any());
+    }
+
+    private static SavingsAccountTransaction transaction(Long id, String refNo, SavingsAccount savingsAccount,
+            boolean withdrawalFeeAndNotReversed) {
+        SavingsAccountTransaction transaction = mock(SavingsAccountTransaction.class);
+        when(transaction.getId()).thenReturn(id);
+        when(transaction.getRefNo()).thenReturn(refNo);
+        when(transaction.getSavingsAccount()).thenReturn(savingsAccount);
+        when(transaction.isWithdrawalFeeAndNotReversed()).thenReturn(withdrawalFeeAndNotReversed);
+        return transaction;
     }
 }

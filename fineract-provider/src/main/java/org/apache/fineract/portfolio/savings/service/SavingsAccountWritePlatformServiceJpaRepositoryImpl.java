@@ -829,11 +829,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         // undoing transaction is withdrawal then undo withdrawal fee
         // transaction if any
         if (savingsAccountTransaction.isWithdrawal()) {
-            final SavingsAccountTransaction nextSavingsAccountTransaction = this.savingsAccountTransactionRepository
-                    .findOneByIdAndSavingsAccountId(transactionId + 1, savingsId);
-            if (nextSavingsAccountTransaction != null && nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()) {
-                account.undoTransaction(transactionId + 1);
-            }
+            undoWithdrawalFee(account, savingsAccountTransaction);
         }
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
@@ -920,11 +916,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         account.undoTransaction(transactionId);
 
         // for undo withdrawal fee
-        final SavingsAccountTransaction nextSavingsAccountTransaction = this.savingsAccountTransactionRepository
-                .findOneByIdAndSavingsAccountId(transactionId + 1, savingsId);
-        if (nextSavingsAccountTransaction != null && nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()) {
-            account.undoTransaction(transactionId + 1);
-        }
+        undoWithdrawalFee(account, savingsAccountTransaction);
 
         SavingsAccountTransaction transaction = null;
         boolean isInterestTransfer = false;
@@ -968,6 +960,27 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withSavingsId(savingsId) //
                 .with(changes) //
                 .build();
+    }
+
+    /**
+     * Undoes the withdrawal fee charged for the given withdrawal. The fee shares the withdrawal's refNo; the order in
+     * which the two get their ids is not guaranteed, so the fee is not always at transactionId + 1. Transactions saved
+     * before refNo existed have no refNo and keep the old lookup.
+     */
+    private void undoWithdrawalFee(final SavingsAccount account, final SavingsAccountTransaction withdrawal) {
+        if (withdrawal.getRefNo() == null) {
+            final SavingsAccountTransaction nextSavingsAccountTransaction = this.savingsAccountTransactionRepository
+                    .findOneByIdAndSavingsAccountId(withdrawal.getId() + 1, account.getId());
+            if (nextSavingsAccountTransaction != null && nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()) {
+                account.undoTransaction(nextSavingsAccountTransaction.getId());
+            }
+            return;
+        }
+        for (final SavingsAccountTransaction transaction : this.savingsAccountTransactionRepository.findByRefNo(withdrawal.getRefNo())) {
+            if (account.getId().equals(transaction.getSavingsAccount().getId()) && transaction.isWithdrawalFeeAndNotReversed()) {
+                account.undoTransaction(transaction.getId());
+            }
+        }
     }
 
     /**
