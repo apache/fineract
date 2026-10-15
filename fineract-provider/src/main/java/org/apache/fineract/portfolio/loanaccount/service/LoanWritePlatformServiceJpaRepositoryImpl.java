@@ -375,6 +375,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final long termsBefore = loan.getTermsCount();
 
         if (canDisburse(loan)) {
+            // Attach loan to originator before downpayment/disbursement
+            if (command.hasNonNullParameter(LoanApiConstants.ORIGINATORS_PARAM)) {
+                final JsonArray originatorsArray = command.arrayOfParameterNamed(LoanApiConstants.ORIGINATORS_PARAM);
+                loanOriginatorLinkingService.processOriginatorsForLoanDisbursement(loanId, originatorsArray);
+            }
+
             // Get netDisbursalAmount from disbursal screen field.
             final BigDecimal netDisbursalAmount = command
                     .bigDecimalValueOfParameterNamed(LoanApiConstants.disbursementNetDisbursalAmountParameterName);
@@ -466,11 +472,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
                     }
                 }
-            }
-
-            if (command.hasNonNullParameter(LoanApiConstants.ORIGINATORS_PARAM)) {
-                final JsonArray originatorsArray = command.arrayOfParameterNamed(LoanApiConstants.ORIGINATORS_PARAM);
-                loanOriginatorLinkingService.processOriginatorsForLoanDisbursement(loanId, originatorsArray);
             }
         }
         if (!changes.isEmpty()) {
