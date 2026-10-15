@@ -25,7 +25,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.domain.StaffRepository;
-import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.useradministration.data.PasswordPreferencesDataValidator;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPasswordRepository;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
@@ -64,9 +63,9 @@ public class UserAdministrationConfiguration {
     @ConditionalOnMissingBean(AppUserReadPlatformService.class)
     public AppUserReadPlatformService appUserReadPlatformService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate,
             OfficeReadPlatformService officeReadPlatformService, RoleReadPlatformService roleReadPlatformService,
-            AppUserRepository appUserRepository, StaffReadService staffReadPlatformService) {
+            AppUserRepository appUserRepository) {
         return new AppUserReadPlatformServiceImpl(context, jdbcTemplate, officeReadPlatformService, roleReadPlatformService,
-                appUserRepository, staffReadPlatformService);
+                appUserRepository);
     }
 
     @Bean
