@@ -52,8 +52,11 @@ public class LoanCommonAccountingHelper {
                 Collectors.reducing(BigDecimal.ZERO, ChargeTaxPaymentDTO::getAmount, BigDecimal::add)));
         final List<ChargePaymentDTO> result = new ArrayList<>();
         for (ChargePaymentDTO cp : chargePayments) {
-            final BigDecimal tax = taxByChargeId.getOrDefault(cp.getLoanChargeId(), BigDecimal.ZERO);
-            result.add(new ChargePaymentDTO(cp.getChargeId(), cp.getAmount().subtract(tax), cp.getLoanChargeId()));
+            // the tax is the whole charge's: a charge paid in several rows (an instalment fee for several instalments)
+            // has it subtracted once, the rows are summed per account afterwards
+            final BigDecimal tax = taxByChargeId.remove(cp.getLoanChargeId());
+            result.add(new ChargePaymentDTO(cp.getChargeId(), tax == null ? cp.getAmount() : cp.getAmount().subtract(tax),
+                    cp.getLoanChargeId()));
         }
         return result;
     }
