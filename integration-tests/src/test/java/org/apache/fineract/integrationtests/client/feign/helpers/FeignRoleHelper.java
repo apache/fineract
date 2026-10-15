@@ -18,12 +18,17 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.DeleteRolesRoleIdResponse;
+import org.apache.fineract.client.models.GetRolesRoleIdResponse;
 import org.apache.fineract.client.models.PostRolesRequest;
 import org.apache.fineract.client.models.PostRolesResponse;
+import org.apache.fineract.client.models.PostRolesRoleIdResponse;
 import org.apache.fineract.client.models.PutRolesRoleIdPermissionsRequest;
 import org.apache.fineract.client.models.PutRolesRoleIdPermissionsResponse;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
@@ -31,6 +36,8 @@ import org.apache.fineract.integrationtests.common.Utils;
 
 /** Typed Feign helper for role and role-permission operations. */
 public final class FeignRoleHelper {
+
+    public static final Long SUPER_USER_ROLE_ID = 1L;
 
     private FeignRoleHelper() {}
 
@@ -52,5 +59,25 @@ public final class FeignRoleHelper {
      */
     public static PutRolesRoleIdPermissionsResponse addPermissionsToRole(Long roleId, Map<String, Boolean> permissions) {
         return ok(() -> client().roles().updateRolePermissions(roleId, new PutRolesRoleIdPermissionsRequest().permissions(permissions)));
+    }
+
+    public static GetRolesRoleIdResponse retrieveRole(Long roleId) {
+        return ok(() -> client().roles().retrieveOneRole(roleId));
+    }
+
+    public static PostRolesRoleIdResponse disableRole(Long roleId) {
+        return ok(() -> client().roles().handleCommandsRole(roleId, "disable"));
+    }
+
+    public static PostRolesRoleIdResponse enableRole(Long roleId) {
+        return ok(() -> client().roles().handleCommandsRole(roleId, "enable"));
+    }
+
+    public static DeleteRolesRoleIdResponse deleteRole(Long roleId) {
+        return ok(() -> client().roles().deleteRole(roleId));
+    }
+
+    public static CallFailedRuntimeException deleteRoleExpectingError(Long roleId) {
+        return fail(() -> client().roles().deleteRole(roleId));
     }
 }

@@ -130,5 +130,7 @@ public final class CodeValuesApiResourceSwagger {
 
         @Schema(example = "4")
         public Long resourceId;
+        @Schema(example = "12", description = "The id of the deleted code value")
+        public Long subResourceId;
     }
 }

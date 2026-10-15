@@ -18,11 +18,17 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PaymentTypeCreateResponse;
+import org.apache.fineract.client.models.PaymentTypeData;
+import org.apache.fineract.client.models.PaymentTypeDeleteResponse;
+import org.apache.fineract.client.models.PaymentTypeUpdateRequest;
+import org.apache.fineract.client.models.PaymentTypeUpdateResponse;
 
 public class FeignPaymentTypeHelper {
 
@@ -34,5 +40,21 @@ public class FeignPaymentTypeHelper {
 
     public PaymentTypeCreateResponse createPaymentType(PaymentTypeCreateRequest request) {
         return ok(() -> fineractClient.paymentType().createPaymentType(request));
+    }
+
+    public PaymentTypeData retrievePaymentType(Long paymentTypeId) {
+        return ok(() -> fineractClient.paymentType().retrieveOnePaymentType(paymentTypeId));
+    }
+
+    public CallFailedRuntimeException retrievePaymentTypeExpectingError(Long paymentTypeId) {
+        return fail(() -> fineractClient.paymentType().retrieveOnePaymentType(paymentTypeId));
+    }
+
+    public PaymentTypeUpdateResponse updatePaymentType(Long paymentTypeId, PaymentTypeUpdateRequest request) {
+        return ok(() -> fineractClient.paymentType().updatePaymentType(paymentTypeId, request));
+    }
+
+    public PaymentTypeDeleteResponse deletePaymentType(Long paymentTypeId) {
+        return ok(() -> fineractClient.paymentType().deleteCodePaymentType(paymentTypeId));
     }
 }

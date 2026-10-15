@@ -18,12 +18,17 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.FundData;
 import org.apache.fineract.client.models.FundRequest;
 import org.apache.fineract.client.models.PostFundsResponse;
+import org.apache.fineract.client.models.PutFundsFundIdResponse;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignFundHelper {
@@ -40,5 +45,29 @@ public class FeignFundHelper {
 
     public PostFundsResponse createFund() {
         return createFund(new FundRequest().name(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()));
+    }
+
+    public CallFailedRuntimeException createFundExpectingError(FundRequest request) {
+        return fail(() -> fineractClient.funds().createFund(request));
+    }
+
+    public FundData retrieveFund(Long fundId) {
+        return ok(() -> fineractClient.funds().retrieveFund(fundId));
+    }
+
+    public CallFailedRuntimeException retrieveFundExpectingError(Long fundId) {
+        return fail(() -> fineractClient.funds().retrieveFund(fundId));
+    }
+
+    public List<FundData> retrieveAllFunds() {
+        return ok(() -> fineractClient.funds().retrieveFunds());
+    }
+
+    public PutFundsFundIdResponse updateFund(Long fundId, FundRequest request) {
+        return ok(() -> fineractClient.funds().updateFund(fundId, request));
+    }
+
+    public CallFailedRuntimeException updateFundExpectingError(Long fundId, FundRequest request) {
+        return fail(() -> fineractClient.funds().updateFund(fundId, request));
     }
 }

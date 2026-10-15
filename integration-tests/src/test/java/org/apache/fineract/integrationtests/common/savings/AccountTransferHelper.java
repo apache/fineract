@@ -114,20 +114,6 @@ public class AccountTransferHelper {
     }
 
     @Deprecated(forRemoval = true)
-    public Long accountTransferReturningResourceId(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
-            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount,
-            final Map<String, Object> paymentDetails) {
-        LOG.debug("--------------------------------ACCOUNT TRANSFER--------------------------------");
-        final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
-                .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
-                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
-                        toAccountType, transferAmount, paymentDetails);
-        final Integer resourceId = Utils.performServerPost(this.requestSpec, this.responseSpec,
-                ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER, accountTransferJSON, "resourceId");
-        return resourceId.longValue();
-    }
-
-    @Deprecated(forRemoval = true)
     public Object invalidAccountTransferWithPaymentDetails(final Map<String, Object> paymentDetails) {
         LOG.debug("--------------------------------ACCOUNT TRANSFER--------------------------------");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();

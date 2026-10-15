@@ -21,9 +21,7 @@ package org.apache.fineract.integrationtests.common.organisation;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
@@ -76,14 +74,6 @@ public final class StaffHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static Map<String, Object> createStaffMap(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return createStaffWithJson(requestSpec, responseSpec, createStaffAsJSON());
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static Map<String, Object> createStaffWithJson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String json) {
         final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER;
@@ -98,46 +88,6 @@ public final class StaffHelper {
             final Integer staffId) {
         final String url = CREATE_STAFF_URL + "/" + staffId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static List<Map<String, Object>> getStaffList(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, url, "");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static List<Map<String, Object>> getStaffListWithState(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String status) {
-        final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER + "&status=" + status;
-        return Utils.performServerGet(requestSpec, responseSpec, url, "");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static List<Map<String, Object>> getStaffListWithLoanOfficerStatus(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String loanOfficerStatus) {
-        final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER + "&loanOfficersOnly=" + loanOfficerStatus;
-        return Utils.performServerGet(requestSpec, responseSpec, url, "");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Map<String, Object> updateStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer staffId, final Map<String, Object> changes) {
-        final String url = CREATE_STAFF_URL + "/" + staffId + "?" + Utils.TENANT_IDENTIFIER;
-        final String json = new Gson().toJson(changes);
-        return Utils.performServerPut(requestSpec, responseSpec, url, json, "");
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -169,32 +119,5 @@ public final class StaffHelper {
         map.put("joiningDate", "20 September 2011");
 
         return map;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String createStaffWithJSONFields(String... fields) {
-        final Map<String, Object> map = getMapWithJoiningDate();
-        final List<String> fieldList = Arrays.asList(fields);
-
-        if (fieldList.contains("officeId")) {
-            map.put("officeId", 1);
-        }
-        if (fieldList.contains("firstname")) {
-            map.put("firstname", Utils.uniqueRandomStringGenerator("michael_", 5));
-        }
-        if (fieldList.contains("lastname")) {
-            map.put("lastname", Utils.uniqueRandomStringGenerator("Doe_", 4));
-        }
-        if (fieldList.contains("isLoanOfficer")) {
-            map.put("isLoanOfficer", true);
-        }
-        if (fieldList.contains("mobileNo")) {
-            map.put("mobileNo", "+123515198");
-        }
-        LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
     }
 }

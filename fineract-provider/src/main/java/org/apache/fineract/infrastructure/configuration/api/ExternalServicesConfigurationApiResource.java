@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.configuration.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -69,7 +70,7 @@ public class ExternalServicesConfigurationApiResource {
     @Operation(summary = "Retrieve External Services Configuration", operationId = "retrieveExternalServicesConfiguration", description = "Returns a external Service configurations based on the Service Name.\n"
             + "\n" + "Service Names supported are S3 and SMTP.\n" + "\n" + "Example Requests:\n" + "\n" + "externalservice/SMTP")
     @AlternativeOperationId("retrieveOne_2")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalServicesPropertiesData.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ExternalServicesPropertiesData.class))))
     public String retrieveOne(@PathParam("servicename") @Parameter(description = "servicename") final String serviceName,
             @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(ExternalServiceConfigurationApiConstant.EXTERNAL_SERVICE_RESOURCE_NAME);

@@ -21,15 +21,19 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import feign.FeignException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.feign.services.SavingsAccountTransactionsApi.SearchSavingsAccountTransactionsQueryParams;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryRequest;
 import org.apache.fineract.client.models.PostSavingsAccountBulkReversalTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
@@ -61,6 +65,16 @@ public class FeignSavingsTransactionHelper {
 
     public PostSavingsAccountTransactionsResponse withdraw(Long savingsId, String amount, String transactionDate) {
         return withdraw(savingsId, SavingsRequestBuilders.withdrawal(amount, transactionDate));
+    }
+
+    /** The result columns come from the query and the datatables it joins, so the page is read as a tree. */
+    public JsonNode querySavingsTransactions(Long savingsId, PagedLocalRequestAdvancedQueryRequest query) {
+        String json = ok(() -> fineractClient.savingsAccountTransactions().advancedQuerySavingsAccountTransactions(savingsId, query));
+        try {
+            return ObjectMapperFactory.getShared().readTree(json);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to parse the transaction query result of savings account " + savingsId, e);
+        }
     }
 
     /** The server only accepts this command while the force-withdrawal global configuration is enabled. */

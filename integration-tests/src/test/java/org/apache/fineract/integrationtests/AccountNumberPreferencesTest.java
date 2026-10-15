@@ -18,95 +18,92 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.integrationtests.common.CenterDomain;
-import org.apache.fineract.integrationtests.common.CenterHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.GroupHelper;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetAccountNumberFormatsIdResponse;
+import org.apache.fineract.client.models.GetCentersCenterIdResponse;
+import org.apache.fineract.client.models.GetClientsClientIdResponse;
+import org.apache.fineract.client.models.GetCodeValuesDataResponse;
+import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
+import org.apache.fineract.client.models.PostAccountNumberFormatsRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansRequestCollateralData;
+import org.apache.fineract.client.models.PutAccountNumberFormatsRequest;
+import org.apache.fineract.client.models.PutAccountNumberFormatsResponse;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCenterHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.FeignErrors;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
-import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.system.AccountNumberPreferencesHelper;
-import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class AccountNumberPreferencesTest {
+public class AccountNumberPreferencesTest extends FeignLoanTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountNumberPreferencesTest.class);
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification responseValidationError;
-    private ResponseSpecification responseNotFoundError;
-    private ResponseSpecification responseForbiddenError;
-    private Integer clientId;
-    private Integer loanProductId;
-    private Integer loanId;
-    private Integer savingsProductId;
-    private Integer savingsId;
+    private static final String DEFAULT_CLIENT_ACTIVATION_DATE = "04 March 2011";
+    private static final String SAVINGS_SUBMITTED_DATE = "08 January 2013";
+    private static final long CLIENT_ACCOUNT_TYPE = 1L;
+    private static final long LOAN_ACCOUNT_TYPE = 2L;
+    private static final long SAVINGS_ACCOUNT_TYPE = 3L;
+    private static final long CENTER_ACCOUNT_TYPE = 4L;
+    private static final long GROUPS_ACCOUNT_TYPE = 5L;
+    private static final long CLIENT_TYPE_PREFIX = 101L;
+    private static final long OFFICE_NAME_PREFIX = 1L;
+    private Long clientId;
+    private Long loanProductId;
+    private Long loanId;
+    private Long savingsProductId;
+    private Long savingsId;
     private final String loanPrincipalAmount = "100000.00";
     private final String numberOfRepayments = "12";
     private final String interestRatePerPeriod = "18";
     private final String dateString = "04 September 2014";
-    private final String minBalanceForInterestCalculation = null;
-    private final String minRequiredBalance = null;
-    private final String enforceMinRequiredBalance = "false";
-    private LoanTransactionHelper loanTransactionHelper;
-    private SavingsAccountHelper savingsAccountHelper;
-    private AccountNumberPreferencesHelper accountNumberPreferencesHelper;
-    private Integer clientAccountNumberPreferenceId;
-    private Integer loanAccountNumberPreferenceId;
-    private Integer savingsAccountNumberPreferenceId;
-    private Integer groupsAccountNumberPreferenceId;
-    private Integer centerAccountNumberPreferenceId;
+    private FeignGroupHelper groupHelper;
+    private FeignCenterHelper centerHelper;
+    private FeignCollateralHelper collateralHelper;
+    private FeignSavingsHelper savingsHelper;
+    private FeignSavingsProductHelper savingsProductHelper;
+    private Long clientAccountNumberPreferenceId;
+    private Long loanAccountNumberPreferenceId;
+    private Long savingsAccountNumberPreferenceId;
+    private Long groupsAccountNumberPreferenceId;
+    private Long centerAccountNumberPreferenceId;
     private static final String MINIMUM_OPENING_BALANCE = "1000.0";
-    private static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     private Boolean isAccountPreferenceSetUp = false;
-    private Integer clientTypeCodeId;
     private String clientCodeValueName;
-    private Integer clientCodeValueId;
+    private Long clientCodeValueId;
     private final String clientTypeName = "CLIENT_TYPE";
     private final String officeName = "OFFICE_NAME";
     private final String loanShortName = "LOAN_PRODUCT_SHORT_NAME";
     private final String savingsShortName = "SAVINGS_PRODUCT_SHORT_NAME";
-    private Integer groupID;
-    private Integer centerId;
+    private Long groupID;
+    private Long centerId;
     private String groupAccountNo;
 
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.responseNotFoundError = new ResponseSpecBuilder().expectStatusCode(404).build();
-        this.responseForbiddenError = new ResponseSpecBuilder().expectStatusCode(403).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountNumberPreferencesHelper = new AccountNumberPreferencesHelper(this.requestSpec, this.responseSpec);
-
+        this.groupHelper = new FeignGroupHelper(fineractClient());
+        this.centerHelper = new FeignCenterHelper(fineractClient());
+        this.collateralHelper = new FeignCollateralHelper(fineractClient());
+        this.savingsHelper = new FeignSavingsHelper(fineractClient());
+        this.savingsProductHelper = new FeignSavingsProductHelper(fineractClient());
     }
 
     @Test
@@ -150,21 +147,21 @@ public class AccountNumberPreferencesTest {
     }
 
     private void deleteAllAccountNumberPreferences() {
-        ArrayList<HashMap<String, Object>> preferenceIds = this.accountNumberPreferencesHelper.getAllAccountNumberPreferences();
+        List<GetAccountNumberFormatsIdResponse> preferenceIds = ok(
+                () -> fineractClient().accountNumberFormat().retrieveAllAccountNumberFormats());
         /* Deletion of valid account preference ID */
-        for (HashMap<String, Object> preferenceId : preferenceIds) {
-            Integer id = (Integer) preferenceId.get("id");
-            HashMap<String, Object> delResponse = this.accountNumberPreferencesHelper.deleteAccountNumberPreference(id, this.responseSpec,
-                    "");
-            LOG.info("Successfully deleted account number preference (ID: {} )", delResponse.get("resourceId"));
+        for (GetAccountNumberFormatsIdResponse preferenceId : preferenceIds) {
+            Long id = preferenceId.getId();
+            Long deletedId = ok(() -> fineractClient().accountNumberFormat().deleteAccountNumberFormat(id)).getResourceId();
+            LOG.info("Successfully deleted account number preference (ID: {} )", deletedId);
         }
         /* Deletion of invalid account preference ID should fail */
         LOG.info(
                 "---------------------------------DELETING ACCOUNT NUMBER PREFERENCE WITH INVALID ID------------------------------------------");
 
-        HashMap<String, Object> deletionError = this.accountNumberPreferencesHelper.deleteAccountNumberPreference(10,
-                this.responseNotFoundError, "");
-        Assertions.assertEquals("error.msg.resource.not.found", deletionError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        CallFailedRuntimeException deletionError = fail(() -> fineractClient().accountNumberFormat().deleteAccountNumberFormat(10L));
+        Assertions.assertEquals(404, deletionError.getStatus());
+        Assertions.assertEquals("error.msg.resource.not.found", deletionError.getUserMessageGlobalisationCode());
     }
 
     private void validateDefaultAccountNumberGeneration() {
@@ -185,98 +182,90 @@ public class AccountNumberPreferencesTest {
     }
 
     private void createAccountNumberPreference() {
-        this.clientAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper
-                .createClientAccountNumberPreference(this.responseSpec, "resourceId");
+        this.clientAccountNumberPreferenceId = createAccountNumberFormat(CLIENT_ACCOUNT_TYPE, CLIENT_TYPE_PREFIX);
         LOG.info("Successfully created account number preferences for Client (ID: {})", this.clientAccountNumberPreferenceId);
 
-        this.loanAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper
-                .createLoanAccountNumberPreference(this.responseSpec, "resourceId");
+        this.loanAccountNumberPreferenceId = createAccountNumberFormat(LOAN_ACCOUNT_TYPE, OFFICE_NAME_PREFIX);
         LOG.info("Successfully created account number preferences for Loan (ID: {} )", this.loanAccountNumberPreferenceId);
 
-        this.savingsAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper
-                .createSavingsAccountNumberPreference(this.responseSpec, "resourceId");
+        this.savingsAccountNumberPreferenceId = createAccountNumberFormat(SAVINGS_ACCOUNT_TYPE, OFFICE_NAME_PREFIX);
         LOG.info("Successfully created account number preferences for Savings (ID: {})", this.savingsAccountNumberPreferenceId);
 
-        this.groupsAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper
-                .createGroupsAccountNumberPreference(this.responseSpec, "resourceId");
+        this.groupsAccountNumberPreferenceId = createAccountNumberFormat(GROUPS_ACCOUNT_TYPE, OFFICE_NAME_PREFIX);
         LOG.info("Successfully created account number preferences for Groups (ID: {})", this.groupsAccountNumberPreferenceId);
 
-        this.centerAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper
-                .createCenterAccountNumberPreference(this.responseSpec, "resourceId");
+        this.centerAccountNumberPreferenceId = createAccountNumberFormat(CENTER_ACCOUNT_TYPE, OFFICE_NAME_PREFIX);
         LOG.info("Successfully created account number preferences for Center (ID: {})", this.centerAccountNumberPreferenceId);
 
-        this.accountNumberPreferencesHelper.verifyCreationOfAccountNumberPreferences(this.clientAccountNumberPreferenceId,
-                this.loanAccountNumberPreferenceId, this.savingsAccountNumberPreferenceId, this.groupsAccountNumberPreferenceId,
-                this.centerAccountNumberPreferenceId, this.responseSpec, this.requestSpec);
+        for (Long preferenceId : List.of(this.clientAccountNumberPreferenceId, this.loanAccountNumberPreferenceId,
+                this.savingsAccountNumberPreferenceId, this.groupsAccountNumberPreferenceId, this.centerAccountNumberPreferenceId)) {
+            Assertions.assertEquals(preferenceId, retrieveAccountNumberFormat(preferenceId).getId());
+        }
 
-        this.createAccountNumberPreferenceInvalidData("1000", "1001");
-        this.createAccountNumberPreferenceDuplicateData("1", "101");
+        this.createAccountNumberPreferenceInvalidData(1000L, 1001L);
+        this.createAccountNumberPreferenceDuplicateData(1L, 101L);
 
     }
 
-    private void createAccountNumberPreferenceDuplicateData(final String accountType, final String prefixType) {
+    private void createAccountNumberPreferenceDuplicateData(final Long accountType, final Long prefixType) {
         /* Creating account Preference with duplicate data should fail */
         LOG.info(
                 "---------------------------------CREATING ACCOUNT NUMBER PREFERENCE WITH DUPLICATE DATA------------------------------------------");
 
-        HashMap<String, Object> creationError = this.accountNumberPreferencesHelper
-                .createAccountNumberPreferenceWithInvalidData(this.responseForbiddenError, accountType, prefixType, "");
+        CallFailedRuntimeException creationError = fail(() -> fineractClient().accountNumberFormat()
+                .createAccountNumberFormat(new PostAccountNumberFormatsRequest().accountType(accountType).prefixType(prefixType)));
 
-        Assertions.assertEquals("error.msg.account.number.format.duplicate.account.type",
-                creationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        Assertions.assertEquals(403, creationError.getStatus());
+        Assertions.assertEquals("error.msg.account.number.format.duplicate.account.type", creationError.getUserMessageGlobalisationCode());
 
     }
 
-    private void createAccountNumberPreferenceInvalidData(final String accountType, final String prefixType) {
+    private void createAccountNumberPreferenceInvalidData(final Long accountType, final Long prefixType) {
 
         /* Creating account Preference with invalid data should fail */
         LOG.info(
                 "---------------------------------CREATING ACCOUNT NUMBER PREFERENCE WITH INVALID DATA------------------------------------------");
 
-        HashMap<String, Object> creationError = this.accountNumberPreferencesHelper
-                .createAccountNumberPreferenceWithInvalidData(this.responseValidationError, accountType, prefixType, "");
+        CallFailedRuntimeException creationError = fail(() -> fineractClient().accountNumberFormat()
+                .createAccountNumberFormat(new PostAccountNumberFormatsRequest().accountType(accountType).prefixType(prefixType)));
 
-        if (creationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE)
-                .equals("validation.msg.accountNumberFormat.accountType.is.not.within.expected.range")) {
-            Assertions.assertEquals("validation.msg.accountNumberFormat.accountType.is.not.within.expected.range",
-                    creationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-        } else if (creationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE)
-                .equals("validation.msg.accountNumberFormat.prefixType.is.not.one.of.expected.enumerations")) {
-            Assertions.assertEquals("validation.msg.accountNumberFormat.prefixType.is.not.one.of.expected.enumerations",
-                    creationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-        }
+        Assertions.assertEquals(400, creationError.getStatus());
+        String errorCode = FeignErrors.firstError(creationError).userMessageGlobalisationCode();
+        Assertions.assertTrue(
+                List.of("validation.msg.accountNumberFormat.accountType.is.not.within.expected.range",
+                        "validation.msg.accountNumberFormat.prefixType.is.not.one.of.expected.enumerations").contains(errorCode),
+                errorCode);
     }
 
     private void updateAccountNumberPreference() {
-        HashMap<String, Object> accountNumberPreferences = this.accountNumberPreferencesHelper
-                .updateAccountNumberPreference(this.clientAccountNumberPreferenceId, "101", this.responseSpec, "");
+        PutAccountNumberFormatsResponse accountNumberPreferences = ok(() -> fineractClient().accountNumberFormat()
+                .updateAccountNumberFormat(this.clientAccountNumberPreferenceId, new PutAccountNumberFormatsRequest().prefixType(101L)));
 
         LOG.info("--------------------------UPDATION SUCCESSFUL FOR ACCOUNT NUMBER PREFERENCE ID {}",
-                accountNumberPreferences.get("resourceId"));
+                accountNumberPreferences.getResourceId());
 
-        this.accountNumberPreferencesHelper.verifyUpdationOfAccountNumberPreferences((Integer) accountNumberPreferences.get("resourceId"),
-                this.responseSpec, this.requestSpec);
+        Assertions.assertEquals(accountNumberPreferences.getResourceId(),
+                retrieveAccountNumberFormat(accountNumberPreferences.getResourceId()).getId());
 
         /* Update invalid account preference id should fail */
         LOG.info(
                 "---------------------------------UPDATING ACCOUNT NUMBER PREFERENCE WITH INVALID DATA------------------------------------------");
 
         /* Invalid Account Type */
-        HashMap<String, Object> updationError = this.accountNumberPreferencesHelper.updateAccountNumberPreference(9999, "101",
-                this.responseNotFoundError, "");
-        if (updationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE).equals("error.msg.resource.not.found")) {
-            Assertions.assertEquals("error.msg.resource.not.found", updationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-        }
+        CallFailedRuntimeException updationError = fail(() -> fineractClient().accountNumberFormat().updateAccountNumberFormat(9999L,
+                new PutAccountNumberFormatsRequest().prefixType(101L)));
+        Assertions.assertEquals(404, updationError.getStatus());
+        Assertions.assertEquals("error.msg.resource.not.found", updationError.getUserMessageGlobalisationCode());
         /* Invalid Prefix Type */
-        HashMap<String, Object> updationError1 = this.accountNumberPreferencesHelper
-                .updateAccountNumberPreference(this.clientAccountNumberPreferenceId, "103", this.responseValidationError, "");
+        CallFailedRuntimeException updationError1 = fail(() -> fineractClient().accountNumberFormat()
+                .updateAccountNumberFormat(this.clientAccountNumberPreferenceId, new PutAccountNumberFormatsRequest().prefixType(103L)));
 
-        Assertions.assertEquals("validation.msg.validation.errors.exist", updationError1.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        Assertions.assertEquals(400, updationError1.getStatus());
+        Assertions.assertEquals("validation.msg.validation.errors.exist", updationError1.getUserMessageGlobalisationCode());
 
     }
 
     private void createAndValidateClientEntity(Boolean isAccountPreferenceSetUp) {
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         if (isAccountPreferenceSetUp) {
             this.createAndValidateClientBasedOnAccountPreference();
         } else {
@@ -285,25 +274,20 @@ public class AccountNumberPreferencesTest {
     }
 
     private void createAndValidateGroup(Boolean isAccountPreferenceSetUp) {
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec);
-        GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
+        this.groupID = groupHelper.createGroup().getGroupId();
+        Assertions.assertEquals(this.groupID, groupHelper.retrieveGroup(this.groupID).getId());
 
-        this.groupID = GroupHelper.activateGroup(this.requestSpec, this.responseSpec, groupID.toString());
-        GroupHelper.verifyGroupActivatedOnServer(this.requestSpec, this.responseSpec, groupID, true);
+        groupHelper.activateGroup(this.groupID);
+        GetGroupsGroupIdResponse group = groupHelper.retrieveGroup(this.groupID);
+        Assertions.assertTrue(group.getActive());
 
-        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + this.groupID + "?" + Utils.TENANT_IDENTIFIER;
-        this.groupAccountNo = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "accountNo");
+        this.groupAccountNo = group.getAccountNo();
 
         if (isAccountPreferenceSetUp) {
-            String groupsPrefixName = (String) this.accountNumberPreferencesHelper
-                    .getAccountNumberPreference(this.groupsAccountNumberPreferenceId, "prefixType.value");
+            String groupsPrefixName = retrieveAccountNumberFormat(this.groupsAccountNumberPreferenceId).getPrefixType().getValue();
 
             if (groupsPrefixName.equals(this.officeName)) {
-
-                final String groupOfficeName = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "officeName");
-
-                this.validateAccountNumberLengthAndStartsWithPrefix(this.groupAccountNo, groupOfficeName);
+                this.validateAccountNumberLengthAndStartsWithPrefix(this.groupAccountNo, group.getOfficeName());
             }
         } else {
             validateAccountNumberLengthAndStartsWithPrefix(this.groupAccountNo, null);
@@ -311,23 +295,21 @@ public class AccountNumberPreferencesTest {
     }
 
     private void createAndValidateCenter(Boolean isAccountPreferenceSetUp) {
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        Integer officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
+        Long officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId();
 
         String name = "CenterCreation" + new Timestamp(new java.util.Date().getTime());
-        this.centerId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
-        CenterDomain center = CenterHelper.retrieveByID(centerId, requestSpec, responseSpec);
+        this.centerId = centerHelper.createCenter(name, officeId).getResourceId();
+
+        GetCentersCenterIdResponse center = centerHelper.retrieveCenter(this.centerId);
+
         Assertions.assertNotNull(center);
         Assertions.assertTrue(center.getName().equals(name));
 
         if (isAccountPreferenceSetUp) {
-            String centerPrefixName = (String) this.accountNumberPreferencesHelper
-                    .getAccountNumberPreference(this.centerAccountNumberPreferenceId, "prefixType.value");
-            final String CENTER_URL = "/fineract-provider/api/v1/centers/" + this.centerId + "?" + Utils.TENANT_IDENTIFIER;
+            String centerPrefixName = retrieveAccountNumberFormat(this.centerAccountNumberPreferenceId).getPrefixType().getValue();
 
             if (centerPrefixName.equals(this.officeName)) {
-                final String centerOfficeName = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "officeName");
-                this.validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), centerOfficeName);
+                this.validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), center.getOfficeName());
             }
         } else {
             validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), null);
@@ -335,47 +317,46 @@ public class AccountNumberPreferencesTest {
     }
 
     private void createAndValidateClientWithoutAccountPreference() {
-        this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        this.clientId = createClient();
         Assertions.assertNotNull(this.clientId);
-        String clientAccountNo = (String) ClientHelper.getClient(requestSpec, responseSpec, this.clientId.toString(), "accountNo");
+        String clientAccountNo = clientHelper.getClient(this.clientId).getAccountNo();
         validateAccountNumberLengthAndStartsWithPrefix(clientAccountNo, null);
     }
 
     private void createAndValidateClientBasedOnAccountPreference() {
         final String codeName = "ClientType";
         String clientAccountNo = null;
-        String clientPrefixName = (String) this.accountNumberPreferencesHelper
-                .getAccountNumberPreference(this.clientAccountNumberPreferenceId, "prefixType.value");
+        String clientPrefixName = retrieveAccountNumberFormat(this.clientAccountNumberPreferenceId).getPrefixType().getValue();
         if (clientPrefixName.equals(this.clientTypeName)) {
 
-            /* Retrieve Code id for the Code "ClientType" */
-            HashMap<String, Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
-            this.clientTypeCodeId = (Integer) code.get("id");
-
             /* Retrieve/Create Code Values for the Code "ClientType" */
-            HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(this.clientTypeCodeId, this.requestSpec,
-                    this.responseSpec);
+            Long clientTypeCodeId = codeHelper.retrieveCodeByName(codeName).getId();
+            codeHelper.retrieveOrCreateCodeValueId(codeName);
+            GetCodeValuesDataResponse codeValue = codeHelper.retrieveAllCodeValues(clientTypeCodeId).get(0);
 
-            this.clientCodeValueName = (String) codeValue.get("name");
-            this.clientCodeValueId = (Integer) codeValue.get("id");
+            this.clientCodeValueName = codeValue.getName();
+            this.clientCodeValueId = codeValue.getId();
 
             /* Create Client with Client Type */
-            this.clientId = ClientHelper.createClientForAccountPreference(this.requestSpec, this.responseSpec, this.clientCodeValueId,
-                    "clientId");
-            ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, this.clientId);
+            this.clientId = clientHelper.createClient(
+                    ClientRequestBuilders.createActivePersonClient(DEFAULT_CLIENT_ACTIVATION_DATE).clientTypeId(this.clientCodeValueId))
+                    .getClientId();
+
+            GetClientsClientIdResponse client = clientHelper.getClient(this.clientId);
+            Assertions.assertEquals(this.clientId, client.getId());
 
             // Assertions.assertNotNull(clientId);
 
-            clientAccountNo = (String) ClientHelper.getClient(this.requestSpec, this.responseSpec, this.clientId.toString(), "accountNo");
+            clientAccountNo = client.getAccountNo();
             this.validateAccountNumberLengthAndStartsWithPrefix(clientAccountNo, this.clientCodeValueName);
 
         } else if (clientPrefixName.equals(this.officeName)) {
-            this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-            ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, this.clientId);
+            this.clientId = createClient();
+            GetClientsClientIdResponse client = clientHelper.getClient(this.clientId);
+            Assertions.assertEquals(this.clientId, client.getId());
             // Assertions.assertNotNull(clientId);
-            clientAccountNo = (String) ClientHelper.getClient(requestSpec, responseSpec, this.clientId.toString(), "accountNo");
-            String officeName = (String) ClientHelper.getClient(requestSpec, responseSpec, this.clientId.toString(), "officeName");
-            this.validateAccountNumberLengthAndStartsWithPrefix(clientAccountNo, officeName);
+            clientAccountNo = client.getAccountNo();
+            this.validateAccountNumberLengthAndStartsWithPrefix(clientAccountNo, client.getOfficeName());
         }
     }
 
@@ -390,62 +371,43 @@ public class AccountNumberPreferencesTest {
     }
 
     private void createLoanProduct() {
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
         LOG.info("---------------------------------CREATING LOAN PRODUCT------------------------------------------");
-
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(loanPrincipalAmount)
-                .withNumberOfRepayments(numberOfRepayments).withinterestRatePerPeriod(interestRatePerPeriod)
-                .withInterestRateFrequencyTypeAsYear().build(null);
-
-        this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        this.loanProductId = createLoanProduct(
+                new LoanProductTestBuilder().withPrincipal(loanPrincipalAmount).withNumberOfRepayments(numberOfRepayments)
+                        .withinterestRatePerPeriod(interestRatePerPeriod).withInterestRateFrequencyTypeAsYear().buildRequest());
         LOG.info("Successfully created loan product  (ID: {} )", this.loanProductId);
     }
 
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
-        collaterals.add(collaterals(collateralId, quantity));
-    }
-
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
-        HashMap<String, String> collateral = new HashMap<String, String>(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("quantity", quantity.toString());
-        return collateral;
-    }
-
     private void createAndValidateLoanEntity(Boolean isAccountPreferenceSetUp) {
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
         LOG.info("---------------------------------NEW LOAN APPLICATION------------------------------------------");
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                this.clientId.toString(), collateralId);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(this.clientId, collateralId).getResourceId();
         Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount)
-                .withLoanTermFrequency(numberOfRepayments).withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments)
-                .withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments()
-                .withInterestCalculationPeriodTypeAsDays().withInterestRatePerPeriod(interestRatePerPeriod).withLoanTermFrequencyAsMonths()
-                .withSubmittedOnDate(dateString).withExpectedDisbursementDate(dateString).withPrincipalGrace("2").withInterestGrace("2")
-                .withCollaterals(collaterals).build(this.clientId.toString(), this.loanProductId.toString(), null);
 
-        LOG.info("Loan Application :{}", loanApplicationJSON);
+        final PostLoansRequest loanApplication = new PostLoansRequest().clientId(this.clientId).productId(this.loanProductId)
+                .loanType("individual").principal(new BigDecimal(loanPrincipalAmount))
+                .loanTermFrequency(Integer.valueOf(numberOfRepayments)).loanTermFrequencyType(2)
+                .numberOfRepayments(Integer.valueOf(numberOfRepayments)).repaymentEvery(1).repaymentFrequencyType(2).amortizationType(1)
+                .interestCalculationPeriodType(0).interestType(1).interestRatePerPeriod(new BigDecimal(interestRatePerPeriod))
+                .submittedOnDate(dateString).expectedDisbursementDate(dateString).graceOnPrincipalPayment(2).graceOnInterestPayment(2)
+                .transactionProcessingStrategyCode(LoanApplicationTestBuilder.DEFAULT_STRATEGY)
+                .maxOutstandingLoanBalance(new BigDecimal("36000"))
+                .collateral(List.of(new PostLoansRequestCollateralData().clientCollateralId(clientCollateralId).quantity(BigDecimal.ONE)))
+                .dateFormat("dd MMMM yyyy").locale("en_GB");
+        this.loanId = loanHelper.applyForLoan(loanApplication).getLoanId();
 
-        this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-        String loanAccountNo = (String) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, this.loanId,
-                "accountNo");
+        String loanAccountNo = loanHelper.getLoanDetails(this.loanId).getAccountNo();
 
         if (isAccountPreferenceSetUp) {
-            String loanPrefixName = (String) this.accountNumberPreferencesHelper
-                    .getAccountNumberPreference(this.loanAccountNumberPreferenceId, "prefixType.value");
+            String loanPrefixName = retrieveAccountNumberFormat(this.loanAccountNumberPreferenceId).getPrefixType().getValue();
+
             if (loanPrefixName.equals(this.officeName)) {
-                String loanOfficeName = (String) ClientHelper.getClient(requestSpec, responseSpec, this.clientId.toString(), "officeName");
+                String loanOfficeName = clientHelper.getClient(this.clientId).getOfficeName();
                 this.validateAccountNumberLengthAndStartsWithPrefix(loanAccountNo, loanOfficeName);
             } else if (loanPrefixName.equals(this.loanShortName)) {
-                String loanShortName = (String) this.loanTransactionHelper.getLoanProductDetail(this.requestSpec, this.responseSpec,
-                        this.loanProductId, "shortName");
+                String loanShortName = loanHelper.retrieveLoanProduct(this.loanProductId).getShortName();
                 this.validateAccountNumberLengthAndStartsWithPrefix(loanAccountNo, loanShortName);
             }
             LOG.info("SUCCESSFULLY CREATED LOAN APPLICATION BASED ON ACCOUNT PREFERENCES (ID: {} )", this.loanId);
@@ -456,55 +418,43 @@ public class AccountNumberPreferencesTest {
     }
 
     private void createSavingsProduct() {
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
-
-        SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-
-        final String savingsProductJSON = savingsProductHelper
-                //
-                .withInterestCompoundingPeriodTypeAsDaily()
-                //
-                .withInterestPostingPeriodTypeAsMonthly()
-                //
-                .withInterestCalculationPeriodTypeAsDailyBalance()
-                //
-                .withMinBalanceForInterestCalculation(minBalanceForInterestCalculation)
-                //
-                .withMinRequiredBalance(minRequiredBalance).withEnforceMinRequiredBalance(enforceMinRequiredBalance)
-                .withMinimumOpenningBalance(MINIMUM_OPENING_BALANCE).build();
-        this.savingsProductId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, this.requestSpec, this.responseSpec);
+        this.savingsProductId = savingsProductHelper.createSavingsProduct(SavingsRequestBuilders
+                .savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY, SavingsTestData.InterestPostingPeriodType.MONTHLY,
+                        SavingsTestData.InterestCalculationType.DAILY_BALANCE)
+                .minRequiredOpeningBalance(new BigDecimal(MINIMUM_OPENING_BALANCE))).getResourceId();
         LOG.info("Sucessfully created savings product (ID: {} )", this.savingsProductId);
-
     }
 
     private void createAndValidateSavingsEntity(Boolean isAccountPreferenceSetUp) {
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.savingsId = savingsHelper.submitApplication(this.clientId, this.savingsProductId, SAVINGS_SUBMITTED_DATE).getSavingsId();
 
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-
-        this.savingsId = this.savingsAccountHelper.applyForSavingsApplication(this.clientId, this.savingsProductId,
-                ACCOUNT_TYPE_INDIVIDUAL);
-
-        String savingsAccountNo = (String) this.savingsAccountHelper.getSavingsAccountDetail(this.savingsId, "accountNo");
+        String savingsAccountNo = savingsHelper.getSavingsDetails(this.savingsId).getAccountNo();
 
         if (isAccountPreferenceSetUp) {
-            String savingsPrefixName = (String) this.accountNumberPreferencesHelper
-                    .getAccountNumberPreference(this.savingsAccountNumberPreferenceId, "prefixType.value");
+            String savingsPrefixName = retrieveAccountNumberFormat(this.savingsAccountNumberPreferenceId).getPrefixType().getValue();
 
             if (savingsPrefixName.equals(this.officeName)) {
-                String savingsOfficeName = (String) ClientHelper.getClient(requestSpec, responseSpec, this.clientId.toString(),
-                        "officeName");
+                String savingsOfficeName = clientHelper.getClient(this.clientId).getOfficeName();
                 this.validateAccountNumberLengthAndStartsWithPrefix(savingsAccountNo, savingsOfficeName);
             } else if (savingsPrefixName.equals(this.savingsShortName)) {
-                String loanShortName = (String) this.savingsAccountHelper.getSavingsAccountDetail(this.savingsId, "shortName");
-                this.validateAccountNumberLengthAndStartsWithPrefix(savingsAccountNo, loanShortName);
+                String savingsShortName = savingsProductHelper.getSavingsProduct(this.savingsProductId).getShortName();
+                this.validateAccountNumberLengthAndStartsWithPrefix(savingsAccountNo, savingsShortName);
             }
-            LOG.info("SUCCESSFULLY CREATED SAVINGS APPLICATION BASED ON ACCOUNT PREFERENCES (ID:  {} )", this.loanId);
+            LOG.info("SUCCESSFULLY CREATED SAVINGS APPLICATION BASED ON ACCOUNT PREFERENCES (ID:  {} )", this.savingsId);
         } else {
             this.validateAccountNumberLengthAndStartsWithPrefix(savingsAccountNo, null);
             LOG.info("SUCCESSFULLY CREATED SAVINGS APPLICATION (ID:{} )", this.savingsId);
         }
+    }
+
+    private Long createAccountNumberFormat(long accountType, long prefixType) {
+        return ok(() -> fineractClient().accountNumberFormat()
+                .createAccountNumberFormat(new PostAccountNumberFormatsRequest().accountType(accountType).prefixType(prefixType)))
+                .getResourceId();
+    }
+
+    private GetAccountNumberFormatsIdResponse retrieveAccountNumberFormat(Long accountNumberFormatId) {
+        return ok(() -> fineractClient().accountNumberFormat().retrieveOneAccountNumberFormat(accountNumberFormatId));
     }
 }

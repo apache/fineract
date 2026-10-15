@@ -195,6 +195,8 @@ final class UsersApiResourceSwagger {
 
         }
 
+        @Schema(example = "newusername")
+        public String username;
         @Schema(example = "Test")
         public String firstname;
         @Schema(example = "User")

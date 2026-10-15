@@ -18,71 +18,70 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.AuditData;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutPermissionsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.FineractClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDatatableHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRoleHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.commands.MakercheckersHelper;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.system.DatatableHelper;
-import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-@SuppressWarnings({ "unused" })
-public class MakercheckerTest {
+public class MakercheckerTest extends FeignIntegrationTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private MakercheckersHelper makercheckersHelper;
-    private RolesHelper rolesHelper;
-    private SavingsProductHelper savingsProductHelper;
-    private SavingsAccountHelper savingsAccountHelper;
     private static final String START_DATE_STRING = "03 June 2023";
     private static final String TRANSACTION_DATE_STRING = "05 June 2023";
-    private static final String CLIENTS_URL = "/fineract-provider/api/v1/clients";
-    private GlobalConfigurationHelper globalConfigurationHelper;
+    private static final String PASSWORD = "A1b2c3d4e5f$";
+    private FeignClientHelper clientHelper;
+    private FeignStaffHelper staffHelper;
+    private FeignSavingsProductHelper savingsProductHelper;
+    private FeignSavingsHelper savingsHelper;
+    private FeignSavingsTransactionHelper savingsTransactionHelper;
+    private FeignGlobalConfigurationHelper globalConfigurationHelper;
 
-    @BeforeEach
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.makercheckersHelper = new MakercheckersHelper(this.requestSpec, this.responseSpec);
-        this.rolesHelper = new RolesHelper();
-        this.savingsProductHelper = new SavingsProductHelper();
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.globalConfigurationHelper = new GlobalConfigurationHelper();
+        this.clientHelper = new FeignClientHelper(fineractClient());
+        this.staffHelper = new FeignStaffHelper(fineractClient());
+        this.savingsProductHelper = new FeignSavingsProductHelper(fineractClient());
+        this.savingsHelper = new FeignSavingsHelper(fineractClient());
+        this.savingsTransactionHelper = new FeignSavingsTransactionHelper(fineractClient());
+        this.globalConfigurationHelper = new FeignGlobalConfigurationHelper(fineractClient());
     }
 
     @Test
     public void testMakercheckerInboxList() {
         // given
         // when
-        List<Map<String, Object>> makerCheckerList = this.makercheckersHelper.getMakerCheckerList(null);
+        List<AuditData> makerCheckerList = retrieveCommands(Map.of());
         assertNotNull(makerCheckerList);
     }
 
@@ -96,93 +95,82 @@ public class MakercheckerTest {
 
         try {
             // client permission - maker-checker disabled
-            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
-            putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", false));
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false));
 
-            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            Long roleId = FeignRoleHelper.createRole();
             Map<String, Boolean> permissionMap = Map.of("CREATE_CLIENT", true, "CREATE_CLIENT_CHECKER", true, "ACTIVATE_CLIENT", true,
                     "ACTIVATE_CLIENT_CHECKER", true, "WITHDRAWAL_SAVINGSACCOUNT", true, "WITHDRAWAL_SAVINGSACCOUNT_CHECKER", true);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
-            final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+            FeignRoleHelper.addPermissionsToRole(roleId, permissionMap);
+            final Long staffId = staffHelper.createStaff().getResourceId();
             // create maker user
             String maker = Utils.uniqueRandomStringGenerator("user", 8);
-            final Integer makerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker,
-                    "A1b2c3d4e5f$", "resourceId");
+            final Long makerUserId = FeignUserHelper.createUser(roleId, staffId, maker, PASSWORD).getResourceId();
 
             // create client - maker-checker disabled
-            RequestSpecification makerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
-                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker, "A1b2c3d4e5f$"));
-            Integer clientId = ClientHelper.createClient(makerRequestSpec, this.responseSpec);
+            FineractFeignClient makerClient = FineractFeignClientHelper.createNewFineractFeignClient(maker, PASSWORD);
+            FeignClientHelper makerClientHelper = new FeignClientHelper(makerClient);
+            Long clientId = makerClientHelper.createClient();
             assertNotNull(clientId);
-            ClientHelper.verifyClientCreatedOnServer(requestSpec, this.responseSpec, clientId);
+            assertEquals(clientId, clientHelper.getClient(clientId).getId());
 
-            final Integer savingsId = createApproveActivateSavingsAccountDailyPosting(clientId, START_DATE_STRING);
+            final Long savingsId = createApproveActivateSavingsAccountDailyPosting(clientId, START_DATE_STRING);
             assertNotNull(savingsId);
-            Integer transactionId = (Integer) savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", TRANSACTION_DATE_STRING,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
+            Long transactionId = savingsTransactionHelper.deposit(savingsId, "1000", TRANSACTION_DATE_STRING).getResourceId();
             assertNotNull(transactionId);
 
             // client and saving permission - maker-checker enabled
-            putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", true);
-            rolesHelper.updatePermissions(putPermissionsRequest);
-            putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("WITHDRAWAL_SAVINGSACCOUNT", true);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", true));
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("WITHDRAWAL_SAVINGSACCOUNT", true));
 
             // create client - maker-checker enabled
-            clientId = ClientHelper.createClient(makerRequestSpec, this.responseSpec);
+            clientId = makerClientHelper.createClient();
             assertNull(clientId, "Client is created on the server");
 
-            List<Map<String, Object>> auditDetails = makercheckersHelper
-                    .getMakerCheckerList(Map.of("actionName", "CREATE", "entityName", "CLIENT", "makerId", makerUserId.toString()));
+            List<AuditData> auditDetails = retrieveCommands(
+                    Map.of("actionName", "CREATE", "entityName", "CLIENT", "makerId", makerUserId.toString()));
             assertEquals(1, auditDetails.size(), "More than one command exists");
-            Long clientCommandId = ((Double) auditDetails.get(0).get("id")).longValue();
+            Long clientCommandId = auditDetails.get(0).getId();
 
             // savings withdrawal - maker-checker enabled
-            SavingsAccountHelper makerSavingsHelper = new SavingsAccountHelper(makerRequestSpec, this.responseSpec);
-            Integer withdrawalId = (Integer) makerSavingsHelper.withdrawalFromSavingsAccount(savingsId, "100", TRANSACTION_DATE_STRING,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
+            FeignSavingsTransactionHelper makerSavingsHelper = new FeignSavingsTransactionHelper(makerClient);
+            Long withdrawalId = makerSavingsHelper.withdraw(savingsId, "100", TRANSACTION_DATE_STRING).getResourceId();
             assertNull(withdrawalId, "Withdrawal performed on the server");
 
-            auditDetails = makercheckersHelper.getMakerCheckerList(
+            auditDetails = retrieveCommands(
                     Map.of("actionName", "WITHDRAWAL", "entityName", "SAVINGSACCOUNT", "makerId", makerUserId.toString()));
             assertEquals(1, auditDetails.size(), "More than one command exists");
-            Long savingCommandId = ((Double) auditDetails.get(0).get("id")).longValue();
+            Long savingCommandId = auditDetails.get(0).getId();
 
             // check by the same user should fail
-            ResponseSpecification failedResponseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
-            MakercheckersHelper.approveMakerCheckerEntry(makerRequestSpec, failedResponseSpec, clientCommandId);
-            MakercheckersHelper.approveMakerCheckerEntry(makerRequestSpec, failedResponseSpec, savingCommandId);
+            assertEquals(400, fail(() -> approve(makerClient, clientCommandId)).getStatus());
+            assertEquals(400, fail(() -> approve(makerClient, savingCommandId)).getStatus());
 
             // create checker user
             String checker = Utils.uniqueRandomStringGenerator("user", 8);
-            final Integer checkerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, checker,
-                    "A1b2c3d4e5f$", "resourceId");
-            RequestSpecification checkerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
-                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(checker, "A1b2c3d4e5f$"));
+            final Long checkerUserId = FeignUserHelper.createUser(roleId, staffId, checker, PASSWORD).getResourceId();
+            FineractFeignClient checkerClient = FineractFeignClientHelper.createNewFineractFeignClient(checker, PASSWORD);
 
             // check by another checker user should succeed
-            HashMap<?, ?> response = MakercheckersHelper.approveMakerCheckerEntry(checkerRequestSpec, responseSpec, clientCommandId);
+            CommandProcessingResult response = ok(() -> approve(checkerClient, clientCommandId));
             assertNotNull(response);
-            clientId = (Integer) response.get("clientId");
+            clientId = response.getClientId();
             assertNotNull(clientId);
-            ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
+            assertEquals(clientId, clientHelper.getClient(clientId).getId());
 
-            response = MakercheckersHelper.approveMakerCheckerEntry(checkerRequestSpec, responseSpec, savingCommandId);
+            response = ok(() -> approve(checkerClient, savingCommandId));
             assertNotNull(response);
-            withdrawalId = (Integer) response.get("resourceId");
+            withdrawalId = response.getResourceId();
             assertNotNull(withdrawalId);
 
             // add checker superuser permission - actions are performed in one step
             permissionMap = Map.of("CHECKER_SUPER_USER", true);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
-            clientId = ClientHelper.createClient(makerRequestSpec, this.responseSpec);
+            FeignRoleHelper.addPermissionsToRole(roleId, permissionMap);
+            clientId = makerClientHelper.createClient();
             assertNotNull(clientId);
-            ClientHelper.verifyClientCreatedOnServer(requestSpec, this.responseSpec, clientId);
+            assertEquals(clientId, clientHelper.getClient(clientId).getId());
 
-            withdrawalId = (Integer) makerSavingsHelper.withdrawalFromSavingsAccount(savingsId, "100", TRANSACTION_DATE_STRING,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
+            withdrawalId = makerSavingsHelper.withdraw(savingsId, "100", TRANSACTION_DATE_STRING).getResourceId();
             assertNotNull(withdrawalId);
         } finally {
 
@@ -192,11 +180,8 @@ public class MakercheckerTest {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
                     new PutGlobalConfigurationsRequest().enabled(true));
 
-            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("WITHDRAWAL_SAVINGSACCOUNT",
-                    false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
-            putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("WITHDRAWAL_SAVINGSACCOUNT", false));
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false));
         }
     }
 
@@ -212,51 +197,46 @@ public class MakercheckerTest {
 
         try {
             // enable maker-checker for datatable creation
-            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", true);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", true));
 
             // create role with permissions for maker and checker
-            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            Long roleId = FeignRoleHelper.createRole();
             Map<String, Boolean> permissionMap = Map.of("CREATE_DATATABLE", true, "CREATE_DATATABLE_CHECKER", true);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
+            FeignRoleHelper.addPermissionsToRole(roleId, permissionMap);
 
             // create maker user
-            Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+            Long staffId = staffHelper.createStaff().getResourceId();
             String maker = Utils.uniqueRandomStringGenerator("user", 8);
-            Integer makerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker,
-                    "A1b2c3d4e5f$", "resourceId");
+            Long makerUserId = FeignUserHelper.createUser(roleId, staffId, maker, PASSWORD).getResourceId();
 
             // create checker user
             String checker = Utils.uniqueRandomStringGenerator("user", 8);
-            UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, checker, "A1b2c3d4e5f$", "resourceId");
+            FeignUserHelper.createUser(roleId, staffId, checker, PASSWORD);
 
-            RequestSpecification makerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
-                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker, "A1b2c3d4e5f$"));
+            FineractFeignClient makerClient = FineractFeignClientHelper.createNewFineractFeignClient(maker, PASSWORD);
 
             // maker creates datatable with maker-checker enabled, this creates the physical table but queues for
             // approval
-            DatatableHelper makerDatatableHelper = new DatatableHelper(makerRequestSpec, this.responseSpec);
-            String datatableJson = DatatableHelper.getTestDatatableAsJSON(apptableName, false);
-            String datatableName = com.google.gson.JsonParser.parseString(datatableJson).getAsJsonObject().get("datatableName")
-                    .getAsString();
-            makerDatatableHelper.createDatatable(datatableJson, "");
+            PostDataTablesRequest datatableRequest = FeignDatatableHelper.testDatatableRequest(apptableName);
+            String datatableName = datatableRequest.getDatatableName();
+            new FeignDatatableHelper(makerClient).createDatatable(datatableRequest);
 
             // find the pending command
-            List<Map<String, Object>> auditDetails = makercheckersHelper
-                    .getMakerCheckerList(Map.of("actionName", "CREATE", "entityName", "DATATABLE", "makerId", makerUserId.toString()));
+            List<AuditData> auditDetails = retrieveCommands(
+                    Map.of("actionName", "CREATE", "entityName", "DATATABLE", "makerId", makerUserId.toString()));
             assertEquals(1, auditDetails.size(), "Error: Expected only one pending CREATE DATATABLE command");
-            Long commandId = ((Double) auditDetails.get(0).get("id")).longValue();
+            Long commandId = auditDetails.get(0).getId();
 
             // checker rejects the command which should drop the orphaned table
-            MakercheckersHelper.rejectMakerCheckerEntry(FineractClientHelper.createNewFineractClient(checker, "A1b2c3d4e5f$"), commandId);
+            FineractFeignClient checkerClient = FineractFeignClientHelper.createNewFineractFeignClient(checker, PASSWORD);
+            ok(() -> checkerClient.makerCheckerOr4EyeFunctionality().approveMakerCheckerEntry(commandId, "reject"));
 
             // verify the datatable no longer exists by trying to create it again
             // verify without maker checker, so transaction rollback in postgres doesn't break the test
-            putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", false));
 
-            DatatableHelper adminDatatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
-            String recreatedName = adminDatatableHelper.createDatatable(datatableJson, "resourceIdentifier");
+            FeignDatatableHelper adminDatatableHelper = new FeignDatatableHelper(fineractClient());
+            String recreatedName = adminDatatableHelper.createDatatable(datatableRequest).getResourceIdentifier();
             assertEquals(datatableName, recreatedName, "Error: Was not able to recreate datatable after rejection cleanup");
 
             // cleanup after test
@@ -267,8 +247,7 @@ public class MakercheckerTest {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
                     new PutGlobalConfigurationsRequest().enabled(true));
 
-            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", false));
         }
     }
 
@@ -280,46 +259,37 @@ public class MakercheckerTest {
                 new PutGlobalConfigurationsRequest().enabled(false));
 
         try {
-            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", true);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", true));
 
-            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            Long roleId = FeignRoleHelper.createRole();
             Map<String, Boolean> permissionMap = Map.of("CREATE_CLIENT", true, "CREATE_CLIENT_CHECKER", true, "ACTIVATE_CLIENT", true);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
-            final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+            FeignRoleHelper.addPermissionsToRole(roleId, permissionMap);
+            final Long staffId = staffHelper.createStaff().getResourceId();
 
             String maker1 = Utils.uniqueRandomStringGenerator("user", 8);
             String maker2 = Utils.uniqueRandomStringGenerator("user", 8);
-            UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker1, "A1b2c3d4e5f$", "resourceId");
-            UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker2, "A1b2c3d4e5f$", "resourceId");
+            FeignUserHelper.createUser(roleId, staffId, maker1, PASSWORD);
+            FeignUserHelper.createUser(roleId, staffId, maker2, PASSWORD);
 
-            RequestSpecification maker1RequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
-                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker1, "A1b2c3d4e5f$"));
-            RequestSpecification maker2RequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
-                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker2, "A1b2c3d4e5f$"));
+            new FeignClientHelper(FineractFeignClientHelper.createNewFineractFeignClient(maker1, PASSWORD)).createClient();
+            new FeignClientHelper(FineractFeignClientHelper.createNewFineractFeignClient(maker2, PASSWORD)).createClient();
 
-            ClientHelper.createClient(maker1RequestSpec, this.responseSpec);
-            ClientHelper.createClient(maker2RequestSpec, this.responseSpec);
-
-            List<Map<String, Object>> maker1Results = makercheckersHelper
-                    .getMakerCheckerList(Map.of("username", maker1, "actionName", "CREATE", "entityName", "CLIENT"));
+            List<AuditData> maker1Results = retrieveCommands(Map.of("username", maker1, "actionName", "CREATE", "entityName", "CLIENT"));
             assertEquals(1, maker1Results.size(), "Username filter should return only maker1's commands");
-            assertEquals(maker1, maker1Results.get(0).get("maker"));
+            assertEquals(maker1, maker1Results.get(0).getMaker());
 
-            List<Map<String, Object>> maker2Results = makercheckersHelper
-                    .getMakerCheckerList(Map.of("username", maker2, "actionName", "CREATE", "entityName", "CLIENT"));
+            List<AuditData> maker2Results = retrieveCommands(Map.of("username", maker2, "actionName", "CREATE", "entityName", "CLIENT"));
             assertEquals(1, maker2Results.size(), "Username filter should return only maker2's commands");
-            assertEquals(maker2, maker2Results.get(0).get("maker"));
+            assertEquals(maker2, maker2Results.get(0).getMaker());
 
-            List<Map<String, Object>> noResults = makercheckersHelper.getMakerCheckerList(Map.of("username", "nonexistentuserxyz_999"));
+            List<AuditData> noResults = retrieveCommands(Map.of("username", "nonexistentuserxyz_999"));
             assertEquals(0, noResults.size(), "Unknown username should return no results");
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
                     new PutGlobalConfigurationsRequest().enabled(false));
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", false));
         }
     }
 
@@ -331,41 +301,35 @@ public class MakercheckerTest {
                 new PutGlobalConfigurationsRequest().enabled(false));
 
         try {
-            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", true);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", true));
 
-            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            Long roleId = FeignRoleHelper.createRole();
             Map<String, Boolean> permissionMap = Map.of("CREATE_CLIENT", true, "CREATE_CLIENT_CHECKER", true, "ACTIVATE_CLIENT", true);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
-            final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+            FeignRoleHelper.addPermissionsToRole(roleId, permissionMap);
+            final Long staffId = staffHelper.createStaff().getResourceId();
 
             String maker = Utils.uniqueRandomStringGenerator("user", 8);
-            final Integer makerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker,
-                    "A1b2c3d4e5f$", "resourceId");
-            RequestSpecification makerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
-                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker, "A1b2c3d4e5f$"));
+            final Long makerUserId = FeignUserHelper.createUser(roleId, staffId, maker, PASSWORD).getResourceId();
 
-            ClientHelper.createClient(makerRequestSpec, this.responseSpec);
+            new FeignClientHelper(FineractFeignClientHelper.createNewFineractFeignClient(maker, PASSWORD)).createClient();
 
             // "dd MMMM yyyy" format without dateFormat/locale — previously caused 500 error
-            List<Map<String, Object>> fromOnly = makercheckersHelper
-                    .getMakerCheckerList(Map.of("makerId", makerUserId.toString(), "makerDateTimeFrom", "01 January 2020"));
+            List<AuditData> fromOnly = retrieveCommands(Map.of("makerId", makerUserId.toString(), "makerDateTimeFrom", "01 January 2020"));
             assertEquals(1, fromOnly.size(), "'dd MMMM yyyy' from-date filter should include today's pending command");
 
-            List<Map<String, Object>> fromAndTo = makercheckersHelper.getMakerCheckerList(Map.of("makerId", makerUserId.toString(),
-                    "makerDateTimeFrom", "01 January 2020", "makerDateTimeTo", "31 December 2030"));
+            List<AuditData> fromAndTo = retrieveCommands(Map.of("makerId", makerUserId.toString(), "makerDateTimeFrom", "01 January 2020",
+                    "makerDateTimeTo", "31 December 2030"));
             assertEquals(1, fromAndTo.size(), "'dd MMMM yyyy' date range filter should include today's pending command");
 
-            List<Map<String, Object>> pastRange = makercheckersHelper.getMakerCheckerList(Map.of("makerId", makerUserId.toString(),
-                    "makerDateTimeFrom", "01 January 2020", "makerDateTimeTo", "31 December 2020"));
+            List<AuditData> pastRange = retrieveCommands(Map.of("makerId", makerUserId.toString(), "makerDateTimeFrom", "01 January 2020",
+                    "makerDateTimeTo", "31 December 2020"));
             assertEquals(0, pastRange.size(), "Past date range should exclude today's pending command");
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
                     new PutGlobalConfigurationsRequest().enabled(false));
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", false);
-            rolesHelper.updatePermissions(putPermissionsRequest);
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", false));
         }
     }
 
@@ -375,56 +339,51 @@ public class MakercheckerTest {
                 new PutGlobalConfigurationsRequest().enabled(true));
         List<Long> pendingIds = new ArrayList<>();
         try {
-            Integer clientId = Utils.performServerPost(requestSpec, responseSpec, CLIENTS_URL + "?" + Utils.TENANT_IDENTIFIER,
-                    ClientHelper.getTestClientAsJSONPending(START_DATE_STRING, "1"), "clientId");
-            rolesHelper.updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", true));
+            Long clientId = clientHelper.createClientPending(START_DATE_STRING).getClientId();
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", true));
 
-            Integer makerRoleId = RolesHelper.createRole(requestSpec, responseSpec);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, makerRoleId,
-                    Map.of("ACTIVATE_CLIENT", true, "ACTIVATE_CLIENT_CHECKER", true));
-            Integer checkerOnlyRoleId = RolesHelper.createRole(requestSpec, responseSpec);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, checkerOnlyRoleId, Map.of("ACTIVATE_CLIENT_CHECKER", true));
-            Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
-            String password = "A1b2c3d4e5f$";
+            Long makerRoleId = FeignRoleHelper.createRole();
+            FeignRoleHelper.addPermissionsToRole(makerRoleId, Map.of("ACTIVATE_CLIENT", true, "ACTIVATE_CLIENT_CHECKER", true));
+            Long checkerOnlyRoleId = FeignRoleHelper.createRole();
+            FeignRoleHelper.addPermissionsToRole(checkerOnlyRoleId, Map.of("ACTIVATE_CLIENT_CHECKER", true));
+            Long staffId = staffHelper.createStaff().getResourceId();
             String maker = Utils.uniqueRandomStringGenerator("user", 8);
-            Integer makerUserId = (Integer) UserHelper.createUser(requestSpec, responseSpec, makerRoleId, staffId, maker, password,
-                    "resourceId");
+            Long makerUserId = FeignUserHelper.createUser(makerRoleId, staffId, maker, PASSWORD).getResourceId();
             String otherMaker = Utils.uniqueRandomStringGenerator("user", 8);
-            Integer otherMakerUserId = (Integer) UserHelper.createUser(requestSpec, responseSpec, makerRoleId, staffId, otherMaker,
-                    password, "resourceId");
+            Long otherMakerUserId = FeignUserHelper.createUser(makerRoleId, staffId, otherMaker, PASSWORD).getResourceId();
             String checkerOnly = Utils.uniqueRandomStringGenerator("user", 8);
-            UserHelper.createUser(requestSpec, responseSpec, checkerOnlyRoleId, staffId, checkerOnly, password, "resourceId");
-            RequestSpecification makerSpec = userRequestSpec(maker, password);
-            ResponseSpecification forbidden = new ResponseSpecBuilder().expectStatusCode(403).build();
+            FeignUserHelper.createUser(checkerOnlyRoleId, staffId, checkerOnly, PASSWORD);
+            FeignClientHelper makerClientHelper = clientHelperFor(maker);
 
-            assertNull(activateClient(makerSpec, responseSpec, clientId, TRANSACTION_DATE_STRING, "clientId"),
+            assertNull(
+                    makerClientHelper.activateClient(clientId, ClientRequestBuilders.activateClient(TRANSACTION_DATE_STRING)).getClientId(),
                     "The first activation should be queued for approval");
 
-            assertRefusal(activateClient(makerSpec, forbidden, clientId, TRANSACTION_DATE_STRING, ""),
+            assertRefusal(
+                    makerClientHelper.activateClientExpectingError(clientId, ClientRequestBuilders.activateClient(TRANSACTION_DATE_STRING)),
                     "error.msg.maker.checker.duplicate.pending.submission");
-            assertRefusal(activateClient(userRequestSpec(otherMaker, password), forbidden, clientId, TRANSACTION_DATE_STRING, ""),
+            assertRefusal(
+                    clientHelperFor(otherMaker).activateClientExpectingError(clientId,
+                            ClientRequestBuilders.activateClient(TRANSACTION_DATE_STRING)),
                     "error.msg.maker.checker.duplicate.pending.submission");
 
-            assertNull(activateClient(makerSpec, responseSpec, clientId, "06 June 2023", "clientId"),
+            assertNull(makerClientHelper.activateClient(clientId, ClientRequestBuilders.activateClient("06 June 2023")).getClientId(),
                     "An activation with a different payload should be queued too");
 
-            assertRefusal(activateClient(userRequestSpec(checkerOnly, password), forbidden, clientId, "07 June 2023", ""),
-                    "error.msg.maker.checker.checker.only.cannot.initiate");
+            assertRefusal(clientHelperFor(checkerOnly).activateClientExpectingError(clientId,
+                    ClientRequestBuilders.activateClient("07 June 2023")), "error.msg.maker.checker.checker.only.cannot.initiate");
 
-            makercheckersHelper
-                    .getMakerCheckerList(Map.of("actionName", "ACTIVATE", "entityName", "CLIENT", "makerId", makerUserId.toString()))
-                    .forEach(entry -> pendingIds.add(((Double) entry.get("id")).longValue()));
+            retrieveCommands(Map.of("actionName", "ACTIVATE", "entityName", "CLIENT", "makerId", makerUserId.toString()))
+                    .forEach(entry -> pendingIds.add(entry.getId()));
             assertEquals(2, pendingIds.size(), "Only the two distinct activations should be pending");
             assertEquals(0,
-                    makercheckersHelper
-                            .getMakerCheckerList(
-                                    Map.of("actionName", "ACTIVATE", "entityName", "CLIENT", "makerId", otherMakerUserId.toString()))
+                    retrieveCommands(Map.of("actionName", "ACTIVATE", "entityName", "CLIENT", "makerId", otherMakerUserId.toString()))
                             .size());
         } finally {
-            pendingIds.forEach(id -> MakercheckersHelper.rejectMakerCheckerEntry(FineractClientHelper.getFineractClient(), id));
+            pendingIds.forEach(id -> ok(() -> fineractClient().makerCheckerOr4EyeFunctionality().approveMakerCheckerEntry(id, "reject")));
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
                     new PutGlobalConfigurationsRequest().enabled(false));
-            rolesHelper.updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false));
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false));
         }
     }
 
@@ -433,70 +392,70 @@ public class MakercheckerTest {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
                 new PutGlobalConfigurationsRequest().enabled(true));
         try {
-            Integer clientId = Utils.performServerPost(requestSpec, responseSpec, CLIENTS_URL + "?" + Utils.TENANT_IDENTIFIER,
-                    ClientHelper.getTestClientAsJSONPending(START_DATE_STRING, "1"), "clientId");
-            rolesHelper.updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", true));
+            Long clientId = clientHelper.createClientPending(START_DATE_STRING).getClientId();
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", true));
 
-            Integer makerRoleId = RolesHelper.createRole(requestSpec, responseSpec);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, makerRoleId, Map.of("ACTIVATE_CLIENT", true));
-            Integer checkerOnlyRoleId = RolesHelper.createRole(requestSpec, responseSpec);
-            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, checkerOnlyRoleId, Map.of("ACTIVATE_CLIENT_CHECKER", true));
-            Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
-            String password = "A1b2c3d4e5f$";
+            Long makerRoleId = FeignRoleHelper.createRole();
+            FeignRoleHelper.addPermissionsToRole(makerRoleId, Map.of("ACTIVATE_CLIENT", true));
+            Long checkerOnlyRoleId = FeignRoleHelper.createRole();
+            FeignRoleHelper.addPermissionsToRole(checkerOnlyRoleId, Map.of("ACTIVATE_CLIENT_CHECKER", true));
+            Long staffId = staffHelper.createStaff().getResourceId();
             String maker = Utils.uniqueRandomStringGenerator("user", 8);
-            Integer makerUserId = (Integer) UserHelper.createUser(requestSpec, responseSpec, makerRoleId, staffId, maker, password,
-                    "resourceId");
+            Long makerUserId = FeignUserHelper.createUser(makerRoleId, staffId, maker, PASSWORD).getResourceId();
             String checkerOnly = Utils.uniqueRandomStringGenerator("user", 8);
-            UserHelper.createUser(requestSpec, responseSpec, checkerOnlyRoleId, staffId, checkerOnly, password, "resourceId");
-            RequestSpecification checkerOnlySpec = userRequestSpec(checkerOnly, password);
-            ResponseSpecification forbidden = new ResponseSpecBuilder().expectStatusCode(403).build();
+            FeignUserHelper.createUser(checkerOnlyRoleId, staffId, checkerOnly, PASSWORD);
+            FeignClientHelper checkerOnlyClientHelper = clientHelperFor(checkerOnly);
 
-            assertNull(activateClient(userRequestSpec(maker, password), responseSpec, clientId, TRANSACTION_DATE_STRING, "clientId"),
-                    "The maker's activation should be queued for approval");
+            assertNull(clientHelperFor(maker).activateClient(clientId, ClientRequestBuilders.activateClient(TRANSACTION_DATE_STRING))
+                    .getClientId(), "The maker's activation should be queued for approval");
 
-            activateClient(checkerOnlySpec, forbidden, clientId, "06 June 2023", "");
+            assertEquals(403, checkerOnlyClientHelper
+                    .activateClientExpectingError(clientId, ClientRequestBuilders.activateClient("06 June 2023")).getStatus());
 
-            assertEquals(clientId, activateClient(checkerOnlySpec, responseSpec, clientId, TRANSACTION_DATE_STRING, "clientId"));
-            assertEquals(Boolean.TRUE, Utils.performServerGet(requestSpec, responseSpec,
-                    CLIENTS_URL + "/" + clientId + "?" + Utils.TENANT_IDENTIFIER, "active"));
+            assertEquals(clientId, checkerOnlyClientHelper
+                    .activateClient(clientId, ClientRequestBuilders.activateClient(TRANSACTION_DATE_STRING)).getClientId());
+            assertEquals(Boolean.TRUE, clientHelper.getClient(clientId).getActive());
             assertEquals(0,
-                    makercheckersHelper.getMakerCheckerList(
-                            Map.of("actionName", "ACTIVATE", "entityName", "CLIENT", "makerId", makerUserId.toString())).size(),
+                    retrieveCommands(Map.of("actionName", "ACTIVATE", "entityName", "CLIENT", "makerId", makerUserId.toString())).size(),
                     "The pending activation should have been approved");
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
                     new PutGlobalConfigurationsRequest().enabled(false));
-            rolesHelper.updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false));
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false));
         }
     }
 
-    private static <T> T activateClient(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer clientId,
-            String activationDate, String jsonAttributeToGetBack) {
-        String body = "{\"activationDate\":\"" + activationDate + "\",\"dateFormat\":\"dd MMMM yyyy\",\"locale\":\"en\"}";
-        return Utils.performServerPost(requestSpec, responseSpec,
-                CLIENTS_URL + "/" + clientId + "?command=activate&" + Utils.TENANT_IDENTIFIER, body, jsonAttributeToGetBack);
+    private static FeignClientHelper clientHelperFor(String username) {
+        return new FeignClientHelper(FineractFeignClientHelper.createNewFineractFeignClient(username, PASSWORD));
     }
 
-    private RequestSpecification userRequestSpec(String username, String password) {
-        return new RequestSpecBuilder().setContentType(ContentType.JSON).build().header("Authorization",
-                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, password));
+    private static void assertRefusal(CallFailedRuntimeException exception, String expectedCode) {
+        assertEquals(403, exception.getStatus());
+        assertTrue(exception.getResponseBody().contains(expectedCode), exception.getResponseBody());
     }
 
-    private void assertRefusal(Map<?, ?> response, String expectedCode) {
-        assertEquals("403", response.get("httpStatusCode"));
-        List<?> errors = (List<?>) response.get("errors");
-        assertEquals(expectedCode, ((Map<?, ?>) errors.get(0)).get("userMessageGlobalisationCode"));
+    private List<AuditData> retrieveCommands(Map<String, Object> queryParams) {
+        return ok(() -> fineractClient().makerCheckerOr4EyeFunctionality().retrieveCommandsUniversal(queryParams));
     }
 
-    private Integer createSavingsProductDailyPosting() {
-        final String savingsProductJSON = this.savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private static CommandProcessingResult approve(FineractFeignClient client, Long commandId) {
+        return client.makerCheckerOr4EyeFunctionality().approveMakerCheckerEntry(commandId, "approve");
     }
 
-    private Integer createApproveActivateSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
-        final Integer savingsProductID = createSavingsProductDailyPosting();
+    private void updatePermissions(PutPermissionsRequest request) {
+        ok(() -> fineractClient().permissions().updatePermissions(request));
+    }
+
+    private Long createSavingsProductDailyPosting() {
+        return savingsProductHelper
+                .createSavingsProduct(SavingsRequestBuilders.savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY,
+                        SavingsTestData.InterestPostingPeriodType.DAILY, SavingsTestData.InterestCalculationType.DAILY_BALANCE))
+                .getResourceId();
+    }
+
+    private Long createApproveActivateSavingsAccountDailyPosting(final Long clientID, final String startDate) {
+        final Long savingsProductID = createSavingsProductDailyPosting();
         assertNotNull(savingsProductID);
-        return savingsAccountHelper.createApproveActivateSavingsAccount(clientID, savingsProductID, startDate);
+        return savingsHelper.createApproveActivateSavings(clientID, savingsProductID, startDate);
     }
 }

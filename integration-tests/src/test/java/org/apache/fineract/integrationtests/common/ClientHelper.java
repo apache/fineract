@@ -88,13 +88,6 @@ public class ClientHelper {
         return Calls.ok(FineractClientHelper.getFineractClient().clients.createClient(request));
     }
 
-    public static PostClientsResponse addClientAsPerson(final String officeId, final Long legalFormId, final String externalId) {
-        PostClientsRequest request = new PostClientsRequest().officeId(officeId != null ? Long.parseLong(officeId) : 1L)
-                .legalFormId(legalFormId).firstname(Utils.randomFirstNameGenerator()).lastname(Utils.randomLastNameGenerator())
-                .externalId(externalId).dateFormat(Utils.DATE_FORMAT).locale("en").active(true).activationDate(DEFAULT_DATE);
-        return createClient(request);
-    }
-
     public static GetClientsClientIdAccountsResponse getClientAccounts(final String externalId) {
         return Calls.ok(FineractClientHelper.getFineractClient().clients.retrieveAllClientAccountsByExternalId(externalId));
     }
@@ -141,84 +134,6 @@ public class ClientHelper {
         final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
                 getTestClientAsJSON(activationDate, officeId));
         return GSON.fromJson(response, PostClientsResponse.class);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Object createClientPendingWithError(final String jsonAttributeToGetBack) {
-        log.info("---------------------------------CREATING A CLIENT IN PENDING WITH ERROR---------------------------------------------");
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_CLIENT_URL,
-                getTestClientAsJSONPending("04 March 2014", "1"), jsonAttributeToGetBack);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createClientPendingWithDatatable(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String registeredTableName) {
-        log.info("-------------------------- CREATING A CLIENT IN PENDING WITH DATATABLES --------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
-                getTestPendingClientWithDatatableAsJson(registeredTableName), "clientId");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return createClientAsPerson(requestSpec, responseSpec, DEFAULT_DATE);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String activationDate) {
-        return createClientAsPerson(requestSpec, responseSpec, activationDate, "1");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String activationDate, final String officeId) {
-
-        log.info(
-                "---------------------------------CREATING A CLIENT NON PERSON(ORGANISATION)---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(activationDate, officeId),
-                "clientId");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static PostClientsResponse createClientAsPersonWithDatatable(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String activationDate, final String officeId,
-            final HashMap<String, Object> datatables) {
-        log.info("---------------------------------CREATING A CLIENT PERSON WITH DATATABLE---------------------------------------------");
-        final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
-                getTestPersonClientAsJSON(activationDate, officeId, datatables), null);
-        return GSON.fromJson(response, PostClientsResponse.class);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createClientForAccountPreference(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer clientType, String jsonAttributeToGetBack) {
-        final String activationDate = DEFAULT_DATE;
-        final String officeId = "1";
-        log.info(
-                "---------------------------------CREATING A CLIENT BASED ON ACCOUNT PREFERENCE---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
-                getTestClientWithClientTypeAsJSON(activationDate, officeId, clientType.toString()), jsonAttributeToGetBack);
     }
 
     // TODO: Rewrite to use fineract-client instead!

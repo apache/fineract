@@ -108,7 +108,7 @@ public class SmsCampaignApiResource {
             Mandatory Fields for Cash based on selected report id
             paramValue in json format""")
     @AlternativeOperationId("createCampaign_1")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CommandWrapper.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SmsCampaignCreationDto.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public CommandProcessingResult createCampaign(@Parameter(hidden = true) final SmsCampaignCreationDto smsCampaignCreationDto) {
         platformSecurityContext.authenticatedUser();
@@ -154,7 +154,7 @@ public class SmsCampaignApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Campaign", operationId = "updateSmsCampaign")
     @AlternativeOperationId("updateCampaign_1")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CommandWrapper.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SmsCampaignUpdateDto.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public CommandProcessingResult updateCampaign(@PathParam("campaignId") final Long campaignId,
             @Parameter(hidden = true) final SmsCampaignUpdateDto smsCampaignUpdateDto) {
@@ -169,6 +169,7 @@ public class SmsCampaignApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "SMS Campaign", operationId = "handleCommandsSmsCampaign", description = "Activates | Deactivates | Reactivates")
     @AlternativeOperationId("handleCommands")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SmsCampaignHandlerDto.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public CommandProcessingResult handleCommands(@PathParam("campaignId") final Long campaignId,
             @QueryParam("command") final String commandParam, @Parameter(hidden = true) SmsCampaignHandlerDto campaignHandlerDto) {

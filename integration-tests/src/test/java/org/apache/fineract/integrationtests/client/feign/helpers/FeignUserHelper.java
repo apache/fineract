@@ -18,17 +18,23 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.DeleteUsersUserIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.GetUsersResponse;
 import org.apache.fineract.client.models.PostRolesRequest;
 import org.apache.fineract.client.models.PostRolesResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.client.models.PutRolesRoleIdPermissionsRequest;
+import org.apache.fineract.client.models.PutUsersUserIdRequest;
+import org.apache.fineract.client.models.PutUsersUserIdResponse;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -64,9 +70,58 @@ public final class FeignUserHelper {
      * the generated user id.
      */
     public static PostUsersResponse createUser(Long roleId, Long staffId, String username, String password) {
-        return createUser(new PostUsersRequest().username(username).firstname("Test").lastname("User").email("whatever@mifos.org")
-                .officeId(OfficeHelper.getHeadOffice().getId()).staffId(staffId).roles(List.of(roleId)).password(password)
-                .repeatPassword(password).sendPasswordToEmail(false));
+        return createUser(userRequest(roleId, staffId, username).password(password).repeatPassword(password));
+    }
+
+    public static PostUsersResponse createUser(Long roleId, Long staffId, String username) {
+        return createUser(userRequest(roleId, staffId, username));
+    }
+
+    public static CallFailedRuntimeException createUserExpectingError(Long roleId, Long staffId, String username) {
+        FineractFeignClient adminClient = FineractFeignClientHelper.getFineractFeignClient();
+        return fail(() -> adminClient.users().createUser(userRequest(roleId, staffId, username)));
+    }
+
+    public static CallFailedRuntimeException createUserExpectingError(PostUsersRequest request) {
+        FineractFeignClient adminClient = FineractFeignClientHelper.getFineractFeignClient();
+        return fail(() -> adminClient.users().createUser(request));
+    }
+
+    public static PutUsersUserIdResponse updateUsername(Long userId, String username) {
+        FineractFeignClient adminClient = FineractFeignClientHelper.getFineractFeignClient();
+        return ok(() -> adminClient.users().updateUser(userId, usernameUpdate(username)));
+    }
+
+    public static CallFailedRuntimeException updateUsernameExpectingError(Long userId, String username) {
+        FineractFeignClient adminClient = FineractFeignClientHelper.getFineractFeignClient();
+        return fail(() -> adminClient.users().updateUser(userId, usernameUpdate(username)));
+    }
+
+    public static DeleteUsersUserIdResponse deleteUser(Long userId) {
+        FineractFeignClient adminClient = FineractFeignClientHelper.getFineractFeignClient();
+        return ok(() -> adminClient.users().deleteUser(userId));
+    }
+
+    public static Long getUserIdByUsername(String username) {
+        FineractFeignClient adminClient = FineractFeignClientHelper.getFineractFeignClient();
+        return ok(() -> adminClient.users().retrieveAllUsers()).stream().filter(user -> username.equals(user.getUsername()))
+                .map(GetUsersResponse::getId).findFirst().orElse(null);
+    }
+
+    public static PostUsersRequest buildUserRequest(String password) {
+        return new PostUsersRequest().username(Utils.uniqueRandomStringGenerator("TestUser", 4)).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email("testuser@example.com").password(password).repeatPassword(password)
+                .sendPasswordToEmail(false).officeId(OfficeHelper.getHeadOffice().getId()).roles(List.of(FeignRoleHelper.createRole()));
+    }
+
+    private static PostUsersRequest userRequest(Long roleId, Long staffId, String username) {
+        return new PostUsersRequest().username(username).firstname("Test").lastname("User").email("whatever@mifos.org")
+                .officeId(OfficeHelper.getHeadOffice().getId()).staffId(staffId).roles(List.of(roleId)).sendPasswordToEmail(false);
+    }
+
+    private static PutUsersUserIdRequest usernameUpdate(String username) {
+        return new PutUsersUserIdRequest().username(username).firstname("Test").lastname("User").email("whatever@mifos.org")
+                .officeId(OfficeHelper.getHeadOffice().getId());
     }
 
     /**
