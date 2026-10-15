@@ -104,6 +104,8 @@ public class ErrorResponse {
     public static class ErrorDetail {
 
         private String developerMessage;
+        private String userMessageGlobalisationCode;
+        private String parameterName;
         private List<ErrorMessageArg> args;
 
         public String getDeveloperMessageWithoutPrefix() {

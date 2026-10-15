@@ -40,7 +40,12 @@ import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetail
 import org.apache.fineract.portfolio.util.Memo;
 
 @ToString(exclude = { "previous" })
-@EqualsAndHashCode(exclude = { "previous" })
+// The hash code of the previous period is a memo dependency, so it must change only with the state of the period.
+// The Money getters turn a null field into a new zero instance on every call, and Money hashes by identity, so the
+// fields are read directly.
+// The memos and the currency are created lazily on first use, so they are left out as well.
+@EqualsAndHashCode(exclude = { "previous", "rateFactorPlus1Calculation", "calculatedDueInterestCalculation", "dueInterestCalculation",
+        "outstandingBalanceCalculation", "currency" }, doNotUseGetters = true)
 public class RepaymentPeriod {
 
     @JsonExclude
