@@ -154,7 +154,7 @@ public interface ConfigurationDomainService {
 
     boolean isForceWithdrawalOnSavingsAccountEnabled();
 
-    Long retrieveForceWithdrawalOnSavingsAccountLimit();
+    Long getForceWithdrawalOnSavingsAccountLimit();
 
     Integer getPasswordReuseRestrictionCount();
 
