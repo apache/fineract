@@ -3966,6 +3966,59 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertThat(exception.getStatus()).as("HTTP status").isEqualTo(expectedStatus);
     }
 
+    @Then("Creating a working capital loan with {string} {string} without delinquency bucket on {string} will result with error {string}")
+    public void createLoanWithDelinquencyFieldWithoutBucketFailure(final String fieldName, final String fieldValue,
+            final String submittedOnDate, final String errorMessage) {
+        final Long clientId = extractClientId();
+        final PostWorkingCapitalLoanProductsResponse productResponse = ok(() -> fineractClient.workingCapitalLoanProducts()
+                .createWorkingCapitalLoanProduct(workingCapitalProductRequestFactory.defaultWorkingCapitalLoanProductRequest() //
+                        .name("WCLP-NO-BUCKET-" + Utils.randomStringGenerator("", 8)) //
+                        .delinquencyBucketId(null), Map.of()));
+        assert productResponse.getResourceId() != null;
+        final PostWorkingCapitalLoansRequest request = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansRequest(clientId)
+                .productId(productResponse.getResourceId()) //
+                .submittedOnDate(submittedOnDate) //
+                .expectedDisbursementDate(submittedOnDate);
+        if ("delinquencyGraceDays".equals(fieldName)) {
+            request.delinquencyGraceDays(Integer.valueOf(fieldValue));
+        } else if ("delinquencyStartType".equals(fieldName)) {
+            request.delinquencyStartType(fieldValue);
+        } else {
+            throw new IllegalArgumentException("Unsupported delinquency field: " + fieldName);
+        }
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(request));
+        assertThat(exception.getStatus()).as("HTTP status").isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
+    @Then("Creating a working capital loan with {string} {string} without breach on {string} will result with error {string}")
+    public void createLoanWithBreachFieldWithoutBreachFailure(final String fieldName, final String fieldValue, final String submittedOnDate,
+            final String errorMessage) {
+        final Long clientId = extractClientId();
+        final PostWorkingCapitalLoanProductsResponse productResponse = ok(
+                () -> fineractClient.workingCapitalLoanProducts().createWorkingCapitalLoanProduct(
+                        workingCapitalProductRequestFactory.defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                                .name("WCLP-NO-BREACH-" + Utils.randomStringGenerator("", 8)),
+                        Map.of()));
+        assert productResponse.getResourceId() != null;
+        final PostWorkingCapitalLoansRequest request = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansRequest(clientId)
+                .productId(productResponse.getResourceId()) //
+                .submittedOnDate(submittedOnDate) //
+                .expectedDisbursementDate(submittedOnDate);
+        if ("breachGraceDays".equals(fieldName)) {
+            request.breachGraceDays(Integer.valueOf(fieldValue));
+        } else if ("breachStartType".equals(fieldName)) {
+            request.breachStartType(fieldValue);
+        } else {
+            throw new IllegalArgumentException("Unsupported breach field: " + fieldName);
+        }
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(request));
+        assertThat(exception.getStatus()).as("HTTP status").isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
     @Then("Creating a working capital loan with invalid delinquencyStartType {string} will result with status code {int}")
     public void createLoanWithInvalidStartType(String startType, int expectedStatus) {
         final Long clientId = extractClientId();
