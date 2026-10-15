@@ -67,7 +67,7 @@ Feature: Working Capital Loan Details
       | repaymentFrequencyType.value                   | present                      |
       | delinquencyGraceDays                           | null                         |
       | delinquencyStartType.code                      | null                         |
-      | breachGraceDays                                | 0                            |
+      | breachGraceDays                                | null                         |
       | delinquencyBucket                              | present                      |
       | delinquencyBucket.id                           | present                      |
       | delinquencyBucket.name                         | present                      |

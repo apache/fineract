@@ -154,6 +154,19 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         checkWorkingCapitalLoanProductCreate();
     }
 
+    @When("Admin creates a new Working Capital Loan Product without delinquency bucket")
+    public void createWorkingCapitalLoanProductWithoutDelinquencyBucket() {
+        final String workingCapitalProductDefaultName = DefaultWorkingCapitalLoanProduct.WCLP.getName()
+                + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+        final PostWorkingCapitalLoanProductsRequest createRequest = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest() //
+                .name(workingCapitalProductDefaultName) //
+                .delinquencyBucketId(null);
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(createRequest);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, createRequest);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
     @When("Admin creates a new Working Capital Loan Product with Annual EIR strategy, annualEir {string} and discount {string}")
     public void createWorkingCapitalLoanProductWithAnnualEirStrategy(final String annualEir, final String discount) {
         final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
@@ -912,17 +925,21 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final PostWorkingCapitalLoanProductsRequest workingCapitalProductForUpdateRequest = testContext()
                 .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST);
         String workingCapitalProductName = workingCapitalProductForUpdateRequest.getName();
-        final PutWorkingCapitalLoanProductsProductIdRequest defaultWorkingCapitalLoanProductUpdateRequest = workingCapitalRequestFactory
-                .defaultWorkingCapitalLoanProductRequestUpdate() //
-                .name(workingCapitalProductName); //
-
         PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = testContext()
                 .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
         Long resourceId = workingCapitalLoanProductsResponse.getResourceId();
-        final PutWorkingCapitalLoanProductsProductIdRequest workingCapitalLoanProductUpdateRequestUpdated = setWorkingCapitalLoanProductsUpdateRequest(
-                defaultWorkingCapitalLoanProductUpdateRequest, fieldName, value);
-        checkUpdateWorkingCapitalLoanProductWithInvalidDataFailure(resourceId, workingCapitalLoanProductUpdateRequestUpdated, 400,
-                errorMessage);
+
+        final PutWorkingCapitalLoanProductsProductIdRequest updateRequest;
+        if (DELINQUENCY_GRACE_DAYS_FIELD_NAME.equals(fieldName) || DELINQUENCY_START_TYPE_FIELD_NAME.equals(fieldName)
+                || BREACH_GRACE_DAYS_FIELD_NAME.equals(fieldName) || BREACH_START_TYPE_FIELD_NAME.equals(fieldName)) {
+            updateRequest = setWorkingCapitalLoanProductsUpdateRequest(
+                    new PutWorkingCapitalLoanProductsProductIdRequest().locale(LoanProductsRequestFactory.LOCALE_EN), fieldName, value);
+        } else {
+            updateRequest = setWorkingCapitalLoanProductsUpdateRequest(
+                    workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequestUpdate().name(workingCapitalProductName), fieldName,
+                    value);
+        }
+        checkUpdateWorkingCapitalLoanProductWithInvalidDataFailure(resourceId, updateRequest, 400, errorMessage);
     }
 
     @Then("Admin failed to update a new Working Capital Loan Product with breach with field {string} invalid data {string} and got an error {string}")
@@ -1841,6 +1858,13 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
         final PostWorkingCapitalLoanProductsRequest workingCapitalLoanProductCreateRequestUpdated = setWorkingCapitalLoanProductsCreateFieldValue(
                 defaultWorkingCapitalLoanProductCreateRequest, fieldName, value);
+        // Only the "without parent" scenarios should drop the factory default bucket/breach.
+        if (errorMessage != null && errorMessage.contains("without.delinquency.bucket")) {
+            workingCapitalLoanProductCreateRequestUpdated.setDelinquencyBucketId(null);
+        }
+        if (errorMessage != null && errorMessage.contains("without.breach")) {
+            workingCapitalLoanProductCreateRequestUpdated.setBreachId(null);
+        }
         checkCreateWorkingCapitalLoanProductWithInvalidDataFailure(workingCapitalLoanProductCreateRequestUpdated, 400, errorMessage);
     }
 
@@ -1877,7 +1901,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         Long valueLong = null;
         if (fieldName.equalsIgnoreCase(DIGITS_AFTER_DECIMAL_FIELD_NAME) || fieldName.equalsIgnoreCase(IN_MULTIPLES_OF_FIELD_NAME)
                 || fieldName.equalsIgnoreCase(NPV_DAY_COUNT_FIELD_NAME) || fieldName.equalsIgnoreCase(REPAYMENT_EVERY_FIELD_NAME)
-                || fieldName.equalsIgnoreCase(DELINQUENCY_GRACE_DAYS_FIELD_NAME)) {
+                || fieldName.equalsIgnoreCase(DELINQUENCY_GRACE_DAYS_FIELD_NAME)
+                || fieldName.equalsIgnoreCase(BREACH_GRACE_DAYS_FIELD_NAME)) {
             valueInteger = fieldValue != null ? Integer.valueOf(fieldValue) : null;
         }
         if (fieldName.equalsIgnoreCase(PRINCIPAL_FIELD_NAME) || fieldName.equalsIgnoreCase(MIN_PRINCIPAL_FIELD_NAME)
@@ -1962,6 +1987,12 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
             case BREACH_ID_FIELD_NAME:
                 defaultWorkingCapitalLoanProductCreateRequest.setBreachId(valueLong);
             break;
+            case BREACH_GRACE_DAYS_FIELD_NAME:
+                defaultWorkingCapitalLoanProductCreateRequest.setBreachGraceDays(valueInteger);
+            break;
+            case BREACH_START_TYPE_FIELD_NAME:
+                defaultWorkingCapitalLoanProductCreateRequest.setBreachStartType(fieldValue);
+            break;
             case NEAR_BREACH_ID_FIELD_NAME:
                 defaultWorkingCapitalLoanProductCreateRequest.setNearBreachId(valueLong);
             break;
@@ -2003,7 +2034,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         Long valueLong = null;
         if (fieldName.equalsIgnoreCase(DIGITS_AFTER_DECIMAL_FIELD_NAME) || fieldName.equalsIgnoreCase(IN_MULTIPLES_OF_FIELD_NAME)
                 || fieldName.equalsIgnoreCase(NPV_DAY_COUNT_FIELD_NAME) || fieldName.equalsIgnoreCase(REPAYMENT_EVERY_FIELD_NAME)
-                || fieldName.equalsIgnoreCase(DELINQUENCY_GRACE_DAYS_FIELD_NAME)) {
+                || fieldName.equalsIgnoreCase(DELINQUENCY_GRACE_DAYS_FIELD_NAME)
+                || fieldName.equalsIgnoreCase(BREACH_GRACE_DAYS_FIELD_NAME)) {
             valueInteger = fieldValue != null ? Integer.valueOf(fieldValue) : null;
         }
         if (fieldName.equalsIgnoreCase(PRINCIPAL_FIELD_NAME) || fieldName.equalsIgnoreCase(MIN_PRINCIPAL_FIELD_NAME)
@@ -2088,6 +2120,12 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
             case BREACH_ID_FIELD_NAME:
                 defaultWorkingCapitalLoanProductUpdateRequest.setBreachId(valueLong);
             break;
+            case BREACH_GRACE_DAYS_FIELD_NAME:
+                defaultWorkingCapitalLoanProductUpdateRequest.setBreachGraceDays(valueInteger);
+            break;
+            case BREACH_START_TYPE_FIELD_NAME:
+                defaultWorkingCapitalLoanProductUpdateRequest.setBreachStartType(fieldValue);
+            break;
             case NEAR_BREACH_ID_FIELD_NAME:
                 defaultWorkingCapitalLoanProductUpdateRequest.setNearBreachId(valueLong);
             break;
@@ -2135,10 +2173,12 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest() //
                 .name(name) //
                 .delinquencyGraceDays(graceDays) //
-                .delinquencyStartType(startType);
+                .delinquencyStartType(startType) //
+                .allowAttributeOverrides(new PostAllowAttributeOverrides().delinquencyBucketClassification(true));
         final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_FOR_LOAN_TEST, response.getResourceId());
     }
 
     @Then("Working Capital Loan Product has delinquencyGraceDays {int} and delinquencyStartType {string}")

@@ -71,10 +71,12 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.repository.WorkingCapitalLoanProductRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.serialization.WorkingCapitalAmountScaleValidator;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.serialization.WorkingCapitalDependentSettingsValidator;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.serialization.WorkingCapitalPaymentAllocationDataValidator;
 import org.springframework.stereotype.Component;
 
@@ -281,49 +283,8 @@ public class WorkingCapitalLoanApplicationDataValidator {
             this.paymentAllocationDataValidator.validate(element, baseDataValidator);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, element)) {
-            final Integer delinquencyGraceDays = this.fromApiJsonHelper
-                    .extractIntegerWithLocaleNamed(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, element);
-            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName)
-                    .value(delinquencyGraceDays).ignoreIfNull().integerZeroOrGreater();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, element)) {
-            final Integer breachGraceDays = this.fromApiJsonHelper
-                    .extractIntegerWithLocaleNamed(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, element);
-            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachGraceDaysParamName).value(breachGraceDays)
-                    .ignoreIfNull().integerZeroOrGreater();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element)) {
-            final String delinquencyStartTypeValue = this.fromApiJsonHelper
-                    .extractStringNamed(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element);
-            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName)
-                    .value(delinquencyStartTypeValue).ignoreIfNull().notBlank();
-            if (delinquencyStartTypeValue != null && !delinquencyStartTypeValue.isBlank()) {
-                final WorkingCapitalLoanDelinquencyStartType delinquencyStartType = WorkingCapitalLoanDelinquencyStartType
-                        .fromString(delinquencyStartTypeValue);
-                if (delinquencyStartType == null) {
-                    baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName)
-                            .failWithCode("invalid.delinquency.start.type");
-                }
-            }
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element)) {
-            final String breachStartTypeValue = this.fromApiJsonHelper
-                    .extractStringNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element);
-            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachStartTypeParamName).value(breachStartTypeValue)
-                    .ignoreIfNull().notBlank();
-            if (breachStartTypeValue != null && !breachStartTypeValue.isBlank()) {
-                final WorkingCapitalLoanBreachStartType breachStartType = WorkingCapitalLoanBreachStartType
-                        .fromString(breachStartTypeValue);
-                if (breachStartType == null) {
-                    baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachStartTypeParamName)
-                            .failWithCode("invalid.breach.start.type");
-                }
-            }
-        }
+        validateDelinquencyGraceAndStartTypeFields(element, baseDataValidator, resolveEffectiveDelinquencyBucketId(element, product, null));
+        validateBreachGraceAndStartTypeFields(element, baseDataValidator, resolveEffectiveBreachId(element, product, null));
 
         // Submitted-on date rules (product range, client activation, not future, not after expected disbursement)
         validateSubmittedOnDate(element, product, client, expectedDisbursementDate, null);
@@ -811,52 +772,16 @@ public class WorkingCapitalLoanApplicationDataValidator {
                     product.getNearBreach());
         }
 
-        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, element)
+                || this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final Integer delinquencyGraceDays = this.fromApiJsonHelper
-                    .extractIntegerWithLocaleNamed(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, element);
-            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName)
-                    .value(delinquencyGraceDays).ignoreIfNull().integerZeroOrGreater();
+            validateDelinquencyGraceAndStartTypeFields(element, baseDataValidator,
+                    resolveEffectiveDelinquencyBucketId(element, product, existingLoan));
         }
-
-        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, element)
+                || this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final Integer breachGraceDays = this.fromApiJsonHelper
-                    .extractIntegerWithLocaleNamed(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, element);
-            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachGraceDaysParamName).value(breachGraceDays)
-                    .ignoreIfNull().integerZeroOrGreater();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element)) {
-            final String delinquencyStartTypeValue = this.fromApiJsonHelper
-                    .extractStringNamed(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element);
-            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName)
-                    .value(delinquencyStartTypeValue).ignoreIfNull().notBlank();
-            if (delinquencyStartTypeValue != null && !delinquencyStartTypeValue.isBlank()) {
-                atLeastOneParameterPassedForUpdate = true;
-                final WorkingCapitalLoanDelinquencyStartType delinquencyStartType = WorkingCapitalLoanDelinquencyStartType
-                        .fromString(delinquencyStartTypeValue);
-                if (delinquencyStartType == null) {
-                    baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName)
-                            .failWithCode("invalid.delinquency.start.type");
-                }
-            }
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element)) {
-            final String breachStartTypeValue = this.fromApiJsonHelper
-                    .extractStringNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element);
-            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachStartTypeParamName).value(breachStartTypeValue)
-                    .ignoreIfNull().notBlank();
-            if (breachStartTypeValue != null && !breachStartTypeValue.isBlank()) {
-                atLeastOneParameterPassedForUpdate = true;
-                final WorkingCapitalLoanBreachStartType breachStartType = WorkingCapitalLoanBreachStartType
-                        .fromString(breachStartTypeValue);
-                if (breachStartType == null) {
-                    baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachStartTypeParamName)
-                            .failWithCode("invalid.breach.start.type");
-                }
-            }
+            validateBreachGraceAndStartTypeFields(element, baseDataValidator, resolveEffectiveBreachId(element, product, existingLoan));
         }
 
         if (!atLeastOneParameterPassedForUpdate) {
@@ -951,6 +876,95 @@ public class WorkingCapitalLoanApplicationDataValidator {
             baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.repaymentEveryParamName)
                     .failWithCode(MUST_BE_PROVIDED_WITH_CODE_PREFIX + WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName);
         }
+    }
+
+    private void validateDelinquencyGraceAndStartTypeFields(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            final Long effectiveDelinquencyBucketId) {
+        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, element)) {
+            final Integer delinquencyGraceDays = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, element);
+            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName)
+                    .value(delinquencyGraceDays).ignoreIfNull().integerZeroOrGreater();
+            WorkingCapitalDependentSettingsValidator.rejectIfSetWithoutParent(baseDataValidator,
+                    WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName,
+                    WorkingCapitalDependentSettingsValidator.isSet(delinquencyGraceDays), effectiveDelinquencyBucketId,
+                    WorkingCapitalLoanProductConstants.cannotEnableDelinquencyGraceDaysWithoutBucket);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element)) {
+            final String delinquencyStartTypeValue = this.fromApiJsonHelper
+                    .extractStringNamed(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element);
+            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName)
+                    .value(delinquencyStartTypeValue).ignoreIfNull().notBlank();
+            if (delinquencyStartTypeValue != null) {
+                final WorkingCapitalLoanDelinquencyStartType delinquencyStartType = WorkingCapitalLoanDelinquencyStartType
+                        .fromString(delinquencyStartTypeValue);
+                if (delinquencyStartType == null) {
+                    baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName)
+                            .failWithCode("invalid.delinquency.start.type");
+                }
+                WorkingCapitalDependentSettingsValidator.rejectIfSetWithoutParent(baseDataValidator,
+                        WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName,
+                        WorkingCapitalDependentSettingsValidator.isSet(delinquencyStartTypeValue), effectiveDelinquencyBucketId,
+                        WorkingCapitalLoanProductConstants.cannotEnableDelinquencyStartTypeWithoutBucket);
+            }
+        }
+    }
+
+    private void validateBreachGraceAndStartTypeFields(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            final Long effectiveBreachId) {
+        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, element)) {
+            final Integer breachGraceDays = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, element);
+            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachGraceDaysParamName).value(breachGraceDays)
+                    .ignoreIfNull().integerZeroOrGreater();
+            WorkingCapitalDependentSettingsValidator.rejectIfSetWithoutParent(baseDataValidator,
+                    WorkingCapitalLoanProductConstants.breachGraceDaysParamName,
+                    WorkingCapitalDependentSettingsValidator.isSet(breachGraceDays), effectiveBreachId,
+                    WorkingCapitalLoanProductConstants.cannotEnableBreachGraceDaysWithoutBreach);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element)) {
+            final String breachStartTypeValue = this.fromApiJsonHelper
+                    .extractStringNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element);
+            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachStartTypeParamName).value(breachStartTypeValue)
+                    .ignoreIfNull().notBlank();
+            if (breachStartTypeValue != null) {
+                final WorkingCapitalLoanBreachStartType breachStartType = WorkingCapitalLoanBreachStartType
+                        .fromString(breachStartTypeValue);
+                if (breachStartType == null) {
+                    baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachStartTypeParamName)
+                            .failWithCode("invalid.breach.start.type");
+                }
+                WorkingCapitalDependentSettingsValidator.rejectIfSetWithoutParent(baseDataValidator,
+                        WorkingCapitalLoanProductConstants.breachStartTypeParamName,
+                        WorkingCapitalDependentSettingsValidator.isSet(breachStartTypeValue), effectiveBreachId,
+                        WorkingCapitalLoanProductConstants.cannotEnableBreachStartTypeWithoutBreach);
+            }
+        }
+    }
+
+    private Long resolveEffectiveDelinquencyBucketId(final JsonElement element, final WorkingCapitalLoanProduct product,
+            final WorkingCapitalLoan existingLoan) {
+        final WorkingCapitalLoanProductRelatedDetails loanDetails = existingLoan != null ? existingLoan.getLoanProductRelatedDetails()
+                : null;
+        final Long loanBucketId = loanDetails != null && loanDetails.getDelinquencyBucket() != null
+                ? loanDetails.getDelinquencyBucket().getId()
+                : null;
+        final Long productBucketId = product != null && product.getDelinquencyBucket() != null ? product.getDelinquencyBucket().getId()
+                : null;
+        return WorkingCapitalDependentSettingsValidator.resolveEffectiveDelinquencyBucketId(this.fromApiJsonHelper, element,
+                productBucketId, loanBucketId);
+    }
+
+    private Long resolveEffectiveBreachId(final JsonElement element, final WorkingCapitalLoanProduct product,
+            final WorkingCapitalLoan existingLoan) {
+        final WorkingCapitalLoanProductRelatedDetails loanDetails = existingLoan != null ? existingLoan.getLoanProductRelatedDetails()
+                : null;
+        final Long loanBreachId = loanDetails != null && loanDetails.getBreach() != null ? loanDetails.getBreach().getId() : null;
+        final Long productBreachId = product != null && product.getBreach() != null ? product.getBreach().getId() : null;
+        return WorkingCapitalDependentSettingsValidator.resolveEffectiveBreachId(this.fromApiJsonHelper, element, productBreachId,
+                loanBreachId);
     }
 
     private void validateOverridables(final JsonElement element, final DataValidatorBuilder baseDataValidator,

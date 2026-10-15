@@ -28,10 +28,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsTemplateResponse;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdRequest;
+import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +43,7 @@ import org.junit.jupiter.api.Test;
 public class WorkingCapitalLoanProductValidationTest {
 
     private WorkingCapitalLoanProductHelper wclProductHelper;
+    private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
 
     @BeforeEach
     public void setup() {
@@ -745,7 +749,18 @@ public class WorkingCapitalLoanProductValidationTest {
     @Test
     public void testCreateWorkingCapitalLoanProductWithNegativeBreachGraceDays() {
         // Given - breachGraceDays must be >= 0
-        final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withBreachGraceDays(-1).build();
+        final GetWorkingCapitalLoanProductsTemplateResponse template = wclProductHelper.retrieveTemplate();
+        Long breachId = template.getBreachOptions() != null && !template.getBreachOptions().isEmpty()
+                ? template.getBreachOptions().getFirst().getId()
+                : null;
+        if (breachId == null) {
+            final WorkingCapitalBreachRequest createBody = breachHelper.createBreachRequest(Utils.randomStringGenerator("Breach", 20), 20,
+                    "DAYS", "PERCENTAGE", BigDecimal.valueOf(7.5));
+            breachId = breachHelper.create(createBody);
+        }
+        assertNotNull(breachId);
+        final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withBreachId(breachId)
+                .withBreachGraceDays(-1).build();
 
         // When & Then
         final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,

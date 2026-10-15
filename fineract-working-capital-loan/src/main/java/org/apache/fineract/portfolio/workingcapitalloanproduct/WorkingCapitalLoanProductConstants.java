@@ -76,10 +76,14 @@ public final class WorkingCapitalLoanProductConstants {
     // Delinquency grace
     public static final String delinquencyGraceDaysParamName = "delinquencyGraceDays";
     public static final String delinquencyStartTypeParamName = "delinquencyStartType";
+    public static final String cannotEnableDelinquencyGraceDaysWithoutBucket = "cannot.enable.delinquency.grace.days.without.delinquency.bucket";
+    public static final String cannotEnableDelinquencyStartTypeWithoutBucket = "cannot.enable.delinquency.start.type.without.delinquency.bucket";
 
     // Breach grace
     public static final String breachGraceDaysParamName = "breachGraceDays";
     public static final String breachStartTypeParamName = "breachStartType";
+    public static final String cannotEnableBreachGraceDaysWithoutBreach = "cannot.enable.breach.grace.days.without.breach";
+    public static final String cannotEnableBreachStartTypeWithoutBreach = "cannot.enable.breach.start.type.without.breach";
 
     // Accounting
     public static final String accountingRuleParamName = "accountingRule";

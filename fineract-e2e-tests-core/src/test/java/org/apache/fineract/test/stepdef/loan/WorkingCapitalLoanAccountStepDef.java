@@ -4050,6 +4050,57 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 bucketId);
     }
 
+    @When("Admin creates a Working Capital Loan Product without delinquency bucket for loan test")
+    public void createProductWithoutDelinquencyBucketForLoanTest() {
+        final PostWorkingCapitalLoanProductsResponse response = ok(() -> fineractClient.workingCapitalLoanProducts()
+                .createWorkingCapitalLoanProduct(workingCapitalProductRequestFactory.defaultWorkingCapitalLoanProductRequest() //
+                        .name("WCLP-NO-BUCKET-" + Utils.randomStringGenerator("", 8)) //
+                        .delinquencyBucketId(null) //
+                        .allowAttributeOverrides(new PostAllowAttributeOverrides().delinquencyBucketClassification(true).breach(true)),
+                        Map.of()));
+        assertThat(response.getResourceId()).as("product resource id").isNotNull();
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_FOR_LOAN_TEST, response.getResourceId());
+    }
+
+    @When("Admin creates a Working Capital Loan Product without breach for loan test")
+    public void createProductWithoutBreachForLoanTest() {
+        final PostWorkingCapitalLoanProductsResponse response = ok(
+                () -> fineractClient.workingCapitalLoanProducts().createWorkingCapitalLoanProduct(
+                        workingCapitalProductRequestFactory.defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                                .name("WCLP-NO-BREACH-" + Utils.randomStringGenerator("", 8)),
+                        Map.of()));
+        assertThat(response.getResourceId()).as("product resource id").isNotNull();
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_FOR_LOAN_TEST, response.getResourceId());
+    }
+
+    @Then("Modifying the working capital loan with {string} {string} will result with error {string}")
+    public void modifyLoanWithFieldFailure(final String fieldName, final String fieldValue, final String errorMessage) {
+        final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final Long loanId = loanResponse.getLoanId();
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory
+                .defaultModifyWorkingCapitalLoansRequest();
+        if ("delinquencyGraceDays".equals(fieldName) || "breachGraceDays".equals(fieldName)) {
+            final Integer graceDays = Integer.valueOf(fieldValue);
+            if ("delinquencyGraceDays".equals(fieldName)) {
+                modifyRequest.delinquencyGraceDays(graceDays);
+            } else {
+                modifyRequest.breachGraceDays(graceDays);
+            }
+        } else if ("delinquencyStartType".equals(fieldName)) {
+            modifyRequest.delinquencyStartType(fieldValue);
+        } else if ("breachStartType".equals(fieldName)) {
+            modifyRequest.breachStartType(fieldValue);
+        } else {
+            throw new IllegalArgumentException("Unsupported modify field: " + fieldName);
+        }
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(loanId, modifyRequest, ""));
+        assertThat(exception.getStatus()).as("HTTP status").isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
     @When("Admin creates a working capital loan with the grace days product and the following data:")
     public void createLoanWithGraceDaysProduct(final DataTable table) {
         final Map<String, String> row = table.asMaps().getFirst();
@@ -4161,6 +4212,59 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final CallFailedRuntimeException exception = fail(
                 () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(request));
         assertThat(exception.getStatus()).as("HTTP status").isEqualTo(expectedStatus);
+    }
+
+    @Then("Creating a working capital loan with {string} {string} without delinquency bucket on {string} will result with error {string}")
+    public void createLoanWithDelinquencyFieldWithoutBucketFailure(final String fieldName, final String fieldValue,
+            final String submittedOnDate, final String errorMessage) {
+        final Long clientId = extractClientId();
+        final PostWorkingCapitalLoanProductsResponse productResponse = ok(() -> fineractClient.workingCapitalLoanProducts()
+                .createWorkingCapitalLoanProduct(workingCapitalProductRequestFactory.defaultWorkingCapitalLoanProductRequest() //
+                        .name("WCLP-NO-BUCKET-" + Utils.randomStringGenerator("", 8)) //
+                        .delinquencyBucketId(null), Map.of()));
+        assertThat(productResponse.getResourceId()).as("product resource id").isNotNull();
+        final PostWorkingCapitalLoansRequest request = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansRequest(clientId)
+                .productId(productResponse.getResourceId()) //
+                .submittedOnDate(submittedOnDate) //
+                .expectedDisbursementDate(submittedOnDate);
+        if ("delinquencyGraceDays".equals(fieldName)) {
+            request.delinquencyGraceDays(Integer.valueOf(fieldValue));
+        } else if ("delinquencyStartType".equals(fieldName)) {
+            request.delinquencyStartType(fieldValue);
+        } else {
+            throw new IllegalArgumentException("Unsupported delinquency field: " + fieldName);
+        }
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(request));
+        assertThat(exception.getStatus()).as("HTTP status").isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
+    @Then("Creating a working capital loan with {string} {string} without breach on {string} will result with error {string}")
+    public void createLoanWithBreachFieldWithoutBreachFailure(final String fieldName, final String fieldValue, final String submittedOnDate,
+            final String errorMessage) {
+        final Long clientId = extractClientId();
+        final PostWorkingCapitalLoanProductsResponse productResponse = ok(
+                () -> fineractClient.workingCapitalLoanProducts().createWorkingCapitalLoanProduct(
+                        workingCapitalProductRequestFactory.defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                                .name("WCLP-NO-BREACH-" + Utils.randomStringGenerator("", 8)),
+                        Map.of()));
+        assertThat(productResponse.getResourceId()).as("product resource id").isNotNull();
+        final PostWorkingCapitalLoansRequest request = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansRequest(clientId)
+                .productId(productResponse.getResourceId()) //
+                .submittedOnDate(submittedOnDate) //
+                .expectedDisbursementDate(submittedOnDate);
+        if ("breachGraceDays".equals(fieldName)) {
+            request.breachGraceDays(Integer.valueOf(fieldValue));
+        } else if ("breachStartType".equals(fieldName)) {
+            request.breachStartType(fieldValue);
+        } else {
+            throw new IllegalArgumentException("Unsupported breach field: " + fieldName);
+        }
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(request));
+        assertThat(exception.getStatus()).as("HTTP status").isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
     }
 
     @Then("Creating a working capital loan with invalid delinquencyStartType {string} will result with status code {int}")

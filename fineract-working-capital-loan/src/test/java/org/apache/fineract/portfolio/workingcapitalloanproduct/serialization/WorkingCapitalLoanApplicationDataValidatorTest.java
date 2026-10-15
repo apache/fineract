@@ -52,6 +52,7 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepository;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.loanaccount.domain.ExpectedDisbursementDateValidator;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
@@ -59,6 +60,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanApplicationDataValidator;
+import org.apache.fineract.portfolio.workingcapitalloanbreach.domain.WorkingCapitalBreach;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
@@ -463,6 +465,13 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
         attributes.setDelinquencyBucketClassification(delinquencyOverridable);
         attributes.setBreach(breachOverridable);
         lenient().when(product.getConfigurableAttributes()).thenReturn(attributes);
+        // Parent bucket/breach must be present so override-gate tests are not also rejected by the parent-gate.
+        final DelinquencyBucket delinquencyBucket = org.mockito.Mockito.mock(DelinquencyBucket.class);
+        lenient().when(delinquencyBucket.getId()).thenReturn(10L);
+        lenient().when(product.getDelinquencyBucket()).thenReturn(delinquencyBucket);
+        final WorkingCapitalBreach breach = org.mockito.Mockito.mock(WorkingCapitalBreach.class);
+        lenient().when(breach.getId()).thenReturn(20L);
+        lenient().when(product.getBreach()).thenReturn(breach);
         lenient().when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
     }
 
