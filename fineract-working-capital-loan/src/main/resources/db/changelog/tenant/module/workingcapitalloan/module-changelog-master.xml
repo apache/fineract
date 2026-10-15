@@ -109,4 +109,5 @@
   <include relativeToChangelogFile="true" file="parts/0085_wc_remove_unsupported_payment_allocation_rules.xml"/>
   <include relativeToChangelogFile="true" file="parts/0086_wc_payment_amount_strategy.xml"/>
   <include relativeToChangelogFile="true" file="parts/0087_wc_loan_adjust_transaction_permission.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0088_put_wc_cob_job_in_the_cob_scheduler_group.xml"/>
 </databaseChangeLog>
