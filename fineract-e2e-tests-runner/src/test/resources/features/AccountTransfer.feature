@@ -76,3 +76,32 @@ Feature: AccountTransfer
       | 01 May 2026      | Deposit          | 1000.0 | 1000.0  | false    |
       | 02 May 2026      | Deposit          | 10.0   | 0.0     | true     |
     When Undo the last account transfer it fails with error: it is already reverted
+
+  Scenario: Undo transfer between savings accounts when the transfer drained the source account
+    When Admin sets the business date to "13 May 2026"
+    And Admin creates a client with random data
+    And Admin creates a EUR savings product
+    And Client creates a "PRIMARY" new EUR savings account with "01 May 2026" submitted on date
+    And Approve "PRIMARY" EUR savings account on "01 May 2026" date
+    And Activate "PRIMARY" EUR savings account on "01 May 2026" date
+    And Client successfully deposits 4 EUR to the "PRIMARY" savings account on "01 May 2026" date
+    And Client creates a "SECONDARY" new EUR savings account with "01 May 2026" submitted on date
+    And Approve "SECONDARY" EUR savings account on "01 May 2026" date
+    And Activate "SECONDARY" EUR savings account on "01 May 2026" date
+    When Initiate account transfer from savings "PRIMARY" to savings "SECONDARY" on "2 May 2026" for 4
+    Then "PRIMARY" Savings Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Balance |
+      | 01 May 2026      | Deposit          | 4.0    | 4.0     |
+      | 02 May 2026      | Withdrawal       | 4.0    | 0.0     |
+    Then "SECONDARY" Savings Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Balance |
+      | 02 May 2026      | Deposit          | 4.0    | 4.0     |
+    When Undo the last account transfer
+    Then "PRIMARY" Savings Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Balance | Reverted |
+      | 01 May 2026      | Deposit          | 4.0    | 4.0     | false    |
+      | 02 May 2026      | Withdrawal       | 4.0    | 0.0     | true     |
+    Then "SECONDARY" Savings Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Balance | Reverted |
+      | 02 May 2026      | Deposit          | 4.0    | 0.0     | true     |
+    When Undo the last account transfer it fails with error: it is already reverted
