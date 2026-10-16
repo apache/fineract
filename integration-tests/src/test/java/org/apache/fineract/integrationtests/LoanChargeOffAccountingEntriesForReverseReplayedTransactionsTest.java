@@ -27,9 +27,9 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ public class LoanChargeOffAccountingEntriesForReverseReplayedTransactionsTest ex
     @Test
     public void testJournalEntriesForChargeOffLoanWithMultipleReverseReplay() {
         runAt("24 May 2024", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //

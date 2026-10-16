@@ -32,9 +32,10 @@ import org.apache.fineract.client.models.DelinquencyRangeRequest;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
@@ -49,6 +50,7 @@ public class WorkingCapitalLoanDelinquencyActionEffectiveEndDateTest {
 
     private static final int PERIOD_FREQUENCY_DAYS = 30;
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
 
@@ -170,7 +172,7 @@ public class WorkingCapitalLoanDelinquencyActionEffectiveEndDateTest {
     private Long createActiveLoan(final LocalDate disbursementDate) {
         final Long bucketId = createWorkingCapitalLoanDelinquencyBucket(PERIOD_FREQUENCY_DAYS);
         final Long productId = createProduct(bucketId);
-        final Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanId = submitAndApproveLoan(clientId, productId);
         WorkingCapitalLoanDelinquencyActionHelper.activateLoan(loanId, disbursementDate);
         return loanId;

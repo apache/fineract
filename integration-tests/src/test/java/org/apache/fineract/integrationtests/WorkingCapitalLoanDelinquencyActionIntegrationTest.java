@@ -41,10 +41,11 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActio
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEventHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
@@ -62,6 +63,7 @@ public class WorkingCapitalLoanDelinquencyActionIntegrationTest {
     private static final String OVERLAP_ERROR_MESSAGE = "Delinquency pause period cannot overlap with another pause period";
     private static final String WC_DELINQUENCY_PAUSE_EVENT = "WorkingCapitalLoanDelinquencyPauseBusinessEvent";
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
     private final FeignExternalEventHelper externalEventHelper = new FeignExternalEventHelper(
@@ -852,7 +854,7 @@ public class WorkingCapitalLoanDelinquencyActionIntegrationTest {
     }
 
     private Long createClient() {
-        return ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        return clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
     }
 
     private Long submitAndApproveLoan(final Long clientId, final Long productId) {

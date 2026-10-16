@@ -40,9 +40,9 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -63,7 +63,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
         runAt("10 September 2022", () -> {
             String loanExternalIdStr = UUID.randomUUID().toString();
             final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting(true);
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr, true, "02 September 2022",
                     "03 September 2022");
 
@@ -99,7 +99,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
         runAt("10 September 2022", () -> {
             String loanExternalIdStr = UUID.randomUUID().toString();
             final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting(false);
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr, false, "02 September 2022",
                     "03 September 2022");
 
@@ -135,7 +135,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
         runAt("1 September 2022", () -> {
             String loanExternalIdStr = UUID.randomUUID().toString();
             final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting(true);
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr, true, "1 September 2022", "1 September 2022");
 
             // make a repayment on 3rd od Sept
@@ -172,7 +172,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
         runAt("1 September 2022", () -> {
             String loanExternalIdStr = UUID.randomUUID().toString();
             final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting(true);
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr, true, "1 September 2022", "1 September 2022");
 
             // make a repayment on 3rd od Sept

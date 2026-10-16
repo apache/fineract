@@ -37,9 +37,10 @@ import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PutDelinquencyBucketResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
@@ -56,6 +57,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class WorkingCapitalLoanDelinquencyRangeScheduleIntegrationTest {
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
@@ -125,7 +127,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleIntegrationTest {
         assertNotNull(productId);
 
         // Create a client and submit a WC loan
-        final Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
         final Long loanId = applicationHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //
@@ -172,7 +174,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleIntegrationTest {
                     .getResourceId();
 
             // Create client and submit WC loan
-            final Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
             final Long loanId = applicationHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
                     .withClientId(clientId) //

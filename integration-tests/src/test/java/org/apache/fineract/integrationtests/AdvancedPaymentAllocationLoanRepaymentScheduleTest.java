@@ -73,13 +73,13 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessSt
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignTransactionHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInMonthType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInYearType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
@@ -119,7 +119,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
 
         commonLoanProductId = createLoanProduct("500", "15", "4", true, "25", true, LoanScheduleType.PROGRESSIVE,
                 LoanScheduleProcessingType.HORIZONTAL, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
-        client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
         // setup COB Business Steps to prevent test failing due other integration test configurations
         new FeignBusinessStepHelper(FineractFeignClientHelper.getFineractFeignClient()).updateSteps("LOAN_CLOSE_OF_BUSINESS",
                 "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION", "CHECK_LOAN_REPAYMENT_DUE",
@@ -3132,7 +3132,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
     @Test
     public void uc122() {
         runAt("24 November 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .numberOfRepayments(3).repaymentEvery(15).enableDownPayment(true)
                     .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25)).enableAutoRepaymentForDownPayment(false);
@@ -3208,7 +3208,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
     @Test
     public void uc123() {
         runAt("22 November 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .numberOfRepayments(3).repaymentEvery(15).enableDownPayment(true)
                     .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25)).enableAutoRepaymentForDownPayment(false);
@@ -3288,7 +3288,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
     @Test
     public void uc124() {
         runAt("06 March 2024", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .numberOfRepayments(1).repaymentEvery(30).enableDownPayment(false);
             PostLoanProductsResponse loanProductResponse = loanHelper.createLoanProduct(product);
@@ -3538,7 +3538,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
     public void uc126() {
         runAt("22 November 2023", () -> {
             final Integer fixedLength = 40; // 40 days
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .numberOfRepayments(3).repaymentEvery(15).fixedLength(fixedLength);
             PostLoanProductsResponse loanProductResponse = loanHelper.createLoanProduct(product);
@@ -3584,7 +3584,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
             final Integer fixedLength = 5; // 5 weeks
             final Integer repaymentFrequencyType = 1; // week
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .numberOfRepayments(3).repaymentEvery(2).repaymentFrequencyType(repaymentFrequencyType.longValue())
                     .fixedLength(fixedLength);
@@ -3633,7 +3633,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
             final Integer fixedLength = 11; // 11 months
             final Integer repaymentFrequencyType = 2; // month
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .numberOfRepayments(6).repaymentEvery(2).repaymentFrequencyType(repaymentFrequencyType.longValue())
                     .fixedLength(fixedLength);
@@ -3824,7 +3824,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
             final Integer repaymentFrequencyType = RepaymentFrequencyType.DAYS;
             final Integer numberOfRepayments = 3;
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .numberOfRepayments(numberOfRepayments).repaymentEvery(15).repaymentFrequencyType(repaymentFrequencyType.longValue())
@@ -3873,7 +3873,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
             final Integer repaymentFrequencyType = RepaymentFrequencyType.DAYS;
             final Integer numberOfRepayments = 4;
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .numberOfRepayments(numberOfRepayments).repaymentEvery(30).fixedLength(fixedLength);
             PostLoanProductsResponse loanProductResponse = loanHelper.createLoanProduct(product);
@@ -3946,7 +3946,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
             final Integer repaymentFrequencyType = RepaymentFrequencyType.DAYS;
             final Integer numberOfRepayments = 4;
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .numberOfRepayments(numberOfRepayments).repaymentEvery(30).fixedLength(fixedLength);
             PostLoanProductsResponse loanProductResponse = loanHelper.createLoanProduct(product);
@@ -4235,7 +4235,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
             double amount = 1000.0;
             String loanDisbursementDate = "1 January 2023";
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
             PostLoanProductsResponse loanProductResponse = loanHelper
@@ -4365,7 +4365,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
     public void uc141() {
         final String operationDate = "1 January 2024";
         runAt(operationDate, () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(5.0).interestCalculationPeriodType(DAYS).interestRateFrequencyType(YEARS)
                     .daysInMonthType(DaysInMonthType.DAYS_30).daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(5)//
@@ -4427,7 +4427,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
     public void uc142() {
         final String operationDate = "1 January 2024";
         runAt(operationDate, () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(12.3).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).interestRateFrequencyType(YEARS)
                     .daysInMonthType(DaysInMonthType.DAYS_30).daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(5)//
@@ -4490,7 +4490,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
     public void uc143() {
         final String operationDate = "1 January 2024";
         runAt(operationDate, () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(12.3).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).interestRateFrequencyType(YEARS)
                     .daysInMonthType(DaysInMonthType.DAYS_30).daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(5)//
@@ -4553,7 +4553,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         final String operationDate = "1 January 2024";
         AtomicLong createdLoanId = new AtomicLong();
         runAt(operationDate, () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(12.3).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).interestRateFrequencyType(YEARS)
                     .daysInMonthType(DaysInMonthType.ACTUAL).daysInYearType(DaysInYearType.DAYS_365).numberOfRepayments(4)//
@@ -4645,7 +4645,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         final String operationDate = "1 January 2024";
         AtomicLong createdLoanId = new AtomicLong();
         runAt(operationDate, () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(108.0).interestCalculationPeriodType(RepaymentFrequencyType.DAYS)
                     .interestRateFrequencyType(YEARS).daysInMonthType(DaysInMonthType.ACTUAL).daysInYearType(DaysInYearType.DAYS_360)
@@ -4820,7 +4820,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
     public void uc146() {
         AtomicLong createdLoanId = new AtomicLong();
         runAt("1 January 2024", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final ArrayList<String> interestRefundTypes = new ArrayList<String>();
             interestRefundTypes.add("PAYOUT_REFUND");
             interestRefundTypes.add("MERCHANT_ISSUED_REFUND");
@@ -4883,7 +4883,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         runAt(operationDate, () -> {
             BigDecimal interestRatePerPeriod = BigDecimal.valueOf(9.4822);
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestCalculationPeriodType(RepaymentFrequencyType.DAYS)
                     .interestRateFrequencyType(YEARS).daysInMonthType(DaysInMonthType.DAYS_30).daysInYearType(DaysInYearType.DAYS_360)
@@ -4964,7 +4964,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         runAt(operationDate, () -> {
             BigDecimal interestRatePerPeriod = BigDecimal.valueOf(9.4822);
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestCalculationPeriodType(RepaymentFrequencyType.DAYS)
                     .interestRateFrequencyType(YEARS).daysInMonthType(DaysInMonthType.DAYS_30).daysInYearType(DaysInYearType.DAYS_360)
@@ -5058,7 +5058,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         runAt(operationDate, () -> {
             BigDecimal interestRatePerPeriod = BigDecimal.valueOf(9.4822);
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()//
                     .interestRatePerPeriod(interestRatePerPeriod.doubleValue())//
                     .interestCalculationPeriodType(RepaymentFrequencyType.DAYS)//
@@ -5176,7 +5176,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         runAt(operationDate, () -> {
             BigDecimal interestRatePerPeriod = BigDecimal.valueOf(7.0);
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestRateFrequencyType(YEARS)//
                     .daysInMonthType(DaysInMonthType.DAYS_30)//
@@ -5781,7 +5781,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         final String operationDate = "23 December 2024";
         AtomicLong createdLoanId = new AtomicLong();
         runAt(operationDate, () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(4.0).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).interestRateFrequencyType(YEARS)
                     .daysInMonthType(DaysInMonthType.ACTUAL).daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(3)//
@@ -5840,7 +5840,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         final String operationDate = "1 January 2024";
         AtomicLong createdLoanId = new AtomicLong();
         runAt(operationDate, () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(12.0).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).numberOfRepayments(4)//
                     .repaymentEvery(1)//
@@ -5904,7 +5904,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
             final ArrayList<String> interestRefundTypes = new ArrayList<String>();
             interestRefundTypes.add("PAYOUT_REFUND");
             interestRefundTypes.add("MERCHANT_ISSUED_REFUND");
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestRateFrequencyType(YEARS)//
                     .daysInMonthType(DaysInMonthType.DAYS_30)//
@@ -6047,7 +6047,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                 final ArrayList<String> interestRefundTypes = new ArrayList<String>();
                 interestRefundTypes.add("PAYOUT_REFUND");
                 interestRefundTypes.add("MERCHANT_ISSUED_REFUND");
-                Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+                Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
                 PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                         .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestRateFrequencyType(YEARS)//
                         .daysInMonthType(DaysInMonthType.DAYS_30)//
@@ -6132,7 +6132,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
     @Test
     public void uc158() {
         AtomicLong loanIdRef = new AtomicLong();
-        Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final BigDecimal principalAmount = BigDecimal.valueOf(2000.0);
 
         runAt("1 January 2024", () -> {

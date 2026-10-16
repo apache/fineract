@@ -34,12 +34,12 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInMonthType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInYearType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.SupportedInterestRefundTypesItem;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +55,7 @@ public class LoanManualInterestRefundResponseStructureTest extends FeignLoanTest
 
     @BeforeAll
     public static void beforeAll() {
-        client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
     }
 
     @Test
