@@ -31,6 +31,8 @@ import static org.apache.fineract.portfolio.loanproduct.domain.InterestMethod.FL
 import static org.apache.fineract.portfolio.loanproduct.domain.LoanPreCloseInterestCalculationStrategy.NONE;
 import static org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType.DISBURSEMENT_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -38,13 +40,16 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
+import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -122,5 +127,28 @@ class LoanApplicationTermsTest {
                 null, null, ZERO, null, NONE, null, ZERO, emptyList(), true, 0, false, holidayDetailDTO, false, false, false, null, false,
                 false, null, false, DISBURSEMENT_DATE, disbursementDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, null, false,
                 null, null, null, false, null, false, null, null, null, false, null, null, null, false, false, null);
+    }
+
+    @Test
+    void assembleFromModelDataKeepsDaysInYearCustomStrategy() {
+        final LoanApplicationTerms terms = LoanApplicationTerms.assembleFrom(modelData(DaysInYearCustomStrategyType.FEB_29_PERIOD_ONLY),
+                MC);
+
+        assertEquals(DaysInYearCustomStrategyType.FEB_29_PERIOD_ONLY, terms.toLoanConfigurationDetails().getDaysInYearCustomStrategy());
+    }
+
+    @Test
+    void assembleFromModelDataKeepsMissingDaysInYearCustomStrategy() {
+        final LoanApplicationTerms terms = LoanApplicationTerms.assembleFrom(modelData(null), MC);
+
+        assertNull(terms.toLoanConfigurationDetails().getDaysInYearCustomStrategy());
+    }
+
+    private static LoanRepaymentScheduleModelData modelData(final DaysInYearCustomStrategyType daysInYearCustomStrategy) {
+        final CurrencyData currency = new CurrencyData("USD", "US Dollar", 2, null, "USD", "$");
+        final LocalDate startDate = LocalDate.of(2024, 1, 1);
+        return new LoanRepaymentScheduleModelData(startDate, currency, BigDecimal.valueOf(100), startDate, 6, 1, "MONTHS",
+                BigDecimal.valueOf(7), false, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, BigDecimal.ZERO, null, null, false,
+                daysInYearCustomStrategy, InterestMethod.DECLINING_BALANCE, true, false, null, null, null);
     }
 }

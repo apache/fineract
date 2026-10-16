@@ -298,12 +298,7 @@ public class LoanProductRelatedDetailUpdateUtil {
             loanRepaymentScheduleDetail.setDaysInYearType(newValue);
         }
 
-        if (command.parameterExists(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME)) {
-            final DaysInYearCustomStrategyType newValue = DaysInYearCustomStrategyType
-                    .valueOf(command.stringValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME));
-            actualChanges.put(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, newValue.name());
-            loanRepaymentScheduleDetail.setDaysInYearCustomStrategy(newValue);
-        }
+        updateDaysInYearCustomStrategy(loanRepaymentScheduleDetail, command, actualChanges);
 
         if (command.parameterExists(LoanProductConstants.MONTH_END_DUE_DATE_STRATEGY_PARAMETER_NAME)) {
             final MonthEndDueDateStrategy newValue = command.enumValueOfParameterNamed(
@@ -411,6 +406,19 @@ public class LoanProductRelatedDetailUpdateUtil {
         }
 
         return actualChanges;
+    }
+
+    public void updateDaysInYearCustomStrategy(final LoanProductRelatedDetail loanRepaymentScheduleDetail, final JsonCommand command,
+            final Map<String, Object> actualChanges) {
+        if (command.parameterExists(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME)) {
+            final DaysInYearCustomStrategyType newValue = command.enumValueOfParameterNamed(
+                    LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, DaysInYearCustomStrategyType.class);
+            if (!Objects.equals(newValue, loanRepaymentScheduleDetail.getDaysInYearCustomStrategy())) {
+                actualChanges.put(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME,
+                        newValue != null ? newValue.name() : null);
+                loanRepaymentScheduleDetail.setDaysInYearCustomStrategy(newValue);
+            }
+        }
     }
 
     public void updateInterestRateDerivedFields(final LoanProductRelatedDetail loanRepaymentScheduleDetail,

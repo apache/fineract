@@ -55,6 +55,8 @@ import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationIncomeType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
@@ -432,6 +434,9 @@ public final class LoanProductDataValidator {
                 element, Locale.getDefault());
         baseDataValidator.reset().parameter(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME).value(daysInYearType).notNull()
                 .isOneOfTheseValues(1, 360, 364, 365);
+
+        // The combination is checked on the saved product by LoanProduct#validateLoanProductPreSave
+        validateDaysInYearCustomStrategy(element, false, null, null, baseDataValidator);
 
         final Integer daysInMonthType = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME,
                 element, Locale.getDefault());
@@ -1376,6 +1381,46 @@ public final class LoanProductDataValidator {
         }
     }
 
+    /**
+     * Validates the daysInYearCustomStrategy value and, when {@code validateCombination} is set, that a strategy passed
+     * in the payload is only used with a progressive schedule and ACTUAL days in year. The days in year type is taken
+     * from the payload when present, otherwise from {@code currentDaysInYearType}. A {@code null} strategy is always
+     * valid, and a strategy that is not passed is not checked: the loan drops an inherited strategy when its days in
+     * year type is not ACTUAL.
+     */
+    public void validateDaysInYearCustomStrategy(final JsonElement element, final boolean validateCombination,
+            final LoanScheduleType currentLoanScheduleType, final Integer currentDaysInYearType,
+            final DataValidatorBuilder baseDataValidator) {
+        if (!this.fromApiJsonHelper.parameterExists(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, element)) {
+            return;
+        }
+        final String daysInYearCustomStrategy = this.fromApiJsonHelper
+                .extractStringNamed(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME)
+                .value(daysInYearCustomStrategy).ignoreIfNull().isOneOfEnumValues(DaysInYearCustomStrategyType.class);
+
+        if (!validateCombination || daysInYearCustomStrategy == null) {
+            return;
+        }
+
+        if (!LoanScheduleType.PROGRESSIVE.equals(currentLoanScheduleType)) {
+            baseDataValidator.reset().parameter(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME).failWithCode(
+                    "days.in.year.custom.strategy.is.only.supported.for.progressive.loan.schedule.type",
+                    "daysInYearCustomStrategy is only supported for progressive loan schedule type");
+        }
+
+        Integer daysInYearType = currentDaysInYearType;
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME, element)) {
+            daysInYearType = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME, element,
+                    Locale.getDefault());
+        }
+        if (!DaysInYearType.ACTUAL.getValue().equals(daysInYearType)) {
+            baseDataValidator.reset().parameter(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME).failWithCode(
+                    "days.in.year.custom.strategy.is.only.applicable.for.actual.days.in.year.type",
+                    "daysInYearCustomStrategy is only applicable for ACTUAL days in year type");
+        }
+    }
+
     public void validateForUpdate(final JsonCommand command, final LoanProduct loanProduct) {
         String json = command.json();
         if (StringUtils.isBlank(json)) {
@@ -1572,6 +1617,9 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME).value(daysInYearType).notNull()
                     .isOneOfTheseValues(1, 360, 364, 365);
         }
+
+        // The combination is checked on the saved product by LoanProduct#validateLoanProductPreSave
+        validateDaysInYearCustomStrategy(element, false, null, null, baseDataValidator);
 
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME, element)) {
             final Integer daysInMonthType = this.fromApiJsonHelper
