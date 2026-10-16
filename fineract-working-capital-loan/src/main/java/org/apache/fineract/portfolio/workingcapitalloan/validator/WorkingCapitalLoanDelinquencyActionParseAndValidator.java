@@ -194,8 +194,11 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
             // start date is mandatory if it is missing, validator already should fail properly.
             return;
         }
+        // An undone reset that started a new period still bounds the schedule (the undo leaves the cut in place), so it
+        // blocks an earlier pause just like an active reset does.
         existing.stream()
-                .filter(existingAction -> existingAction.getAction().equals(DelinquencyAction.RESET) && existingAction.getEndDate() == null
+                .filter(existingAction -> existingAction.getAction().equals(DelinquencyAction.RESET)
+                        && (existingAction.getEndDate() == null || Boolean.TRUE.equals(existingAction.getStartNewPeriod()))
                         && existingAction.getStartDate().isAfter(action.getStartDate()))
                 .findAny().ifPresent(existingAction -> failParameterValidation(dataValidator, START_DATE, "reset.exists.after.pause",
                         "Delinquency pause cannot start before the latest delinquency reset date: " + existingAction.getStartDate()));

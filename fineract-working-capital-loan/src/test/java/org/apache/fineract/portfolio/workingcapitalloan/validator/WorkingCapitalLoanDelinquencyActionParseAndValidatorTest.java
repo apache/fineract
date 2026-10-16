@@ -90,6 +90,11 @@ class WorkingCapitalLoanDelinquencyActionParseAndValidatorTest {
         return action;
     }
 
+    private static WorkingCapitalLoanDelinquencyAction startNewPeriod(final WorkingCapitalLoanDelinquencyAction reset) {
+        reset.setStartNewPeriod(true);
+        return reset;
+    }
+
     private static WorkingCapitalLoanDelinquencyAction resume(final LocalDate startDate) {
         final WorkingCapitalLoanDelinquencyAction action = new WorkingCapitalLoanDelinquencyAction();
         action.setAction(DelinquencyAction.RESUME);
@@ -145,7 +150,15 @@ class WorkingCapitalLoanDelinquencyActionParseAndValidatorTest {
                             "validation.msg.workingCapitalLoanDelinquencyAction.startDate.reset.exists.after.pause"),
                     Arguments.of("existing undone reset after action start date has no validation error",
                             pause(LocalDate.of(2026, 9, 15), LocalDate.of(2026, 9, 20)), List.of(undoneReset(LocalDate.of(2026, 9, 17))),
-                            null));
+                            null),
+                    // the undo leaves the cut of a reset that started a new period in place, so it still bounds a pause
+                    Arguments.of("existing undone reset with start new period after action start date has validation error",
+                            pause(LocalDate.of(2026, 9, 15), LocalDate.of(2026, 9, 20)),
+                            List.of(startNewPeriod(undoneReset(LocalDate.of(2026, 9, 17)))),
+                            "validation.msg.workingCapitalLoanDelinquencyAction.startDate.reset.exists.after.pause"),
+                    Arguments.of("existing undone reset with start new period before action has no validation error",
+                            pause(LocalDate.of(2026, 9, 15), LocalDate.of(2026, 9, 20)),
+                            List.of(startNewPeriod(undoneReset(LocalDate.of(2026, 9, 10)))), null));
         }
     }
 }
