@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.test.stepdef.loan;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
@@ -35,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.services.WorkingCapitalLoansApi;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
@@ -83,6 +85,18 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
         final ProjectedAmortizationScheduleData response = api.retrieveAmortizationSchedule(loanId);
         log.info("Retrieved amortization schedule for loan {}: netDisbursementAmount={}", loanId, response.getNetDisbursementAmount());
         TestContext.INSTANCE.set(WC_AMORT_SCHEDULE_KEY, response);
+    }
+
+    @Then("Working Capital loan has no projected amortization schedule")
+    public void amortizationScheduleDoesNotExist() {
+        final Long loanId = extractLoanId();
+        final WorkingCapitalLoansApi api = fineractFeignClient.create(WorkingCapitalLoansApi.class);
+
+        final CallFailedRuntimeException exception = fail(() -> api.retrieveAmortizationSchedule(loanId));
+
+        assertThat(exception.getStatus()).as("Amortization schedule of loan %d should not exist", loanId).isEqualTo(404);
+        assertThat(exception.getMessage()).contains("error.msg.wc.loan.amortization.schedule.not.found");
+        log.info("Verified that loan {} has no projected amortization schedule", loanId);
     }
 
     @Then("Admin remembers the retrieved amortization schedule as {string}")

@@ -128,6 +128,13 @@ public class WorkingCapitalNearBreachActionStepDef extends AbstractStepDef {
         }
     }
 
+    @Then("Working Capital loan has no near breach actions")
+    public void verifyNoNearBreachActions() {
+        final Long loanId = extractLoanId();
+        assertThat(retrieveNearBreachActionHistory(loanId)).as("Near breach actions of loan %d", loanId).isEmpty();
+        log.info("Verified that loan {} has no near breach actions", loanId);
+    }
+
     @Then("Latest near breach action was submitted on the current tenant date")
     public void latestNearBreachActionSubmittedOnTenantDate() {
         final Long loanId = extractLoanId();

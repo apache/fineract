@@ -52,6 +52,13 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
 
     void generateAndSaveAmortizationScheduleOnApproval(WorkingCapitalLoan loan);
 
+    /**
+     * Drops the approval-time projection when the approval is undone. A submitted loan carries no projection
+     * (submission and modification never write one), so the loan is left exactly as a never approved one rather than
+     * with a projection nobody keeps in sync with later modifications.
+     */
+    void deleteAmortizationScheduleOnUndoApproval(WorkingCapitalLoan loan);
+
     void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
 
     void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
