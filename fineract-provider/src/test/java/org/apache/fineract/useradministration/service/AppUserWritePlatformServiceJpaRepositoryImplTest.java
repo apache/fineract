@@ -181,6 +181,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
 
         assertThrows(PasswordPreviouslyUsedException.class, () -> underTest.changeUserPassword(USER_ID, command));
 
+        verify(appUserPreviewPasswordRepository, never()).findByUserId(any(), any(PageRequest.class));
         verify(appUserRepository, never()).saveAndFlush(user);
         verify(appUserPreviewPasswordRepository, never()).save(any(AppUserPreviousPassword.class));
     }
