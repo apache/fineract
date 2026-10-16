@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -60,6 +61,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCap
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductMinMaxConstraints;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
@@ -406,6 +408,69 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
         stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, BigDecimal.valueOf(47.22), null, null);
         assertCreateCodes(paymentAmountJsonObject(new BigDecimal("0.01")),
                 WCL + "paymentAmount.unable.to.build.schedule.from.payment.amount");
+    }
+
+    @Test
+    void graceDaysAndStartTypes_WhenOverridesAreForbidden_ShouldRejectEachOne() {
+        stubOverrides(false, false);
+        assertCreateCodes(withGraceDaysAndStartTypes(createBaseJsonObject()), //
+                WCL + "delinquencyGraceDays.override.not.allowed.by.product", //
+                WCL + "delinquencyStartType.override.not.allowed.by.product", //
+                WCL + "breachGraceDays.override.not.allowed.by.product", //
+                WCL + "breachStartType.override.not.allowed.by.product");
+    }
+
+    @Test
+    void graceDaysAndStartTypes_WhenOverridesAreAllowed_ShouldPass() {
+        stubOverrides(true, true);
+        assertDoesNotThrow(() -> validator.validateForCreate(jsonCommand(withGraceDaysAndStartTypes(createBaseJsonObject()).toString())));
+    }
+
+    /** Each switch gates only its own pair: the delinquency switch does not open the breach fields. */
+    @Test
+    void graceDaysAndStartTypes_WhenOnlyDelinquencyOverrideIsAllowed_ShouldRejectOnlyTheBreachOnes() {
+        stubOverrides(true, false);
+        assertCreateCodes(withGraceDaysAndStartTypes(createBaseJsonObject()), //
+                WCL + "breachGraceDays.override.not.allowed.by.product", //
+                WCL + "breachStartType.override.not.allowed.by.product");
+    }
+
+    /** Presence is what is gated, so an explicit null is rejected as well. */
+    @Test
+    void graceDaysAndStartTypes_WhenOverridesAreForbidden_ShouldRejectExplicitNulls() {
+        stubOverrides(false, false);
+        final JsonObject json = createBaseJsonObject();
+        json.add(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, JsonNull.INSTANCE);
+        json.add(WorkingCapitalLoanProductConstants.breachStartTypeParamName, JsonNull.INSTANCE);
+        assertCreateCodes(json, //
+                WCL + "delinquencyGraceDays.override.not.allowed.by.product", //
+                WCL + "breachStartType.override.not.allowed.by.product");
+    }
+
+    /** A modification carrying only a gated field must still reach the override check. */
+    @Test
+    void graceDaysAndStartTypesUpdate_WhenOverridesAreForbidden_ShouldRejectALoneGatedField() {
+        stubOverrides(false, false);
+        final JsonObject json = updateJsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, 3);
+        assertUpdateCodes(json, WCL + "breachGraceDays.override.not.allowed.by.product");
+    }
+
+    private void stubOverrides(final boolean delinquencyOverridable, final boolean breachOverridable) {
+        final WorkingCapitalLoanProduct product = createMockProduct();
+        final WorkingCapitalLoanProductConfigurableAttributes attributes = new WorkingCapitalLoanProductConfigurableAttributes();
+        attributes.setDelinquencyBucketClassification(delinquencyOverridable);
+        attributes.setBreach(breachOverridable);
+        lenient().when(product.getConfigurableAttributes()).thenReturn(attributes);
+        lenient().when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+    }
+
+    private JsonObject withGraceDaysAndStartTypes(final JsonObject json) {
+        json.addProperty(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, 5);
+        json.addProperty(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, "DISBURSEMENT");
+        json.addProperty(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, 3);
+        json.addProperty(WorkingCapitalLoanProductConstants.breachStartTypeParamName, "LOAN_CREATION");
+        return json;
     }
 
     private static final String WCL = "validation.msg." + WorkingCapitalLoanConstants.WCL_RESOURCE_NAME + ".";

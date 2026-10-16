@@ -3923,7 +3923,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final PostWorkingCapitalLoanProductsRequest request = workingCapitalProductRequestFactory.defaultWorkingCapitalLoanProductRequest() //
                 .name(name) //
                 .delinquencyGraceDays(graceDays) //
-                .delinquencyStartType(startType);
+                .delinquencyStartType(startType) //
+                .allowAttributeOverrides(new PostAllowAttributeOverrides().delinquencyBucketClassification(true));
         if (bucketId != null) {
             request.delinquencyBucketId(bucketId);
         }
