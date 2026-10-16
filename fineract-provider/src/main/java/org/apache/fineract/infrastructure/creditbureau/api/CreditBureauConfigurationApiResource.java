@@ -19,6 +19,11 @@
 
 package org.apache.fineract.infrastructure.creditbureau.api;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -104,6 +109,7 @@ public class CreditBureauConfigurationApiResource {
     @GET
     @Path("/organisationCreditBureau")
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = OrganisationCreditBureauData.class))))
     public String getOrganisationCreditBureau(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -118,6 +124,7 @@ public class CreditBureauConfigurationApiResource {
     @GET
     @Path("/config/{organisationCreditBureauId}")
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CreditBureauConfigurationData.class))))
     public String getConfiguration(@PathParam("organisationCreditBureauId") final Long organisationCreditBureauId,
             @Context final UriInfo uriInfo) {
 
@@ -161,6 +168,8 @@ public class CreditBureauConfigurationApiResource {
     @Path("/organisationCreditBureau")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CreditBureauConfigurationApiResourceSwagger.PutOrganisationCreditBureauRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public String updateCreditBureau(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCreditBureau().withJson(apiRequestBodyAsJson).build();
@@ -188,6 +197,8 @@ public class CreditBureauConfigurationApiResource {
     @Path("/organisationCreditBureau/{organisationCreditBureauId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CreditBureauConfigurationApiResourceSwagger.PostOrganisationCreditBureauRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public String addOrganisationCreditBureau(@PathParam("organisationCreditBureauId") final Long organisationCreditBureauId,
             final String apiRequestBodyAsJson) {
 
@@ -203,6 +214,8 @@ public class CreditBureauConfigurationApiResource {
     @Path("/mappings/{organisationCreditBureauId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CreditBureauConfigurationApiResourceSwagger.PostCreditBureauLoanProductMappingRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public String createCreditBureauLoanProductMapping(@PathParam("organisationCreditBureauId") final Long organisationCreditBureauId,
             final String apiRequestBodyAsJson) {
 
@@ -218,6 +231,8 @@ public class CreditBureauConfigurationApiResource {
     @Path("/configuration/{creditBureauId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CreditBureauConfigurationApiResourceSwagger.PostCreditBureauConfigurationRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public String createCreditBureauConfiguration(@PathParam("creditBureauId") final Long creditBureauId,
             final String apiRequestBodyAsJson) {
 
@@ -233,6 +248,8 @@ public class CreditBureauConfigurationApiResource {
     @Path("/configuration/{configurationId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CreditBureauConfigurationApiResourceSwagger.PutCreditBureauConfigurationRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public String updateCreditBureauConfiguration(@PathParam("configurationId") final Long configurationId,
             final String apiRequestBodyAsJson) {
 

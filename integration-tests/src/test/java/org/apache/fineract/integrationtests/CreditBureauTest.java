@@ -25,9 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatterBuilder;
@@ -35,11 +32,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
-import org.apache.fineract.integrationtests.common.CreditBureauConfigurationHelper;
-import org.apache.fineract.integrationtests.common.CreditBureauIntegrationHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.CreditBureauConfigurationData;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCreditBureauHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +44,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CreditBureauTest {
+public class CreditBureauTest extends FeignIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(CreditBureauTest.class);
 
@@ -59,56 +56,55 @@ public class CreditBureauTest {
     @RegisterExtension
     static WireMockExtension wm = WireMockExtension.newInstance().options(wireMockConfig().port(3558)).build();
 
+    private FeignCreditBureauHelper creditBureauHelper;
+
     @BeforeEach
     public void setup() {
-        Utils.initializeRESTAssured();
+        creditBureauHelper = new FeignCreditBureauHelper(fineractClient());
         configureCreditBureauService(creditBureauHost);
     }
 
     private void configureCreditBureauService(String creditBureauHost) {
         String creditBureauUrl = "http://" + creditBureauHost + ":3558";
-        String organisations = CreditBureauConfigurationHelper.getOrganisationCreditBureauConfiguration();
 
-        if (new Gson().fromJson(organisations, List.class).isEmpty()) {
-            CreditBureauConfigurationHelper.addOrganisationCreditBureau(1L, "SAMPLE_ALIAS", true);
+        if (creditBureauHelper.retrieveOrganisationCreditBureaus().isEmpty()) {
+            creditBureauHelper.addOrganisationCreditBureau(1L, "SAMPLE_ALIAS", true);
         } else {
-            CreditBureauConfigurationHelper.updateOrganisationCreditBureau("1", true);
+            creditBureauHelper.updateOrganisationCreditBureau(1L, true);
         }
-        String configJson = CreditBureauConfigurationHelper.getCreditBureauConfiguration(1L);
-        List<Map<String, Object>> configurations = new Gson().fromJson(configJson, new TypeToken<List<Map<String, Object>>>() {}.getType());
+        List<CreditBureauConfigurationData> configurations = creditBureauHelper.retrieveConfigurations(1L);
         Assertions.assertNotNull(configurations);
         Map<String, Long> currentConfiguration = configurations.stream()
-                .collect(Collectors.toMap(k -> String.valueOf(k.get("configurationKey")).toUpperCase(Locale.ROOT),
-                        v -> ((Number) v.get("creditBureauConfigurationId")).longValue()));
-        final String usernameResponse = CreditBureauConfigurationHelper
-                .updateCreditBureauConfiguration(currentConfiguration.get("USERNAME"), "USERNAME", "testUser");
+                .collect(Collectors.toMap(k -> k.getConfigurationKey().toUpperCase(Locale.ROOT), v -> v.getCreditBureauConfigurationId()));
+        final CommandProcessingResult usernameResponse = creditBureauHelper.updateConfiguration(currentConfiguration.get("USERNAME"),
+                "USERNAME", "testUser");
         Assertions.assertNotNull(usernameResponse);
-        final String passwordResponse = CreditBureauConfigurationHelper
-                .updateCreditBureauConfiguration(currentConfiguration.get("PASSWORD"), "PASSWORD", "testPassword");
+        final CommandProcessingResult passwordResponse = creditBureauHelper.updateConfiguration(currentConfiguration.get("PASSWORD"),
+                "PASSWORD", "testPassword");
         Assertions.assertNotNull(passwordResponse);
-        final String creditReportUrlResponse = CreditBureauConfigurationHelper.updateCreditBureauConfiguration(
-                currentConfiguration.get("CREDITREPORTURL"), "CREDITREPORTURL", creditBureauUrl + "/report/");
+        final CommandProcessingResult creditReportUrlResponse = creditBureauHelper
+                .updateConfiguration(currentConfiguration.get("CREDITREPORTURL"), "CREDITREPORTURL", creditBureauUrl + "/report/");
         Assertions.assertNotNull(creditReportUrlResponse);
-        final String searchUrlResponse = CreditBureauConfigurationHelper
-                .updateCreditBureauConfiguration(currentConfiguration.get("SEARCHURL"), "SEARCHURL", creditBureauUrl + "/search/");
+        final CommandProcessingResult searchUrlResponse = creditBureauHelper.updateConfiguration(currentConfiguration.get("SEARCHURL"),
+                "SEARCHURL", creditBureauUrl + "/search/");
         Assertions.assertNotNull(searchUrlResponse);
-        final String tokenUrlResponse = CreditBureauConfigurationHelper
-                .updateCreditBureauConfiguration(currentConfiguration.get("TOKENURL"), "TOKENURL", creditBureauUrl + "/token/");
+        final CommandProcessingResult tokenUrlResponse = creditBureauHelper.updateConfiguration(currentConfiguration.get("TOKENURL"),
+                "TOKENURL", creditBureauUrl + "/token/");
         Assertions.assertNotNull(tokenUrlResponse);
-        final String subscriptionIdResponse = CreditBureauConfigurationHelper
-                .updateCreditBureauConfiguration(currentConfiguration.get("SUBSCRIPTIONID"), "SUBSCRIPTIONID", "subscriptionID123");
+        final CommandProcessingResult subscriptionIdResponse = creditBureauHelper
+                .updateConfiguration(currentConfiguration.get("SUBSCRIPTIONID"), "SUBSCRIPTIONID", "subscriptionID123");
         Assertions.assertNotNull(subscriptionIdResponse);
-        final String subscriptionKeyResponse = CreditBureauConfigurationHelper
-                .updateCreditBureauConfiguration(currentConfiguration.get("SUBSCRIPTIONKEY"), "SUBSCRIPTIONKEY", "subscriptionKey456");
+        final CommandProcessingResult subscriptionKeyResponse = creditBureauHelper
+                .updateConfiguration(currentConfiguration.get("SUBSCRIPTIONKEY"), "SUBSCRIPTIONKEY", "subscriptionKey456");
         Assertions.assertNotNull(subscriptionKeyResponse);
-        final String addCreditReportUrlResponse = CreditBureauConfigurationHelper.updateCreditBureauConfiguration(
-                currentConfiguration.get("ADDCREDITREPORTURL"), "addCreditReporturl", creditBureauUrl + "/upload/");
+        final CommandProcessingResult addCreditReportUrlResponse = creditBureauHelper
+                .updateConfiguration(currentConfiguration.get("ADDCREDITREPORTURL"), "addCreditReporturl", creditBureauUrl + "/upload/");
         Assertions.assertNotNull(addCreditReportUrlResponse);
     }
 
-    private String getCreditReport(String creditBureauId, String nrc) {
+    private Map<String, Object> getCreditReport(String creditBureauId, String nrc) {
         try {
-            return CreditBureauIntegrationHelper.getCreditReport(creditBureauId, nrc);
+            return creditBureauHelper.fetchCreditReport(creditBureauId, nrc).getCreditBureauReportData();
         } catch (CallFailedRuntimeException e) {
             if (!LOCAL_EXTERNAL_HOST.equals(creditBureauHost) || !isConnectionFailure(e)) {
                 throw e;
@@ -116,7 +112,7 @@ public class CreditBureauTest {
 
             creditBureauHost = DOCKER_EXTERNAL_HOST;
             configureCreditBureauService(creditBureauHost);
-            return CreditBureauIntegrationHelper.getCreditReport(creditBureauId, nrc);
+            return creditBureauHelper.fetchCreditReport(creditBureauId, nrc).getCreditBureauReportData();
         }
     }
 
@@ -142,24 +138,22 @@ public class CreditBureauTest {
                         + "\"Gender\":\"male\"," + "\"Address\":\"Test Address\"" + "}," + "\"CreditScore\": {\"Score\":  \"500\"},"
                         + "\"ActiveLoans\": [\"Loan1\", \"Loan2\"]," + "\"WriteOffLoans\": [\"Loan3\", \"Loan4\"]" + "}}", 200)));
 
-        String serviceResult = getCreditReport("1", "NRC213");
-        Assertions.assertNotNull(serviceResult);
-        Gson gson = new Gson();
-        CreditBureauReportData responseData = gson.fromJson(
-                gson.toJson(JsonParser.parseString(serviceResult).getAsJsonObject().get("creditBureauReportData")),
-                CreditBureauReportData.class);
-        Assertions.assertEquals("\"Test Name\"", responseData.getName());
-        Assertions.assertEquals("{\"Score\":\"500\"}", responseData.getCreditScore());
+        Map<String, Object> responseData = getCreditReport("1", "NRC213");
+        Assertions.assertNotNull(responseData);
+        Assertions.assertEquals("\"Test Name\"", responseData.get("name"));
+        Assertions.assertEquals("{\"Score\":\"500\"}", responseData.get("creditScore"));
 
-        Assertions.assertEquals("\"male\"", responseData.getGender());
-        Assertions.assertEquals("\"Test Address\"", responseData.getAddress());
+        Assertions.assertEquals("\"male\"", responseData.get("gender"));
+        Assertions.assertEquals("\"Test Address\"", responseData.get("address"));
 
-        Assertions.assertEquals(2, responseData.getClosedAccounts().length);
-        Assertions.assertEquals(2, responseData.getOpenAccounts().length);
-        Assertions.assertEquals("\"Loan3\"", responseData.getClosedAccounts()[0]);
-        Assertions.assertEquals("\"Loan4\"", responseData.getClosedAccounts()[1]);
-        Assertions.assertEquals("\"Loan1\"", responseData.getOpenAccounts()[0]);
-        Assertions.assertEquals("\"Loan2\"", responseData.getOpenAccounts()[1]);
+        List<?> closedAccounts = (List<?>) responseData.get("closedAccounts");
+        List<?> openAccounts = (List<?>) responseData.get("openAccounts");
+        Assertions.assertEquals(2, closedAccounts.size());
+        Assertions.assertEquals(2, openAccounts.size());
+        Assertions.assertEquals("\"Loan3\"", closedAccounts.get(0));
+        Assertions.assertEquals("\"Loan4\"", closedAccounts.get(1));
+        Assertions.assertEquals("\"Loan1\"", openAccounts.get(0));
+        Assertions.assertEquals("\"Loan2\"", openAccounts.get(1));
     }
 
     @Test
@@ -180,20 +174,16 @@ public class CreditBureauTest {
                         + "\"Name\":\"Test Name\"," + "\"Gender\":\"male\"," + "\"Address\":\"Test Address\"" + "},"
                         + "\"CreditScore\": {\"Score\":  \"500\"}," + "\"ActiveLoans\": []," + "\"WriteOffLoans\": []" + "}}", 200)));
 
-        String serviceResult = getCreditReport("1", "NRC213");
-        Assertions.assertNotNull(serviceResult);
-        Gson gson = new Gson();
-        CreditBureauReportData responseData = gson.fromJson(
-                gson.toJson(JsonParser.parseString(serviceResult).getAsJsonObject().get("creditBureauReportData")),
-                CreditBureauReportData.class);
-        Assertions.assertEquals("\"Test Name\"", responseData.getName());
-        Assertions.assertEquals("{\"Score\":\"500\"}", responseData.getCreditScore());
+        Map<String, Object> responseData = getCreditReport("1", "NRC213");
+        Assertions.assertNotNull(responseData);
+        Assertions.assertEquals("\"Test Name\"", responseData.get("name"));
+        Assertions.assertEquals("{\"Score\":\"500\"}", responseData.get("creditScore"));
 
-        Assertions.assertEquals("\"male\"", responseData.getGender());
-        Assertions.assertEquals("\"Test Address\"", responseData.getAddress());
+        Assertions.assertEquals("\"male\"", responseData.get("gender"));
+        Assertions.assertEquals("\"Test Address\"", responseData.get("address"));
 
-        Assertions.assertEquals(0, responseData.getClosedAccounts().length);
-        Assertions.assertEquals(0, responseData.getOpenAccounts().length);
+        Assertions.assertEquals(0, ((List<?>) responseData.get("closedAccounts")).size());
+        Assertions.assertEquals(0, ((List<?>) responseData.get("openAccounts")).size());
     }
 
 }

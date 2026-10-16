@@ -19,6 +19,10 @@
 package org.apache.fineract.infrastructure.campaigns.email.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -156,6 +160,8 @@ public class EmailApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create an email message", operationId = "createEmail")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = EmailApiResourceSwagger.PostEmailRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     @AlternativeOperationId("create_1")
     public String create(final String apiRequestBodyAsJson) {
 
@@ -169,6 +175,7 @@ public class EmailApiResource {
     @GET
     @Path("{resourceId}")
     @Operation(summary = "Retrieve an email message", operationId = "retrieveOneEmail")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EmailData.class)))
     @AlternativeOperationId("retrieveOne_1")
     public String retrieveOne(@PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
 
@@ -182,6 +189,8 @@ public class EmailApiResource {
     @Path("{resourceId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update an email message", operationId = "updateEmail")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = EmailApiResourceSwagger.PutEmailRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     @AlternativeOperationId("update_2")
     public String update(@PathParam("resourceId") final Long resourceId, final String apiRequestBodyAsJson) {
 
@@ -195,6 +204,7 @@ public class EmailApiResource {
     @DELETE
     @Path("{resourceId}")
     @Operation(summary = "Delete an email message", operationId = "deleteEmail")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     @AlternativeOperationId("delete_1")
     public String delete(@PathParam("resourceId") final Long resourceId) {
 
