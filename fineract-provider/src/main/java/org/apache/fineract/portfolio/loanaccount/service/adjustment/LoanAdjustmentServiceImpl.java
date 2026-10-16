@@ -215,6 +215,9 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
         loanTransactionValidator.validateRepaymentDateIsOnNonWorkingDay(newTransactionDetail.getTransactionDate(),
                 holidayDetailDTO.getWorkingDays(), holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
 
+        if (paymentDetail != null) {
+            paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
+        }
         adjustExistingTransaction(loan, newTransactionDetail, transactionToAdjust, scheduleGeneratorDTO, reversalTxnExternalId);
 
         loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
