@@ -75,9 +75,7 @@ public class SavingsAccountForceWithdrawalTest extends FeignSavingsTestBase {
     @Test
     public void testRegularWithdrawalSucceedsAfterEarlierForceWithdrawalRecoversBalance() {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
-                new PutGlobalConfigurationsRequest().enabled(true));
-        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT,
-                new PutGlobalConfigurationsRequest().value(1000L).enabled(true));
+                new PutGlobalConfigurationsRequest().value(FORCE_WITHDRAWAL_LIMIT).enabled(true));
 
         Long clientId = createClient();
         assertNotNull(clientId);
@@ -112,9 +110,7 @@ public class SavingsAccountForceWithdrawalTest extends FeignSavingsTestBase {
     @Test
     public void testForceFlagSurvivesBalanceRecalculationReplacement() {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
-                new PutGlobalConfigurationsRequest().enabled(true));
-        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT,
-                new PutGlobalConfigurationsRequest().value(1000L).enabled(true));
+                new PutGlobalConfigurationsRequest().value(FORCE_WITHDRAWAL_LIMIT).enabled(true));
 
         Long clientId = createClient();
         assertNotNull(clientId);

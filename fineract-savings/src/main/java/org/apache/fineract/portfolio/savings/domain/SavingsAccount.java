@@ -1234,9 +1234,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             // deal with potential minRequiredBalance and
             // enforceMinRequiredBalance
             if (!isException && transaction.canProcessBalanceCheck() && !isOverdraft()) {
-                if (violatesMinRequiredBalance(runningBalance, minRequiredBalance)
-                        && !isForceWithdrawalAllowed(transaction, isForceWithdrawal, runningBalance, forceWithdrawalEnabled,
-                                forceWithdrawalLimit)) {
+                if (violatesMinRequiredBalance(runningBalance, minRequiredBalance) && !isForceWithdrawalAllowed(transaction,
+                        isForceWithdrawal, runningBalance, forceWithdrawalEnabled, forceWithdrawalLimit)) {
                     throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
                             transactionAmount);
                 }
@@ -1251,9 +1250,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (isOverdraft()) {
             final SavingsAccountTransaction lastTransaction = transactionsSortedByDate.isEmpty() ? null
                     : transactionsSortedByDate.get(transactionsSortedByDate.size() - 1);
-            if (violatesMinRequiredBalance(runningBalance, minRequiredBalance)
-                    && !isForceWithdrawalAllowed(lastTransaction, isForceWithdrawal, runningBalance, forceWithdrawalEnabled,
-                            forceWithdrawalLimit)) {
+            if (violatesMinRequiredBalance(runningBalance, minRequiredBalance) && !isForceWithdrawalAllowed(lastTransaction,
+                    isForceWithdrawal, runningBalance, forceWithdrawalEnabled, forceWithdrawalLimit)) {
                 throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
             }
         }

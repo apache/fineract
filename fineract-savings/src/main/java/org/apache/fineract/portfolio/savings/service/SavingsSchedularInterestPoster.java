@@ -333,8 +333,7 @@ public class SavingsSchedularInterestPoster {
                             savingsAccountTransactionData.getCumulativeBalance(), auditTime, userId, auditTime, userId,
                             savingsAccountTransactionData.isManualTransaction(), savingsAccountTransactionData.getRefNo(),
                             savingsAccountTransactionData.isReversalTransaction(), savingsAccountTransactionData.isForceTransaction(),
-                            savingsAccountTransactionData.getOverdraftAmount(),
-                            currentDate });
+                            savingsAccountTransactionData.getOverdraftAmount(), currentDate });
                 } else {
                     updateParams.add(new Object[] { savingsAccountTransactionData.isReversed(), savingsAccountTransactionData.getAmount(),
                             savingsAccountTransactionData.getOverdraftAmount(), savingsAccountTransactionData.getBalanceEndDate(),
