@@ -99,6 +99,7 @@ final class LoansApiResourceSwagger {
         public Long clientOfficeId;
         public GetLoansTemplateTimeline timeline;
         public Set<GetLoansTemplateProductOptions> productOptions;
+        public List<StringEnumOptionData> daysInYearCustomStrategyOptions;
     }
 
     @Schema(description = "GetLoansLoanIdResponse")
@@ -1325,6 +1326,7 @@ final class LoansApiResourceSwagger {
         public StringEnumOptionData monthEndDueDateStrategy;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        public StringEnumOptionData daysInYearCustomStrategy;
         @Schema(example = "false")
         public Boolean enableIncomeCapitalization;
         @Schema(example = "FLAT")
@@ -1739,6 +1741,8 @@ final class LoansApiResourceSwagger {
                 "FIRST_DAY_OF_NEXT_MONTH" }, description = "Overrides the loan product's month end due date strategy for this loan. "
                         + "It has no effect on a loan whose repayments follow a meeting calendar.")
         public String monthEndDueDateStrategy;
+        @Schema(example = "FULL_LEAP_YEAR", allowableValues = { "FULL_LEAP_YEAR", "FEB_29_PERIOD_ONLY" })
+        public String daysInYearCustomStrategy;
 
         static final class PutLoansLoanIdChargeData {
 
