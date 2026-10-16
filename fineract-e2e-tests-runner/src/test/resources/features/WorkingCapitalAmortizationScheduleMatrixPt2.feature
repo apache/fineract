@@ -634,3 +634,21 @@ Feature: WorkingCapitalAmortizationScheduleMatrixPt2
     And The retrieved amortization schedule has exactly 2 payment rows
     And The retrieved amortization schedule actual amortization total is "1000"
 
+
+  # =============================================================================
+  # FINERACT-2455: Dynamic repaymentFrequencyType / repaymentEvery
+  # =============================================================================
+
+  @TestRailId:C115294
+  Scenario: Verify annual EIR - UC2: DAYS/7 frequency annualizes per-period rate
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new Working Capital Loan Product with the following matrix data:
+      | accountingRule | npvDayCount | repaymentFrequencyType | repaymentEvery |
+      | NONE           | 360         | DAYS                   | 7              |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    Then Working capital loan details has annual EIR "45.146503"
