@@ -386,6 +386,7 @@ Feature: Working Capital Loan Undo Transaction
     And Customer undo "1"th "REPAYMENT" transaction made on "05 January 2026" on Working Capital loan
     Then a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "10 January 2026" with principal portion changed from "6000.0" to "6500.0" and fee portion changed from "0.0" to "0.0"
     And a Working Capital Loan Adjust Transaction business event is raised for the reversed "repayment" transaction
+    And BulkBusinessEvent is not raised on "12 January 2026"
     And Working Capital loan status will be "ACTIVE"
     And Working Capital loan balance payload contains the following fields:
       | field                | value  |

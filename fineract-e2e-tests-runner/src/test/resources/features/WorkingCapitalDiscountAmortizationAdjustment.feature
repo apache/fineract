@@ -1402,6 +1402,14 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | overpaidOnDate              | null |
       | timeline.closedOnDate       | null |
       | timeline.actualMaturityDate | null |
+    When Admin adds Discount fee adjustment with "50" amount on transaction date "04 January 2026" on Working Capital loan account for last discount
+    Then Working Capital loan status will be "ACTIVE"
+    When Customer adjust "1"th "REPAYMENT" transaction made on "02 January 2026" on Working Capital loan with amount "9950" and date "02 January 2026"
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null       |
+      | timeline.closedOnDate       | 2026-01-02 |
+      | timeline.actualMaturityDate | 2026-01-02 |
 
   @TestRailId:C106809
   Scenario: Verify settlement dates - a discount fee adjustment that settles the loan exactly dates the closure, a later extra payment keeps it and the refund closes it on its own date

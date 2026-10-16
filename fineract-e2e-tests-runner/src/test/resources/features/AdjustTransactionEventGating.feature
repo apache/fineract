@@ -171,13 +171,17 @@ Feature: Adjust transaction business event gating by the transaction type event
     And Customer makes repayment on "05 January 2026" with 30 transaction amount on Working Capital loan
     When Admin sets the business date to "10 January 2026"
     And Customer makes repayment on "10 January 2026" with 25 transaction amount on Working Capital loan
+    And Customer makes repayment on "10 January 2026" with 9000 transaction amount on Working Capital loan
     When Admin disables external business event "WorkingCapitalLoanAdjustTransactionBusinessEvent"
     And Customer undo "1"th "REPAYMENT" transaction made on "05 January 2026" on Working Capital loan
     Then a Working Capital Loan Adjust Transaction business event is not raised for any "repayment" transaction
+    And BulkBusinessEvent is not raised on "10 January 2026"
     And Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Repayment    | 30.0              | 25.0             | 5.0               | 0.0                   | true     |
       | 10 January 2026 | Repayment    | 25.0              | 20.0             | 5.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 9000.0            | 8980.0           | 0.0               | 0.0                   | false    |
     When Admin enables external business event "WorkingCapitalLoanAdjustTransactionBusinessEvent"
-    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+    When Customer makes credit balance refund on "10 January 2026" with 20.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"

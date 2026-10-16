@@ -678,3 +678,18 @@ Feature: Working Capital Breach Schedule
       | 10           | 2026-03-08 | 2026-03-14 | 7            | 900.00           | 0.00              | null       | false  |
       | 11           | 2026-03-15 | 2026-03-21 | 7            | 900.00           | 0.00              | null       | false  |
       | 12           | 2026-03-22 | 2026-03-28 | 7            | 0.00             | 0.00              | null       | false  |
+    When Customer adjust "2"th "REPAYMENT" transaction made on "21 March 2026" on Working Capital loan with amount "60" and date "23 March 2026"
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-01-10 | 10           | 900.00           | 0.00              | null       | false  |
+      | 2            | 2026-01-11 | 2026-01-17 | 7            | 900.00           | 0.00              | null       | false  |
+      | 3            | 2026-01-18 | 2026-01-24 | 7            | 900.00           | 0.00              | null       | false  |
+      | 4            | 2026-01-25 | 2026-01-31 | 7            | 900.00           | 0.00              | null       | false  |
+      | 5            | 2026-02-01 | 2026-02-07 | 7            | 900.00           | 0.00              | null       | false  |
+      | 6            | 2026-02-08 | 2026-02-14 | 7            | 900.00           | 0.00              | null       | false  |
+      | 7            | 2026-02-15 | 2026-02-21 | 7            | 900.00           | 0.00              | null       | false  |
+      | 8            | 2026-02-22 | 2026-02-28 | 7            | 900.00           | 0.00              | null       | false  |
+      | 9            | 2026-03-01 | 2026-03-07 | 7            | 900.00           | 0.00              | null       | false  |
+      | 10           | 2026-03-08 | 2026-03-14 | 7            | 900.00           | 0.00              | null       | false  |
+      | 11           | 2026-03-15 | 2026-03-21 | 7            | 900.00           | 0.00              | null       | false  |
+      | 12           | 2026-03-22 | 2026-03-28 | 7            | 100.00           | 40.00             | null       | null   |
