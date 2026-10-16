@@ -133,8 +133,6 @@ plugins {
     id 'io.github.usekylis.java-architecture-metrics' version '0.1.1' apply false
 }
 
-apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
-
 description = '''\
 Run as:
 gradle clean bootRun'''

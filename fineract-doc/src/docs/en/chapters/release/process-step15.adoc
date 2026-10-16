@@ -14,13 +14,3 @@ Manually draft an email using your Apache ID. This works best if you use plain t
 ****
 
 Send the email to dev@fineract.apache.org and announce@apache.org.
-
-== Gradle Task
-
-.Command
-[source,bash,subs="attributes+,+macros"]
-----
-./gradlew fineractReleaseStep15
-----
-
-NOTE: Do this task manually.

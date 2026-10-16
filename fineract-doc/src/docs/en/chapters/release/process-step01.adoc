@@ -12,17 +12,21 @@ The RM must then send the pointer to the umbrella issue along with the tentative
 
 The RM should then inform users when the git branch is planned to be created, by sending an email based on this template:
 
-[source,text]
+[source,text,subs="attributes+"]
 ----
-include::{rootdir}/buildSrc/src/main/resources/email/release.step01.headsup.subject.ftl[lines=21..]
+Subject: [FINERACT] [PROPOSAL] 📦 New release {revnumber}
 
-include::{rootdir}/buildSrc/src/main/resources/email/release.step01.headsup.message.ftl[lines=21..]
-----
+Hello everyone,
 
-== Gradle Task
+... based on our release process (https://fineract.apache.org/docs/current/#_releases), I will create a release/{revnumber} branch off develop in our git repository at https://github.com/apache/fineract on <planned branch date, e. g. "Monday, April 25, 2022">.
 
-.Command
-[source,bash,subs="attributes+,+macros"]
-----
-./gradlew fineractReleaseStep1 -Pfineract.release.issue=1234 -Pfineract.releaseBranch.date="Monday, April 25, 2022" -Pfineract.release.version={revnumber}
+The release tracking umbrella issue for tracking all activity in JIRA is FINERACT-<issue number> (https://issues.apache.org/jira/browse/FINERACT-<issue number>).
+
+If you have any work in progress that you would like to see included in this release, please add "blocking" links to the release JIRA issue.
+
+I am the release manager for this release.
+
+Cheers,
+
+<your name>
 ----

@@ -11,13 +11,3 @@ A form to add new releases and a table with list of all releases should appear. 
 Next, in the "Actions" column in the table, click on ⋯  (three horizontal dots menu) to the right of release {version}. Choose "Release". Enter the current date (doesn't need to be the date the release is acutally announced).
 
 TIP: For the "Unresolved Issues" radio button: If unresolved issues block the release, ignore them and proceed. If they'll be part of another release, move them to that version.
-
-== Gradle Task
-
-.Command
-[source,bash]
-----
-./gradlew fineractReleaseStep4
-----
-
-CAUTION: This task is not yet automated!

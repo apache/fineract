@@ -35,13 +35,3 @@ svn add * && svn commit -m "Stage Fineract {revnumber} 🎭"
 ----
 
 NOTE: You will need your ASF Committer credentials to be able to access the Subversion host at `dist.apache.org`.
-
-== Gradle Task
-
-.Command
-[source,bash,subs="attributes+,+macros"]
-----
-./gradlew fineractReleaseStep8 -Pfineract.release.version={revnumber}
-----
-
-CAUTION: Gradle task 8 is inefficient. We recommend `svn mkdir` and other manual steps above.

@@ -18,11 +18,3 @@ gpg --print-md SHA512 apache-fineract-src-{revnumber}.tar.gz \
 gpg --print-md SHA512 apache-fineract-bin-{revnumber}.tar.gz \
   > apache-fineract-bin-{revnumber}.tar.gz.sha512
 ----
-
-== Gradle Task
-
-.Command
-[source,bash]
-----
-./gradlew fineractReleaseStep7
-----

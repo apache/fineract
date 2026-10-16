@@ -15,13 +15,3 @@ git describe <2>
 ----
 <1> This merge ensures all future commits and releases descend from the tagged commit used to build this release.
 <2> The output must refer to the most recent release. For example, if your working copy is checked out to the `develop` branch, the current commit is `0762a012e`, and the latest release tag (28 commits ago) was `1.12.1`, the output of `git describe` would be `1.12.1-28-g0762a012e`.
-
-== Gradle Task
-
-.Command
-[source,bash,subs="attributes+,+macros"]
-----
-./gradlew fineractReleaseStep13 -Pfineract.release.version={revnumber}
-----
-
-CAUTION: This task is not yet automated!

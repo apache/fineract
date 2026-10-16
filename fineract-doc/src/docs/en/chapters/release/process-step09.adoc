@@ -115,13 +115,3 @@ Confirm the following:
 . http://localhost:8080/fineract-provider/actuator/health works
 . http://localhost:8080/fineract-provider/actuator/info displays the expected information
 . API calls work against http://localhost:8080/fineract-provider/api/v1
-
-== Gradle Task
-
-.Command
-[source,bash,subs="attributes+,+macros"]
-----
-./gradlew fineractReleaseStep9 -Pfineract.release.version={revnumber}
-----
-
-CAUTION: This task is not yet automated!
