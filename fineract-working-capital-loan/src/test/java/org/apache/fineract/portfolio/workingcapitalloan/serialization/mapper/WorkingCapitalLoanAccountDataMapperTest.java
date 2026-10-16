@@ -567,7 +567,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
     private static WorkingCapitalLoanData fullLoanData() {
         return WorkingCapitalLoanData.builder().id(101L).accountNo("WC-000101").externalId(new ExternalId("ext-101")).clientId(11L)
                 .clientAccountNo("CL-11").clientName("John Doe").clientExternalId(new ExternalId("client-ext")).clientOfficeId(22L)
-                .fundId(44L).fundName("Main Fund").loanProductId(33L).loanProductName("WC Product")
+                .officeName("Head Office").fundId(44L).fundName("Main Fund").loanProductId(33L).loanProductName("WC Product")
                 .loanProductDescription("WC product description").status(fullStatus()).proposedPrincipal(new BigDecimal("1200.00"))
                 .approvedPrincipal(new BigDecimal("1100.00")).principal(new BigDecimal("1000.00"))
                 .netDisbursalAmount(new BigDecimal("980.00"))
