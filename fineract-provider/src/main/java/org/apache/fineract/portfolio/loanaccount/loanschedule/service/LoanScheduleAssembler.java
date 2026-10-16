@@ -78,6 +78,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.common.domain.DayOfWeekType;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.NthDayType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -540,6 +541,12 @@ public class LoanScheduleAssembler {
                     .extractBooleanNamed(LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, element);
         }
 
+        DaysInYearCustomStrategyType daysInYearCustomStrategy = loanProduct.getLoanProductRelatedDetail().getDaysInYearCustomStrategy();
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.daysInYearCustomStrategyParameterName, element)) {
+            daysInYearCustomStrategy = this.fromApiJsonHelper.enumValueOfParameterNamed(
+                    LoanApiConstants.daysInYearCustomStrategyParameterName, element, DaysInYearCustomStrategyType.class);
+        }
+
         boolean allowFullTermForTranche = loanProduct.isAllowFullTermForTranche();
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element)) {
             allowFullTermForTranche = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element);
@@ -564,8 +571,7 @@ public class LoanScheduleAssembler {
                 loanProduct.getLoanProductRelatedDetail().isEnableAccrualActivityPosting(),
                 loanProduct.getLoanProductRelatedDetail().getSupportedInterestRefundTypes(),
                 loanProduct.getLoanProductRelatedDetail().getChargeOffBehaviour(), interestRecognitionOnDisbursementDate,
-                loanProduct.getLoanProductRelatedDetail().getDaysInYearCustomStrategy(),
-                loanProduct.getLoanProductRelatedDetail().isEnableIncomeCapitalization(),
+                daysInYearCustomStrategy, loanProduct.getLoanProductRelatedDetail().isEnableIncomeCapitalization(),
                 loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeCalculationType(),
                 loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeStrategy(),
                 loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeType(),
@@ -1437,6 +1443,8 @@ public class LoanScheduleAssembler {
             changes.put("locale", localeAsInput);
             loanProductRelatedDetail.setDaysInYearType(newValue);
         }
+
+        relatedDetailUpdateUtil.updateDaysInYearCustomStrategy(loanProductRelatedDetail, command, changes);
 
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME,
                 loanProductRelatedDetail.isInterestRecalculationEnabled())) {

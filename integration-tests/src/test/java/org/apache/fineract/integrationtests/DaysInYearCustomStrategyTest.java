@@ -18,11 +18,18 @@
  */
 package org.apache.fineract.integrationtests;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.math.BigDecimal;
+import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
+import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.DaysInYearCustomStrategyRawApi;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +39,7 @@ public class DaysInYearCustomStrategyTest extends FeignLoanTestBase {
     private static final Integer DAYS_IN_YEAR_360 = 360;
     private static final String FEB_29_PERIOD_ONLY = "FEB_29_PERIOD_ONLY";
     private static final String FULL_LEAP_YEAR = "FULL_LEAP_YEAR";
+    private static final String INVALID_STRATEGY = "NOT_A_STRATEGY";
 
     @Test
     public void test_HttpError_for_ValidationError_DaysInYearsCustomStrategy() {
@@ -105,5 +113,239 @@ public class DaysInYearCustomStrategyTest extends FeignLoanTestBase {
                     installment(1235.88, 104.68, 1340.56, false, "01 January 2025") //
             );
         });
+    }
+
+    @Test
+    public void test_LoanLevel_DaysInYearCustomStrategy_Overrides_Product_Value() {
+        Long clientId = createClient();
+        runAt("1 January 2024", () -> {
+            Long loanProductId = createLoanProduct(
+                    create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL).daysInYearCustomStrategy(FULL_LEAP_YEAR));
+            Long loanId = FeignCalls.ok(() -> rawApi().submitLoanApplication(withDaysInYearCustomStrategy(
+                    applyLP2ProgressiveLoanRequest(clientId, loanProductId, "1 January 2024", 10000.0, 99.99, 12, null),
+                    FEB_29_PERIOD_ONLY))).getLoanId();
+            approveLoan(loanId, approveLoanRequest(10000.0, "1 January 2024"));
+            Assertions.assertEquals(FEB_29_PERIOD_ONLY, getLoanDetails(loanId).getDaysInYearCustomStrategy().getId());
+
+            disburseLoan(loanId, BigDecimal.valueOf(10000), "1 January 2024");
+            // Same schedule as testFEB_29_PERIOD_ONLY, although the product uses FULL_LEAP_YEAR
+            verifyRepaymentSchedule(loanId, //
+                    installment(10000.0, null, "01 January 2024"), //
+                    installment(519.92, 821.84, 1341.76, false, "01 February 2024"), //
+                    installment(564.78, 776.98, 1341.76, false, "01 March 2024"), //
+                    installment(609.07, 732.69, 1341.76, false, "01 April 2024"), //
+                    installment(659.12, 682.64, 1341.76, false, "01 May 2024"), //
+                    installment(713.29, 628.47, 1341.76, false, "01 June 2024"), //
+                    installment(771.91, 569.85, 1341.76, false, "01 July 2024"), //
+                    installment(835.35, 506.41, 1341.76, false, "01 August 2024"), //
+                    installment(904.0, 437.76, 1341.76, false, "01 September 2024"), //
+                    installment(978.3, 363.46, 1341.76, false, "01 October 2024"), //
+                    installment(1058.7, 283.06, 1341.76, false, "01 November 2024"), //
+                    installment(1145.71, 196.05, 1341.76, false, "01 December 2024"), //
+                    installment(1239.85, 101.9, 1341.75, false, "01 January 2025") //
+            );
+        });
+    }
+
+    @Test
+    public void test_LoanLevel_DaysInYearCustomStrategy_Is_Used_By_Schedule_Preview() {
+        Long clientId = createClient();
+        runAt("1 January 2024", () -> {
+            Long fullLeapYearProductId = createLoanProduct(
+                    create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL).daysInYearCustomStrategy(FULL_LEAP_YEAR));
+            Long feb29ProductId = createLoanProduct(create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL)
+                    .daysInYearCustomStrategy(FEB_29_PERIOD_ONLY));
+
+            BigDecimal fullLeapYearInterest = calculateLoanSchedule(
+                    applyLP2ProgressiveLoanRequest(clientId, fullLeapYearProductId, "1 January 2024", 10000.0, 99.99, 12, null))
+                    .getTotalInterestCharged();
+            BigDecimal feb29Interest = calculateLoanSchedule(
+                    applyLP2ProgressiveLoanRequest(clientId, feb29ProductId, "1 January 2024", 10000.0, 99.99, 12, null))
+                    .getTotalInterestCharged();
+            BigDecimal overriddenInterest = FeignCalls.ok(() -> rawApi().calculateLoanSchedule(withDaysInYearCustomStrategy(
+                    applyLP2ProgressiveLoanRequest(clientId, fullLeapYearProductId, "1 January 2024", 10000.0, 99.99, 12, null),
+                    FEB_29_PERIOD_ONLY))).getTotalInterestCharged();
+
+            Assertions.assertNotEquals(0, fullLeapYearInterest.compareTo(feb29Interest));
+            Assertions.assertEquals(0, feb29Interest.compareTo(overriddenInterest));
+        });
+    }
+
+    @Test
+    public void test_LoanLevel_Invalid_DaysInYearCustomStrategy_Is_Rejected() {
+        Long clientId = createClient();
+        runAt("1 January 2024", () -> {
+            Long loanProductId = createLoanProduct(
+                    create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL).daysInYearCustomStrategy(FULL_LEAP_YEAR));
+            // The generated client only accepts valid enum values, so the invalid one is sent as raw JSON
+            ObjectNode body = ObjectMapperFactory.getShared()
+                    .valueToTree(applyLP2ProgressiveLoanRequest(clientId, loanProductId, "1 January 2024", 10000.0, 99.99, 12, null));
+            body.put("daysInYearCustomStrategy", INVALID_STRATEGY);
+
+            CallFailedRuntimeException exception = FeignCalls.fail(() -> rawApi().submitLoanApplication(body.toString()));
+            Assertions.assertEquals(400, exception.getStatus());
+        });
+    }
+
+    @Test
+    public void test_LoanLevel_DaysInYearCustomStrategy_With_NonActual_DaysInYearType_Is_Rejected() {
+        Long clientId = createClient();
+        runAt("1 January 2024", () -> {
+            Long loanProductId = createLoanProduct(
+                    create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL).daysInYearCustomStrategy(FULL_LEAP_YEAR));
+            String body = withDaysInYearCustomStrategy(applyLP2ProgressiveLoanRequest(clientId, loanProductId, "1 January 2024", 10000.0,
+                    99.99, 12, request -> request.daysInYearType(DAYS_IN_YEAR_360)), FEB_29_PERIOD_ONLY);
+            CallFailedRuntimeException exception = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> FeignCalls.ok(() -> rawApi().submitLoanApplication(body)));
+            Assertions.assertEquals(400, exception.getStatus());
+        });
+    }
+
+    @Test
+    public void test_Modify_Loan_DaysInYearCustomStrategy() {
+        Long clientId = createClient();
+        runAt("1 January 2024", () -> {
+            Long loanProductId = createLoanProduct(
+                    create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL).daysInYearCustomStrategy(FULL_LEAP_YEAR));
+            Long loanId = applyForLoan(applyLP2ProgressiveLoanRequest(clientId, loanProductId, "1 January 2024", 10000.0, 99.99, 12, null));
+            Assertions.assertEquals(FULL_LEAP_YEAR, getLoanDetails(loanId).getDaysInYearCustomStrategy().getId());
+
+            modifyLoanApplication(loanId, "modify", modifyRequest(clientId, loanProductId)
+                    .daysInYearCustomStrategy(PutLoansLoanIdRequest.DaysInYearCustomStrategyEnum.FEB_29_PERIOD_ONLY));
+            Assertions.assertEquals(FEB_29_PERIOD_ONLY, getLoanDetails(loanId).getDaysInYearCustomStrategy().getId());
+
+            approveLoan(loanId, approveLoanRequest(10000.0, "1 January 2024"));
+            disburseLoan(loanId, BigDecimal.valueOf(10000), "1 January 2024");
+            verifyRepaymentSchedule(loanId, //
+                    installment(10000.0, null, "01 January 2024"), //
+                    installment(519.92, 821.84, 1341.76, false, "01 February 2024"), //
+                    installment(564.78, 776.98, 1341.76, false, "01 March 2024"), //
+                    installment(609.07, 732.69, 1341.76, false, "01 April 2024"), //
+                    installment(659.12, 682.64, 1341.76, false, "01 May 2024"), //
+                    installment(713.29, 628.47, 1341.76, false, "01 June 2024"), //
+                    installment(771.91, 569.85, 1341.76, false, "01 July 2024"), //
+                    installment(835.35, 506.41, 1341.76, false, "01 August 2024"), //
+                    installment(904.0, 437.76, 1341.76, false, "01 September 2024"), //
+                    installment(978.3, 363.46, 1341.76, false, "01 October 2024"), //
+                    installment(1058.7, 283.06, 1341.76, false, "01 November 2024"), //
+                    installment(1145.71, 196.05, 1341.76, false, "01 December 2024"), //
+                    installment(1239.85, 101.9, 1341.75, false, "01 January 2025") //
+            );
+        });
+    }
+
+    @Test
+    public void test_Update_Product_Clears_DaysInYearCustomStrategy_When_Switching_To_360() {
+        Long loanProductId = createLoanProduct(
+                create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL).daysInYearCustomStrategy(FEB_29_PERIOD_ONLY));
+
+        // The generated client drops null fields, so the explicit null is sent as raw JSON
+        FeignCalls.ok(() -> rawApi().updateLoanProduct(loanProductId,
+                "{\"daysInYearCustomStrategy\": null, \"daysInYearType\": 360, \"locale\": \"en\"}"));
+
+        GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
+        Assertions.assertNull(loanProduct.getDaysInYearCustomStrategy());
+        Assertions.assertEquals(DAYS_IN_YEAR_360.longValue(), loanProduct.getDaysInYearType().getId());
+    }
+
+    @Test
+    public void test_Update_Product_Clears_DaysInYearCustomStrategy_For_Progressive_Actual() {
+        Long loanProductId = createLoanProduct(
+                create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL).daysInYearCustomStrategy(FEB_29_PERIOD_ONLY));
+
+        FeignCalls.ok(() -> rawApi().updateLoanProduct(loanProductId, "{\"daysInYearCustomStrategy\": null}"));
+        Assertions.assertNull(retrieveLoanProduct(loanProductId).getDaysInYearCustomStrategy());
+    }
+
+    @Test
+    public void test_Modify_Loan_NonActual_DaysInYearType_With_Inherited_DaysInYearCustomStrategy_Is_Rejected() {
+        Long clientId = createClient();
+        runAt("1 January 2024", () -> {
+            Long loanProductId = createLoanProduct(create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL)
+                    .daysInYearCustomStrategy(FEB_29_PERIOD_ONLY));
+            Long loanId = applyForLoan(applyLP2ProgressiveLoanRequest(clientId, loanProductId, "1 January 2024", 10000.0, 99.99, 12, null));
+
+            // PutLoansLoanIdRequest has no daysInYearType, so the body is sent as raw JSON
+            ObjectNode body = ObjectMapperFactory.getShared().valueToTree(modifyRequest(clientId, loanProductId));
+            body.put("daysInYearType", DAYS_IN_YEAR_360);
+
+            CallFailedRuntimeException exception = FeignCalls.fail(() -> rawApi().modifyLoanApplication(loanId, body.toString()));
+            Assertions.assertEquals(400, exception.getStatus());
+            Assertions.assertEquals(FEB_29_PERIOD_ONLY, getLoanDetails(loanId).getDaysInYearCustomStrategy().getId());
+        });
+    }
+
+    @Test
+    public void test_Modify_Loan_Clears_DaysInYearCustomStrategy_With_NonActual_DaysInYearType() {
+        Long clientId = createClient();
+        runAt("1 January 2024", () -> {
+            Long loanProductId = createLoanProduct(create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL)
+                    .daysInYearCustomStrategy(FEB_29_PERIOD_ONLY));
+            Long loanId = applyForLoan(applyLP2ProgressiveLoanRequest(clientId, loanProductId, "1 January 2024", 10000.0, 99.99, 12, null));
+
+            ObjectNode body = ObjectMapperFactory.getShared().valueToTree(modifyRequest(clientId, loanProductId));
+            body.put("daysInYearType", DAYS_IN_YEAR_360);
+            body.putNull("daysInYearCustomStrategy");
+
+            FeignCalls.ok(() -> rawApi().modifyLoanApplication(loanId, body.toString()));
+            Assertions.assertNull(getLoanDetails(loanId).getDaysInYearCustomStrategy());
+        });
+    }
+
+    @Test
+    public void test_Modify_Loan_Product_Change_Keeps_Inherited_DaysInYearCustomStrategy_In_Validation() {
+        Long clientId = createClient();
+        runAt("1 January 2024", () -> {
+            Long feb29ProductId = createLoanProduct(create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL)
+                    .daysInYearCustomStrategy(FEB_29_PERIOD_ONLY));
+            Long noStrategyProductId = createLoanProduct(create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL));
+            Long loanId = applyForLoan(
+                    applyLP2ProgressiveLoanRequest(clientId, feb29ProductId, "1 January 2024", 10000.0, 99.99, 12, null));
+
+            // Changing the product does not copy its strategy onto the loan, so the inherited one is still checked
+            ObjectNode body = ObjectMapperFactory.getShared().valueToTree(modifyRequest(clientId, noStrategyProductId));
+            body.put("daysInYearType", DAYS_IN_YEAR_360);
+
+            CallFailedRuntimeException exception = FeignCalls.fail(() -> rawApi().modifyLoanApplication(loanId, body.toString()));
+            Assertions.assertEquals(400, exception.getStatus());
+            Assertions.assertTrue(extractErrorGlobalisationCode(exception)
+                    .endsWith("days.in.year.custom.strategy.is.only.applicable.for.actual.days.in.year.type"));
+        });
+    }
+
+    @Test
+    public void test_Update_Product_Invalid_DaysInYearCustomStrategy_Is_Rejected() {
+        Long loanProductId = createLoanProduct(
+                create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL).daysInYearCustomStrategy(FEB_29_PERIOD_ONLY));
+
+        CallFailedRuntimeException exception = Assertions.assertThrows(CallFailedRuntimeException.class,
+                () -> updateLoanProduct(loanProductId, new PutLoanProductsProductIdRequest().daysInYearCustomStrategy(INVALID_STRATEGY)));
+        Assertions.assertEquals(400, exception.getStatus());
+    }
+
+    // The POST enum of the generated model holds a single combined value, so the strategy is set on the raw JSON
+    private static String withDaysInYearCustomStrategy(PostLoansRequest request, String daysInYearCustomStrategy) {
+        ObjectNode body = ObjectMapperFactory.getShared().valueToTree(request);
+        body.put("daysInYearCustomStrategy", daysInYearCustomStrategy);
+        return body.toString();
+    }
+
+    // PUT /loans/{loanId} expects the full application, so the original terms are sent again
+    private PutLoansLoanIdRequest modifyRequest(Long clientId, Long loanProductId) {
+        return new PutLoansLoanIdRequest().clientId(clientId).productId(loanProductId).loanType("individual")
+                .submittedOnDate("1 January 2024").expectedDisbursementDate("1 January 2024").dateFormat(LoanTestData.DATETIME_PATTERN)
+                .locale(LoanTestData.LOCALE)
+                .transactionProcessingStrategyCode(LoanTestData.TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS).interestRatePerPeriod(BigDecimal.valueOf(99.99))
+                .numberOfRepayments(12).principal(10000L).loanTermFrequency(12).repaymentEvery(1)
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS).interestType(LoanTestData.InterestType.DECLINING_BALANCE)
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.DAILY);
+    }
+
+    // The generated models cannot express an explicit null or an out-of-enum value, so these bodies are sent as raw
+    // JSON
+    private DaysInYearCustomStrategyRawApi rawApi() {
+        return fineractClient().create(DaysInYearCustomStrategyRawApi.class);
     }
 }
