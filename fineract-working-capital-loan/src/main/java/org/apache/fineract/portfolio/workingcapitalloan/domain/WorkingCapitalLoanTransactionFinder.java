@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -127,6 +128,10 @@ public class WorkingCapitalLoanTransactionFinder {
      */
     public Optional<TransactionDateAndAmountHolder> findLastRepayment(final Long loanId) {
         return findLastActiveTransactionOfTypes(loanId, REPAYMENT_TYPES);
+    }
+
+    public BigDecimal sumPayments(final Long loanId) {
+        return transactionRepository.sumActiveAmountsOfTypes(loanId, PAYMENT_TYPES);
     }
 
     /**

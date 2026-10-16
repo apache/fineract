@@ -117,6 +117,15 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
     BigDecimal sumAmountsOfTypesUpTo(@Param("wcLoanId") Long wcLoanId,
             @Param("transactionTypes") Collection<LoanTransactionType> transactionTypes, @Param("date") LocalDate date);
 
+    @Query("""
+            select coalesce(sum(t.transactionAmount), 0)
+            from WorkingCapitalLoanTransaction t
+            where t.wcLoan.id = :wcLoanId and t.reversed = false
+              and t.transactionType in :transactionTypes
+            """)
+    BigDecimal sumActiveAmountsOfTypes(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
+
     Optional<WorkingCapitalLoanTransaction> findByWcLoan_IdAndExternalId(Long wcLoanId, ExternalId externalId);
 
     boolean existsByExternalId(ExternalId externalId);

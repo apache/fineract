@@ -310,6 +310,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals(new BigDecimal("900"), result.getPrincipalOutstanding());
         assertEquals(new BigDecimal("1500"), result.getTotalExpectedRepayment());
         assertEquals(new BigDecimal("600"), result.getTotalRepayment());
+        assertEquals(new BigDecimal("650"), result.getTotalPayment());
         assertEquals(new BigDecimal("900"), result.getTotalOutstanding());
         assertEquals(new BigDecimal("15"), result.getRealizedIncomeFromDiscountFee());
         assertEquals(new BigDecimal("35"), result.getUnrealizedIncomeFromDiscountFee());
@@ -346,7 +347,6 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertNull(result.getTotalCreditBalanceRefundReversed());
         assertNull(result.getTotalRepaymentTransaction());
         assertNull(result.getTotalRepaymentTransactionReversed());
-        assertNull(result.getTotalPayment());
         assertNull(result.getTotalPaymentReversed());
     }
 
@@ -618,8 +618,8 @@ class WorkingCapitalLoanAccountDataMapperTest {
                 .unrealizedIncomeFromDiscountFee(new BigDecimal("35")).overpayment(new BigDecimal("9.99"))
                 .totalDisbursement(new BigDecimal("950")).totalDiscountFee(new BigDecimal("50"))
                 .totalDiscountFeeAdjustment(new BigDecimal("5")).totalExpectedRepayment(new BigDecimal("1500"))
-                .totalRepayment(new BigDecimal("600")).totalOutstanding(new BigDecimal("900")).overdueSinceDate(LocalDate.of(2024, 1, 30))
-                .build();
+                .totalRepayment(new BigDecimal("600")).totalPayment(new BigDecimal("650")).totalOutstanding(new BigDecimal("900"))
+                .overdueSinceDate(LocalDate.of(2024, 1, 30)).build();
     }
 
     private static WorkingCapitalLoanCollectionData fullCollection() {

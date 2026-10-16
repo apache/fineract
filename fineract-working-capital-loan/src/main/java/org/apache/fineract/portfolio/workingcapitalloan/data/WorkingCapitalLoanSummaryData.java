@@ -68,6 +68,7 @@ public class WorkingCapitalLoanSummaryData implements Serializable {
     private BigDecimal totalDiscountFeeAdjustment;
     private BigDecimal totalExpectedRepayment;
     private BigDecimal totalRepayment;
+    private BigDecimal totalPayment;
     private BigDecimal totalOutstanding;
 
     // Delinquency
