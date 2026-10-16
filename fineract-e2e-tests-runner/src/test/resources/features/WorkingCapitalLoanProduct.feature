@@ -542,3 +542,39 @@ Feature: WorkingCapitalLoanProduct
     Examples:
       | wcp_field_name      | wcp_invalid_field_value    | wcp_error_message                                                                          |
       | delinquencyBucketId | "BASIC_DELINQUENCY_BUCKET" | "The parameter `delinquencyBucketId` must reference a WORKING_CAPITAL delinquency bucket." |
+
+  Scenario Outline: Verify WC Loan Product create fails when delinquency grace/start type set without delinquency bucket
+    Then Admin failed to create a new Working Capital Loan Product with field "<wcp_field_name>" invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+
+    Examples:
+      | wcp_field_name         | wcp_invalid_field_value | wcp_error_message                                                                                   |
+      | delinquencyGraceDays   | "3"                     | "Failed data validation due to: cannot.enable.delinquency.grace.days.without.delinquency.bucket." |
+      | delinquencyStartType   | "DISBURSEMENT"          | "Failed data validation due to: cannot.enable.delinquency.start.type.without.delinquency.bucket." |
+
+  Scenario Outline: Verify WC Loan Product create fails when breach grace/start type set without breach
+    Then Admin failed to create a new Working Capital Loan Product with field "<wcp_field_name>" invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+
+    Examples:
+      | wcp_field_name  | wcp_invalid_field_value | wcp_error_message                                                                  |
+      | breachGraceDays | "5"                     | "Failed data validation due to: cannot.enable.breach.grace.days.without.breach." |
+      | breachStartType | "DISBURSEMENT"          | "Failed data validation due to: cannot.enable.breach.start.type.without.breach." |
+
+  Scenario Outline: Verify WC Loan Product update fails when delinquency grace/start type set without delinquency bucket
+    When Admin creates a new Working Capital Loan Product without delinquency bucket
+    Then Admin failed to update a new Working Capital Loan Product field "<wcp_field_name>" with invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+    Then Admin deletes a Working Capital Loan Product
+
+    Examples:
+      | wcp_field_name         | wcp_invalid_field_value | wcp_error_message                                                                                   |
+      | delinquencyGraceDays   | "5"                     | "Failed data validation due to: cannot.enable.delinquency.grace.days.without.delinquency.bucket." |
+      | delinquencyStartType   | "DISBURSEMENT"          | "Failed data validation due to: cannot.enable.delinquency.start.type.without.delinquency.bucket." |
+
+  Scenario Outline: Verify WC Loan Product update fails when breach grace/start type set without breach
+    When Admin creates a new Working Capital Loan Product
+    Then Admin failed to update a new Working Capital Loan Product field "<wcp_field_name>" with invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+    Then Admin deletes a Working Capital Loan Product
+
+    Examples:
+      | wcp_field_name  | wcp_invalid_field_value | wcp_error_message                                                                  |
+      | breachGraceDays | "7"                     | "Failed data validation due to: cannot.enable.breach.grace.days.without.breach." |
+      | breachStartType | "LOAN_CREATION"         | "Failed data validation due to: cannot.enable.breach.start.type.without.breach." |

@@ -2092,3 +2092,23 @@ Feature: WorkingCapitalLoanAccount
       | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      |
     Then Working capital loan creation was successful
     When Admin modifies the working capital loan resenting its current delinquencyBucketId
+
+  Scenario Outline: Verify WC Loan creation fails when delinquency grace/start type set without delinquency bucket
+    When Admin sets the business date to "01 January 2027"
+    And Admin creates a client with random data
+    Then Creating a working capital loan with "<wcl_field_name>" "<wcl_field_value>" without delinquency bucket on "01 January 2027" will result with error "<wcl_error_message>"
+
+    Examples:
+      | wcl_field_name         | wcl_field_value | wcl_error_message                                                                               |
+      | delinquencyGraceDays   | 3               | Failed data validation due to: cannot.enable.delinquency.grace.days.without.delinquency.bucket. |
+      | delinquencyStartType   | DISBURSEMENT    | Failed data validation due to: cannot.enable.delinquency.start.type.without.delinquency.bucket. |
+
+  Scenario Outline: Verify WC Loan creation fails when breach grace/start type set without breach
+    When Admin sets the business date to "01 January 2027"
+    And Admin creates a client with random data
+    Then Creating a working capital loan with "<wcl_field_name>" "<wcl_field_value>" without breach on "01 January 2027" will result with error "<wcl_error_message>"
+
+    Examples:
+      | wcl_field_name  | wcl_field_value | wcl_error_message                                                          |
+      | breachGraceDays | 5               | Failed data validation due to: cannot.enable.breach.grace.days.without.breach. |
+      | breachStartType | DISBURSEMENT    | Failed data validation due to: cannot.enable.breach.start.type.without.breach. |
