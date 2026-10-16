@@ -18,11 +18,12 @@
  */
 package org.apache.fineract.portfolio.account.service;
 
-import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
+import org.apache.fineract.portfolio.account.data.StandingInstructionPartition;
 
 public interface StandingInstructionReadPlatformService {
 
@@ -33,7 +34,24 @@ public interface StandingInstructionReadPlatformService {
 
     StandingInstructionData retrieveOne(Long instructionId);
 
-    Collection<StandingInstructionData> retrieveAll(Integer status);
+    /**
+     * Cuts the set of instructions due today into partitions of at most {@code partitionSize} distinct source accounts,
+     * so that the batch job can process them in parallel without two partitions contending on the same account.
+     */
+    List<StandingInstructionPartition> retrieveDuePartitions(Integer status, int partitionSize);
+
+    /**
+     * Reads one keyset page of the instructions due today whose source account falls in the given inclusive range,
+     * ordered by priority then id.
+     *
+     * <p>
+     * Paging is by keyset rather than offset on purpose: executing an instruction stamps its {@code last_run_date},
+     * which removes it from the due set, so an offset would step over unprocessed rows. Pass {@code null} keys to read
+     * the first page, then the priority and id of the last item of the previous page.
+     * </p>
+     */
+    List<StandingInstructionData> retrieveDuePage(Integer status, Long minAccountKey, Long maxAccountKey, Integer afterPriority,
+            Long afterId, int limit);
 
     StandingInstructionDuesData retriveLoanDuesData(Long loanId);
 

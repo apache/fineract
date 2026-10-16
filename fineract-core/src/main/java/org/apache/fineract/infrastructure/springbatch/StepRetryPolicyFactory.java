@@ -47,13 +47,14 @@ public final class StepRetryPolicyFactory {
     /**
      * @param maxAttempts
      *            total number of attempts per item, the initial one included; values below 1 are treated as 1
-     * @param retryableException
-     *            exception type (and its subtypes and nested causes) that should be retried
+     * @param retryableExceptions
+     *            exception types (and their subtypes and nested causes) that should be retried
      * @return a policy that retries immediately until {@code maxAttempts} attempts have been made
      */
-    public static RetryPolicy immediateRetryPolicy(int maxAttempts, Class<? extends Throwable> retryableException) {
+    @SafeVarargs
+    public static RetryPolicy immediateRetryPolicy(int maxAttempts, Class<? extends Throwable>... retryableExceptions) {
         return RetryPolicy.builder() //
-                .includes(retryableException) //
+                .includes(retryableExceptions) //
                 .maxRetries(Math.max(maxAttempts - 1, 0)) //
                 .delay(Duration.ZERO) //
                 .build();
