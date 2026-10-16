@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeReso
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.eclipse.persistence.sessions.SessionCustomizer;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jpa.EntityManagerFactoryBuilder;
@@ -47,7 +48,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -126,9 +126,9 @@ public class JPAConfig extends JpaBaseConfiguration {
     @Override
     public EntityManagerFactoryBuilder entityManagerFactoryBuilder(JpaVendorAdapter jpaVendorAdapter,
             ObjectProvider<PersistenceUnitManager> persistenceUnitManager,
-            ObjectProvider<EntityManagerFactoryBuilderCustomizer> customizers, Map<String, AsyncTaskExecutor> taskExecutors) {
+            ObjectProvider<EntityManagerFactoryBuilderCustomizer> customizers, ListableBeanFactory beanFactory) {
         EntityManagerFactoryBuilder builder = super.entityManagerFactoryBuilder(jpaVendorAdapter, persistenceUnitManager, customizers,
-                taskExecutors);
+                beanFactory);
         builder.setPersistenceUnitPostProcessors(getPersistenceUnitPostProcessors());
         return builder;
     }

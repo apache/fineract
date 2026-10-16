@@ -33,7 +33,7 @@ dependencyManagement {
         mavenBom 'com.squareup.okhttp3:okhttp-bom:5.5.0'
         mavenBom 'org.slf4j:slf4j-bom:2.0.17'
         mavenBom 'io.micrometer:micrometer-bom:1.16.5'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:4.1.0'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:4.1.1'
         mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:4.0.2'
         mavenBom 'io.opentelemetry:opentelemetry-bom:1.62.0'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.3.21'
@@ -52,8 +52,8 @@ dependencyManagement {
         // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
         // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-        dependency 'ch.qos.logback:logback-core:1.5.35'
-        dependency 'ch.qos.logback:logback-classic:1.5.35'
+        dependency 'ch.qos.logback:logback-core:1.5.38'
+        dependency 'ch.qos.logback:logback-classic:1.5.38'
         dependency 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.12'
@@ -213,7 +213,7 @@ dependencyManagement {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
         dependency 'jakarta.validation:jakarta.validation-api:3.1.1'
-        dependency 'org.hibernate.validator:hibernate-validator:9.1.0.Final'
+        dependency 'org.hibernate.validator:hibernate-validator:9.1.3.Final'
 
         dependency ('org.liquibase:liquibase-core:4.33.0') {
             exclude 'javax.xml.bind:jaxb-api'
@@ -246,7 +246,7 @@ dependencyManagement {
 
         dependency "org.apache.avro:avro:1.12.1"
 
-        dependency ('org.mariadb.jdbc:mariadb-java-client:3.5.8') {
+        dependency ('org.mariadb.jdbc:mariadb-java-client:3.5.10') {
             exclude 'org.slf4j:jcl-over-slf4j'
             exclude 'org.slf4j:slf4j-api'
         }
