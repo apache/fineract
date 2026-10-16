@@ -205,17 +205,25 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             final Collection<Long> interestPostTransactions, final boolean isInterestTransfer, final Money minBalanceForInterestCalculation,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final BigDecimal overdraftInterestRateAsFraction,
             final Money minOverdraftForInterestCalculation, final boolean isUserPosting, final Integer financialYearBeginningMonth,
-            final boolean allowOverdraft, final List<PostingPeriod> allPostingPeriods, Boolean isOverdraftTransacction) {
+            final boolean allowOverdraft, final List<PostingPeriod> allPostingPeriods, Boolean isOverdraftTransacction,
+            final boolean carryForwardBalanceWithoutTransactions) {
 
-        if (txs == null || txs.isEmpty()) {
+        final List<SavingsAccountTransactionData> transactions = txs == null ? Collections.emptyList() : txs;
+        // When backdated transactions before the last interest posting are not allowed, only the transactions on or
+        // after interestPostedTillDate are loaded and the earlier balance is carried in as periodStartingBalance. An
+        // account without activity since its last posting then has no transactions here but still has a balance that
+        // earns interest, so the period must not be skipped: PostingPeriod falls back to one end-of-day balance
+        // spanning the whole period. The overdraft split lists are filtered per period, so for them an empty list
+        // still means the period does not apply.
+        if (transactions.isEmpty() && (!carryForwardBalanceWithoutTransactions || periodStartingBalance.isZero())) {
             return periodStartingBalance;
         }
 
-        final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance, txs, monetaryCurrency,
-                compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYear, upToInterestCalculationDate,
-                interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd,
-                overdraftInterestRateAsFraction, minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth,
-                allowOverdraft);
+        final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance, transactions,
+                monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYear,
+                upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
+                isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
+                isUserPosting, financialYearBeginningMonth, allowOverdraft);
 
         periodStartingBalance = postingPeriod.closingBalance();
         postingPeriod.setOverdraftInterest(isOverdraftTransacction);
@@ -323,14 +331,14 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
                         isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
                         isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft(), allPostingPeriods,
-                        isOverdraftAccountType ? true : false);
+                        isOverdraftAccountType ? true : false, false);
 
                 periodStartingBalance = appendPostingPeriodIfAny(periodInterval, periodStartingBalance, secondaryInterestPublication,
                         monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
                         upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
                         isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
                         isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft(), allPostingPeriods,
-                        isOverdraftAccountType ? false : true);
+                        isOverdraftAccountType ? false : true, false);
 
             } else {
                 periodStartingBalance = appendPostingPeriodIfAny(periodInterval, periodStartingBalance,
@@ -338,7 +346,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         interestCalculationType, interestRateAsFraction, daysInYearType.getValue(), upToInterestCalculationDate,
                         interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
                         isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
-                        isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft(), allPostingPeriods, false);
+                        isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft(), allPostingPeriods, false, true);
             }
         }
 
