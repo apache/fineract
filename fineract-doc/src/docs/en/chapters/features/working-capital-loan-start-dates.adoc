@@ -158,7 +158,7 @@ Every WC loan business event carries the same `breach` and `delinquency` blocks 
 
 === Delinquency Start Date
 
-* `delinquencyStartDate` is the `fromDate` of the earliest `m_wc_loan_delinquency_range_schedule` row with `min_payment_criteria_met = false` (`findTopByLoanIdAndMinPaymentCriteriaMetFalseOrderByFromDateAsc`), with no grace arithmetic applied.
+* `delinquencyStartDate` is the `fromDate` of the earliest still-open past delinquency-range-schedule period that already carries a positive classified `delinquentDays` (`findOpenPastDuePeriodsOrderByFromDateAsc`: `min_payment_criteria_met` is `null` or `false`, `reset = false`, `to_date` on or before the business date), with no grace arithmetic applied. `null` is included because instant classification can mark a period delinquent before COB evaluates `min_payment_criteria_met`.
 * The delinquency schedule itself is anchored according to `delinquencyStartType`: `LOAN_CREATION` anchors the first period on the loan submitted-on date, while `DISBURSEMENT` (or an unset type) anchors it on the actual disbursement date. This anchor is resolved in `WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl.generateInitialPeriod`.
 * When no delinquent period exists, `delinquencyStartDate` is `null`.
 
