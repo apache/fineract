@@ -25,15 +25,19 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdRequest;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.GetUsersUserIdResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutUsersUserIdRequest;
 import org.apache.fineract.client.models.PutUsersUserIdResponse;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignRoleHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
@@ -55,10 +59,12 @@ public class UserAdministrationTest extends FeignIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(UserAdministrationTest.class);
     private final List<Long> transientUsers = new ArrayList<>();
     private FeignStaffHelper staffHelper;
+    private FeignGlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeAll
     public void setup() {
         staffHelper = new FeignStaffHelper(fineractClient());
+        globalConfigurationHelper = new FeignGlobalConfigurationHelper(fineractClient());
     }
 
     @AfterEach
@@ -203,6 +209,61 @@ public class UserAdministrationTest extends FeignIntegrationTest {
     }
 
     @Test
+    public void testChangePasswordRejectsPreviouslyUsedPasswordWhenReuseCheckEnabled() {
+        String originalPassword = "QwE!5rTy#9uP0";
+        String updatedPassword = "pX268-4Pfv|kF6";
+        Long userId = createUserWithPassword(originalPassword);
+
+        setPasswordReuseCheck(true);
+        try {
+            ok(() -> fineractClient().users().changePasswordUser(userId, changePasswordRequest(updatedPassword)));
+
+            CallFailedRuntimeException exception = FeignCalls
+                    .fail(() -> fineractClient().users().changePasswordUser(userId, changePasswordRequest(originalPassword)));
+            Assertions.assertEquals(400, exception.getStatus());
+            Assertions.assertEquals("error.msg.password.already.used", FeignErrors.errorGlobalisationCode(exception));
+        } finally {
+            setPasswordReuseCheck(false);
+        }
+    }
+
+    @Test
+    public void testChangePasswordRejectsCurrentPasswordWhenReuseCheckEnabled() {
+        String password = "QwE!5rTy#9uP0";
+        Long userId = createUserWithPassword(password);
+
+        setPasswordReuseCheck(true);
+        try {
+            CallFailedRuntimeException exception = FeignCalls
+                    .fail(() -> fineractClient().users().changePasswordUser(userId, changePasswordRequest(password)));
+            Assertions.assertEquals(400, exception.getStatus());
+            Assertions.assertEquals("error.msg.password.already.used", FeignErrors.errorGlobalisationCode(exception));
+        } finally {
+            setPasswordReuseCheck(false);
+        }
+    }
+
+    @Test
+    public void testUpdateUserRejectsPreviouslyUsedPasswordWhenReuseCheckEnabled() {
+        String originalPassword = "QwE!5rTy#9uP0";
+        String updatedPassword = "pX268-4Pfv|kF6";
+        Long userId = createUserWithPassword(originalPassword);
+
+        setPasswordReuseCheck(true);
+        try {
+            ok(() -> fineractClient().users().updateUser(userId,
+                    new PutUsersUserIdRequest().password(updatedPassword).repeatPassword(updatedPassword)));
+
+            CallFailedRuntimeException exception = FeignCalls.fail(() -> fineractClient().users().updateUser(userId,
+                    new PutUsersUserIdRequest().password(originalPassword).repeatPassword(originalPassword)));
+            Assertions.assertEquals(400, exception.getStatus());
+            Assertions.assertEquals("error.msg.password.already.used", FeignErrors.errorGlobalisationCode(exception));
+        } finally {
+            setPasswordReuseCheck(false);
+        }
+    }
+
+    @Test
     public void testApplicationUserShallNotBeAbleToChangeItsOwnRoles() {
         // Admin creates a new user with one role assigned
         Long roleId = FeignRoleHelper.createRole();
@@ -269,4 +330,26 @@ public class UserAdministrationTest extends FeignIntegrationTest {
     private static FineractFeignClient clientFor(String username, String password) {
         return FineractFeignClientHelper.createNewFineractFeignClient(username, password);
     }
+
+    private Long createUserWithPassword(String password) {
+        Long roleId = FeignRoleHelper.createRole();
+        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(Utils.uniqueRandomStringGenerator("ReuseUser", 4))
+                .firstname(Utils.randomFirstNameGenerator()).lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org")
+                .password(password).repeatPassword(password).sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(roleId));
+        Long userId = FeignUserHelper.createUser(createUserRequest).getResourceId();
+        Assertions.assertNotNull(userId);
+        this.transientUsers.add(userId);
+        return userId;
+    }
+
+    private static ChangePwdUsersUserIdRequest changePasswordRequest(String password) {
+        return new ChangePwdUsersUserIdRequest().password(password).repeatPassword(password);
+    }
+
+    private void setPasswordReuseCheck(boolean enabled) {
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.PASSWORD_REUSE_CHECK_HISTORY_COUNT,
+                new PutGlobalConfigurationsRequest().enabled(enabled).value(3L));
+    }
+
 }
