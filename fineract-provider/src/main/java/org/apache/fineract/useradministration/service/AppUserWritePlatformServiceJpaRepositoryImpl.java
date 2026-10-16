@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -240,8 +241,16 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     }
 
     /**
-     * Encode the new submitted password and retrieve the last N used passwords to check if the current submitted
-     * password matches with one of them.
+     * Check the submitted password against the last N used passwords, and return the current password to save in the
+     * password history.
+     * <p>
+     * A plain-text password is checked with {@link PlatformPasswordEncoder#matches}, which runs one bcrypt verification
+     * per history row. With a reuse count of 0 (the whole history), the cost grows with the size of the history. That
+     * is accepted because passwords change rarely.
+     * <p>
+     * A {@code passwordEncoded} value (a password the client has already hashed) has no plain text, so it is compared
+     * with {@code equals}. Stored hashes are salted, so such a value is practically never matched and reuse is not
+     * detected on that path.
      */
     private AppUserPreviousPassword getCurrentPasswordToSaveAsPreview(final AppUser user, final JsonCommand command) {
         final String passWordEncodedValue = user.getEncodedPassword(command, this.platformPasswordEncoder);
@@ -251,6 +260,11 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         if (passWordEncodedValue != null) {
             final Integer passwordReuseRestrictionCount = this.configurationDomainService.getPasswordReuseRestrictionCount();
             if (passwordReuseRestrictionCount != null) {
+                final String rawPassword = command.stringValueOfParameterNamedAllowingNull(AppUserConstants.PASSWORD);
+                final Predicate<String> matchesSubmittedPassword = rawPassword != null
+                        ? storedPassword -> storedPassword.startsWith("{")
+                                && this.platformPasswordEncoder.matches(rawPassword, storedPassword)
+                        : passWordEncodedValue::equals;
                 List<AppUserPreviousPassword> previousPasswords;
                 if (passwordReuseRestrictionCount == 0) {
                     previousPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),
@@ -260,7 +274,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     previousPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(), pageRequest);
                 }
                 for (AppUserPreviousPassword aPreviewPassword : previousPasswords) {
-                    if (aPreviewPassword.getPassword().equals(passWordEncodedValue)) {
+                    if (matchesSubmittedPassword.test(aPreviewPassword.getPassword())) {
                         throw new PasswordPreviouslyUsedException();
                     }
                 }
