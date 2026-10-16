@@ -219,7 +219,8 @@ public class SavingsSchedularInterestPoster {
                             savingsAccountTransactionData.getRunningBalance(), savingsAccountTransactionData.getCumulativeBalance(),
                             auditTime, userId, auditTime, userId, savingsAccountTransactionData.isManualTransaction(),
                             savingsAccountTransactionData.getRefNo(), savingsAccountTransactionData.isReversalTransaction(),
-                            savingsAccountTransactionData.getOverdraftAmount(), currentDate });
+                            savingsAccountTransactionData.isForceTransaction(), savingsAccountTransactionData.getOverdraftAmount(),
+                            currentDate });
                 } else {
                     updateParams.add(new Object[] { savingsAccountTransactionData.isReversed(), savingsAccountTransactionData.getAmount(),
                             savingsAccountTransactionData.getOverdraftAmount(), savingsAccountTransactionData.getBalanceEndDate(),
@@ -279,8 +280,8 @@ public class SavingsSchedularInterestPoster {
         return "INSERT INTO m_savings_account_transaction (savings_account_id, office_id, is_reversed, transaction_type_enum, transaction_date, amount, balance_end_date_derived, "
                 + "balance_number_of_days_derived, running_balance_derived, cumulative_balance_derived, " + CREATED_DATE_DB_FIELD + ", "
                 + CREATED_BY_DB_FIELD + ", " + LAST_MODIFIED_DATE_DB_FIELD + ", " + LAST_MODIFIED_BY_DB_FIELD
-                + ", is_manual, ref_no, is_reversal, "
-                + "overdraft_amount_derived, submitted_on_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + ", is_manual, ref_no, is_reversal, is_force_transaction, "
+                + "overdraft_amount_derived, submitted_on_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     }
 
     private String batchQueryForSavingsSummaryUpdate() {
