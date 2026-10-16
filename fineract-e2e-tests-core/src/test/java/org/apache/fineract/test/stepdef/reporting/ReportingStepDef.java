@@ -26,11 +26,14 @@ import io.cucumber.java.en.Then;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.PostOfficesResponse;
@@ -44,6 +47,8 @@ public class ReportingStepDef extends AbstractStepDef {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
     private static final String TRIAL_BALANCE_REPORT = "Trial Balance Summary Report with Asset Owner";
+    private static final String WC_TRANSACTION_SUMMARY_REPORT = "Transaction Summary Report for Working Capital Loans";
+    private static final String WC_TRANSACTION_SUMMARY_REPORT_WITH_ASSET_OWNER = "Transaction Summary Report with Asset Owner for Working Capital Loans";
     private final FineractFeignClient fineractClient;
 
     @Then("Transaction Summary Report for date {string} has the following data:")
@@ -70,6 +75,22 @@ public class ReportingStepDef extends AbstractStepDef {
     @Then("Transaction Summary Report with Asset Owner for date {string} column {string} has empty value for all rows")
     public void transactionSummaryReportWithAssetOwnerColumnEmpty(final String dateStr, final String columnName) {
         verifyColumnNullability("Transaction Summary Report with Asset Owner", dateStr, columnName, true);
+    }
+
+    @Then("Transaction Summary Report for Working Capital Loans for date {string} has the following data:")
+    public void transactionSummaryReportForWorkingCapitalLoansHasData(final String dateStr, final DataTable dataTable) {
+        verifyReportDataWithEmptyValues(WC_TRANSACTION_SUMMARY_REPORT, dateStr, dataTable);
+    }
+
+    @Then("Transaction Summary Report with Asset Owner for Working Capital Loans for date {string} has the following data:")
+    public void transactionSummaryReportWithAssetOwnerForWorkingCapitalLoansHasData(final String dateStr, final DataTable dataTable) {
+        verifyReportDataWithEmptyValues(WC_TRANSACTION_SUMMARY_REPORT_WITH_ASSET_OWNER, dateStr, dataTable);
+    }
+
+    @Then("Transaction Summary Report with Asset Owner for Working Capital Loans for date {string} has originatorId, asset owner externalId and the following data:")
+    public void transactionSummaryReportWithAssetOwnerForWorkingCapitalLoansHasDataWithOriginatorId(final String dateStr,
+            final DataTable dataTable) {
+        verifyReportDataWithOwnerExternalIdAndOriginatorId(WC_TRANSACTION_SUMMARY_REPORT_WITH_ASSET_OWNER, dateStr, dataTable);
     }
 
     @Then("Trial Balance Summary Report with Asset Owner for date {string} has originatorId, asset owner externalId and the following data:")
@@ -104,6 +125,15 @@ public class ReportingStepDef extends AbstractStepDef {
         final List<String> headers = expected.getFirst();
 
         verifyReportData(reportName, response, expected, headers);
+    }
+
+    private void verifyReportDataWithEmptyValues(final String reportName, final String dateStr, final DataTable dataTable) {
+        final RunReportsResponse response = executeReport(reportName, dateStr);
+
+        final List<List<String>> expected = dataTable.asLists();
+        final List<String> headers = expected.getFirst();
+
+        verifyReportDataWithEmptyValues(reportName, response, expected, headers);
     }
 
     private List<List<String>> verifyReportDataHeaders(final String reportName, final RunReportsResponse response,
@@ -204,6 +234,11 @@ public class ReportingStepDef extends AbstractStepDef {
     private void verifyReportDataWithOwnerExternalIdAndOriginatorId(final String reportName, final String dateStr,
             final DataTable dataTable) {
         String originatorExternalId = testContext().get(TestContextKey.ORIGINATOR_EXTERNAL_ID);
+        String secondOriginatorExternalId = testContext().get(TestContextKey.ORIGINATOR_SECOND_EXTERNAL_ID);
+        // "originator_external_ids" = every originator created in the scenario, rendered like the report column:
+        // sorted, comma-separated. The ids are UUIDs, so the Java sort order matches the DB collation of STRING_AGG.
+        String allOriginatorExternalIds = Stream.of(originatorExternalId, secondOriginatorExternalId).filter(Objects::nonNull).sorted()
+                .collect(Collectors.joining(", "));
         String ownerExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID);
         String previousOwnerExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_PREVIOUS_OWNER_EXTERNAL_ID);
 
@@ -232,6 +267,7 @@ public class ReportingStepDef extends AbstractStepDef {
                     expectedRow.set(index, originatorExternalId);
                 }
             }
+            Collections.replaceAll(expectedRow, "originator_external_ids", allOriginatorExternalIds);
         });
         verifyReportDataWithEmptyValues(reportName, response, expected, headers);
     }
