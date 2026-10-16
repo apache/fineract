@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 
 @Builder
 @Getter
@@ -32,11 +34,24 @@ public class PaginationParameters {
     public static final int DEFAULT_MAX_LIMIT = 200;
 
     private boolean paged;
+    @Getter(AccessLevel.NONE)
     private Integer offset;
     @Getter(AccessLevel.NONE)
     private Integer limit;
     private String orderBy;
     private String sortOrder;
+
+    /**
+     * A negative offset is not valid SQL and used to surface as an HTTP 500 from the database; it is a client error.
+     */
+    public Integer getOffset() {
+        if (offset != null && offset < 0) {
+            throw new PlatformApiDataValidationException(
+                    List.of(ApiParameterError.parameterError("validation.msg.pagination.offset.must.not.be.negative",
+                            "The parameter `offset` must not be negative.", "offset", offset)));
+        }
+        return offset;
+    }
 
     public Integer getLimit() {
         if (limit == null) {
