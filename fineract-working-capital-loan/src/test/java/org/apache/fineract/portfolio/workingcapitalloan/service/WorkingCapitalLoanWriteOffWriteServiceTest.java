@@ -123,6 +123,8 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
     private BusinessEventNotifierService businessEventNotifierService;
     @Mock
     private WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
+    @Mock
+    private WorkingCapitalLoanBreachScheduleService breachScheduleService;
 
     @Mock
     private WorkingCapitalLoan loan;
@@ -183,6 +185,7 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
         writeOffService.undoWriteOff(LOAN_ID, command);
 
         verify(delinquencyRangeScheduleService).reprocessDelinquencySchedule(loan);
+        verify(breachScheduleService).rederiveNearBreachIfReopened(loan, LoanStatus.CLOSED_WRITTEN_OFF);
         verify(discountFeeAmortizationService).undoFinalDiscountFeeAmortization(any(), any());
         final List<BusinessEvent<?>> events = publishedEvents(3);
         assertThat(events.get(0)).isInstanceOf(WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent.class);

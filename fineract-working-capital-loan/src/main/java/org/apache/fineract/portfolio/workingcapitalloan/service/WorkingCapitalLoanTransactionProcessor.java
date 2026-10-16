@@ -137,7 +137,7 @@ public class WorkingCapitalLoanTransactionProcessor {
         }
 
         // Breach schedule is maintained incrementally here; reprocessing does not rebuild it.
-        breachScheduleService.applyRepayment(loanId, transactionDate, transactionAmount);
+        breachScheduleService.applyRepayment(loan, transactionDate, transactionAmount);
 
         stateMachine.determineAndTransition(loan, transactionDate);
         recalculateOverpaidOnDate(loan, transaction);
