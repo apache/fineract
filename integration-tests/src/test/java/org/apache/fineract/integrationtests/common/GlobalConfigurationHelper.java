@@ -18,128 +18,18 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.GetGlobalConfigurationsResponse;
-import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
-import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.client.models.PutGlobalConfigurationsResponse;
-import org.apache.fineract.client.util.Calls;
-import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.junit.jupiter.api.Assertions;
 
-@SuppressWarnings({ "unused", "rawtypes" })
-@Slf4j
-@RequiredArgsConstructor
-public class GlobalConfigurationHelper {
+/**
+ * The default value of every global configuration. Tests that change a configuration restore these defaults through
+ * {@link org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper}.
+ */
+@SuppressWarnings("rawtypes")
+public final class GlobalConfigurationHelper {
 
-    private static final Gson GSON = new JSON().getGson();
-
-    public GetGlobalConfigurationsResponse getAllGlobalConfigurations() {
-        log.info("------------------------ RETRIEVING ALL GLOBAL CONFIGURATIONS -------------------------");
-        return Calls.ok(FineractClientHelper.getFineractClient().globalConfigurations.retrieveConfiguration(false));
-    }
-
-    public GlobalConfigurationPropertyData getGlobalConfigurationByName(final String configName) {
-        log.info("------------------------ RETRIEVING GLOBAL CONFIGURATION BY NAME -------------------------");
-        return Calls.ok(FineractClientHelper.getFineractClient().globalConfigurations.retrieveOneByName(configName));
-    }
-
-    public GlobalConfigurationPropertyData getGlobalConfigurationById(final Long configId) {
-        log.info("------------------------ RETRIEVING GLOBAL CONFIGURATION BY ID -------------------------");
-        return Calls.ok(FineractClientHelper.getFineractClient().globalConfigurations.retrieveOneGlobalConfiguration(configId));
-    }
-
-    // TODO: This is quite a bad pattern and adds a lot of time to individual test
-    // executions
-    public void resetAllDefaultGlobalConfigurations() {
-
-        GetGlobalConfigurationsResponse actualGlobalConfigurations = getAllGlobalConfigurations();
-        final ArrayList<HashMap> defaults = getAllDefaultGlobalConfigurations();
-
-        Map<String, HashMap> defaultMap = new HashMap<>();
-        for (HashMap config : defaults) {
-            defaultMap.put((String) config.get("name"), config);
-        }
-
-        int changedNo = 0;
-        for (GlobalConfigurationPropertyData actualGlobalConfiguration : actualGlobalConfigurations.getGlobalConfiguration()) {
-
-            HashMap defaultGlobalConfiguration = defaultMap.get(actualGlobalConfiguration.getName());
-            if (defaultGlobalConfiguration == null) {
-                String message = "Global configuration '" + actualGlobalConfiguration.getName()
-                        + "' found in database but not in integration test defaults. "
-                        + "You must add it to GlobalConfigurationHelper.getAllDefaultGlobalConfigurations() to ensure test isolation.";
-                log.error(message);
-                throw new RuntimeException(message);
-            }
-
-            if (!isMatching(defaultGlobalConfiguration, actualGlobalConfiguration)) {
-
-                /**
-                 * Cannot update trapDoor global configurations because
-                 * {@link org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied}
-                 * will be thrown.
-                 */
-                if ((Boolean) defaultGlobalConfiguration.get("trapDoor")) {
-                    continue;
-                }
-
-                // Currently only values and enabled flags are modified by the
-                // integration test suite.
-                // If any other column is modified by the integration test suite in
-                // the future, it needs to be reset here.
-                final String configName = (String) defaultGlobalConfiguration.get("name");
-                final Long configDefaultValue = (Long) defaultGlobalConfiguration.get("value");
-
-                updateGlobalConfiguration(configName, new PutGlobalConfigurationsRequest().value(configDefaultValue)
-                        .enabled((Boolean) defaultGlobalConfiguration.get("enabled")));
-                changedNo++;
-            }
-        }
-        log.info("--------------------------------- UPDATED GLOBAL CONFIG ENTRY SIZE: {} ---------------------------------------------",
-                changedNo);
-    }
-
-    private static boolean isMatching(HashMap o1, GlobalConfigurationPropertyData o2) {
-        return o1.get("name").equals(o2.getName()) && o1.get("value").equals(o2.getValue()) && o1.get("enabled").equals(o2.getEnabled())
-                && o1.get("trapDoor").equals(o2.getTrapDoor());
-    }
-
-    public void verifyAllDefaultGlobalConfigurations() {
-        ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
-        GetGlobalConfigurationsResponse actualGlobalConfigurations = getAllGlobalConfigurations();
-
-        Assertions.assertEquals(expectedGlobalConfigurations.size(), actualGlobalConfigurations.getGlobalConfiguration().size());
-
-        Map<String, HashMap> expectedConfigMap = new HashMap<>();
-        for (HashMap config : expectedGlobalConfigurations) {
-            expectedConfigMap.put((String) config.get("name"), config);
-        }
-
-        for (GlobalConfigurationPropertyData actualGlobalConfiguration : actualGlobalConfigurations.getGlobalConfiguration()) {
-            String configName = actualGlobalConfiguration.getName();
-            HashMap expectedGlobalConfiguration = expectedConfigMap.get(configName);
-
-            assertNotNull(expectedGlobalConfiguration, "Configuration found in API but not in expected defaults: " + configName);
-
-            final String assertionFailedMessage = "Assertion failed for configName:<" + configName + ">";
-            Assertions.assertEquals(expectedGlobalConfiguration.get("name"), actualGlobalConfiguration.getName(), assertionFailedMessage);
-            Assertions.assertEquals(expectedGlobalConfiguration.get("value"), actualGlobalConfiguration.getValue(), assertionFailedMessage);
-            Assertions.assertEquals(expectedGlobalConfiguration.get("enabled"), actualGlobalConfiguration.getEnabled(),
-                    assertionFailedMessage);
-            Assertions.assertEquals(expectedGlobalConfiguration.get("trapDoor"), actualGlobalConfiguration.getTrapDoor(),
-                    assertionFailedMessage);
-        }
-    }
+    private GlobalConfigurationHelper() {}
 
     /**
      * Helper method to get the current default instance data of the /configurations endpoint. Used to reset and verify
@@ -733,23 +623,5 @@ public class GlobalConfigurationHelper {
         defaults.add(payoffSchedulePreviewMaxTermPeriods);
 
         return defaults;
-    }
-
-    public PutGlobalConfigurationsResponse updateGlobalConfiguration(final String configName, PutGlobalConfigurationsRequest request) {
-        log.info("---------------------------------UPDATE VALUE FOR GLOBAL CONFIG---------------------------------------------");
-        return Calls.ok(FineractClientHelper.getFineractClient().globalConfigurations.updateConfigurationByName(configName, request));
-    }
-
-    public void updateGlobalConfigurationInternal(final String configName, final Long value) {
-        log.info("---------------------------UPDATE VALUE FOR GLOBAL CONFIG (internal) ---------------------------------------");
-        Calls.ok(FineractClientHelper.getFineractClient().legacy.updateInternalGlobalConfiguration(configName, value));
-    }
-
-    public void manageConfigurations(final String configurationName, final boolean enabled) {
-        GlobalConfigurationPropertyData configuration = getGlobalConfigurationByName(configurationName);
-        assertNotNull(configuration);
-        updateGlobalConfiguration(configurationName, new PutGlobalConfigurationsRequest().enabled(enabled));
-        GlobalConfigurationPropertyData updatedConfiguration = getGlobalConfigurationByName(configurationName);
-        assertEquals(updatedConfiguration.getEnabled(), enabled);
     }
 }
