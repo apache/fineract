@@ -36,9 +36,10 @@ import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
@@ -118,6 +119,7 @@ public class WorkingCapitalLoanStartDatesTest {
     // Natural end of the first period, restored when the reset is undone.
     private static final LocalDate NATURAL_FIRST_PERIOD_TO_DATE = LocalDate.of(2026, 1, 20);
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
@@ -567,7 +569,7 @@ public class WorkingCapitalLoanStartDatesTest {
         assertNotNull(productId);
 
         // Client + loan application.
-        final Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
         final Long loanId = loanHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //
@@ -620,7 +622,7 @@ public class WorkingCapitalLoanStartDatesTest {
                 .build()).getResourceId();
         assertNotNull(productId);
 
-        final Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
         final Long loanId = loanHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //

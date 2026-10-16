@@ -34,8 +34,9 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PostPaymentAllocationRule;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
@@ -55,6 +56,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
     private static Long delinquencyBucketId;
     private static Long breachId;
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
     private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
@@ -1232,6 +1234,6 @@ public class WorkingCapitalLoanApplicationValidationTest {
     }
 
     private Long createClient() {
-        return ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        return clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
     }
 }

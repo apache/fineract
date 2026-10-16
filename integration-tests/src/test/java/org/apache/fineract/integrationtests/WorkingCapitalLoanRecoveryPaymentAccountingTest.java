@@ -39,9 +39,10 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest.A
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
@@ -68,6 +69,7 @@ import org.junit.jupiter.api.Test;
  */
 public class WorkingCapitalLoanRecoveryPaymentAccountingTest {
 
+    private static final FeignClientHelper CLIENT_HELPER = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private static final DateTimeFormatter BUSINESS_DATE = DateTimeFormatter.ofPattern("dd MMMM yyyy");
     private static final PostWorkingCapitalLoansLoanIdRequest CLEANUP_EMPTY_COMMAND_REQUEST = WorkingCapitalLoanApplicationTestBuilder
             .buildUndoApproveRequest();
@@ -403,7 +405,7 @@ public class WorkingCapitalLoanRecoveryPaymentAccountingTest {
     }
 
     private static Long createClient() {
-        return ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        return CLIENT_HELPER.createClient(ClientRequestBuilders.defaultClient()).getClientId();
     }
 
     private Long trackRecovery(final Long loanId, final Long recoveryTxnId) {

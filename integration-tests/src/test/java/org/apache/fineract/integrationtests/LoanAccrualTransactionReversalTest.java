@@ -35,9 +35,9 @@ import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationC
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -62,7 +62,7 @@ public class LoanAccrualTransactionReversalTest extends FeignLoanTestBase {
                 delinquencyBucketId, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
         assertNotNull(getLoanProductsProductResponse);
 
-        Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanId = createLoanAccount(clientId, getLoanProductsProductResponse.getId(), loanExternalIdStr);
         disburseLoanWithAmount(loanId, "03 September 2022", 100.0);
         disburseLoanWithAmount(loanId, "04 September 2022", 300.0);
@@ -100,7 +100,7 @@ public class LoanAccrualTransactionReversalTest extends FeignLoanTestBase {
 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithInterestRecalculation(assetAccount,
                     incomeAccount, expenseAccount, overpaymentAccount);

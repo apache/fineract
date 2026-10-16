@@ -67,8 +67,8 @@ import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationC
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignReportHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -1295,7 +1295,7 @@ public class InitiateExternalAssetOwnerTransferTest extends ExternalAssetOwnerTr
     }
 
     private Long createClientInOffice(Long officeId) {
-        return clientHelper.createClient(ClientHelper.defaultClientCreationRequest().officeId(officeId).activationDate("01 January 2020"))
+        return clientHelper.createClient(ClientRequestBuilders.defaultClient().officeId(officeId).activationDate("01 January 2020"))
                 .getClientId();
     }
 

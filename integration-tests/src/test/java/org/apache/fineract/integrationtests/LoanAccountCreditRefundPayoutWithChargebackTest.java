@@ -29,8 +29,8 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +44,7 @@ public class LoanAccountCreditRefundPayoutWithChargebackTest extends FeignLoanTe
 
         final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
-        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanProductId = createLoanProduct(delinquencyBucketId);
 
         final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);

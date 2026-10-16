@@ -42,8 +42,9 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
 import org.apache.fineract.client.models.ProjectedAmortizationSchedulePaymentData;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
@@ -73,6 +74,8 @@ public class WorkingCapitalLoanDiscountFeeAmortizationDriftTest {
     private static final int MAX_DAYS = TERM_DAYS + 15;
     private static final LocalDate DISBURSEMENT_DATE = LocalDate.of(2026, 1, 1);
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
+
     /**
      * The fee earned by each of the first six repayments of the over-payment case. Each is the increment of the
      * running, capped amortization total, which is what keeps the loan and the schedule on the same number.
@@ -96,7 +99,7 @@ public class WorkingCapitalLoanDiscountFeeAmortizationDriftTest {
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
     private final List<Long> createdLoanIds = new ArrayList<>();
     private final List<Long> createdProductIds = new ArrayList<>();
-    private final Long createdClientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+    private final Long createdClientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
     @AfterEach
     void cleanupEntities() {

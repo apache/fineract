@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends FeignLoanT
     @Test
     public void loanNPlusOneInstallmentIsRetainedAfterLoanRescheduleTest() {
         runAt("03 March 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepayments();
 
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 March 2023", 1500.0, 4, req -> {
@@ -79,7 +79,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends FeignLoanT
     @Test
     public void loanNPlusOneInstallmentIsAdjustedAfterRescheduleIfDateFallBeforeMaturityDateTest() {
         runAt("03 March 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepayments();
 
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 March 2023", 1500.0, 4, req -> {
@@ -123,7 +123,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends FeignLoanT
     @Test
     public void loanNPlusOneInstallmentIsRetainedAfterLoanRescheduleForAdvancedPaymentAllocationTest() {
         runAt("03 March 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithAdvancedPaymentAllocationStrategy();
 
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 March 2023", 1500.0, 4, req -> {
@@ -171,7 +171,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends FeignLoanT
     @Test
     public void loanNPlusOneInstallmentIsAdjustedAfterRescheduleIfDateFallBeforeMaturityDateForAdvancedPaymentAllocationTest() {
         runAt("03 March 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithAdvancedPaymentAllocationStrategy();
 
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 March 2023", 1500.0, 4, req -> {
@@ -216,7 +216,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends FeignLoanT
     @Test
     public void incorrectValueAfterCharge() {
         runAt("20 December 2024", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .minPrincipal(100.0);
             Long loanProductId = createLoanProduct(product);

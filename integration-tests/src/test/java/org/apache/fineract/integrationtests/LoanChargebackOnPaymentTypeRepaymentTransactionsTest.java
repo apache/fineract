@@ -36,9 +36,9 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -58,7 +58,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest extends FeignL
 
         final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
-        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanProductId = createLoanProduct(strategyCode, advancedAllocation, delinquencyBucketId);
 
         final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr, strategyCode);
@@ -167,7 +167,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest extends FeignL
 
         final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
-        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanProductId = createLoanProduct(strategyCode, advancedAllocation, delinquencyBucketId);
 
         final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr, strategyCode);

@@ -33,7 +33,7 @@ import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Feig
             try {
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("next-unpaid-due-date"));
-                Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+                Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
                 Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(false, true, false, 0);
 
@@ -116,7 +116,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Feig
             try {
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("next-unpaid-due-date"));
-                Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+                Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
                 Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, false, 0);
 

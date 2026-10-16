@@ -35,8 +35,8 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ public class LoanTransactionReverseReplayTest extends FeignLoanTestBase {
 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanProductId = createDefaultLoanProductId();
 
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
@@ -96,7 +96,7 @@ public class LoanTransactionReverseReplayTest extends FeignLoanTestBase {
 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanProductId = createDefaultLoanProductId();
 
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
@@ -163,7 +163,7 @@ public class LoanTransactionReverseReplayTest extends FeignLoanTestBase {
 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting(assetAccount, assetFeeAndPenaltyAccount,
                     incomeAccount, expenseAccount, overpaymentAccount);
 

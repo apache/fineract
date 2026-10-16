@@ -37,8 +37,8 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Order;
@@ -63,7 +63,7 @@ public class LoanWaiveChargeTest extends FeignLoanTestBase {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             // Create Loan Product
             PostLoanProductsRequest product;
@@ -152,7 +152,7 @@ public class LoanWaiveChargeTest extends FeignLoanTestBase {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             // Create Loan Product
             PostLoanProductsRequest product;
@@ -271,7 +271,7 @@ public class LoanWaiveChargeTest extends FeignLoanTestBase {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             // Create Loan Product
             PostLoanProductsRequest product = create4IProgressive();

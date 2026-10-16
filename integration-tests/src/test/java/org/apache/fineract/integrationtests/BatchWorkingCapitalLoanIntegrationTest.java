@@ -45,8 +45,9 @@ import org.apache.fineract.client.models.WorkingCapitalLoanBreachActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachActionData;
 import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.batch.BatchServiceHelper;
@@ -72,6 +73,7 @@ import org.junit.jupiter.api.Test;
  */
 public class BatchWorkingCapitalLoanIntegrationTest {
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final BatchServiceHelper batchServiceHelper = new BatchServiceHelper();
     private final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
@@ -931,7 +933,7 @@ public class BatchWorkingCapitalLoanIntegrationTest {
     }
 
     private Long createClient() {
-        return ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        return clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
     }
 
     private Long extractResourceId(final String responseBody) {
