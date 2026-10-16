@@ -34,15 +34,18 @@ import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Test;
 
 public class LoanAccrualTransactionReversalTest extends FeignLoanTestBase {
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void testNoAccrualTransactionReversalForMultipleDisbursementWithChargeForLoanAccountWithNoInterestBearingSchedulePeriodicAccrual() {
@@ -54,7 +57,7 @@ public class LoanAccrualTransactionReversalTest extends FeignLoanTestBase {
 
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
         final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithMultipleDisbursement(
                 delinquencyBucketId, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
         assertNotNull(getLoanProductsProductResponse);

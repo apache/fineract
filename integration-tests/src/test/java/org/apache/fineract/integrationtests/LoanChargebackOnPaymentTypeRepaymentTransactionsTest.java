@@ -35,11 +35,12 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,12 +49,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest extends FeignLoanTestBase {
 
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
+
     @ParameterizedTest
     @MethodSource("loanProductFactory")
     public void loanTransactionChargebackForPaymentTypeRepaymentTransactionTest(String strategyCode, boolean advancedAllocation) {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
         final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
         final Long loanProductId = createLoanProduct(strategyCode, advancedAllocation, delinquencyBucketId);
@@ -162,7 +165,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest extends FeignL
     public void loanChargebackNotAllowedForReversedPaymentTypeRepaymentTest(String strategyCode, boolean advancedAllocation) {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
         final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
         final Long loanProductId = createLoanProduct(strategyCode, advancedAllocation, delinquencyBucketId);
