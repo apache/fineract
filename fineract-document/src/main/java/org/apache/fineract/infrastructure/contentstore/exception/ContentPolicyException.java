@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.infrastructure.contentstore.exception;
 
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformException;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 
-public class ContentPolicyException extends AbstractPlatformException {
+public class ContentPolicyException extends PlatformApiDataValidationException {
 
     public ContentPolicyException(String message) {
-        super("error.msg.content.policy", message);
+        super("error.msg.content.policy", message, List.of(ApiParameterError.parameterError("error.msg.content.policy", message, "file")));
     }
 }
