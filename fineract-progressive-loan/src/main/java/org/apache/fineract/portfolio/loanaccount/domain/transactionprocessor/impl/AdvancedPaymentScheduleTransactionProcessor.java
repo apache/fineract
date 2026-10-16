@@ -4266,15 +4266,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .repaymentPeriodFrequencyType(loanTransaction.getLoanReAgeParameter().getFrequencyType())
                 .interestRatePerPeriod(interestRate)
                 .interestRatePeriodFrequencyType(loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType())
-                .annualNominalInterestRate(interestRate).daysInMonthType(loan.getLoanProduct().fetchDaysInMonthType())
-                .daysInYearType(loan.getLoanProduct().fetchDaysInYearType()).inArrearsTolerance(Money.zero(currency, mc))
+                .annualNominalInterestRate(interestRate).daysInMonthType(loan.getLoanProductRelatedDetail().fetchDaysInMonthType())
+                .daysInYearType(loan.getLoanProductRelatedDetail().fetchDaysInYearType()).inArrearsTolerance(Money.zero(currency, mc))
                 .isDownPaymentEnabled(false).downPaymentPercentage(ZERO).seedDate(reAgingStartDate)
-                .interestRecognitionOnDisbursementDate(
-                        loan.getLoanProduct().getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate())
-                .daysInYearCustomStrategy(loan.getLoanProduct().getLoanProductRelatedDetail().getDaysInYearCustomStrategy())
-                .interestMethod(loan.getLoanProductRelatedDetail().getInterestMethod()).allowPartialPeriodInterestCalculation(
-                        loan.getLoanProduct().getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalculation())
-                .mc(mc).build();
+                .interestRecognitionOnDisbursementDate(loan.getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate())
+                .daysInYearCustomStrategy(loan.getLoanProductRelatedDetail().getDaysInYearCustomStrategy())
+                .interestMethod(loan.getLoanProductRelatedDetail().getInterestMethod())
+                .allowPartialPeriodInterestCalculation(loan.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalculation()).mc(mc)
+                .build();
 
         final LocalDate reAgePeriodStartDate = calculateFirstReAgedPeriodStartDate(loanTransaction);
         final LocalDate reAgeFirstDueDate = loanTransaction.getLoanReAgeParameter().getStartDate();

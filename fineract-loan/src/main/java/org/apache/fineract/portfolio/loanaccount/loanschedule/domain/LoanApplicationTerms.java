@@ -326,6 +326,7 @@ public final class LoanApplicationTerms {
         this.disbursedAmountPercentageForDownPayment = builder.downPaymentPercentage;
         this.interestRecognitionOnDisbursementDate = builder.interestRecognitionOnDisbursementDate != null
                 && builder.interestRecognitionOnDisbursementDate;
+        this.daysInYearCustomStrategy = builder.daysInYearCustomStrategy;
         if (isDownPaymentEnabled) {
             this.downPaymentAmount = Money.of(getCurrency(),
                     MathUtil.percentageOf(getPrincipal().getAmount(), getDisbursedAmountPercentageForDownPayment(), builder.mc),
