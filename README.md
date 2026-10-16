@@ -39,7 +39,7 @@ For a list of known vulnerabilities, see [Apache Fineract Security Reports](http
 
 If you believe you have found a new vulnerability, [let us know privately](https://fineract.apache.org/#contribute).
 
-For details about security during development and deployment, see the documentation [here](https://fineract.apache.org/docs/stable/#_security).
+For details about security during development and deployment, see the documentation [here](https://fineract.apache.org/docs/develop/#_security).
 
 PRIVATE FORKS
 ============
@@ -116,46 +116,7 @@ Expected response for fresh instance:
 How to run the tests
 ---
 
-Unit tests need nothing running:
-
-```bash
-./gradlew test -x :integration-tests:test -x :twofactor-tests:test -x :oauth2-tests:test
-```
-
-The integration, two-factor, OAuth2 and Cucumber E2E suites all drive a **live Fineract instance over HTTP, and the
-build does not start one for you** — start it first, or every test fails on connection refused. The Docker stack is
-what CI uses, so it is the configuration these suites are actually verified against:
-
-```bash
-# build the image once
-./gradlew :fineract-provider:jibDockerBuild -Djib.to.image=fineract -x test -x cucumber
-
-# start Fineract plus its database, LocalStack and the mock OAuth2 server
-docker compose -f docker-compose-postgresql-test.yml up -d
-./gradlew :integration-tests:waitForFineract
-
-./gradlew :integration-tests:test --tests ClientLoanIntegrationTest
-```
-
-Use `docker-compose-mariadb-test.yml` or `docker-compose-mysql-test.yml` for the other database engines.
-
-Docker is not a requirement, though. Anything that serves `https://localhost:8443/fineract-provider` works just as
-well — `./gradlew devRun` from the Quick Start above, or `ServerApplication` from your IDE — since that is the
-address the suites default to. Point them somewhere else with the `BACKEND_PROTOCOL`, `BACKEND_HOST` and
-`BACKEND_PORT` environment variables.
-
-`:twofactor-tests` and `:oauth2-tests` need the server started in a different authentication mode, so they cannot
-share an instance with `:integration-tests`. Layer the matching override on top and recreate the service:
-
-```bash
-docker compose -f docker-compose-postgresql-test.yml -f docker-compose-twofactor-test.yml \
-  up -d --force-recreate fineract
-./gradlew :twofactor-tests:test
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md#how-to-run-tests) and the
-[Integration Testing](https://fineract.apache.org/docs/current/#testing-integration) chapter for the rest.
-
+See [CONTRIBUTING.md](CONTRIBUTING.md#how-to-run-tests) and [Integration Testing](https://fineract.apache.org/docs/develop/#_integration_testing).
 
 How to run for production
 ---

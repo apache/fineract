@@ -25,15 +25,18 @@ We need a lot of help besides code changes. For example, we also welcome wiki ed
 Here's how to run the set of relatively fast and independent Fineract tests:
 
 ```bash
-./gradlew test -x :twofactor-tests:test -x :oauth2-tests:test -x :integration-tests:test
+./gradlew test -x :twofactor-tests:test -x :oauth2-tests:test -x :integration-tests:test -x :fineract-e2e-tests-runner:test
 ```
 
-This runs nearly 1,000 tests and completes in a few minutes on decent hardware.
+This runs over 1,500 tests and completes in ~5 minutes on decent hardware.
 They shouldn't need any special servers/services running.
+
+The integration, two-factor, OAuth2 and Cucumber E2E suites all require a live Fineract instance over HTTP, and the
+build does not start one for you. Start one first, or every API-dependent test will fail.
 
 #### Cucumber E2E tests
 
-The Cucumber E2E tests run against a live Fineract instance instead of starting one for you.
+The Cucumber E2E tests run against a live Fineract instance. You must start Fineract yourself.
 Before running them locally, create the required databases and start Fineract:
 
 ```bash
@@ -75,8 +78,8 @@ See [Cucumber E2E Tests](https://fineract.apache.org/docs/current/#testing-cucum
 
 #### Integration tests
 
-Like the Cucumber tests, the integration tests run against a live Fineract instance instead of starting one for you.
-Bring one up first — the Docker stack is what CI uses, so it is the configuration these suites are verified against:
+Like the Cucumber tests, the integration tests also require a live Fineract instance.
+Bring one up first. The Docker stack is what CI uses, so it is the configuration these suites are verified against:
 
 ```bash
 # Build the image once
@@ -89,11 +92,10 @@ docker compose -f docker-compose-postgresql-test.yml up -d
 ./gradlew :integration-tests:test --tests ClientLoanIntegrationTest
 ```
 
-`./gradlew :fineract-provider:bootRun` works too, provided you created the databases as shown above for the
-Cucumber tests. `:twofactor-tests` and `:oauth2-tests` need the server started in a different authentication mode,
-and `docker-compose-war-test.yml` runs the WAR in a stock Tomcat instead of the Spring Boot jar; see
-[Integration Testing](https://fineract.apache.org/docs/current/#testing-integration) for those and for the
-`BACKEND_*` variables that point the suites at a non-default address.
+Docker is not required, though.
+Starting `ServerApplication` from your IDE or `./gradlew devRun` from the command line both work too provided you have a running, initialized database as shown above for the Cucumber tests (and have customized `BACKEND_PROTOCOL`, `BACKEND_HOST`, and `BACKEND_PORT` environment variables as necessary).
+
+`:twofactor-tests` and `:oauth2-tests` need the server started in a different authentication mode, and `docker-compose-war-test.yml` runs the WAR in a stock Tomcat instead of the Spring Boot jar; see [Integration Testing](https://fineract.apache.org/docs/develop/#testing-integration) for those and for the `BACKEND_*` variables that point the suites at a non-default address.
 
 Running tests with external dependencies is a multi-step process with many moving parts.
 Sometimes there are arbitrary failures and the prerequisite setup can be daunting.
@@ -177,7 +179,7 @@ Some dependencies are required (e.g. Ghostscript, Graphviz), see [.github/workfl
 
 IDEs such as IntelliJ are useful for editing the AsciiDoc source files while providing a live rendered preview.
 
-HTML rendered from the AsciiDoc source files is also available online at [https://fineract.apache.org/docs/current/](https://fineract.apache.org/docs/current/).
+HTML rendered from the AsciiDoc source files is also available online at <https://fineract.apache.org/docs/develop/>.
 
 ## Recommended IDEs
 
@@ -357,7 +359,7 @@ If merging the PR resolved a JIRA issue, mark that issue as resolved and set "Fi
 
 All commits must be signed with GPG keys.
 
-For GPG setup instructions, see the [Fineract GPG Guide](https://fineract.apache.org/docs/current/#_gpg_2).
+For GPG setup instructions, see the [Fineract GPG Guide](https://fineract.apache.org/docs/develop/#_signing_releases).
 
 Commit signatures may be checked locally with `git log --show-signature`, and a "Verified" badge should appear on GitHub for [every commit](https://github.com/apache/fineract/commits/).
 
