@@ -174,6 +174,8 @@ public interface ConfigurationDomainService {
 
     String getRetainedEarningUsedByReportName();
 
+    String getRetainedEarningWorkingCapitalUsedByReportName();
+
     Long getOfficeId();
 
     boolean isAllowCashAndNonCashAccrual();
