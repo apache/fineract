@@ -48,15 +48,16 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
 import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Assertions;
@@ -67,6 +68,8 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
     private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
 
     // Charge-off accounting and balances
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
+
     @Test
     public void loanChargeOffWithAdvancedPaymentStrategyTest() {
         runAt("10 September 2022", () -> {
@@ -604,7 +607,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
         Assertions.assertNotNull(fundId);
 
         // Delinquency Bucket
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
         String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);

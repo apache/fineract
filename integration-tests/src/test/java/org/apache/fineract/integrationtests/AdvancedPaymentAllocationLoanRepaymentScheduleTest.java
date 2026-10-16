@@ -70,6 +70,7 @@ import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignTransactionHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
@@ -87,7 +88,6 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAccountingHelper;
 import org.apache.fineract.integrationtests.common.loans.CobHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.EarlyPaymentLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.FineractStyleLoanRepaymentScheduleTransactionProcessor;
@@ -107,6 +107,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
 
     private static Long commonLoanProductId;
     private static PostClientsResponse client;
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @BeforeAll
     public static void setup() {
@@ -5891,7 +5893,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         AtomicLong createdLoanChargeId = new AtomicLong();
         final BigDecimal interestRatePerPeriod = BigDecimal.valueOf(11.32);
         final BigDecimal principalAmount = BigDecimal.valueOf(135.94);
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+        final Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                 Pair.of(1, 10), //
                 Pair.of(11, 30), //
                 Pair.of(31, 60), //
@@ -6034,7 +6036,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
             GetLoansLoanIdTransactions[] accrualActivityId = new GetLoansLoanIdTransactions[1];
             final BigDecimal interestRatePerPeriod = BigDecimal.valueOf(11.32);
             final BigDecimal principalAmount = BigDecimal.valueOf(135.94);
-            final Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            final Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //

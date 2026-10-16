@@ -41,12 +41,12 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActio
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEventHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyActionHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyRangeScheduleHelper;
@@ -66,6 +66,8 @@ public class WorkingCapitalLoanDelinquencyActionIntegrationTest {
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
     private final FeignExternalEventHelper externalEventHelper = new FeignExternalEventHelper(
             FineractFeignClientHelper.getFineractFeignClient());
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     /**
      * Happy path: activate loan -> initial range period generated -> POST pause -> periods shifted by pause duration ->
@@ -827,7 +829,7 @@ public class WorkingCapitalLoanDelinquencyActionIntegrationTest {
     }
 
     private Long createWorkingCapitalLoanDelinquencyBucket(final int frequencyDays) {
-        final PostDelinquencyRangeResponse range1 = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest()
+        final PostDelinquencyRangeResponse range1 = delinquencyHelper.createRange(new DelinquencyRangeRequest()
                 .classification(Utils.randomStringGenerator("DLQ_R_", 10)).minimumAgeDays(1).maximumAgeDays(30).locale("en"));
         assertNotNull(range1);
 

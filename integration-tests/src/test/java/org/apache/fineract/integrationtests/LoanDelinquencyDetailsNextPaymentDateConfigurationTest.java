@@ -32,14 +32,17 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends FeignLoanTestBase {
 
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE = new BigDecimal(25);
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void testNextPaymentDateForUnpaidInstallmentsWithNPlusOneTest() {
@@ -210,7 +213,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Feig
 
     private Long createLoanProductWith25PctDownPaymentAndDelinquencyBucket(boolean autoDownPaymentEnabled, boolean multiDisburseEnabled,
             boolean installmentLevelDelinquencyEnabled, Integer graceOnArrearsAging) {
-        Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+        Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                 Pair.of(1, 3), //
                 Pair.of(4, 10), //
                 Pair.of(11, 60), //

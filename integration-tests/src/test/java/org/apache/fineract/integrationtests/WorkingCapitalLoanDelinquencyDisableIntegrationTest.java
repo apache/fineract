@@ -45,12 +45,12 @@ import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyActionHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyRangeScheduleHelper;
@@ -73,6 +73,8 @@ public class WorkingCapitalLoanDelinquencyDisableIntegrationTest {
 
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     /**
      * Disable is applied as of the current business date, has no end date while active and is visible via GET.
@@ -360,7 +362,7 @@ public class WorkingCapitalLoanDelinquencyDisableIntegrationTest {
     }
 
     private Long createWorkingCapitalLoanDelinquencyBucket(final int frequencyDays) {
-        final PostDelinquencyRangeResponse range1 = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest()
+        final PostDelinquencyRangeResponse range1 = delinquencyHelper.createRange(new DelinquencyRangeRequest()
                 .classification(Utils.randomStringGenerator("DLQ_R_", 10)).minimumAgeDays(1).maximumAgeDays(30).locale("en"));
         assertNotNull(range1);
 
