@@ -182,7 +182,7 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(example = "ext-id-001")
         public String externalId;
         @Schema(description = "Client object. Populated only by the loan template endpoint; null in loan details "
-                + "(loan details exposes clientId/clientAccountNo/clientName/clientOfficeId instead)")
+                + "(loan details exposes clientId/clientAccountNo/clientName/clientOfficeId/clientOfficeName instead)")
         public GetWorkingCapitalLoansClient client;
         @Schema(example = "1")
         public Long clientId;
@@ -194,6 +194,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public String clientExternalId;
         @Schema(example = "1")
         public Long clientOfficeId;
+        @Schema(example = "Head Office", description = "Client office name")
+        public String clientOfficeName;
         @Schema(example = "1")
         public Long fundId;
         @Schema(example = "Fund 1")

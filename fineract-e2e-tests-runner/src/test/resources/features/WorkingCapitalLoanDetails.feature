@@ -21,6 +21,7 @@ Feature: Working Capital Loan Details
       | clientAccountNo                                | present                      |
       | clientName                                     | present                      |
       | clientOfficeId                                 | 1                            |
+      | clientOfficeName                               | Head Office                  |
       | loanProductId                                  | present                      |
       | loanProductName                                | WCLP                         |
       | loanProductDescription                         | Working Capital Loan Product |
