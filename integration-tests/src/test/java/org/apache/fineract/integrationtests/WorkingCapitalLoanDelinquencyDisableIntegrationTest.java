@@ -45,10 +45,10 @@ import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
@@ -269,7 +269,8 @@ public class WorkingCapitalLoanDelinquencyDisableIntegrationTest {
      */
     @Test
     public void testDisableLiftsActiveDelinquencyClassification() {
-        final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
+        final FeignGlobalConfigurationHelper globalConfigurationHelper = new FeignGlobalConfigurationHelper(
+                FineractFeignClientHelper.getFineractFeignClient());
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_INSTANT_DELINQUENCY_CALCULATION,
                 new PutGlobalConfigurationsRequest().enabled(true));
         try {
@@ -309,7 +310,8 @@ public class WorkingCapitalLoanDelinquencyDisableIntegrationTest {
                 .getDelinquencyRangeSchedule(loanId);
         final LocalDate toDateBefore = periodsBefore.getFirst().getToDate();
 
-        final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
+        final FeignGlobalConfigurationHelper globalConfigurationHelper = new FeignGlobalConfigurationHelper(
+                FineractFeignClientHelper.getFineractFeignClient());
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                 new PutGlobalConfigurationsRequest().enabled(true));
         try {
