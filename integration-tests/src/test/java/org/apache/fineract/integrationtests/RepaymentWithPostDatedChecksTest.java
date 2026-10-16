@@ -42,7 +42,6 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateral
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
-import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -98,11 +97,11 @@ public class RepaymentWithPostDatedChecksTest extends FeignLoanTestBase {
         verifyLoanStatus(getLoanDetails(loanId), GetLoansLoanIdStatus::getActive);
 
         final String name = "PDC";
-        final Long paymentTypeId = PaymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(name)
-                .description(PaymentTypeHelper.randomNameGenerator("PDC", 15)).isCashPayment(false).position(1L)).getResourceId();
+        final Long paymentTypeId = paymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(name)
+                .description(Utils.randomStringGenerator("PDC", 15)).isCashPayment(false).position(1L)).getResourceId();
         assertNotNull(paymentTypeId);
-        PaymentTypeHelper.verifyPaymentTypeCreatedOnServer(paymentTypeId);
-        final PaymentTypeData paymentTypeResponse = PaymentTypeHelper.retrieveById(paymentTypeId);
+        final PaymentTypeData paymentTypeResponse = paymentTypeHelper.retrievePaymentType(paymentTypeId);
+        assertEquals(paymentTypeId, paymentTypeResponse.getId(), "ERROR IN CREATING THE PAYMENT TYPE");
         assertEquals(name, paymentTypeResponse.getName());
 
         final GetPostDatedChecks postDatedCheck = loanHelper.getPostDatedCheck(loanId, 1);

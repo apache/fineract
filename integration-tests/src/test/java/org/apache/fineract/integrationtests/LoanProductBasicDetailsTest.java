@@ -19,12 +19,14 @@
 
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
+import org.apache.fineract.client.feign.services.LoanProductsDetailsApi;
 import org.apache.fineract.client.models.LoanProductBasicDetailsData;
-import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +36,8 @@ public class LoanProductBasicDetailsTest {
 
     @Test
     public void loanProductBasicDetailsTest() {
-        final Collection<LoanProductBasicDetailsData> productList = LoanProductHelper.fetchProductBasicDetailsList();
+        final Collection<LoanProductBasicDetailsData> productList = ok(() -> FineractFeignClientHelper.getFineractFeignClient()
+                .create(LoanProductsDetailsApi.class).retrieveAllLoanProductsDetails());
         assertNotNull(productList);
         assertTrue(!productList.isEmpty());
     }

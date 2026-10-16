@@ -40,12 +40,11 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFundHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
-import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Assertions;
@@ -55,6 +54,7 @@ public class UndoRepaymentWithDownPaymentIntegrationTest extends FeignLoanTestBa
 
     private static final BigDecimal DOWN_PAYMENT_PERCENTAGE = BigDecimal.valueOf(25);
 
+    private final FeignFundHelper fundHelper = new FeignFundHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
@@ -124,12 +124,12 @@ public class UndoRepaymentWithDownPaymentIntegrationTest extends FeignLoanTestBa
         List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
 
-        String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
-        String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
+        String paymentTypeName = Utils.randomStringGenerator("P_T", 5);
+        String description = Utils.randomStringGenerator("PT_Desc", 15);
         Boolean isCashPayment = false;
         Long position = 1L;
 
-        var paymentTypesResponse = PaymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(paymentTypeName)
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(paymentTypeName)
                 .description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
@@ -140,7 +140,7 @@ public class UndoRepaymentWithDownPaymentIntegrationTest extends FeignLoanTestBa
         loanPaymentChannelToFundSourceMappings.paymentTypeId(paymentTypeIdOne.longValue());
         paymentChannelToFundSourceMappings.add(loanPaymentChannelToFundSourceMappings);
 
-        final Long fundId = FundsResourceHandler.createFund().getResourceId();
+        final Long fundId = fundHelper.createFund().getResourceId();
         Assertions.assertNotNull(fundId);
 
         // Delinquency Bucket
