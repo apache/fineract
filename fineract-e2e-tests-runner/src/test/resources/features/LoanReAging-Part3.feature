@@ -3703,3 +3703,190 @@ Feature: LoanReAging - Part3
     When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "MERCHANT_ISSUED_REFUND" transaction type to "REAMORTIZATION" future installment allocation rule
     When Loan Pay-off is made on "10 June 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C115270 @AdvancedPaymentAllocation
+  Scenario: Verify additional disbursement after re-aging gets its own down payment installment on zero interest loan
+    When Admin sets the business date to "01 September 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2026 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 September 2026" with "1000" amount and expected disbursement date on "01 September 2026"
+    When Admin successfully disburse the loan on "01 September 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "28 September 2026"
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate       | numberOfInstallments | reAgeInterestHandling |
+      | 1               | MONTHS        | 28 October 2026 | 5                    | DEFAULT               |
+    When Admin sets the business date to "28 January 2027"
+    When Admin successfully disburse the loan on "28 January 2027" with "400" EUR transaction amount
+    Then Loan Repayment schedule has 8 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 September 2026 |                   | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 1  | 0    | 01 September 2026 | 01 September 2026 | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 250.0 | 0.0        | 0.0   | 0.0         |
+      | 2  | 27   | 28 September 2026 | 28 September 2026 | 750.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0   | 0.0         |
+      | 3  | 30   | 28 October 2026   |                   | 600.0           | 150.0         | 0.0      | 0.0  | 0.0       | 150.0 | 100.0 | 0.0        | 100.0 | 50.0        |
+      | 4  | 31   | 28 November 2026  |                   | 450.0           | 150.0         | 0.0      | 0.0  | 0.0       | 150.0 | 0.0   | 0.0        | 0.0   | 150.0       |
+      | 5  | 30   | 28 December 2026  |                   | 300.0           | 150.0         | 0.0      | 0.0  | 0.0       | 150.0 | 0.0   | 0.0        | 0.0   | 150.0       |
+      | 6  | 31   | 28 January 2027   |                   | 150.0           | 150.0         | 0.0      | 0.0  | 0.0       | 150.0 | 0.0   | 0.0        | 0.0   | 150.0       |
+      |    |      | 28 January 2027   |                   | 400.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 7  | 0    | 28 January 2027   |                   | 450.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0   | 0.0        | 0.0   | 100.0       |
+      | 8  | 31   | 28 February 2027  |                   | 0.0             | 450.0         | 0.0      | 0.0  | 0.0       | 450.0 | 0.0   | 0.0        | 0.0   | 450.0       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 September 2026 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 September 2026 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        | false    |
+      | 28 September 2026 | Re-age           | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 28 January 2027   | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       | false    |
+      | 28 January 2027   | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1050.0       | false    |
+    When Loan Pay-off is made on "28 January 2027"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C115271 @AdvancedPaymentAllocation
+  Scenario: Verify additional disbursement after re-aged maturity date gets its own down payment installment on zero interest loan
+    When Admin sets the business date to "01 September 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2026 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 September 2026" with "1000" amount and expected disbursement date on "01 September 2026"
+    When Admin successfully disburse the loan on "01 September 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "28 September 2026"
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate       | numberOfInstallments | reAgeInterestHandling |
+      | 1               | MONTHS        | 28 October 2026 | 2                    | DEFAULT               |
+    When Admin sets the business date to "28 January 2027"
+    When Admin successfully disburse the loan on "28 January 2027" with "400" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 September 2026 |                   | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 1  | 0    | 01 September 2026 | 01 September 2026 | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 250.0 | 0.0        | 0.0   | 0.0         |
+      | 2  | 27   | 28 September 2026 | 28 September 2026 | 750.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0   | 0.0         |
+      | 3  | 30   | 28 October 2026   |                   | 375.0           | 375.0         | 0.0      | 0.0  | 0.0       | 375.0 | 100.0 | 0.0        | 100.0 | 275.0       |
+      | 4  | 31   | 28 November 2026  |                   | 0.0             | 375.0         | 0.0      | 0.0  | 0.0       | 375.0 | 0.0   | 0.0        | 0.0   | 375.0       |
+      |    |      | 28 January 2027   |                   | 400.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 5  | 0    | 28 January 2027   |                   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0   | 0.0        | 0.0   | 100.0       |
+      | 6  | 0    | 28 January 2027   |                   | 0.0             | 300.0         | 0.0      | 0.0  | 0.0       | 300.0 | 0.0   | 0.0        | 0.0   | 300.0       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 September 2026 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 September 2026 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        | false    |
+      | 28 September 2026 | Re-age           | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 28 January 2027   | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       | false    |
+      | 28 January 2027   | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1050.0       | false    |
+    When Loan Pay-off is made on "28 January 2027"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify additional disbursement after re-aging gets its own down payment installment on interest bearing loan - EQUAL_AMORTIZATION_FULL_INTEREST
+    When Admin sets the business date to "01 September 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_MULTIDISBURSE_DOWNPAYMENT | 01 September 2026 | 1400           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 September 2026" with "1400" amount and expected disbursement date on "01 September 2026"
+    When Admin successfully disburse the loan on "01 September 2026" with "1000" EUR transaction amount
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 September 2026" with 250 EUR transaction amount and system-generated Idempotency key
+    When Admin sets the business date to "28 September 2026"
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate       | numberOfInstallments | reAgeInterestHandling            |
+      | 1               | MONTHS        | 28 October 2026 | 5                    | EQUAL_AMORTIZATION_FULL_INTEREST |
+    When Admin sets the business date to "28 January 2027"
+    When Admin successfully disburse the loan on "28 January 2027" with "400" EUR transaction amount
+    Then Loan Repayment schedule has 8 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 September 2026 |                   | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 01 September 2026 | 01 September 2026 | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0  | 250.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 27   | 28 September 2026 | 28 September 2026 | 750.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 30   | 28 October 2026   |                   | 600.0           | 150.0         | 3.01     | 0.0  | 0.0       | 153.01 | 0.0   | 0.0        | 0.0  | 153.01      |
+      | 4  | 31   | 28 November 2026  |                   | 450.0           | 150.0         | 3.01     | 0.0  | 0.0       | 153.01 | 0.0   | 0.0        | 0.0  | 153.01      |
+      | 5  | 30   | 28 December 2026  |                   | 300.0           | 150.0         | 3.01     | 0.0  | 0.0       | 153.01 | 0.0   | 0.0        | 0.0  | 153.01      |
+      | 6  | 31   | 28 January 2027   |                   | 150.0           | 150.0         | 3.01     | 0.0  | 0.0       | 153.01 | 0.0   | 0.0        | 0.0  | 153.01      |
+      |    |      | 28 January 2027   |                   | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 7  | 0    | 28 January 2027   |                   | 450.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 0.0   | 0.0        | 0.0  | 100.0       |
+      | 8  | 31   | 28 February 2027  |                   | 0.0             | 450.0         | 3.0      | 0.0  | 0.0       | 453.0  | 0.0   | 0.0        | 0.0  | 453.0       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 September 2026 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 September 2026 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        | false    |
+      | 28 September 2026 | Re-age           | 765.04 | 750.0     | 15.04    | 0.0  | 0.0       | 0.0          | false    |
+      | 28 January 2027   | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       | false    |
+    When Loan Pay-off is made on "28 January 2027"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify additional disbursement after re-aged maturity date gets its own down payment installment on interest bearing loan - EQUAL_AMORTIZATION_FULL_INTEREST
+    When Admin sets the business date to "01 September 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_MULTIDISBURSE_DOWNPAYMENT | 01 September 2026 | 1400           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 September 2026" with "1400" amount and expected disbursement date on "01 September 2026"
+    When Admin successfully disburse the loan on "01 September 2026" with "1000" EUR transaction amount
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 September 2026" with 250 EUR transaction amount and system-generated Idempotency key
+    When Admin sets the business date to "28 September 2026"
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate       | numberOfInstallments | reAgeInterestHandling            |
+      | 1               | MONTHS        | 28 October 2026 | 2                    | EQUAL_AMORTIZATION_FULL_INTEREST |
+    When Admin sets the business date to "28 January 2027"
+    When Admin successfully disburse the loan on "28 January 2027" with "400" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 September 2026 |                   | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 01 September 2026 | 01 September 2026 | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0  | 250.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 27   | 28 September 2026 | 28 September 2026 | 750.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 30   | 28 October 2026   |                   | 375.0           | 375.0         | 7.52     | 0.0  | 0.0       | 382.52 | 0.0   | 0.0        | 0.0  | 382.52      |
+      | 4  | 31   | 28 November 2026  |                   | 0.0             | 375.0         | 7.52     | 0.0  | 0.0       | 382.52 | 0.0   | 0.0        | 0.0  | 382.52      |
+      |    |      | 28 January 2027   |                   | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 5  | 0    | 28 January 2027   |                   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 0.0   | 0.0        | 0.0  | 100.0       |
+      | 6  | 0    | 28 January 2027   |                   | 0.0             | 300.0         | 0.0      | 0.0  | 0.0       | 300.0  | 0.0   | 0.0        | 0.0  | 300.0       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 September 2026 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 September 2026 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        | false    |
+      | 28 September 2026 | Re-age           | 765.04 | 750.0     | 15.04    | 0.0  | 0.0       | 0.0          | false    |
+      | 28 January 2027   | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       | false    |
+    When Loan Pay-off is made on "28 January 2027"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify down payment installments of disbursements before and after re-aging are kept on zero interest loan
+    When Admin sets the business date to "01 September 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2026 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 September 2026" with "1000" amount and expected disbursement date on "01 September 2026"
+    When Admin successfully disburse the loan on "01 September 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "15 September 2026"
+    When Admin successfully disburse the loan on "15 September 2026" with "300" EUR transaction amount
+    When Admin sets the business date to "28 September 2026"
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate       | numberOfInstallments | reAgeInterestHandling |
+      | 1               | MONTHS        | 28 October 2026 | 5                    | DEFAULT               |
+    When Admin sets the business date to "28 January 2027"
+    When Admin successfully disburse the loan on "28 January 2027" with "200" EUR transaction amount
+    Then Loan Repayment schedule has 9 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 September 2026 |                   | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 0    | 01 September 2026 | 01 September 2026 | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 250.0 | 0.0        | 0.0  | 0.0         |
+      |    |      | 15 September 2026 |                   | 300.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 2  | 0    | 15 September 2026 | 15 September 2026 | 975.0           | 75.0          | 0.0      | 0.0  | 0.0       | 75.0  | 75.0  | 0.0        | 0.0  | 0.0         |
+      | 3  | 13   | 28 September 2026 | 28 September 2026 | 975.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 4  | 30   | 28 October 2026   |                   | 780.0           | 195.0         | 0.0      | 0.0  | 0.0       | 195.0 | 50.0  | 0.0        | 50.0 | 145.0       |
+      | 5  | 31   | 28 November 2026  |                   | 585.0           | 195.0         | 0.0      | 0.0  | 0.0       | 195.0 | 0.0   | 0.0        | 0.0  | 195.0       |
+      | 6  | 30   | 28 December 2026  |                   | 390.0           | 195.0         | 0.0      | 0.0  | 0.0       | 195.0 | 0.0   | 0.0        | 0.0  | 195.0       |
+      | 7  | 31   | 28 January 2027   |                   | 195.0           | 195.0         | 0.0      | 0.0  | 0.0       | 195.0 | 0.0   | 0.0        | 0.0  | 195.0       |
+      |    |      | 28 January 2027   |                   | 200.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 8  | 0    | 28 January 2027   |                   | 345.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0  | 0.0   | 0.0        | 0.0  | 50.0        |
+      | 9  | 31   | 28 February 2027  |                   | 0.0             | 345.0         | 0.0      | 0.0  | 0.0       | 345.0 | 0.0   | 0.0        | 0.0  | 345.0       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 September 2026 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 September 2026 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        | false    |
+      | 15 September 2026 | Disbursement     | 300.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1050.0       | false    |
+      | 15 September 2026 | Down Payment     | 75.0   | 75.0      | 0.0      | 0.0  | 0.0       | 975.0        | false    |
+      | 28 September 2026 | Re-age           | 975.0  | 975.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 28 January 2027   | Disbursement     | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1175.0       | false    |
+      | 28 January 2027   | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 1125.0       | false    |
+    When Loan Pay-off is made on "28 January 2027"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
