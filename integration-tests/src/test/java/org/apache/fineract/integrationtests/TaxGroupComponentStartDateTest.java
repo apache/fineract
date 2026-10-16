@@ -38,13 +38,13 @@ import org.apache.fineract.client.models.PostTaxesGroupRequest;
 import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
 import org.apache.fineract.client.models.PutTaxesGroupTaxComponents;
 import org.apache.fineract.client.models.PutTaxesGroupTaxGroupIdRequest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.TaxGroupTemplateApi;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -53,6 +53,7 @@ import org.junit.jupiter.api.Test;
 
 public class TaxGroupComponentStartDateTest {
 
+    private final FeignAccountHelper accountHelper = new FeignAccountHelper(FineractFeignClientHelper.getFineractFeignClient());
     private FineractFeignClient fineractClient;
     private TaxGroupTemplateApi taxGroupTemplateApi;
 
@@ -177,7 +178,7 @@ public class TaxGroupComponentStartDateTest {
     }
 
     private Long createTaxComponent() {
-        final Account glAccount = AccountHelper.createLiabilityGlAccount("taxComponent");
+        final Account glAccount = accountHelper.createLiabilityAccount("taxComponent");
         final PostTaxesComponentsRequest request = new PostTaxesComponentsRequest().name(Utils.randomStringGenerator("TAX_CMP_", 6))
                 .percentage(5.0f).startDate("01 January 2023").creditAccountType(Integer.valueOf(glAccount.getAccountType().toString()))
                 .creditAccountId(glAccount.getAccountID().longValue()).dateFormat(Utils.DATE_FORMAT).locale(Utils.LOCALE);

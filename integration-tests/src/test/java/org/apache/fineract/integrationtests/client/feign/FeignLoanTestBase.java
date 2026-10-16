@@ -24,15 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1187,26 +1184,6 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected PostLoansLoanIdChargesResponse addChargesForLoan(Long loanId, PostLoansLoanIdChargesRequest request) {
         return loanHelper.addChargesForLoan(loanId, request);
-    }
-
-    protected Long addChargesForLoan(Integer loanId, String chargeJson) {
-        Gson gson = new Gson();
-        HashMap<String, Object> chargeMap = gson.fromJson(chargeJson, new TypeToken<HashMap<String, Object>>() {}.getType());
-        PostLoansLoanIdChargesRequest request = new PostLoansLoanIdChargesRequest();
-        if (chargeMap.get("chargeId") != null) {
-            request.chargeId(Long.parseLong(chargeMap.get("chargeId").toString()));
-        }
-        if (chargeMap.get("amount") != null) {
-            request.amount(Double.valueOf(chargeMap.get("amount").toString()));
-        }
-        if (chargeMap.get("dueDate") != null) {
-            request.dueDate(chargeMap.get("dueDate").toString());
-        }
-        if (chargeMap.get("externalId") != null) {
-            request.externalId(chargeMap.get("externalId").toString());
-        }
-        request.dateFormat("dd MMMM yyyy").locale("en");
-        return loanHelper.addChargesForLoan(loanId.longValue(), request).getResourceId();
     }
 
     protected PostLoansLoanIdTransactionsResponse makeWriteoff(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {

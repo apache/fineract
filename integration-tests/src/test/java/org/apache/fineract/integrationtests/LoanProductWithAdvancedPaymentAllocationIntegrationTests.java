@@ -35,8 +35,9 @@ import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFinancialActivityAccountHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
@@ -55,7 +56,8 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests extends Fe
     private static Account EXPENSE_ACCOUNT;
     private static Account INCOME_ACCOUNT;
     private static Account OVERPAYMENT_ACCOUNT;
-    private static final FinancialActivityAccountHelper FINANCIAL_ACTIVITY_ACCOUNT_HELPER = new FinancialActivityAccountHelper(null);
+    private static final FeignFinancialActivityAccountHelper FINANCIAL_ACTIVITY_ACCOUNT_HELPER = new FeignFinancialActivityAccountHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
 
     @BeforeAll
     public static void setupAccounts() {
@@ -493,9 +495,9 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests extends Fe
     }
 
     private static void setProperFinancialActivity(Account transferAccount) {
-        List<GetFinancialActivityAccountsResponse> financialMappings = FINANCIAL_ACTIVITY_ACCOUNT_HELPER.getAllFinancialActivityAccounts();
-        financialMappings.forEach(mapping -> FINANCIAL_ACTIVITY_ACCOUNT_HELPER.deleteFinancialActivityAccount(mapping.getId()));
-        FINANCIAL_ACTIVITY_ACCOUNT_HELPER.createFinancialActivityAccount(new PostFinancialActivityAccountsRequest()
+        List<GetFinancialActivityAccountsResponse> financialMappings = FINANCIAL_ACTIVITY_ACCOUNT_HELPER.getAllMappings();
+        financialMappings.forEach(mapping -> FINANCIAL_ACTIVITY_ACCOUNT_HELPER.deleteMapping(mapping.getId()));
+        FINANCIAL_ACTIVITY_ACCOUNT_HELPER.createMapping(new PostFinancialActivityAccountsRequest()
                 .financialActivityId((long) AccountingConstants.FinancialActivity.ASSET_TRANSFER.getValue())
                 .glAccountId((long) transferAccount.getAccountID()));
     }

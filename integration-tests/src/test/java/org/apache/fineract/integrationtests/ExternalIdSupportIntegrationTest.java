@@ -74,7 +74,6 @@ import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.Test;
 
 public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
@@ -124,8 +123,8 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             String penalty1LoanChargeExternalId = UUID.randomUUID().toString();
-            Integer penalty1LoanChargeId = addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(penalty), penaltyCharge1AddedDate, "10", penalty1LoanChargeExternalId)).intValue();
+            Integer penalty1LoanChargeId = addSpecifiedDueDateCharge(loanId, penalty, penaltyCharge1AddedDate, 10.0,
+                    penalty1LoanChargeExternalId);
 
             // Get loan charges
             List<GetLoansLoanIdChargesChargeIdResponse> loanChargesResult = getLoanCharges((long) loanId);
@@ -494,18 +493,14 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             formattedDate = dateFormatter.format(aMonthBeforePlus3Days);
 
             String penalty3LoanChargeExternalId = UUID.randomUUID().toString();
-            Integer penalty3LoanChargeId = addChargesForLoan(loanWithInterestId, LoanTransactionHelper
-                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), formattedDate, "10", penalty3LoanChargeExternalId))
-                    .intValue();
+            Integer penalty3LoanChargeId = addSpecifiedDueDateCharge(loanWithInterestId, penalty, formattedDate, 10.0,
+                    penalty3LoanChargeExternalId);
 
-            Integer penalty4LoanChargeId = addChargesForLoan(loanWithInterestId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty2), formattedDate, "1000"))
-                    .intValue();
+            Integer penalty4LoanChargeId = addSpecifiedDueDateCharge(loanWithInterestId, penalty2, formattedDate, 1000.0, null);
 
             String penalty5LoanChargeExternalId = UUID.randomUUID().toString();
-            Integer penalty5LoanChargeId = addChargesForLoan(loanWithInterestId, LoanTransactionHelper
-                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty2), formattedDate, "1000", penalty5LoanChargeExternalId))
-                    .intValue();
+            Integer penalty5LoanChargeId = addSpecifiedDueDateCharge(loanWithInterestId, penalty2, formattedDate, 1000.0,
+                    penalty5LoanChargeExternalId);
 
             // Check whether an external id was generated
             final PostLoansLoanIdTransactionsResponse waiveInterestResult = makeWaiveInterest(loanExternalIdStr,
@@ -701,8 +696,8 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             String penalty1LoanChargeExternalId = UUID.randomUUID().toString();
-            Integer penalty1LoanChargeId = addChargesForLoan(loan2Id, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(penalty), penaltyCharge1AddedDate, "10", penalty1LoanChargeExternalId)).intValue();
+            Integer penalty1LoanChargeId = addSpecifiedDueDateCharge(loan2Id, penalty, penaltyCharge1AddedDate, 10.0,
+                    penalty1LoanChargeExternalId);
 
             // NEGATIVE SCENARIOS
 
@@ -1045,4 +1040,8 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
         });
     }
 
+    private Integer addSpecifiedDueDateCharge(Integer loanId, Long chargeId, String dueDate, double amount, String externalId) {
+        return addChargesForLoan(loanId.longValue(), new PostLoansLoanIdChargesRequest().chargeId(chargeId).dueDate(dueDate).amount(amount)
+                .externalId(externalId).dateFormat("dd MMMM yyyy").locale("en")).getResourceId().intValue();
+    }
 }
