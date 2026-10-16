@@ -111,7 +111,6 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(target = "totalCreditBalanceRefundReversed", ignore = true)
     @Mapping(target = "totalRepaymentTransaction", ignore = true)
     @Mapping(target = "totalRepaymentTransactionReversed", ignore = true)
-    @Mapping(target = "totalPayment", ignore = true)
     @Mapping(target = "totalPaymentReversed", ignore = true)
     WorkingCapitalLoanSummaryDataV1 map(WorkingCapitalLoanSummaryData source);
 

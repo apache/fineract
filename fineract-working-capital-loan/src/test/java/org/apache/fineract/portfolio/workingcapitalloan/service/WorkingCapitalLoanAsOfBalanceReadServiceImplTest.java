@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -217,8 +216,8 @@ public class WorkingCapitalLoanAsOfBalanceReadServiceImplTest {
         retrieve();
 
         // A repayment must never be summed into the charged side - it belongs to the paid side, which is not scoped.
-        final Collection<LoanTransactionType> increasing = List.of(LoanTransactionType.DISBURSEMENT, LoanTransactionType.DISCOUNT_FEE);
-        final Collection<LoanTransactionType> decreasing = List.of(LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT);
+        final List<LoanTransactionType> increasing = List.of(LoanTransactionType.DISBURSEMENT, LoanTransactionType.DISCOUNT_FEE);
+        final List<LoanTransactionType> decreasing = List.of(LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT);
         org.mockito.Mockito.verify(transactionRepository).sumAmountsOfTypesUpTo(LOAN_ID, increasing, AS_OF);
         org.mockito.Mockito.verify(transactionRepository).sumAmountsOfTypesUpTo(LOAN_ID, decreasing, AS_OF);
     }

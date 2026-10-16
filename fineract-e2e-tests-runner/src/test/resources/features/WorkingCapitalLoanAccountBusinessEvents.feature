@@ -107,6 +107,8 @@ Feature: Working Capital Loan Account Business Events
     And a Working Capital Loan Balance Changed business event is raised with transaction type totals:
       | totalRepaymentTransaction | totalCreditBalanceRefund | totalCreditBalanceRefundReversed | totalPayment | totalPaymentReversed |
       | 9200.0                    | 200.0                    | 0.0                              | 9200.0       | 0.0                  |
+    And Working capital loan details has the following field values:
+      | summary.totalPayment | 9200.0 |
 
   @TestRailId:C89795
   Scenario: Delinquent Working Capital loan raises a Delinquency Range Change business event
@@ -226,6 +228,8 @@ Feature: Working Capital Loan Account Business Events
     Then a Working Capital Loan Balance Changed business event is raised with transaction type totals:
       | totalPayoutRefund | totalPayoutRefundReversed | totalGoodwillCredit | totalRepaymentTransaction | totalPayment | totalPaymentReversed |
       | 1000.0            | 0.0                       | 0.0                 | 0.0                       | 1000.0       | 0.0                  |
+    And Working capital loan details has the following field values:
+      | summary.totalPayment | 1000.0 |
     When Customer makes "GOODWILL_CREDIT" transaction on "05 January 2026" with 500.0 transaction amount on Working Capital loan
     Then a Working Capital Loan Balance Changed business event is raised with transaction type totals:
       | totalPayoutRefund | totalGoodwillCredit | totalGoodwillCreditReversed | totalPayment | totalPaymentReversed |
@@ -361,6 +365,8 @@ Feature: Working Capital Loan Account Business Events
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
     And a Working Capital Loan Status Changed business event is raised
     And a Working Capital Loan Balance Changed business event is raised
+    And Working capital loan details has the following field values:
+      | summary.totalPayment | 150.0 |
 
   @TestRailId:C89804
   Scenario: A partial charge adjustment on an active Working Capital loan raises Balance Changed without Status Changed

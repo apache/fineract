@@ -122,6 +122,7 @@ Feature: Working Capital Loan Details
       | summary.totalDiscountFeeAdjustment             | 0.0                          |
       | summary.totalExpectedRepayment                 | 100.0                        |
       | summary.totalRepayment                         | 0.0                          |
+      | summary.totalPayment                           | 0.0                          |
       | delinquent.pastDueDays                         | 0                            |
       | delinquent.delinquentDays                      | 0                            |
       | delinquent.delinquentAmount                    | 0.0                          |
@@ -433,6 +434,7 @@ Feature: Working Capital Loan Details
       | delinquent.lastPaymentAmount   | 10.0       |
       | delinquent.lastRepaymentDate   | 2026-01-15 |
       | delinquent.lastRepaymentAmount | 20.0       |
+      | summary.totalPayment           | 30.0       |
     # Closing the loan
     When Admin closes the Working Capital loan with a full repayment on "20 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -519,6 +521,7 @@ Feature: Working Capital Loan Details
       | delinquent.lastPaymentAmount   | 20.0       |
       | delinquent.lastRepaymentDate   | 2026-01-15 |
       | delinquent.lastRepaymentAmount | 20.0       |
+      | summary.totalPayment           | 20.0       |
     # Closing the loan
     When Admin closes the Working Capital loan with a full repayment on "20 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
@@ -42,6 +43,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionTypeTotalHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanBreachScheduleMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper;
@@ -58,11 +60,9 @@ import org.springframework.stereotype.Component;
 public class WorkingCapitalLoanBusinessEventSerializer
         extends AbstractBusinessEventWithCustomDataSerializer<WorkingCapitalLoanBusinessEvent> implements BusinessEventSerializer {
 
-    private static final List<LoanTransactionType> SUMMARY_TOTAL_TRANSACTION_TYPES = List.of(LoanTransactionType.PAYOUT_REFUND,
-            LoanTransactionType.GOODWILL_CREDIT, LoanTransactionType.CHARGE_ADJUSTMENT, LoanTransactionType.CREDIT_BALANCE_REFUND,
-            LoanTransactionType.REPAYMENT);
-    private static final List<LoanTransactionType> PAYMENT_TRANSACTION_TYPES = List.of(LoanTransactionType.REPAYMENT,
-            LoanTransactionType.PAYOUT_REFUND, LoanTransactionType.GOODWILL_CREDIT, LoanTransactionType.CHARGE_ADJUSTMENT);
+    private static final List<LoanTransactionType> SUMMARY_TOTAL_TRANSACTION_TYPES = Stream
+            .concat(WorkingCapitalLoanTransactionFinder.PAYMENT_TYPES.stream(), Stream.of(LoanTransactionType.CREDIT_BALANCE_REFUND))
+            .toList();
 
     private final WorkingCapitalLoanApplicationReadPlatformService readPlatformService;
     private final WorkingCapitalLoanAccountDataMapper mapper;
@@ -140,8 +140,7 @@ public class WorkingCapitalLoanBusinessEventSerializer
         summary.setTotalCreditBalanceRefundReversed(totalOf(totals, LoanTransactionType.CREDIT_BALANCE_REFUND, true));
         summary.setTotalRepaymentTransaction(totalOf(totals, LoanTransactionType.REPAYMENT, false));
         summary.setTotalRepaymentTransactionReversed(totalOf(totals, LoanTransactionType.REPAYMENT, true));
-        summary.setTotalPayment(sumOf(totals, PAYMENT_TRANSACTION_TYPES, false));
-        summary.setTotalPaymentReversed(sumOf(totals, PAYMENT_TRANSACTION_TYPES, true));
+        summary.setTotalPaymentReversed(sumOf(totals, WorkingCapitalLoanTransactionFinder.PAYMENT_TYPES, true));
     }
 
     private BigDecimal totalOf(final Map<LoanTransactionType, Map<Boolean, BigDecimal>> totals, final LoanTransactionType transactionType,
