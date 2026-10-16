@@ -51,6 +51,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,8 +90,9 @@ class ProjectedAmortizationScheduleCalculatorTest {
         final BigDecimal initialNetDisbursement = new BigDecimal("450");
         final LocalDate initialDisbursementDate = LocalDate.of(2019, 1, 1);
 
-        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generateEir(discountFee,
-                initialNetDisbursement, TPV, RATE, DAY_COUNT, initialDisbursementDate, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
+                discountFee, initialNetDisbursement, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1,
+                initialDisbursementDate, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         final ProjectedAmortizationScheduleModel model1 = initial.regenerate(discountFee, initialNetDisbursement, initialDisbursementDate,
                 initialDisbursementDate);
 
@@ -538,8 +540,9 @@ class ProjectedAmortizationScheduleCalculatorTest {
     @Test
     void testNoDiscountLoan_term180_discountFee0_netDisbursement9000() {
         final BigDecimal zeroDiscount = BigDecimal.ZERO;
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(zeroDiscount, NET_DISBURSEMENT, TPV,
-                RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
+                zeroDiscount, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1,
+                EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
 
         assertEquals(180, model.originalPaymentNumber(), "loanTerm = ceil(9000/50) = 180");
         assertEquals(BigDecimal.ZERO, model.effectiveInterestRate(),
@@ -2196,8 +2199,9 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testLessPayment_term10_discountFee50_netDisbursement450_pay40() {
         final BigDecimal smallDiscountFee = new BigDecimal("50");
         final BigDecimal smallNetDisbursement = new BigDecimal("450");
-        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generateEir(smallDiscountFee,
-                smallNetDisbursement, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
+                smallDiscountFee, smallNetDisbursement, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1,
+                EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         final ProjectedAmortizationScheduleModel model = initial.regenerate(smallDiscountFee, smallNetDisbursement,
                 EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
 
@@ -2229,8 +2233,9 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testExcessPayment_term10_discountFee50_netDisbursement450_pay110() {
         final BigDecimal smallDiscountFee = new BigDecimal("50");
         final BigDecimal smallNetDisbursement = new BigDecimal("450");
-        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generateEir(smallDiscountFee,
-                smallNetDisbursement, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
+                smallDiscountFee, smallNetDisbursement, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1,
+                EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         final ProjectedAmortizationScheduleModel model = initial.regenerate(smallDiscountFee, smallNetDisbursement,
                 EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
 
@@ -2464,8 +2469,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
     @Test
     void testFlat_noDiscount_earnsNothingAndStaysCalculable() {
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
-                BigDecimal.ZERO, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
-                EXPECTED_DISBURSEMENT_DATE);
+                BigDecimal.ZERO, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1,
+                EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
 
         assertEquals(180, model.originalPaymentNumber(), "ceil(9000 / 50)");
         model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("50"));
@@ -2501,8 +2506,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
         // 1000.00
         // the plan closes on the 200th, so the term must be sized from what the model actually carries
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
-                new BigDecimal("1000.004"), new BigDecimal("9000.004"), TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
-                EXPECTED_DISBURSEMENT_DATE);
+                new BigDecimal("1000.004"), new BigDecimal("9000.004"), TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1,
+                EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
 
         assertEquals(TERM, model.originalPaymentNumber(), "the term is sized from the currency-rounded gross payable");
         assertEquals(TERM + 1, model.projectedPayments().size(), "no zero-payment period after the plan closes");
@@ -2514,10 +2519,14 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 "every period bills something");
 
         final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
-        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, new BigDecimal("1000.004"),
-                new BigDecimal("9000.004"), TPV, RATE, DAY_COUNT, usd, MC), "the pre-check sizes the term the same way");
-        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
-                new BigDecimal("0.004"), TPV, RATE, DAY_COUNT, usd, MC), "a sub-cent disbursement is nothing to disburse");
+        assertTrue(
+                ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, new BigDecimal("1000.004"),
+                        new BigDecimal("9000.004"), TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC),
+                "the pre-check sizes the term the same way");
+        assertFalse(
+                ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                        new BigDecimal("0.004"), TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC),
+                "a sub-cent disbursement is nothing to disburse");
     }
 
     @Test
@@ -2526,8 +2535,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
         // (half-even); a plan written from the raw figure would restate itself on the first regeneration
         final BigDecimal subCentVolume = new BigDecimal("100010.004");
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
-                DISCOUNT_FEE, NET_DISBURSEMENT, subCentVolume, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
-                EXPECTED_DISBURSEMENT_DATE);
+                DISCOUNT_FEE, NET_DISBURSEMENT, subCentVolume, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1,
+                EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
 
         assertMoneyValue(100010.00, model.totalPaymentVolume(), 2, "the volume is stored in the currency");
         assertMoneyValue(50.00, model.expectedPaymentAmount(), 2, "the daily payment is derived from the stored volume");
@@ -2538,10 +2547,14 @@ class ProjectedAmortizationScheduleCalculatorTest {
         assertEquals(model.originalPaymentNumber(), regenerated.originalPaymentNumber(), "and runs the same term");
 
         final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
-        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
-                NET_DISBURSEMENT, subCentVolume, RATE, DAY_COUNT, usd, MC), "the pre-check accepts what generate() accepts");
-        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
-                NET_DISBURSEMENT, new BigDecimal("0.004"), RATE, DAY_COUNT, usd, MC), "a sub-cent volume bills nothing");
+        assertTrue(
+                ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE, NET_DISBURSEMENT,
+                        subCentVolume, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC),
+                "the pre-check accepts what generate() accepts");
+        assertFalse(
+                ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE, NET_DISBURSEMENT,
+                        new BigDecimal("0.004"), RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC),
+                "a sub-cent volume bills nothing");
     }
 
     @Test
@@ -2553,7 +2566,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
             flat.applyRateChange(new BigDecimal("25"), EXPECTED_DISBURSEMENT_DATE.plusDays(2), EXPECTED_DISBURSEMENT_DATE.plusDays(2));
             flat.projectedPayments();
             assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
-                    NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, usd, MC));
+                    NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC));
             tvm.verify(() -> TvmFunctions.irr(anyList(), any(MathContext.class)), never());
             tvm.verify(() -> TvmFunctions.irr(anyList(), any(BigDecimal.class), any(MathContext.class)), never());
 
@@ -2566,25 +2579,34 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testFlat_calculabilityGate_keepsStructuralChecksOnly() {
         final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
         assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
-                NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, usd, MC));
+                NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC));
+        assertFalse(
+                ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE, BigDecimal.ZERO,
+                        TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC),
+                "a FLAT schedule still needs something to disburse");
+        assertFalse(
+                ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE, NET_DISBURSEMENT,
+                        TPV, BigDecimal.ZERO, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC),
+                "a FLAT schedule still needs a positive daily payment");
         assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
-                BigDecimal.ZERO, TPV, RATE, DAY_COUNT, usd, MC), "a FLAT schedule still needs something to disburse");
-        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
-                NET_DISBURSEMENT, TPV, BigDecimal.ZERO, DAY_COUNT, usd, MC), "a FLAT schedule still needs a positive daily payment");
-        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
-                new BigDecimal("100000000"), TPV, new BigDecimal("0.01"), DAY_COUNT, usd, MC), "the term cap still applies");
-        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(null, DISCOUNT_FEE, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, usd,
-                MC), "a missing type is EIR, and the standard inputs admit an IRR");
+                new BigDecimal("100000000"), TPV, new BigDecimal("0.01"), DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd,
+                MC), "the term cap still applies");
+        assertTrue(
+                ProjectedAmortizationScheduleModel.isScheduleCalculable(null, DISCOUNT_FEE, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT,
+                        WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC),
+                "a missing type is EIR, and the standard inputs admit an IRR");
     }
 
     private ProjectedAmortizationScheduleModel generateFlatModel() {
         return ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE, NET_DISBURSEMENT, TPV, RATE,
-                DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+                DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
+                EXPECTED_DISBURSEMENT_DATE);
     }
 
     private ProjectedAmortizationScheduleModel generateModel() {
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
-                RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
+                DISCOUNT_FEE, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1,
+                EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         return model.regenerate(DISCOUNT_FEE, NET_DISBURSEMENT, EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
     }
 
@@ -2712,14 +2734,14 @@ class ProjectedAmortizationScheduleCalculatorTest {
         // billing nothing; sized from the currency-rounded 10450.00 the plan closes on the 418th with a full
         // instalment.
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
-                new BigDecimal("1000"), new BigDecimal("9500"), TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
-                EXPECTED_DISBURSEMENT_DATE);
+                new BigDecimal("1000"), new BigDecimal("9500"), TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1,
+                EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("50"));
         final LocalDate changeDate = EXPECTED_DISBURSEMENT_DATE.plusDays(2);
         model.applyRateChange(new BigDecimal("9"), changeDate, changeDate);
 
         final ProjectedAmortizationScheduleModel.RateChangeSolve solve = model.rateChangeSolveOn(changeDate);
-        assertMoneyValue(25.00, solve.dailyPayment(), 2, "(100000 x 9 %) / 360");
+        assertMoneyValue(25.00, solve.periodPayment(), 2, "(100000 x 9 %) / 360");
         assertEquals(418, solve.term(), "ceil(10450.00 / 25)");
         assertNull(solve.eir(), "no rate is solved");
 
@@ -2739,8 +2761,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
         // annualEir 46.8451 sizes the same 50.00 / 200-day plan as TPV rate 18 on 100000 volume
         final BigDecimal annualEir = new BigDecimal("46.8451");
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateFromAnnualEir(
-                WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE, NET_DISBURSEMENT, annualEir, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC,
-                CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+                WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE, NET_DISBURSEMENT, annualEir, DAY_COUNT,
+                WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
 
         assertEquals(TERM, model.originalPaymentNumber());
         assertMoneyValue(50.00, model.expectedPaymentAmount(), 2, "daily payment sized from annual EIR");
@@ -2751,7 +2773,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
 
         final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
         assertTrue(ProjectedAmortizationScheduleModel.isAnnualEirCalculable(WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE,
-                NET_DISBURSEMENT, annualEir, DAY_COUNT, usd, MC));
+                NET_DISBURSEMENT, annualEir, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC));
     }
 
     @Test
@@ -2760,14 +2782,19 @@ class ProjectedAmortizationScheduleCalculatorTest {
         final BigDecimal annualEir = new BigDecimal("46.8451");
         final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
 
-        assertFalse(ProjectedAmortizationScheduleModel.isAnnualEirCalculable(WorkingCapitalAmortizationType.EIR, new BigDecimal("0.004"),
-                NET_DISBURSEMENT, annualEir, DAY_COUNT, usd, MC), "sub-cent discount is nothing after currency rounding");
-        assertFalse(ProjectedAmortizationScheduleModel.isAnnualEirCalculable(WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE,
-                new BigDecimal("0.004"), annualEir, DAY_COUNT, usd, MC), "sub-cent disbursement is nothing to disburse");
+        assertFalse(
+                ProjectedAmortizationScheduleModel.isAnnualEirCalculable(WorkingCapitalAmortizationType.EIR, new BigDecimal("0.004"),
+                        NET_DISBURSEMENT, annualEir, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC),
+                "sub-cent discount is nothing after currency rounding");
+        assertFalse(
+                ProjectedAmortizationScheduleModel.isAnnualEirCalculable(WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE,
+                        new BigDecimal("0.004"), annualEir, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, usd, MC),
+                "sub-cent disbursement is nothing to disburse");
 
         assertThrows(IllegalArgumentException.class,
                 () -> ProjectedAmortizationScheduleModel.generateFromAnnualEir(WorkingCapitalAmortizationType.EIR, new BigDecimal("0.004"),
-                        NET_DISBURSEMENT, annualEir, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE));
+                        NET_DISBURSEMENT, annualEir, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, EXPECTED_DISBURSEMENT_DATE,
+                        MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE));
     }
 
     @Test
@@ -2775,7 +2802,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
         final BigDecimal annualEir = new BigDecimal("46.8451");
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateFromAnnualEir(
                 WorkingCapitalAmortizationType.EIR, new BigDecimal("1000.004"), new BigDecimal("9000.004"), annualEir, DAY_COUNT,
-                EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+                WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
 
         assertMoneyValue(1000.00, model.discountFeeAmount(), 2, "the fee is stored in the currency");
         assertMoneyValue(9000.00, model.netDisbursementAmount(), 2, "the net is stored in the currency");
@@ -2822,17 +2849,18 @@ class ProjectedAmortizationScheduleCalculatorTest {
 
         assertFalse(
                 ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.EIR, fee, net, TPV, RATE, DAY_COUNT,
-                        eur, MC),
+                        WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, eur, MC),
                 "an annual EIR above " + ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR + " % is not calculable");
         assertThrows(IllegalStateException.class,
                 () -> ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR, fee, net, TPV, RATE, DAY_COUNT,
-                        EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE),
+                        WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
+                        EXPECTED_DISBURSEMENT_DATE),
                 "and generate() refuses the same shape the pre-check refused");
 
         // FLAT earns a fixed share of every payment and solves no rate, so there is no rate to check and the cap
         // has nothing to say about it - what keeps this shape off a FLAT loan is the discount-versus-principal rule.
         assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, fee, net, TPV, RATE,
-                DAY_COUNT, eur, MC));
+                DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, eur, MC));
     }
 
     /**
@@ -2846,7 +2874,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
         final BigDecimal net = new BigDecimal("120");
         final BigDecimal fee = new BigDecimal("17");
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
-                fee, net, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+                fee, net, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
+                EXPECTED_DISBURSEMENT_DATE);
         assertTrue(model.calculatedAnnualEir().compareTo(ProjectedAmortizationScheduleModel.MAX_CALCULABLE_ANNUAL_EIR) < 0,
                 "the loan's own EIR is within the cap");
 
@@ -2870,7 +2899,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void aProjectionThatCannotBeReSolvedIsKeptAndReportedWithEverythingNeededToReplayIt() {
         final BigDecimal net = new BigDecimal("1000");
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
-                new BigDecimal("50"), net, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+                new BigDecimal("50"), net, TPV, RATE, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, EXPECTED_DISBURSEMENT_DATE,
+                MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         final Logger logger = (Logger) LoggerFactory.getLogger(AmortizationWalk.class.getName());
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
         appender.start();
@@ -2878,7 +2908,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
         // The plan is solved from the net disbursement; only a re-solve starts from any other balance.
         try (MockedStatic<AmortizationParams> params = mockStatic(AmortizationParams.class, CALLS_REAL_METHODS)) {
             params.when(() -> AmortizationParams.solve(any(), argThat(balance -> balance.compareTo(net) != 0), any(), any(), any(),
-                    anyInt(), anyInt(), any())).thenThrow(new IllegalStateException("IRR did not converge"));
+                    anyInt(), any(), anyInt(), any())).thenThrow(new IllegalStateException("IRR did not converge"));
 
             model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("30"));
 

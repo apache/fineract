@@ -2092,3 +2092,11 @@ Feature: WorkingCapitalLoanAccount
       | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      |
     Then Working capital loan creation was successful
     When Admin modifies the working capital loan resenting its current delinquencyBucketId
+
+  @TestRailId:C115287
+  Scenario: Create Working Capital Loan account - UC4.3: With LP overridable disabled, overriding to non-daily frequency is rejected (Negative)
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    Then Creating a working capital loan with LP overridable disabled and with the following data will result an error:
+      | LoanProduct                       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId   | repaymentEvery | repaymentFrequencyType |
+      | WCLP_DISALLOW_ATTRIBUTES_OVERRIDE | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      | WC_DELINQUENCY_BUCKET | 1              | MONTHS                 |

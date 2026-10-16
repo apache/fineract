@@ -241,6 +241,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // The loan is back in SUBMITTED state and can be modified.
         loan.getLoanProductRelatedDetails().setDiscountApproved(null);
 
+        this.amortizationScheduleWriteService.restoreScheduledFrequencyOnUndoApproval(loan);
+
         // The active contractual principal falls back to the proposed one while the loan is unapproved again.
         loan.getLoanProductRelatedDetails().setPrincipal(loan.getProposedPrincipal());
 
@@ -1382,7 +1384,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                     rateChange.getId(), rateChange.getEffectiveDate());
             return;
         }
-        rateChange.applyCalculatedValues(solve.calculatedAnnualEir(), solve.dailyPayment().getAmount(), solve.term());
+        rateChange.applyCalculatedValues(solve.calculatedAnnualEir(), solve.periodPayment().getAmount(), solve.term());
         this.rateChangeRepository.save(rateChange);
     }
 
@@ -1659,7 +1661,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         reverseRateChanges(loan);
         deactivateCharges(loan);
         replaceBalance(loan);
-        amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnApproval(loan);
+        amortizationScheduleWriteService.regenerateAmortizationScheduleOnUndoDisbursal(loan);
     }
 
     private void deactivateCharges(final WorkingCapitalLoan loan) {

@@ -119,8 +119,7 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
                 .getValuesAsStringEnumOptionDataList(WorkingCapitalAmortizationType.class);
         final List<StringEnumOptionData> paymentAmountCalculationStrategyOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(WorkingCapitalPaymentAmountCalculationStrategy.class);
-        final List<StringEnumOptionData> periodFrequencyTypeOptions = ApiFacingEnum
-                .getValuesAsStringEnumOptionDataList(WorkingCapitalLoanPeriodFrequencyType.class);
+        final List<StringEnumOptionData> periodFrequencyTypeOptions = WorkingCapitalLoanPeriodFrequencyType.repaymentFrequencyOptions();
         final List<WorkingCapitalBreachData> breachOptions = breachReadPlatformService.retrieveAll();
         final List<StringEnumOptionData> advancedPaymentAllocationTypes = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(WorkingCapitalPaymentAllocationType.class);

@@ -61,6 +61,7 @@ public final class WorkingCapitalLoanProductConstants {
     public static final String discountParamName = "discount";
     public static final String repaymentEveryParamName = "repaymentEvery";
     public static final String repaymentFrequencyTypeParamName = "repaymentFrequencyType";
+    public static final String INVALID_PERIOD_FREQUENCY_TYPE_CODE = "invalid.period.frequency.type";
     public static final String breachIdParamName = "breachId";
     public static final String nearBreachIdParamName = "nearBreachId";
 

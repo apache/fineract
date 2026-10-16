@@ -542,3 +542,13 @@ Feature: WorkingCapitalLoanProduct
     Examples:
       | wcp_field_name      | wcp_invalid_field_value    | wcp_error_message                                                                          |
       | delinquencyBucketId | "BASIC_DELINQUENCY_BUCKET" | "The parameter `delinquencyBucketId` must reference a WORKING_CAPITAL delinquency bucket." |
+
+  @TestRailId:C115288
+  Scenario Outline: Verify WC Loan Product create rejects unsupported repayment frequency settings
+    Then Admin failed to create a new Working Capital Loan Product with field "<wcp_field_name>" invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+
+    Examples:
+      | wcp_field_name         | wcp_invalid_field_value | wcp_error_message                                              |
+      | repaymentFrequencyType | "YEARS"                 | "invalid.period.frequency.type"                                |
+      | repaymentEvery         | "0"                     | "The parameter `repaymentEvery` must be greater than 0."       |
+      | repaymentEvery         | "-3"                    | "The parameter `repaymentEvery` must be greater than 0."       |

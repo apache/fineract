@@ -97,7 +97,7 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public String paymentAmountCalculationStrategy;
         @Schema(example = "43.7562", description = "Annual EIR percentage (6 decimal places max). Required when strategy is ANNUAL_EIR.")
         public BigDecimal annualEir;
-        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+        @Schema(example = "47.22", description = "Payment amount per repayment period, at most the currency's decimal precision. "
                 + "Required when strategy is PAYMENT_AMOUNT.")
         public BigDecimal paymentAmount;
         @Schema(example = "1")
@@ -125,15 +125,16 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public BigDecimal minAnnualEir;
         @Schema(example = "50.0", description = "Maximum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
         public BigDecimal maxAnnualEir;
-        @Schema(example = "10.0", description = "Minimum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        @Schema(example = "10.0", description = "Minimum payment amount per repayment period. Optional; only for PAYMENT_AMOUNT strategy.")
         public BigDecimal minPaymentAmount;
-        @Schema(example = "100.0", description = "Maximum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        @Schema(example = "100.0", description = "Maximum payment amount per repayment period. Optional; only for PAYMENT_AMOUNT strategy.")
         public BigDecimal maxPaymentAmount;
         @Schema(example = "0.0")
         public BigDecimal discount;
         @Schema(example = "30")
         public Integer repaymentEvery;
-        @Schema(example = "DAYS", allowableValues = { "DAYS", "MONTHS", "YEARS" })
+        @Schema(example = "DAYS", allowableValues = { "DAYS", "WEEKS", "MONTHS", "YEARS" }, description = "Unit of the repayment "
+                + "period, which is repaymentEvery of these. DAYS, WEEKS and MONTHS are supported; YEARS is rejected.")
         public String repaymentFrequencyType;
         @Schema(example = "1")
         public Long breachId;
@@ -341,11 +342,11 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public BigDecimal minAnnualEir;
         @Schema(example = "50.0", description = "Maximum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
         public BigDecimal maxAnnualEir;
-        @Schema(example = "10.0", description = "Minimum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        @Schema(example = "10.0", description = "Minimum payment amount per repayment period. Optional; only for PAYMENT_AMOUNT strategy.")
         public BigDecimal minPaymentAmount;
-        @Schema(example = "100.0", description = "Maximum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        @Schema(example = "100.0", description = "Maximum payment amount per repayment period. Optional; only for PAYMENT_AMOUNT strategy.")
         public BigDecimal maxPaymentAmount;
-        @Schema(example = "47.22", description = "Configured daily payment amount. Only for PAYMENT_AMOUNT strategy.")
+        @Schema(example = "47.22", description = "Configured payment amount per repayment period. Only for PAYMENT_AMOUNT strategy.")
         public BigDecimal paymentAmount;
         @Schema(example = "43.7562", description = "Configured annual EIR percentage. Only for ANNUAL_EIR strategy.")
         public BigDecimal annualEir;
@@ -545,11 +546,11 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public BigDecimal minAnnualEir;
         @Schema(example = "50.0", description = "Maximum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
         public BigDecimal maxAnnualEir;
-        @Schema(example = "10.0", description = "Minimum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        @Schema(example = "10.0", description = "Minimum payment amount per repayment period. Optional; only for PAYMENT_AMOUNT strategy.")
         public BigDecimal minPaymentAmount;
-        @Schema(example = "100.0", description = "Maximum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        @Schema(example = "100.0", description = "Maximum payment amount per repayment period. Optional; only for PAYMENT_AMOUNT strategy.")
         public BigDecimal maxPaymentAmount;
-        @Schema(example = "47.22", description = "Configured daily payment amount. Only for PAYMENT_AMOUNT strategy.")
+        @Schema(example = "47.22", description = "Configured payment amount per repayment period. Only for PAYMENT_AMOUNT strategy.")
         public BigDecimal paymentAmount;
         @Schema(example = "43.7562", description = "Configured annual EIR percentage. Only for ANNUAL_EIR strategy.")
         public BigDecimal annualEir;
@@ -641,11 +642,11 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public BigDecimal minAnnualEir;
         @Schema(example = "50.0", description = "Maximum annual EIR percentage. Optional; only for ANNUAL_EIR strategy.")
         public BigDecimal maxAnnualEir;
-        @Schema(example = "10.0", description = "Minimum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        @Schema(example = "10.0", description = "Minimum payment amount per repayment period. Optional; only for PAYMENT_AMOUNT strategy.")
         public BigDecimal minPaymentAmount;
-        @Schema(example = "100.0", description = "Maximum daily payment amount. Optional; only for PAYMENT_AMOUNT strategy.")
+        @Schema(example = "100.0", description = "Maximum payment amount per repayment period. Optional; only for PAYMENT_AMOUNT strategy.")
         public BigDecimal maxPaymentAmount;
-        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+        @Schema(example = "47.22", description = "Payment amount per repayment period, at most the currency's decimal precision. "
                 + "Required when strategy is PAYMENT_AMOUNT.")
         public BigDecimal paymentAmount;
         @Schema(example = "43.7562", description = "Annual EIR percentage (6 decimal places max). Required when strategy is ANNUAL_EIR.")
@@ -658,7 +659,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public BigDecimal discount;
         @Schema(example = "30")
         public Integer repaymentEvery;
-        @Schema(example = "DAYS", allowableValues = { "DAYS", "MONTHS", "YEARS" })
+        @Schema(example = "DAYS", allowableValues = { "DAYS", "WEEKS", "MONTHS", "YEARS" }, description = "Unit of the repayment "
+                + "period, which is repaymentEvery of these. DAYS, WEEKS and MONTHS are supported; YEARS is rejected.")
         public String repaymentFrequencyType;
         @Schema(example = "1")
         public Long breachId;

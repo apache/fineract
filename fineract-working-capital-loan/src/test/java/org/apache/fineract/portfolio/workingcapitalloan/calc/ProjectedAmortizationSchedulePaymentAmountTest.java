@@ -29,6 +29,7 @@ import java.math.MathContext;
 import java.time.LocalDate;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.junit.jupiter.api.Test;
@@ -45,15 +46,15 @@ class ProjectedAmortizationSchedulePaymentAmountTest {
 
     private static ProjectedAmortizationScheduleModel generate(final WorkingCapitalAmortizationType type, final BigDecimal paymentAmount) {
         return ProjectedAmortizationScheduleModel.generateFromPaymentAmount(type, DISCOUNT_FEE, NET_DISBURSEMENT, paymentAmount, DAY_COUNT,
-                DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE);
+                WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE);
     }
 
     @Test
     void evenPayment_sizesTheSamePlanAsTheEquivalentTpvProduct() {
         final ProjectedAmortizationScheduleModel model = generate(WorkingCapitalAmortizationType.EIR, new BigDecimal("50"));
         final ProjectedAmortizationScheduleModel tpv = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.EIR,
-                DISCOUNT_FEE, NET_DISBURSEMENT, new BigDecimal("100000"), new BigDecimal("18"), DAY_COUNT, DISBURSEMENT_DATE, MC, CURRENCY,
-                DISBURSEMENT_DATE);
+                DISCOUNT_FEE, NET_DISBURSEMENT, new BigDecimal("100000"), new BigDecimal("18"), DAY_COUNT,
+                WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE);
 
         assertEquals(200, model.originalPaymentNumber());
         assertEquals(0, new BigDecimal("50.00").compareTo(model.expectedPaymentAmount().getAmount()));
@@ -108,34 +109,39 @@ class ProjectedAmortizationSchedulePaymentAmountTest {
     void subCentInputs_areRejectedByThePreCheckAndByGenerate() {
         final BigDecimal payment = new BigDecimal("50");
         assertTrue(ProjectedAmortizationScheduleModel.isPaymentAmountCalculable(WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE,
-                NET_DISBURSEMENT, payment, DAY_COUNT, USD, MC));
-        assertFalse(ProjectedAmortizationScheduleModel.isPaymentAmountCalculable(WorkingCapitalAmortizationType.EIR,
-                new BigDecimal("0.004"), NET_DISBURSEMENT, payment, DAY_COUNT, USD, MC), "sub-cent discount is nothing to earn");
-        assertFalse(ProjectedAmortizationScheduleModel.isPaymentAmountCalculable(WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE,
-                new BigDecimal("0.004"), payment, DAY_COUNT, USD, MC), "sub-cent disbursement is nothing to disburse");
+                NET_DISBURSEMENT, payment, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, USD, MC));
+        assertFalse(
+                ProjectedAmortizationScheduleModel.isPaymentAmountCalculable(WorkingCapitalAmortizationType.EIR, new BigDecimal("0.004"),
+                        NET_DISBURSEMENT, payment, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, USD, MC),
+                "sub-cent discount is nothing to earn");
+        assertFalse(
+                ProjectedAmortizationScheduleModel.isPaymentAmountCalculable(WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE,
+                        new BigDecimal("0.004"), payment, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, USD, MC),
+                "sub-cent disbursement is nothing to disburse");
         assertThrows(IllegalArgumentException.class,
                 () -> ProjectedAmortizationScheduleModel.generateFromPaymentAmount(WorkingCapitalAmortizationType.EIR,
-                        new BigDecimal("0.004"), NET_DISBURSEMENT, payment, DAY_COUNT, DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE));
+                        new BigDecimal("0.004"), NET_DISBURSEMENT, payment, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1,
+                        DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE));
     }
 
     @Test
     void paymentTooSmallForTheCalculableTerm_isNotCalculable() {
         // 10000 / 0.09 = 111112 days, above the 100000-day cap
         assertFalse(ProjectedAmortizationScheduleModel.isPaymentAmountCalculable(WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE,
-                NET_DISBURSEMENT, new BigDecimal("0.09"), DAY_COUNT, USD, MC));
+                NET_DISBURSEMENT, new BigDecimal("0.09"), DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, USD, MC));
         assertFalse(ProjectedAmortizationScheduleModel.isPaymentAmountCalculable(WorkingCapitalAmortizationType.EIR, DISCOUNT_FEE,
-                NET_DISBURSEMENT, BigDecimal.ZERO, DAY_COUNT, USD, MC));
+                NET_DISBURSEMENT, BigDecimal.ZERO, DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, USD, MC));
     }
 
     @Test
     void planCursor_solvesFromTheKnownPayment() {
         final PlanCursor cursor = PlanCursor.forPaymentAmount(WorkingCapitalAmortizationType.EIR, null, NET_DISBURSEMENT, DISCOUNT_FEE,
-                new BigDecimal("47.22"), DAY_COUNT, 2, MC);
+                new BigDecimal("47.22"), DAY_COUNT, RepaymentFrequency.DAILY, 2, MC);
         final AmortizationParams.Solved expected = AmortizationParams.solveFromKnownPayment(WorkingCapitalAmortizationType.EIR,
-                NET_DISBURSEMENT, DISCOUNT_FEE, new BigDecimal("47.22"), MC, DAY_COUNT, 2);
+                NET_DISBURSEMENT, DISCOUNT_FEE, new BigDecimal("47.22"), MC, DAY_COUNT, RepaymentFrequency.DAILY, 2);
 
         assertEquals(212, cursor.solved().term());
-        assertEquals(0, new BigDecimal("47.22").compareTo(cursor.solved().dailyPayment()));
+        assertEquals(0, new BigDecimal("47.22").compareTo(cursor.solved().periodPayment()));
         assertEquals(0, new BigDecimal("36.58").compareTo(cursor.solved().closingPayment()));
         assertEquals(0, expected.eir().compareTo(cursor.solved().eir()));
         assertEquals(0, expected.calculatedAnnualEir().compareTo(cursor.solved().calculatedAnnualEir()));

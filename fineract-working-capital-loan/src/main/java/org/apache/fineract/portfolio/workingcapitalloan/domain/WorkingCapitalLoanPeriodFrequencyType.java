@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
@@ -63,6 +66,26 @@ public enum WorkingCapitalLoanPeriodFrequencyType implements ApiFacingEnum<Worki
         }
 
         return null;
+    }
+
+    /** Whether a working capital loan can be scheduled at this frequency. */
+    public boolean isRepaymentFrequency() {
+        return this != YEARS;
+    }
+
+    /** The options a repayment frequency can be chosen from, leaving out the ones a schedule cannot be built at. */
+    public static List<StringEnumOptionData> repaymentFrequencyOptions() {
+        return Arrays.stream(values()).filter(WorkingCapitalLoanPeriodFrequencyType::isRepaymentFrequency)
+                .map(WorkingCapitalLoanPeriodFrequencyType::getValueAsStringEnumOptionData).toList();
+    }
+
+    public LocalDate plus(final LocalDate date, final long amount) {
+        return switch (this) {
+            case DAYS -> date.plusDays(amount);
+            case WEEKS -> date.plusWeeks(amount);
+            case MONTHS -> date.plusMonths(amount);
+            case YEARS -> date.plusYears(amount);
+        };
     }
 
     public StringEnumOptionData toStringEnumOptionData() {

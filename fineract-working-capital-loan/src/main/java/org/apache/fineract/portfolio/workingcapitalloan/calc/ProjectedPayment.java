@@ -42,7 +42,10 @@ public class ProjectedPayment {
     /** Exponent for discount factor: {@code DF = 1/(1+EIR)^paymentsLeft}. Zero for paid periods. */
     private final long paymentsLeft;
 
-    /** {@code (TPV × periodRate) / dayCount / 100}; negated disbursement for row 0. */
+    /**
+     * What the period bills (see {@code ProjectedAmortizationScheduleModel#expectedPaymentAmount}); negated
+     * disbursement for row 0.
+     */
     private final Money expectedPaymentAmount;
 
     /** {@code 1 / (1 + EIR)^paymentsLeft} */

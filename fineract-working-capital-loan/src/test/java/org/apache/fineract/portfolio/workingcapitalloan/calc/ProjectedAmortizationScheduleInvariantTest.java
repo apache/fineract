@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -118,14 +119,14 @@ class ProjectedAmortizationScheduleInvariantTest {
                     for (final String annualEir : new String[] { "50", "5000", "500000" }) {
                         loans.add(new Loan(type + " annual EIR " + annualEir + "% net " + net + " fee " + fee,
                                 () -> ProjectedAmortizationScheduleModel.generateFromAnnualEir(type, BigDecimal.valueOf(fee),
-                                        BigDecimal.valueOf(net), new BigDecimal(annualEir), DAY_COUNT, DISBURSEMENT, MC, CURRENCY,
-                                        DISBURSEMENT)));
+                                        BigDecimal.valueOf(net), new BigDecimal(annualEir), DAY_COUNT,
+                                        WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT)));
                     }
                     for (final String paymentAmount : new String[] { "50", "17.35" }) {
                         loans.add(new Loan(type + " payment amount " + paymentAmount + " net " + net + " fee " + fee,
                                 () -> ProjectedAmortizationScheduleModel.generateFromPaymentAmount(type, BigDecimal.valueOf(fee),
-                                        BigDecimal.valueOf(net), new BigDecimal(paymentAmount), DAY_COUNT, DISBURSEMENT, MC, CURRENCY,
-                                        DISBURSEMENT)));
+                                        BigDecimal.valueOf(net), new BigDecimal(paymentAmount), DAY_COUNT,
+                                        WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT)));
                     }
                 }
             }
@@ -194,8 +195,9 @@ class ProjectedAmortizationScheduleInvariantTest {
     }
 
     private static Loan tpv(final WorkingCapitalAmortizationType type, final int net, final int fee) {
-        return new Loan(type + " TPV net " + net + " fee " + fee, () -> ProjectedAmortizationScheduleModel.generate(type,
-                BigDecimal.valueOf(fee), BigDecimal.valueOf(net), TPV, RATE, DAY_COUNT, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT));
+        return new Loan(type + " TPV net " + net + " fee " + fee,
+                () -> ProjectedAmortizationScheduleModel.generate(type, BigDecimal.valueOf(fee), BigDecimal.valueOf(net), TPV, RATE,
+                        DAY_COUNT, WorkingCapitalLoanPeriodFrequencyType.DAYS, 1, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT));
     }
 
     /** A loan that is not calculable is refused when it is created, so there is no schedule to hold to account. */

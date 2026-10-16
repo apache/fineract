@@ -427,3 +427,134 @@ Feature: WorkingCapitalAmortizationScheduleMatrixPt1
       | 2         | 2026-01-03 | 50.00                 | 0.00            | 0.00                       |                     |                          | 0.00                       |               |                          |
     And The retrieved amortization schedule has no negative monetary amounts
     And The retrieved amortization schedule has exactly 3 payment rows
+
+  # =============================================================================
+  # FINERACT-2455: Dynamic repaymentFrequencyType / repaymentEvery
+  # =============================================================================
+
+  @TestRailId:C115289
+  Scenario: Verify dynamic repayment frequency - UC1: weekly-equivalent frequency DAYS/7
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new Working Capital Loan Product with the following matrix data:
+      | accountingRule | npvDayCount | repaymentFrequencyType | repaymentEvery |
+      | NONE           | 360         | DAYS                   | 7              |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    # --- Amortization schedule verification ---
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has the following summary fields:
+      | discountFeeAmount | netDisbursementAmount | totalPaymentVolume | periodPaymentRate | npvDayCount | expectedPaymentAmount | originalPaymentNumber |
+      | 1000.00           | 9000.00               | 100000.00          | 18                | 360         | 350.00                | 29                    |
+    And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedDiscountFeeBalance |
+      | 0         | 2026-01-01 | -9000.00              | 9000.00         | 1000.00                    |
+      | 1         | 2026-01-08 | 350.00                | 8715.44         | 934.56                     |
+      | 2         | 2026-01-15 | 350.00                | 8428.81         | 871.19                     |
+      | 28        | 2026-07-16 | 350.00                | 198.56          | 1.44                       |
+      | 29        | 2026-07-23 | 200.00                | 0.00            | 0.00                       |
+    And The retrieved amortization schedule has exactly 30 payment rows
+    And The retrieved amortization schedule has no negative monetary amounts
+
+  @TestRailId:C115290
+  Scenario: Verify dynamic repayment frequency - UC2: native WEEKS/2 frequency
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new Working Capital Loan Product with the following matrix data:
+      | accountingRule | npvDayCount | repaymentFrequencyType | repaymentEvery |
+      | NONE           | 360         | WEEKS                  | 2              |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    # --- Amortization schedule verification ---
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has the following summary fields:
+      | discountFeeAmount | netDisbursementAmount | totalPaymentVolume | periodPaymentRate | npvDayCount | expectedPaymentAmount | originalPaymentNumber |
+      | 1000.00           | 9000.00               | 100000.00          | 18                | 360         | 700.00                | 15                    |
+    And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedDiscountFeeBalance |
+      | 0         | 2026-01-01 | -9000.00              | 9000.00         | 1000.00                    |
+      | 1         | 2026-01-15 | 700.00                | 8426.80         | 873.20                     |
+      | 2         | 2026-01-29 | 700.00                | 7845.52         | 754.48                     |
+      | 15        | 2026-07-30 | 200.00                | 0.00            | 0.00                       |
+    And The retrieved amortization schedule has exactly 16 payment rows
+    And The retrieved amortization schedule has no negative monetary amounts
+
+  @TestRailId:C115291
+  Scenario: Verify dynamic repayment frequency - UC3: monthly frequency MONTHS/1
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new Working Capital Loan Product with the following matrix data:
+      | accountingRule | npvDayCount | repaymentFrequencyType | repaymentEvery |
+      | NONE           | 360         | MONTHS                 | 1              |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    # --- Amortization schedule verification ---
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has the following summary fields:
+      | discountFeeAmount | netDisbursementAmount | totalPaymentVolume | periodPaymentRate | npvDayCount | expectedPaymentAmount | originalPaymentNumber |
+      | 1000.00           | 9000.00               | 100000.00          | 18                | 360         | 1500.00               | 7                     |
+    And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedDiscountFeeBalance |
+      | 0         | 2026-01-01 | -9000.00              | 9000.00         | 1000.00                    |
+      | 1         | 2026-02-01 | 1500.00               | 7753.14         | 746.86                     |
+      | 2         | 2026-03-01 | 1500.00               | 6471.21         | 528.79                     |
+      | 6         | 2026-07-01 | 1500.00               | 972.64          | 27.36                      |
+      | 7         | 2026-08-01 | 1000.00               | 0.00            | 0.00                       |
+    And The retrieved amortization schedule has exactly 8 payment rows
+    And The retrieved amortization schedule has no negative monetary amounts
+
+  @TestRailId:C115292
+  Scenario: Verify dynamic repayment frequency - UC4: MONTHS/1 keeps month-end anchor for 31st disbursement
+    When Admin sets the business date to "31 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new Working Capital Loan Product with the following matrix data:
+      | accountingRule | npvDayCount | repaymentFrequencyType | repaymentEvery |
+      | NONE           | 360         | MONTHS                 | 1              |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 31 January 2026 | 31 January 2026          | 9000            | 100000             | 18                | 1000     |
+    When Admin successfully approves the working capital loan on "31 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "31 January 2026"
+    And Admin successfully disburse the Working Capital loan on "31 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    # --- Amortization schedule verification: due dates snap back to the 31st after February ---
+    And Admin retrieves the projected amortization schedule
+    And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedDiscountFeeBalance |
+      | 0         | 2026-01-31 | -9000.00              | 9000.00         | 1000.00                    |
+      | 1         | 2026-02-28 | 1500.00               | 7753.14         | 746.86                     |
+      | 2         | 2026-03-31 | 1500.00               | 6471.21         | 528.79                     |
+      | 3         | 2026-04-30 | 1500.00               | 5153.22         | 346.78                     |
+    And The retrieved amortization schedule has no negative monetary amounts
+
+  @TestRailId:C115293
+  Scenario: Verify dynamic repayment frequency - UC5: repayment on DAYS/7 due date
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new Working Capital Loan Product with the following matrix data:
+      | accountingRule | npvDayCount | repaymentFrequencyType | repaymentEvery |
+      | NONE           | 360         | DAYS                   | 7              |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    # --- Repayment on the first due date ---
+    When Admin sets the business date to "08 January 2026"
+    And Customer makes repayment on "08 January 2026" with 350 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "ACTIVE"
+    # --- Schedule after repayment ---
+    When Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | expectedPaymentAmount | expectedBalance | actualPaymentAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
+      | 0         | 2026-01-01 | -9000.00              | 9000.00         |                     | 1000.00                    | 9000.00       | 1000.00                  |
+      | 1         | 2026-01-08 | 350.00                | 8715.44         | 350.00              | 934.56                     | 8715.44       | 934.56                   |
+      | 2         | 2026-01-15 | 350.00                | 8428.81         |                     | 871.19                     |               |                          |
+    And The retrieved amortization schedule has no negative monetary amounts
