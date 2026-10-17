@@ -85,6 +85,7 @@ import org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManag
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralAssembler;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.Validator;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
@@ -111,6 +112,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementData
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyScheduleDates;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanMapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
@@ -122,6 +124,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPerio
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.EqualAmortizationUnsupportedFeatureException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
@@ -146,7 +149,8 @@ public final class LoanApplicationValidator {
             LoanApiConstants.principalParamName, LoanApiConstants.totalLoanParamName, LoanApiConstants.parentAccountParamName,
             LoanApiConstants.loanTermFrequencyParameterName, LoanApiConstants.loanTermFrequencyTypeParameterName,
             LoanApiConstants.numberOfRepaymentsParameterName, LoanApiConstants.repaymentEveryParameterName,
-            LoanApiConstants.repaymentFrequencyTypeParameterName, LoanApiConstants.repaymentFrequencyNthDayTypeParameterName,
+            LoanApiConstants.repaymentFrequencyTypeParameterName, LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH,
+            LoanApiConstants.SECOND_REPAYMENT_DAY_OF_MONTH, LoanApiConstants.repaymentFrequencyNthDayTypeParameterName,
             LoanApiConstants.repaymentFrequencyDayOfWeekTypeParameterName, LoanApiConstants.interestRatePerPeriodParameterName,
             LoanApiConstants.amortizationTypeParameterName, LoanApiConstants.amortizationTypeOptionsParameterName,
             LoanApiConstants.interestTypeParameterName, LoanApiConstants.isFloatingInterestRate, LoanApiConstants.interestRateDifferential,
@@ -178,6 +182,14 @@ public final class LoanApplicationValidator {
             LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, LoanApiConstants.daysInYearCustomStrategyParameterName,
             LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, LoanApiConstants.ORIGINATORS_PARAM, LoanApiConstants.REPAYMENT_START_DATE_TYPE));
     public static final String LOANAPPLICATION_UNDO = "loanapplication.undo";
+
+    /**
+     * WHOLE_TERM and INVALID are not frequencies a loan can be applied for. The same set applies to both
+     * loanTermFrequencyType and repaymentFrequencyType, because the two are required to be equal.
+     */
+    private static final Object[] SUPPORTED_PERIOD_FREQUENCY_TYPES = { PeriodFrequencyType.DAYS.getValue(),
+            PeriodFrequencyType.WEEKS.getValue(), PeriodFrequencyType.MONTHS.getValue(), PeriodFrequencyType.YEARS.getValue(),
+            PeriodFrequencyType.SEMI_MONTHLY.getValue() };
 
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanScheduleValidator loanScheduleValidator;
@@ -384,7 +396,7 @@ public final class LoanApplicationValidator {
             final Integer loanTermFrequencyType = this.fromApiJsonHelper
                     .extractIntegerSansLocaleNamed(LoanApiConstants.loanTermFrequencyTypeParameterName, element);
             baseDataValidator.reset().parameter(LoanApiConstants.loanTermFrequencyTypeParameterName).value(loanTermFrequencyType).notNull()
-                    .inMinMaxRange(0, 3);
+                    .isOneOfTheseValues(SUPPORTED_PERIOD_FREQUENCY_TYPES);
 
             final Integer numberOfRepayments = this.fromApiJsonHelper
                     .extractIntegerWithLocaleNamed(LoanApiConstants.numberOfRepaymentsParameterName, element);
@@ -399,7 +411,10 @@ public final class LoanApplicationValidator {
             final Integer repaymentEveryType = this.fromApiJsonHelper
                     .extractIntegerSansLocaleNamed(LoanApiConstants.repaymentFrequencyTypeParameterName, element);
             baseDataValidator.reset().parameter(LoanApiConstants.repaymentFrequencyTypeParameterName).value(repaymentEveryType).notNull()
-                    .inMinMaxRange(0, 3);
+                    .isOneOfTheseValues(SUPPORTED_PERIOD_FREQUENCY_TYPES);
+            validateSemiMonthlyRepayment(element, baseDataValidator, repaymentEveryType, repaymentEvery,
+                    loanProduct.getLoanProductRelatedDetail().getFirstRepaymentDayOfMonth(),
+                    loanProduct.getLoanProductRelatedDetail().getSecondRepaymentDayOfMonth());
 
             CalendarUtils.validateNthDayOfMonthFrequency(baseDataValidator, LoanApiConstants.repaymentFrequencyNthDayTypeParameterName,
                     LoanApiConstants.repaymentFrequencyDayOfWeekTypeParameterName, element, this.fromApiJsonHelper);
@@ -1052,7 +1067,7 @@ public final class LoanApplicationValidator {
                 final Integer loanTermFrequencyType = this.fromApiJsonHelper
                         .extractIntegerWithLocaleNamed(LoanApiConstants.loanTermFrequencyTypeParameterName, element);
                 baseDataValidator.reset().parameter(LoanApiConstants.loanTermFrequencyTypeParameterName).value(loanTermFrequencyType)
-                        .notNull().inMinMaxRange(0, 3);
+                        .notNull().isOneOfTheseValues(SUPPORTED_PERIOD_FREQUENCY_TYPES);
             }
 
             Integer numberOfRepayments = loan.getNumberOfRepayments();
@@ -1064,10 +1079,11 @@ public final class LoanApplicationValidator {
                         .integerGreaterThanZero();
             }
 
+            Integer repaymentEvery = loan.getLoanRepaymentScheduleDetail().getRepayEvery();
             if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.repaymentEveryParameterName, element)) {
                 atLeastOneParameterPassedForUpdate = true;
-                final Integer repaymentEvery = this.fromApiJsonHelper
-                        .extractIntegerWithLocaleNamed(LoanApiConstants.repaymentEveryParameterName, element);
+                repaymentEvery = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(LoanApiConstants.repaymentEveryParameterName,
+                        element);
                 baseDataValidator.reset().parameter(LoanApiConstants.repaymentEveryParameterName).value(repaymentEvery).notNull()
                         .integerGreaterThanZero();
             }
@@ -1077,7 +1093,21 @@ public final class LoanApplicationValidator {
                 final Integer repaymentEveryType = this.fromApiJsonHelper
                         .extractIntegerWithLocaleNamed(LoanApiConstants.repaymentFrequencyTypeParameterName, element);
                 baseDataValidator.reset().parameter(LoanApiConstants.repaymentFrequencyTypeParameterName).value(repaymentEveryType)
-                        .notNull().inMinMaxRange(0, 3);
+                        .notNull().isOneOfTheseValues(SUPPORTED_PERIOD_FREQUENCY_TYPES);
+                // A loan being modified keeps the days it already has before falling back to the product's.
+                final LoanProductRelatedDetail dueDaysFallback = loan.getLoanRepaymentScheduleDetail().getFirstRepaymentDayOfMonth() != null
+                        ? loan.getLoanRepaymentScheduleDetail()
+                        : loanProduct.getLoanProductRelatedDetail();
+                validateSemiMonthlyRepayment(element, baseDataValidator, repaymentEveryType, repaymentEvery,
+                        dueDaysFallback.getFirstRepaymentDayOfMonth(), dueDaysFallback.getSecondRepaymentDayOfMonth());
+            } else if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH, element)
+                    || this.fromApiJsonHelper.parameterExists(LoanApiConstants.SECOND_REPAYMENT_DAY_OF_MONTH, element)) {
+                // Only the days are changing, so they are checked against the frequency the loan already has.
+                atLeastOneParameterPassedForUpdate = true;
+                validateSemiMonthlyRepayment(element, baseDataValidator,
+                        loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue(), repaymentEvery,
+                        loan.getLoanRepaymentScheduleDetail().getFirstRepaymentDayOfMonth(),
+                        loan.getLoanRepaymentScheduleDetail().getSecondRepaymentDayOfMonth());
             }
 
             CalendarUtils.validateNthDayOfMonthFrequency(baseDataValidator, LoanApiConstants.repaymentFrequencyNthDayTypeParameterName,
@@ -2277,4 +2307,65 @@ public final class LoanApplicationValidator {
         return firstDisbursalAmount;
     }
 
+    /**
+     * A semi-monthly loan is repaid on two fixed days of every calendar month, so it needs both of those days and it
+     * cannot repeat on a multiple of its period. The days are overridden as a pair, because one of them next to the
+     * other one of the product could break their order. When the request carries neither day, the loan falls back to
+     * the given days, so those must exist.
+     */
+    private void validateSemiMonthlyRepayment(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            final Integer repaymentFrequencyType, final Integer repaymentEvery, final Integer fallbackFirstRepaymentDayOfMonth,
+            final Integer fallbackSecondRepaymentDayOfMonth) {
+        final boolean isSemiMonthly = PeriodFrequencyType.SEMI_MONTHLY.getValue().equals(repaymentFrequencyType);
+        final boolean firstDayInRequest = this.fromApiJsonHelper.parameterExists(LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH, element);
+        final boolean secondDayInRequest = this.fromApiJsonHelper.parameterExists(LoanApiConstants.SECOND_REPAYMENT_DAY_OF_MONTH, element);
+
+        if (firstDayInRequest || secondDayInRequest) {
+            final Integer firstRepaymentDayOfMonth = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH, element);
+            final Integer secondRepaymentDayOfMonth = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(LoanApiConstants.SECOND_REPAYMENT_DAY_OF_MONTH, element);
+            validateSemiMonthlyDueDays(baseDataValidator, firstRepaymentDayOfMonth, secondRepaymentDayOfMonth);
+            if (!isSemiMonthly) {
+                baseDataValidator.reset()
+                        .parameter(firstDayInRequest ? LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH
+                                : LoanApiConstants.SECOND_REPAYMENT_DAY_OF_MONTH)
+                        .failWithCode("supported.only.for.semi.monthly.repayment.frequency");
+            }
+        } else if (isSemiMonthly) {
+            baseDataValidator.reset().parameter(LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH).value(fallbackFirstRepaymentDayOfMonth)
+                    .notNull();
+            baseDataValidator.reset().parameter(LoanApiConstants.SECOND_REPAYMENT_DAY_OF_MONTH).value(fallbackSecondRepaymentDayOfMonth)
+                    .notNull();
+        }
+
+        if (isSemiMonthly && repaymentEvery != null && repaymentEvery != 1) {
+            baseDataValidator.reset().parameter(LoanApiConstants.repaymentEveryParameterName).value(repaymentEvery)
+                    .failWithCode("must.be.one.for.semi.monthly.repayment.frequency");
+        }
+
+        // Meeting calendars have no semi-monthly recurrence; a group or JLG loan that needs this frequency is handled
+        // like an individual loan, without syncing its repayments to a meeting.
+        if (isSemiMonthly && this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.calendarIdParameterName, element) != null) {
+            baseDataValidator.reset().parameter(LoanApiConstants.calendarIdParameterName)
+                    .failWithCode("not.supported.for.semi.monthly.repayment.frequency");
+        }
+    }
+
+    /**
+     * The first day has to exist in every month and the second one has to come after it; a second day the month lacks
+     * falls on its last day, so 31 is the last day of every month.
+     */
+    private void validateSemiMonthlyDueDays(final DataValidatorBuilder baseDataValidator, final Integer firstRepaymentDayOfMonth,
+            final Integer secondRepaymentDayOfMonth) {
+        baseDataValidator.reset().parameter(LoanApiConstants.FIRST_REPAYMENT_DAY_OF_MONTH).value(firstRepaymentDayOfMonth).notNull()
+                .inMinMaxRange(SemiMonthlyScheduleDates.MIN_FIRST_DAY_OF_MONTH, SemiMonthlyScheduleDates.MAX_FIRST_DAY_OF_MONTH);
+        baseDataValidator.reset().parameter(LoanApiConstants.SECOND_REPAYMENT_DAY_OF_MONTH).value(secondRepaymentDayOfMonth).notNull()
+                .inMinMaxRange(SemiMonthlyScheduleDates.MIN_SECOND_DAY_OF_MONTH, SemiMonthlyScheduleDates.MAX_SECOND_DAY_OF_MONTH);
+        if (firstRepaymentDayOfMonth != null && secondRepaymentDayOfMonth != null
+                && secondRepaymentDayOfMonth <= firstRepaymentDayOfMonth) {
+            baseDataValidator.reset().parameter(LoanApiConstants.SECOND_REPAYMENT_DAY_OF_MONTH).value(secondRepaymentDayOfMonth)
+                    .failWithCode("must.be.greater.than.first.repayment.day.of.month");
+        }
+    }
 }

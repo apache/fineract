@@ -138,6 +138,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyScheduleDates;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanTransactionMapper;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
@@ -792,7 +793,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " l.expected_disbursedon_date as expectedDisbursementDate, l.disbursedon_date as actualDisbursementDate, dbu.username as disbursedByUsername, dbu.firstname as disbursedByFirstname, dbu.lastname as disbursedByLastname,"
                     + " l.closedon_date as closedOnDate, cbu.username as closedByUsername, cbu.firstname as closedByFirstname, cbu.lastname as closedByLastname, l.writtenoffon_date as writtenOffOnDate, "
                     + " l.expected_firstrepaymenton_date as expectedFirstRepaymentOnDate, l.interest_calculated_from_date as interestChargedFromDate, l.maturedon_date as actualMaturityDate, l.expected_maturedon_date as expectedMaturityDate, "
-                    + " l.principal_amount_proposed as proposedPrincipal, l.principal_amount as principal, l.total_principal_derived as totalPrincipal, l.approved_principal as approvedPrincipal, l.net_disbursal_amount as netDisbursalAmount, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery,"
+                    + " l.principal_amount_proposed as proposedPrincipal, l.principal_amount as principal, l.total_principal_derived as totalPrincipal, l.approved_principal as approvedPrincipal, l.net_disbursal_amount as netDisbursalAmount, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery, l.first_repayment_day_of_month as firstRepaymentDayOfMonth, l.second_repayment_day_of_month as secondRepaymentDayOfMonth,"
                     + " l.grace_on_principal_periods as graceOnPrincipalPayment, l.recurring_moratorium_principal_periods as recurringMoratoriumOnPrincipalPeriods, l.grace_on_interest_periods as graceOnInterestPayment, l.grace_interest_free_periods as graceOnInterestCharged,l.grace_on_arrears_ageing as graceOnArrearsAgeing,"
                     + " l.nominal_interest_rate_per_period as interestRatePerPeriod, l.annual_nominal_interest_rate as annualInterestRate, "
                     + " l.repayment_period_frequency_enum as repaymentFrequencyType, l.interest_period_frequency_enum as interestRateFrequencyType, "
@@ -1280,7 +1281,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     chargeOffBehaviour.getValueAsStringEnumOptionData(), interestRecognitionOnDisbursementDate, allowFullTermForTranche,
                     daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
                     capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                    merchantBuyDownFee);
+                    merchantBuyDownFee).setFirstRepaymentDayOfMonth(JdbcSupport.getInteger(rs, "firstRepaymentDayOfMonth"))
+                    .setSecondRepaymentDayOfMonth(JdbcSupport.getInteger(rs, "secondRepaymentDayOfMonth"));
         }
     }
 
@@ -1764,7 +1766,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         }
 
         final PeriodFrequencyType frequencyType = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType();
-        final LocalDate calculatedStartDate = calculateReAgeStartDate(businessDate, frequencyType);
+        final LocalDate calculatedStartDate = calculateReAgeStartDate(businessDate, frequencyType,
+                loan.getLoanRepaymentScheduleDetail().getFirstRepaymentDayOfMonth(),
+                loan.getLoanRepaymentScheduleDetail().getSecondRepaymentDayOfMonth());
 
         final CurrencyData currencyData = new CurrencyData(loan.getCurrencyCode(), null, loan.getCurrency().getDigitsAfterDecimal(),
                 loan.getCurrency().getInMultiplesOf(), null, null);
@@ -1777,7 +1781,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 .nextInstallmentDueDate(nextInstallmentDueDate).calculatedStartDate(calculatedStartDate).build();
     }
 
-    private LocalDate calculateReAgeStartDate(LocalDate businessDate, PeriodFrequencyType frequencyType) {
+    private LocalDate calculateReAgeStartDate(LocalDate businessDate, PeriodFrequencyType frequencyType, Integer firstRepaymentDayOfMonth,
+            Integer secondRepaymentDayOfMonth) {
         if (frequencyType == null) {
             return null;
         }
@@ -1787,6 +1792,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             case WEEKS -> businessDate.plusWeeks(1);
             case MONTHS -> businessDate.plusMonths(1);
             case YEARS -> businessDate.plusYears(1);
+            case SEMI_MONTHLY -> SemiMonthlyScheduleDates.next(businessDate,
+                    SemiMonthlyScheduleDates.requireDueDays(firstRepaymentDayOfMonth, secondRepaymentDayOfMonth));
             case WHOLE_TERM, INVALID -> null;
         };
     }
