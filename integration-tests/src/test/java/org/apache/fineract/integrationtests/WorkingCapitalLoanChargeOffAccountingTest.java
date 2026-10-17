@@ -40,6 +40,7 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest.AccountingRuleEnum;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanTransactionTemplateResponse;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
@@ -177,6 +178,28 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
         assertEquals(4, entries.size(), "Expected 4 journal entries (2 original + 2 reversal)");
         assertJournalEntry(entries, "DEBIT", loanPortfolioAccount, 5000.0);
         assertJournalEntry(entries, "CREDIT", chargeOffExpenseAccount, 5000.0);
+    }
+
+    @Test
+    public void testChargeOffAcceptsHyphenatedAndUpperCaseCommandValues() {
+        final Long productId = createAccrualWithDeferredRevenueAmortizationProduct();
+        final Long[] loanIdHolder = new Long[1];
+        businessDateHelper.runAt(DAY_1.toString(),
+                () -> loanIdHolder[0] = createApprovedAndDisbursedLoan(productId, BigDecimal.valueOf(5000), DAY_1));
+
+        businessDateHelper.runAt(DAY_2.toString(), () -> {
+            // The template resolves the command with the same normalization as the transaction endpoint
+            final WorkingCapitalLoanTransactionTemplateResponse template = loanHelper.getTransactionTemplate(loanIdHolder[0], "CHARGE-OFF",
+                    null);
+            assertNotNull(template.getExpectedAmount());
+            loanHelper.executeTransaction(loanIdHolder[0], "charge-off",
+                    WorkingCapitalLoanRequestBuilders.chargeOff(DAY_2.format(API_DATE), null));
+        });
+        assertEquals(Boolean.TRUE, loanHelper.getLoanDetails(loanIdHolder[0]).getChargedOff());
+
+        businessDateHelper.runAt(DAY_3.toString(), () -> loanHelper.executeTransaction(loanIdHolder[0], "UNDO-CHARGE-OFF",
+                WorkingCapitalLoanRequestBuilders.undoChargeOff(null)));
+        assertNotEquals(Boolean.TRUE, loanHelper.getLoanDetails(loanIdHolder[0]).getChargedOff());
     }
 
     @Test
