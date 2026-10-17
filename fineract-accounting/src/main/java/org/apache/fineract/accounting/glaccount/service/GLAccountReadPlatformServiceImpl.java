@@ -96,9 +96,9 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             final EnumOptionData usage = AccountingEnumerations.gLAccountUsage(usageId);
             final String description = rs.getString("description");
             final String nameDecorated = rs.getString("nameDecorated");
-            final Long codeId = rs.wasNull() ? null : rs.getLong("codeId");
+            final Long codeId = JdbcSupport.getLong(rs, "codeId");
             final String codeValue = rs.getString("codeValue");
-            final CodeValueData tagId = CodeValueData.instance(codeId, codeValue);
+            final CodeValueData tagId = codeId == null ? null : CodeValueData.instance(codeId, codeValue);
             Long organizationRunningBalance = null;
             if (associationParametersData.isRunningBalanceRequired()) {
                 organizationRunningBalance = rs.getLong("organizationRunningBalance");
@@ -151,7 +151,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
                 if (firstWhereConditionAdded) {
                     sql += SQL_AND;
                 }
-                sql += " ( name like %?% or gl_code like %?% )";
+                sql += " ( name like concat('%', ?, '%') or gl_code like concat('%', ?, '%') )";
                 parameterArray[arrayPos] = searchParam;
                 arrayPos = arrayPos + 1;
                 parameterArray[arrayPos] = searchParam;
