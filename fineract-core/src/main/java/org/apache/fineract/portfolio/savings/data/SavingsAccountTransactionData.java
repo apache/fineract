@@ -215,11 +215,11 @@ public class SavingsAccountTransactionData implements Serializable {
     public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
             final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
-            final boolean reversed, final LocalDate submittedOnDate, final boolean interestedPostedAsOn, final BigDecimal cumulativeBalance,
+            final boolean reversed, final LocalDate submittedOnDate, final boolean isManualTransaction, final BigDecimal cumulativeBalance,
             final LocalDate balanceEndDate) {
-        SavingsAccountTransactionData data = createData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
-                amount, outstandingChargeAmount, runningBalance, reversed, null, null, submittedOnDate, interestedPostedAsOn, null, null,
-                false);
+        SavingsAccountTransactionData data = new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId,
+                savingsAccountNo, ExternalId.empty(), date, currency, amount, outstandingChargeAmount, runningBalance, reversed, null, null,
+                submittedOnDate, isManualTransaction, null, null, null, null, isManualTransaction, false, null, null, false);
         data.transactionDate = date;
         data.cumulativeBalance = cumulativeBalance;
         data.balanceEndDate = balanceEndDate;
