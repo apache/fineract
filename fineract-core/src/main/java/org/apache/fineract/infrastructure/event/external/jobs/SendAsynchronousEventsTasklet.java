@@ -73,7 +73,7 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     private final ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
+    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         try {
             if (isDownstreamChannelEnabled()) {
                 List<ExternalEventView> events = getQueuedEventsBatch();
@@ -82,6 +82,9 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
             }
         } catch (Exception e) {
             log.error("Error occurred while processing events: ", e);
+            // the events stay TO_BE_SENT and are retried on the next run; fail the step so that the job run is not
+            // recorded as a success
+            throw e;
         }
         return RepeatStatus.FINISHED;
     }
@@ -134,14 +137,22 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
                 }
             }));
         });
+        Exception failure = null;
         for (Future<?> task : tasks) {
             try {
                 task.get();
             } catch (InterruptedException e) {
                 log.error("Interrupted while marking events as sent", e);
+                Thread.currentThread().interrupt();
+                failure = e;
             } catch (ExecutionException e) {
                 log.error("Exception while marking events as sent", e);
+                failure = e;
             }
+        }
+        if (failure != null) {
+            // the events were already sent: they stay TO_BE_SENT and will be sent again, so this must not go unnoticed
+            throw new IllegalStateException("Events were sent but could not all be marked as sent", failure);
         }
     }
 
