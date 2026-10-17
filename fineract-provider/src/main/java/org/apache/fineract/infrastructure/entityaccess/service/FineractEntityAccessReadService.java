@@ -21,6 +21,8 @@ package org.apache.fineract.infrastructure.entityaccess.service;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
+import org.apache.fineract.infrastructure.entityaccess.data.FineractOfficeEntityAccessData;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 
 public interface FineractEntityAccessReadService {
@@ -43,4 +45,6 @@ public interface FineractEntityAccessReadService {
 
     Collection<FineractEntityToEntityMappingData> retrieveEntityToEntityMappings(Long mapId, Long fromoId, Long toId);
 
+    FineractOfficeEntityAccessData retrieveOfficeEntityAccess(FineractEntityAccessType accessType, Long officeId,
+            boolean includeSubOffices);
 }

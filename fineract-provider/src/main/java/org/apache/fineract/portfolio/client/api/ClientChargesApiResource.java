@@ -60,6 +60,7 @@ import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientChargeData;
 import org.apache.fineract.portfolio.client.data.ClientTransactionData;
 import org.apache.fineract.portfolio.client.service.ClientChargeReadPlatformService;
+import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.client.service.ClientTransactionReadPlatformService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -79,6 +80,7 @@ public class ClientChargesApiResource {
     private final DefaultToApiJsonSerializer<ClientChargeData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final ClientReadPlatformService clientReadPlatformService;
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
@@ -121,7 +123,8 @@ public class ClientChargesApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
-        final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveAllChargesApplicableToClients();
+        final Long clientOfficeId = this.clientReadPlatformService.retrieveOne(clientId).getOfficeId();
+        final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveAllChargesApplicableToClients(clientOfficeId);
         final ClientChargeData clientChargeData = ClientChargeData.template(chargeOptions);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
