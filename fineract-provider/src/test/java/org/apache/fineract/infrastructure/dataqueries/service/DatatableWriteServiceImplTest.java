@@ -20,11 +20,14 @@ package org.apache.fineract.infrastructure.dataqueries.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +41,8 @@ import java.util.Map;
 import org.apache.fineract.infrastructure.codes.service.CodeReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.DatatableCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -45,6 +50,10 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
+import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
+import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
+import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
@@ -297,5 +306,121 @@ class DatatableWriteServiceImplTest {
         verify(jdbcTemplate).execute(sqlCaptor.capture());
         assertTrue(sqlCaptor.getValue().contains("ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 COLLATE=UTF8MB4_UNICODE_CI;"),
                 "MySQL table creation must include utf8mb4 charset and utf8mb4_unicode_ci collation");
+    }
+
+    @Test
+    void testDeleteOneToManyEntryIsScopedToApplicationTableId() {
+        setupDeleteEntryMocks(true);
+        when(jdbcTemplate.update(anyString(), eq(7L), eq(3L))).thenReturn(1);
+
+        underTest.deleteDatatableEntry(DATATABLE_NAME, 3L, 7L, mock(JsonCommand.class));
+
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(jdbcTemplate).update(sqlCaptor.capture(), eq(7L), eq(3L));
+        assertEquals("DELETE FROM \"" + DATATABLE_NAME + "\" WHERE \"id\" = ? AND \"client_id\" = ?", sqlCaptor.getValue());
+    }
+
+    @Test
+    void testDeleteOneToManyEntryOfAnotherEntityIsNotFound() {
+        setupDeleteEntryMocks(true);
+        when(jdbcTemplate.update(anyString(), eq(7L), eq(3L))).thenReturn(0);
+
+        assertThrows(DatatableNotFoundException.class,
+                () -> underTest.deleteDatatableEntry(DATATABLE_NAME, 3L, 7L, mock(JsonCommand.class)));
+        verify(jdbcTemplate).update(anyString(), eq(7L), eq(3L));
+        verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any());
+    }
+
+    @Test
+    void testDeleteOneToOneEntryWithIdIsRejected() {
+        setupDeleteEntryMocks(false);
+
+        PlatformDataIntegrityException exception = assertThrows(PlatformDataIntegrityException.class,
+                () -> underTest.deleteDatatableEntry(DATATABLE_NAME, 3L, 4L, mock(JsonCommand.class)));
+        assertEquals("error.msg.datatable.entry.id.not.allowed.for.one.to.one", exception.getGlobalisationMessageCode());
+        verify(jdbcTemplate, never()).update(anyString(), any(Object[].class));
+    }
+
+    @Test
+    void testUpdateOneToOneEntryWithIdIsRejected() {
+        setupUpdateEntryMocks(false, 3L, 4L);
+
+        PlatformDataIntegrityException exception = assertThrows(PlatformDataIntegrityException.class,
+                () -> underTest.updateDatatableEntryOneToMany(DATATABLE_NAME, 3L, 4L, mock(JsonCommand.class)));
+        assertEquals("error.msg.datatable.entry.id.not.allowed.for.one.to.one", exception.getGlobalisationMessageCode());
+        verify(jdbcTemplate, never()).update(anyString(), any(Object[].class));
+    }
+
+    @Test
+    void testUpdateKeysOnTheReadRowsPrimaryKey() {
+        // a registered table whose primary key is client_id and which also has a plain id column reads as one to many
+        setupUpdateEntryMocks(true, 3L, 4L);
+        when(jdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(1);
+
+        CommandProcessingResult result = underTest.updateDatatableEntryOneToMany(DATATABLE_NAME, 3L, 4L, mock(JsonCommand.class));
+
+        ArgumentCaptor<Object[]> paramsCaptor = ArgumentCaptor.forClass(Object[].class);
+        verify(jdbcTemplate).update(anyString(), paramsCaptor.capture());
+        Object[] params = paramsCaptor.getValue();
+        assertEquals(3L, params[params.length - 1], "the UPDATE must key on the primary key of the row read for appTableId");
+        assertEquals(3L, result.getResourceId());
+    }
+
+    @Test
+    void testUpdateOneToManyEntryKeysOnItsId() {
+        ResultsetColumnHeaderData id = ResultsetColumnHeaderData.detailed("id", "bigint", null, false, true, List.of(), null, false, false,
+                DatabaseType.POSTGRESQL);
+        ResultsetColumnHeaderData fk = ResultsetColumnHeaderData.basic("client_id", "bigint", DatabaseType.POSTGRESQL);
+        ResultsetColumnHeaderData note = ResultsetColumnHeaderData.basic("note", "varchar", DatabaseType.POSTGRESQL);
+        setupUpdateEntryMocks(true, List.of(id, fk, note), id, note, List.of(4L, 3L, "old"));
+        when(jdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(1);
+
+        CommandProcessingResult result = underTest.updateDatatableEntryOneToMany(DATATABLE_NAME, 3L, 4L, mock(JsonCommand.class));
+
+        ArgumentCaptor<Object[]> paramsCaptor = ArgumentCaptor.forClass(Object[].class);
+        verify(jdbcTemplate).update(anyString(), paramsCaptor.capture());
+        Object[] params = paramsCaptor.getValue();
+        assertEquals(4L, params[params.length - 1], "the UPDATE must key on the entry's id");
+        assertEquals(4L, result.getResourceId());
+    }
+
+    private void setupDeleteEntryMocks(boolean multiRow) {
+        when(sqlGenerator.escape(anyString())).thenAnswer(invocation -> "\"" + invocation.getArgument(0) + "\"");
+        when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), anyString())).thenReturn(0L);
+        when(datatableUtil.queryForApplicationEntity(DATATABLE_NAME)).thenReturn(EntityTables.CLIENT);
+        when(datatableUtil.getFKField(EntityTables.CLIENT)).thenReturn("client_id");
+        when(datatableUtil.checkMainResourceExistsWithinScope(eq(EntityTables.CLIENT), any()))
+                .thenReturn(mock(CommandProcessingResult.class));
+        when(genericDataService.fillResultsetColumnHeaders(DATATABLE_NAME)).thenReturn(List.of());
+        when(datatableUtil.isMultirowDatatable(any())).thenReturn(multiRow);
+    }
+
+    private void setupUpdateEntryMocks(boolean multiRow, Long primaryKey, Long idColumnValue) {
+        ResultsetColumnHeaderData pk = ResultsetColumnHeaderData.detailed("client_id", "bigint", null, false, true, List.of(), null, false,
+                false, DatabaseType.POSTGRESQL);
+        ResultsetColumnHeaderData id = ResultsetColumnHeaderData.basic("id", "bigint", DatabaseType.POSTGRESQL);
+        ResultsetColumnHeaderData note = ResultsetColumnHeaderData.basic("note", "varchar", DatabaseType.POSTGRESQL);
+        setupUpdateEntryMocks(multiRow, List.of(pk, id, note), pk, note, List.of(primaryKey, idColumnValue, "old"));
+    }
+
+    private void setupUpdateEntryMocks(boolean multiRow, List<ResultsetColumnHeaderData> headers, ResultsetColumnHeaderData pk,
+            ResultsetColumnHeaderData note, List<Object> row) {
+        GenericResultsetData read = new GenericResultsetData(headers, List.of(ResultsetRowData.create(new ArrayList<>(row))));
+
+        when(datatableUtil.queryForApplicationEntity(DATATABLE_NAME)).thenReturn(EntityTables.CLIENT);
+        when(datatableUtil.checkMainResourceExistsWithinScope(eq(EntityTables.CLIENT), any()))
+                .thenReturn(mock(CommandProcessingResult.class));
+        when(datatableUtil.retrieveDataTableGenericResultSet(eq(EntityTables.CLIENT), eq(DATATABLE_NAME), any(), any(), any()))
+                .thenReturn(read);
+        when(datatableUtil.isMultirowDatatable(headers)).thenReturn(multiRow);
+        Map<String, ResultsetColumnHeaderData> headersByName = new HashMap<>();
+        headers.forEach(header -> headersByName.put(header.getColumnName(), header));
+        when(searchUtil.mapHeadersToName(headers)).thenReturn(headersByName);
+        when(searchUtil.getFiltered(eq(headers), any())).thenReturn(pk);
+        when(searchUtil.validateToJdbcColumn(eq("note"), any(), eq(false))).thenReturn(note);
+        when(searchUtil.parseColumnValue(eq(note), eq("new"), any(), any(), any(), eq(false), any())).thenReturn("new");
+        when(fromJsonHelper.extractDataMap(any(), any())).thenReturn(new HashMap<>(Map.of("note", "new")));
+        when(sqlGenerator.getDialect()).thenReturn(DatabaseType.POSTGRESQL);
+        when(sqlGenerator.buildUpdate(eq(DATATABLE_NAME), any(), any())).thenReturn("UPDATE \"" + DATATABLE_NAME + "\" SET x = ?");
     }
 }

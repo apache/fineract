@@ -217,6 +217,8 @@ class DatatableBusinessEventTest {
                 eq(APP_TABLE_ID), isNull(), eq(DATATABLE_ID));
 
         when(genericDataService.fillResultsetRowData(anyString(), any())).thenReturn(rows);
+        when(datatableUtil.isMultirowDatatable(any())).thenReturn(true);
+        when(jdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(1);
     }
 
     private void verifyBusinessEvent(Long expectedEntityId) {
