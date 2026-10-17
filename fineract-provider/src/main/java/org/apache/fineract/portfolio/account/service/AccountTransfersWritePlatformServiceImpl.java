@@ -128,6 +128,10 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
         if (isSavingsToSavingsAccountTransfer(fromAccountType, toAccountType)) {
 
+            // one global lock order for both accounts, so that crossing transfers (A to B and B to A) do not deadlock
+            this.savingsAccountAssembler.lockInIdOrder(command.longValueOfParameterNamed(fromAccountIdParamName),
+                    command.longValueOfParameterNamed(toAccountIdParamName));
+
             fromSavingsAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
             final SavingsAccount fromSavingsAccount = this.savingsAccountAssembler.assembleFrom(fromSavingsAccountId,
                     backdatedTxnsAllowedTill);
@@ -361,6 +365,11 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             transferTransactionId = accountTransferDetails.getId();
         } else if (isSavingsToSavingsAccountTransfer(accountTransferDTO.getFromAccountType(), accountTransferDTO.getToAccountType())) {
 
+            if (accountTransferDetails == null) {
+                // one global lock order for both accounts, so that crossing transfers (A to B and B to A) do not
+                // deadlock
+                this.savingsAccountAssembler.lockInIdOrder(accountTransferDTO.getFromAccountId(), accountTransferDTO.getToAccountId());
+            }
             SavingsAccount fromSavingsAccount;
             SavingsAccount toSavingsAccount;
             if (accountTransferDetails == null) {
