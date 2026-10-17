@@ -236,6 +236,98 @@ class SendAsynchronousEventsTaskletTest {
         assertThat(externalEventPageSizeArgumentCaptor.getValue().getPageSize()).isEqualTo(10);
     }
 
+    @Test
+    public void givenDefaultMaxBatchesPerRunWhenBacklogIsLargerThanABatchThenOnlyOneBatchIsSent() throws Exception {
+        // given: a full batch is always available (backlog), but the default is one batch per run
+        configureBatchSizeAndMaxBatchesPerRun(2L, 1);
+        stubMessageCreation();
+        List<ExternalEventView> batch = fullBatchOf(2);
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(batch);
+        // when
+        resultStatus = underTest.execute(stepContribution, chunkContext);
+        // then
+        verify(repository, times(1)).findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any());
+        verify(eventProducer, times(1)).sendEvents(Mockito.any());
+        assertEquals(RepeatStatus.FINISHED, resultStatus);
+    }
+
+    @Test
+    public void givenMaxBatchesPerRun3WhenBacklogIsLargerThenExactlyThreeBatchesAreSentAndMarked() throws Exception {
+        // given
+        configureBatchSizeAndMaxBatchesPerRun(2L, 3);
+        stubMessageCreation();
+        List<ExternalEventView> batch = fullBatchOf(2);
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(batch);
+        // when
+        resultStatus = underTest.execute(stepContribution, chunkContext);
+        // then
+        verify(repository, times(3)).findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any());
+        verify(eventProducer, times(3)).sendEvents(Mockito.any());
+        Awaitility.await().atMost(10L, TimeUnit.SECONDS)
+                .untilAsserted(() -> verify(repository, times(3)).markEventsSent(Mockito.any(), Mockito.any()));
+        assertEquals(RepeatStatus.FINISHED, resultStatus);
+    }
+
+    @Test
+    public void givenMaxBatchesPerRun5WhenBacklogDrainsMidRunThenItStopsAtThePartialBatch() throws Exception {
+        // given: full, full, then a partial batch of 1 -> the backlog is drained after the third read
+        configureBatchSizeAndMaxBatchesPerRun(2L, 5);
+        stubMessageCreation();
+        List<ExternalEventView> first = fullBatchOf(2);
+        List<ExternalEventView> second = fullBatchOf(2);
+        List<ExternalEventView> partial = fullBatchOf(1);
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(first, second, partial);
+        // when
+        resultStatus = underTest.execute(stepContribution, chunkContext);
+        // then
+        verify(repository, times(3)).findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any());
+        verify(eventProducer, times(3)).sendEvents(Mockito.any());
+        assertEquals(RepeatStatus.FINISHED, resultStatus);
+    }
+
+    @Test
+    public void givenMaxBatchesPerRun3WhenTheSecondSendFailsThenOnlyTheFirstBatchIsMarkedSent() throws Exception {
+        // given
+        configureBatchSizeAndMaxBatchesPerRun(2L, 3);
+        stubMessageCreation();
+        List<ExternalEventView> firstBatch = fullBatchOf(2);
+        List<ExternalEventView> secondBatch = fullBatchOf(2);
+        List<ExternalEventView> thirdBatch = fullBatchOf(2);
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(firstBatch, secondBatch,
+                thirdBatch);
+        Mockito.doNothing().doThrow(new AcknowledgementTimeoutException("Event Send Exception", new RuntimeException())).when(eventProducer)
+                .sendEvents(Mockito.any());
+        // when
+        resultStatus = underTest.execute(stepContribution, chunkContext);
+        // then: the failed batch stays TO_BE_SENT (not marked), and the run stops without reading a third batch
+        verify(eventProducer, times(2)).sendEvents(Mockito.any());
+        verify(repository, times(2)).findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any());
+        Awaitility.await().atMost(10L, TimeUnit.SECONDS).untilAsserted(() -> verify(repository)
+                .markEventsSent(Mockito.eq(firstBatch.stream().map(ExternalEventView::getId).toList()), Mockito.any()));
+        verify(repository, times(1)).markEventsSent(Mockito.any(), Mockito.any());
+        assertEquals(RepeatStatus.FINISHED, resultStatus);
+    }
+
+    private void configureBatchSizeAndMaxBatchesPerRun(long batchSize, int maxBatchesPerRun) {
+        fineractProperties.getEvents().getExternal().setMaxBatchesPerRun(maxBatchesPerRun);
+        when(configurationDomainService.retrieveExternalEventBatchSize()).thenReturn(batchSize);
+    }
+
+    private void stubMessageCreation() throws Exception {
+        MessageV1 dummyMessage = new MessageV1(1L, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+                "anidempotencyKey", "aSchema", ByteBuffer.wrap("dummy".getBytes(StandardCharsets.UTF_8)));
+        when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
+        when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
+    }
+
+    private List<ExternalEventView> fullBatchOf(int size) {
+        List<ExternalEventView> events = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            events.add(createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L));
+        }
+        return events;
+    }
+
     private ExternalEventView createExternalEventView(String type, String category, String schema, byte[] data, String idempotencyKey,
             Long aggregateRootId) {
         ExternalEventView result = Mockito.mock(ExternalEventView.class);
