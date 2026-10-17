@@ -557,8 +557,8 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
-    public Long retrieveForceWithdrawalOnSavingsAccountLimit() {
-        return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT).getValue();
+    public Long getForceWithdrawalOnSavingsAccountLimit() {
+        return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT).getValue();
     }
 
     @Override

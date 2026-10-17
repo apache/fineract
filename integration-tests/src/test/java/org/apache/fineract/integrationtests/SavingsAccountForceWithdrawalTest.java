@@ -44,12 +44,10 @@ public class SavingsAccountForceWithdrawalTest extends FeignSavingsTestBase {
     @Test
     public void testForceWithdrawal() {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
-                new PutGlobalConfigurationsRequest().enabled(true));
-        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT,
                 new PutGlobalConfigurationsRequest().value(FORCE_WITHDRAWAL_LIMIT).enabled(true));
 
         GlobalConfigurationPropertyData config = globalConfigurationHelper
-                .getGlobalConfigurationByName(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT);
+                .getGlobalConfigurationByName(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT);
         assertEquals(FORCE_WITHDRAWAL_LIMIT, config.getValue());
 
         Long clientId = createClient();
@@ -77,8 +75,6 @@ public class SavingsAccountForceWithdrawalTest extends FeignSavingsTestBase {
     @AfterEach
     public void resetForceWithdrawalConfiguration() {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
-                new PutGlobalConfigurationsRequest().enabled(false));
-        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT,
                 new PutGlobalConfigurationsRequest().value(DISABLED_LIMIT).enabled(false));
     }
 }

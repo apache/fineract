@@ -84,7 +84,6 @@ public final class GlobalConfigurationConstants {
     public static final String ENABLE_INSTANT_DELINQUENCY_CALCULATION = "enable-instant-delinquency-calculation";
     public static final String PASSWORD_REUSE_CHECK_HISTORY_COUNT = "password-reuse-check-history-count";
     public static final String FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT = "allow-force-withdrawal-on-savings-account";
-    public static final String FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT = "force-withdrawal-on-savings-account-limit";
     public static final String FORCE_PASSWORD_RESET_ON_FIRST_LOGIN = "force-password-reset-on-first-login";
     public static final String ALLOW_CASH_AND_NON_CASH_ACCRUAL = "allow-cash-and-non-cash-accrual";
     public static final String BLOCK_TRANSACTIONS_ON_CLOSED_OVERPAID_LOANS = "block-transactions-on-closed-overpaid-loans";
