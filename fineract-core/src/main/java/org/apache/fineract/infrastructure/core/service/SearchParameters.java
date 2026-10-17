@@ -18,11 +18,14 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 
 @Builder
 @Getter
@@ -38,6 +41,7 @@ public class SearchParameters {
     private String firstname;
     private String lastname;
     private String status;
+    @Getter(AccessLevel.NONE)
     private Integer offset;
     @Getter(AccessLevel.NONE)
     private Integer limit;
@@ -55,6 +59,18 @@ public class SearchParameters {
     private Long productId;
     private Long categoryId;
     private Integer legalForm;
+
+    /**
+     * A negative offset is not valid SQL and used to surface as an HTTP 500 from the database; it is a client error.
+     */
+    public Integer getOffset() {
+        if (offset != null && offset < 0) {
+            throw new PlatformApiDataValidationException(
+                    List.of(ApiParameterError.parameterError("validation.msg.pagination.offset.must.not.be.negative",
+                            "The parameter `offset` must not be negative.", "offset", offset)));
+        }
+        return offset;
+    }
 
     public Integer getLimit() {
         if (limit == null) {
