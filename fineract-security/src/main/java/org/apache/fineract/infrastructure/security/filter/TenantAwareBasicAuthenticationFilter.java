@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdenti
 import org.apache.fineract.infrastructure.security.service.AuthTenantDetailsService;
 import org.apache.fineract.notification.service.UserNotificationService;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,6 +50,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.transaction.CannotCreateTransactionException;
 
 /**
  * A customised version of spring security's {@link BasicAuthenticationFilter}.
@@ -158,6 +160,13 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 
             response.addHeader("WWW-Authenticate", "Basic realm=\"" + "Fineract Platform API" + "\"");
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (final DataAccessResourceFailureException | CannotCreateTransactionException e) {
+            // no database connection (database down or connection pool exhausted): a temporary condition, not a failed
+            // request
+            log.warn("The database is not available", e);
+            SecurityContextHolder.getContext().setAuthentication(null);
+            response.addHeader("Retry-After", "5");
+            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "The database is currently not available");
         } finally {
             ThreadLocalContextUtil.reset();
             task.stop();
