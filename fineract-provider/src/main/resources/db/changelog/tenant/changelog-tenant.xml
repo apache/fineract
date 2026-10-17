@@ -278,4 +278,6 @@
     <include file="parts/0257_merge_trailing_space_standinginstruction_permissions.xml" relativeToChangelogFile="true" />
     <include file="parts/0258_add_read_entitymapping_permission.xml" relativeToChangelogFile="true" />
     <include file="parts/0259_put_cob_jobs_in_one_scheduler_group.xml" relativeToChangelogFile="true" />
+    <include file="parts/0260_add_payoff_schedule_preview_max_payoff_periods_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0261_add_payoff_schedule_preview_max_term_periods_configuration.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
