@@ -20,6 +20,7 @@ package org.apache.fineract.accounting.journalentry.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.Data;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -60,7 +61,7 @@ public class JournalEntryData {
     @SuppressWarnings("unused")
     private Long createdByUserId;
     @SuppressWarnings("unused")
-    private LocalDate createdDate;
+    private OffsetDateTime createdDate;
     @SuppressWarnings("unused")
     private String createdByUserName;
     @SuppressWarnings("unused")
@@ -190,9 +191,10 @@ public class JournalEntryData {
             final String glAccountCode, final EnumOptionData glAccountClassification, final LocalDate transactionDate,
             final EnumOptionData entryType, final BigDecimal amount, final String transactionId, final Boolean manualEntry,
             final EnumOptionData entityType, final Long entityId, final Long createdByUserId, final LocalDate submittedOnDate,
-            final String createdByUserName, final String comments, final Boolean reversed, final String referenceNumber,
-            final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance, final Boolean runningBalanceComputed,
-            final TransactionDetailData transactionDetailData, final CurrencyData currency, final String externalAssetOwner) {
+            final OffsetDateTime createdDate, final String createdByUserName, final String comments, final Boolean reversed,
+            final String referenceNumber, final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance,
+            final Boolean runningBalanceComputed, final TransactionDetailData transactionDetailData, final CurrencyData currency,
+            final String externalAssetOwner) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -208,7 +210,7 @@ public class JournalEntryData {
         this.entityType = entityType;
         this.entityId = entityId;
         this.createdByUserId = createdByUserId;
-        this.createdDate = submittedOnDate;
+        this.createdDate = createdDate;
         this.submittedOnDate = submittedOnDate;
         this.createdByUserName = createdByUserName;
         this.comments = comments;
@@ -252,6 +254,7 @@ public class JournalEntryData {
         final Long entityId = null;
         final Long createdByUserId = null;
         final LocalDate submittedOnDate = null;
+        final OffsetDateTime createdDate = null;
         final String createdByUserName = null;
         final String comments = null;
         final Boolean reversed = null;
@@ -264,7 +267,7 @@ public class JournalEntryData {
         final String externalAssetOwner = null;
         return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glAccountCode, glAccountClassification,
                 transactionDate, entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, submittedOnDate,
-                createdByUserName, comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance,
+                createdDate, createdByUserName, comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance,
                 runningBalanceComputed, transactionDetailData, currency, externalAssetOwner);
     }
 
