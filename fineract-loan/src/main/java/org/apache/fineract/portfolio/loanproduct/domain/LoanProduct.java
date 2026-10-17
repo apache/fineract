@@ -502,6 +502,13 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         return updated;
     }
 
+    public BigDecimal getOverdueInstallmentChargeAmount() {
+        if (this.charges == null) {
+            return null;
+        }
+        return this.charges.stream().filter(Charge::isOverdueInstallment).map(Charge::getAmount).findFirst().orElse(null);
+    }
+
     public boolean updateRates(final List<Rate> newProductRates) {
         if (newProductRates == null) {
             return false;

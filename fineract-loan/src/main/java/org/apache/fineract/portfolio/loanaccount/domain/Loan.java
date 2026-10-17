@@ -338,6 +338,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @Column(name = "max_outstanding_loan_balance", scale = 6, precision = 19)
     private BigDecimal maxOutstandingLoanBalance;
 
+    @Setter
+    @Column(name = "overdue_charge_amount", scale = 6, precision = 19)
+    private BigDecimal overdueChargeAmount;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy(value = "expectedDisbursementDate, id")
     private List<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
@@ -521,6 +525,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.transactionProcessingStrategyName = transactionProcessingStrategy.getName();
 
         this.loanProduct = loanProduct;
+        this.overdueChargeAmount = loanProduct == null ? null : loanProduct.getOverdueInstallmentChargeAmount();
         this.loanStatus = loanStatus;
         if (loanCharges != null && !loanCharges.isEmpty()) {
             this.charges = associateChargesWithThisLoan(loanCharges);
@@ -685,6 +690,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public void updateLoanProduct(final LoanProduct loanProduct) {
         this.loanProduct = loanProduct;
+        this.overdueChargeAmount = loanProduct == null ? null : loanProduct.getOverdueInstallmentChargeAmount();
     }
 
     public void updateFund(final Fund fund) {
