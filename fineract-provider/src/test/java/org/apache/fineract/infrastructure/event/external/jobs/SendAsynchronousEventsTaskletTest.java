@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.event.external.jobs;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -175,10 +176,9 @@ class SendAsynchronousEventsTaskletTest {
         doThrow(new AcknowledgementTimeoutException("Event Send Exception", new RuntimeException())).when(eventProducer)
                 .sendEvents(Mockito.any());
         // when
-        resultStatus = underTest.execute(stepContribution, chunkContext);
+        assertThrows(AcknowledgementTimeoutException.class, () -> underTest.execute(stepContribution, chunkContext));
         // then
         verify(repository, times(0)).markEventsSent(Mockito.any(), Mockito.any());
-        assertEquals(RepeatStatus.FINISHED, resultStatus);
     }
 
     @Test
@@ -200,6 +200,55 @@ class SendAsynchronousEventsTaskletTest {
             verify(repository).markEventsSent(Mockito.eq(events.stream().map(ExternalEventView::getId).toList()), Mockito.any());
         });
         assertEquals(RepeatStatus.FINISHED, resultStatus);
+    }
+
+    @Test
+    public void givenEventSendFailsThenTheStepFails() throws Exception {
+        // given
+        stubOneQueuedEvent();
+        doThrow(new AcknowledgementTimeoutException("Event Send Exception", new RuntimeException())).when(eventProducer)
+                .sendEvents(Mockito.any());
+        // when
+        AcknowledgementTimeoutException thrown = assertThrows(AcknowledgementTimeoutException.class,
+                () -> underTest.execute(stepContribution, chunkContext));
+        // then: nothing is marked as sent (the events stay TO_BE_SENT), and the step fails so the job run is not
+        // recorded as a success
+        verify(repository, times(0)).markEventsSent(Mockito.any(), Mockito.any());
+        assertThat(thrown.getMessage()).contains("Event Send Exception");
+    }
+
+    @Test
+    public void givenEventsAreSentButMarkingThemFailsThenTheStepFails() throws Exception {
+        // given
+        stubOneQueuedEvent();
+        doThrow(new IllegalStateException("database is down")).when(repository).markEventsSent(Mockito.any(), Mockito.any());
+        // when
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> underTest.execute(stepContribution, chunkContext));
+        // then: they were sent but stay TO_BE_SENT, so they will be sent again; this must not go unnoticed
+        verify(eventProducer).sendEvents(Mockito.any());
+        assertThat(thrown.getMessage()).contains("could not all be marked as sent");
+    }
+
+    @Test
+    public void givenEventsAreSentThenTheStepSucceeds() throws Exception {
+        // given
+        stubOneQueuedEvent();
+        // when
+        resultStatus = underTest.execute(stepContribution, chunkContext);
+        // then
+        Awaitility.await().atMost(10L, TimeUnit.SECONDS)
+                .untilAsserted(() -> verify(repository).markEventsSent(Mockito.any(), Mockito.any()));
+        assertEquals(RepeatStatus.FINISHED, resultStatus);
+    }
+
+    private void stubOneQueuedEvent() throws Exception {
+        List<ExternalEventView> events = Arrays
+                .asList(createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L));
+        MessageV1 dummyMessage = new MessageV1(1L, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+                "anidempotencyKey", "aSchema", ByteBuffer.wrap("dummy".getBytes(StandardCharsets.UTF_8)));
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
+        when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
+        when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
     }
 
     @Test
@@ -225,7 +274,7 @@ class SendAsynchronousEventsTaskletTest {
     }
 
     @Test
-    public void givenEventBatchSizeIsConfiguredAs10WhenTaskExecutionThenEventReadPageSizeIsCorrect() {
+    public void givenEventBatchSizeIsConfiguredAs10WhenTaskExecutionThenEventReadPageSizeIsCorrect() throws Exception {
         ArgumentCaptor<Pageable> externalEventPageSizeArgumentCaptor = ArgumentCaptor.forClass(Pageable.class);
         List<ExternalEventView> events = new ArrayList<>();
         when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
