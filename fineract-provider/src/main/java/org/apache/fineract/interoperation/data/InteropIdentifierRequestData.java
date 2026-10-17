@@ -21,6 +21,7 @@ package org.apache.fineract.interoperation.data;
 import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_ACCOUNT_ID;
 
 import com.google.gson.JsonObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.Arrays;
@@ -32,11 +33,14 @@ public class InteropIdentifierRequestData {
 
     static final String[] PARAMS = { PARAM_ACCOUNT_ID };
 
+    @Schema(hidden = true, description = "Taken from the request path, not the body")
     @NotEmpty
     private final InteropIdentifierType idType;
+    @Schema(hidden = true, description = "Taken from the request path, not the body")
     @NotEmpty
     private final String idValue;
 
+    @Schema(hidden = true, description = "Taken from the request path, not the body")
     private final String subIdOrType;
 
     @NotEmpty
