@@ -204,6 +204,10 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loans().calculateOrSubmitLoanApplication(request, (String) null));
     }
 
+    public CallFailedRuntimeException applyForLoanExpectingError(PostLoansRequest request) {
+        return fail(() -> fineractClient.loans().calculateOrSubmitLoanApplication(request, (String) null));
+    }
+
     public PostLoansResponse calculateLoanSchedule(PostLoansRequest request) {
         return ok(() -> fineractClient.loans().calculateOrSubmitLoanApplication(request, "calculateLoanSchedule"));
     }
