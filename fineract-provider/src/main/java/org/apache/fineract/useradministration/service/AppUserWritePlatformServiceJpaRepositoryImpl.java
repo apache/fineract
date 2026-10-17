@@ -240,8 +240,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     }
 
     /**
-     * Encode the new submitted password and retrieve the last N used passwords to check if the current submitted
-     * password matches with one of them.
+     * Check the submitted password against the current password and the last N used passwords, and return the current
+     * password to save in the password history.
      */
     private AppUserPreviousPassword getCurrentPasswordToSaveAsPreview(final AppUser user, final JsonCommand command) {
         final String passWordEncodedValue = user.getEncodedPassword(command, this.platformPasswordEncoder);
@@ -251,6 +251,12 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         if (passWordEncodedValue != null) {
             final Integer passwordReuseRestrictionCount = this.configurationDomainService.getPasswordReuseRestrictionCount();
             if (passwordReuseRestrictionCount != null) {
+                final String rawPassword = command.hasParameter(AppUserConstants.PASSWORD)
+                        ? command.stringValueOfParameterNamed(AppUserConstants.PASSWORD)
+                        : null;
+                if (isSamePassword(rawPassword, passWordEncodedValue, user.getPassword())) {
+                    throw new PasswordPreviouslyUsedException();
+                }
                 List<AppUserPreviousPassword> previousPasswords;
                 if (passwordReuseRestrictionCount == 0) {
                     previousPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),
@@ -260,7 +266,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     previousPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(), pageRequest);
                 }
                 for (AppUserPreviousPassword aPreviewPassword : previousPasswords) {
-                    if (aPreviewPassword.getPassword().equals(passWordEncodedValue)) {
+                    if (isSamePassword(rawPassword, passWordEncodedValue, aPreviewPassword.getPassword())) {
                         throw new PasswordPreviouslyUsedException();
                     }
                 }
@@ -270,6 +276,13 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         }
 
         return currentPasswordToSaveAsPreview;
+    }
+
+    private boolean isSamePassword(final String rawPassword, final String encodedPassword, final String storedPassword) {
+        if (rawPassword != null) {
+            return this.platformPasswordEncoder.matches(rawPassword, storedPassword);
+        }
+        return encodedPassword.equals(storedPassword);
     }
 
     private Set<Role> assembleSetOfRoles(final String[] rolesArray) {
