@@ -41,6 +41,8 @@ public interface LoanCapitalizedIncomeBalanceRepository extends JpaRepository<Lo
 
     LoanCapitalizedIncomeBalance findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(Long loanId, Long transactionId);
 
+    LoanCapitalizedIncomeBalance findByLoanIdAndLoanTransactionIdAndClosedFalse(Long loanId, Long transactionId);
+
     @Query(FIND_BALANCE_REPAYMENT_SCHEDULE_DATA
             + " WHERE lcib.loan.id = :loanId AND lcib.deleted = false AND lcib.closed = false ORDER BY lcib.date, lcib.createdDate")
     List<LoanTransactionRepaymentPeriodData> findRepaymentPeriodDataByLoanId(Long loanId);

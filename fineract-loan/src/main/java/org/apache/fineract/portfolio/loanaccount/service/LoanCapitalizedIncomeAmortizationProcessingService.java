@@ -29,6 +29,14 @@ public interface LoanCapitalizedIncomeAmortizationProcessingService {
 
     void processCapitalizedIncomeAmortizationOnLoanSale(@NonNull Loan loan, @NonNull LocalDate transactionDate, boolean addJournal);
 
+    /**
+     * Immediately recognizes the unrecognized balance of the capitalized income (or capitalized income adjustment) that
+     * triggered the call. Only that related balance is touched so already-deferred balances on the same loan keep
+     * amortizing daily. Reuses the same recognition path as sale/closure, scoped to the related balance.
+     */
+    void processCapitalizedIncomeAmortizationImmediately(@NonNull Loan loan, @NonNull LoanTransaction capitalizedIncomeRelatedTransaction,
+            @NonNull LocalDate transactionDate, boolean addJournal);
+
     void processCapitalizedIncomeAmortizationOnLoanChargeOff(@NonNull Loan loan, @NonNull LoanTransaction chargeOffTransaction);
 
     void processCapitalizedIncomeAmortizationOnLoanUndoChargeOff(@NonNull LoanTransaction loanTransaction);

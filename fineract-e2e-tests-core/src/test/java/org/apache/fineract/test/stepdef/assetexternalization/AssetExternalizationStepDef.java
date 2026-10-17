@@ -23,6 +23,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -898,6 +899,13 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         }
 
         externalAssetOwnersApi().transferRequestWithIdByExternalId(transferExternalId, Map.of(COMMAND, command));
+    }
+
+    @After("@CapitalizedIncomeAmortizationStrategyReset")
+    public void resetCapitalizedIncomeAmortizationStrategy() throws IOException {
+        // Scenarios flip the shared product to IMMEDIATE; a failed scenario must not leak it into the next one.
+        setAExternalAssetOwnerLoanProductAttribute("CAPITALIZED_INCOME_AMORTIZATION_STRATEGY", "DEFERRED",
+                "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME");
     }
 
     @When("Admin set external asset owner loan product attribute {string} value {string} for loan product {string}")
