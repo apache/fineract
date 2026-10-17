@@ -514,6 +514,10 @@ public final class LoanRequestBuilders {
                 .dateFormat(LoanTestData.DATETIME_PATTERN);
     }
 
+    public static PostLoansLoanIdChargesChargeIdRequest waiveLoanCharge() {
+        return new PostLoansLoanIdChargesChargeIdRequest();
+    }
+
     public static PostLoansLoanIdChargesChargeIdRequest waiveLoanCharge(double amount) {
         PostLoansLoanIdChargesChargeIdRequest request = new PostLoansLoanIdChargesChargeIdRequest();
         request.setAmount(amount);

@@ -294,12 +294,14 @@ public class LoanRepositoryWrapper {
         return repository.findLoanIdByStatus(LoanStatus.fromInt(statusId));
     }
 
-    public List<Loan> findLoansForPeriodicAccrual(AccountingRuleType accountingType, LocalDate tillDate, boolean futureCharges) {
-        return repository.findLoansForPeriodicAccrual(accountingType, tillDate, futureCharges, LoanStatus.ACTIVE);
+    public List<Loan> findLoansForPeriodicAccrual(AccountingRuleType accountingType, LocalDate tillDate, boolean futureCharges,
+            boolean progressiveFutureCharges) {
+        return repository.findLoansForPeriodicAccrual(accountingType, tillDate, futureCharges, progressiveFutureCharges, LoanStatus.ACTIVE);
     }
 
-    public List<Loan> findLoansForAddAccrual(AccountingRuleType accountingType, LocalDate tillDate, boolean futureCharges) {
-        return repository.findLoansForAddAccrual(accountingType, tillDate, futureCharges, LoanStatus.ACTIVE);
+    public List<Loan> findLoansForAddAccrual(AccountingRuleType accountingType, LocalDate tillDate, boolean futureCharges,
+            boolean progressiveFutureCharges) {
+        return repository.findLoansForAddAccrual(accountingType, tillDate, futureCharges, progressiveFutureCharges, LoanStatus.ACTIVE);
     }
 
     public List<Long> findIdByExternalIds(List<ExternalId> externalIds) {

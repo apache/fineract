@@ -40,6 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ConfigurationDomainServiceJpa implements ConfigurationDomainService {
 
+    private static final String CHARGE_ACCRUAL_TIME_REAL_TIME = "real-time";
+
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
@@ -543,6 +545,12 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     @Override
     public boolean isImmediateChargeAccrualPostMaturityEnabled() {
         return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.ENABLE_IMMEDIATE_CHARGE_ACCRUAL_POST_MATURITY).isEnabled();
+    }
+
+    @Override
+    public boolean isPlChargeAccrualRealTime() {
+        final String value = getGlobalConfigurationPropertyData(GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME).getStringValue();
+        return CHARGE_ACCRUAL_TIME_REAL_TIME.equalsIgnoreCase(StringUtils.trimToEmpty(value));
     }
 
     @Override
