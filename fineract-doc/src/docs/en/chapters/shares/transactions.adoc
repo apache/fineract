@@ -1,0 +1,129 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= Transactions & status
+
+== Share account status
+
+Status values are defined in `ShareAccountStatusType`
+(`fineract-shares/.../shareaccounts/domain/ShareAccountStatusType.java`) and stored in
+`m_share_account.status_enum`.
+
+[cols="2,1,3"]
+|===
+|*Status* |*Value* |*Meaning*
+
+|`INVALID` |0 |Sentinel for an unrecognized status.
+|`SUBMITTED_AND_PENDING_APPROVAL` |100 |Account just created; subscribed shares are pending.
+|`APPROVED` |200 |Approved by staff; ready to be activated.
+|`ACTIVE` |300 |Activated; additional purchases and redemptions are allowed.
+|`REJECTED` |500 |Application rejected.
+|`CLOSED` |600 |Account closed.
+|===
+
+.Share account lifecycle
+[plantuml,format=svg]
+----
+include::{diagramsdir}/shares-account-lifecycle.puml[]
+----
+
+The transitions are driven by the write service `ShareAccountWritePlatformService`
+(`fineract-provider/.../shareaccounts/service/ShareAccountWritePlatformService.java`):
+`approveShareAccount`, `undoApproveShareAccount`, `activateShareAccount`, `rejectShareAccount`,
+`closeShareAccount`, `applyAddtionalShares`, `approveAdditionalShares`, `rejectAdditionalShares` and
+`redeemShares`.
+
+== Transaction type and status
+
+A `ShareAccountTransaction` carries both a *status* and a *type*, both drawn from
+`PurchasedSharesStatusType`
+(`fineract-shares/.../shareaccounts/domain/PurchasedSharesStatusType.java`).
+
+.Transaction status (`status_enum`)
+[cols="2,1,3"]
+|===
+|*Status* |*Value* |*Meaning*
+
+|`APPLIED` |100 |Shares applied for, pending approval.
+|`APPROVED` |300 |Shares approved; counted in `totalSharesApproved`.
+|`REJECTED` |400 |Application for the shares was rejected.
+|===
+
+.Transaction type (`type_enum`)
+[cols="2,1,3"]
+|===
+|*Type* |*Value* |*Meaning*
+
+|`PURCHASED` |500 |Subscription / purchase of shares (initial or additional).
+|`REDEEMED` |600 |Redemption of previously held shares.
+|`CHARGE_PAYMENT` |700 |A charge settlement movement.
+|===
+
+== Transaction flows
+
+.Apply / approve additional shares and redeem shares
+[plantuml,format=svg]
+----
+include::{diagramsdir}/shares-purchase-sequence.puml[]
+----
+
+[cols="1,2,2"]
+|===
+|*Operation* |*Effect on transaction* |*Effect on account*
+
+|Apply (initial or additional)
+|New transaction `type=PURCHASED`, `status=APPLIED`.
+|`totalSharesPending` increases.
+
+|Approve additional shares
+|Transaction `status` moves APPLIED → APPROVED.
+|`totalSharesApproved` increases; purchase/activation charges applied.
+
+|Reject additional shares
+|Transaction `status` moves APPLIED → REJECTED; `active=false`.
+|Pending shares released.
+
+|Redeem shares
+|New transaction `type=REDEEMED`.
+|`totalSharesApproved` decreases (subject to lock-in & availability).
+|===
+
+== Dividends
+
+Dividends move through two independent status enums.
+
+.Product dividend declaration — `ShareProductDividendStatusType`
+[cols="2,1,3"]
+|===
+|*Status* |*Value* |*Meaning*
+
+|`INITIATED` |100 |Declaration created and split across eligible accounts.
+|`APPROVED` |300 |Declaration approved; ready to be posted by the scheduled job.
+|===
+
+.Per-account dividend — `ShareAccountDividendStatusType`
+[cols="2,1,3"]
+|===
+|*Status* |*Value* |*Meaning*
+
+|`INITIATED` |100 |Account's share of the dividend has been computed.
+|`POSTED` |300 |Dividend deposited into the linked savings account (`savingsTransactionId` set).
+|===
+
+The end-to-end dividend process is detailed in the next section.
