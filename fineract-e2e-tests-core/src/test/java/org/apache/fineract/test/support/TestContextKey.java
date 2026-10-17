@@ -295,6 +295,8 @@ public abstract class TestContextKey {
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_CONTRACT_TERMINATION_INT_RECOGNITION = "loanProductCreateResponseLP2AdvancedPaymentInterestDailyInterestRecalculationContractTerminationIntRecognition";
     public static final String LOAN_CONTRACT_TERMINATION_RESPONSE = "loanContractTerminationResponse";
     public static final String LOAN_UNDO_CONTRACT_TERMINATION_RESPONSE = "loanUndoContractTerminationResponse";
+    public static final String LOAN_WITHDRAWAL_RESPONSE = "loanWithdrawalResponse";
+    public static final String LOAN_UNDO_LOAN_WITHDRAWAL_RESPONSE = "loanUndoLoanWithdrawalResponse";
     public static final String LOAN_BUY_DOWN_FEE_RESPONSE = "loanBuyDownFeeResponse";
     public static final String LOAN_BUY_DOWN_FEE_ADJUSTMENT_RESPONSE = "loanBuyDownFeeAdjustmentResponse";
     public static final String MANUAL_JOURNAL_ENTRIES_REQUEST = "manualJournalEntriesRequest";

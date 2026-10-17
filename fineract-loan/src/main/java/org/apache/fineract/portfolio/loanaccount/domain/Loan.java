@@ -1627,8 +1627,16 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return false;
     }
 
-    public void liftContractTerminationSubStatus() {
-        if (this.loanSubStatus.isContractTermination()) {
+    public boolean isLoanWithdrawal() {
+        return this.loanSubStatus != null && this.loanSubStatus.isLoanWithdrawal();
+    }
+
+    public boolean isTerminatedEarly() {
+        return isContractTermination() || isLoanWithdrawal();
+    }
+
+    public void liftEarlyTerminationSubStatus() {
+        if (isTerminatedEarly()) {
             this.loanSubStatus = null;
         }
     }
@@ -1773,6 +1781,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return getLoanTransaction(e -> e.isNotReversed() && e.isContractTermination());
     }
 
+    public LoanTransaction findLoanWithdrawalTransaction() {
+        return getLoanTransaction(e -> e.isNotReversed() && e.isLoanWithdrawal());
+    }
+
+    public LoanTransaction findEarlyTerminationTransaction() {
+        return getLoanTransaction(e -> e.isNotReversed() && e.isEarlyTermination());
+    }
+
     public LoanTransaction findReAgeTransaction() {
         return getLoanTransaction(LoanTransaction::isReAge);
     }
@@ -1826,9 +1842,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return chargeOffTransaction != null && chargeOffTransaction.getDateOf().compareTo(onDate) <= 0;
     }
 
-    public boolean isContractTerminatedOnDate(final LocalDate onDate) {
-        final LoanTransaction contractTerminationTransaction = isContractTermination() ? findContractTerminationTransaction() : null;
-        return contractTerminationTransaction != null && contractTerminationTransaction.getDateOf().compareTo(onDate) <= 0;
+    public boolean isTerminatedEarlyOnDate(final LocalDate onDate) {
+        final LoanTransaction earlyTerminationTransaction = isTerminatedEarly() ? findEarlyTerminationTransaction() : null;
+        return earlyTerminationTransaction != null && earlyTerminationTransaction.getDateOf().compareTo(onDate) <= 0;
     }
 
     public boolean hasMonetaryActivityAfter(final LocalDate transactionDate) {
@@ -1846,8 +1862,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return false;
     }
 
-    public boolean hasContractTerminationTransaction() {
-        return getLoanTransactions().stream().anyMatch(t -> t.isContractTermination() && t.isNotReversed());
+    public boolean hasEarlyTerminationTransaction() {
+        return getLoanTransactions().stream().anyMatch(t -> t.isEarlyTermination() && t.isNotReversed());
     }
 
     public long getTermsCount() {

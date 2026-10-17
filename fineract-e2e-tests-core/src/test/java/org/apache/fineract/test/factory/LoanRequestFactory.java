@@ -351,6 +351,14 @@ public class LoanRequestFactory {
         return new PostLoansLoanIdRequest().dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE).note("Contract Termination");
     }
 
+    public PostLoansLoanIdRequest defaultLoanWithdrawalUndoRequest() {
+        return new PostLoansLoanIdRequest().note("Loan Withdrawal Undo");
+    }
+
+    public PostLoansLoanIdRequest defaultLoanWithdrawalRequest() {
+        return new PostLoansLoanIdRequest().dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE).note("Loan Withdrawal");
+    }
+
     public PostLoansLoanIdTransactionsRequest defaultBuyDownFeeIncomeRequest() {
         return new PostLoansLoanIdTransactionsRequest().transactionDate(DEFAULT_TRANSACTION_DATE).dateFormat(DATE_FORMAT)
                 .locale(DEFAULT_LOCALE).note("Buy Down Fee");
