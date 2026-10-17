@@ -25,7 +25,6 @@ import lombok.Getter;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 @Getter
 public class FloatingRateData implements Comparable<FloatingRateData>, Serializable {
@@ -39,11 +38,9 @@ public class FloatingRateData implements Comparable<FloatingRateData>, Serializa
     private final String modifiedBy;
     private final OffsetDateTime modifiedOn;
     private final List<FloatingRatePeriodData> ratePeriods;
-    private final List<EnumOptionData> interestRateFrequencyTypeOptions;
 
     public FloatingRateData(Long id, String name, Boolean isBaseLendingRate, Boolean isActive, String createdBy, OffsetDateTime createdOn,
-            String modifiedBy, OffsetDateTime modifiedOn, List<FloatingRatePeriodData> ratePeriods,
-            List<EnumOptionData> interestRateFrequencyTypeOptions) {
+            String modifiedBy, OffsetDateTime modifiedOn, List<FloatingRatePeriodData> ratePeriods) {
         this.id = id;
         this.name = name;
         this.isBaseLendingRate = isBaseLendingRate;
@@ -53,7 +50,6 @@ public class FloatingRateData implements Comparable<FloatingRateData>, Serializa
         this.modifiedBy = modifiedBy;
         this.modifiedOn = modifiedOn;
         this.ratePeriods = ratePeriods;
-        this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
     }
 
     @Override
@@ -97,9 +93,5 @@ public class FloatingRateData implements Comparable<FloatingRateData>, Serializa
                 .append(this.isBaseLendingRate) //
                 .append(this.isActive) //
                 .toHashCode();
-    }
-
-    public static FloatingRateData toTemplate(List<EnumOptionData> interestRateFrequencyTypeOptions) {
-        return new FloatingRateData(null, null, false, true, null, null, null, null, null, interestRateFrequencyTypeOptions);
     }
 }
