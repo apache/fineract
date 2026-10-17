@@ -19,12 +19,16 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import jakarta.annotation.PostConstruct;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanCapitalizedIncomeTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoChargeOffBusinessEvent;
@@ -39,10 +43,17 @@ public class LoanCapitalizedIncomeAmortizationEventService {
 
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanCapitalizedIncomeAmortizationProcessingService loanCapitalizedIncomeAmortizationProcessingService;
+    private final CapitalizedIncomeAmortizationStrategyService capitalizedIncomeAmortizationStrategyService;
 
     @PostConstruct
     public void addListeners() {
         businessEventNotifierService.addPreBusinessEventListener(LoanCloseBusinessEvent.class, new LoanCloseListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanCapitalizedIncomeTransactionCreatedBusinessEvent.class,
+                new LoanCapitalizedIncomeTransactionListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent.class,
+                new LoanCapitalizedIncomeAdjustmentTransactionListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanAdjustTransactionBusinessEvent.class,
+                new LoanAdjustTransactionListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanBalanceChangedBusinessEvent.class, new LoanBalanceChangedListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanChargeOffPostBusinessEvent.class, new LoanChargeOffEventListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanUndoChargeOffBusinessEvent.class,
@@ -61,6 +72,64 @@ public class LoanCapitalizedIncomeAmortizationEventService {
                 log.debug("Loan closure on capitalized income amortization for loan {}", loan.getId());
                 loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanClosure(loan, false);
             }
+        }
+    }
+
+    /**
+     * Closure recognition and IMMEDIATE recognition both recognize remaining unrecognized amounts. Guard so that at
+     * most one of them runs. IMMEDIATE only applies when the product is IMMEDIATE and the loan is already sold.
+     */
+    private void processCapitalizedIncomeAmortizationAfterChange(final Loan loan, final LoanTransaction capitalizedIncomeRelatedTransaction,
+            final LocalDate transactionDate) {
+        if (!loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization()) {
+            return;
+        }
+        final LoanStatus status = loan.getStatus();
+        if (status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid()) {
+            log.debug("Loan capitalized income change on capitalized income amortization for closed loan {}", loan.getId());
+            loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanClosure(loan, true);
+        } else if (capitalizedIncomeAmortizationStrategyService.shouldRecognizeImmediately(loan)) {
+            log.debug("Immediate capitalized income amortization for loan {}", loan.getId());
+            loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationImmediately(loan,
+                    capitalizedIncomeRelatedTransaction, transactionDate, true);
+        }
+    }
+
+    private final class LoanCapitalizedIncomeTransactionListener
+            implements BusinessEventListener<LoanCapitalizedIncomeTransactionCreatedBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(final LoanCapitalizedIncomeTransactionCreatedBusinessEvent event) {
+            final LoanTransaction loanTransaction = event.get();
+            processCapitalizedIncomeAmortizationAfterChange(loanTransaction.getLoan(), loanTransaction,
+                    loanTransaction.getTransactionDate());
+        }
+    }
+
+    private final class LoanCapitalizedIncomeAdjustmentTransactionListener
+            implements BusinessEventListener<LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(final LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent event) {
+            final LoanTransaction loanTransaction = event.get();
+            processCapitalizedIncomeAmortizationAfterChange(loanTransaction.getLoan(), loanTransaction,
+                    loanTransaction.getTransactionDate());
+        }
+    }
+
+    private final class LoanAdjustTransactionListener implements BusinessEventListener<LoanAdjustTransactionBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(final LoanAdjustTransactionBusinessEvent event) {
+            final LoanTransaction transactionToAdjust = event.get().getTransactionToAdjust();
+            // Already reversed here, so check the type: LoanTransaction#isCapitalizedIncome() excludes reversed ones.
+            final boolean isTransactionCapitalizedIncomeRelated = transactionToAdjust.getTypeOf().isCapitalizedIncome()
+                    || transactionToAdjust.getTypeOf().isCapitalizedIncomeAdjustment();
+            if (!isTransactionCapitalizedIncomeRelated) {
+                return;
+            }
+            processCapitalizedIncomeAmortizationAfterChange(transactionToAdjust.getLoan(), transactionToAdjust,
+                    DateUtils.getBusinessLocalDate());
         }
     }
 
