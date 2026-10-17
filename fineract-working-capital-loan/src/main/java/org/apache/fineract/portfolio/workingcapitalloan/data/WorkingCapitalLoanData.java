@@ -60,6 +60,7 @@ public class WorkingCapitalLoanData implements Serializable {
     private String clientName;
     private ExternalId clientExternalId;
     private Long clientOfficeId;
+    private String officeName;
     private Long fundId;
     private String fundName;
     private WorkingCapitalLoanProductData product;
