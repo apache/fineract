@@ -113,7 +113,7 @@ plugins {
     id 'org.nosphere.apache.rat' version '0.8.1' apply false
     id 'com.github.jk1.dependency-license-report' version '3.1.4' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.2' apply false
-    id 'org.springframework.boot' version '4.1.0' apply false
+    id 'org.springframework.boot' version '4.1.1' apply false
     id 'net.ltgt.errorprone' version '4.4.0' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.49' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.5.7' apply false
