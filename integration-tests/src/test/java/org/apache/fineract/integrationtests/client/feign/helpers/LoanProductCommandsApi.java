@@ -32,16 +32,8 @@ import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
  * <p>
  * The generated {@code PutLoanProductsProductIdRequest} cannot express that: the mapper's global {@code NON_NULL} drops
  * a null property, so {@code .delinquencyBucketId(null)} serialises to <code>{}</code> and the bucket is never cleared.
- * Declaring the property {@code nullable} in the spec would model it as a {@code JsonNullable<Long>} and fix it for SDK
- * consumers, but it cannot fix it here: {@code fineract-client} (Retrofit/Gson) and {@code fineract-client-feign}
- * (Jackson) both generate into {@code org.apache.fineract.client.models}, and {@code integration-tests} puts the
- * Retrofit artifact on the test classpath first ({@code integration-tests/dependencies.gradle}), so the Retrofit model
- * - a plain {@code Long} - wins the name clash and the Jackson annotations never reach the wire. Measured, not assumed.
- *
- * <p>
- * So the spec is left alone and this keeps the call typed end to end, binding the response to the generated model.
- * Resolving the classpath shadowing is a separate concern: 46 test files import Retrofit-only packages and 430 import
- * the shared model package.
+ * Declaring the property {@code nullable} in the spec would model it as a {@code JsonNullable<Long>}; until the spec
+ * does that, this keeps the call typed end to end, binding the response to the generated model.
  */
 @Headers({ "Accept: application/json", "Content-Type: application/json" })
 public interface LoanProductCommandsApi {
