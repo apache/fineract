@@ -22,14 +22,23 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.infrastructure.item.ExecutionContext;
 
 public class InlineCOBLoanItemReader extends AbstractLoanItemReader<Loan> {
 
+    private final LoanRepository loanRepository;
+
     public InlineCOBLoanItemReader(LoanRepository loanRepository) {
         super(loanRepository);
+        this.loanRepository = loanRepository;
+    }
+
+    @Override
+    protected Loan loadEntity(final Long id) {
+        return loanRepository.findByIdWithRepaymentSchedule(id).orElseThrow(() -> new LoanNotFoundException(id));
     }
 
     @Override

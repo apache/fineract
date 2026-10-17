@@ -120,6 +120,15 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_LOAN_BY_EXTERNAL_ID = "SELECT loan FROM Loan loan WHERE loan.externalId = :externalId";
 
+    // One collection only: a second JOIN FETCH here is cartesian. EclipseLink does not apply the mapping's
+    // @OrderBy("installmentNumber") to a join-fetched collection and Loan reads the list by position, so the
+    // order is stated here. No DISTINCT: EclipseLink already collapses the repeated loan rows of a to-many fetch.
+    String FIND_BY_ID_WITH_REPAYMENT_SCHEDULE = "select loan from Loan loan left join fetch loan.repaymentScheduleInstallments installment where loan.id = :loanId order by installment.installmentNumber";
+
+    String FIND_BY_CLIENT_OFFICE_IDS_AND_LOAN_STATUS_WITH_SCHEDULE = "select loan from Loan loan left join fetch loan.repaymentScheduleInstallments installment where loan.client.office.id IN :officeIds and loan.loanStatus IN :loanStatuses order by loan.id, installment.installmentNumber";
+
+    String FIND_BY_GROUP_OFFICE_IDS_AND_LOAN_STATUS_WITH_SCHEDULE = "select loan from Loan loan left join fetch loan.repaymentScheduleInstallments installment where loan.group.office.id IN :officeIds and loan.loanStatus IN :loanStatuses order by loan.id, installment.installmentNumber";
+
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
             @Param("loanType") AccountType loanType);
@@ -182,9 +191,20 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
+    @Query(FIND_BY_CLIENT_OFFICE_IDS_AND_LOAN_STATUS_WITH_SCHEDULE)
+    List<Loan> findByClientOfficeIdsAndLoanStatusWithSchedule(@Param("officeIds") Collection<Long> officeIds,
+            @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
+
     @Query("select loan from Loan loan where loan.group.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
     List<Loan> findByGroupOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
+
+    @Query(FIND_BY_GROUP_OFFICE_IDS_AND_LOAN_STATUS_WITH_SCHEDULE)
+    List<Loan> findByGroupOfficeIdsAndLoanStatusWithSchedule(@Param("officeIds") Collection<Long> officeIds,
+            @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
+
+    @Query(FIND_BY_ID_WITH_REPAYMENT_SCHEDULE)
+    Optional<Loan> findByIdWithRepaymentSchedule(@Param("loanId") Long loanId);
 
     /*** FIXME: Add more appropriate names for the query ***/
     @Query(FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_CLIENT)
