@@ -772,24 +772,8 @@ public final class LoanApplicationValidator {
                         graceOnInterestPayment, graceOnInterestCharged, recurringMoratoriumOnPrincipalPeriods, baseDataValidator);
             }
 
-            if (fromApiJsonHelper.parameterExists(LoanApiConstants.daysInYearCustomStrategyParameterName, element)) {
-                DaysInYearCustomStrategyType daysInYearCustomStrategy = fromApiJsonHelper
-                        .enumValueOfParameterNamed("daysInYearCustomStrategyParameterName", element, DaysInYearCustomStrategyType.class);
-                if (daysInYearCustomStrategy != null) {
-                    if (!LoanScheduleType.PROGRESSIVE.equals(loanProduct.getLoanProductRelatedDetail().getLoanScheduleType())) {
-                        baseDataValidator.reset().parameter(LoanApiConstants.daysInYearCustomStrategyParameterName).failWithCode(
-                                "days.in.year.custom.strategy.is.only.supported.for.progressive.loan.schedule.type",
-                                "daysInYearCustomStrategy is only supported for progressive loan schedule type");
-                    }
-
-                    if (!DaysInYearType.ACTUAL.getValue().equals(loanProduct.getLoanProductRelatedDetail().getDaysInYearType())) {
-                        baseDataValidator.reset().parameter(LoanApiConstants.daysInYearCustomStrategyParameterName).failWithCode(
-                                "days.in.year.custom.strategy.is.only.applicable.for.actual.days.in.year.type",
-                                "daysInYearCustomStrategy is only applicable for ACTUAL days in year type");
-                    }
-
-                }
-            }
+            validateDaysInYearCustomStrategy(element, loanProduct.getLoanProductRelatedDetail().getLoanScheduleType(),
+                    loanProduct.getLoanProductRelatedDetail().getDaysInYearType(), baseDataValidator);
 
             if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.REPAYMENT_START_DATE_TYPE, element)) {
                 final Integer repaymentStartDateType = this.fromApiJsonHelper
@@ -831,6 +815,37 @@ public final class LoanApplicationValidator {
             loanProductDataValidator.fixedLengthValidations(transactionProcessingStrategy, isInterestBearing, numberOfRepayments,
                     repaymentEvery, element, baseDataValidator);
         });
+    }
+
+    private void validateDaysInYearCustomStrategy(final JsonElement element, final LoanScheduleType loanScheduleType,
+            final Integer defaultDaysInYearType, final DataValidatorBuilder baseDataValidator) {
+        if (!this.fromApiJsonHelper.parameterExists(LoanApiConstants.daysInYearCustomStrategyParameterName, element)) {
+            return;
+        }
+        final String daysInYearCustomStrategy = this.fromApiJsonHelper
+                .extractStringNamed(LoanApiConstants.daysInYearCustomStrategyParameterName, element);
+        if (daysInYearCustomStrategy == null) {
+            return;
+        }
+        baseDataValidator.reset().parameter(LoanApiConstants.daysInYearCustomStrategyParameterName).value(daysInYearCustomStrategy)
+                .isOneOfEnumValues(DaysInYearCustomStrategyType.class);
+
+        if (!LoanScheduleType.PROGRESSIVE.equals(loanScheduleType)) {
+            baseDataValidator.reset().parameter(LoanApiConstants.daysInYearCustomStrategyParameterName).failWithCode(
+                    "days.in.year.custom.strategy.is.only.supported.for.progressive.loan.schedule.type",
+                    "daysInYearCustomStrategy is only supported for progressive loan schedule type");
+        }
+
+        Integer daysInYearType = defaultDaysInYearType;
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.daysInYearTypeParameterName, element)) {
+            daysInYearType = this.fromApiJsonHelper.extractIntegerNamed(LoanApiConstants.daysInYearTypeParameterName, element,
+                    Locale.getDefault());
+        }
+        if (!DaysInYearType.ACTUAL.getValue().equals(daysInYearType)) {
+            baseDataValidator.reset().parameter(LoanApiConstants.daysInYearCustomStrategyParameterName).failWithCode(
+                    "days.in.year.custom.strategy.is.only.applicable.for.actual.days.in.year.type",
+                    "daysInYearCustomStrategy is only applicable for ACTUAL days in year type");
+        }
     }
 
     private void validateBorrowerCycle(JsonElement element, LoanProduct loanProduct, Long clientId, Long groupId,
@@ -1363,6 +1378,10 @@ public final class LoanApplicationValidator {
                         .integerGreaterThanZero();
             }
 
+            if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.daysInYearCustomStrategyParameterName, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+            }
+
             if (!atLeastOneParameterPassedForUpdate) {
                 final Object forceError = null;
                 baseDataValidator.reset().anyOfNotNull(forceError);
@@ -1514,6 +1533,9 @@ public final class LoanApplicationValidator {
                     throw new UnsupportedParameterException(unsupportedParameterList);
                 }
             }
+
+            validateDaysInYearCustomStrategy(element, loanProduct.getLoanProductRelatedDetail().getLoanScheduleType(),
+                    loan.getLoanProductRelatedDetail().getDaysInYearType(), baseDataValidator);
 
             Integer repaymentStartDateType = loan.getRepaymentStartDateType().getValue();
             if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.REPAYMENT_START_DATE_TYPE, element)) {

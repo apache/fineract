@@ -50,6 +50,8 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionApiConstants;
@@ -417,6 +419,8 @@ public final class LoanProductDataValidator {
                 element, Locale.getDefault());
         baseDataValidator.reset().parameter(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME).value(daysInYearType).notNull()
                 .isOneOfTheseValues(1, 360, 364, 365);
+
+        validateDaysInYearCustomStrategyValue(element, baseDataValidator);
 
         final Integer daysInMonthType = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME,
                 element, Locale.getDefault());
@@ -1336,6 +1340,41 @@ public final class LoanProductDataValidator {
         }
     }
 
+    private void validateDaysInYearCustomStrategyValue(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, element)) {
+            final String daysInYearCustomStrategy = this.fromApiJsonHelper
+                    .extractStringNamed(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME)
+                    .value(daysInYearCustomStrategy).ignoreIfNull().isOneOfEnumValues(DaysInYearCustomStrategyType.class);
+        }
+    }
+
+    private void validateDaysInYearCustomStrategyClearing(final JsonElement element, final LoanProduct loanProduct,
+            final DataValidatorBuilder baseDataValidator) {
+        if (!this.fromApiJsonHelper.parameterExists(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, element)
+                || this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME,
+                        element) != null
+                || loanProduct.getLoanProductRelatedDetail().getDaysInYearCustomStrategy() == null) {
+            return;
+        }
+
+        String loanScheduleType = loanProduct.getLoanProductRelatedDetail().getLoanScheduleType().name();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_TYPE, element)) {
+            loanScheduleType = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
+        }
+        Integer daysInYearType = loanProduct.getLoanProductRelatedDetail().getDaysInYearType();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME, element)) {
+            daysInYearType = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME, element,
+                    Locale.getDefault());
+        }
+
+        if (LoanScheduleType.PROGRESSIVE.name().equals(loanScheduleType) && DaysInYearType.ACTUAL.getValue().equals(daysInYearType)) {
+            baseDataValidator.reset().parameter(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME).failWithCode(
+                    "cannot.be.cleared.for.progressive.loan.with.actual.days.in.year.type",
+                    "daysInYearCustomStrategy can only be cleared for cumulative loan schedule type or non ACTUAL days in year type");
+        }
+    }
+
     public void validateForUpdate(final JsonCommand command, final LoanProduct loanProduct) {
         String json = command.json();
         if (StringUtils.isBlank(json)) {
@@ -1524,6 +1563,9 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME).value(daysInYearType).notNull()
                     .isOneOfTheseValues(1, 360, 364, 365);
         }
+
+        validateDaysInYearCustomStrategyValue(element, baseDataValidator);
+        validateDaysInYearCustomStrategyClearing(element, loanProduct, baseDataValidator);
 
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME, element)) {
             final Integer daysInMonthType = this.fromApiJsonHelper
