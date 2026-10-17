@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -294,6 +295,22 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         private PostFixedDepositAccountsRequest() {}
 
+        static final class PostFixedDepositAccountsCharges {
+
+            private PostFixedDepositAccountsCharges() {}
+
+            @Schema(example = "2")
+            public Long chargeId;
+            @Schema(example = "100")
+            public BigDecimal amount;
+            @Schema(example = "29 April 2013")
+            public String dueDate;
+            @Schema(example = "04 March", description = "The recurring day an annual or monthly fee falls due")
+            public String feeOnMonthDay;
+            @Schema(example = "1")
+            public Integer feeInterval;
+        }
+
         @Schema(example = "1")
         public Long clientId;
         @Schema(example = "1")
@@ -348,6 +365,7 @@ final class FixedDepositAccountsApiResourceSwagger {
         public Boolean transferInterestToSavings;
         @Schema(example = "100")
         public Integer maturityInstructionId;
+        public List<PostFixedDepositAccountsCharges> charges;
         @Schema(example = "false", description = "Determines whether product level interest rate chart is overridden by custom nominal annual interest rate")
         public Boolean isRateChartOverridden;
         @Schema(example = "5.0", description = "Custom nominal annual interest rate to override product chart slabs")
