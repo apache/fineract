@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.integrationtests.client;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PostOfficesRequest;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -34,7 +37,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  *
  * @author Michael Vorburger.ch
  */
-public class OfficeTest extends IntegrationTest {
+public class OfficeTest extends FeignIntegrationTest {
 
     @Test
     @Order(1)
@@ -42,15 +45,16 @@ public class OfficeTest extends IntegrationTest {
         // NB parentId(1) always exists (Head Office)
         // NB name random() because Office Names have to be unique
         // TODO requiring dateFormat(..).locale(..) is dumb :( see https://issues.apache.org/jira/browse/FINERACT-1233
-        assertThat(ok(fineractClient().offices.createOffice(new PostOfficesRequest().name(Utils.randomStringGenerator("TestOffice_", 6))
-                .parentId(1L).openingDate(LocalDate.now(ZoneId.of("UTC"))).dateFormat("yyyy-MM-dd").locale("en_US"))).getOfficeId())
-                .isGreaterThan(0);
+        assertThat(ok(() -> fineractClient().offices()
+                .createOffice(new PostOfficesRequest().name(Utils.randomStringGenerator("TestOffice_", 6)).parentId(1L)
+                        .openingDate(LocalDate.now(ZoneId.of("UTC"))).dateFormat("yyyy-MM-dd").locale("en_US")))
+                .getOfficeId()).isGreaterThan(0);
     }
 
     @Test
     @Order(2)
     void retrieveOneExistingInclDateFormat() { // see FINERACT-1220 re. what this tests re. Date Format
-        List<GetOfficesResponse> response = ok(fineractClient().offices.retrieveAllOffices(true, null, null));
+        List<GetOfficesResponse> response = ok(() -> fineractClient().offices().retrieveAllOffices(true, null, null));
         assertThat(response.size()).isGreaterThanOrEqualTo(1);
         assertThat(response.get(0).getOpeningDate()).isNotNull();
     }
@@ -83,11 +87,9 @@ public class OfficeTest extends IntegrationTest {
     @ParameterizedTest(name = "orderBy=''{0}'' is whitelisted — must succeed")
     @ValueSource(strings = { "id", "name", "nameDecorated", "externalId", "hierarchy", "openingDate" })
     @Order(3)
-    void retrieveAllOffices_withWhitelistedOrderByColumn_succeeds(String column) throws Exception {
-        var response = fineractClient().offices.retrieveAllOffices(false, column, null).execute();
-        assertThat(response.isSuccessful())
-                .as("GET /offices?orderBy=%s should return 2xx (whitelist over-blocks), got HTTP %d", column, response.code()).isTrue();
-        assertThat(response.body()).isNotNull();
+    void retrieveAllOffices_withWhitelistedOrderByColumn_succeeds(String column) {
+        List<GetOfficesResponse> response = ok(() -> fineractClient().offices().retrieveAllOffices(false, column, null));
+        assertThat(response).isNotNull();
     }
 
     /**
@@ -97,9 +99,9 @@ public class OfficeTest extends IntegrationTest {
     @ParameterizedTest(name = "orderBy=''{0}'' is blank — treated as absent, must succeed")
     @ValueSource(strings = { "   ", "\t" })
     @Order(4)
-    void retrieveAllOffices_withBlankOrderBy_isAcceptedAsAbsent(String blank) throws Exception {
-        var response = fineractClient().offices.retrieveAllOffices(false, blank, null).execute();
-        assertThat(response.isSuccessful()).as("Blank orderBy [%s] should be treated as absent, not rejected", blank).isTrue();
+    void retrieveAllOffices_withBlankOrderBy_isAcceptedAsAbsent(String blank) {
+        assertThat(ok(() -> fineractClient().offices().retrieveAllOffices(false, blank, null)))
+                .as("Blank orderBy [%s] should be treated as absent, not rejected", blank).isNotNull();
     }
 
     /**
@@ -121,10 +123,9 @@ public class OfficeTest extends IntegrationTest {
     @ValueSource(strings = { "(SELECT SLEEP(3))", "(SELECT SLEEP(10))", "(SELECT IF(SUBSTRING(user(),1,4)='root',SLEEP(2),0))",
             "(SELECT SLEEP(300))", "(SELECT 1)", "(SELECT 1 FROM dual)", })
     @Order(5)
-    void retrieveAllOffices_zdres035SubqueryPayloads_areRejected(String payload) throws Exception {
-        var response = fineractClient().offices.retrieveAllOffices(false, payload, null).execute();
-        assertThat(response.isSuccessful()).as("ZDRES-035 subquery [%s] must be rejected — whitelist fix not effective", payload).isFalse();
-        assertThat(response.code()).as("Expected HTTP 403 for payload [%s], got %d", payload, response.code()).isEqualTo(403);
+    void retrieveAllOffices_zdres035SubqueryPayloads_areRejected(String payload) {
+        CallFailedRuntimeException response = fail(() -> fineractClient().offices().retrieveAllOffices(false, payload, null));
+        assertThat(response.getStatus()).as("Expected HTTP 403 for payload [%s], got %d", payload, response.getStatus()).isEqualTo(403);
     }
 
     /**
@@ -141,12 +142,12 @@ public class OfficeTest extends IntegrationTest {
      */
     @Test
     @Order(6)
-    void retrieveAllOffices_sleepSubquery_isRejectedBeforeDatabaseExecution() throws Exception {
+    void retrieveAllOffices_sleepSubquery_isRejectedBeforeDatabaseExecution() {
         long start = System.currentTimeMillis();
-        var response = fineractClient().offices.retrieveAllOffices(false, "(SELECT SLEEP(3))", null).execute();
+        CallFailedRuntimeException response = fail(() -> fineractClient().offices().retrieveAllOffices(false, "(SELECT SLEEP(3))", null));
         long elapsed = System.currentTimeMillis() - start;
 
-        assertThat(response.code()).as("Expected HTTP 403 for SLEEP(3) subquery, got %d", response.code()).isEqualTo(403);
+        assertThat(response.getStatus()).as("Expected HTTP 403 for SLEEP(3) subquery, got %d", response.getStatus()).isEqualTo(403);
         assertThat(elapsed)
                 .as("Response took %d ms — if >= 2000 ms the SLEEP(3) executed on the DB; whitelist fix is not active on this code path",
                         elapsed)
@@ -170,16 +171,15 @@ public class OfficeTest extends IntegrationTest {
             // Comment truncation
             "id--", "id/*comment*/", })
     @Order(7)
-    void retrieveAllOffices_classicInjectionPayloads_areRejected(String payload) throws Exception {
-        var response = fineractClient().offices.retrieveAllOffices(false, payload, null).execute();
-        assertThat(response.isSuccessful()).as("Injection payload [%s] must be rejected", payload).isFalse();
-        assertThat(response.code()).isEqualTo(403);
+    void retrieveAllOffices_classicInjectionPayloads_areRejected(String payload) {
+        CallFailedRuntimeException response = fail(() -> fineractClient().offices().retrieveAllOffices(false, payload, null));
+        assertThat(response.getStatus()).as("Injection payload [%s] must be rejected", payload).isEqualTo(403);
     }
 
     /**
      * Non-whitelisted column names that are not injection payloads — internal schema columns, table-qualified forms,
-     * numeric literals, and a percent-encoded subquery (passed as a literal string through retrofit; the server
-     * receives the raw percent signs, which do not match any whitelisted column name and are therefore rejected).
+     * numeric literals, and a percent-encoded subquery (the server receives the raw percent signs, which do not match
+     * any whitelisted column name and are therefore rejected).
      *
      * <p>
      * Note: blank / whitespace-only values are tested separately in
@@ -194,14 +194,13 @@ public class OfficeTest extends IntegrationTest {
             "m_office.id", "o.name",
             // Numeric literals
             "1", "0",
-            // Percent-encoded subquery passed as a literal string value;
-            // retrofit re-encodes it, server receives the literal percent signs
-            // → no whitelist match → 403
-            "%28SELECT%20SLEEP%283%29%29", })
+            // Percent-encoded subquery; Feign sends percent triplets as they are, so the
+            // percent signs are encoded once more and the server receives the literal
+            // %28SELECT%20SLEEP%283%29%29 → no whitelist match → 403
+            "%2528SELECT%2520SLEEP%25283%2529%2529", })
     @Order(8)
-    void retrieveAllOffices_nonWhitelistedColumns_areRejected(String payload) throws Exception {
-        var response = fineractClient().offices.retrieveAllOffices(false, payload, null).execute();
-        assertThat(response.isSuccessful()).as("Non-whitelisted column [%s] must be rejected by the whitelist", payload).isFalse();
-        assertThat(response.code()).isEqualTo(403);
+    void retrieveAllOffices_nonWhitelistedColumns_areRejected(String payload) {
+        CallFailedRuntimeException response = fail(() -> fineractClient().offices().retrieveAllOffices(false, payload, null));
+        assertThat(response.getStatus()).as("Non-whitelisted column [%s] must be rejected by the whitelist", payload).isEqualTo(403);
     }
 }

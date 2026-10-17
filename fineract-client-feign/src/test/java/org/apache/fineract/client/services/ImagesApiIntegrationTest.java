@@ -19,9 +19,14 @@
 package org.apache.fineract.client.services;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.common.ContentTypes.CONTENT_TYPE;
@@ -37,6 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.fineract.client.feign.FineractFeignClientConfig;
+import org.apache.fineract.client.feign.FineractMultipartEncoder.MultipartData;
 import org.apache.fineract.client.feign.services.ImagesApi;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,6 +125,34 @@ class ImagesApiIntegrationTest {
 
         assertThat(response.status()).isEqualTo(200);
         assertThat(response.body().asInputStream().readAllBytes()).isEqualTo(resizedImage);
+    }
+
+    @Test
+    void testCreateStaffImageAsMultipart() throws IOException {
+        wireMockServer.stubFor(post(urlEqualTo("/v1/staff/456/images"))
+                .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "application/json").withBody("{\"resourceId\":456}")));
+
+        ImagesApi api = config.createClient(ImagesApi.class);
+        Response response = api.create("staff", 456L,
+                new MultipartData().addFile("file", testImageFile.getName(), Files.readAllBytes(testImageFile.toPath()), "image/jpeg"));
+
+        assertThat(response.status()).isEqualTo(200);
+        wireMockServer.verify(postRequestedFor(urlEqualTo("/v1/staff/456/images"))
+                .withHeader(CONTENT_TYPE, containing("multipart/form-data")).withRequestBody(containing("filename=\"test-image.jpg\"")));
+    }
+
+    @Test
+    void testUpdateStaffImageAsMultipart() throws IOException {
+        wireMockServer.stubFor(put(urlEqualTo("/v1/staff/456/images"))
+                .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "application/json").withBody("{\"resourceId\":456}")));
+
+        ImagesApi api = config.createClient(ImagesApi.class);
+        Response response = api.update("staff", 456L,
+                new MultipartData().addFile("file", testImageFile.getName(), Files.readAllBytes(testImageFile.toPath()), "image/jpeg"));
+
+        assertThat(response.status()).isEqualTo(200);
+        wireMockServer.verify(putRequestedFor(urlEqualTo("/v1/staff/456/images"))
+                .withHeader(CONTENT_TYPE, containing("multipart/form-data")).withRequestBody(containing("filename=\"test-image.jpg\"")));
     }
 
     @Test

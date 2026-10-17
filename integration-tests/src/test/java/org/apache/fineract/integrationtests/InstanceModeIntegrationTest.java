@@ -18,16 +18,20 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
+import static org.apache.fineract.client.feign.util.FeignCalls.failVoid;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
-import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.FineractClientHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.support.instancemode.ConfigureInstanceMode;
 import org.apache.fineract.integrationtests.support.instancemode.InstanceModeSupportExtension;
@@ -38,12 +42,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(InstanceModeSupportExtension.class)
 public class InstanceModeIntegrationTest {
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private Long jobId;
 
     @BeforeEach
     public void setup() throws InterruptedException {
         // Apply Annual Fee For Savings
-        jobId = Calls.ok(FineractClientHelper.getFineractClient().jobs.retrieveByShortName("SA_AANF")).getJobId();
+        jobId = ok(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().retrieveByShortName("SA_AANF")).getJobId();
     }
 
     @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = false)
@@ -82,7 +87,7 @@ public class InstanceModeIntegrationTest {
         // given
         PostClientsRequest request = ClientHelper.defaultClientCreationRequest();
         // when/then
-        assertThrows(RuntimeException.class, () -> ClientHelper.createClient(request));
+        assertEquals(405, clientHelper.createClientExpectingError(request).getStatus());
     }
 
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = true, batchWorkerEnabled = false, batchManagerEnabled = false)
@@ -91,7 +96,7 @@ public class InstanceModeIntegrationTest {
         // given
         PostClientsRequest request = ClientHelper.defaultClientCreationRequest();
         // when
-        var result = ClientHelper.createClient(request);
+        var result = clientHelper.createClient(request);
         // then
         assertNotNull(result);
     }
@@ -102,28 +107,33 @@ public class InstanceModeIntegrationTest {
         // given
         PostClientsRequest request = ClientHelper.defaultClientCreationRequest();
         // when/then
-        assertThrows(RuntimeException.class, () -> ClientHelper.createClient(request));
+        assertEquals(405, clientHelper.createClientExpectingError(request).getStatus());
     }
 
     @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = false)
     @Test
     public void testRunSchedulerJobDoesntWork_WhenReadOnly() {
         // when/then
-        assertThrows(RuntimeException.class, () -> Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob")));
+        CallFailedRuntimeException exception = failVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob()
+                .executeJob(jobId, "executeJob", new ExecuteJobRequest()));
+        assertEquals(405, exception.getStatus());
     }
 
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = true, batchWorkerEnabled = false, batchManagerEnabled = false)
     @Test
     public void testRunSchedulerJobDoesntWork_WhenWriteOnly() {
         // when/then
-        assertThrows(RuntimeException.class, () -> Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob")));
+        CallFailedRuntimeException exception = failVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob()
+                .executeJob(jobId, "executeJob", new ExecuteJobRequest()));
+        assertEquals(405, exception.getStatus());
     }
 
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchWorkerEnabled = true, batchManagerEnabled = true)
     @Test
     public void testRunSchedulerJobWorks_WhenBatchOnly() {
         // when
-        Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob"));
+        executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().executeJob(jobId, "executeJob",
+                new ExecuteJobRequest()));
         // then no exception thrown
     }
 }

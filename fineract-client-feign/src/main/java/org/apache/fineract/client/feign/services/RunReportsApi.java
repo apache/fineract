@@ -24,6 +24,7 @@ import feign.RequestLine;
 import feign.Response;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.RunReportsResponse;
 
 public interface RunReportsApi {
@@ -52,6 +53,19 @@ public interface RunReportsApi {
      */
     @RequestLine("GET /v1/runreports/{reportName}")
     RunReportsResponse runReportGetData(@Param("reportName") String reportName, @QueryMap Map<String, String> parameters);
+
+    /**
+     * Similar to {@link #runReportGetData} but it also returns the HTTP status code and response headers.
+     *
+     * @param reportName
+     *            reportName (required)
+     * @param parameters
+     *            Dynamic query parameters for the report (required)
+     * @return ApiResponse wrapping the RunReportsResponse
+     */
+    @RequestLine("GET /v1/runreports/{reportName}")
+    ApiResponse<RunReportsResponse> runReportGetDataWithHttpInfo(@Param("reportName") String reportName,
+            @QueryMap Map<String, String> parameters);
 
     /**
      * Run Report which returns a response such as a PDF, CSV, XLS or XLSX file.

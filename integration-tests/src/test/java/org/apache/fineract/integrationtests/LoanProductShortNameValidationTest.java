@@ -19,14 +19,14 @@
 
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.apache.fineract.integrationtests.common.Utils.uniqueRandomStringGenerator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.client.util.Calls;
-import org.apache.fineract.integrationtests.common.FineractClientHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Test;
 
 public class LoanProductShortNameValidationTest {
@@ -37,12 +37,12 @@ public class LoanProductShortNameValidationTest {
         PostLoanProductsRequest request = buildMinimalLoanProductRequest(shortName);
 
         // First creation should succeed
-        Calls.ok(FineractClientHelper.getFineractClient().loanProducts.createLoanProduct(request));
+        ok(() -> FineractFeignClientHelper.getFineractFeignClient().loanProducts().createLoanProduct(request));
 
         // Second creation with same short name should fail with 403
-        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                () -> Calls.ok(FineractClientHelper.getFineractClient().loanProducts.createLoanProduct(request)));
-        assertEquals(403, exception.getResponse().code());
+        CallFailedRuntimeException exception = fail(
+                () -> FineractFeignClientHelper.getFineractFeignClient().loanProducts().createLoanProduct(request));
+        assertEquals(403, exception.getStatus());
     }
 
     private PostLoanProductsRequest buildMinimalLoanProductRequest(String shortName) {
