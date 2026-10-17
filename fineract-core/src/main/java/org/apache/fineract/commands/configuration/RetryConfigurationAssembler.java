@@ -117,7 +117,13 @@ public class RetryConfigurationAssembler {
         if (props.getWaitDuration() != null && props.getWaitDuration().toMillis() >= 0) {
             if (Boolean.TRUE.equals(props.getEnableExponentialBackoff())) {
                 Double multiplier = props.getExponentialBackoffMultiplier();
-                if (multiplier != null) {
+                Double jitter = props.getExponentialBackoffJitter();
+                if (multiplier != null && jitter != null && jitter > 0) {
+                    // randomizes every wait by +/- jitter (0 < jitter < 1) so that callers which failed together do not
+                    // retry together
+                    configBuilder
+                            .intervalFunction(IntervalFunction.ofExponentialRandomBackoff(props.getWaitDuration(), multiplier, jitter));
+                } else if (multiplier != null) {
                     configBuilder.intervalFunction(IntervalFunction.ofExponentialBackoff(props.getWaitDuration(), multiplier));
                 } else {
                     configBuilder.intervalFunction(IntervalFunction.ofExponentialBackoff(props.getWaitDuration()));
