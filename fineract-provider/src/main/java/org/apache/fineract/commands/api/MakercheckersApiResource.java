@@ -68,7 +68,8 @@ public class MakercheckersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Maker Checker Entries", description = "Get a list of entries that can be checked by the requestor that match the criteria supplied.\n"
             + "\n" + "Example Requests:\n" + "\n" + "makercheckers\n" + "\n" + "makercheckers?fields=madeOnDate,maker,processingResult\n"
-            + "\n" + "makercheckers?makerDateTimeFrom=2013-03-25 08:00:00&makerDateTimeTo=2013-04-04 18:00:00\n" + "\n"
+            + "\n" + "makercheckers?username=john.doe\n" + "\n"
+            + "makercheckers?makerDateTimeFrom=2013-03-25 08:00:00&makerDateTimeTo=2013-04-04 18:00:00\n" + "\n"
             + "makercheckers?officeId=1\n" + "\n" + "makercheckers?officeId=1&includeJson=true")
     public List<AuditData> retrieveCommands(@Context final UriInfo uriInfo, @BeanParam MakerCheckerRequest makerCheckerRequest) {
         final SQLBuilder extraCriteria = getExtraCriteria(makerCheckerRequest);
