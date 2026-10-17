@@ -77,7 +77,7 @@ public class InternalConfigurationsApiResource implements InitializingBean {
         log.warn("                                                            ");
         log.warn("------------------------------------------------------------");
 
-        final GlobalConfigurationProperty config = repository.findOneByNameWithNotFoundDetection(configName);
+        final GlobalConfigurationProperty config = repository.findOneByNameForUpdateWithNotFoundDetection(configName);
         config.setValue(configValue);
         repository.save(config);
         log.warn("Config {} updated to {}", config.getName(), config.getValue());
