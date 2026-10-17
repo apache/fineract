@@ -118,7 +118,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                 paymentDetail, null, accountType);
         UUID refNo = UUID.randomUUID();
         final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO, transactionBooleanValues.isApplyWithdrawFee(),
-                backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate, refNo.toString());
+                backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate, refNo.toString(), transactionBooleanValues.isForceWithdrawal());
         final MathContext mc = MathContext.DECIMAL64;
 
         final LocalDate today = DateUtils.getBusinessLocalDate();
