@@ -22,6 +22,7 @@ import java.util.Collection;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountAnnualFeeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
+import org.apache.fineract.portfolio.savings.data.SavingsChargeTransactionData;
 
 public interface SavingsAccountChargeReadPlatformService {
 
@@ -30,6 +31,8 @@ public interface SavingsAccountChargeReadPlatformService {
     Collection<SavingsAccountChargeData> retrieveSavingsAccountCharges(Long savingsAccountId, String status);
 
     SavingsAccountChargeData retrieveSavingsAccountChargeDetails(Long savingsAccountChargeId, Long savingsAccountId);
+
+    Collection<SavingsChargeTransactionData> retrieveChargeTransactions(Long savingsAccountChargeId, Long savingsAccountId);
 
     Collection<SavingsAccountAnnualFeeData> retrieveChargesWithAnnualFeeDue();
 
