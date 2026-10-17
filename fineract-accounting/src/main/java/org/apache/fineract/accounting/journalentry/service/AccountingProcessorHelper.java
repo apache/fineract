@@ -150,11 +150,22 @@ public interface AccountingProcessorHelper {
             Long paymentTypeId, Long loanId, String transactionId, LocalDate transactionDate, BigDecimal totalAmount, Boolean isReversal,
             List<ChargePaymentDTO> chargePaymentDTOs);
 
+    void createCashBasedJournalEntriesAndReversalsForSavingsCharges(Office office, String currencyCode,
+            CashAccountsForSavings accountTypeToBeDebited, CashAccountsForSavings accountTypeToBeCredited, Long savingsProductId,
+            Long paymentTypeId, Long loanId, String transactionId, LocalDate transactionDate, BigDecimal totalAmount, Boolean isReversal,
+            List<ChargePaymentDTO> chargePaymentDTOs, List<TaxPaymentDTO> taxPayments);
+
     void createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(Office office, String currencyCode,
             AccountingConstants.AccrualAccountsForSavings accountTypeToBeDebited,
             AccountingConstants.AccrualAccountsForSavings accountTypeToBeCredited, Long savingsProductId, Long paymentTypeId, Long loanId,
             String transactionId, LocalDate transactionDate, BigDecimal totalAmount, Boolean isReversal,
             List<ChargePaymentDTO> chargePaymentDTOs);
+
+    void createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(Office office, String currencyCode,
+            AccountingConstants.AccrualAccountsForSavings accountTypeToBeDebited,
+            AccountingConstants.AccrualAccountsForSavings accountTypeToBeCredited, Long savingsProductId, Long paymentTypeId, Long loanId,
+            String transactionId, LocalDate transactionDate, BigDecimal totalAmount, Boolean isReversal,
+            List<ChargePaymentDTO> chargePaymentDTOs, List<TaxPaymentDTO> taxPayments);
 
     Office getOfficeById(long officeId);
 
