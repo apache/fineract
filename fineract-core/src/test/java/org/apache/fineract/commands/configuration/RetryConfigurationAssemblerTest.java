@@ -27,6 +27,8 @@ import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.persistence.OptimisticLockException;
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
@@ -86,5 +88,61 @@ class RetryConfigurationAssemblerTest {
         retry.getRetryConfig().getExceptionPredicate().test(new OptimisticLockException("stale"));
 
         assertNull(underTest.getLastException());
+    }
+
+    @Test
+    void shouldExecuteCommandBackoffBeDeterministicWithoutJitter() {
+        RetryConfigurationAssembler assembler = assemblerWithBackoff(null);
+
+        for (int i = 0; i < 20; i++) {
+            assertEquals(1000L, waitBeforeRetry(assembler, 1));
+            assertEquals(2000L, waitBeforeRetry(assembler, 2));
+        }
+    }
+
+    @Test
+    void shouldExecuteCommandBackoffBeDeterministicWhenJitterIsZero() {
+        RetryConfigurationAssembler assembler = assemblerWithBackoff(0.0);
+
+        assertEquals(1000L, waitBeforeRetry(assembler, 1));
+        assertEquals(2000L, waitBeforeRetry(assembler, 2));
+    }
+
+    @Test
+    void shouldExecuteCommandBackoffVaryWithinTheJitterBandWhenJitterIsSet() {
+        RetryConfigurationAssembler assembler = assemblerWithBackoff(0.5);
+        Set<Long> firstWaits = new HashSet<>();
+
+        for (int i = 0; i < 200; i++) {
+            long first = waitBeforeRetry(assembler, 1);
+            long second = waitBeforeRetry(assembler, 2);
+            assertTrue(first >= 500 && first <= 1500, "first wait outside +/-50% of 1s: " + first);
+            assertTrue(second >= 1000 && second <= 3000, "second wait outside +/-50% of 2s: " + second);
+            firstWaits.add(first);
+        }
+
+        // callers that failed together must not all retry after the same wait
+        assertTrue(firstWaits.size() > 20, "waits were not randomized: " + firstWaits.size() + " distinct values");
+    }
+
+    private RetryConfigurationAssembler assemblerWithBackoff(Double jitter) {
+        FineractProperties.RetryProperties.InstancesProperties.ExecuteCommandProperties executeCommand = new FineractProperties.RetryProperties.InstancesProperties.ExecuteCommandProperties();
+        executeCommand.setRetryExceptions(new Class[] { ConcurrencyFailureException.class });
+        executeCommand.setMaxAttempts(3);
+        executeCommand.setWaitDuration(Duration.ofSeconds(1));
+        executeCommand.setEnableExponentialBackoff(true);
+        executeCommand.setExponentialBackoffMultiplier(2.0);
+        executeCommand.setExponentialBackoffJitter(jitter);
+        FineractProperties.RetryProperties.InstancesProperties instances = new FineractProperties.RetryProperties.InstancesProperties();
+        instances.setExecuteCommand(executeCommand);
+        FineractProperties.RetryProperties retry = new FineractProperties.RetryProperties();
+        retry.setInstances(instances);
+        FineractProperties fineractProperties = new FineractProperties();
+        fineractProperties.setRetry(retry);
+        return new RetryConfigurationAssembler(RetryRegistry.ofDefaults(), fineractProperties, mock(FineractRequestContextHolder.class));
+    }
+
+    private long waitBeforeRetry(RetryConfigurationAssembler assembler, int attempt) {
+        return assembler.getRetryConfigurationForExecuteCommand().getRetryConfig().getIntervalBiFunction().apply(attempt, null);
     }
 }
