@@ -140,7 +140,6 @@ public class WorkingCapitalLoanBusinessEventSerializer
         summary.setTotalCreditBalanceRefundReversed(totalOf(totals, LoanTransactionType.CREDIT_BALANCE_REFUND, true));
         summary.setTotalRepaymentTransaction(totalOf(totals, LoanTransactionType.REPAYMENT, false));
         summary.setTotalRepaymentTransactionReversed(totalOf(totals, LoanTransactionType.REPAYMENT, true));
-        summary.setTotalPayment(sumOf(totals, PAYMENT_TRANSACTION_TYPES, false));
         summary.setTotalPaymentReversed(sumOf(totals, PAYMENT_TRANSACTION_TYPES, true));
     }
 
