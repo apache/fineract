@@ -176,7 +176,8 @@ public final class LoanApplicationValidator {
             LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.ENABLE_DOWN_PAYMENT,
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
             LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, LoanApiConstants.daysInYearCustomStrategyParameterName,
-            LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, LoanApiConstants.ORIGINATORS_PARAM, LoanApiConstants.REPAYMENT_START_DATE_TYPE));
+            LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, LoanApiConstants.ORIGINATORS_PARAM, LoanApiConstants.REPAYMENT_START_DATE_TYPE,
+            LoanApiConstants.monthEndDueDateStrategyParameterName));
     public static final String LOANAPPLICATION_UNDO = "loanapplication.undo";
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -790,6 +791,8 @@ public final class LoanApplicationValidator {
 
                 }
             }
+
+            loanProductDataValidator.validateMonthEndDueDateStrategy(element, baseDataValidator);
 
             if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.REPAYMENT_START_DATE_TYPE, element)) {
                 final Integer repaymentStartDateType = this.fromApiJsonHelper
@@ -1514,6 +1517,8 @@ public final class LoanApplicationValidator {
                     throw new UnsupportedParameterException(unsupportedParameterList);
                 }
             }
+
+            loanProductDataValidator.validateMonthEndDueDateStrategy(element, baseDataValidator);
 
             Integer repaymentStartDateType = loan.getRepaymentStartDateType().getValue();
             if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.REPAYMENT_START_DATE_TYPE, element)) {

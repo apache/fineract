@@ -115,6 +115,7 @@ import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralResponseData;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralManagementReadService;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger;
 import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryData;
@@ -266,7 +267,7 @@ public class LoansApiResource {
             LoanApiConstants.clientActiveLoanOptions, LoanApiConstants.datatables, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.MULTIDISBURSE_DETAILS_PARAMNAME, LoanApiConstants.EMI_AMOUNT_VARIATIONS_PARAMNAME,
             LoanApiConstants.COLLECTION_PARAMNAME, LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE,
-            LoanApiConstants.daysInYearCustomStrategyParameterName));
+            LoanApiConstants.daysInYearCustomStrategyParameterName, LoanApiConstants.monthEndDueDateStrategyParameterName));
 
     private static final Set<String> LOAN_APPROVAL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
     private static final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("glimId", "groupId", "clientId",
@@ -1311,6 +1312,7 @@ public class LoansApiResource {
                 ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanBuyDownFeeCalculationType.class),
                 ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanBuyDownFeeStrategy.class),
                 ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanBuyDownFeeIncomeType.class));
+        loanAccount.setMonthEndDueDateStrategyOptions(ApiFacingEnum.getValuesAsStringEnumOptionDataList(MonthEndDueDateStrategy.class));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

@@ -174,6 +174,8 @@ public final class LoanProductsApiResourceSwagger {
         public Integer daysInYearType;
         @Schema(example = "FULL_LEAP_YEAR")
         public String daysInYearCustomStrategy;
+        @Schema(example = "LAST_DAY_OF_MONTH", allowableValues = { "LAST_DAY_OF_MONTH", "FIRST_DAY_OF_NEXT_MONTH" })
+        public String monthEndDueDateStrategy;
         @Schema(example = "true")
         public Boolean allowPartialPeriodInterestCalculation;
         @Schema(example = "179")
@@ -717,6 +719,7 @@ public final class LoanProductsApiResourceSwagger {
         public GetLoanProductsDaysInMonthType daysInMonthType;
         public GetLoanProductsDaysInYearType daysInYearType;
         public GetLoanProductsDaysInYearCustomStrategy daysInYearCustomStrategy;
+        public StringEnumOptionData monthEndDueDateStrategy;
         @Schema(example = "true")
         public Boolean isInterestRecalculationEnabled;
         public GetLoanProductsInterestRecalculationData interestRecalculationData;
@@ -1155,6 +1158,8 @@ public final class LoanProductsApiResourceSwagger {
         public GetLoanProductsDaysInMonthType daysInMonthType;
         public GetLoanProductsDaysInYearType daysInYearType;
         public StringEnumOptionData daysInYearCustomStrategy;
+        public StringEnumOptionData monthEndDueDateStrategy;
+        public List<StringEnumOptionData> monthEndDueDateStrategyOptions;
         @Schema(example = "false")
         public Boolean isInterestRecalculationEnabled;
         public GetLoanProductsInterestRecalculationTemplateData interestRecalculationData;
@@ -1496,6 +1501,7 @@ public final class LoanProductsApiResourceSwagger {
         public GetLoanProductsDaysInMonthType daysInMonthType;
         public GetLoanProductsDaysInYearType daysInYearType;
         public StringEnumOptionData daysInYearCustomStrategy;
+        public StringEnumOptionData monthEndDueDateStrategy;
         @Schema(example = "false")
         public Boolean canUseForTopup;
         public GetLoanAccountingMappings accountingMappings;
@@ -1691,6 +1697,8 @@ public final class LoanProductsApiResourceSwagger {
         public Long daysInYearType;
         @Schema(example = "FULL_LEAP_YEAR")
         public String daysInYearCustomStrategy;
+        @Schema(example = "LAST_DAY_OF_MONTH", allowableValues = { "LAST_DAY_OF_MONTH", "FIRST_DAY_OF_NEXT_MONTH" })
+        public String monthEndDueDateStrategy;
         @Schema(example = "true")
         public Boolean allowPartialPeriodInterestCalculation;
         @Schema(example = "179")

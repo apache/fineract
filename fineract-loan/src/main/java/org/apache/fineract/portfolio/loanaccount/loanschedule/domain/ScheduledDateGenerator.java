@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 
@@ -46,6 +47,9 @@ public interface ScheduledDateGenerator {
             HolidayDetailDTO holidayDetailDTO);
 
     LocalDate getRepaymentPeriodDate(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate);
+
+    LocalDate getRepaymentPeriodDate(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate,
+            MonthEndDueDateStrategy monthEndDueDateStrategy);
 
     Boolean isDateFallsInSchedule(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate, LocalDate date);
 

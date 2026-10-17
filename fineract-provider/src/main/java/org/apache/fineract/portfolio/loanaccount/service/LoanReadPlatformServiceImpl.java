@@ -83,6 +83,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
@@ -852,6 +853,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " l.is_floating_interest_rate as isFloatingInterestRate, "
                     + " l.interest_rate_differential as interestRateDifferential, "
                     + " l.days_in_year_custom_strategy as daysInYearCustomStrategy, "
+                    + " l.month_end_due_date_strategy as monthEndDueDateStrategy, "
                     + " l.enable_income_capitalization as enableIncomeCapitalization, "
                     + " l.capitalized_income_calculation_type as capitalizedIncomeCalculationType, "
                     + " l.capitalized_income_strategy as capitalizedIncomeStrategy, "
@@ -1258,6 +1260,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final StringEnumOptionData buyDownFeeIncomeType = ApiFacingEnum.getStringEnumOptionData(LoanBuyDownFeeIncomeType.class,
                     rs.getString("buyDownFeeIncomeType"));
             final boolean merchantBuyDownFee = rs.getBoolean("merchantBuyDownFee");
+            final StringEnumOptionData monthEndDueDateStrategy = ApiFacingEnum.getStringEnumOptionData(MonthEndDueDateStrategy.class,
+                    rs.getString("monthEndDueDateStrategy"));
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo, clientName,
                     clientOfficeId, clientExternalId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
@@ -1280,7 +1284,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     chargeOffBehaviour.getValueAsStringEnumOptionData(), interestRecognitionOnDisbursementDate, allowFullTermForTranche,
                     daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
                     capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                    merchantBuyDownFee);
+                    merchantBuyDownFee).setMonthEndDueDateStrategy(monthEndDueDateStrategy);
         }
     }
 

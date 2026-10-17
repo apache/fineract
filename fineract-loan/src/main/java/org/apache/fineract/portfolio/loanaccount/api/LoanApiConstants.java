@@ -94,6 +94,7 @@ public interface LoanApiConstants {
     String createStandingInstructionAtDisbursementParameterName = "createStandingInstructionAtDisbursement";
     String daysInYearTypeParameterName = "daysInYearType";
     String daysInYearCustomStrategyParameterName = "daysInYearCustomStrategy";
+    String monthEndDueDateStrategyParameterName = "monthEndDueDateStrategy";
     String daysInMonthTypeParameterName = "daysInMonthType";
 
     String MULTIDISBURSE_DETAILS_PARAMNAME = "multiDisburseDetails";
