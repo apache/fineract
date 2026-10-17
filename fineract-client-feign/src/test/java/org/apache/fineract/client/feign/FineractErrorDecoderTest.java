@@ -78,6 +78,29 @@ class FineractErrorDecoderTest {
     }
 
     @Test
+    void testDecodeNonFineractErrorKeepsTheBody() {
+        String springError = "{\"status\":401,\"error\":\"Unauthorized\",\"path\":\"/fineract-provider/api/v1/loans/1\"}";
+        Response response = createResponse(401, springError);
+
+        Exception exception = decoder.decode("Test#method", response);
+
+        assertInstanceOf(feign.FeignException.class, exception);
+        feign.FeignException feignException = (feign.FeignException) exception;
+        assertEquals(401, feignException.status());
+        assertEquals(springError, feignException.contentUTF8());
+    }
+
+    @Test
+    void testDecodeInvalidJsonKeepsTheBody() {
+        Response response = createResponse(502, "Bad Gateway");
+
+        Exception exception = decoder.decode("Test#method", response);
+
+        assertInstanceOf(feign.FeignException.class, exception);
+        assertEquals("Bad Gateway", ((feign.FeignException) exception).contentUTF8());
+    }
+
+    @Test
     void testDecode400Error() {
         String jsonError = "{\"developerMessage\":\"Bad request details\",\"userMessage\":\"Invalid input\"}";
         Response response = createResponse(400, jsonError);

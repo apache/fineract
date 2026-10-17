@@ -18,87 +18,70 @@
  */
 package org.apache.fineract.integrationtests.bulkimport.populator.loan;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import java.io.IOException;
+import java.util.Map;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.FundRequest;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBulkImportHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFundHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignPaymentTypeHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
-import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class LoanWorkbookPopulatorTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private PaymentTypeHelper paymentTypeHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.paymentTypeHelper = new PaymentTypeHelper();
-    }
+    private final FineractFeignClient fineractClient = FineractFeignClientHelper.getFineractFeignClient();
 
     @Test
-    public void testLoanWorkbookPopulate() throws IOException {
-        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+    public void testLoanWorkbookPopulate() {
         // in order to populate helper sheets
         OfficeHelper officeHelper = new OfficeHelper();
         Integer outcome_office_creation = officeHelper.createOffice(java.time.LocalDate.of(2000, 5, 2)).getResourceId().intValue();
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         // in order to populate helper sheets
-        Integer outcome_client_creation = ClientHelper.createClient(requestSpec, responseSpec);
+        Long outcome_client_creation = new FeignClientHelper(fineractClient).createClient();
         Assertions.assertNotNull(outcome_client_creation, "Could not create client");
 
         // in order to populate helper sheets
-        Integer outcome_group_creation = GroupHelper.createGroup(requestSpec, responseSpec, true);
+        Long outcome_group_creation = new FeignGroupHelper(fineractClient).createActiveGroup().getGroupId();
         Assertions.assertNotNull(outcome_group_creation, "Could not create group");
 
         // in order to populate helper sheets
-        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec, responseSpec);
+        Long outcome_staff_creation = new FeignStaffHelper(fineractClient).createStaff().getResourceId();
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
-        LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
         LoanProductTestBuilder loanProductTestBuilder = new LoanProductTestBuilder();
-        String jsonLoanProduct = loanProductTestBuilder.build(null);
-        Integer outcome_lp_creaion = loanTransactionHelper.getLoanProductId(jsonLoanProduct);
+        Long outcome_lp_creaion = new FeignLoanHelper(fineractClient).createLoanProduct(loanProductTestBuilder.buildRequest(null))
+                .getResourceId();
         Assertions.assertNotNull(outcome_lp_creaion, "Could not create Loan Product");
 
-        String jsonFund = "{\n" + "\t\"name\": \"" + Utils.uniqueRandomStringGenerator("Fund_Name", 9) + "\"\n" + "}";
-        Integer outcome_fund_creation = FundsResourceHandler.createFund(jsonFund, requestSpec, responseSpec);
+        Long outcome_fund_creation = new FeignFundHelper(fineractClient)
+                .createFund(new FundRequest().name(Utils.uniqueRandomStringGenerator("Fund_Name", 9))).getResourceId();
         Assertions.assertNotNull(outcome_fund_creation, "Could not create Fund");
 
-        String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
-        String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
+        String name = Utils.randomStringGenerator("P_T", 5);
+        String description = Utils.randomStringGenerator("PT_Desc", 15);
         Boolean isCashPayment = true;
         Long position = 1L;
-        var paymentTypesResponse = paymentTypeHelper.createPaymentType(
+        var paymentTypesResponse = new FeignPaymentTypeHelper(fineractClient).createPaymentType(
                 new PaymentTypeCreateRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
         Long outcome_payment_creation = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 
-        Workbook workbook = loanTransactionHelper.getLoanWorkbook("dd MMMM yyyy");
+        Workbook workbook = new FeignBulkImportHelper(fineractClient).downloadTemplate("loans", Map.of("dateFormat", "dd MMMM yyyy"));
 
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Row firstOfficeRow = officeSheet.getRow(1);

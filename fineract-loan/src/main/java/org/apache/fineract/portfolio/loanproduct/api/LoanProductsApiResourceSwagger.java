@@ -496,7 +496,7 @@ public final class LoanProductsApiResourceSwagger {
             @Schema(example = "repaymentFrequency.periodFrequencyType.days")
             public String code;
             @Schema(example = "Days")
-            public String description;
+            public String value;
         }
 
         static final class GetLoanProductsInterestRateFrequencyType {
@@ -508,7 +508,7 @@ public final class LoanProductsApiResourceSwagger {
             @Schema(example = "interestRateFrequency.periodFrequencyType.years")
             public String code;
             @Schema(example = "Per year")
-            public String description;
+            public String value;
         }
 
         static final class GetLoanProductsAmortizationType {
@@ -520,7 +520,7 @@ public final class LoanProductsApiResourceSwagger {
             @Schema(example = "amortizationType.equal.installments")
             public String code;
             @Schema(example = "Equal installments")
-            public String description;
+            public String value;
         }
 
         static final class GetLoanProductsInterestType {
@@ -544,7 +544,7 @@ public final class LoanProductsApiResourceSwagger {
             @Schema(example = "interestCalculationPeriodType.same.as.repayment.period")
             public String code;
             @Schema(example = "Same as repayment period")
-            public String description;
+            public String value;
         }
 
         static final class GetLoanProductsDaysInYearCustomStrategy {
@@ -806,7 +806,7 @@ public final class LoanProductsApiResourceSwagger {
             @Schema(example = "interestType.declining.balance")
             public String code;
             @Schema(example = "Declining Balance")
-            public String description;
+            public String value;
         }
 
         static final class GetLoanProductsAccountingRule {
@@ -1236,7 +1236,7 @@ public final class LoanProductsApiResourceSwagger {
             @Schema(example = "interestRateFrequency.periodFrequencyType.months")
             public String code;
             @Schema(example = "Per month")
-            public String description;
+            public String value;
         }
 
         static final class GetLoanProductsRepaymentStartDateType {

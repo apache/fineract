@@ -27,6 +27,7 @@ import org.apache.fineract.client.feign.services.AuditsApi;
 import org.apache.fineract.client.feign.services.AuthenticationHttpBasicApi;
 import org.apache.fineract.client.feign.services.BatchApiApi;
 import org.apache.fineract.client.feign.services.BulkImportApi;
+import org.apache.fineract.client.feign.services.BulkImportTemplatesApi;
 import org.apache.fineract.client.feign.services.BulkLoansApi;
 import org.apache.fineract.client.feign.services.BusinessDateManagementApi;
 import org.apache.fineract.client.feign.services.BusinessStepConfigurationApi;
@@ -244,6 +245,10 @@ public final class FineractFeignClient {
 
     public BatchApiApi batch() {
         return create(BatchApiApi.class);
+    }
+
+    public BulkImportTemplatesApi bulkImportTemplates() {
+        return create(BulkImportTemplatesApi.class);
     }
 
     public BulkImportApi bulkImport() {

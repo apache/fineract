@@ -20,68 +20,56 @@ package org.apache.fineract.integrationtests.bulkimport.populator.savings;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import java.io.IOException;
+import java.util.Map;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBulkImportHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData.InterestCalculationType;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData.InterestCompoundingPeriodType;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData.InterestPostingPeriodType;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class SavingsWorkbookPopulateTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
+    private final FineractFeignClient fineractClient = FineractFeignClientHelper.getFineractFeignClient();
 
     @Test
-    public void testSavingsWorkbookPopulate() throws IOException {
-        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+    public void testSavingsWorkbookPopulate() {
         // in order to populate helper sheets
         OfficeHelper officeHelper = new OfficeHelper();
         Integer outcome_office_creation = officeHelper.createOffice(java.time.LocalDate.of(2000, 5, 2)).getResourceId().intValue();
         assertNotNull(outcome_office_creation, "Could not create office");
 
         // in order to populate helper sheets
-        Integer outcome_client_creation = ClientHelper.createClient(requestSpec, responseSpec);
+        Long outcome_client_creation = new FeignClientHelper(fineractClient).createClient();
         assertNotNull(outcome_client_creation, "Could not create client");
 
         // in order to populate helper sheets
-        Integer outcome_group_creation = GroupHelper.createGroup(requestSpec, responseSpec, true);
+        Long outcome_group_creation = new FeignGroupHelper(fineractClient).createActiveGroup().getGroupId();
         assertNotNull(outcome_group_creation, "Could not create group");
 
         // in order to populate helper sheets
-        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec, responseSpec);
+        Long outcome_staff_creation = new FeignStaffHelper(fineractClient).createStaff().getResourceId();
         assertNotNull(outcome_staff_creation, "Could not create staff");
 
-        SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        String jsonSavingsProduct = savingsProductHelper.build();
-        Integer outcome_sp_creaction = SavingsProductHelper.createSavingsProduct(jsonSavingsProduct, requestSpec, responseSpec);
+        Long outcome_sp_creaction = new FeignSavingsProductHelper(fineractClient)
+                .createSavingsProduct(SavingsRequestBuilders.savingsProduct(InterestCompoundingPeriodType.MONTHLY,
+                        InterestPostingPeriodType.MONTHLY, InterestCalculationType.DAILY_BALANCE))
+                .getResourceId();
         assertNotNull(outcome_sp_creaction, "Could not create Savings product");
 
-        SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-        Workbook workbook = savingsAccountHelper.getSavingsWorkbook("dd MMMM yyyy");
+        Workbook workbook = new FeignBulkImportHelper(fineractClient).downloadTemplate("savingsaccounts",
+                Map.of("dateFormat", "dd MMMM yyyy"));
 
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Row firstOfficeRow = officeSheet.getRow(1);

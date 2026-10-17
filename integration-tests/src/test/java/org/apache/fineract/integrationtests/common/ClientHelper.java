@@ -25,10 +25,6 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,10 +41,7 @@ import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
-import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Workbook;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -445,43 +438,10 @@ public class ClientHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public Workbook getClientEntityWorkbook(GlobalEntityType clientsEntity, String dateFormat) throws IOException {
-        requestSpec.header(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
-        byte[] byteArray = Utils.performGetBinaryResponse(requestSpec, responseSpec, CLIENT_URL + "/downloadtemplate" + "?"
-                + Utils.TENANT_IDENTIFIER + "&legalFormType=" + clientsEntity + "&dateFormat=" + dateFormat);
-        InputStream inputStream = new ByteArrayInputStream(byteArray);
-        Workbook workbook = new HSSFWorkbook(inputStream);
-        return workbook;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public String getOutputTemplateLocation(final String importDocumentId) {
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
         return Utils.performServerOutputTemplateLocationGet(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/imports/getOutputTemplateLocation" + "?" + Utils.TENANT_IDENTIFIER, importDocumentId);
-    }
-
-    @Deprecated(forRemoval = true)
-    public byte[] downloadOutputTemplate(final String importDocumentId) {
-        requestSpec.header(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
-        return Utils.performServerOutputTemplateDownloadGet(requestSpec, responseSpec,
-                "/fineract-provider/api/v1/imports/downloadOutputTemplate" + "?" + Utils.TENANT_IDENTIFIER, importDocumentId);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public String importClientEntityTemplate(File file) {
-        String locale = "en";
-        String dateFormat = "dd MMMM yyyy";
-        String legalFormType = GlobalEntityType.CLIENTS_ENTITY.toString();
-        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
-        return Utils.performServerTemplatePost(requestSpec, responseSpec, CLIENT_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER,
-                legalFormType, file, locale, dateFormat);
     }
 
     public static PostClientsRequest defaultClientCreationRequest() {
