@@ -22,42 +22,27 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.client.models.GetDataTablesResponse;
 import org.apache.fineract.client.models.PostColumnHeaderData;
+import org.apache.fineract.client.models.PostDataTablesAppTableIdResponse;
 import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PostDataTablesResponse;
 import org.apache.fineract.client.models.ResultsetColumnHeaderData;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDatatableHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignShareAccountHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.shares.ShareProductHelper;
-import org.apache.fineract.integrationtests.common.shares.ShareProductTransactionHelper;
-import org.apache.fineract.integrationtests.common.system.DatatableHelper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class ShareProductDatatableIntegrationTest {
 
     private static final String SHARES_APP_TABLE_NAME = "m_share_product";
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-    private DatatableHelper datatableHelper;
-    private ShareProductHelper shareProductHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
-    }
+    private final FeignDatatableHelper datatableHelper = new FeignDatatableHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignShareAccountHelper shareAccountHelper = new FeignShareAccountHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void testDatatableCreationForShareProduct() {
@@ -98,7 +83,7 @@ public class ShareProductDatatableIntegrationTest {
         assertNotNull(response.getResourceIdentifier());
 
         // verify Datatable got created
-        GetDataTablesResponse dataTable = datatableHelper.getDataTableDetails(datatableName);
+        GetDataTablesResponse dataTable = datatableHelper.getDatatable(datatableName);
 
         // verfify columns
         List<ResultsetColumnHeaderData> columnHeaderData = dataTable.getColumnHeaderData();
@@ -111,8 +96,7 @@ public class ShareProductDatatableIntegrationTest {
     @Test
     public void testDatatableEntryForShareProduct() {
         // create Shares Product
-        shareProductHelper = new ShareProductHelper();
-        final Integer shareProductId = createShareProduct();
+        final Long shareProductId = shareAccountHelper.createShareProduct(FeignShareAccountHelper.defaultShareProduct());
 
         assertNotNull(shareProductId);
 
@@ -148,26 +132,17 @@ public class ShareProductDatatableIntegrationTest {
         datatableEntryMap.put("locale", "en");
         datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
 
-        String datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        PostDataTablesAppTableIdResponse datatableEntryResponseFirst = datatableHelper.createDatatableEntry(datatableId, shareProductId,
+                datatableEntryMap);
+        PostDataTablesAppTableIdResponse datatableEntryResponseSecond = datatableHelper.createDatatableEntry(datatableId, shareProductId,
+                datatableEntryMap);
 
-        final boolean genericResultSet = true;
-
-        HashMap<String, Object> datatableEntryResponseFirst = this.datatableHelper.createDatatableEntry(datatableId, shareProductId,
-                genericResultSet, datatabelEntryRequestJsonString);
-        HashMap<String, Object> datatableEntryResponseSecond = this.datatableHelper.createDatatableEntry(datatableId, shareProductId,
-                genericResultSet, datatabelEntryRequestJsonString);
-
-        assertNotNull(datatableEntryResponseFirst.get("resourceId"));
-        assertNotNull(datatableEntryResponseSecond.get("resourceId"));
+        assertNotNull(datatableEntryResponseFirst.getResourceId());
+        assertNotNull(datatableEntryResponseSecond.getResourceId());
 
         // Read the Datatable entry generated with genericResultSet
-        HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableId, shareProductId, genericResultSet, null, "");
+        JsonNode items = datatableHelper.getDatatableEntries(datatableId, shareProductId);
         assertNotNull(items);
-        assertEquals(2, ((List) items.get("data")).size());
-    }
-
-    private Integer createShareProduct() {
-        String shareProductJson = shareProductHelper.build();
-        return ShareProductTransactionHelper.createShareProduct(shareProductJson, requestSpec, responseSpec);
+        assertEquals(2, items.get("data").size());
     }
 }
