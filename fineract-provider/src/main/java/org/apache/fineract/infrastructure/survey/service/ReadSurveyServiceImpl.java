@@ -28,6 +28,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.service.DatatableReadService;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableUtil;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
@@ -49,6 +50,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
     private final GenericDataService genericDataService;
     private final DatatableReadService datatableReadService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final DatatableUtil datatableUtil;
 
     @Override
     public List<SurveyDataTableData> retrieveAllSurveys() {
@@ -65,9 +67,10 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
             final boolean enabled = rs.getBoolean("enabled");
             final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
                     .fillResultsetColumnHeaders(registeredDatatableName);
+            final boolean multiRow = datatableUtil.isMultirowDatatable(columnHeaderData);
 
-            surveyDataTables.add(SurveyDataTableData
-                    .create(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData), enabled));
+            surveyDataTables.add(SurveyDataTableData.create(
+                    DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData, multiRow), enabled));
         }
 
         return surveyDataTables;
@@ -106,8 +109,9 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
             final boolean enabled = rs.getBoolean("enabled");
             final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
                     .fillResultsetColumnHeaders(registeredDatatableName);
-            datatableData = SurveyDataTableData
-                    .create(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData), enabled);
+            final boolean multiRow = datatableUtil.isMultirowDatatable(columnHeaderData);
+            datatableData = SurveyDataTableData.create(
+                    DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData, multiRow), enabled);
 
         }
 

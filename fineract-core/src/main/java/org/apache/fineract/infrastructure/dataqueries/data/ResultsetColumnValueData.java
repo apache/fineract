@@ -19,13 +19,16 @@
 package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.io.Serializable;
+import lombok.Getter;
 
 /**
  * Immutable data object representing a possible value for a given resultset column.
  */
 public class ResultsetColumnValueData implements Serializable {
 
+    @Getter
     private final int id;
+    @Getter
     private final String value;
     @SuppressWarnings("unused")
     private final Integer score;
