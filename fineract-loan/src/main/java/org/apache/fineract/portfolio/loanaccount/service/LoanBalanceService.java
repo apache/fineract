@@ -39,7 +39,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentSchedulePro
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +48,6 @@ public class LoanBalanceService {
 
     private final CapitalizedIncomeBalanceService capitalizedIncomeBalanceService;
     private final FlushModeHandler flushModeHandler;
-    private final LoanTransactionRepository loanTransactionRepository;
 
     public Money calculateTotalOverpayment(final Loan loan) {
         Money totalPaidInRepayments = loan.getTotalPaidInRepayments();
@@ -151,10 +149,17 @@ public class LoanBalanceService {
         }
     }
 
-    private Money calculateTotalRecoveredPayments(Loan loan) {
-        // in case logic for reversing recovered payment is implemented handle subtraction from totalRecoveredPayments
-        final BigDecimal totalRecoveryAmount = loanTransactionRepository.calculateTotalRecoveryPaymentAmount(loan);
-        return Money.of(loan.getCurrency(), totalRecoveryAmount);
+    Money calculateTotalRecoveredPayments(final Loan loan) {
+        // Summed from the loan's transactions rather than queried: the summary is refreshed with FlushModeType.COMMIT
+        // before a new recovery payment is saved, so a query would not see it yet.
+        final MonetaryCurrency currency = loan.getCurrency();
+        Money totalRecovered = Money.zero(currency);
+        for (final LoanTransaction transaction : loan.getLoanTransactions()) {
+            if (transaction.isRecoveryRepayment()) {
+                totalRecovered = totalRecovered.plus(transaction.getAmount(currency));
+            }
+        }
+        return totalRecovered;
     }
 
     public void updateLoanOutstandingBalances(Loan loan) {

@@ -465,15 +465,6 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
     List<LoanTransaction> findNonReversedMonetaryTransactionsByLoan(@Param("loan") Loan loan);
 
     @Query("""
-            SELECT COALESCE(SUM(lt.amount), 0)
-            FROM LoanTransaction lt
-            WHERE lt.loan = :loan
-                AND lt.reversed = false
-                AND lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.RECOVERY_REPAYMENT
-            """)
-    BigDecimal calculateTotalRecoveryPaymentAmount(@Param("loan") Loan loan);
-
-    @Query("""
             SELECT CASE WHEN COUNT(lt) > 0 THEN true ELSE false END
             FROM LoanTransaction lt
             WHERE lt.loan = :loan
