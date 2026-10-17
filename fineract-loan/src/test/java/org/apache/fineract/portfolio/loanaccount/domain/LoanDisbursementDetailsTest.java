@@ -1,0 +1,125 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.fineract.portfolio.loanaccount.domain;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import org.junit.jupiter.api.Test;
+
+class LoanDisbursementDetailsTest {
+
+    private static final LocalDate EXPECTED_DATE = LocalDate.of(2026, 1, 15);
+
+    private static LoanDisbursementDetails details(final LocalDate expectedDate, final BigDecimal principal) {
+        return new LoanDisbursementDetails(expectedDate, null, principal, null, false);
+    }
+
+    private static LoanDisbursementDetails details(final BigDecimal principal) {
+        return details(EXPECTED_DATE, principal);
+    }
+
+    @Test
+    void equalsIgnoresPrincipalScale() {
+        final LoanDisbursementDetails stored = details(new BigDecimal("1000.000000"));
+        final LoanDisbursementDetails fromRequest = details(new BigDecimal("1000"));
+
+        assertEquals(stored, fromRequest);
+        assertEquals(fromRequest, stored);
+    }
+
+    @Test
+    void hashCodeIgnoresPrincipalScale() {
+        final LoanDisbursementDetails stored = details(new BigDecimal("1000.000000"));
+        final LoanDisbursementDetails fromRequest = details(new BigDecimal("1000"));
+
+        assertEquals(stored.hashCode(), fromRequest.hashCode());
+    }
+
+    @Test
+    void equalsAndHashCodeIgnoreScaleOfZeroPrincipal() {
+        final LoanDisbursementDetails zero = details(new BigDecimal("0"));
+        final LoanDisbursementDetails zeroWithScale = details(new BigDecimal("0.000000"));
+
+        assertEquals(zero, zeroWithScale);
+        assertEquals(zeroWithScale, zero);
+        assertEquals(zero.hashCode(), zeroWithScale.hashCode());
+    }
+
+    @Test
+    void equalsAndHashCodeIgnoreTrailingZerosOfFractionalPrincipal() {
+        final LoanDisbursementDetails first = details(new BigDecimal("1000.50"));
+        final LoanDisbursementDetails second = details(new BigDecimal("1000.500000"));
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
+    void equalsDoesNotThrowWhenThisPrincipalIsNull() {
+        final LoanDisbursementDetails withoutPrincipal = details(null);
+        final LoanDisbursementDetails withPrincipal = details(new BigDecimal("1000"));
+
+        assertDoesNotThrow(() -> withoutPrincipal.equals(withPrincipal));
+        assertFalse(withoutPrincipal.equals(withPrincipal));
+    }
+
+    @Test
+    void equalsDoesNotThrowWhenOtherPrincipalIsNull() {
+        final LoanDisbursementDetails withPrincipal = details(new BigDecimal("1000"));
+        final LoanDisbursementDetails withoutPrincipal = details(null);
+
+        assertDoesNotThrow(() -> withPrincipal.equals(withoutPrincipal));
+        assertFalse(withPrincipal.equals(withoutPrincipal));
+    }
+
+    @Test
+    void equalsDoesNotThrowWhenBothPrincipalsAreNull() {
+        final LoanDisbursementDetails first = details(null);
+        final LoanDisbursementDetails second = details(null);
+
+        assertDoesNotThrow(() -> first.equals(second));
+        assertTrue(first.equals(second));
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
+    void nullPrincipalIsNotEqualToZeroPrincipal() {
+        final LoanDisbursementDetails withoutPrincipal = details(null);
+        final LoanDisbursementDetails zero = details(BigDecimal.ZERO);
+
+        assertNotEquals(withoutPrincipal, zero);
+        assertNotEquals(zero, withoutPrincipal);
+    }
+
+    @Test
+    void equalsDistinguishesDifferentPrincipals() {
+        assertNotEquals(details(new BigDecimal("1000")), details(new BigDecimal("1000.01")));
+    }
+
+    @Test
+    void equalsDistinguishesDifferentExpectedDisbursementDates() {
+        assertNotEquals(details(EXPECTED_DATE, new BigDecimal("1000")), details(EXPECTED_DATE.plusDays(1), new BigDecimal("1000")));
+    }
+}
