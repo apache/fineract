@@ -522,7 +522,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             } else {
                 Money overdraftAmount = Money.zero(savingsAccountData.getCurrency());
                 Money transactionAmount = Money.zero(savingsAccountData.getCurrency());
-                if (transaction.isCredit() || transaction.isAmountRelease()) {
+                if (transaction.isCredit()) {
                     if (runningBalance.isLessThanZero()) {
                         Money diffAmount = Money.of(savingsAccountData.getCurrency(), transaction.getAmount()).plus(runningBalance);
                         if (diffAmount.isGreaterThanZero()) {
@@ -532,7 +532,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         }
                     }
                     transactionAmount = transactionAmount.plus(transaction.getAmount());
-                } else if (transaction.isDebit() || transaction.isAmountOnHold()) {
+                } else if (transaction.isDebit()) {
                     if (runningBalance.isLessThanZero()) {
                         overdraftAmount = Money.of(savingsAccountData.getCurrency(), transaction.getAmount());
                     }
