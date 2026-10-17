@@ -158,36 +158,39 @@ public class FixedDepositAccount extends SavingsAccount {
     protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate interestPostingUpToDate,
             final boolean isPreMatureClosure) {
 
-        // default it to nominalAnnualInterst rate. interest chart overrrides
-        // this value.
         BigDecimal applicableInterestRate = this.nominalAnnualInterestRate;
-        if (this.chart != null) {
-            boolean applyPreMaturePenalty = false;
-            BigDecimal penalInterest = BigDecimal.ZERO;
-            LocalDate depositCloseDate = calculateMaturityDate();
-            if (isPreMatureClosure) {
-                if (this.accountTermAndPreClosure.isPreClosurePenalApplicable()) {
-                    applyPreMaturePenalty = true;
-                    penalInterest = this.accountTermAndPreClosure.depositPreClosureDetail().preClosurePenalInterest();
-                    final PreClosurePenalInterestOnType preClosurePenalInterestOnType = this.accountTermAndPreClosure
-                            .depositPreClosureDetail().preClosurePenalInterestOnType();
-                    if (preClosurePenalInterestOnType == PreClosurePenalInterestOnType.WHOLE_TERM) {
-                        depositCloseDate = interestCalculatedUpto();
-                    } else if (preClosurePenalInterestOnType == PreClosurePenalInterestOnType.TILL_PREMATURE_WITHDRAWAL) {
-                        depositCloseDate = interestPostingUpToDate;
-                    }
+        boolean applyPreMaturePenalty = false;
+        BigDecimal penalInterest = BigDecimal.ZERO;
+        LocalDate depositCloseDate = calculateMaturityDate();
+
+        if (isPreMatureClosure) {
+            if (this.accountTermAndPreClosure.isPreClosurePenalApplicable()) {
+                applyPreMaturePenalty = true;
+                penalInterest = this.accountTermAndPreClosure.depositPreClosureDetail().preClosurePenalInterest();
+
+                final PreClosurePenalInterestOnType preClosurePenalInterestOnType = this.accountTermAndPreClosure.depositPreClosureDetail()
+                        .preClosurePenalInterestOnType();
+                if (preClosurePenalInterestOnType == PreClosurePenalInterestOnType.WHOLE_TERM) {
+                    depositCloseDate = interestCalculatedUpto();
+                } else if (preClosurePenalInterestOnType == PreClosurePenalInterestOnType.TILL_PREMATURE_WITHDRAWAL) {
+                    depositCloseDate = interestPostingUpToDate;
                 }
             }
+        }
 
+        if (this.chart != null && !this.accountTermAndPreClosure.isRateChartOverridden()) {
             final BigDecimal depositAmount = accountTermAndPreClosure.depositAmount();
             applicableInterestRate = this.chart.getApplicableInterestRate(depositAmount, depositStartDate(), depositCloseDate, this.client);
-
-            if (applyPreMaturePenalty) {
-                applicableInterestRate = applicableInterestRate.subtract(penalInterest);
-                applicableInterestRate = applicableInterestRate.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : applicableInterestRate;
-            }
         }
-        this.nominalAnnualInterestRate = applicableInterestRate;
+
+        if (applyPreMaturePenalty) {
+            applicableInterestRate = applicableInterestRate.subtract(penalInterest);
+            applicableInterestRate = applicableInterestRate.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : applicableInterestRate;
+        }
+
+        if (!this.accountTermAndPreClosure.isRateChartOverridden()) {
+            this.nominalAnnualInterestRate = applicableInterestRate;
+        }
 
         return applicableInterestRate.divide(BigDecimal.valueOf(100L), mc);
     }
@@ -747,7 +750,7 @@ public class FixedDepositAccount extends SavingsAccount {
             }
         }
 
-        if (this.chart != null) {
+        if (this.chart != null && !this.accountTermAndPreClosure.isRateChartOverridden()) {
             final LocalDate chartFromDate = this.chart.getFromDate();
             LocalDate chartEndDate = this.chart.getEndDate();
             chartEndDate = chartEndDate == null ? DateUtils.getBusinessLocalDate() : chartEndDate;
