@@ -223,6 +223,7 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDat
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.service.RepaymentWithPostDatedChecksAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.tax.service.TaxUtils;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -488,7 +489,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()
                     && loanCharge.isChargePending()) {
-                disBuLoanCharges.put(loanCharge.getId(), loanCharge.amountOutstanding());
+                final BigDecimal chargeAmountWithTax = TaxUtils.calculateChargeAmountWithTax(loanCharge.amountOutstanding(),
+                        loanCharge.getCharge().getTaxGroup(), actualDisbursementDate, loan.getCurrency().getDigitsAfterDecimal());
+                disBuLoanCharges.put(loanCharge.getId(), chargeAmountWithTax);
             }
         }
 
@@ -838,7 +841,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             for (final LoanCharge loanCharge : loanCharges) {
                 if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()
                         && loanCharge.isChargePending()) {
-                    disBuLoanCharges.put(loanCharge.getId(), loanCharge.amountOutstanding());
+                    final BigDecimal chargeAmountWithTax = TaxUtils.calculateChargeAmountWithTax(loanCharge.amountOutstanding(),
+                            loanCharge.getCharge().getTaxGroup(), actualDisbursementDate, loan.getCurrency().getDigitsAfterDecimal());
+                    disBuLoanCharges.put(loanCharge.getId(), chargeAmountWithTax);
                 }
             }
             final Locale locale = command.extractLocale();

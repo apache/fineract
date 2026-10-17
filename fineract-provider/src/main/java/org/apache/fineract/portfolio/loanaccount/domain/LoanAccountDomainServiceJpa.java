@@ -118,6 +118,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksStatus;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
+import org.apache.fineract.portfolio.tax.service.TaxUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -448,10 +449,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 charge = loanCharge;
             }
         }
-        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, charge.amount(), null);
+        final BigDecimal chargeAmountWithTax = TaxUtils.calculateChargeAmountWithTax(charge.amountOutstanding(),
+                charge.getCharge().getTaxGroup(), chargesPayment.getTransactionDate(), loan.getCurrency().getDigitsAfterDecimal());
+        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, chargeAmountWithTax, null);
         chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
         final Money zero = Money.zero(loan.getCurrency());
-        chargesPayment.updateComponents(zero, zero, charge.getAmount(loan.getCurrency()), zero);
+        chargesPayment.updateComponents(zero, zero, Money.of(loan.getCurrency(), chargeAmountWithTax), zero);
         chargesPayment.updateLoan(loan);
         loan.addLoanTransaction(chargesPayment);
         loanBalanceService.updateLoanOutstandingBalances(loan);
