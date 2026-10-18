@@ -53,7 +53,10 @@ class TenantAwareBasicAuthenticationFilterDatabaseDownTest {
         when(request.getMethod()).thenReturn("GET");
         when(request.getHeader("Fineract-Platform-TenantId")).thenReturn("default");
         when(request.getRequestURI()).thenReturn("/fineract-provider/api/v1/clients");
-        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8443/fineract-provider/api/v1/clients"));
+        // the servlet API returns a StringBuffer, which the build does not allow to be constructed (modernizer)
+        StringBuffer requestUrl = mock(StringBuffer.class);
+        when(requestUrl.toString()).thenReturn("http://localhost:8443/fineract-provider/api/v1/clients");
+        when(request.getRequestURL()).thenReturn(requestUrl);
         return request;
     }
 
