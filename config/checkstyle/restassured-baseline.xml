@@ -31,6 +31,4 @@
 -->
 
 <suppressions>
-    <suppress id="FeignNoRestAssured" files="[/\\]oauth2-tests[/\\]src[/\\]test[/\\]java[/\\]org[/\\]apache[/\\]fineract[/\\]oauth2tests[/\\]OAuth2AuthenticationTest\.java$"/>
-    <suppress id="FeignNoRestAssured" files="[/\\]twofactor-tests[/\\]src[/\\]test[/\\]java[/\\]org[/\\]apache[/\\]fineract[/\\]twofactortests[/\\]TwoFactorAuthenticationTest\.java$"/>
 </suppressions>
