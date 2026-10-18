@@ -28,6 +28,7 @@ dependencies {
             'org.bouncycastle:bcprov-jdk18on',
             'org.bouncycastle:bcutil-jdk18on',
             )
+    testImplementation(project(path: ':fineract-client-feign', configuration: 'runtimeElements'))
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'
