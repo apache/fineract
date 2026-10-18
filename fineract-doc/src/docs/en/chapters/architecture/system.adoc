@@ -1,18 +1,135 @@
-= System Overview
+= System Overview 
 
-.Platform System Overview
-image::{imagesdir}/platform-systemview.png[]
+image::platform-systemview.png[Platform System Overview,title="Platform System Overview"]
 
-Financial institutions deliver their services to customers through a variety of means today.
+Apache Fineract is the core engine of a financial institution's information
+system. It can be used by non-banks or banks. 
 
-* Customers can call direct into branches (teller model)
-* Customers can organise into groups (or centers) and agree to meetup at a location and time with FI staff (traditional microfinance).
-* An FI might have a public facing information portal that customers can use for variety of reasons including account management (online banking).
-* An FI might be integrated into a ATM/POS/Card services network that the customer can use.
-* An FI might be integrated with a mobile money operator and support mobile money services for customer (present/future microfinance).
-* An FI might use third party agents to sell on products/services from other banks/FIs.
+It holds the clients, accounts, products, transactions and ledger, and
+it exposes every one of those capabilities through a single HTTPS REST API.
+Nothing in the platform is reachable by any other route: there is no alternate
+back door for a favoured channel, and no private interface reserved for a
+bundled front end. 
 
-As illustrated in the above diagram, the various stakeholders leverage business apps to perform specific customer or FI related actions. The functionality contained in these business apps can be bundled up and packaged in any way. In the diagram, several of the apps may be combined into one app or any one of the blocks representing an app could be further broken up as needed.
+Fineract is a headless application. 
 
-The platform is the core engine of the MIS. It hides a lot of the complexity that exists in the business and technical domains needed for an MIS in FIs behind a relatively simple API. It is this API that frees up app developers to innovate and produce apps that can be as general or as bespoke as FIs need them to be.
+== Channels and applications
 
+Financial institutions reach their customers through many channels at once, and
+the mix differs by institution and by market. A customer may walk into a branch
+and transact with a teller; organise into a group or centre that meets a field
+officer at an agreed time and place; use a self-service portal or mobile
+application; transact over an ATM, point-of-sale or card network the institution
+participates in; use a mobile money or wallet service; or deal with a third-party
+agent who sells the institution's products alongside others.
+
+
+Each of these is served by a third party application, and those applications are the
+diagram's top band. The grouping shown is illustrative rather than prescriptive.
+
+
+== The API gateway
+
+In a production deployment, clients apps do not address Fineract instances directly.
+They address an API gateway or edge layer that sits in front of the platform and
+carries the concerns that belong at the perimeter:
+
+* TLS termination with managed, automatically rotating certificates — Fineract
+  enforces HTTPS and ships a self-signed certificate for localhost development
+  only;
+* authentication and token issuance, and coarse authorisation, ahead of the
+  platform's own fine-grained permission checks;
+* rate limiting, throttling and request size limits;
+* routing of requests to the appropriate instance type (see below);
+* a single point for edge audit logging, tracing and observability.
+
+See the *Security* chapter for the authentication schemes the platform supports
+and for deployment guidance on the proxy layer.
+
+== Instance types and scaling
+
+A Fineract deployment is not a single process. Because reads and writes are
+separated in the architecture, the same binary can be started in three instance
+types, enabled independently by configuration:
+
+[cols="1,3"]
+|===
+| Write instances
+| Serve the state-changing APIs. Commands pass through the command pipeline,
+  which gives audit, maker-checker and idempotency. Business events are raised
+  here, and database schema migration runs only on these instances.
+
+| Read instances
+| Serve the query APIs, and may be scaled out horizontally against read
+  replicas, using read-only database connections. This is the usual way to take
+  query load off the primary.
+
+| Batch instances
+| Run the scheduled and Close of Business work, including partitioned jobs
+  distributed across manager and worker nodes.
+|===
+
+In a single-instance deployment all three are enabled together, which is the
+default and requires no configuration. A common scaled topology is one write
+instance, one or more batch instances, and several read instances backed by read
+replicas. The *Deployment* chapter covers the configuration in detail.
+
+== State and integration fabric
+
+Beneath the instances sit the tenant databases. Fineract is multi-tenant by
+design, isolating each institution's data in its own database or schema, which
+makes it equally suitable for a single local installation and for a
+Software-as-a-Service offering.
+
+Alongside the databases, the reliable event framework publishes business events
+to a downstream message channel in a standardised Avro format, with ordering and
+at-least-once delivery guarantees. Events are the second integration surface
+after the API, and they are what allow surrounding systems to react to what
+happens in the core without polling it.
+
+
+== Surrounding systems
+
+A core banking platform (or loan management system with core ledger) is never deployed alone. 
+Around Fineract an institution typically operates a set of specialised systems, and the lower band of the
+diagram names the categories most often seen:
+
+* a payment hub or payment switch, connecting the institution to domestic
+  instant payment schemes, card networks and mobile money operators;
+* loan origination and credit decisioning, where applications are captured,
+  underwritten and approved before an account is opened in the core;
+* credit risk and scoring services, including alternative-data scoring models;
+* fraud monitoring and AML, sanctions and transaction screening;
+* identity, KYC and credit bureau services;
+* reporting, business intelligence and analytics, usually reading from a data
+  warehouse fed from the replicas or the event stream rather than querying the
+  transactional database;
+* core accounting, ERP and treasury systems, which exchange general ledger
+  postings with the platform;
+* notification and messaging services.
+
+None of these other components or systems are part of the Apache Fineract core distribution. 
+They are separate products or projects, commercial or open source, and an institution may combine
+several of them, split one across vendors, or operate without some of them
+entirely. They are drawn here because the shape of a real deployment is not
+legible without them — and because the way they attach matters. Each integrates
+through the API gateway, through the event stream, or both. None of them reaches
+into the platform's database, and none of them is a privileged component.
+
+For capabilities that belong inside a transaction rather than beside it, the
+platform offers extension points instead of integration: custom modules and
+plugin JARs, configurable business steps within jobs such as Close of Business,
+hooks, and custom command handlers. The *Custom Modules* chapter describes these.
+
+== What this means for an implementer
+
+
+. *The API is the contract.* It is described by an OpenAPI descriptor from which
+  client SDKs are generated, and backward compatibility is enforced
+  automatically on every change. Build against it with confidence.
+. *The core stays core.* Resist the temptation to add additional origination workflow,
+  scoring models, channel-specific logic or reporting pipelines inside the
+  platform. They belong in the surrounding systems, where they can evolve on
+  their own release cycle.
+. *Scale the parts that need it.* Query load, write load and batch load have
+  different profiles. Separating the instance types is usually a cheaper answer.
