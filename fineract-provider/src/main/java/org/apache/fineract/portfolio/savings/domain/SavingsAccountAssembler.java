@@ -339,6 +339,10 @@ public class SavingsAccountAssembler {
         return account;
     }
 
+    public void lockInIdOrder(final Long... savingsIds) {
+        this.savingsAccountRepository.lockInIdOrder(savingsIds);
+    }
+
     public SavingsAccount assembleFrom(final Long savingsId, final boolean backdatedTxnsAllowedTill) {
         SavingsAccount account = this.savingsAccountRepository.findSavingsWithNotFoundDetection(savingsId, backdatedTxnsAllowedTill);
         return loadTransactionsToSavingsAccount(account, backdatedTxnsAllowedTill);
