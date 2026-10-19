@@ -50,6 +50,14 @@ public class GlobalConfigurationStepDef {
         globalConfigurationHelper.setGlobalConfigValueString("wcl-charge-accrual-time", "eod");
     }
 
+    // PS-3351 twin of the hook above: pl-charge-accrual-time and the post-maturity flag must not leak
+    @After("@LoanChargeRealTimeAccrualFeature")
+    public void restorePlChargeAccrualConfig() {
+        globalConfigurationHelper.setGlobalConfigValueString("pl-charge-accrual-time", "EOD");
+        globalConfigurationHelper.setGlobalConfigValueString("charge-accrual-date", "due-date");
+        globalConfigurationHelper.disableGlobalConfiguration("enable-immediate-charge-accrual-post-maturity", 0L);
+    }
+
     @After("@BusinessDateDisabledCheck")
     public void restoreBusinessDateConfig() {
         globalConfigurationHelper.enableGlobalConfiguration("enable-business-date", 0L);
