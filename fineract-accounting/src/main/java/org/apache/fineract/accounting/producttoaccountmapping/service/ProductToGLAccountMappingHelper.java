@@ -63,6 +63,7 @@ public class ProductToGLAccountMappingHelper {
     protected final GLAccountRepository accountRepository;
     protected final ProductToGLAccountMappingRepository accountMappingRepository;
     protected final FromJsonHelper fromApiJsonHelper;
+    private final AccountingChargeReadService accountingChargeReadService;
     protected final GLAccountRepositoryWrapper accountRepositoryWrapper;
     private final PaymentTypeRepository paymentTypeRepository;
     private final CodeValueRepository codeValueRepository;
@@ -610,6 +611,10 @@ public class ProductToGLAccountMappingHelper {
      */
     private void saveChargeToFundSourceMapping(final Long productId, final Long chargeId, final Long incomeAccountId,
             final PortfolioProductType portfolioProductType, final boolean isPenalty) {
+        this.accountingChargeReadService.validateChargeForMapping(chargeId);
+
+        // TODO Vishwas: Need to validate if given charge is fee or Penalty
+        // based on input condition
 
         GLAccount glAccount;
         /**

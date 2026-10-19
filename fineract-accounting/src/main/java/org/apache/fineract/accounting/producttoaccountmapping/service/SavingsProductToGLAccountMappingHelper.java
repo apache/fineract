@@ -41,11 +41,15 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
 
     public SavingsProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
-            final GLAccountRepositoryWrapper accountRepositoryWrapper, final PaymentTypeRepository paymentTypeRepository,
-            final CodeValueRepository codeValueRepository) {
-        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, accountRepositoryWrapper, paymentTypeRepository,
-                codeValueRepository);
+            final AccountingChargeReadService accountingChargeReadService, final GLAccountRepositoryWrapper accountRepositoryWrapper,
+            final PaymentTypeRepository paymentTypeRepository, final CodeValueRepository codeValueRepository) {
+        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, accountingChargeReadService, accountRepositoryWrapper,
+                paymentTypeRepository, codeValueRepository);
     }
+
+    /***
+     * Set of abstractions for saving Saving Products to GL Account Mappings
+     ***/
 
     public void saveSavingsToAssetAccountMapping(final JsonElement element, final String paramName, final Long productId,
             final int placeHolderTypeId) {

@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.mapper.CodeValueMapper;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.data.ChargeSummaryData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.springframework.stereotype.Component;
 
@@ -87,17 +88,17 @@ public class WorkingCapitalLoanProductAdvancedAccountingReadHelper {
                 ? productToGLAccountMappingRepository.findAllPenaltyToIncomeAccountMappings(wcLoanProductId, productType)
                 : productToGLAccountMappingRepository.findAllFeeToIncomeAccountMappings(wcLoanProductId, productType);
         if (mappings.isEmpty()) {
-            return List.of();
+            return null;
         }
 
         final Set<Long> chargeIds = mappings.stream().map(ProductToGLAccountMapping::getChargeId).collect(Collectors.toSet());
-        final Map<Long, ChargeData> chargesById = accountingChargeReadService.findChargesByIds(chargeIds).stream()
-                .collect(Collectors.toMap(ChargeData::getId, Function.identity()));
+        final Map<Long, ChargeSummaryData> chargesById = accountingChargeReadService.findChargesByIds(chargeIds).stream()
+                .collect(Collectors.toMap(ChargeSummaryData::id, Function.identity()));
 
         final List<ChargeToGLAccountMapper> result = new ArrayList<>();
         for (final ProductToGLAccountMapping mapping : mappings) {
-            final ChargeData chargeData = chargesById.get(mapping.getChargeId());
-            if (chargeData == null) {
+            final ChargeSummaryData charge = chargesById.get(mapping.getChargeId());
+            if (charge == null) {
                 log.warn("Charge {} referenced by product to GL account mapping {} no longer exists; mapping is skipped",
                         mapping.getChargeId(), mapping.getId());
                 continue;
@@ -105,9 +106,10 @@ public class WorkingCapitalLoanProductAdvancedAccountingReadHelper {
             final GLAccount glAccount = mapping.getGlAccount();
             final GLAccountData gLAccountData = new GLAccountData().setId(glAccount.getId()).setName(glAccount.getName())
                     .setGlCode(glAccount.getGlCode());
+            final ChargeData chargeData = ChargeData.builder().id(charge.id()).name(charge.name()).penalty(charge.penalty()).build();
             result.add(new ChargeToGLAccountMapper().setCharge(chargeData).setIncomeAccount(gLAccountData));
         }
-        return result;
+        return result.isEmpty() ? null : result;
     }
 
     private List<AdvancedMappingToExpenseAccountData> fetchReasonMappings(final List<ProductToGLAccountMapping> mappings) {

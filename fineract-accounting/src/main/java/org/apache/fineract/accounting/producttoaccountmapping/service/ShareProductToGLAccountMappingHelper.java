@@ -40,10 +40,10 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
 
     public ShareProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
-            final GLAccountRepositoryWrapper accountRepositoryWrapper, final PaymentTypeRepository paymentTypeRepository,
-            final CodeValueRepository codeValueRepository) {
-        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, accountRepositoryWrapper, paymentTypeRepository,
-                codeValueRepository);
+            final AccountingChargeReadService accountingChargeReadService, final GLAccountRepositoryWrapper accountRepositoryWrapper,
+            final PaymentTypeRepository paymentTypeRepository, final CodeValueRepository codeValueRepository) {
+        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, accountingChargeReadService, accountRepositoryWrapper,
+                paymentTypeRepository, codeValueRepository);
     }
 
     /***

@@ -16,13 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.producttoaccountmapping.service;
+package org.apache.fineract.portfolio.charge.data;
 
-import java.util.List;
-import java.util.Set;
-import org.apache.fineract.portfolio.charge.data.ChargeData;
-
-public interface AccountingChargeReadService {
-
-    List<ChargeData> findChargesByIds(Set<Long> chargeIds);
+/**
+ * Minimal view of a charge (id, name and penalty flag), projected directly from the database.
+ */
+public record ChargeSummaryData(Long id, String name, boolean penalty) {
 }

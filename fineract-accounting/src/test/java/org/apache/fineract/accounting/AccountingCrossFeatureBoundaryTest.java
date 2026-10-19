@@ -20,23 +20,29 @@ package org.apache.fineract.accounting;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.base.Splitter;
 import com.tngtech.archunit.core.domain.JavaClass;
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.modulith.core.ApplicationModule;
 import org.springframework.modulith.core.ApplicationModuleDependency;
 import org.springframework.modulith.core.ApplicationModules;
 
+/**
+ * Checks that the accounting module references types from fineract-core and fineract-command only, and not from other
+ * feature modules such as fineract-charge or fineract-loan.
+ * <p>
+ * Spring Modulith models the {@code org.apache.fineract} classes on this module's test classpath, and each type that
+ * accounting references is attributed to the Gradle module it was loaded from. Only fineract-accounting's own
+ * dependencies are on that classpath, so the test can only catch a feature module that is added back to
+ * {@code fineract-accounting/dependencies.gradle} and then used from accounting code. It does not check dependencies of
+ * other modules, including dependencies pointing into accounting.
+ */
 class AccountingCrossFeatureBoundaryTest {
 
     private static final Logger log = LoggerFactory.getLogger(AccountingCrossFeatureBoundaryTest.class);
@@ -48,101 +54,55 @@ class AccountingCrossFeatureBoundaryTest {
 
     private static final Pattern FINERACT_ARTIFACT = Pattern.compile("(?<=/)fineract-[a-z0-9-]+");
 
-    private static ApplicationModules modules;
+    // Built once during class initialization, which the JVM makes thread-safe for parallel test execution
+    private static final ApplicationModules MODULES = ApplicationModules.of(BASE);
 
-    private static ApplicationModules modules() {
-        if (modules == null) {
-            modules = ApplicationModules.of(BASE);
+    @Test
+    void accountingMustNotImportOtherFeatureModules() {
+        Set<String> violations = new TreeSet<>();
+        Set<String> unresolvedTypes = new TreeSet<>();
+
+        accountingModule().getDirectDependencies(MODULES).stream().forEach((ApplicationModuleDependency dependency) -> {
+            JavaClass targetType = dependency.getTargetType();
+            Optional<String> artifact = owningArtifact(targetType);
+            if (artifact.isEmpty()) {
+                unresolvedTypes.add(targetType.getName());
+            } else if (!FOUNDATION_ARTIFACTS.contains(artifact.get())) {
+                violations.add(dependency.getSourceType().getName() + " -> " + targetType.getName() + " (" + artifact.get() + ")");
+            }
+        });
+
+        if (!unresolvedTypes.isEmpty()) {
+            log.warn("Owning module could not be determined, so these types were not checked: {}", unresolvedTypes);
         }
-        return modules;
+
+        assertThat(violations) //
+                .as("Accounting may depend only on fineract-core and fineract-command. Types referenced from other feature modules "
+                        + "must be reached via core read-contracts / DTOs, command/event boundaries, or by-id references (or the "
+                        + "shared type moved into core). Offending dependencies (source -> target (owning module)): %s", violations) //
+                .isEmpty();
     }
 
     private static ApplicationModule accountingModule() {
-        return modules().stream() //
+        return MODULES.stream() //
                 .filter(module -> module.getBasePackage().getName().equals(ACCOUNTING_PACKAGE)) //
                 .findFirst() //
                 .orElseThrow(() -> new IllegalStateException("Accounting module not found in the model"));
     }
 
-    private static String featureKey(String typeName) {
-        String prefix = BASE + ".";
-        if (!typeName.startsWith(prefix)) {
-            return typeName;
-        }
-        List<String> parts = Splitter.on('.').splitToList(typeName.substring(prefix.length()));
-        return parts.size() >= 2 ? parts.get(0) + "." + parts.get(1) : parts.get(0);
-    }
-
-    private static String owningArtifact(JavaClass type) {
-        return type.getSource().map(source -> source.getUri().toString()).map(uri -> {
+    /**
+     * Resolves the Gradle module a type was loaded from (e.g. {@code fineract-core}) using its class file location.
+     * Empty when ArchUnit has no location for the type or the location is not inside a fineract-* module.
+     */
+    private static Optional<String> owningArtifact(JavaClass type) {
+        return type.getSource().map(source -> source.getUri().toString()).flatMap(uri -> {
             Matcher matcher = FINERACT_ARTIFACT.matcher(uri);
             String artifact = null;
             while (matcher.find()) {
                 artifact = matcher.group();
             }
-            return artifact == null ? uri : artifact.replaceAll("-\\d.*$", "");
-        }).orElse("(unknown-source)");
-    }
-
-    private static boolean isFoundation(JavaClass type) {
-        return FOUNDATION_ARTIFACTS.contains(owningArtifact(type));
-    }
-
-    @Test
-    @EnabledIfSystemProperty(named = "accounting.boundary.report", matches = "true")
-    void printAccountingCrossFeatureDependencyReport() {
-        Map<String, Set<String>> sourceTypeToTargets = new TreeMap<>();
-        Set<String> violationFeatures = new TreeSet<>();
-        Set<String> allowedFromCore = new TreeSet<>();
-
-        accountingModule().getDirectDependencies(modules()).stream().forEach((ApplicationModuleDependency dependency) -> {
-            JavaClass targetType = dependency.getTargetType();
-            String sourceType = dependency.getSourceType().getName();
-            String featureKey = featureKey(targetType.getName());
-            String artifact = owningArtifact(targetType);
-            boolean foundation = isFoundation(targetType);
-
-            String label = featureKey + "  [" + artifact + (foundation ? " : foundation]" : " : VIOLATION]");
-            sourceTypeToTargets.computeIfAbsent(sourceType, key -> new TreeSet<>()).add(label);
-
-            if (foundation) {
-                allowedFromCore.add(featureKey + " (" + artifact + ")");
-            } else {
-                violationFeatures.add(featureKey + " (" + artifact + ")");
-            }
+            // Jar names carry a version (fineract-core-1.12.0.jar), build directories do not
+            return Optional.ofNullable(artifact).map(name -> name.replaceAll("-\\d.*$", ""));
         });
-
-        log.info("==== Accounting cross-feature dependency report ====");
-        log.info("base package         : {}", BASE);
-        log.info("-- source type -> referenced feature packages [owning artifact : status] --");
-
-        sourceTypeToTargets.forEach((source, targets) -> {
-            log.info("source type          : {}", source);
-            log.info("referenced targets   : {}", targets);
-        });
-
-        log.info("-- allowed dependencies --");
-        log.info("allowed from core    : {}", allowedFromCore);
-        log.info("-- dependency violations --");
-        log.info("violation features   : {}", violationFeatures);
-    }
-
-    @Test
-    void accountingMustNotImportOtherFeatureModules() {
-        Set<String> featureDependencies = new TreeSet<>();
-
-        accountingModule().getDirectDependencies(modules()).stream().forEach((ApplicationModuleDependency dependency) -> {
-            JavaClass targetType = dependency.getTargetType();
-            if (!isFoundation(targetType)) {
-                featureDependencies.add(featureKey(targetType.getName()) + " (" + owningArtifact(targetType) + ")");
-            }
-        });
-
-        assertThat(featureDependencies) //
-                .as("Accounting may depend only on fineract-core and fineract-command. Types referenced from "
-                        + "other feature modules must be reached via core read-contracts / DTOs, command/event "
-                        + "boundaries, or by-id references (or the shared type moved into core). Offending "
-                        + "feature packages (with owning artifact): %s", featureDependencies) //
-                .isEmpty();
     }
 }

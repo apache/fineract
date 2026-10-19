@@ -22,28 +22,34 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.producttoaccountmapping.service.AccountingChargeReadService;
-import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.data.ChargeSummaryData;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
+import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Charge module implementation of the contract declared by the accounting module. Keeping the implementation here means
- * the accounting module depends only on the interface it owns, and the charge module supplies the details at runtime.
+ * Charge module implementation of the {@link AccountingChargeReadService} contract declared in fineract-core, so the
+ * accounting module can look up charges without depending on the charge module.
  */
 @Service
 @RequiredArgsConstructor
 public class AccountingChargeReadServiceImpl implements AccountingChargeReadService {
 
     private final ChargeRepository chargeRepository;
+    private final ChargeRepositoryWrapper chargeRepositoryWrapper;
+
+    @Override
+    public void validateChargeForMapping(final Long chargeId) {
+        chargeRepositoryWrapper.findOneWithNotFoundDetection(chargeId);
+    }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ChargeData> findChargesByIds(final Set<Long> chargeIds) {
+    public List<ChargeSummaryData> findChargesByIds(final Set<Long> chargeIds) {
         if (chargeIds == null || chargeIds.isEmpty()) {
             return List.of();
         }
-        return chargeRepository.findAllById(chargeIds).stream().map(Charge::toData).toList();
+        return chargeRepository.findChargeSummariesByIds(chargeIds);
     }
 }
