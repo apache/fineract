@@ -2042,3 +2042,47 @@ Feature: LoanChargesDisbursementCharges
       | 01 March 2024    | Repayment                           | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | true     |
     When Loan Pay-off is made on "03 March 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C_ADD_1
+  Scenario: Verify due date charge added before approval is appears on repayment schedule after disbursement
+    When Admin sets the business date to "1 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30 | 1 January 2024    | 75             | 12.3                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 5                 | MONTHS                | 1              | MONTHS                 | 5                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    When Admin adds "LOAN_NSF_FEE" due date charge with "01 February 2024" due date and 4.53 EUR transaction amount
+    And Admin successfully approves the loan on "1 January 2024" with "75" amount and expected disbursement date on "1 January 2024"
+    When Admin successfully disburse the loan on "1 January 2024" with "75" EUR transaction amount
+    Then Loan Repayment schedule has 5 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 75.0            |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 60.3            | 14.7          | 0.77     | 0.0  | 4.53      | 20.0  | 0.0  | 0.0        | 0.0  | 20.0        |
+      | 2  | 29   | 01 March 2024    |           | 45.45           | 14.85         | 0.62     | 0.0  | 0.0       | 15.47 | 0.0  | 0.0        | 0.0  | 15.47       |
+      | 3  | 31   | 01 April 2024    |           | 30.45           | 15.0          | 0.47     | 0.0  | 0.0       | 15.47 | 0.0  | 0.0        | 0.0  | 15.47       |
+      | 4  | 30   | 01 May 2024      |           | 15.29           | 15.16         | 0.31     | 0.0  | 0.0       | 15.47 | 0.0  | 0.0        | 0.0  | 15.47       |
+      | 5  | 31   | 01 June 2024     |           | 0.0             | 15.29         | 0.16     | 0.0  | 0.0       | 15.45 | 0.0  | 0.0        | 0.0  | 15.45       |
+
+    When Loan Pay-off is made on "01 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C_ADD_2
+  Scenario: Verify due date % charge added before approval is appears on repayment schedule after disbursement
+    When Admin sets the business date to "1 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30 | 1 January 2024    | 75             | 12.3                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 5                 | MONTHS                | 1              | MONTHS                 | 5                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    When Admin adds "LOAN_PERCENTAGE_PROCESSING_FEE" due date charge with "01 February 2024" due date and 14 EUR transaction amount
+    And Admin successfully approves the loan on "1 January 2024" with "75" amount and expected disbursement date on "1 January 2024"
+    When Admin successfully disburse the loan on "1 January 2024" with "75" EUR transaction amount
+    Then Loan Repayment schedule has 5 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 75.0            |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 60.3            | 14.7          | 0.77     | 10.83 | 0.0       | 26.3 | 0.0  | 0.0        | 0.0  | 26.3       |
+      | 2  | 29   | 01 March 2024    |           | 45.45           | 14.85         | 0.62     | 0.0  | 0.0       | 15.47 | 0.0  | 0.0        | 0.0  | 15.47       |
+      | 3  | 31   | 01 April 2024    |           | 30.45           | 15.0          | 0.47     | 0.0  | 0.0       | 15.47 | 0.0  | 0.0        | 0.0  | 15.47       |
+      | 4  | 30   | 01 May 2024      |           | 15.29           | 15.16         | 0.31     | 0.0  | 0.0       | 15.47 | 0.0  | 0.0        | 0.0  | 15.47       |
+      | 5  | 31   | 01 June 2024     |           | 0.0             | 15.29         | 0.16     | 0.0  | 0.0       | 15.45 | 0.0  | 0.0        | 0.0  | 15.45       |
+
+    When Loan Pay-off is made on "01 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

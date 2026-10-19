@@ -301,9 +301,13 @@ public class LoanChargeStepDef extends AbstractStepDef {
                 .retrieveOneLoanCharge(loanChargeResponse.getLoanId(), loanChargeResponse.getResourceId()));
         GetLoansLoanIdChargesChargeIdResponse body = chargeDetails;
 
-        eventAssertion.assertEvent(LoanAddChargeEvent.class, loanChargeResponse.getResourceId()).extractingData(LoanChargeDataV1::getName)
-                .isEqualTo(body.getName()).extractingBigDecimal(LoanChargeDataV1::getAmount).isEqualTo(BigDecimal.valueOf(body.getAmount()))
-                .extractingData(LoanChargeDataV1::getDueDate).isEqualTo(formatter.format(body.getDueDate()));
+        EventAssertion.EventAssertionBuilder<LoanChargeDataV1> assertionBuilder = eventAssertion
+                .assertEvent(LoanAddChargeEvent.class, loanChargeResponse.getResourceId()).extractingData(LoanChargeDataV1::getName)
+                .isEqualTo(body.getName()).extractingBigDecimal(LoanChargeDataV1::getAmount)
+                .isEqualTo(BigDecimal.valueOf(body.getAmount()));
+        if (body.getDueDate() != null) {
+            assertionBuilder.extractingData(LoanChargeDataV1::getDueDate).isEqualTo(formatter.format(body.getDueDate()));
+        }
     }
 
     @Then("Loan charge transaction with the following data results a {int} error and {string} error message")

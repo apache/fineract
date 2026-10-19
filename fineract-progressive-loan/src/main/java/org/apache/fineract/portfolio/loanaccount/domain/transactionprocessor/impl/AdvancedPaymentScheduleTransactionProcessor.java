@@ -1615,7 +1615,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             changeOperations.addAll(charges.stream().map(ChangeOperation::new).toList());
         }
         if (loanTransactions != null) {
-            changeOperations.addAll(loanTransactions.stream().map(ChangeOperation::new).toList());
+            List<ChangeOperation> transactionChangeOperations = loanTransactions.stream().map(ChangeOperation::new).toList();
+            transactionChangeOperations.stream()
+                    .filter(t -> t.getLoanTransaction().isPresent() && t.getLoanTransaction().get().isDisbursement())
+                    .min(ChangeOperation::compareTo).ifPresent(t -> t.setFirstDisbursementTransaction(true));
+            changeOperations.addAll(transactionChangeOperations);
         }
         Collections.sort(changeOperations);
         return changeOperations;

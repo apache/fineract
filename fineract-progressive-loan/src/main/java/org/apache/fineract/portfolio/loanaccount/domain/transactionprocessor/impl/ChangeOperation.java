@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -35,6 +36,9 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
     private final Optional<LoanTermVariationsData> loanTermVariationsData;
     private final Optional<LoanCharge> loanCharge;
     private final Optional<LoanTransaction> loanTransaction;
+
+    @Setter
+    private boolean isFirstDisbursementTransaction = false;
 
     public ChangeOperation(LoanCharge loanCharge) {
         this.loanTermVariationsData = Optional.empty();
@@ -121,10 +125,24 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
         }
     }
 
+    private boolean isDueDatePercentageCharge() {
+        return this.isCharge() && this.getLoanCharge().isPresent() && this.getLoanCharge().get().isDueDateCharge()
+                && this.getLoanCharge().get().getPercentage() != null;
+    }
+
     @Override
     @SuppressFBWarnings(value = "EQ_COMPARETO_USE_OBJECT_EQUALS", justification = "TODO: fix this! See: https://stackoverflow.com/questions/2609037/findbugs-how-to-solve-eq-compareto-use-object-equals")
     public int compareTo(@NonNull ChangeOperation o) {
         int datePortion = DateUtils.compareWithNullsLast(this.getEffectiveDate(), o.getEffectiveDate());
+        if (isFirstDisbursementTransaction || o.isFirstDisbursementTransaction) {
+            if (this.isFirstDisbursementTransaction && o.isFirstDisbursementTransaction) {
+                return 0;
+            } else if (this.isFirstDisbursementTransaction && o.isDueDatePercentageCharge()) {
+                return -1;
+            } else if (o.isFirstDisbursementTransaction && this.isDueDatePercentageCharge()) {
+                return 1;
+            }
+        }
         if (datePortion == 0) {
             boolean thisIsDisb = this.isTransaction() && this.getLoanTransaction().isPresent()
                     && this.getLoanTransaction().get().isDisbursement();
