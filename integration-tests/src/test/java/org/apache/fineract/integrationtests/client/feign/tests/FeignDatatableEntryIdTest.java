@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.client.feign.tests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,9 +30,12 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.BatchRequest;
+import org.apache.fineract.client.models.BatchResponse;
 import org.apache.fineract.client.models.PostColumnHeaderData;
 import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBatchHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDatatableHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
@@ -41,7 +45,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The datatable entry routes that take a second id act only on an entry of the application table row named first: a
- * one-to-one datatable refuses the entry id, and a one-to-many entry of another row is not found.
+ * one-to-one datatable refuses the entry id, and a one-to-many entry of another row is not found, also through the
+ * survey and batch routes.
  */
 public class FeignDatatableEntryIdTest extends FeignIntegrationTest {
 
@@ -51,12 +56,14 @@ public class FeignDatatableEntryIdTest extends FeignIntegrationTest {
 
     private static FeignClientHelper clientHelper;
     private static FeignDatatableHelper datatableHelper;
+    private static FeignBatchHelper batchHelper;
 
     @BeforeAll
     public static void setup() {
         FineractFeignClient fineractClient = FineractFeignClientHelper.getFineractFeignClient();
         clientHelper = new FeignClientHelper(fineractClient);
         datatableHelper = new FeignDatatableHelper(fineractClient);
+        batchHelper = new FeignBatchHelper(fineractClient);
     }
 
     @Test
@@ -101,7 +108,7 @@ public class FeignDatatableEntryIdTest extends FeignIntegrationTest {
     }
 
     @Test
-    void oneToManyDeleteOfAnotherEntitysEntryIsNotFound() {
+    void oneToManyDeleteOfAnEntryNotOwnedIsNotFound() {
         String datatableName = createClientDatatable(true);
         Long x = createClient();
         Long b = createClient();
@@ -110,6 +117,7 @@ public class FeignDatatableEntryIdTest extends FeignIntegrationTest {
             Long entryOfB = datatableHelper.createDatatableEntry(datatableName, b, Map.of("note", "b")).getResourceId();
 
             assertRefused(datatableHelper.deleteDatatableEntryExpectingError(datatableName, x, entryOfB), 404, NOT_FOUND);
+            assertRefused(datatableHelper.deleteDatatableEntryExpectingError(datatableName, x, entryOfB + 1000), 404, NOT_FOUND);
 
             assertEquals(List.of("x"), notes(datatableName, x));
             assertEquals(List.of("b"), notes(datatableName, b));
@@ -119,17 +127,40 @@ public class FeignDatatableEntryIdTest extends FeignIntegrationTest {
     }
 
     @Test
-    void oneToManyDeleteOfUnknownEntryIsNotFound() {
+    void surveyDeleteOfAnotherEntitysEntryIsNotFound() {
         String datatableName = createClientDatatable(true);
         Long x = createClient();
+        Long b = createClient();
         try {
-            Long entry = datatableHelper.createDatatableEntry(datatableName, x, Map.of("note", "x")).getResourceId();
+            datatableHelper.createDatatableEntry(datatableName, x, Map.of("note", "x"));
+            Long entryOfB = datatableHelper.createDatatableEntry(datatableName, b, Map.of("note", "b")).getResourceId();
 
-            assertRefused(datatableHelper.deleteDatatableEntryExpectingError(datatableName, x, entry + 1000), 404, NOT_FOUND);
+            assertRefused(fail(() -> fineractClient().survey().deleteDatatableEntries1(datatableName, x, entryOfB)), 404, NOT_FOUND);
 
-            assertEquals(List.of("x"), notes(datatableName, x));
+            assertEquals(List.of("b"), notes(datatableName, b));
         } finally {
-            dropDatatable(datatableName, x);
+            dropDatatable(datatableName, x, b);
+        }
+    }
+
+    @Test
+    void batchDeleteOfAnotherEntitysEntryIsNotFound() {
+        String datatableName = createClientDatatable(true);
+        Long x = createClient();
+        Long b = createClient();
+        try {
+            datatableHelper.createDatatableEntry(datatableName, x, Map.of("note", "x"));
+            Long entryOfB = datatableHelper.createDatatableEntry(datatableName, b, Map.of("note", "b")).getResourceId();
+
+            BatchRequest delete = new BatchRequest().requestId(1L).relativeUrl("v1/datatables/" + datatableName + "/" + x + "/" + entryOfB)
+                    .method("DELETE");
+            BatchResponse response = batchHelper.executeWithoutEnclosingTransaction(List.of(delete)).get(0);
+            assertEquals(404, response.getStatusCode(), response.getBody());
+            assertTrue(response.getBody().contains(NOT_FOUND), response.getBody());
+
+            assertEquals(List.of("b"), notes(datatableName, b));
+        } finally {
+            dropDatatable(datatableName, x, b);
         }
     }
 

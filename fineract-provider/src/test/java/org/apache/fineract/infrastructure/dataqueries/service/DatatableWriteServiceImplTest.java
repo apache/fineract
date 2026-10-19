@@ -309,25 +309,13 @@ class DatatableWriteServiceImplTest {
     }
 
     @Test
-    void testDeleteOneToManyEntryIsScopedToApplicationTableId() {
-        setupDeleteEntryMocks(true);
-        when(jdbcTemplate.update(anyString(), eq(7L), eq(3L))).thenReturn(1);
-
-        underTest.deleteDatatableEntry(DATATABLE_NAME, 3L, 7L, mock(JsonCommand.class));
-
-        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).update(sqlCaptor.capture(), eq(7L), eq(3L));
-        assertEquals("DELETE FROM \"" + DATATABLE_NAME + "\" WHERE \"id\" = ? AND \"client_id\" = ?", sqlCaptor.getValue());
-    }
-
-    @Test
     void testDeleteOneToManyEntryOfAnotherEntityIsNotFound() {
         setupDeleteEntryMocks(true);
-        when(jdbcTemplate.update(anyString(), eq(7L), eq(3L))).thenReturn(0);
+        when(jdbcTemplate.update(anyString(), eq(3L), eq(7L))).thenReturn(0);
 
         assertThrows(DatatableNotFoundException.class,
                 () -> underTest.deleteDatatableEntry(DATATABLE_NAME, 3L, 7L, mock(JsonCommand.class)));
-        verify(jdbcTemplate).update(anyString(), eq(7L), eq(3L));
+        verify(jdbcTemplate).update(anyString(), eq(3L), eq(7L));
         verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any());
     }
 
@@ -366,24 +354,6 @@ class DatatableWriteServiceImplTest {
         assertEquals(3L, result.getResourceId());
     }
 
-    @Test
-    void testUpdateOneToManyEntryKeysOnItsId() {
-        ResultsetColumnHeaderData id = ResultsetColumnHeaderData.detailed("id", "bigint", null, false, true, List.of(), null, false, false,
-                DatabaseType.POSTGRESQL);
-        ResultsetColumnHeaderData fk = ResultsetColumnHeaderData.basic("client_id", "bigint", DatabaseType.POSTGRESQL);
-        ResultsetColumnHeaderData note = ResultsetColumnHeaderData.basic("note", "varchar", DatabaseType.POSTGRESQL);
-        setupUpdateEntryMocks(true, List.of(id, fk, note), id, note, List.of(4L, 3L, "old"));
-        when(jdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(1);
-
-        CommandProcessingResult result = underTest.updateDatatableEntryOneToMany(DATATABLE_NAME, 3L, 4L, mock(JsonCommand.class));
-
-        ArgumentCaptor<Object[]> paramsCaptor = ArgumentCaptor.forClass(Object[].class);
-        verify(jdbcTemplate).update(anyString(), paramsCaptor.capture());
-        Object[] params = paramsCaptor.getValue();
-        assertEquals(4L, params[params.length - 1], "the UPDATE must key on the entry's id");
-        assertEquals(4L, result.getResourceId());
-    }
-
     private void setupDeleteEntryMocks(boolean multiRow) {
         when(sqlGenerator.escape(anyString())).thenAnswer(invocation -> "\"" + invocation.getArgument(0) + "\"");
         when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), anyString())).thenReturn(0L);
@@ -400,12 +370,9 @@ class DatatableWriteServiceImplTest {
                 false, DatabaseType.POSTGRESQL);
         ResultsetColumnHeaderData id = ResultsetColumnHeaderData.basic("id", "bigint", DatabaseType.POSTGRESQL);
         ResultsetColumnHeaderData note = ResultsetColumnHeaderData.basic("note", "varchar", DatabaseType.POSTGRESQL);
-        setupUpdateEntryMocks(multiRow, List.of(pk, id, note), pk, note, List.of(primaryKey, idColumnValue, "old"));
-    }
-
-    private void setupUpdateEntryMocks(boolean multiRow, List<ResultsetColumnHeaderData> headers, ResultsetColumnHeaderData pk,
-            ResultsetColumnHeaderData note, List<Object> row) {
-        GenericResultsetData read = new GenericResultsetData(headers, List.of(ResultsetRowData.create(new ArrayList<>(row))));
+        List<ResultsetColumnHeaderData> headers = List.of(pk, id, note);
+        GenericResultsetData read = new GenericResultsetData(headers,
+                List.of(ResultsetRowData.create(new ArrayList<>(List.of(primaryKey, idColumnValue, "old")))));
 
         when(datatableUtil.queryForApplicationEntity(DATATABLE_NAME)).thenReturn(EntityTables.CLIENT);
         when(datatableUtil.checkMainResourceExistsWithinScope(eq(EntityTables.CLIENT), any()))
