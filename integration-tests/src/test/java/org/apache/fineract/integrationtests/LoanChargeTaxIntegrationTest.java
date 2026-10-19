@@ -68,6 +68,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
     // about 23/123 of the fee, a 23 % VAT already inside it. The client's percentage is a Float, and no float is stored
     // as 18.699187: 18.699186 is the value the expected amounts are computed from
     private static final float TAX_RATE_23_IN_123 = 18.699186f;
+    private static final String AFTER_BOTH_DUE_DATES = "15 March 2023";
 
     private final FeignTaxComponentHelper taxComponentHelper = new FeignTaxComponentHelper(
             FineractFeignClientHelper.getFineractFeignClient());
@@ -727,5 +728,53 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
 
     private static boolean isOn(JournalEntryTransactionItem line, Account account) {
         return Long.valueOf(account.getAccountID().longValue()).equals(line.getGlAccountId());
+    }
+
+    // -----------------------------------------------------------------------
+    // 13. Cash-based accounting: taxed instalment fee paid for two instalments at once
+    // -----------------------------------------------------------------------
+
+    /**
+     * One repayment pays both instalments of a taxed instalment fee, so the transaction carries two paid-by rows of the
+     * same charge. The tax is subtracted from the fee income once:
+     *
+     * <pre>
+     *   DR  Fund Source         1100.00
+     *   CR  Loan Portfolio      1000.00
+     *   CR  Income from Fees      90.00  (2 x 50 less 2 x 5 tax)
+     *   CR  Tax Liability         10.00
+     * </pre>
+     */
+    @Test
+    public void testCashAccounting_instalmentFeePaidForTwoInstalmentsAtOnce_taxSubtractedOnce() {
+        Account taxLiabilityAccount = accountHelper.createLiabilityAccount("taxLiability_instalment");
+        Long[] loanId = new Long[1];
+        runAt(LOAN_DATE, () -> {
+            PostTaxesComponentsResponse taxComponent = createTaxComponent(10.0f, taxLiabilityAccount.getAccountID().longValue());
+            PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
+            PostChargesResponse charge = chargesHelper.createCharge(new ChargeRequest().penalty(false).amount(50.0)
+                    .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.INSTALMENT_FEE.getValue())
+                    .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
+                    .name(Utils.uniqueRandomStringGenerator("CHARGE_", 6)).chargeAppliesTo(1).locale(LoanTestData.LOCALE).active(true)
+                    .taxGroupId(taxGroup.getResourceId()));
+            Long clientId = createClient();
+            Long loanProductId = createLoanProduct(
+                    createCashBasedLoanProduct().multiDisburseLoan(false).disallowExpectedDisbursements(null).numberOfRepayments(2));
+            loanId[0] = applyAndApproveLoan(clientId, loanProductId, LOAN_DATE, 1000.0, 2);
+            disburseLoan(loanId[0], BigDecimal.valueOf(1000.0), LOAN_DATE);
+            addChargesForLoan(loanId[0], new PostLoansLoanIdChargesRequest().chargeId(charge.getResourceId()).amount(50.0)
+                    .dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE));
+        });
+
+        runAt(AFTER_BOTH_DUE_DATES, () -> {
+            addRepaymentForLoan(loanId[0], 1100.0, AFTER_BOTH_DUE_DATES);
+
+            verifyJournalEntries(loanId[0],
+                    // disbursement
+                    debit(getAccounts().getLoansReceivableAccount(), 1000.0), credit(getAccounts().getFundSource(), 1000.0),
+                    // repayment
+                    debit(getAccounts().getFundSource(), 1100.0), credit(getAccounts().getLoansReceivableAccount(), 1000.0),
+                    credit(getAccounts().getFeeIncomeAccount(), 90.0), credit(taxLiabilityAccount, 10.0));
+        });
     }
 }
