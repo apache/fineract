@@ -22,6 +22,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.COMMAND_
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.COMMAND_PAY_CHARGE;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.COMMAND_WAIVE_CHARGE;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,12 +47,15 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
+import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -138,7 +142,8 @@ public class SavingsAccountChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Savings account Charge", operationId = "retrieveOneSavingsAccountCharge", description = "Retrieves a Savings account Charge\n\n"
             + "Example Requests:\n" + "\n" + "/savingsaccounts/1/charges/5\n" + "\n" + "\n"
-            + "/savingsaccounts/1/charges/5?fields=name,amountOrPercentage")
+            + "/savingsaccounts/1/charges/5?fields=name,amountOrPercentage\n\n"
+            + "Use associations=transactions or associations=all to include recorded transaction allocations, including reversed transactions and available payment details.")
     @AlternativeOperationId("retrieveSavingsAccountCharge")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse.class))) })
@@ -152,9 +157,17 @@ public class SavingsAccountChargesApiResource {
         final SavingsAccountChargeData savingsAccountCharge = this.savingsAccountChargeReadPlatformService
                 .retrieveSavingsAccountChargeDetails(savingsAccountChargeId, savingsAccountId);
 
+        final Set<String> associations = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+        final Set<String> responseFields = new HashSet<>(SavingsApiSetConstants.SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS);
+        if (associations.contains("transactions") || associations.contains("all")) {
+            this.context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_RESOURCE_NAME);
+            savingsAccountCharge.setTransactions(
+                    this.savingsAccountChargeReadPlatformService.retrieveChargeTransactions(savingsAccountChargeId, savingsAccountId));
+            responseFields.add("transactions");
+        }
+
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, savingsAccountCharge,
-                SavingsApiSetConstants.SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, savingsAccountCharge, responseFields);
     }
 
     @POST
