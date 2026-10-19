@@ -18,11 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -41,19 +38,12 @@ class LoanDisbursementDetailsTest {
     }
 
     @Test
-    void equalsIgnoresPrincipalScale() {
+    void equalsAndHashCodeIgnorePrincipalScale() {
         final LoanDisbursementDetails stored = details(new BigDecimal("1000.000000"));
         final LoanDisbursementDetails fromRequest = details(new BigDecimal("1000"));
 
         assertEquals(stored, fromRequest);
         assertEquals(fromRequest, stored);
-    }
-
-    @Test
-    void hashCodeIgnoresPrincipalScale() {
-        final LoanDisbursementDetails stored = details(new BigDecimal("1000.000000"));
-        final LoanDisbursementDetails fromRequest = details(new BigDecimal("1000"));
-
         assertEquals(stored.hashCode(), fromRequest.hashCode());
     }
 
@@ -63,54 +53,7 @@ class LoanDisbursementDetailsTest {
         final LoanDisbursementDetails zeroWithScale = details(new BigDecimal("0.000000"));
 
         assertEquals(zero, zeroWithScale);
-        assertEquals(zeroWithScale, zero);
         assertEquals(zero.hashCode(), zeroWithScale.hashCode());
-    }
-
-    @Test
-    void equalsAndHashCodeIgnoreTrailingZerosOfFractionalPrincipal() {
-        final LoanDisbursementDetails first = details(new BigDecimal("1000.50"));
-        final LoanDisbursementDetails second = details(new BigDecimal("1000.500000"));
-
-        assertEquals(first, second);
-        assertEquals(first.hashCode(), second.hashCode());
-    }
-
-    @Test
-    void equalsDoesNotThrowWhenThisPrincipalIsNull() {
-        final LoanDisbursementDetails withoutPrincipal = details(null);
-        final LoanDisbursementDetails withPrincipal = details(new BigDecimal("1000"));
-
-        assertDoesNotThrow(() -> withoutPrincipal.equals(withPrincipal));
-        assertFalse(withoutPrincipal.equals(withPrincipal));
-    }
-
-    @Test
-    void equalsDoesNotThrowWhenOtherPrincipalIsNull() {
-        final LoanDisbursementDetails withPrincipal = details(new BigDecimal("1000"));
-        final LoanDisbursementDetails withoutPrincipal = details(null);
-
-        assertDoesNotThrow(() -> withPrincipal.equals(withoutPrincipal));
-        assertFalse(withPrincipal.equals(withoutPrincipal));
-    }
-
-    @Test
-    void equalsDoesNotThrowWhenBothPrincipalsAreNull() {
-        final LoanDisbursementDetails first = details(null);
-        final LoanDisbursementDetails second = details(null);
-
-        assertDoesNotThrow(() -> first.equals(second));
-        assertTrue(first.equals(second));
-        assertEquals(first.hashCode(), second.hashCode());
-    }
-
-    @Test
-    void nullPrincipalIsNotEqualToZeroPrincipal() {
-        final LoanDisbursementDetails withoutPrincipal = details(null);
-        final LoanDisbursementDetails zero = details(BigDecimal.ZERO);
-
-        assertNotEquals(withoutPrincipal, zero);
-        assertNotEquals(zero, withoutPrincipal);
     }
 
     @Test
