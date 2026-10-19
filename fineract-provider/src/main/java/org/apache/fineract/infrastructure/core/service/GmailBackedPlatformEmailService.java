@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
+import jakarta.mail.internet.MimeMessage;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
@@ -25,6 +27,7 @@ import org.apache.fineract.infrastructure.core.domain.EmailDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -76,13 +79,22 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
         props.put("mail.smtp.starttls.enable", "true");
 
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(smtpCredentialsData.getFromEmail()); // same email address used for the authentication
-            message.setTo(emailDetails.getAddress());
-            message.setSubject(emailDetails.getSubject());
-            message.setText(emailDetails.getBody());
-            mailSender.send(message);
-
+            if (emailDetails.isHtml()) {
+                MimeMessage mimeMessage = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, StandardCharsets.UTF_8.name());
+                helper.setFrom(smtpCredentialsData.getFromEmail());
+                helper.setTo(emailDetails.getAddress());
+                helper.setSubject(emailDetails.getSubject());
+                helper.setText(emailDetails.getBody(), true);
+                mailSender.send(mimeMessage);
+            } else {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(smtpCredentialsData.getFromEmail()); // same email address used for the authentication
+                message.setTo(emailDetails.getAddress());
+                message.setSubject(emailDetails.getSubject());
+                message.setText(emailDetails.getBody());
+                mailSender.send(message);
+            }
         } catch (Exception e) {
             throw new PlatformEmailSendException(e);
         }
