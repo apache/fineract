@@ -172,7 +172,7 @@ class SavingsAccountOverdraftInterestSplitTest {
             final String amount, final String overdraftAmount) {
         final SavingsAccountTransactionData transaction = SavingsAccountTransactionData.create(id,
                 SavingsEnumerations.transactionType(type), null, 1L, "000000001", date, CURRENCY, new BigDecimal(amount), null,
-                BigDecimal.ZERO, false, date, false, null, null);
+                BigDecimal.ZERO, false, date, false, null, null, false);
         if (overdraftAmount != null) {
             transaction.updateOverdraftAmount(new BigDecimal(overdraftAmount));
         }

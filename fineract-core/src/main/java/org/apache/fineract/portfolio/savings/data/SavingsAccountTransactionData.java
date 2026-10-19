@@ -162,10 +162,10 @@ public class SavingsAccountTransactionData implements Serializable {
             final LocalDate date, final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount,
             final BigDecimal runningBalance, final boolean reversed, final AccountTransferData transfer,
             final Collection<PaymentTypeData> paymentTypeOptions, final LocalDate submittedOnDate, final boolean interestedPostedAsOn,
-            final String submittedByUsername, final String note, final Boolean lienTransaction) {
+            final String submittedByUsername, final String note, final Boolean lienTransaction, final Boolean isReversal) {
         return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, accountId, accountNo, externalId, date, currency,
                 amount, outstandingChargeAmount, runningBalance, reversed, transfer, paymentTypeOptions, submittedOnDate,
-                interestedPostedAsOn, submittedByUsername, note, null, null, false, lienTransaction, null, null, false);
+                interestedPostedAsOn, submittedByUsername, note, isReversal, null, false, lienTransaction, null, null, false);
     }
 
     private static SavingsAccountTransactionData createData(final Long id, final SavingsAccountTransactionEnumData transactionType,
@@ -176,7 +176,7 @@ public class SavingsAccountTransactionData implements Serializable {
             final Boolean lienTransaction) {
         return createData(id, transactionType, paymentDetailData, accountId, accountNo, ExternalId.empty(), date, currency, amount,
                 outstandingChargeAmount, runningBalance, reversed, transfer, paymentTypeOptions, submittedOnDate, interestedPostedAsOn,
-                submittedByUsername, note, lienTransaction);
+                submittedByUsername, note, lienTransaction, null);
     }
 
     public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
@@ -216,10 +216,10 @@ public class SavingsAccountTransactionData implements Serializable {
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
             final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
             final boolean reversed, final LocalDate submittedOnDate, final boolean interestedPostedAsOn, final BigDecimal cumulativeBalance,
-            final LocalDate balanceEndDate) {
-        SavingsAccountTransactionData data = createData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
-                amount, outstandingChargeAmount, runningBalance, reversed, null, null, submittedOnDate, interestedPostedAsOn, null, null,
-                false);
+            final LocalDate balanceEndDate, final boolean isReversal) {
+        SavingsAccountTransactionData data = createData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo,
+                ExternalId.empty(), date, currency, amount, outstandingChargeAmount, runningBalance, reversed, null, null, submittedOnDate,
+                interestedPostedAsOn, null, null, false, isReversal);
         data.transactionDate = date;
         data.cumulativeBalance = cumulativeBalance;
         data.balanceEndDate = balanceEndDate;
@@ -243,7 +243,7 @@ public class SavingsAccountTransactionData implements Serializable {
                 savingsAccountTransactionData.getTransfer(), savingsAccountTransactionData.getPaymentTypeOptions(),
                 savingsAccountTransactionData.getSubmittedOnDate(), savingsAccountTransactionData.isInterestedPostedAsOn(),
                 savingsAccountTransactionData.getSubmittedByUsername(), savingsAccountTransactionData.getNote(),
-                savingsAccountTransactionData.getLienTransaction());
+                savingsAccountTransactionData.getLienTransaction(), null);
     }
 
     public static SavingsAccountTransactionData template(final Long savingsId, final String savingsAccountNo,
@@ -262,7 +262,7 @@ public class SavingsAccountTransactionData implements Serializable {
                 savingsAccountTransactionData.getRunningBalance(), savingsAccountTransactionData.isReversed(),
                 savingsAccountTransactionData.getTransfer(), paymentTypeOptions, savingsAccountTransactionData.getSubmittedOnDate(),
                 savingsAccountTransactionData.isInterestedPostedAsOn(), savingsAccountTransactionData.getSubmittedByUsername(),
-                savingsAccountTransactionData.getNote(), savingsAccountTransactionData.getLienTransaction());
+                savingsAccountTransactionData.getNote(), savingsAccountTransactionData.getLienTransaction(), null);
     }
 
     private static SavingsAccountTransactionData createImport(final SavingsAccountTransactionEnumData transactionType,

@@ -333,7 +333,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
             sqlBuilder.append("tr.submitted_on_date as transSubmittedOnDate,tr.cumulative_balance_derived as cumulativeBalance,");
-            sqlBuilder.append("tr.running_balance_derived as runningBalance, tr.is_reversed as reversed,");
+            sqlBuilder.append("tr.running_balance_derived as runningBalance, tr.is_reversed as reversed, tr.is_reversal as reversal,");
             sqlBuilder.append("tr.balance_end_date_derived as balanceEndDate, tr.overdraft_amount_derived as overdraftAmount,");
             sqlBuilder.append("tr.is_manual as manualTransaction,tr.office_id as officeId, ");
             sqlBuilder.append("pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
@@ -608,6 +608,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final BigDecimal outstandingChargeAmount = null;
                     final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "runningBalance");
                     final boolean reversed = rs.getBoolean("reversed");
+                    final boolean reversal = rs.getBoolean("reversal");
                     final Long officeId = rs.getLong("officeId");
                     final BigDecimal cumulativeBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "cumulativeBalance");
 
@@ -626,7 +627,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
                     savingsAccountTransactionData = SavingsAccountTransactionData.create(transactionId, transactionType, paymentDetailData,
                             id, accountNo, date, currency, amount, outstandingChargeAmount, runningBalance, reversed, transSubmittedOnDate,
-                            postInterestAsOn, cumulativeBalance, balanceEndDate);
+                            postInterestAsOn, cumulativeBalance, balanceEndDate, reversal);
                     savingsAccountTransactionData.setOverdraftAmount(overdraftAmount);
 
                     transMap.put("id", transactionId);
