@@ -31,7 +31,6 @@ import static org.apache.fineract.portfolio.loanproduct.domain.InterestMethod.FL
 import static org.apache.fineract.portfolio.loanproduct.domain.LoanPreCloseInterestCalculationStrategy.NONE;
 import static org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType.DISBURSEMENT_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -70,15 +69,25 @@ class LoanApplicationTermsTest {
     }
 
     @Test
-    void flatLoan_principalVariationOnLastInstallment_doesNotThrow() {
+    void flatLoan_principalVariationOnLastInstallment_principalPortionsSumToLoanPrincipal() {
         LoanApplicationTerms terms = flatLoanTerms();
+        Money cumulativePrincipal = zero();
+
+        for (int period = 1; period < NUMBER_OF_REPAYMENTS; period++) {
+            Money principal = terms.calculateTotalPrincipalForPeriod(null, terms.getPrincipal(), period, MC, zero());
+            cumulativePrincipal = cumulativePrincipal.plus(principal);
+        }
+
         terms.setCurrentPeriodFixedPrincipalAmount(BigDecimal.valueOf(30));
+        Money lastPeriodPrincipal = terms.calculateTotalPrincipalForPeriod(null, terms.getPrincipal(), NUMBER_OF_REPAYMENTS, MC, zero());
+        assertThat(lastPeriodPrincipal.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(30));
 
-        assertThatCode(() -> terms.calculateTotalPrincipalForPeriod(null, terms.getPrincipal(), NUMBER_OF_REPAYMENTS, MC, zero()))
-                .doesNotThrowAnyException();
+        cumulativePrincipal = cumulativePrincipal.plus(lastPeriodPrincipal);
+        Money adjustedLastPeriodPrincipal = terms.adjustPrincipalIfLastRepaymentPeriod(lastPeriodPrincipal, cumulativePrincipal,
+                NUMBER_OF_REPAYMENTS);
 
-        Money principal = terms.calculateTotalPrincipalForPeriod(null, terms.getPrincipal(), NUMBER_OF_REPAYMENTS, MC, zero());
-        assertThat(principal.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(30));
+        Money totalPrincipal = cumulativePrincipal.minus(lastPeriodPrincipal).plus(adjustedLastPeriodPrincipal);
+        assertThat(totalPrincipal.getAmount()).isEqualByComparingTo(terms.getPrincipal().getAmount());
     }
 
     @Test
