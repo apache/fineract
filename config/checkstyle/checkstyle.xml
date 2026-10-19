@@ -115,6 +115,15 @@
             <message key="import.illegal"
                      value="Integration tests must call the server through the generated Feign client, not REST Assured: ''{0}''. Do not add this file to restassured-baseline.xml." />
         </module>
+        <!-- Forbid the legacy command API in packages already migrated to fineract-command (FSIP-5).
+             The migrated packages are listed in import-control.xml; the list only grows. -->
+        <module name="ImportControl">
+            <property name="id" value="LegacyCommandApi" />
+            <property name="file" value="${config_loc}/import-control.xml" />
+            <property name="path" value="[\\/]org[\\/]apache[\\/]fineract[\\/]" />
+            <message key="import.control.disallowed"
+                     value="This package has been migrated to fineract-command and must not use the legacy command API: ''{0}''. See fineract-command/REFACTORING.md. Do not remove the package from import-control.xml." />
+        </module>
         <!-- Forbid JetBrains annotations in Java sources; prefer Jakarta or Spring annotations -->
         <module name="com.github.sevntu.checkstyle.checks.coding.ForbidCertainImportsCheck">
             <property name="packageNameRegexp" value=".*" />
