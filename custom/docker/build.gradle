@@ -28,7 +28,7 @@ tasks.withType(com.google.cloud.tools.jib.gradle.JibTask).configureEach {
 
 jib {
     from {
-        image = 'azul/zulu-openjdk-alpine:25'
+        image = 'azul/zulu-openjdk-alpine:25-jre-headless'
         platforms {
             platform {
                 architecture = System.getProperty("os.arch").equals("aarch64")?"arm64":"amd64"
