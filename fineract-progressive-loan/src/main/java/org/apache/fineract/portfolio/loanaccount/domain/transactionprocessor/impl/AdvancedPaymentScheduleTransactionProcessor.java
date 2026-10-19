@@ -1631,7 +1631,43 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             changeOperations.addAll(loanTransactions.stream().map(ChangeOperation::new).toList());
         }
         Collections.sort(changeOperations);
-        return changeOperations;
+        return fixPercentageDueDAteChargesSortOrderBeforeFirstDisbursement(changeOperations);
+    }
+
+    /**
+     * the percentage due date charges before the first disbursement should be processed right after the first
+     * disbursement because they can't resolve the effective base amount to calculate amount to charge.
+     *
+     * @param changeOperations
+     *            the list of operations sorted by comparator of ChangeOperation
+     * @return updated list of change operations, if there is any percentage due date charges before the first
+     *         disbursement unmodified list otherwise
+     */
+    private List<ChangeOperation> fixPercentageDueDAteChargesSortOrderBeforeFirstDisbursement(
+            final List<ChangeOperation> changeOperations) {
+        List<ChangeOperation> result = new ArrayList<>(changeOperations.size());
+        List<ChangeOperation> percentageDueDateCharges = new ArrayList<>();
+        boolean firstDisbursementReached = false;
+        for (ChangeOperation changeOperation : changeOperations) {
+            if (firstDisbursementReached) {
+                result.add(changeOperation);
+            } else {
+                if (changeOperation.isDueDatePercentageCharge()) {
+                    percentageDueDateCharges.add(changeOperation);
+                } else {
+                    result.add(changeOperation);
+                }
+                if (changeOperation.isTransaction()
+                        && changeOperation.getLoanTransaction().map(LoanTransaction::isDisbursement).orElse(false)) {
+                    if (percentageDueDateCharges.isEmpty()) {
+                        return changeOperations;
+                    }
+                    result.addAll(percentageDueDateCharges);
+                    firstDisbursementReached = true;
+                }
+            }
+        }
+        return firstDisbursementReached ? result : changeOperations;
     }
 
     private void handleDisbursement(LoanTransaction disbursementTransaction, TransactionCtx transactionCtx) {

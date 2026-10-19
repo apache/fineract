@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PE
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PRINCIPAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,6 +39,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -45,14 +48,17 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -802,6 +808,208 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Money interestCharged = Money.of(MONETARY_CURRENCY, BigDecimal.ZERO);
         lenient().when(installment.getInterestCharged(MONETARY_CURRENCY)).thenReturn(interestCharged);
         return installment;
+    }
+
+    @Test
+    public void fixPercentageDueDateChargesSortOrderReturnsOriginalListWhenNoDisbursementExists() {
+        // given
+        ChangeOperation percentageDueDateCharge = new ChangeOperation(
+                dueDateCharge(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), BigDecimal.TEN));
+        ChangeOperation repayment = new ChangeOperation(transaction(LocalDate.of(2024, 1, 3), false));
+        ChangeOperation flatDueDateCharge = new ChangeOperation(dueDateCharge(LocalDate.of(2024, 1, 2), LocalDate.of(2024, 2, 1), null));
+        List<ChangeOperation> changeOperations = new ArrayList<>(List.of(percentageDueDateCharge, repayment, flatDueDateCharge));
+
+        // when
+        List<ChangeOperation> result = invokeFixPercentageDueDateChargesSortOrderBeforeFirstDisbursement(changeOperations);
+
+        // then
+        assertSame(changeOperations, result);
+        Assertions.assertIterableEquals(List.of(percentageDueDateCharge, repayment, flatDueDateCharge), result);
+    }
+
+    @Test
+    public void fixPercentageDueDateChargesSortOrderMovesPercentageDueDateChargeAfterFirstDisbursement() {
+        // given
+        ChangeOperation percentageDueDateCharge = new ChangeOperation(
+                dueDateCharge(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), BigDecimal.TEN));
+        ChangeOperation disbursement = new ChangeOperation(transaction(LocalDate.of(2024, 1, 2), true));
+        ChangeOperation repayment = new ChangeOperation(transaction(LocalDate.of(2024, 1, 3), false));
+        List<ChangeOperation> changeOperations = new ArrayList<>(List.of(percentageDueDateCharge, disbursement, repayment));
+
+        // when
+        List<ChangeOperation> result = invokeFixPercentageDueDateChargesSortOrderBeforeFirstDisbursement(changeOperations);
+
+        // then
+        Assertions.assertIterableEquals(List.of(disbursement, percentageDueDateCharge, repayment), result);
+    }
+
+    @Test
+    public void fixPercentageDueDateChargesSortOrderMovesMultiplePercentageDueDateChargesAfterFirstDisbursementKeepingRelativeOrder() {
+        // given
+        ChangeOperation percentageDueDateChargeA = new ChangeOperation(
+                dueDateCharge(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), BigDecimal.TEN));
+        ChangeOperation percentageDueDateChargeB = new ChangeOperation(
+                dueDateCharge(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 3, 1), BigDecimal.ONE));
+        ChangeOperation disbursement = new ChangeOperation(transaction(LocalDate.of(2024, 1, 2), true));
+        ChangeOperation repayment = new ChangeOperation(transaction(LocalDate.of(2024, 1, 3), false));
+        List<ChangeOperation> changeOperations = new ArrayList<>(
+                List.of(percentageDueDateChargeA, percentageDueDateChargeB, disbursement, repayment));
+
+        // when
+        List<ChangeOperation> result = invokeFixPercentageDueDateChargesSortOrderBeforeFirstDisbursement(changeOperations);
+
+        // then
+        Assertions.assertIterableEquals(List.of(disbursement, percentageDueDateChargeA, percentageDueDateChargeB, repayment), result);
+    }
+
+    @Test
+    public void fixPercentageDueDateChargesSortOrderKeepsFlatDueDateChargeBeforeDisbursement() {
+        // given
+        ChangeOperation flatDueDateCharge = new ChangeOperation(dueDateCharge(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), null));
+        ChangeOperation percentageDueDateCharge = new ChangeOperation(
+                dueDateCharge(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), BigDecimal.TEN));
+        ChangeOperation disbursement = new ChangeOperation(transaction(LocalDate.of(2024, 1, 2), true));
+        ChangeOperation repayment = new ChangeOperation(transaction(LocalDate.of(2024, 1, 3), false));
+        List<ChangeOperation> changeOperations = new ArrayList<>(
+                List.of(flatDueDateCharge, percentageDueDateCharge, disbursement, repayment));
+
+        // when
+        List<ChangeOperation> result = invokeFixPercentageDueDateChargesSortOrderBeforeFirstDisbursement(changeOperations);
+
+        // then
+        Assertions.assertIterableEquals(List.of(flatDueDateCharge, disbursement, percentageDueDateCharge, repayment), result);
+    }
+
+    @Test
+    public void fixPercentageDueDateChargesSortOrderDoesNotMovePercentageDueDateChargeAfterFirstDisbursement() {
+        // given
+        ChangeOperation disbursement = new ChangeOperation(transaction(LocalDate.of(2024, 1, 1), true));
+        ChangeOperation repayment = new ChangeOperation(transaction(LocalDate.of(2024, 1, 2), false));
+        ChangeOperation percentageDueDateCharge = new ChangeOperation(
+                dueDateCharge(LocalDate.of(2024, 1, 3), LocalDate.of(2024, 2, 1), BigDecimal.TEN));
+        List<ChangeOperation> changeOperations = new ArrayList<>(List.of(disbursement, repayment, percentageDueDateCharge));
+
+        // when
+        List<ChangeOperation> result = invokeFixPercentageDueDateChargesSortOrderBeforeFirstDisbursement(changeOperations);
+
+        // then
+        assertSame(changeOperations, result);
+        Assertions.assertIterableEquals(List.of(disbursement, repayment, percentageDueDateCharge), result);
+    }
+
+    @Test
+    public void createSortedChangeListAppliesPercentageDueDateChargeOrderingFixAfterSorting() {
+        // given
+        LoanCharge percentageDueDateCharge = dueDateCharge(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), BigDecimal.TEN);
+        LoanTransaction disbursement = transaction(LocalDate.of(2024, 1, 2), true);
+        LoanTransaction repayment = transaction(LocalDate.of(2024, 1, 3), false);
+
+        // when
+        List<ChangeOperation> result = invokeCreateSortedChangeList(List.of(), List.of(repayment, disbursement),
+                new LinkedHashSet<>(Set.of(percentageDueDateCharge)));
+
+        // then
+        assertEquals(3, result.size());
+        assertSame(disbursement, result.get(0).getLoanTransaction().orElseThrow());
+        assertSame(percentageDueDateCharge, result.get(1).getLoanCharge().orElseThrow());
+        assertSame(repayment, result.get(2).getLoanTransaction().orElseThrow());
+    }
+
+    @Test
+    public void createSortedChangeListKeepsPercentageDueDateChargeWhenNoDisbursementExists() {
+        // given
+        LoanCharge percentageDueDateCharge = dueDateCharge(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), BigDecimal.TEN);
+        LoanTransaction repayment = transaction(LocalDate.of(2024, 1, 3), false);
+
+        // when
+        List<ChangeOperation> result = invokeCreateSortedChangeList(List.of(), List.of(repayment),
+                new LinkedHashSet<>(Set.of(percentageDueDateCharge)));
+
+        // then
+        assertEquals(2, result.size());
+        assertSame(percentageDueDateCharge, result.get(0).getLoanCharge().orElseThrow());
+        assertSame(repayment, result.get(1).getLoanTransaction().orElseThrow());
+    }
+
+    @Test
+    public void createSortedChangeListHandlesNullCharges() {
+        // given
+        LoanTransaction disbursement = transaction(LocalDate.of(2024, 1, 1), true);
+        LoanTransaction repayment = transaction(LocalDate.of(2024, 1, 2), false);
+
+        // when
+        List<ChangeOperation> result = invokeCreateSortedChangeList(List.of(), List.of(repayment, disbursement), null);
+
+        // then
+        assertEquals(2, result.size());
+        assertSame(disbursement, result.get(0).getLoanTransaction().orElseThrow());
+        assertSame(repayment, result.get(1).getLoanTransaction().orElseThrow());
+    }
+
+    @Test
+    public void createSortedChangeListHandlesNullTransactions() {
+        // given
+        LoanCharge percentageDueDateCharge = dueDateCharge(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), BigDecimal.TEN);
+        LoanCharge flatDueDateCharge = dueDateCharge(LocalDate.of(2024, 1, 2), LocalDate.of(2024, 2, 1), null);
+
+        // when
+        List<ChangeOperation> result = invokeCreateSortedChangeList(List.of(), null,
+                new LinkedHashSet<>(List.of(flatDueDateCharge, percentageDueDateCharge)));
+
+        // then
+        assertEquals(2, result.size());
+        assertSame(percentageDueDateCharge, result.get(0).getLoanCharge().orElseThrow());
+        assertSame(flatDueDateCharge, result.get(1).getLoanCharge().orElseThrow());
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<ChangeOperation> invokeFixPercentageDueDateChargesSortOrderBeforeFirstDisbursement(
+            final List<ChangeOperation> changeOperations) {
+        try {
+            Method method = AdvancedPaymentScheduleTransactionProcessor.class
+                    .getDeclaredMethod("fixPercentageDueDAteChargesSortOrderBeforeFirstDisbursement", List.class);
+            method.setAccessible(true);
+            return (List<ChangeOperation>) method.invoke(underTest, changeOperations);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<ChangeOperation> invokeCreateSortedChangeList(final List<?> loanTermVariations,
+            final List<LoanTransaction> loanTransactions, final Set<LoanCharge> charges) {
+        try {
+            Method method = AdvancedPaymentScheduleTransactionProcessor.class.getDeclaredMethod("createSortedChangeList", List.class,
+                    List.class, Set.class);
+            method.setAccessible(true);
+            return (List<ChangeOperation>) method.invoke(underTest, loanTermVariations, loanTransactions, charges);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private LoanTransaction transaction(final LocalDate transactionDate, final boolean disbursement) {
+        LoanTransaction loanTransaction = mock(LoanTransaction.class);
+        lenient().when(loanTransaction.isDisbursement()).thenReturn(disbursement);
+        lenient().when(loanTransaction.getTransactionDate()).thenReturn(transactionDate);
+        lenient().when(loanTransaction.getSubmittedOnDate()).thenReturn(transactionDate);
+        lenient().when(loanTransaction.getCreatedDate())
+                .thenReturn(Optional.of(DateUtils.getOffsetDateTimeOfTenantFromLocalDate(transactionDate)));
+        lenient().when(loanTransaction.isAccrualActivity()).thenReturn(false);
+        return loanTransaction;
+    }
+
+    private LoanCharge dueDateCharge(final LocalDate submittedOnDate, final LocalDate dueDate, final BigDecimal percentage) {
+        LoanCharge loanCharge = mock(LoanCharge.class);
+        lenient().when(loanCharge.isDueDateCharge()).thenReturn(true);
+        lenient().when(loanCharge.isInstalmentFee()).thenReturn(false);
+        lenient().when(loanCharge.getSubmittedOnDate()).thenReturn(submittedOnDate);
+        lenient().when(loanCharge.getDueDate()).thenReturn(dueDate);
+        lenient().when(loanCharge.getDueLocalDate()).thenReturn(dueDate);
+        lenient().when(loanCharge.getPercentage()).thenReturn(percentage);
+        lenient().when(loanCharge.getCreatedDate())
+                .thenReturn(Optional.of(DateUtils.getOffsetDateTimeOfTenantFromLocalDate(submittedOnDate)));
+        return loanCharge;
     }
 
     @NonNull
