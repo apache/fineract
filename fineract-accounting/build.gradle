@@ -48,6 +48,13 @@ configurations {
 
 apply from: 'dependencies.gradle'
 
+// AccountingCrossFeatureBoundaryTest builds a Spring Modulith model of every org.apache.fineract class on the test
+// classpath, which does not fit into the default test JVM heap and metaspace.
+test {
+    maxHeapSize = '2g'
+    jvmArgs += ['-XX:MaxMetaspaceSize=1g']
+}
+
 // Configuration for the modernizer plugin
 // https://github.com/andygoossens/gradle-modernizer-plugin
 modernizer {
