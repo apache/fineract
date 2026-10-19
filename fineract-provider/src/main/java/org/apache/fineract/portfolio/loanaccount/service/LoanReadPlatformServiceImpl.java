@@ -1921,9 +1921,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                                       AND frp.from_date >= bfrp.from_date))
                              AND lrr.loan_id IS NULL)
                     )
-                    AND l.id >= ?
+                    AND l.id > ?
                     AND o.hierarchy like ?
                 GROUP BY l.id
+                ORDER BY l.id
                 LIMIT ?
                 """;
         try {

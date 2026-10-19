@@ -105,14 +105,14 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
         List<Long> loanIds = Collections.synchronizedList(
                 this.loanReadPlatformService.fetchLoansForInterestRecalculation(pageSize, maxLoanIdInList, officeHierarchy));
 
-        do {
+        while (!CollectionUtils.isEmpty(loanIds)) {
             int totalFilteredRecords = loanIds.size();
             log.debug("Starting accrual - total filtered records - {}", totalFilteredRecords);
             recalculateInterest(loanIds, threadPoolSize);
-            maxLoanIdInList += pageSize + 1;
+            maxLoanIdInList = loanIds.get(loanIds.size() - 1);
             loanIds = Collections.synchronizedList(
                     this.loanReadPlatformService.fetchLoansForInterestRecalculation(pageSize, maxLoanIdInList, officeHierarchy));
-        } while (!CollectionUtils.isEmpty(loanIds));
+        }
     }
 
     private void recalculateInterest(List<Long> loanIds, int threadPoolSize) {
