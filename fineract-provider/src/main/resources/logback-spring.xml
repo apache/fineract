@@ -27,7 +27,7 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
     <conversionRule conversionWord="tenantId"
-                    converterClass="org.apache.fineract.infrastructure.core.logging.TenantIdentifierLoggingConverter" />
+                    class="org.apache.fineract.infrastructure.core.logging.TenantIdentifierLoggingConverter" />
 
     <appender name="CONSOLE" target="System.out" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -41,15 +41,22 @@
     <logger name="org.apache.fineract" level="${FINERACT_LOGGING_LEVEL:-INFO}"/>
     <logger name="liquibase" level="warn"/>
 
-    <if condition="${jsonLoggingEnabled} == true">
+    <!-- Janino-based <if condition="..."> was removed in logback 1.5.37, use the <condition> element instead -->
+    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+        <key>jsonLoggingEnabled</key>
+        <value>true</value>
+    </condition>
+    <if>
         <then>
             <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
-                <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
-                    <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
-                        <prettyPrint>false</prettyPrint>
-                    </jsonFormatter>
-                    <appendLineSeparator>true</appendLineSeparator>
-                </layout>
+                <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+                    <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
+                        <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
+                            <prettyPrint>false</prettyPrint>
+                        </jsonFormatter>
+                        <appendLineSeparator>true</appendLineSeparator>
+                    </layout>
+                </encoder>
             </appender>
 
             <root level="info">
