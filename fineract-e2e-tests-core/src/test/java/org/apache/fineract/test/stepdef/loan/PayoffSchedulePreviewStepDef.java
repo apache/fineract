@@ -37,8 +37,10 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PostPayoffSchedulePreviewInstallment;
 import org.apache.fineract.client.models.PostPayoffSchedulePreviewRequest;
 import org.apache.fineract.client.models.PostPayoffSchedulePreviewResponse;
+import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.helper.ErrorResponse;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
+import org.apache.fineract.test.support.TestContextKey;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -49,6 +51,7 @@ public class PayoffSchedulePreviewStepDef extends AbstractStepDef {
     private static final Long DEFAULT_MAX_PERIODS = 1200L;
 
     private final FineractFeignClient fineractClient;
+    private final FineractClientConfiguration fineractClientConfiguration;
 
     private PostPayoffSchedulePreviewResponse lastResponse;
     private CallFailedRuntimeException lastError;
@@ -73,6 +76,18 @@ public class PayoffSchedulePreviewStepDef extends AbstractStepDef {
     public void attemptToComputePayoffSchedulePreview(final DataTable table) {
         final PostPayoffSchedulePreviewRequest request = buildRequest(table.asMaps().getFirst());
         lastError = fail(() -> fineractClient.payoffSchedulePreview().calculatePayoffSchedulePreview(request));
+    }
+
+    @When("Created user computes a payoff schedule preview with the following parameters:")
+    public void computePayoffSchedulePreviewAsCreatedUser(final DataTable table) {
+        final PostPayoffSchedulePreviewRequest request = buildRequest(table.asMaps().getFirst());
+        lastResponse = ok(() -> createdUserClient().payoffSchedulePreview().calculatePayoffSchedulePreview(request));
+    }
+
+    @When("Created user attempts to compute a payoff schedule preview with the following parameters:")
+    public void attemptToComputePayoffSchedulePreviewAsCreatedUser(final DataTable table) {
+        final PostPayoffSchedulePreviewRequest request = buildRequest(table.asMaps().getFirst());
+        lastError = fail(() -> createdUserClient().payoffSchedulePreview().calculatePayoffSchedulePreview(request));
     }
 
     @Then("Payoff schedule preview response has the following summary:")
@@ -129,6 +144,25 @@ public class PayoffSchedulePreviewStepDef extends AbstractStepDef {
                 .map(error -> error.getParameterName() + " " + error.getUserMessageGlobalisationCode()).toList();
         final List<String> expected = table.asMaps().stream().map(row -> row.get("parameterName") + " " + row.get("code")).toList();
         assertThat(actual).as("Validation errors").containsExactlyElementsOf(expected);
+    }
+
+    @Then("Computing the payoff schedule preview is rejected with HTTP {int} and error code {string}")
+    public void verifyRejectedWithStatusAndCode(final int status, final String code) {
+        assertThat(lastError).as("Expected the payoff schedule preview call to fail").isNotNull();
+        assertThat(lastError.getStatus()).as("HTTP status code").isEqualTo(status);
+
+        final ErrorResponse errorResponse = ErrorResponse.fromFeignException((FeignException) lastError.getCause());
+        assertThat(errorResponse.getErrors()).extracting(ErrorResponse.ErrorDetail::getUserMessageGlobalisationCode).as("Error codes")
+                .containsExactly(code);
+    }
+
+    /**
+     * Client authenticated as the user created by {@code Admin creates new user with ... given permissions}.
+     */
+    private FineractFeignClient createdUserClient() {
+        final String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
+        final String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
+        return fineractClientConfiguration.fineractFeignClientForUser(username, password);
     }
 
     private static String nullableValue(final String value) {
