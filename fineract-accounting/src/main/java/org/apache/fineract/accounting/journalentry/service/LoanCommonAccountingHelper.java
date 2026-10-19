@@ -21,6 +21,7 @@ package org.apache.fineract.accounting.journalentry.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -50,10 +51,25 @@ public class LoanCommonAccountingHelper {
             final List<ChargeTaxPaymentDTO> taxPayments) {
         final Map<Long, BigDecimal> taxByChargeId = taxPayments.stream().collect(Collectors.groupingBy(ChargeTaxPaymentDTO::getLoanChargeId,
                 Collectors.reducing(BigDecimal.ZERO, ChargeTaxPaymentDTO::getAmount, BigDecimal::add)));
+        // a taxed charge paid in several rows (an instalment fee for several instalments) is merged into one row,
+        // so its tax is subtracted once
+        final Map<Long, BigDecimal> paidByTaxedChargeId = new HashMap<>();
+        for (ChargePaymentDTO cp : chargePayments) {
+            if (taxByChargeId.containsKey(cp.getLoanChargeId())) {
+                paidByTaxedChargeId.merge(cp.getLoanChargeId(), cp.getAmount(), BigDecimal::add);
+            }
+        }
         final List<ChargePaymentDTO> result = new ArrayList<>();
         for (ChargePaymentDTO cp : chargePayments) {
-            final BigDecimal tax = taxByChargeId.getOrDefault(cp.getLoanChargeId(), BigDecimal.ZERO);
-            result.add(new ChargePaymentDTO(cp.getChargeId(), cp.getAmount().subtract(tax), cp.getLoanChargeId()));
+            final BigDecimal tax = taxByChargeId.get(cp.getLoanChargeId());
+            if (tax == null) {
+                result.add(cp);
+            } else {
+                final BigDecimal paid = paidByTaxedChargeId.remove(cp.getLoanChargeId());
+                if (paid != null) {
+                    result.add(new ChargePaymentDTO(cp.getChargeId(), paid.subtract(tax), cp.getLoanChargeId()));
+                }
+            }
         }
         return result;
     }
