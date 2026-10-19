@@ -1454,7 +1454,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (!this.configurationDomainService.isForceWithdrawalOnSavingsAccountEnabled()) {
             return false;
         }
-        Long limit = this.configurationDomainService.retrieveForceWithdrawalOnSavingsAccountLimit();
+        Long limit = this.configurationDomainService.getForceWithdrawalOnSavingsAccountLimit();
         BigDecimal limitBd = BigDecimal.valueOf(limit);
         if (limitBd.compareTo(BigDecimal.ZERO) > 0) {
             limitBd = limitBd.negate();

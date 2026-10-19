@@ -628,13 +628,6 @@ public class GlobalConfigurationHelper {
         forceWithdrawalOnSavingsAccount.put("trapDoor", false);
         defaults.add(forceWithdrawalOnSavingsAccount);
 
-        HashMap<String, Object> forceWithdrawalOnSavingsAccountLimit = new HashMap<>();
-        forceWithdrawalOnSavingsAccountLimit.put("name", GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT);
-        forceWithdrawalOnSavingsAccountLimit.put("value", 0L);
-        forceWithdrawalOnSavingsAccountLimit.put("enabled", false);
-        forceWithdrawalOnSavingsAccountLimit.put("trapDoor", false);
-        defaults.add(forceWithdrawalOnSavingsAccountLimit);
-
         HashMap<String, Object> allowCashAndNonCashAccrual = new HashMap<>();
         allowCashAndNonCashAccrual.put("name", GlobalConfigurationConstants.ALLOW_CASH_AND_NON_CASH_ACCRUAL);
         allowCashAndNonCashAccrual.put("value", 0L);
