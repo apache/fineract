@@ -175,6 +175,32 @@ Feature: LoanDelinquency - Part1
     When Admin sets the business date to "20 October 2023"
     Then Overlapping PAUSE periods result an error - startDate: "20 October 2023", endDate: "30 October 2023"
 
+  @TestRailId:CXXXX
+  Scenario: Verify Loan delinquency pause API - PAUSE period overlapping with same start date, same end date or containing an existing PAUSE results an error
+    When Admin sets the business date to "01 October 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
+    When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
+    When Admin sets the business date to "16 October 2023"
+    When Admin initiate a DELINQUENCY PAUSE with startDate: "16 October 2023" and endDate: "23 October 2023"
+    Then Delinquency-actions have the following data:
+      | action | startDate       | endDate         |
+      | PAUSE  | 16 October 2023 | 23 October 2023 |
+    Then Overlapping PAUSE periods result an error - startDate: "16 October 2023", endDate: "30 October 2023"
+    Then Overlapping PAUSE periods result an error - startDate: "10 October 2023", endDate: "23 October 2023"
+    Then Overlapping PAUSE periods result an error - startDate: "10 October 2023", endDate: "25 October 2023"
+    Then Delinquency-actions have the following data:
+      | action | startDate       | endDate         |
+      | PAUSE  | 16 October 2023 | 23 October 2023 |
+    When Admin initiate a DELINQUENCY PAUSE with startDate: "23 October 2023" and endDate: "30 October 2023"
+    Then Delinquency-actions have the following data:
+      | action | startDate       | endDate         |
+      | PAUSE  | 16 October 2023 | 23 October 2023 |
+      | PAUSE  | 23 October 2023 | 30 October 2023 |
+
   @TestRailId:C2972
   Scenario: Verify Loan delinquency pause API - RESUME without an active PAUSE period results an error
     When Admin sets the business date to "01 October 2023"
