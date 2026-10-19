@@ -44,6 +44,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ChargeAccrualDateConfig;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -377,8 +378,9 @@ public class LoanAccrualsProcessingServiceImplTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("jobLoanSelectionCases")
     @DisplayName("Accrual jobs widen the loan selection to future charges for progressive loans only when Real-Time is on")
-    void addAccruals_ShouldWidenLoanSelectionForProgressiveLoansOnly_WhenRealTimeIsOn(final String scenario, final String chargeAccrualDate,
-            final boolean realTime, final boolean expectedFutureCharges, final boolean expectedProgressiveFutureCharges) throws Exception {
+    void addAccruals_ShouldWidenLoanSelectionForProgressiveLoansOnly_WhenRealTimeIsOn(final String scenario,
+            final ChargeAccrualDateConfig chargeAccrualDate, final boolean realTime, final boolean expectedFutureCharges,
+            final boolean expectedProgressiveFutureCharges) throws Exception {
         LocalDate tillDate = LocalDate.of(2025, 1, 31);
         when(configurationDomainService.getAccrualDateConfigForCharge()).thenReturn(chargeAccrualDate);
         when(configurationDomainService.isPlChargeAccrualRealTime()).thenReturn(realTime);
@@ -590,8 +592,8 @@ public class LoanAccrualsProcessingServiceImplTest {
     @MethodSource("chargeSubmittedAroundDisbursementCases")
     @DisplayName("COB matches a charge submitted before disbursement on its due date under Real-Time, otherwise on its submitted date")
     void addPeriodicAccruals_ShouldMatchChargeSubmittedBeforeDisbursementOnDueDateOnly_UnderRealTime(final String scenario,
-            final LocalDate submittedOnDate, final boolean realTimeChargeAccrual, final String chargeAccrualDate, final LocalDate tillDate,
-            final String expectedFeeAccrued) {
+            final LocalDate submittedOnDate, final boolean realTimeChargeAccrual, final ChargeAccrualDateConfig chargeAccrualDate,
+            final LocalDate tillDate, final String expectedFeeAccrued) {
         MonetaryCurrency currency = new MonetaryCurrency("USD", 2, null);
         LoanRepaymentScheduleInstallment first = new LoanRepaymentScheduleInstallment(loan, 1, LocalDate.of(2024, 1, 1),
                 LocalDate.of(2024, 1, 31), BigDecimal.valueOf(500), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null, null);
@@ -630,7 +632,7 @@ public class LoanAccrualsProcessingServiceImplTest {
     private void givenInterestBearingRealTimeProgressiveLoan(final MonetaryCurrency currency,
             final List<LoanRepaymentScheduleInstallment> installments) {
         when(configurationDomainService.isPlChargeAccrualRealTime()).thenReturn(true);
-        when(configurationDomainService.getAccrualDateConfigForCharge()).thenReturn("due-date");
+        when(configurationDomainService.getAccrualDateConfigForCharge()).thenReturn(ChargeAccrualDateConfig.DUE_DATE);
         when(loan.isProgressiveSchedule()).thenReturn(true);
         when(loan.isOpen()).thenReturn(true);
         when(loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()).thenReturn(true);
@@ -804,10 +806,10 @@ public class LoanAccrualsProcessingServiceImplTest {
     }
 
     private static Stream<Arguments> jobLoanSelectionCases() {
-        return Stream.of(Arguments.of("due-date, EOD -> no widening", "due-date", false, false, false),
-                Arguments.of("due-date, Real-Time -> progressive loans only", "due-date", true, false, true),
-                Arguments.of("submitted-date, EOD -> all loans", "submitted-date", false, true, false),
-                Arguments.of("submitted-date, Real-Time -> all loans", "submitted-date", true, true, true));
+        return Stream.of(Arguments.of("due-date, EOD -> no widening", ChargeAccrualDateConfig.DUE_DATE, false, false, false),
+                Arguments.of("due-date, Real-Time -> progressive loans only", ChargeAccrualDateConfig.DUE_DATE, true, false, true),
+                Arguments.of("submitted-date, EOD -> all loans", ChargeAccrualDateConfig.SUBMITTED_DATE, false, true, false),
+                Arguments.of("submitted-date, Real-Time -> all loans", ChargeAccrualDateConfig.SUBMITTED_DATE, true, true, true));
     }
 
     private static Stream<Arguments> chargeSubmittedAroundDisbursementCases() {
@@ -817,13 +819,13 @@ public class LoanAccrualsProcessingServiceImplTest {
         LocalDate afterDueDate = LocalDate.of(2024, 2, 15);
         return Stream.of(
                 Arguments.of("real-time, submitted before disbursement, before due date -> not accrued", beforeDisbursement, true,
-                        "due-date", beforeDueDate, "0"),
-                Arguments.of("real-time, submitted before disbursement, after due date -> accrued", beforeDisbursement, true, "due-date",
-                        afterDueDate, "10"),
-                Arguments.of("real-time, submitted on disbursement date, before due date -> accrued", disbursement, true, "due-date",
-                        beforeDueDate, "10"),
+                        ChargeAccrualDateConfig.DUE_DATE, beforeDueDate, "0"),
+                Arguments.of("real-time, submitted before disbursement, after due date -> accrued", beforeDisbursement, true,
+                        ChargeAccrualDateConfig.DUE_DATE, afterDueDate, "10"),
+                Arguments.of("real-time, submitted on disbursement date, before due date -> accrued", disbursement, true,
+                        ChargeAccrualDateConfig.DUE_DATE, beforeDueDate, "10"),
                 Arguments.of("eod submitted-date, submitted before disbursement, after due date -> not accrued", beforeDisbursement, false,
-                        "submitted-date", afterDueDate, "0"));
+                        ChargeAccrualDateConfig.SUBMITTED_DATE, afterDueDate, "0"));
     }
 
     private static Stream<Arguments> loanStatusTestCases() {

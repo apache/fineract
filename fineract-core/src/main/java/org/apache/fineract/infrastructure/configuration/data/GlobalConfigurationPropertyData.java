@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.configuration.data;
 
 import java.time.LocalDate;
+import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -47,5 +48,6 @@ public class GlobalConfigurationPropertyData {
     private String description;
     @SuppressWarnings("unused")
     private boolean trapDoor;
-
+    private List<String> allowedValues;
+    private Boolean multipleValuesAllowed;
 }

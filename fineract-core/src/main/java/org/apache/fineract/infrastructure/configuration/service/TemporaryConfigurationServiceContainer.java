@@ -42,10 +42,6 @@ public class TemporaryConfigurationServiceContainer implements InitializingBean 
         return TemporaryConfigurationServiceContainer.STATIC_REF_CONFIGURATION_SERVICE.isExternalIdAutoGenerationEnabled();
     }
 
-    public static String getAccrualDateConfigForCharge() {
-        return TemporaryConfigurationServiceContainer.STATIC_REF_CONFIGURATION_SERVICE.getAccrualDateConfigForCharge();
-    }
-
     @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     @Override
     public void afterPropertiesSet() throws Exception {

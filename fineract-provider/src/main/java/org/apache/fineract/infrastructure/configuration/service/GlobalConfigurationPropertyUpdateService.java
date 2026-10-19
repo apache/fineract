@@ -21,9 +21,11 @@ package org.apache.fineract.infrastructure.configuration.service;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationAllowedValues;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
 import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -67,10 +69,14 @@ public class GlobalConfigurationPropertyUpdateService {
         }
 
         final String stringValueParamName = "stringValue";
-        if (command.isChangeInStringParameterNamed(stringValueParamName, property.getStringValue())) {
-            final String newStringValue = command.stringValueOfParameterNamed(stringValueParamName);
-            actualChanges.put(stringValueParamName, newStringValue);
-            property.setStringValue(newStringValue);
+        if (command.parameterExists(stringValueParamName)) {
+            final String requestedStringValue = command.stringValueOfParameterNamed(stringValueParamName);
+            final String newStringValue = GlobalConfigurationAllowedValues.find(property.getName())
+                    .map(allowedValues -> allowedValues.canonicalize(requestedStringValue)).orElse(requestedStringValue);
+            if (!Objects.equals(property.getStringValue(), newStringValue)) {
+                actualChanges.put(stringValueParamName, newStringValue);
+                property.setStringValue(newStringValue);
+            }
         }
 
         final String passwordPropertyName = GlobalConfigurationConstants.FORCE_PASSWORD_RESET_DAYS;

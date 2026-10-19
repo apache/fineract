@@ -109,8 +109,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public static final String WRITTEN_OFF_ON_DATE = "writtenOffOnDate";
     public static final String FEE = "fee";
     public static final String PENALTIES = "penalties";
-    public static final String EARLIEST_UNPAID_DATE = "earliest-unpaid-date";
-    public static final String NEXT_UNPAID_DUE_DATE = "next-unpaid-due-date";
 
     @Version
     int version;

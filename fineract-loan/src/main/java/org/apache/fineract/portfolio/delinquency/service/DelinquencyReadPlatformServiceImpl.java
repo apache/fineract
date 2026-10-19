@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.portfolio.delinquency.service;
 
-import static org.apache.fineract.portfolio.loanaccount.domain.Loan.EARLIEST_UNPAID_DATE;
-import static org.apache.fineract.portfolio.loanaccount.domain.Loan.NEXT_UNPAID_DUE_DATE;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -29,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.domain.NextPaymentDueDateConfig;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -174,7 +172,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
             List<LoanDelinquencyActionData> effectiveDelinquencyList = delinquencyEffectivePauseHelper
                     .calculateEffectiveDelinquencyList(savedDelinquencyList);
 
-            final String nextPaymentDueDateConfig = configurationDomainService.getNextPaymentDateConfigForLoan();
+            final NextPaymentDueDateConfig nextPaymentDueDateConfig = configurationDomainService.getNextPaymentDateConfigForLoan();
 
             // Below method calculates delinquency for active loans only and returns template data for Closed or
             // Overpaid
@@ -314,14 +312,10 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         return List.of();
     }
 
-    private LocalDate possibleNextRepaymentDate(final String nextPaymentDueDateConfig, final Loan loan) {
-        if (nextPaymentDueDateConfig == null) {
-            return null;
-        }
-        return switch (nextPaymentDueDateConfig.toLowerCase()) {
+    private LocalDate possibleNextRepaymentDate(final NextPaymentDueDateConfig nextPaymentDueDateConfig, final Loan loan) {
+        return switch (nextPaymentDueDateConfig) {
             case EARLIEST_UNPAID_DATE -> getEarliestUnpaidInstallmentDate(loan);
             case NEXT_UNPAID_DUE_DATE -> getNextUnpaidInstallmentDueDate(loan);
-            default -> null;
         };
     }
 

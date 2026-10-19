@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationData;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationAllowedValues;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
@@ -107,8 +108,9 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
             final Long id = rs.getLong("id");
             final boolean isTrapDoor = rs.getBoolean("is_trap_door");
             final LocalDate localDate = dateValue != null ? dateValue.toLocalDate() : null;
-            return new GlobalConfigurationPropertyData().setName(name).setEnabled(enabled).setValue(value).setDateValue(localDate)
-                    .setStringValue(stringValue).setId(id).setDescription(description).setTrapDoor(isTrapDoor);
+            return GlobalConfigurationAllowedValues.withAllowedValues(
+                    new GlobalConfigurationPropertyData().setName(name).setEnabled(enabled).setValue(value).setDateValue(localDate)
+                            .setStringValue(stringValue).setId(id).setDescription(description).setTrapDoor(isTrapDoor));
         }
     }
 

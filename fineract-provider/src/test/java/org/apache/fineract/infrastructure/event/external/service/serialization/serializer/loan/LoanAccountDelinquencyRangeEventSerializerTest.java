@@ -48,6 +48,7 @@ import org.apache.fineract.avro.loan.v1.LoanAccountDelinquencyRangeDataV1;
 import org.apache.fineract.avro.loan.v1.LoanInstallmentDelinquencyBucketDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.domain.NextPaymentDueDateConfig;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -366,6 +367,7 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         LoanDelinquencyActionRepository loanDelinquencyActionRepository = Mockito.mock(LoanDelinquencyActionRepository.class);
         DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper = Mockito.mock(DelinquencyEffectivePauseHelper.class);
         ConfigurationDomainService configurationDomainService = Mockito.mock(ConfigurationDomainService.class);
+        when(configurationDomainService.getNextPaymentDateConfigForLoan()).thenReturn(NextPaymentDueDateConfig.EARLIEST_UNPAID_DATE);
 
         DelinquencyReadPlatformService delinquencyReadPlatformService = new DelinquencyReadPlatformServiceImpl(repositoryRange,
                 repositoryBucket, minimumPaymentPeriodAndRuleRepository, repositoryLoanDelinquencyTagHistory, mapperRange, mapperBucket,

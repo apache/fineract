@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationApiConstant;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationAllowedValues;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationAllowedValues.AllowedValues;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -91,5 +93,30 @@ public class GlobalConfigurationDataValidator {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
+    }
+
+    /**
+     * Checks a {@code stringValue} against the allowed values of the configuration it is sent to. Runs after
+     * {@link #validateForUpdate(JsonCommand)}, once the configuration is loaded, so a malformed request still fails
+     * before the configuration is looked up.
+     */
+    public void validateAllowedValues(final JsonCommand command, final String configName) {
+        final AllowedValues<?> allowedValues = GlobalConfigurationAllowedValues.find(configName).orElse(null);
+        // a blank stringValue is extracted as null, which validateForUpdate already reports
+        final String stringValue = command.stringValueOfParameterNamedAllowingNull(GlobalConfigurationApiConstant.STRING_VALUE);
+        if (allowedValues == null || stringValue == null) {
+            return;
+        }
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(GlobalConfigurationApiConstant.CONFIGURATION_RESOURCE_NAME);
+        for (final String element : allowedValues.elements(stringValue)) {
+            baseDataValidator.reset().parameter(GlobalConfigurationApiConstant.STRING_VALUE).value(element)
+                    .isOneOfTheseStringValues(allowedValues.values());
+        }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

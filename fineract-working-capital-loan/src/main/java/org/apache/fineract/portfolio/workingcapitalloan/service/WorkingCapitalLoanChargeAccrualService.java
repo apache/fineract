@@ -21,9 +21,10 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.domain.WclChargeAccrualTimeConfig;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanAccrualTransactionBusinessEvent;
@@ -47,15 +48,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class WorkingCapitalLoanChargeAccrualService {
 
-    private static final String SUBMITTED_DATE = "submitted-date";
-    private static final String DUE_DATE = "due-date";
-    private static final String DEFAULT_ACCRUAL_DATE_CONFIG = DUE_DATE;
-
-    private static final String REAL_TIME = GlobalConfigurationConstants.CHARGE_ACCRUAL_TIME_REAL_TIME;
-    private static final String EOD = "eod";
-    private static final String DEFAULT_WC_CHARGE_ACCRUAL_TIME_CONFIG = EOD;
-
-    private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
+    private final ConfigurationDomainService configurationDomainService;
     private final WorkingCapitalLoanChargeRepository chargeRepository;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
     private final WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
@@ -90,15 +83,14 @@ public class WorkingCapitalLoanChargeAccrualService {
         if (isAccrualPostingDisabled(loan)) {
             return;
         }
-        final String accrualDateMode = retrieveChargeAccrualDateConfig();
-        final List<WorkingCapitalLoanCharge> charges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
-        if (SUBMITTED_DATE.equalsIgnoreCase(accrualDateMode)) {
-            charges.stream().filter(charge -> charge.getSubmittedOnDate() != null && !charge.getSubmittedOnDate().isAfter(businessDate))
-                    .forEach(charge -> createChargeAccrualIfMissing(loan, charge, charge.getSubmittedOnDate()));
-        } else if (DUE_DATE.equalsIgnoreCase(accrualDateMode)) {
-            charges.stream().filter(charge -> charge.getDueDate() != null && !charge.getDueDate().isAfter(businessDate))
-                    .forEach(charge -> createChargeAccrualIfMissing(loan, charge, charge.getDueDate()));
-        }
+        final Function<WorkingCapitalLoanCharge, LocalDate> accrualDate = switch (configurationDomainService
+                .getAccrualDateConfigForCharge()) {
+            case SUBMITTED_DATE -> WorkingCapitalLoanCharge::getSubmittedOnDate;
+            case DUE_DATE -> WorkingCapitalLoanCharge::getDueDate;
+        };
+        chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId()).stream()
+                .filter(charge -> accrualDate.apply(charge) != null && !accrualDate.apply(charge).isAfter(businessDate))
+                .forEach(charge -> createChargeAccrualIfMissing(loan, charge, accrualDate.apply(charge)));
     }
 
     /**
@@ -170,30 +162,6 @@ public class WorkingCapitalLoanChargeAccrualService {
     }
 
     private boolean isRealTimeChargeAccrual() {
-        return REAL_TIME.equals(resolveWCChargeAccrualTimeConfig());
-    }
-
-    /**
-     * Resolves {@code wcl-charge-accrual-time} to a known value. Unknown / mistyped values fall back to EOD so charge
-     * income is still recognized through COB instead of silently stopping until loan closure.
-     */
-    private String resolveWCChargeAccrualTimeConfig() {
-        final String configuredValue = globalConfigurationRepository
-                .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.WCL_CHARGE_ACCRUAL_TIME).getStringValue();
-        if (configuredValue == null || configuredValue.isBlank()) {
-            return DEFAULT_WC_CHARGE_ACCRUAL_TIME_CONFIG;
-        }
-        final String normalized = configuredValue.trim();
-        if (REAL_TIME.equalsIgnoreCase(normalized)) {
-            return REAL_TIME;
-        } else {
-            return EOD;
-        }
-    }
-
-    private String retrieveChargeAccrualDateConfig() {
-        final String configuredValue = globalConfigurationRepository
-                .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE).getStringValue();
-        return configuredValue == null || configuredValue.isBlank() ? DEFAULT_ACCRUAL_DATE_CONFIG : configuredValue;
+        return configurationDomainService.getWclChargeAccrualTime() == WclChargeAccrualTimeConfig.REAL_TIME;
     }
 }

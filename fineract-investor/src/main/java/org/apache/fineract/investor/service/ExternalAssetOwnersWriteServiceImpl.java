@@ -626,13 +626,11 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     }
 
     private List<LoanStatus> getAllowedLoanStatuses() {
-        return configurationDomainService.getAllowedLoanStatusesForExternalAssetTransfer().stream().map(LoanStatus::valueOf)
-                .collect(Collectors.toList());
+        return configurationDomainService.getAllowedLoanStatusesForExternalAssetTransfer();
     }
 
     private List<LoanStatus> getAllowedLoanStatusesForDelayedSettlement() {
-        return configurationDomainService.getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer().stream()
-                .map(LoanStatus::valueOf).collect(Collectors.toList());
+        return configurationDomainService.getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer();
     }
 
     @Override

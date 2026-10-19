@@ -18,20 +18,19 @@
  */
 package org.apache.fineract.infrastructure.configuration.data;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/**
- * Regression test: a negative {@code value} used to be reported under the {@code enabled} parameter name instead of
- * {@code value}, because the validator reused the wrong constant when building the validation error.
- */
 class GlobalConfigurationDataValidatorTest {
 
     private final FromJsonHelper fromJsonHelper = new FromJsonHelper();
@@ -42,6 +41,10 @@ class GlobalConfigurationDataValidatorTest {
         validator = new GlobalConfigurationDataValidator(fromJsonHelper);
     }
 
+    /**
+     * Regression test: a negative {@code value} used to be reported under the {@code enabled} parameter name instead of
+     * {@code value}, because the validator reused the wrong constant when building the validation error.
+     */
     @Test
     void validateForUpdateWithNegativeValueReportsErrorForValueParameter() {
         JsonCommand command = new JsonCommand(1L, fromJsonHelper.parse("{\"value\": -5}"), fromJsonHelper);
@@ -53,5 +56,57 @@ class GlobalConfigurationDataValidatorTest {
                 "Expected validation error for parameter 'value'");
         assertFalse(ex.getErrors().stream().anyMatch(e -> "enabled".equals(e.getParameterName())),
                 "Did not expect a validation error for parameter 'enabled'");
+    }
+
+    @Test
+    void validateAllowedValuesRejectsStringValueThatIsNotAllowed() {
+        PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateAllowedValues(stringValueCommand("weekly"), GlobalConfigurationConstants.WCL_CHARGE_ACCRUAL_TIME));
+
+        assertEquals(1, ex.getErrors().size());
+        assertEquals("validation.msg.globalConfiguration.stringValue.is.not.one.of.expected.enumerations",
+                ex.getErrors().get(0).getUserMessageGlobalisationCode());
+    }
+
+    @Test
+    void validateAllowedValuesAcceptsAllowedStringValueInAnyCase() {
+        assertDoesNotThrow(() -> validator.validateAllowedValues(stringValueCommand("Real-Time"),
+                GlobalConfigurationConstants.WCL_CHARGE_ACCRUAL_TIME));
+    }
+
+    @Test
+    void validateForUpdateRejectsBlankStringValue() {
+        PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateForUpdate(stringValueCommand(" ")));
+
+        assertEquals(1, ex.getErrors().size());
+        assertEquals("validation.msg.globalConfiguration.stringValue.cannot.be.blank",
+                ex.getErrors().get(0).getUserMessageGlobalisationCode());
+    }
+
+    @Test
+    void validateAllowedValuesReportsEachNotAllowedElementOfMultipleValues() {
+        PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateAllowedValues(stringValueCommand("ACTIVE,ACTIV,CLOSED"),
+                        GlobalConfigurationConstants.ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER));
+
+        assertEquals(2, ex.getErrors().size());
+    }
+
+    @Test
+    void validateAllowedValuesAcceptsAnyStringValueForUnrestrictedConfig() {
+        assertDoesNotThrow(() -> validator.validateAllowedValues(stringValueCommand("any folder"),
+                GlobalConfigurationConstants.REPORT_EXPORT_S3_FOLDER_NAME));
+    }
+
+    @Test
+    void validateAllowedValuesIgnoresMissingStringValue() {
+        JsonCommand command = new JsonCommand(1L, fromJsonHelper.parse("{\"enabled\": true}"), fromJsonHelper);
+
+        assertDoesNotThrow(() -> validator.validateAllowedValues(command, GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE));
+    }
+
+    private JsonCommand stringValueCommand(final String stringValue) {
+        return new JsonCommand(1L, fromJsonHelper.parse("{\"stringValue\": \"" + stringValue + "\"}"), fromJsonHelper);
     }
 }
