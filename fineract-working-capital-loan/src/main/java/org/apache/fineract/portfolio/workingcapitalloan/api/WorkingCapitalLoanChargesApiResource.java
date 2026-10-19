@@ -45,11 +45,11 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanCommandParameterUtil;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanChargeData;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
@@ -310,9 +310,9 @@ public class WorkingCapitalLoanChargesApiResource {
                 : loanChargeId;
 
         final CommandWrapperBuilder builder;
-        if (CommandParameterUtil.is(commandParam, WorkingCapitalLoanChargeConstants.ADJUSTMENT_LOAN_CHARGE_COMMAND)) {
+        if (WorkingCapitalLoanCommandParameterUtil.is(commandParam, WorkingCapitalLoanChargeConstants.ADJUSTMENT_LOAN_CHARGE_COMMAND)) {
             builder = new CommandWrapperBuilder().adjustmentForWorkingCapitalLoanCharge(resolvedLoanId, resolvedLoanChargeId);
-        } else if (CommandParameterUtil.is(commandParam, WorkingCapitalLoanChargeConstants.WAIVE_LOAN_CHARGE_COMMAND)) {
+        } else if (WorkingCapitalLoanCommandParameterUtil.is(commandParam, WorkingCapitalLoanChargeConstants.WAIVE_LOAN_CHARGE_COMMAND)) {
             builder = new CommandWrapperBuilder().waiveWorkingCapitalLoanCharge(resolvedLoanId, resolvedLoanChargeId);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);

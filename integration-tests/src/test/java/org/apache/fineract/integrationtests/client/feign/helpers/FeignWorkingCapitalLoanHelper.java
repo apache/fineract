@@ -200,6 +200,16 @@ public class FeignWorkingCapitalLoanHelper {
         return response.getResourceId();
     }
 
+    /**
+     * Executes a loan-level transaction with the {@code command} value sent verbatim, for tests that exercise the
+     * command naming conventions the API accepts.
+     */
+    public Long executeTransaction(Long loanId, String command, PostWorkingCapitalLoanTransactionsRequest request) {
+        PostWorkingCapitalLoanTransactionsResponse response = ok(
+                () -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId, command, request));
+        return response.getResourceId();
+    }
+
     public Long undoChargeOff(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
         PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, "undoChargeOff", request));

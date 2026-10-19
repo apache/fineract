@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
+import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanCommandParameterUtil;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAsOfBalanceData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanChargePaidByData;
@@ -67,7 +68,7 @@ public class WorkingCapitalLoanTransactionReadPlatformServiceImpl implements Wor
         final WorkingCapitalLoan wcLoan = retrieveWorkingCapitalLoan(loanId);
 
         final LocalDate expectedDisbursementDate = wcLoan.getDisbursementDetails().getFirst().getExpectedDisbursementDate();
-        if (WorkingCapitalLoanConstants.APPROVE_LOAN_COMMAND.equals(command)) {
+        if (WorkingCapitalLoanCommandParameterUtil.is(command, WorkingCapitalLoanConstants.APPROVE_LOAN_COMMAND)) {
             return WorkingCapitalLoanCommandTemplateData.builder().approvalAmount(wcLoan.getProposedPrincipal())
                     .approvalDate(expectedDisbursementDate).expectedDisbursementDate(expectedDisbursementDate)
                     .discountAmount(wcLoan.getLoanProductRelatedDetails().getDiscountProposed())
@@ -89,7 +90,7 @@ public class WorkingCapitalLoanTransactionReadPlatformServiceImpl implements Wor
         final WorkingCapitalLoanTransactionTemplateData.WorkingCapitalLoanTransactionTemplateDataBuilder template = WorkingCapitalLoanTransactionTemplateData
                 .builder().wcLoanId(loanId).currency(wcLoan.getLoanProduct().getCurrency().toData());
 
-        if (WorkingCapitalLoanConstants.DISBURSE_LOAN_COMMAND.equals(command)) {
+        if (WorkingCapitalLoanCommandParameterUtil.is(command, WorkingCapitalLoanConstants.DISBURSE_LOAN_COMMAND)) {
             return template.expectedAmount(wcLoan.getApprovedPrincipal())
                     .expectedDisbursementDate(wcLoan.getDisbursementDetails().getFirst().getExpectedDisbursementDate())
                     .discountAmount(wcLoan.getLoanProductRelatedDetails().getDiscountApproved())
@@ -98,14 +99,14 @@ public class WorkingCapitalLoanTransactionReadPlatformServiceImpl implements Wor
                     .classificationOptions(codeValueReadPlatformService
                             .retrieveCodeValuesByCode(WorkingCapitalLoanConstants.DISBURSEMENT_CLASSIFICATION_CODE_NAME))
                     .build();
-        } else if (WorkingCapitalLoanConstants.REPAYMENT_LOAN_COMMAND.equals(command)
-                || WorkingCapitalLoanConstants.GOODWILL_CREDIT_LOAN_COMMAND.equals(command)) {
+        } else if (WorkingCapitalLoanCommandParameterUtil.is(command, WorkingCapitalLoanConstants.REPAYMENT_LOAN_COMMAND)
+                || WorkingCapitalLoanCommandParameterUtil.is(command, WorkingCapitalLoanConstants.GOODWILL_CREDIT_LOAN_COMMAND)) {
             return template.expectedAmount(balance.map(WorkingCapitalLoanAsOfBalanceData::principalOutstanding).orElse(null))
                     .paymentTypeOptions(paymentTypeReadPlatformService.retrieveAllPaymentTypes())
                     .classificationOptions(codeValueReadPlatformService
                             .retrieveCodeValuesByCode(WorkingCapitalLoanConstants.REPAYMENT_CLASSIFICATION_CODE_NAME))
                     .build();
-        } else if (WorkingCapitalLoanConstants.CREDIT_BALANCE_REFUND_COMMAND.equals(command)) {
+        } else if (WorkingCapitalLoanCommandParameterUtil.is(command, WorkingCapitalLoanConstants.CREDIT_BALANCE_REFUND_COMMAND)) {
             // The overpayment is a paid-side figure, so unlike the buckets above it does not vary with the date.
             final BigDecimal overpaymentAmount = balance.map(WorkingCapitalLoanAsOfBalanceData::overpaymentAmount).orElse(null);
             return template.expectedAmount(overpaymentAmount != null ? overpaymentAmount : BigDecimal.ZERO)
@@ -113,18 +114,18 @@ public class WorkingCapitalLoanTransactionReadPlatformServiceImpl implements Wor
                     .classificationOptions(codeValueReadPlatformService
                             .retrieveCodeValuesByCode(WorkingCapitalLoanConstants.CREDIT_BALANCE_REFUND_CLASSIFICATION_CODE_NAME))
                     .build();
-        } else if (WorkingCapitalLoanConstants.RECOVERY_PAYMENT_LOAN_COMMAND.equals(command)) {
+        } else if (WorkingCapitalLoanCommandParameterUtil.is(command, WorkingCapitalLoanConstants.RECOVERY_PAYMENT_LOAN_COMMAND)) {
             // The amount to pre-fill is what is still recoverable, NOT the gross amount written off: a recovery may
             // not exceed it, so offering the gross figure after a partial recovery would pre-fill a value the API
             // rejects. Term loan pre-fills the gross figure and has that problem. Both figures behind it are
             // paid-side, so this does not vary with the date either.
             return template.expectedAmount(balance.map(WorkingCapitalLoanAsOfBalanceData::writtenOffOutstanding).orElse(BigDecimal.ZERO))
                     .paymentTypeOptions(paymentTypeReadPlatformService.retrieveAllPaymentTypes()).build();
-        } else if (WorkingCapitalLoanConstants.DISCOUNT_FEE_LOAN_COMMAND.equals(command)
-                || WorkingCapitalLoanConstants.DISCOUNT_FEE_ADJUSTMENT_LOAN_COMMAND.equals(command)) {
+        } else if (WorkingCapitalLoanCommandParameterUtil.is(command, WorkingCapitalLoanConstants.DISCOUNT_FEE_LOAN_COMMAND)
+                || WorkingCapitalLoanCommandParameterUtil.is(command, WorkingCapitalLoanConstants.DISCOUNT_FEE_ADJUSTMENT_LOAN_COMMAND)) {
             return template.classificationOptions(codeValueReadPlatformService
                     .retrieveCodeValuesByCode(WorkingCapitalLoanConstants.DISCOUNT_FEE_CLASSIFICATION_CODE_NAME)).build();
-        } else if (WorkingCapitalLoanConstants.CHARGE_OFF_LOAN_COMMAND.equals(command)) {
+        } else if (WorkingCapitalLoanCommandParameterUtil.is(command, WorkingCapitalLoanConstants.CHARGE_OFF_LOAN_COMMAND)) {
             // Charge-off amount is the auto-calculated outstanding balance as of the quote date. chargeOffDate stays
             // the business date and is deliberately NOT the quote date: the e2e suite reads it back as a probe for the
             // server's own business date, and echoing the caller's date would turn that check into a tautology.
@@ -132,7 +133,7 @@ public class WorkingCapitalLoanTransactionReadPlatformServiceImpl implements Wor
                     .chargeOffDate(DateUtils.getBusinessLocalDate()).chargeOffReasonOptions(
                             codeValueReadPlatformService.retrieveCodeValuesByCode(WorkingCapitalLoanConstants.CHARGE_OFF_REASONS))
                     .build();
-        } else if (WorkingCapitalLoanConstants.PREPAY_LOAN_COMMAND.equals(command)) {
+        } else if (WorkingCapitalLoanCommandParameterUtil.is(command, WorkingCapitalLoanConstants.PREPAY_LOAN_COMMAND)) {
             return prePaymentTemplate(template, balance, quoteDate);
         }
         return null;
