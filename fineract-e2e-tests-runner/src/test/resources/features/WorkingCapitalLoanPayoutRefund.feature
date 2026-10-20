@@ -85,6 +85,10 @@ Feature: Working Capital Loan Payout Refund
       | transactionDate | type          | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement  | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Payout Refund | 270.0             | 230.0            | 15.0              | 25.0                  | true     |
+    And Working Capital Loan reversed "PAYOUT_REFUND" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name                  | Amount |
+      | Working Capital Loan Penalty | 25.0   |
+      | Working Capital Loan Fee     | 15.0   |
     # Close loan
     When Admin closes the Working Capital loan with a full repayment on "10 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"

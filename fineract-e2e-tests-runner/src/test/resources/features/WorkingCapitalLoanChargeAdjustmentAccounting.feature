@@ -46,6 +46,9 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
+    And Working Capital Loan reversed "CHARGE_ADJUSTMENT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 100.0  |
     And Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Fee | 10 January 2026 | 100.0  | EUR      | false     | Specified due date | Flat                    | Regular             |
@@ -98,6 +101,9 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment | 50.0              | 0.0              | 0.0               | 50.0                  | true     |
+    And Working Capital Loan reversed "CHARGE_ADJUSTMENT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name                  | Amount |
+      | Working Capital Loan Penalty | 50.0   |
     And Working Capital Loan has charges with the following data:
       | Charge Name                  | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Penalty | 10 January 2026 | 50.0   | EUR      | true      | Specified due date | Flat                    | Regular             |

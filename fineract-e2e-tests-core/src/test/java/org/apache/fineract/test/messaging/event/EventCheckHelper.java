@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,7 @@ import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalBreachDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanAccountDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanChargeDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanChargePaidByDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanCollectionDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencyDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencySchedulePeriodDataV1;
@@ -1295,6 +1297,19 @@ public class EventCheckHelper {
                 .extractingData(data -> data.getTransactionToAdjust().getType().getCode()).isEqualTo(transaction.getType().getCode())//
                 .extractingData(data -> data.getTransactionToAdjust().getReversed()).isEqualTo(true)//
                 .extractingData(WorkingCapitalLoanTransactionAdjustmentDataV1::getNewTransactionDetail).isEqualTo(null);
+    }
+
+    public void workingCapitalLoanAdjustTransactionChargePaidByCheck(final Long transactionId,
+            final Function<WorkingCapitalLoanChargePaidByDataV1, List<String>> rowMapper, final List<List<String>> expectedRows) {
+        eventAssertion.assertEventReceived(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transactionId)//
+                .extractingData(data -> data.getTransactionToAdjust().getReversed()).isEqualTo(true)//
+                .extractingData(data -> sortedRows(Optional.ofNullable(data.getTransactionToAdjust().getChargePaidByList())
+                        .orElse(List.of()).stream().map(rowMapper).toList()))//
+                .isEqualTo(sortedRows(expectedRows));
+    }
+
+    private List<List<String>> sortedRows(final List<List<String>> rows) {
+        return rows.stream().sorted(Comparator.comparing(Object::toString)).toList();
     }
 
     public void workingCapitalLoanAdjustTransactionPartialEventCheck(final Long loanId, final String transactionType,

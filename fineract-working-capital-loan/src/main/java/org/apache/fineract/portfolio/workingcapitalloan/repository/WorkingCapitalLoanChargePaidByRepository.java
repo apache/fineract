@@ -28,11 +28,12 @@ import org.springframework.data.repository.query.Param;
 public interface WorkingCapitalLoanChargePaidByRepository extends JpaRepository<WorkingCapitalLoanChargePaidBy, Long> {
 
     /**
-     * Drops every paid-by row of a loan in one statement, for the reprocessing reset that rebuilds them.
+     * Drops the paid-by rows of a loan's non-reversed transactions - the ones the reprocessing replay rebuilds. A
+     * reversed transaction is not replayed and keeps its rows, as an undone or adjusted term-loan transaction does.
      *
      * <p>
      * Deliberately a bulk delete rather than a derived one. A derived delete loads each row and removes it through the
-     * persistence context, which defers the deletes to the next flush - and Hibernate runs inserts before deletes
+     * persistence context, which defers the deletes to the next flush - and EclipseLink runs inserts before deletes
      * within a flush, so the rebuilt rows would be written while the rows they replace are still present. This executes
      * immediately instead, so the reset is complete before anything is rebuilt, whatever constraints the table carries.
      *
@@ -45,9 +46,10 @@ public interface WorkingCapitalLoanChargePaidByRepository extends JpaRepository<
     @Query("""
             delete from WorkingCapitalLoanChargePaidBy paidBy
             where paidBy.wcLoanTransaction.id in (
-                select transaction.id from WorkingCapitalLoanTransaction transaction where transaction.wcLoan.id = :loanId)
+                select transaction.id from WorkingCapitalLoanTransaction transaction
+                where transaction.wcLoan.id = :loanId and transaction.reversed = false)
             """)
-    void deleteByLoanId(@Param("loanId") Long loanId);
+    void deleteOfActiveTransactionsByLoanId(@Param("loanId") Long loanId);
 
     @Query("""
             select paidBy from WorkingCapitalLoanChargePaidBy paidBy

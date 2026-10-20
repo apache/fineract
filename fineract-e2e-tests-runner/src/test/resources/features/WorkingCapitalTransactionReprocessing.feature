@@ -293,6 +293,12 @@ Feature: Working Capital Transaction Reprocessing
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Repayment    | 30.0              | 25.0             | 5.0               | 0.0                   | true     |
       | 10 January 2026 | Repayment    | 25.0              | 20.0             | 5.0               | 0.0                   | false    |
+    And Working Capital Loan reversed "REPAYMENT" transaction on "05 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 5.0    |
+    And Working Capital Loan "REPAYMENT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 5.0    |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Paid | Fee Outstanding |
       | 5.0        | 5.0      | 0.0             |
@@ -300,6 +306,16 @@ Feature: Working Capital Transaction Reprocessing
       | field                | value  |
       | principalOutstanding | 8980.0 |
       | totalPaidPrincipal   | 20.0   |
+    When Customer makes repayment on "08 January 2026" with 10 transaction amount on Working Capital loan
+    Then a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "10 January 2026" with principal portion changed from "20.0" to "25.0" and fee portion changed from "5.0" to "0.0"
+    And Working Capital Loan reversed "REPAYMENT" transaction on "05 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 5.0    |
+    And Working Capital Loan "REPAYMENT" transaction on "08 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 5.0    |
+    And Working Capital Loan "REPAYMENT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name | Amount |
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
   @TestRailId:C85218
