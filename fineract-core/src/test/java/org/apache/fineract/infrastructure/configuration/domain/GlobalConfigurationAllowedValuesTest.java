@@ -21,11 +21,13 @@ package org.apache.fineract.infrastructure.configuration.domain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationAllowedValues.AllowedValues;
+import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyValueNotAllowedException;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Test;
 
@@ -93,21 +95,37 @@ class GlobalConfigurationAllowedValuesTest {
 
     @Test
     void resolveReturnsAllowedConstantOrDefault() {
-        final AllowedValues<OutstandingInterestStrategyConfig> allowedValues = GlobalConfigurationAllowedValues.OUTSTANDING_INTEREST_STRATEGY;
+        final AllowedValues<NextPaymentDueDateConfig> allowedValues = GlobalConfigurationAllowedValues.NEXT_PAYMENT_DUE_DATE;
 
-        assertEquals(OutstandingInterestStrategyConfig.PAYABLE_OUTSTANDING_INTEREST, allowedValues.resolve("payable_outstanding_interest"));
-        assertEquals(OutstandingInterestStrategyConfig.TOTAL_OUTSTANDING_INTEREST, allowedValues.resolve("UNKNOWN"));
-        assertEquals(OutstandingInterestStrategyConfig.TOTAL_OUTSTANDING_INTEREST, allowedValues.resolve(" "));
-        assertEquals(OutstandingInterestStrategyConfig.TOTAL_OUTSTANDING_INTEREST, allowedValues.resolve(null));
+        assertEquals(NextPaymentDueDateConfig.NEXT_UNPAID_DUE_DATE, allowedValues.resolve("Next-Unpaid-Due-Date"));
+        assertEquals(NextPaymentDueDateConfig.EARLIEST_UNPAID_DATE, allowedValues.resolve("UNKNOWN"));
+        assertEquals(NextPaymentDueDateConfig.EARLIEST_UNPAID_DATE, allowedValues.resolve(" "));
+        assertEquals(NextPaymentDueDateConfig.EARLIEST_UNPAID_DATE, allowedValues.resolve(null));
     }
 
     @Test
-    void resolveAllFallsBackToDefaultListWhenAnyElementIsNotAllowed() {
+    void resolveFailsWithoutDefaultWhenValueIsBlankOrNotAllowed() {
+        final AllowedValues<OutstandingInterestStrategyConfig> allowedValues = GlobalConfigurationAllowedValues.OUTSTANDING_INTEREST_STRATEGY;
+
+        assertEquals(OutstandingInterestStrategyConfig.PAYABLE_OUTSTANDING_INTEREST, allowedValues.resolve("payable_outstanding_interest"));
+        assertThrows(GlobalConfigurationPropertyValueNotAllowedException.class, () -> allowedValues.resolve("UNKNOWN"));
+        assertThrows(GlobalConfigurationPropertyValueNotAllowedException.class, () -> allowedValues.resolve(" "));
+        assertThrows(GlobalConfigurationPropertyValueNotAllowedException.class, () -> allowedValues.resolve(null));
+    }
+
+    @Test
+    void resolveAllFailsWithoutDefaultWhenAnyElementIsNotAllowed() {
         final AllowedValues<LoanStatus> allowedValues = GlobalConfigurationAllowedValues.ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER;
 
         assertEquals(List.of(LoanStatus.ACTIVE, LoanStatus.OVERPAID), allowedValues.resolveAll("Active,overpaid,ACTIVE"));
-        assertEquals(List.of(LoanStatus.ACTIVE, LoanStatus.TRANSFER_IN_PROGRESS, LoanStatus.TRANSFER_ON_HOLD),
-                allowedValues.resolveAll("ACTIVE,INVALID"));
+        assertThrows(GlobalConfigurationPropertyValueNotAllowedException.class, () -> allowedValues.resolveAll("ACTIVE,INVALID"));
+    }
+
+    @Test
+    void transferConfigsHaveNoDefault() {
+        assertFalse(GlobalConfigurationAllowedValues.OUTSTANDING_INTEREST_STRATEGY.hasDefault());
+        assertFalse(GlobalConfigurationAllowedValues.ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER.hasDefault());
+        assertFalse(GlobalConfigurationAllowedValues.ALLOWED_LOAN_STATUSES_OF_DELAYED_SETTLEMENT_FOR_EXTERNAL_ASSET_TRANSFER.hasDefault());
     }
 
     @Test
@@ -121,6 +139,9 @@ class GlobalConfigurationAllowedValuesTest {
     @Test
     void everyDefaultIsAnAllowedCanonicalValue() {
         for (final AllowedValues<?> allowedValues : GlobalConfigurationAllowedValues.ALL) {
+            if (!allowedValues.hasDefault()) {
+                continue;
+            }
             assertTrue(allowedValues.isAllowed(allowedValues.defaultValue()), allowedValues.configName());
             assertEquals(allowedValues.defaultValue(), allowedValues.canonicalize(allowedValues.defaultValue()),
                     allowedValues.configName());

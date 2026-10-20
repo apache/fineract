@@ -19,13 +19,20 @@
 package org.apache.fineract.infrastructure.configuration.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationDataValidator;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
+import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -33,8 +40,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 class GlobalConfigurationPropertyUpdateServiceTest {
 
     private final FromJsonHelper fromJsonHelper = new FromJsonHelper();
-    private final GlobalConfigurationPropertyUpdateService underTest = new GlobalConfigurationPropertyUpdateService(
-            mock(JdbcTemplate.class));
+    private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+    private final GlobalConfigurationPropertyUpdateService underTest = new GlobalConfigurationPropertyUpdateService(jdbcTemplate,
+            new GlobalConfigurationDataValidator(fromJsonHelper));
 
     @Test
     void storesCanonicalSpellingOfAllowedValue() {
@@ -83,6 +91,23 @@ class GlobalConfigurationPropertyUpdateServiceTest {
         underTest.update(property, stringValueCommand(" Reports "));
 
         assertEquals(" Reports ", property.getStringValue());
+    }
+
+    @Test
+    void rejectsValueThatIsNotAllowed() {
+        final GlobalConfigurationProperty property = property(GlobalConfigurationConstants.WCL_CHARGE_ACCRUAL_TIME, "eod");
+
+        assertThrows(PlatformApiDataValidationException.class, () -> underTest.update(property, stringValueCommand("hourly")));
+        assertEquals("eod", property.getStringValue());
+    }
+
+    @Test
+    void reportsLockedTrapDoorBeforeValueThatIsNotAllowed() {
+        final GlobalConfigurationProperty property = property(GlobalConfigurationConstants.WCL_CHARGE_ACCRUAL_TIME, "eod")
+                .setTrapDoor(true);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Boolean.class))).thenReturn(true);
+
+        assertThrows(GlobalConfigurationPropertyCannotBeModfied.class, () -> underTest.update(property, stringValueCommand("hourly")));
     }
 
     private static GlobalConfigurationProperty property(final String name, final String stringValue) {

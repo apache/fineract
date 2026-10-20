@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.configuration.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import org.apache.fineract.infrastructure.cache.domain.PlatformCacheRepository;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyValueNotAllowedException;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
 import org.junit.jupiter.api.Test;
@@ -62,14 +64,20 @@ class ConfigurationDomainServiceJpaTest {
         stored(GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME, "realtime");
         stored(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE, null);
         stored(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE, "");
-        stored(GlobalConfigurationConstants.ASSET_OWNER_TRANSFER_OUTSTANDING_INTEREST_CALCULATION_STRATEGY, "UNKNOWN");
 
         assertEquals(ChargeAccrualTimeConfig.EOD, underTest.getWclChargeAccrualTime());
         assertFalse(underTest.isPlChargeAccrualRealTime());
         assertEquals(ChargeAccrualDateConfig.DUE_DATE, underTest.getAccrualDateConfigForCharge());
         assertEquals(NextPaymentDueDateConfig.EARLIEST_UNPAID_DATE, underTest.getNextPaymentDateConfigForLoan());
-        assertEquals(OutstandingInterestStrategyConfig.TOTAL_OUTSTANDING_INTEREST,
-                underTest.getAssetOwnerTransferOustandingInterestStrategy());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = "UNKNOWN")
+    void failsForBlankOrNotAllowedOutstandingInterestStrategy(final String stringValue) {
+        stored(GlobalConfigurationConstants.ASSET_OWNER_TRANSFER_OUTSTANDING_INTEREST_CALCULATION_STRATEGY, stringValue);
+
+        assertThrows(GlobalConfigurationPropertyValueNotAllowedException.class, underTest::getAssetOwnerTransferOustandingInterestStrategy);
     }
 
     @Test
@@ -82,14 +90,13 @@ class ConfigurationDomainServiceJpaTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = { "ACTIVE,ACTIV", "ACTIVE,,OVERPAID", "INVALID" })
-    void usesDefaultLoanStatusesForBlankOrNotAllowedValues(final String stringValue) {
+    void failsForBlankOrNotAllowedLoanStatuses(final String stringValue) {
         stored(GlobalConfigurationConstants.ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER, stringValue);
         stored(GlobalConfigurationConstants.ALLOWED_LOAN_STATUSES_OF_DELAYED_SETTLEMENT_FOR_EXTERNAL_ASSET_TRANSFER, stringValue);
 
-        assertEquals(List.of(LoanStatus.ACTIVE, LoanStatus.TRANSFER_IN_PROGRESS, LoanStatus.TRANSFER_ON_HOLD),
-                underTest.getAllowedLoanStatusesForExternalAssetTransfer());
-        assertEquals(List.of(LoanStatus.ACTIVE, LoanStatus.TRANSFER_IN_PROGRESS, LoanStatus.TRANSFER_ON_HOLD, LoanStatus.OVERPAID,
-                LoanStatus.CLOSED_OBLIGATIONS_MET), underTest.getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer());
+        assertThrows(GlobalConfigurationPropertyValueNotAllowedException.class, underTest::getAllowedLoanStatusesForExternalAssetTransfer);
+        assertThrows(GlobalConfigurationPropertyValueNotAllowedException.class,
+                underTest::getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer);
     }
 
     @Test
