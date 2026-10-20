@@ -1391,6 +1391,119 @@ Feature: Working Capital Delinquency
       | 1            | 2026-02-03  |              | D00            | 1              | 30             |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 February 2026"
 
+  @TestRailId:C115361
+  Scenario: Verify that delinquency start type is not overridable on create lWC loan account with allow attributes override forbidden on WCLP level - UC5
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with delinquencyGraceDays 3 and delinquencyStartType "LOAN_CREATION" and overrides disallowed for loan test
+    And Admin failed to create working capital loan with delinquency start type override while override is disallowed and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyStartType |
+      | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 |          | DISBURSEMENT         |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    Then Working capital loan creation was successful
+    And Working capital loan account has delinquencyGraceDays 3 and delinquencyStartType "LOAN_CREATION"
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "03 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working capital loan account has the correct data:
+      | delinquencyStartDate | delinquencyEffectiveStartDate |
+      | 2026-01-01           | 2026-01-04                    |
+    And Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 1            | 2026-02-03  |              | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 February 2026"
+
+  @TestRailId:C115362
+  Scenario: Verify that delinquency grace days is not overridable on create lWC loan account with allow attributes override forbidden on WCLP level - UC6
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with delinquencyGraceDays 3 and delinquencyStartType "LOAN_CREATION" and overrides disallowed for loan test
+    And Admin failed to create working capital loan with delinquency grace days override while override is disallowed and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyGraceDays |
+      | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 |          | 4                    |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    Then Working capital loan creation was successful
+    And Working capital loan account has delinquencyGraceDays 3 and delinquencyStartType "LOAN_CREATION"
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "03 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working capital loan account has the correct data:
+      | delinquencyStartDate | delinquencyEffectiveStartDate |
+      | 2026-01-01           | 2026-01-04                    |
+    And Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 1            | 2026-02-03  |              | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 February 2026"
+
+  @TestRailId:C115363
+  Scenario: Verify that delinquency grace days is not overridable on modify WC loan account with allow attributes override is forbidden on WCLP level - UC7
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with delinquencyGraceDays 3 and delinquencyStartType "DISBURSEMENT" and overrides disallowed for loan test
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    Then Working capital loan creation was successful
+    And Working capital loan account has delinquencyGraceDays 3 and delinquencyStartType "DISBURSEMENT"
+    And Admin failed to modify working capital loan with disallowed WCLP overrides using created product with delinquencyGraceDays 11
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "03 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working capital loan account has the correct data:
+      | delinquencyStartDate | delinquencyEffectiveStartDate |
+      | 2026-01-01           | 2026-01-04                    |
+    And Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 1            | 2026-02-03  |              | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 February 2026"
+
+  @TestRailId:C115364
+  Scenario: Verify that delinquency start type is not overridable on modify WC loan account with allow attributes override is forbidden on WCLP level - UC8
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with delinquencyGraceDays 3 and delinquencyStartType "DISBURSEMENT" and overrides disallowed for loan test
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    Then Working capital loan creation was successful
+    And Working capital loan account has delinquencyGraceDays 3 and delinquencyStartType "DISBURSEMENT"
+    And Admin failed to modify working capital loan with disallowed WCLP overrides using created product with delinquencyStartType "LOAN_CREATION"
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "03 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working capital loan account has the correct data:
+      | delinquencyStartDate | delinquencyEffectiveStartDate |
+      | 2026-01-01           | 2026-01-04                    |
+    And Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 1            | 2026-02-03  |              | D00            | 1              | 30             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 February 2026"
+
+
   @TestRailId:C111075
   Scenario: Verify WC delinquency grace days and start type has been updated correctly on modify loan account stage after undo disbursement
     When Admin sets the business date to "01 January 2026"
