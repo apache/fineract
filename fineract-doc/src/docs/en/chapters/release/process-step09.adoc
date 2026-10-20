@@ -69,6 +69,7 @@ Now it's time to build and run the release candidate.
 ----
 tar -xzf $src
 cd apache-fineract-src-{revnumber}
+chmod +x gradlew
 ./gradlew build -x test -x doc
 cd ..
 ----
