@@ -405,7 +405,7 @@ public class SearchReadServiceImpl implements SearchReadService {
 
             final StringBuilder sql = new StringBuilder();
             sql.append(
-                    "Select a.name as officeName, a.Product as productName, a.cnt as 'count', a.outstandingAmt as outstanding, a.percentOut as percentOut ")
+                    "Select a.name as officeName, a.Product as productName, a.cnt as count, a.outstandingAmt as outstanding, a.percentOut as percentOut ")
                     .append("from (select mo.name, mp.name Product, SUM(COALESCE(ml.total_expected_repayment_derived,0.0)) TotalAmt, count(*) cnt, ")
                     .append("SUM(COALESCE(ml.total_outstanding_derived,0.0)) outstandingAmt, ")
                     .append("(SUM(COALESCE(ml.total_outstanding_derived,0.0)) * 100 / SUM(COALESCE(ml.total_expected_repayment_derived,0.0))) percentOut ")
