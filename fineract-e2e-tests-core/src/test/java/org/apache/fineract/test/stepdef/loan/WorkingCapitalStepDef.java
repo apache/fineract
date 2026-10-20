@@ -335,8 +335,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final int expectedHttpCode = Integer.parseInt(rawData.get("httpCode"));
         final String expectedErrorMessage = rawData.get("errorMessage").trim();
         checkCreateWorkingCapitalLoanProductWithInvalidDataFailure(request, expectedHttpCode, expectedErrorMessage);
-        log.info("Verified Working Capital Loan Product create failed with status {} and message: {}", expectedHttpCode,
-                expectedErrorMessage);
+        log.info("Verified Working Capital Loan Product create with payment amount strategy  failed with status {} and message: {}",
+                expectedHttpCode, expectedErrorMessage);
     }
 
     @Then("Admin creates a Working Capital Loan Product with the following payment strategy data expecting error:")
@@ -363,8 +363,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final int expectedHttpCode = Integer.parseInt(rawData.get("httpCode"));
         final String expectedErrorMessage = rawData.get("errorMessage").trim();
         checkCreateWorkingCapitalLoanProductWithInvalidDataFailure(request, expectedHttpCode, expectedErrorMessage);
-        log.info("Verified Working Capital Loan Product create failed with status {} and message: {}", expectedHttpCode,
-                expectedErrorMessage);
+        log.info("Verified Working Capital Loan Product create with payment strategy failed with status {} and message: {}",
+                expectedHttpCode, expectedErrorMessage);
     }
 
     private static String blankToNull(final String value) {
@@ -591,7 +591,27 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     }
 
     @When("Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:")
-    public void createWorkingCapitalLoanProductWithCustomBreachConfig(final DataTable table) {
+    public void createWorkingCapitalLoanProductWithCustomBreachConfigAllowOverrides(final DataTable table) {
+        PostWorkingCapitalLoanProductsRequest request = createWorkingCapitalLoanProductWithCustomBreachConfigRequest(table, true);
+
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
+    @When("Admin creates a Working Capital Loan Product with custom breach config and overrides disabled:")
+    public void createWorkingCapitalLoanProductWithCustomBreachConfigDisallowOverrides(final DataTable table) {
+        PostWorkingCapitalLoanProductsRequest request = createWorkingCapitalLoanProductWithCustomBreachConfigRequest(table, false);
+
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
+    public PostWorkingCapitalLoanProductsRequest createWorkingCapitalLoanProductWithCustomBreachConfigRequest(final DataTable table,
+            final boolean overridesEnabled) {
         final Map<String, String> data = table.asMaps().getFirst();
 
         final Long breachId = createBreach(table);
@@ -606,6 +626,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final String delinquencyStartTypeStr = data.get(DELINQUENCY_START_TYPE_FIELD_NAME);
         final String delinquencyStartType = delinquencyStartTypeStr != null && !delinquencyStartTypeStr.isEmpty() ? delinquencyStartTypeStr
                 : null;
+        final String discountStr = data.get("discount");
+        final String discountAmount = discountStr != null && !discountStr.isEmpty() ? discountStr : null;
 
         final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
         PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory
@@ -618,11 +640,16 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         if (delinquencyStartType != null) {
             request.delinquencyStartType(delinquencyStartType);
         }
-
-        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
-        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
-        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
-        checkWorkingCapitalLoanProductCreate();
+        if (discountAmount != null) {
+            request.discount(new BigDecimal(discountAmount));
+        }
+        if (!overridesEnabled) {
+            PostAllowAttributeOverrides disallowAttributeOverrides = new PostAllowAttributeOverrides()
+                    .delinquencyBucketClassification(false).breach(false).discountDefault(false).periodPaymentFrequencyType(false)
+                    .periodPaymentFrequency(false);
+            request.allowAttributeOverrides(disallowAttributeOverrides);
+        }
+        return request;
     }
 
     @When("Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:")

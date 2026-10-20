@@ -516,7 +516,38 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         submitLoanUsingCreatedProduct(table, null, breachStartType);
     }
 
+    @When("Admin creates a working capital loan using created product with breachGraceDays {int} and breachStartType {string} and the following data:")
+    public void createWorkingCapitalLoanUsingCreatedProductWithBreachStartType(final int breachGraceDays, final String breachStartType,
+            final DataTable table) {
+        submitLoanUsingCreatedProduct(table, breachGraceDays, breachStartType);
+    }
+
+    @When("Admin failed create a working capital loan with disallowed WCLP overrides using created product with breachGraceDays {int} and the following data:")
+    public void createWorkingCapitalLoanUsingCreatedProductWithBreachGraceDaysFailure(final int breachGraceDays, final DataTable table) {
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequestWithBreachData(table, breachGraceDays, null);
+        String errorMessage = ErrorMessageHelper.overrideDisallowedByProductFailure("breachGraceDays");
+        verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, errorMessage);
+    }
+
+    @When("Admin failed create a working capital loan with disallowed WCLP overrides using created product with breachStartType {string} and the following data:")
+    public void createWorkingCapitalLoanUsingCreatedProductWithBreachStartTypeFailure(final String breachStartType, final DataTable table) {
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequestWithBreachData(table, null, breachStartType);
+        String errorMessage = ErrorMessageHelper.overrideDisallowedByProductFailure("breachStartType");
+        verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, errorMessage);
+    }
+
     private void submitLoanUsingCreatedProduct(final DataTable table, final Integer breachGraceDays, final String breachStartType) {
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequestWithBreachData(table, breachGraceDays, breachStartType);
+
+        final PostWorkingCapitalLoansResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_CREATE_RESPONSE, response);
+        log.info("Working Capital Loan account created with dynamic product and Loan ID: {}", response.getLoanId());
+    }
+
+    public PostWorkingCapitalLoansRequest buildCreateLoanRequestWithBreachData(final DataTable table, final Integer breachGraceDays,
+            final String breachStartType) {
         final Map<String, String> rawData = table.asMaps().getFirst();
         final Long clientId = extractClientId();
         final PostWorkingCapitalLoanProductsResponse productResponse = testContext()
@@ -565,6 +596,9 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         if (rawData.get("delinquencyGraceDays") != null) {
             loansRequest.delinquencyGraceDays(Integer.parseInt(rawData.get("delinquencyGraceDays")));
         }
+        if (rawData.get("delinquencyStartType") != null) {
+            loansRequest.delinquencyStartType(rawData.get("delinquencyStartType"));
+        }
         if (breachStartType != null) {
             loansRequest.breachStartType(breachStartType);
         }
@@ -576,12 +610,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                     PostWorkingCapitalLoansRequest.RepaymentFrequencyTypeEnum.valueOf(rawData.get("repaymentFrequencyType")));
         }
         testContext().set(TestContextKey.LOAN_CREATE_REQUEST, loansRequest);
-
-        final PostWorkingCapitalLoansResponse response = ok(
-                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
-        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
-        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_CREATE_RESPONSE, response);
-        log.info("Working Capital Loan created with dynamic product ID: {}, Loan ID: {}", loanProductId, response.getLoanId());
+        log.info("Working Capital Loan product ID pre create loan account request: {}", loanProductId);
+        return loansRequest;
     }
 
     @Then("Working capital loan account has breachGraceDays {int}")
@@ -1196,6 +1226,23 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertValidationError(exception, expectedError);
     }
 
+    @When("Admin failed to modify working capital loan with disallowed WCLP overrides using created product with delinquencyGraceDays {int}")
+    public void modifyWorkingCapitalLoanUsingCreatedProductWithDelinquencyGraceDaysFailure(final int delinquencyGraceDays) {
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest() //
+                .delinquencyGraceDays(delinquencyGraceDays);//
+
+        String message = ErrorMessageHelper.overrideDisallowedByProductFailure("delinquencyGraceDays");
+        verifyModifyWorkingCapitalLoanAccountFailure(modifyRequest, 400, message);
+    }
+
+    @When("Admin failed to modify working capital loan with disallowed WCLP overrides using created product with delinquencyStartType {string}")
+    public void createWorkingCapitalLoanUsingCreatedProductWithDelinquencyStartTypeFailure(final String delinquencyStartType) {
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest() //
+                .delinquencyStartType(delinquencyStartType);//
+        String errorMessage = ErrorMessageHelper.overrideDisallowedByProductFailure("delinquencyStartType");
+        verifyModifyWorkingCapitalLoanAccountFailure(modifyRequest, 400, errorMessage);
+    }
+
     @When("Admin modifies the working capital loan resenting its current delinquencyBucketId")
     public void adminModifiesWorkingCapitalLoanResentingCurrentDelinquencyBucketId() {
         final GetWorkingCapitalLoansLoanIdResponse loanDetails = retrieveLoanDetails(getCreatedLoanId());
@@ -1354,6 +1401,23 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
         String message = ErrorMessageHelper.overrideDisallowedByProductFailure();
         verifyModifyWorkingCapitalLoanAccountFailure(modifyRequest, 400, message);
+    }
+
+    @When("Admin failed to modify working capital loan with disallowed WCLP overrides using created product with breachGraceDays {int}")
+    public void modifyWorkingCapitalLoanUsingCreatedProductWithBreachGraceDaysFailure(final int breachGraceDays) {
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest() //
+                .breachGraceDays(breachGraceDays);//
+
+        String message = ErrorMessageHelper.overrideDisallowedByProductFailure("breachGraceDays");
+        verifyModifyWorkingCapitalLoanAccountFailure(modifyRequest, 400, message);
+    }
+
+    @When("Admin failed to modify working capital loan with disallowed WCLP overrides using created product with breachStartType {string}")
+    public void createWorkingCapitalLoanUsingCreatedProductWithBreachStartTypeFailure(final String breachStartType) {
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest() //
+                .breachStartType(breachStartType);//
+        String errorMessage = ErrorMessageHelper.overrideDisallowedByProductFailure("breachStartType");
+        verifyModifyWorkingCapitalLoanAccountFailure(modifyRequest, 400, errorMessage);
     }
 
     @Then("Admin failed to modify working capital loan while delinquency override disallowed with delinquency override")
@@ -3907,6 +3971,11 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         createGraceDaysProductForLoanTest(graceDays, startType, null);
     }
 
+    @When("Admin creates a Working Capital Loan Product with delinquencyGraceDays {int} and delinquencyStartType {string} and overrides disallowed for loan test")
+    public void createProductWithGraceDaysOverridesDisallowedForLoanTest(int graceDays, String startType) {
+        createGraceDaysProductForLoanTest(graceDays, startType, null, false);
+    }
+
     @When("Admin creates a Working Capital Loan Product with delinquencyGraceDays {int} and delinquencyStartType {string} and the created delinquency bucket for loan test")
     public void createProductWithGraceDaysAndBucketForLoanTest(int graceDays, String startType) {
         final Long bucketId = testContext().get(TestContextKey.DELINQUENCY_BUCKET_ID);
@@ -3919,6 +3988,11 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
      * place, which is what the callers that do not build their own bucket rely on.
      */
     private void createGraceDaysProductForLoanTest(final int graceDays, final String startType, final Long bucketId) {
+        createGraceDaysProductForLoanTest(graceDays, startType, bucketId, true);
+    }
+
+    private void createGraceDaysProductForLoanTest(final int graceDays, final String startType, final Long bucketId,
+            final boolean overridesAllowed) {
         final String name = "WCLP-GD-" + Utils.randomStringGenerator("", 8);
         final PostWorkingCapitalLoanProductsRequest request = workingCapitalProductRequestFactory.defaultWorkingCapitalLoanProductRequest() //
                 .name(name) //
@@ -3927,6 +4001,12 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .allowAttributeOverrides(new PostAllowAttributeOverrides().delinquencyBucketClassification(true));
         if (bucketId != null) {
             request.delinquencyBucketId(bucketId);
+        }
+        if (!overridesAllowed) {
+            PostAllowAttributeOverrides disallowAttributeOverrides = new PostAllowAttributeOverrides()
+                    .delinquencyBucketClassification(false).breach(false).discountDefault(false).periodPaymentFrequencyType(false)
+                    .periodPaymentFrequency(false);
+            request.allowAttributeOverrides(disallowAttributeOverrides);
         }
         final PostWorkingCapitalLoanProductsResponse response = ok(
                 () -> fineractClient.workingCapitalLoanProducts().createWorkingCapitalLoanProduct(request, Map.of()));
@@ -3944,12 +4024,30 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     @When("Admin creates a working capital loan with grace days override and the following data:")
     public void createLoanWithGraceDaysOverride(final DataTable table) {
+        final PostWorkingCapitalLoansRequest request = buildDelinquencyGraceDaysAndStartTypeLoanRequest(table);
+        submitLoanAndStore(request);
+    }
+
+    @When("Admin failed to create working capital loan with delinquency grace days override while override is disallowed and the following data:")
+    public void createLoanWithDelinquencyGraceDaysOverrideFailure(final DataTable table) {
+        final PostWorkingCapitalLoansRequest loansRequest = buildDelinquencyGraceDaysAndStartTypeLoanRequest(table);
+        String errorMessage = ErrorMessageHelper.overrideDisallowedByProductFailure("delinquencyGraceDays");
+        verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, errorMessage);
+    }
+
+    @When("Admin failed to create working capital loan with delinquency start type override while override is disallowed and the following data:")
+    public void createLoanWithDelinquencyStartTypeOverrideFailure(final DataTable table) {
+        final PostWorkingCapitalLoansRequest loansRequest = buildDelinquencyGraceDaysAndStartTypeLoanRequest(table);
+        String errorMessage = ErrorMessageHelper.overrideDisallowedByProductFailure("delinquencyStartType");
+        verifyCreateWorkingCapitalLoanAccountFailure(loansRequest, 400, errorMessage);
+    }
+
+    public PostWorkingCapitalLoansRequest buildDelinquencyGraceDaysAndStartTypeLoanRequest(final DataTable table) {
         final Map<String, String> row = table.asMaps().getFirst();
-        final PostWorkingCapitalLoansRequest request = buildGraceDaysLoanRequest(row) //
+        return buildGraceDaysLoanRequest(row) //
                 .delinquencyGraceDays(
                         Optional.ofNullable(row.get("delinquencyGraceDays")).filter(s -> !s.isEmpty()).map(Integer::valueOf).orElse(null)) //
                 .delinquencyStartType(row.get("delinquencyStartType"));
-        submitLoanAndStore(request);
     }
 
     private PostWorkingCapitalLoansRequest buildGraceDaysLoanRequest(final Map<String, String> row) {
