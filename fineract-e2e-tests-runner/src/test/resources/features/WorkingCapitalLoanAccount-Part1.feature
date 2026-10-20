@@ -25,6 +25,9 @@ Feature: WorkingCapitalLoanAccount - Part1
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 100.0             | 0.0               | 100.0              | 1.0               | null     |
+    Then Creating a working capital loan whose generated account number is already used is rejected with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               |          |
 
   @TestRailId:C70252
   Scenario: Create Working Capital Loan account - UC3: Create loan with non-default values

@@ -67,7 +67,7 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     private LocalDate lastClosedBusinessDate;
 
     @Setter
-    @Column(name = "account_no", length = 20, unique = true, nullable = false)
+    @Column(name = "account_no", length = 20)
     private String accountNumber;
 
     @Setter

@@ -39,8 +39,8 @@ public interface WorkingCapitalLoanAssembler {
     Map<String, Object> updateFrom(JsonCommand command, WorkingCapitalLoan loan);
 
     /**
-     * If account number was not provided in the request, generates one and sets it on the loan (e.g. after save when id
-     * is available). Aligned with {@code LoanAssembler.accountNumberGeneration}.
+     * If the loan has no account number, generates one and sets it on the loan (after save, when the id is available).
+     * Aligned with {@code LoanAssembler.accountNumberGeneration}.
      */
-    void accountNumberGeneration(JsonCommand command, WorkingCapitalLoan loan);
+    void accountNumberGeneration(WorkingCapitalLoan loan);
 }

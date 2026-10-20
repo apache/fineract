@@ -1230,13 +1230,17 @@ public class WorkingCapitalLoanApplicationDataValidator {
     }
 
     public void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+        handleDataIntegrityIssues(command, command.stringValueOfParameterNamed("accountNo"), realCause, dve);
+    }
+
+    public void handleDataIntegrityIssues(final JsonCommand command, final String accountNo, final Throwable realCause,
+            final Exception dve) {
         if (realCause != null) {
             final String message = realCause.getMessage();
             final Throwable cause = realCause.getCause();
             final String causeMessage = cause != null ? cause.getMessage() : null;
             if ((message != null && message.contains("wc_loan_account_no_UNIQUE"))
                     || (causeMessage != null && causeMessage.contains("wc_loan_account_no_UNIQUE"))) {
-                final String accountNo = command.stringValueOfParameterNamed("accountNo");
                 throw new PlatformDataIntegrityException("error.msg.wc.loan.duplicate.accountNo",
                         "Working Capital Loan with accountNo `" + accountNo + "` already exists", "accountNo", accountNo);
             }

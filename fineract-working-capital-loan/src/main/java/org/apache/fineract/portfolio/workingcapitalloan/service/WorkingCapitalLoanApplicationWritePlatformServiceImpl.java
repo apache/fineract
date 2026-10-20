@@ -81,12 +81,12 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
     @Transactional
     @Override
     public CommandProcessingResult submitApplication(final JsonCommand command) {
+        this.validator.validateForCreate(command);
+        final WorkingCapitalLoan loan = this.assembler.assembleFrom(command);
         try {
-            this.validator.validateForCreate(command);
-            final WorkingCapitalLoan loan = this.assembler.assembleFrom(command);
             final WorkingCapitalLoan saved = this.repository.saveAndFlush(loan);
-            this.assembler.accountNumberGeneration(command, saved);
-            this.repository.saveAndFlush(saved);
+            this.assembler.accountNumberGeneration(saved);
+            this.repository.flush();
             final String submittedOnNote = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.submittedOnNoteParameterName);
             createNote(submittedOnNote, saved);
             saveDatatablesIfProvided(command, saved);
@@ -103,11 +103,11 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
                     .withLoanId(saved.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            this.validator.handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            this.validator.handleDataIntegrityIssues(command, loan.getAccountNumber(), dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            this.validator.handleDataIntegrityIssues(command, throwable, dve);
+            this.validator.handleDataIntegrityIssues(command, loan.getAccountNumber(), throwable, dve);
             return CommandProcessingResult.empty();
         }
     }

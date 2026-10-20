@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet author="fineract" id="wcl-0092-1">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan"/>
+        </preConditions>
+        <dropNotNullConstraint tableName="m_wc_loan" columnName="account_no" columnDataType="VARCHAR(20)"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0092-2">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan"/>
+        </preConditions>
+        <addUniqueConstraint tableName="m_wc_loan" columnNames="account_no" constraintName="wc_loan_account_no_UNIQUE"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0092-3" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <indexExists tableName="m_wc_loan" indexName="account_no"/>
+        </preConditions>
+        <dropUniqueConstraint tableName="m_wc_loan" constraintName="account_no"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0092-3-pg" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <indexExists tableName="m_wc_loan" indexName="m_wc_loan_account_no_key"/>
+        </preConditions>
+        <dropUniqueConstraint tableName="m_wc_loan" constraintName="m_wc_loan_account_no_key"/>
+    </changeSet>
+
+</databaseChangeLog>
