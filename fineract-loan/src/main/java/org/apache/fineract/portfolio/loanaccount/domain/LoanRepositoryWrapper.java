@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.springframework.data.repository.query.Param;
@@ -52,6 +53,7 @@ public class LoanRepositoryWrapper {
 
     private final LoanRepository repository;
     private final FineractProperties fineractProperties;
+    private final PlatformSecurityContext context;
 
     @Transactional(readOnly = true)
     public Loan findOneWithNotFoundDetection(final Long id) {
@@ -78,6 +80,13 @@ public class LoanRepositoryWrapper {
         if (loadLazyCollections) {
             loan.initializeLazyCollections();
         }
+        return loan;
+    }
+
+    @Transactional(readOnly = true)
+    public Loan findOneInUserScope(final Long id, final boolean loadLazyCollections) {
+        final Loan loan = this.findOneWithNotFoundDetection(id, loadLazyCollections);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         return loan;
     }
 
