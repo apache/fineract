@@ -2,16 +2,8 @@
 
 == Description
 
-Move the release candidate from the dev area to the release area using a Subversion server-side copy.
+Confirm the ATR moved the release candidate into the proper final destination.
 
-[source,bash,subs="attributes+"]
-----
-# this is a remote operation
-svn mv -m "Release Fineract {revnumber} 🚢" \
-  https://dist.apache.org/repos/dist/dev/fineract/{revnumber} \
-  https://dist.apache.org/repos/dist/release/fineract/
-----
-
-NOTE: https://www.apache.org/legal/release-policy.html#upload-ci[This must be done by a Fineract PMC member].
+https://dist.apache.org/repos/dist/release/fineract/{revnumber}/
 
 You will now get an automated email from the Apache Reporter Service (no-reply@reporter.apache.org), subject "Please add your release data for 'fineract'" to add the release data (version and date) to the database on https://reporter.apache.org/addrelease.html?fineract (requires PMC membership).
