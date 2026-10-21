@@ -1278,6 +1278,22 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new InvalidLoanTransactionTypeException("transaction", "error.msg.loan.transaction.update.not.allowed", errorMessage);
         }
 
+        if (isAdjustCommand && (transactionToAdjust.isMerchantIssuedRefund() || transactionToAdjust.isPayoutRefund())) {
+            if (loan.getSupportedInterestRefundTransactionTypes().contains(transactionToAdjust.getTypeOf())) {
+                throw new GeneralPlatformDomainRuleException(
+                        "error.msg.loan.transaction.adjust.not.allowed.when.interest.refund.enabled", "Loan transaction: " + transactionId
+                                + " cannot be adjusted as interest refund is enabled for " + transactionToAdjust.getTypeOf().getCode(),
+                        transactionId);
+            }
+            // Decide on the actual data too: replacing the refund would reverse its linked interest refund without
+            // creating a new one
+            if (!loanTransactionRelationRepository.findNonReversedInterestRefundsRelatedTo(transactionToAdjust).isEmpty()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.adjust.not.allowed.when.interest.refund.exists",
+                        "Loan transaction: " + transactionId + " cannot be adjusted as it has a linked interest refund transaction",
+                        transactionId);
+            }
+        }
+
         if (transactionToAdjust.isChargeback() && !loan.isProgressiveSchedule()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.update.not.allowed",
                     "Chargeback transaction: " + transactionId + " reversal is only supported for progressive loans", transactionId);

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <!--
+        Adjusting a Charge Adjustment used to create the replacement without its link to the loan charge. Such rows block
+        any further charge adjustment on the loan, as they cannot be counted against a charge.
+
+        The charge is recovered from the transaction the orphan replaced. Two kinds of steps lead back to it:
+        - an ADJUST command created its resource_id from the transaction in its api_get_url,
+        - a replayed transaction has a REPLAYED (3) relation to the transaction it replaced.
+        The chain is followed until a Charge Adjustment linked to a charge (CHARGE_ADJUSTMENT relation, 2) of the same
+        loan is found. Orphans without such an ancestor, or with ancestors linked to different charges, are left as they
+        are.
+    -->
+    <changeSet author="fineract" id="1036-1">
+        <sql>
+            INSERT INTO m_loan_transaction_relation (from_loan_transaction_id, to_loan_transaction_id, to_loan_charge_id,
+                relation_type_enum, created_by, created_on_utc, last_modified_by, last_modified_on_utc)
+            WITH RECURSIVE orphans AS (
+                SELECT lt.id, lt.loan_id
+                FROM m_loan_transaction lt
+                WHERE lt.transaction_type_enum = 26 AND lt.is_reversed = false
+                  AND NOT EXISTS (SELECT 1 FROM m_loan_transaction_relation r
+                                  WHERE r.from_loan_transaction_id = lt.id AND r.relation_type_enum = 2
+                                    AND r.to_loan_charge_id IS NOT NULL)
+            ), edges AS (
+                SELECT r.from_loan_transaction_id AS child_id, r.to_loan_transaction_id AS parent_id
+                FROM m_loan_transaction_relation r
+                WHERE r.relation_type_enum = 3 AND r.to_loan_transaction_id IS NOT NULL
+                UNION ALL
+                SELECT cs.resource_id AS child_id, original.id AS parent_id
+                FROM m_portfolio_command_source cs
+                JOIN m_loan_transaction original ON original.loan_id = cs.loan_id
+                     AND cs.api_get_url = CONCAT('/loans/', original.loan_id, '/transactions/', original.id)
+                WHERE cs.action_name = 'ADJUST' AND cs.entity_name = 'LOAN' AND cs.resource_id IS NOT NULL
+                  AND cs.resource_id &lt;&gt; original.id
+            ), chain AS (
+                SELECT o.id AS orphan_id, o.loan_id, o.id AS ancestor_id, 0 AS depth
+                FROM orphans o
+                UNION ALL
+                SELECT c.orphan_id, c.loan_id, e.parent_id, c.depth + 1
+                FROM chain c
+                JOIN edges e ON e.child_id = c.ancestor_id
+                WHERE c.depth &lt; 100
+            )
+            SELECT c.orphan_id, NULL, MIN(r.to_loan_charge_id), 2, orphan.created_by, orphan.created_on_utc,
+                orphan.last_modified_by, orphan.last_modified_on_utc
+            FROM chain c
+            JOIN m_loan_transaction ancestor ON ancestor.id = c.ancestor_id AND ancestor.loan_id = c.loan_id
+                 AND ancestor.transaction_type_enum = 26
+            JOIN m_loan_transaction_relation r ON r.from_loan_transaction_id = ancestor.id AND r.relation_type_enum = 2
+            JOIN m_loan_charge lc ON lc.id = r.to_loan_charge_id AND lc.loan_id = c.loan_id
+            JOIN m_loan_transaction orphan ON orphan.id = c.orphan_id
+            GROUP BY c.orphan_id, orphan.created_by, orphan.created_on_utc, orphan.last_modified_by, orphan.last_modified_on_utc
+            HAVING COUNT(DISTINCT r.to_loan_charge_id) = 1
+        </sql>
+    </changeSet>
+</databaseChangeLog>
