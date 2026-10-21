@@ -769,7 +769,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     }
 
     public boolean isEditable() {
-        return !(isChargeback() || isGoodwillCredit() || isPayoutRefund() || isMerchantIssuedRefund());
+        return !isChargeback();
     }
 
     public boolean isPenaltyPayment() {

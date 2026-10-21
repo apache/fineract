@@ -18,16 +18,22 @@
  */
 package org.apache.fineract.portfolio.loanaccount.serialization;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeAdjustmentException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeRefundException;
 import org.springframework.stereotype.Component;
 
@@ -103,5 +109,72 @@ public final class LoanChargeValidator {
             throw new InvalidLoanStateTransitionException("charge.payment", "cannot.be.a.future.date", errorMessage,
                     paymentTransaction.getTransactionDate());
         }
+    }
+
+    /**
+     * Validates the amount of a charge adjustment against the charge. The transaction identified by
+     * excludedTransactionId (if any) is ignored, so the amount of a charge adjustment being replaced counts as
+     * available again.
+     */
+    public void validateChargeAdjustmentAmount(final LoanCharge loanCharge, final BigDecimal transactionAmount,
+            final Long excludedTransactionId) {
+        if (transactionAmount.compareTo(loanCharge.amount()) > 0) {
+            throw new LoanChargeAdjustmentException("loan.charge.adjustment.invalid.amount",
+                    "Transaction amount cannot be higher than the charge amount: " + loanCharge.amount());
+        }
+
+        final BigDecimal availableAmountForAdjustment = calculateAvailableAmountForChargeAdjustment(loanCharge, excludedTransactionId);
+        if (transactionAmount.compareTo(availableAmountForAdjustment) > 0) {
+            throw new LoanChargeAdjustmentException("loan.charge.adjustment.invalid.amount",
+                    "Transaction amount cannot be higher than the available charge amount for adjustment: " + availableAmountForAdjustment);
+        }
+    }
+
+    public void validateLoanStatusForChargeAdjustment(final Loan loan) {
+        if (!(loan.isOpen() || loan.getStatus().isClosedObligationsMet() || loan.getStatus().isOverpaid())) {
+            throw new LoanChargeAdjustmentException("loan.charge.adjustment.invalid.status",
+                    "Adjustment is not supported for the status of " + loan.getStatus().toString());
+        }
+    }
+
+    /**
+     * A charge adjustment cannot be dated before the charge exists on the loan, which is the earlier of its submitted
+     * on date and its due date.
+     */
+    public void validateChargeAdjustmentDate(final LoanCharge loanCharge, final LocalDate transactionDate) {
+        final LocalDate chargeEffectiveDate = Stream.of(loanCharge.getSubmittedOnDate(), loanCharge.getDueLocalDate())
+                .filter(Objects::nonNull).min(LocalDate::compareTo).orElse(null);
+        if (DateUtils.isBefore(transactionDate, chargeEffectiveDate)) {
+            throw new LoanChargeAdjustmentException("loan.charge.adjustment.date.before.charge.date",
+                    "Charge adjustment date cannot be before the charge date: " + chargeEffectiveDate, transactionDate,
+                    chargeEffectiveDate);
+        }
+    }
+
+    // package-private for testing purposes
+    BigDecimal calculateAvailableAmountForChargeAdjustment(final LoanCharge loanCharge, final Long excludedTransactionId) {
+        BigDecimal availableAmountForAdjustment = loanCharge.amount();
+        for (LoanTransaction loanTransaction : loanCharge.getLoan().getLoanTransactions()) {
+            if (loanTransaction.isNotReversed() && loanTransaction.getTypeOf().isChargeAdjustment()
+                    && !Objects.equals(excludedTransactionId, loanTransaction.getId())
+                    && loanCharge.equals(getAdjustedCharge(loanTransaction))) {
+                availableAmountForAdjustment = availableAmountForAdjustment.subtract(loanTransaction.getAmount());
+            }
+        }
+        return availableAmountForAdjustment;
+    }
+
+    /**
+     * Returns the loan charge a charge adjustment transaction belongs to. A charge adjustment without a charge link is
+     * corrupt data: it cannot be counted against any charge, so the request is rejected rather than over-adjusting.
+     */
+    public LoanCharge getAdjustedCharge(final LoanTransaction chargeAdjustmentTransaction) {
+        return chargeAdjustmentTransaction.getLoanTransactionRelations().stream()
+                .filter(relation -> LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT.equals(relation.getRelationType())
+                        && relation.getToCharge() != null)
+                .map(LoanTransactionRelation::getToCharge).findFirst()
+                .orElseThrow(() -> new LoanChargeAdjustmentException("loan.charge.adjustment.charge.not.found",
+                        "Charge adjustment transaction: " + chargeAdjustmentTransaction.getId() + " is not linked to a loan charge",
+                        chargeAdjustmentTransaction.getId()));
     }
 }

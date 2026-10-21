@@ -18,18 +18,21 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
@@ -59,6 +62,7 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
@@ -70,6 +74,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationR
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeAdjustmentException;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorDomainService;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationValidator;
@@ -211,24 +216,10 @@ class LoanAdjustmentServiceImplTest {
         // Mock transaction date
         when(transactionForAdjustment.getTransactionDate()).thenReturn(LocalDate.now(ZoneId.systemDefault()));
 
-        // Mock transaction ID to prevent NullPointerException
-        when(transactionForAdjustment.getId()).thenReturn(1L);
-
-        // Mock loan transactions
+        // Mock the non-reversed interest refunds related to the adjusted one
         LoanTransaction relatedTransaction = mock(LoanTransaction.class);
-        when(relatedTransaction.isNotReversed()).thenReturn(true);
-
-        LoanTransactionRelation transactionRelation = mock(LoanTransactionRelation.class);
-        when(transactionRelation.getRelationType()).thenReturn(LoanTransactionRelationTypeEnum.RELATED);
-        when(transactionRelation.getToTransaction()).thenReturn(transactionForAdjustment);
-
-        Set<LoanTransactionRelation> transactionRelations = new HashSet<>();
-        transactionRelations.add(transactionRelation);
-
-        when(relatedTransaction.getLoanTransactionRelations()).thenReturn(transactionRelations);
-
-        List<LoanTransaction> loanTransactions = Arrays.asList(transactionForAdjustment, relatedTransaction);
-        when(loan.getLoanTransactions()).thenReturn(loanTransactions);
+        when(loanTransactionRelationRepository.findNonReversedInterestRefundsRelatedTo(transactionForAdjustment))
+                .thenReturn(List.of(relatedTransaction));
 
         doNothing().when(loanTransactionValidator).validateActivityNotBeforeClientOrGroupTransferDate(any(), any(), any());
         when(loan.isClosedWrittenOff()).thenReturn(false);
@@ -283,4 +274,51 @@ class LoanAdjustmentServiceImplTest {
         verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any(LoanAdjustTransactionBusinessEvent.class));
     }
 
+    @Test
+    void givenChargeAdjustmentWithoutChargeLink_whenValidateReplacement_thenAdjustmentIsRejected() {
+        LoanTransaction unlinked = chargeAdjustment(Set.of());
+        doCallRealMethod().when(loanChargeValidator).getAdjustedCharge(any());
+
+        LoanChargeAdjustmentException exception = assertThrows(LoanChargeAdjustmentException.class,
+                () -> underTest.validateReplacement(mock(Loan.class), unlinked, BigDecimal.TEN, LocalDate.of(2024, 2, 10)));
+        assertEquals("error.msg.loan.charge.adjustment.charge.not.found", exception.getGlobalisationMessageCode());
+    }
+
+    @Test
+    void givenChargeAdjustmentWithoutChargeLink_whenValidateReplacementForReversal_thenReversalIsAllowed() {
+        LoanTransaction unlinked = chargeAdjustment(Set.of());
+
+        assertDoesNotThrow(() -> underTest.validateReplacement(mock(Loan.class), unlinked, BigDecimal.ZERO, LocalDate.of(2024, 2, 10)));
+        verify(loanChargeValidator, never()).getAdjustedCharge(any());
+    }
+
+    @Test
+    void givenLinkedChargeAdjustment_whenValidateReplacement_thenChargeValidationsRun() {
+        Loan loan = mock(Loan.class);
+        LoanCharge loanCharge = mock(LoanCharge.class);
+        LoanTransactionRelation chargeLink = mock(LoanTransactionRelation.class);
+        when(chargeLink.getRelationType()).thenReturn(LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT);
+        when(chargeLink.getToCharge()).thenReturn(loanCharge);
+        LoanTransaction linked = chargeAdjustment(Set.of(chargeLink));
+        doCallRealMethod().when(loanChargeValidator).getAdjustedCharge(any());
+        doCallRealMethod().when(loanChargeValidator).validateChargeAdjustmentDate(any(), any());
+        when(loanCharge.getSubmittedOnDate()).thenReturn(LocalDate.of(2024, 2, 15));
+        when(loanCharge.getDueLocalDate()).thenReturn(LocalDate.of(2024, 1, 15));
+
+        assertDoesNotThrow(() -> underTest.validateReplacement(loan, linked, BigDecimal.TEN, LocalDate.of(2024, 1, 15)));
+        verify(loanChargeValidator).validateLoanStatusForChargeAdjustment(loan);
+        verify(loanChargeValidator).validateChargeAdjustmentAmount(loanCharge, BigDecimal.TEN, 5L);
+
+        LoanChargeAdjustmentException exception = assertThrows(LoanChargeAdjustmentException.class,
+                () -> underTest.validateReplacement(loan, linked, BigDecimal.TEN, LocalDate.of(2024, 1, 14)));
+        assertEquals("error.msg.loan.charge.adjustment.date.before.charge.date", exception.getGlobalisationMessageCode());
+    }
+
+    private static LoanTransaction chargeAdjustment(Set<LoanTransactionRelation> relations) {
+        LoanTransaction transaction = mock(LoanTransaction.class);
+        lenient().when(transaction.getId()).thenReturn(5L);
+        when(transaction.isChargeAdjustment()).thenReturn(true);
+        lenient().when(transaction.getLoanTransactionRelations()).thenReturn(relations);
+        return transaction;
+    }
 }
