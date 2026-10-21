@@ -244,10 +244,10 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
             data.setBreachEffectiveStartDate(resolveBreachEffectiveStartDate(period, data.getBreachGraceDays()));
         });
 
-        // delinquencyStartDate: fromDate of the earliest delinquent period. The delinquency range schedule bakes the
-        // delinquency grace days into the toDate of its first period, so the fromDate is the raw anchor date.
-        delinquencyRangeScheduleRepository.findTopByLoanIdAndMinPaymentCriteriaMetFalseOrderByFromDateAsc(loan.getId())
-                .ifPresent(period -> {
+        // Same open-past-due definition as pastDueDays: instant classification can mark a period delinquent while
+        // minPaymentCriteriaMet is still NULL (before COB evaluates it), so FALSE-only would leave these empty.
+        delinquencyRangeScheduleRepository.findOpenPastDuePeriodsOrderByFromDateAsc(loan.getId(), ThreadLocalContextUtil.getBusinessDate())
+                .stream().findFirst().ifPresent(period -> {
                     data.setDelinquencyStartDate(period.getFromDate());
                     data.setDelinquencyEffectiveStartDate(resolveDelinquencyEffectiveStartDate(period, data.getDelinquencyGraceDays()));
                     Optional.ofNullable(data.getSummary()).ifPresent(summary -> summary.setOverdueSinceDate(period.getToDate()));

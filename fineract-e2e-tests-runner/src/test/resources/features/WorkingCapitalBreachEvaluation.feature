@@ -372,6 +372,121 @@ Feature: Working Capital Breach Evaluation
       | 1            | 2026-01-01 | 2026-01-25 | 25           | 250.00           | 250.00            | null       | null   |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
 
+  @TestRailId:C115357
+  Scenario: Verify that breach start type is not overridable on create lWC loan account with allow attributes override forbidden on WCLP level - UC1
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides disabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays | breachStartType |
+      | 1               | MONTHS              | FLAT                        | 500          | 5               | DISBURSEMENT    |
+    And Admin failed create a working capital loan with disallowed WCLP overrides using created product with breachStartType "LOAN_CREATION" and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | breachId     |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |              |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-05 | 36           | 500.00           | 500.00            | null       | null   |
+    Then Working capital loan details has the following field values:
+      | breachStartType.code | DISBURSEMENT |
+      | breachGraceDays      | 5            |
+    And Working capital loan account has the correct data:
+      | breachStartDate |
+      | null            |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
+
+  @TestRailId:C115358
+  Scenario: Verify that breach grace days is not overridable on create lWC loan account with allow attributes override forbidden on WCLP level - UC2
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides disabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays | breachStartType | discount |
+      | 1               | MONTHS              | FLAT                        | 500          | 5               | DISBURSEMENT    | 1000     |
+    And Admin failed create a working capital loan with disallowed WCLP overrides using created product with breachGraceDays 11 and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | breachId     |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |              |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-05 | 36           | 500.00           | 500.00            | null       | null   |
+    Then Working capital loan details has the following field values:
+      | breachStartType.code | DISBURSEMENT |
+      | breachGraceDays      | 5            |
+    And Working capital loan account has the correct data:
+      | breachStartDate |
+      | null            |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 10000.0           | 10000.0          | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 1000.0            |                  |                   |                       | false    |
+
+  @TestRailId:C115359
+  Scenario: Verify that breach grace days is not overridable on modify WC loan account with allow attributes override is forbidden on WCLP level - UC3
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides disabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays | breachStartType |
+      | 1               | MONTHS              | FLAT                        | 500          | 5               | DISBURSEMENT    |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    And Admin failed to modify working capital loan with disallowed WCLP overrides using created product with breachGraceDays 11
+    And Admin failed to modify working capital loan with disallowed WCLP overrides using created product with breachStartType "LOAN_CREATION"
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-05 | 36           | 500.00           | 500.00            | null       | null   |
+    Then Working capital loan details has the following field values:
+      | breachStartType.code | DISBURSEMENT |
+      | breachGraceDays      | 5            |
+    And Working capital loan account has the correct data:
+      | breachStartDate |
+      | null            |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
+
+  @TestRailId:C115360
+  Scenario: Verify that breach start type is not overridable on modify WC loan account with allow attributes override is forbidden on WCLP level - UC4
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides disabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays | breachStartType |
+      | 1               | MONTHS              | FLAT                        | 500          | 5               | LOAN_CREATION    |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    And Admin failed to modify working capital loan with disallowed WCLP overrides using created product with breachStartType "DISBURSEMENT"
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-05 | 36           | 500.00           | 500.00            | null       | null   |
+    Then Working capital loan details has the following field values:
+      | breachStartType.code | LOAN_CREATION |
+      | breachGraceDays      | 5             |
+    And Working capital loan account has the correct data:
+      | breachStartDate |
+      | null            |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
+
   @TestRailId:C111071
   Scenario: Verify that breach Id is overridable and applied on modify loan account after undo disbursement - UC2
     When Admin sets the business date to "01 January 2026"

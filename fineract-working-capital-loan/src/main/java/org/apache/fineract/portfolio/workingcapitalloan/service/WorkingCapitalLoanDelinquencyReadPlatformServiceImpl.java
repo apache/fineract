@@ -76,7 +76,7 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImpl implements Wor
             template.setDelinquentPrincipal(delinquentAmount);
         });
 
-        delinquencyRangeScheduleRepository.findTopByLoanIdAndMinPaymentCriteriaMetFalseOrderByFromDateAsc(loanId)
+        delinquencyRangeScheduleRepository.findOpenPastDuePeriodsOrderByFromDateAsc(loanId, businessDate).stream().findFirst()
                 .map(WorkingCapitalLoanDelinquencyRangeSchedule::getDelinquentDays).ifPresent(template::setPastDueDays);
 
         template.setInstallmentLevelDelinquency(list);

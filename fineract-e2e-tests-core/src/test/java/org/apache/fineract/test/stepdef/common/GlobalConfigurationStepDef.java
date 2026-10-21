@@ -55,6 +55,12 @@ public class GlobalConfigurationStepDef {
         globalConfigurationHelper.enableGlobalConfiguration("enable-business-date", 0L);
     }
 
+    // instant delinquency classification is seeded enabled; restore it even when a scenario fails mid-way
+    @After("@WorkingCapitalInstantDelinquencyConfig")
+    public void restoreInstantDelinquencyConfig() {
+        globalConfigurationHelper.enableGlobalConfiguration("enable-instant-delinquency-calculation", 0L);
+    }
+
     @Given("Global configuration {string} is disabled")
     public void disableGlobalConfiguration(String configKey) {
         globalConfigurationHelper.disableGlobalConfiguration(configKey, 0L);

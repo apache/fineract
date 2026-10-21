@@ -84,6 +84,7 @@ public class ClientTransactionTest extends FeignIntegrationTest {
         GetClientsClientIdTransactionsTransactionIdResponse clientTransactionByExternalId = clientHelper
                 .getClientTransaction(clientExternalId, clientChargePaidTransactionId1);
         assertEquals(clientChargePaidTransactionId1, clientTransactionByExternalId.getId());
+        assertEquals(clientChargeId1, clientTransactionByExternalId.getClientChargeId());
 
         GetClientsClientIdTransactionsTransactionIdResponse clientTransactionByTransactionExternalId = clientHelper
                 .getClientTransactionByTransactionExternalId(clientId, clientChargePaidTransactionExternalId);
