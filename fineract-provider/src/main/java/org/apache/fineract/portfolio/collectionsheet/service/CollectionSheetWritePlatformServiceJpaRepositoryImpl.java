@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.service.TransactionBoundApplicationEventPublisher;
+import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetTransactionDataValidator;
@@ -150,6 +151,8 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
                 SavingsAccountTransaction savingsAccountTransaction = this.accountWritePlatformService
                         .mandatorySavingsAccountDeposit(savingsAccountTransactionDTO);
                 depositTransactionIds.add(savingsAccountTransaction.getId());
+            } catch (NoAuthorizationException e) {
+                throw e;
             } catch (Exception e) {
                 // TODO: handle exception
             }
