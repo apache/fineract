@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
@@ -195,8 +196,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
     @Test
     void changeUserPasswordAllowsReuseWhenReuseCheckDisabled() {
         stubOffice();
+        String currentPassword = PASSWORD_ENCODER.encode(RAW_PASSWORD);
         when(user.getEncodedPassword(command, platformPasswordEncoder)).thenReturn(PASSWORD_ENCODER.encode(RAW_PASSWORD));
-        when(user.getPassword()).thenReturn(PASSWORD_ENCODER.encode(RAW_PASSWORD));
+        when(user.getPassword()).thenReturn(currentPassword);
         when(user.changePassword(command, platformPasswordEncoder)).thenReturn(Map.of("password", true));
         when(configurationDomainService.getPasswordReuseRestrictionCount()).thenReturn(null);
 
@@ -204,6 +206,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
 
         assertEquals(USER_ID, result.getResourceId());
         verify(appUserRepository).saveAndFlush(user);
+        verify(appUserPreviewPasswordRepository)
+                .save(argThat((AppUserPreviousPassword saved) -> currentPassword.equals(saved.getPassword())));
         verify(appUserPreviewPasswordRepository, never()).findByUserId(any(), any(PageRequest.class));
     }
 
