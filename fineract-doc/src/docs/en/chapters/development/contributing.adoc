@@ -1,0 +1,53 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on
+// an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= Contributing to Fineract
+
+Apache Fineract welcomes contributions to its backend, documentation, and related projects. This page links the main resources for understanding the platform, choosing a task, setting up a development environment, and asking for help.
+
+== Understand the platform
+
+Before changing code, start with the link:#_architecture[architecture overview] and its link:#_functional_overview[functional overview]. The architecture pages describe the main modules and design; the functional overview introduces the financial services and workflows that Fineract supports.
+
+The link:#_introduction[project introduction] explains where Fineract fits in a financial-services system.
+
+== Find a contribution
+
+Browse unresolved issues in the https://issues.apache.org/jira/projects/FINERACT/issues[Apache Fineract Jira project]. To find tasks marked for volunteers or newcomers, use Jira's advanced search with a query such as:
+
+[source,text]
+----
+project = FINERACT AND resolution = Unresolved
+AND labels in (volunteer, gsoc, "new contributor", beginner, beginner-friendly, "good-first-issue")
+ORDER BY priority DESC, created ASC
+----
+
+Read the issue and its recent comments before starting. If the scope is unclear, ask on the developer mailing list so contributors do not duplicate work. For a code change, include a focused test and keep the pull request limited to one issue.
+
+== Set up and make a change
+
+Use the link:#_fineract_development_environment[development environment guide] to check the required Java version and set up the project. The root https://github.com/apache/fineract/blob/develop/CONTRIBUTING.md[contribution guide] covers tests, formatting, code conventions, and pull request requirements.
+
+For an initial change, choose a small issue, run the most relevant test or documentation build, and describe the observed behavior and the fix in the pull request. Fineract's review and build checks are part of the contribution process; a passing local build does not replace review by the maintainers.
+
+== Ask questions and explore GSoC
+
+Project discussions take place on the https://lists.apache.org/list.html?dev@fineract.apache.org[developer mailing list]. You can also join the https://matrix.to/#/#apache-fineract-home:matrix.org[Apache Fineract Matrix room]. Keep technical questions in public project channels so other contributors can learn from the answers.
+
+The https://summerofcode.withgoogle.com/programs/2026/organizations/apache-software-foundation[ASF GSoC 2026 organization page] links to the projects and ideas for that cycle. Future participation, ideas, and dates are announced by Google and the ASF; check the https://developers.google.com/open-source/gsoc[official GSoC site] and the Fineract developer channels for current information.

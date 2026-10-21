@@ -6,6 +6,8 @@
 
 Tomcat (min. v10) is only needed if you wish to deploy the Fineract WAR to a separate external servlet container. You do not need to install Tomcat to run Fineract. We recommend the use of the self-contained JAR, which transparently embeds a servlet container using Spring Boot.
 
+include::contributing.adoc[leveloffset=+1]
+
 include::git.adoc[leveloffset=+1]
 
 include::gpg.adoc[leveloffset=+1]

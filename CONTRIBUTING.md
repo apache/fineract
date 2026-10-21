@@ -1,5 +1,7 @@
 # Contributing
 
+New to the project? Start with the [Fineract contributor guide](https://fineract.apache.org/docs/develop/#contributing-to-fineract) for an overview of the architecture, issue tracker, development setup, and community channels.
+
 Hello there!
 
 First of all, **Thank You** for contributing to Apache Fineract! We are grateful for your interest in this project.
