@@ -243,6 +243,14 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     /**
      * Check the submitted password against the last N used passwords, and return the current password to save in the
      * password history.
+     * <p>
+     * A plain-text password is checked with {@link PlatformPasswordEncoder#matches}, which runs one bcrypt verification
+     * per history row. With a reuse count of 0 (the whole history), the cost grows with the size of the history. That
+     * is accepted because passwords change rarely.
+     * <p>
+     * A {@code passwordEncoded} value (a password the client has already hashed) has no plain text, so it is compared
+     * with {@code equals}. Stored hashes are salted, so such a value is practically never matched and reuse is not
+     * detected on that path.
      */
     private AppUserPreviousPassword getCurrentPasswordToSaveAsPreview(final AppUser user, final JsonCommand command) {
         final String passWordEncodedValue = user.getEncodedPassword(command, this.platformPasswordEncoder);
