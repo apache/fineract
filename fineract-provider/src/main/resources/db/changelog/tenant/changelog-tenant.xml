@@ -282,4 +282,5 @@
     <include file="parts/0261_transaction_summary_reports_for_working_capital_loans.xml" relativeToChangelogFile="true" />
     <include file="parts/0262_add_configuration_pl_charge_accrual_time.xml" relativeToChangelogFile="true" />
     <include file="parts/0263_update_charge_accrual_date_description.xml" relativeToChangelogFile="true" />
+    <include file="parts/0264_fix_postgresql_report_sql.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
