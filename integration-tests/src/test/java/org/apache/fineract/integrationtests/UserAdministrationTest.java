@@ -228,22 +228,6 @@ public class UserAdministrationTest extends FeignIntegrationTest {
     }
 
     @Test
-    public void testChangePasswordRejectsCurrentPasswordWhenReuseCheckEnabled() {
-        String password = "QwE!5rTy#9uP0";
-        Long userId = createUserWithPassword(password);
-
-        setPasswordReuseCheck(true);
-        try {
-            CallFailedRuntimeException exception = FeignCalls
-                    .fail(() -> fineractClient().users().changePasswordUser(userId, changePasswordRequest(password)));
-            Assertions.assertEquals(400, exception.getStatus());
-            Assertions.assertEquals("error.msg.password.already.used", FeignErrors.errorGlobalisationCode(exception));
-        } finally {
-            setPasswordReuseCheck(false);
-        }
-    }
-
-    @Test
     public void testUpdateUserRejectsPreviouslyUsedPasswordWhenReuseCheckEnabled() {
         String originalPassword = "QwE!5rTy#9uP0";
         String updatedPassword = "pX268-4Pfv|kF6";

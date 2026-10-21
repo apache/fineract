@@ -240,8 +240,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     }
 
     /**
-     * Check the submitted password against the current password and the last N used passwords, and return the current
-     * password to save in the password history.
+     * Check the submitted password against the last N used passwords, and return the current password to save in the
+     * password history.
      */
     private AppUserPreviousPassword getCurrentPasswordToSaveAsPreview(final AppUser user, final JsonCommand command) {
         final String passWordEncodedValue = user.getEncodedPassword(command, this.platformPasswordEncoder);
@@ -254,9 +254,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 final String rawPassword = command.hasParameter(AppUserConstants.PASSWORD)
                         ? command.stringValueOfParameterNamed(AppUserConstants.PASSWORD)
                         : null;
-                if (isSamePassword(rawPassword, passWordEncodedValue, user.getPassword())) {
-                    throw new PasswordPreviouslyUsedException();
-                }
                 List<AppUserPreviousPassword> previousPasswords;
                 if (passwordReuseRestrictionCount == 0) {
                     previousPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),

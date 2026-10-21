@@ -160,7 +160,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
     void changeUserPasswordThrowsWhenRawPasswordMatchesPreviousPasswordHash() {
         stubRawPasswordCommand(RAW_PASSWORD);
         when(user.getId()).thenReturn(USER_ID);
-        when(user.getPassword()).thenReturn(PASSWORD_ENCODER.encode(OTHER_RAW_PASSWORD));
         when(configurationDomainService.getPasswordReuseRestrictionCount()).thenReturn(3);
 
         AppUserPreviousPassword previousPassword = mock(AppUserPreviousPassword.class);
@@ -169,19 +168,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
 
         assertThrows(PasswordPreviouslyUsedException.class, () -> underTest.changeUserPassword(USER_ID, command));
 
-        verify(appUserRepository, never()).saveAndFlush(user);
-        verify(appUserPreviewPasswordRepository, never()).save(any(AppUserPreviousPassword.class));
-    }
-
-    @Test
-    void changeUserPasswordThrowsWhenRawPasswordMatchesCurrentPassword() {
-        stubRawPasswordCommand(RAW_PASSWORD);
-        when(user.getPassword()).thenReturn(PASSWORD_ENCODER.encode(RAW_PASSWORD));
-        when(configurationDomainService.getPasswordReuseRestrictionCount()).thenReturn(3);
-
-        assertThrows(PasswordPreviouslyUsedException.class, () -> underTest.changeUserPassword(USER_ID, command));
-
-        verify(appUserPreviewPasswordRepository, never()).findByUserId(any(), any(PageRequest.class));
         verify(appUserRepository, never()).saveAndFlush(user);
         verify(appUserPreviewPasswordRepository, never()).save(any(AppUserPreviousPassword.class));
     }
