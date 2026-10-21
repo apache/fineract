@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationApiConstant;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -41,6 +42,26 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GlobalConfigurationDataValidator {
+
+    /**
+     * Allowed values of the string configurations that the platform interprets. Without this check any text is stored
+     * and the problem only shows up later, when the configuration is read: an unknown
+     * {@code outstanding-interest-calculation-strategy-for-external-asset-transfer} throws during asset transfers, and
+     * an unknown {@code next-payment-due-date} or {@code charge-accrual-date} silently falls back to other behaviour.
+     * {@code ignoreCase} mirrors how the value is compared where it is used.
+     */
+    private static final Map<String, AllowedStringValues> ALLOWED_STRING_VALUES = Map.of(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE,
+            new AllowedStringValues(List.of("earliest-unpaid-date", "next-unpaid-due-date"), true),
+            GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE, new AllowedStringValues(List.of("due-date", "submitted-date"), true),
+            GlobalConfigurationConstants.ASSET_OWNER_TRANSFER_OUTSTANDING_INTEREST_CALCULATION_STRATEGY,
+            new AllowedStringValues(List.of("TOTAL_OUTSTANDING_INTEREST", "PAYABLE_OUTSTANDING_INTEREST"), false));
+
+    private record AllowedStringValues(List<String> values, boolean ignoreCase) {
+
+        boolean allows(final String value) {
+            return values.stream().anyMatch(allowed -> ignoreCase ? allowed.equalsIgnoreCase(value) : allowed.equals(value));
+        }
+    }
 
     private final FromJsonHelper fromApiJsonHelper;
     private static final Set<String> UPDATE_CONFIGURATION_DATA_PARAMETERS = new HashSet<>(
@@ -91,5 +112,30 @@ public class GlobalConfigurationDataValidator {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
+    }
+
+    /**
+     * Rejects a {@code stringValue} that the named configuration does not support. Configurations without a fixed set
+     * of values (for example folder names or GL account lists) and blank values (which fall back to the default) are
+     * not checked.
+     */
+    public void validateStringValueForUpdate(final String configurationName, final JsonCommand command) {
+        final AllowedStringValues allowed = ALLOWED_STRING_VALUES.get(configurationName);
+        final JsonElement element = this.fromApiJsonHelper.parse(command.json());
+        if (allowed == null || !this.fromApiJsonHelper.parameterExists(GlobalConfigurationApiConstant.STRING_VALUE, element)) {
+            return;
+        }
+        final String stringValue = this.fromApiJsonHelper.extractStringNamed(GlobalConfigurationApiConstant.STRING_VALUE, element);
+        if (StringUtils.isBlank(stringValue) || allowed.allows(stringValue)) {
+            return;
+        }
+        final String parameter = GlobalConfigurationApiConstant.STRING_VALUE;
+        final String valuesList = String.join(", ", allowed.values());
+        final ApiParameterError error = ApiParameterError.parameterErrorWithValue(
+                "validation.msg." + GlobalConfigurationApiConstant.CONFIGURATION_RESOURCE_NAME + "." + parameter
+                        + ".is.not.one.of.expected.enumerations",
+                "The parameter `" + parameter + "` must be one of [ " + valuesList + " ] for configuration `" + configurationName + "`.",
+                parameter, stringValue, allowed.values().toArray());
+        throw new PlatformApiDataValidationException(List.of(error));
     }
 }
