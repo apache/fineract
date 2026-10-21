@@ -54,7 +54,7 @@ class WorkingCapitalLoanNearBreachRederivationTest {
     private static final LocalDate TODAY = LocalDate.of(2026, 6, 1);
     private static final LocalDate LATEST_COB_DATE = LocalDate.of(2026, 5, 31);
     private static final NearBreachParameters PARAMETERS = new NearBreachParameters(BigDecimal.valueOf(33), 3,
-            WorkingCapitalLoanPeriodFrequencyType.DAYS, 0);
+            WorkingCapitalLoanPeriodFrequencyType.DAYS, 0, List.of(), List.of());
 
     @Mock
     private WorkingCapitalLoanNearBreachEvaluationService evaluationService;

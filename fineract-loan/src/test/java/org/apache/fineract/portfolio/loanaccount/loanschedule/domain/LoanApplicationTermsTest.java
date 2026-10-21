@@ -121,6 +121,6 @@ class LoanApplicationTermsTest {
                 emptyList(), BigDecimal.valueOf(36_000L), null, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null,
                 null, null, ZERO, null, NONE, null, ZERO, emptyList(), true, 0, false, holidayDetailDTO, false, false, false, null, false,
                 false, null, false, DISBURSEMENT_DATE, disbursementDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, null, false,
-                null, null, false, null, false, null, null, null, false, null, null, null, false, false);
+                null, null, false, null, false, null, null, null, false, null, null, null, false, false, null);
     }
 }
