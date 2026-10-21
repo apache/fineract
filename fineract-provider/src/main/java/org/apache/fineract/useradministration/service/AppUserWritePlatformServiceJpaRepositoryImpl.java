@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -251,9 +252,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         if (passWordEncodedValue != null) {
             final Integer passwordReuseRestrictionCount = this.configurationDomainService.getPasswordReuseRestrictionCount();
             if (passwordReuseRestrictionCount != null) {
-                final String rawPassword = command.hasParameter(AppUserConstants.PASSWORD)
-                        ? command.stringValueOfParameterNamed(AppUserConstants.PASSWORD)
-                        : null;
+                final String rawPassword = command.stringValueOfParameterNamedAllowingNull(AppUserConstants.PASSWORD);
+                final Predicate<String> matchesSubmittedPassword = rawPassword != null
+                        ? storedPassword -> this.platformPasswordEncoder.matches(rawPassword, storedPassword)
+                        : passWordEncodedValue::equals;
                 List<AppUserPreviousPassword> previousPasswords;
                 if (passwordReuseRestrictionCount == 0) {
                     previousPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),
@@ -263,7 +265,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     previousPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(), pageRequest);
                 }
                 for (AppUserPreviousPassword aPreviewPassword : previousPasswords) {
-                    if (isSamePassword(rawPassword, passWordEncodedValue, aPreviewPassword.getPassword())) {
+                    if (matchesSubmittedPassword.test(aPreviewPassword.getPassword())) {
                         throw new PasswordPreviouslyUsedException();
                     }
                 }
@@ -273,13 +275,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         }
 
         return currentPasswordToSaveAsPreview;
-    }
-
-    private boolean isSamePassword(final String rawPassword, final String encodedPassword, final String storedPassword) {
-        if (rawPassword != null) {
-            return this.platformPasswordEncoder.matches(rawPassword, storedPassword);
-        }
-        return encodedPassword.equals(storedPassword);
     }
 
     private Set<Role> assembleSetOfRoles(final String[] rolesArray) {

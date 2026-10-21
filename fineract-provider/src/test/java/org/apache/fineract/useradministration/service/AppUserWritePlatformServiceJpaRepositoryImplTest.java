@@ -209,8 +209,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
 
     private void stubRawPasswordCommand(String rawPassword) {
         String encodedPassword = PASSWORD_ENCODER.encode(rawPassword);
-        when(command.hasParameter(AppUserConstants.PASSWORD)).thenReturn(true);
-        when(command.stringValueOfParameterNamed(AppUserConstants.PASSWORD)).thenReturn(rawPassword);
+        when(command.stringValueOfParameterNamedAllowingNull(AppUserConstants.PASSWORD)).thenReturn(rawPassword);
         when(user.getEncodedPassword(command, platformPasswordEncoder)).thenReturn(encodedPassword);
     }
 
