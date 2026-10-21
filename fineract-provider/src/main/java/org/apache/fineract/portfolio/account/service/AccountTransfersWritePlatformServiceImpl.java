@@ -44,6 +44,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.AccountTransfersDataValidator;
@@ -96,6 +98,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final FineractProperties fineractProperties;
     private final LoanAdjustmentService loanAdjustmentService;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
+    private final PlatformSecurityContext context;
 
     @Transactional
     @Override
@@ -521,6 +524,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
         final PaymentDetail paymentDetail = null;
         final AccountTransferDetails accountTransferDetails = transaction.getAccountTransferDetails();
+        validateAccessRights(accountTransferDetails);
 
         PortfolioAccountType fromAccountType = accountTransferDetails.fromLoanAccount() != null ? PortfolioAccountType.LOAN
                 : accountTransferDetails.fromSavingsAccount() != null ? PortfolioAccountType.SAVINGS : throwUnsupported();
@@ -553,6 +557,15 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 .withEntityId(transaction.getId());
 
         return builder.build();
+    }
+
+    private void validateAccessRights(final AccountTransferDetails accountTransferDetails) {
+        final Office fromOffice = accountTransferDetails.fromSavingsAccount() != null ? accountTransferDetails.fromSavingsAccount().office()
+                : accountTransferDetails.fromLoanAccount().getOffice();
+        final Office toOffice = accountTransferDetails.toSavingsAccount() != null ? accountTransferDetails.toSavingsAccount().office()
+                : accountTransferDetails.toLoanAccount().getOffice();
+        this.context.validateAccessRights(fromOffice.getHierarchy());
+        this.context.validateAccessRights(toOffice.getHierarchy());
     }
 
     private static PortfolioAccountType throwUnsupported() {

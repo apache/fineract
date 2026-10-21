@@ -350,6 +350,32 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     }
 
     @Test
+    void undoTransaction_shouldCheckUserScopeWhenCalledByUser() {
+        Long savingsId = 1L;
+        Long transactionId = 7L;
+
+        when(savingAccountAssembler.assembleFromInUserScope(savingsId, false)).thenReturn(mock(SavingsAccount.class));
+
+        assertThatThrownBy(() -> service.undoTransaction(savingsId, transactionId, false))
+                .isInstanceOf(SavingsAccountTransactionNotFoundException.class);
+        verify(savingAccountAssembler).assembleFromInUserScope(savingsId, false);
+        verify(savingAccountAssembler, never()).assembleFrom(savingsId, false);
+    }
+
+    @Test
+    void undoTransaction_shouldSkipUserScopeForAccountTransferReversal() {
+        Long savingsId = 1L;
+        Long transactionId = 7L;
+
+        when(savingAccountAssembler.assembleFrom(savingsId, false)).thenReturn(mock(SavingsAccount.class));
+
+        assertThatThrownBy(() -> service.undoTransaction(savingsId, transactionId, true))
+                .isInstanceOf(SavingsAccountTransactionNotFoundException.class);
+        verify(savingAccountAssembler).assembleFrom(savingsId, false);
+        verify(savingAccountAssembler, never()).assembleFromInUserScope(anyLong(), anyBoolean());
+    }
+
+    @Test
     void postInterest_shouldValidateRequestAndUpdateManualInterestPostingExternalId() {
         Long savingsId = 1L;
         LocalDate transactionDate = LocalDate.of(2024, 4, 5);

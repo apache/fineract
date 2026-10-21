@@ -792,7 +792,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
-        final SavingsAccount account = this.savingAccountAssembler.assembleFromInUserScope(savingsId, false);
+        // Account transfer reversals are side effects of an action already checked on the triggering account
+        final SavingsAccount account = allowAccountTransferModification ? this.savingAccountAssembler.assembleFrom(savingsId, false)
+                : this.savingAccountAssembler.assembleFromInUserScope(savingsId, false);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
