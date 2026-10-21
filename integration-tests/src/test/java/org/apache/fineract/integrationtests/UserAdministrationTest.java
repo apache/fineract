@@ -30,6 +30,7 @@ import org.apache.fineract.client.models.ChangePwdUsersUserIdRequest;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.GetUsersUserIdResponse;
+import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -214,7 +215,9 @@ public class UserAdministrationTest extends FeignIntegrationTest {
         String updatedPassword = "pX268-4Pfv|kF6";
         Long userId = createUserWithPassword(originalPassword);
 
-        setPasswordReuseCheck(true);
+        GlobalConfigurationPropertyData originalReuseCheck = globalConfigurationHelper
+                .getGlobalConfigurationByName(GlobalConfigurationConstants.PASSWORD_REUSE_CHECK_HISTORY_COUNT);
+        setPasswordReuseCheck(true, 3L);
         try {
             ok(() -> fineractClient().users().updateUser(userId,
                     new PutUsersUserIdRequest().password(updatedPassword).repeatPassword(updatedPassword)));
@@ -224,7 +227,7 @@ public class UserAdministrationTest extends FeignIntegrationTest {
             Assertions.assertEquals(400, exception.getStatus());
             Assertions.assertEquals("error.msg.password.already.used", FeignErrors.errorGlobalisationCode(exception));
         } finally {
-            setPasswordReuseCheck(false);
+            setPasswordReuseCheck(originalReuseCheck.getEnabled(), originalReuseCheck.getValue());
         }
     }
 
@@ -308,9 +311,9 @@ public class UserAdministrationTest extends FeignIntegrationTest {
         return userId;
     }
 
-    private void setPasswordReuseCheck(boolean enabled) {
+    private void setPasswordReuseCheck(Boolean enabled, Long value) {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.PASSWORD_REUSE_CHECK_HISTORY_COUNT,
-                new PutGlobalConfigurationsRequest().enabled(enabled).value(3L));
+                new PutGlobalConfigurationsRequest().enabled(enabled).value(value));
     }
 
 }
