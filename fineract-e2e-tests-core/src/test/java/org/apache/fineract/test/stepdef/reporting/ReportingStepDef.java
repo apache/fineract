@@ -231,11 +231,14 @@ public class ReportingStepDef extends AbstractStepDef {
             List<String> headers) {
         for (int i = 1; i < expected.size(); i++) {
             final List<String> expRow = expected.get(i).stream().map(v -> v == null ? "" : v).toList();
-            String expectedDescription = expRow.get(3);
-            String expectedAssetOwnerId = expRow.get(4);
+            // Rows are identified by product, GL account, description and asset owner (columns 1-4), so a report
+            // listing the same GL account for several products is matched to the right row.
             final List<String> actRow = actual.stream()
-                    .filter(actualRow -> actualRow.contains(expectedDescription) && actualRow.contains(expectedAssetOwnerId)).findFirst()
-                    .orElseThrow(() -> new RuntimeException(String.format("No such row is found in %s report!", reportName)));
+                    .filter(actualRow -> IntStream.rangeClosed(1, 4)
+                            .allMatch(k -> expRow.get(k).isEmpty() || expRow.get(k).equals(actualRow.get(k))))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException(String.format("No such row is found in %s report: %s%nAll actual rows:%n%s",
+                            reportName, expRow, formatRows(actual))));
             for (int j = 0; j < headers.size(); j++) {
                 if (expRow.get(j).isEmpty()) {
                     assertThat(actRow.get(j).isEmpty() || actRow.get(j).equals("null")).isTrue();
