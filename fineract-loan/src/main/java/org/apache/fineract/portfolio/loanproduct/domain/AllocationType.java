@@ -32,7 +32,7 @@ public enum AllocationType {
     FEE("Fee"), //
     PRINCIPAL("Principal"), //
     INTEREST("Interest"), //
-    PRINCIPAL_ONLY("Principal only"); // <-- الاختيار الجديد بتاعنا هنا
+    PRINCIPAL_ONLY("Principal only");
 
     private final String humanReadableName;
 
