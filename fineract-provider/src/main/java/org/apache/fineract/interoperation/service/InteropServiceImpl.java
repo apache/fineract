@@ -224,7 +224,7 @@ public class InteropServiceImpl implements InteropService {
         InteropTransactionsData interopTransactionsData = InteropTransactionsData.build(savingsAccount, transFilter);
         for (InteropTransactionData interopTransactionData : interopTransactionsData.getTransactions()) {
             final List<Note> transactionNotes = noteRepository
-                    .findBySavingsTransactionId(Long.valueOf(interopTransactionData.getTransactionId()));
+                    .findBySavingsTransactionId(Long.valueOf(interopTransactionData.getSavingTransactionId()));
             StringBuilder sb = new StringBuilder();
             for (final Note note : transactionNotes) {
                 String s = note.getNote();
