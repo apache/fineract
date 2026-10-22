@@ -34,7 +34,8 @@ public enum ChargeTimeType {
     SHARE_ACCOUNT_ACTIVATE(13), //
     SHARE_PURCHASE(14), //
     SHARE_REDEEM(15), //
-    SAVING_NO_ACTIVITY_FEE(16); //
+    SAVING_NO_ACTIVITY_FEE(16), //
+    DOWN_PAYMENT(17); //
 
     public final Integer value;
 

@@ -1570,6 +1570,9 @@ public class LoanScheduleAssembler {
 
         if (expectedDisbursementDate != null) {
             loan.setExpectedDisbursementDate(expectedDisbursementDate);
+            if (loan.getDisbursementDetails().isEmpty()) {
+                loanDisbursementService.moveDownPaymentFeesToExpectedDisbursementDate(loan, expectedDisbursementDate);
+            }
             actualChanges.put(EXPECTED_DISBURSEMENT_DATE, expectedDisbursementDate);
         }
 

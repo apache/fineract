@@ -21,10 +21,14 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.im
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
+import org.apache.fineract.portfolio.loanaccount.domain.DownPaymentFees;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.jspecify.annotations.NonNull;
@@ -74,6 +78,60 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
         return isTransaction() && loanTransaction.get().isAccrualActivity();
     }
 
+    private boolean isDownPaymentFee() {
+        return loanCharge.map(LoanCharge::isDueAtDownPayment).orElse(false);
+    }
+
+    private boolean isDownPaymentTransaction() {
+        return loanTransaction.map(LoanTransaction::isDownPayment).orElse(false);
+    }
+
+    /**
+     * The down payment transaction that pays this down payment fee: the one of the fee's down payment period (see
+     * {@link DownPaymentFees}). The fee is ordered right before it, whenever the fee was added.
+     */
+    private Optional<LoanTransaction> downPaymentAnchor() {
+        return loanCharge.filter(LoanCharge::isDueAtDownPayment).flatMap(ChangeOperation::findDownPaymentAnchor);
+    }
+
+    private static Optional<LoanTransaction> findDownPaymentAnchor(final LoanCharge fee) {
+        final Loan loan = fee.getLoan();
+        final LocalDate dueDate = fee.getDueLocalDate();
+        if (loan == null || dueDate == null) {
+            return Optional.empty();
+        }
+        final List<LoanTransaction> downPayments = loan.getLoanTransactions().stream()
+                .filter(t -> t.isNotReversed() && t.isDownPayment() && DateUtils.isEqual(dueDate, t.getTransactionDate()))
+                .sorted(Comparator.comparing(LoanTransaction::getId, Comparator.nullsLast(Long::compareTo))).toList();
+        if (downPayments.isEmpty()) {
+            return Optional.empty();
+        }
+        final int periodIndex = DownPaymentFees.periodIndexOf(fee,
+                DownPaymentFees.downPaymentPeriodsOn(loan.getRepaymentScheduleInstallments(), dueDate).size());
+        return Optional.of(downPayments.get(Math.min(periodIndex, downPayments.size() - 1)));
+    }
+
+    private boolean isSameTransactionAs(final ChangeOperation other) {
+        return loanTransaction.isPresent() && loanTransaction.equals(other.loanTransaction);
+    }
+
+    /**
+     * Compares by the anchor transactions (a down payment fee stands for its down payment transaction, anything else
+     * for itself); a fee goes right before its own down payment, fees of the same down payment by id.
+     */
+    private int compareByDownPaymentAnchor(final ChangeOperation o, final ChangeOperation thisKey, final ChangeOperation otherKey) {
+        if (!thisKey.isSameTransactionAs(otherKey)) {
+            return thisKey.compareTo(otherKey);
+        }
+        final boolean thisIsAnchoredFee = thisKey != this;
+        final boolean otherIsAnchoredFee = otherKey != o;
+        if (thisIsAnchoredFee != otherIsAnchoredFee) {
+            return thisIsAnchoredFee ? -1 : 1;
+        }
+        return Comparator.nullsLast(Long::compareTo).compare(loanCharge.map(LoanCharge::getId).orElse(null),
+                o.loanCharge.map(LoanCharge::getId).orElse(null));
+    }
+
     private boolean isBackdatedCharge() {
         return isCharge() && loanCharge.isPresent() && loanCharge.get().getDueDate() != null
                 && DateUtils.isBefore(loanCharge.get().getDueDate(), loanCharge.get().getSubmittedOnDate());
@@ -83,6 +141,9 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
         if (loanTermVariationsData.isPresent()) {
             return getSubmittedOnDate();
         } else if (loanCharge.isPresent()) {
+            if (loanCharge.get().isDueAtDownPayment() && loanCharge.get().getDueDate() != null) {
+                return loanCharge.get().getDueDate();
+            }
             if (isBackdatedCharge()) {
                 return loanCharge.get().getDueDate();
             } else if (isInstallmentFee()) {
@@ -139,6 +200,17 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
                 return -1;
             }
             if (this.isCharge() && this.isInstallmentFee() && otherIsDisb) {
+                return 1;
+            }
+            final ChangeOperation thisKey = downPaymentAnchor().map(ChangeOperation::new).orElse(this);
+            final ChangeOperation otherKey = o.downPaymentAnchor().map(ChangeOperation::new).orElse(o);
+            if (thisKey != this || otherKey != o) {
+                return compareByDownPaymentAnchor(o, thisKey, otherKey);
+            }
+            if ((thisIsDisb && o.isDownPaymentFee()) || (isDownPaymentFee() && o.isDownPaymentTransaction())) {
+                return -1;
+            }
+            if ((isDownPaymentFee() && otherIsDisb) || (isDownPaymentTransaction() && o.isDownPaymentFee())) {
                 return 1;
             }
 
