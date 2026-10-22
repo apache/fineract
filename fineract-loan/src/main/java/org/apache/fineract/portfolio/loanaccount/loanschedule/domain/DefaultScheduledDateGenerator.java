@@ -419,16 +419,22 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
     }
 
     /*
-     * A due date rolled forward to the 1st stands for the month before it, so stepping back from it has to start from
-     * that month and land on the anchor day again - otherwise 1 March minus one month is 1 February, and the first
-     * period looks a day shorter than it is.
+     * Mirror the forward generation (plusMonths + month-end strategy) when stepping back from the first due date,
+     * otherwise the first period looks longer than it is and interest is charged from before the disbursement:
+     *
+     * - clamped first due date (31 January -> 28 February): plain minusMonths lands on 28 January, before the anchor
+     * day, so the stepped-back date is snapped onto the anchor day again (FINERACT-2968);
+     *
+     * - first due date rolled forward to the 1st stands for the month before it, so stepping back has to start from
+     * that month and land on the anchor day again - otherwise 1 March minus one month is 1 February.
      */
     private LocalDate idealDisbursementDateForMonthlyRepayments(final int repaidEvery, final LocalDate firstRepaymentDate,
             final LoanApplicationTerms loanApplicationTerms) {
-        final MonthEndDueDateStrategy monthEndDueDateStrategy = loanApplicationTerms.getMonthEndDueDateStrategy();
-        if (!MonthEndDueDateStrategy.rollsForward(monthEndDueDateStrategy) || loanApplicationTerms.getSeedDate() == null) {
+        if (loanApplicationTerms.getSeedDate() == null) {
             return firstRepaymentDate.minusMonths(repaidEvery);
         }
+        final MonthEndDueDateStrategy monthEndDueDateStrategy = loanApplicationTerms.getMonthEndDueDateStrategy();
+        // no-op unless the strategy rolls forward
         final LocalDate unrolledFirstRepaymentDate = LoanApplicationTerms.unrollChainedDueDate(loanApplicationTerms, firstRepaymentDate);
         return (LocalDate) MonthlyDueDateResolver.adjustDate(unrolledFirstRepaymentDate.minusMonths(repaidEvery),
                 loanApplicationTerms.getSeedDate(), PeriodFrequencyType.MONTHS, monthEndDueDateStrategy);
