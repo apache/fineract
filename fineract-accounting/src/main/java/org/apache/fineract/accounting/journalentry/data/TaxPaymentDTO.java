@@ -19,8 +19,11 @@
 package org.apache.fineract.accounting.journalentry.data;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 
 @RequiredArgsConstructor
 @Getter
@@ -29,4 +32,18 @@ public class TaxPaymentDTO {
     private final Long debitAccountId;
     private final Long creditAccountId;
     private final BigDecimal amount;
+
+    public static List<TaxPaymentDTO> share(final List<TaxPaymentDTO> taxPayments, final BigDecimal part, final BigDecimal whole) {
+        return taxPayments.stream().map(tax -> new TaxPaymentDTO(tax.debitAccountId, tax.creditAccountId,
+                tax.amount.multiply(part).divide(whole, tax.amount.scale(), MoneyHelper.getRoundingMode()))).toList();
+    }
+
+    public static List<TaxPaymentDTO> remainder(final List<TaxPaymentDTO> taxPayments, final List<TaxPaymentDTO> share) {
+        final List<TaxPaymentDTO> remainder = new ArrayList<>();
+        for (int i = 0; i < taxPayments.size(); i++) {
+            final TaxPaymentDTO tax = taxPayments.get(i);
+            remainder.add(new TaxPaymentDTO(tax.debitAccountId, tax.creditAccountId, tax.amount.subtract(share.get(i).amount)));
+        }
+        return remainder;
+    }
 }

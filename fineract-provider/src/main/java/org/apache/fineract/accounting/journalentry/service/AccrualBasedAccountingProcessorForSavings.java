@@ -28,6 +28,7 @@ import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivi
 import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.SavingsDTO;
 import org.apache.fineract.accounting.journalentry.data.SavingsTransactionDTO;
+import org.apache.fineract.accounting.journalentry.data.TaxPaymentDTO;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.springframework.stereotype.Component;
@@ -210,29 +211,32 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
 
             /** Handle Fees Deductions and reversals of Fees Deductions **/
             else if (savingsTransactionDTO.getTransactionType().isFeeDeduction() && savingsTransactionDTO.isOverdraftTransaction()) {
+                final List<TaxPaymentDTO> overdraftTaxPayments = TaxPaymentDTO.share(savingsTransactionDTO.getTaxPayments(),
+                        overdraftAmount, amount);
                 boolean isPositive = amount.subtract(overdraftAmount).compareTo(BigDecimal.ZERO) > 0;
                 // Is the Charge a penalty?
                 if (penaltyPayments.size() > 0) {
                     this.helper.createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
                             AccrualAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL, AccrualAccountsForSavings.INCOME_FROM_PENALTIES,
                             savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, overdraftAmount, isReversal,
-                            penaltyPayments);
+                            penaltyPayments, overdraftTaxPayments);
                     if (isPositive) {
                         this.helper.createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
                                 AccrualAccountsForSavings.SAVINGS_CONTROL, AccrualAccountsForSavings.INCOME_FROM_PENALTIES,
                                 savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate,
-                                amount.subtract(overdraftAmount), isReversal, penaltyPayments);
+                                amount.subtract(overdraftAmount), isReversal, penaltyPayments,
+                                TaxPaymentDTO.remainder(savingsTransactionDTO.getTaxPayments(), overdraftTaxPayments));
                     }
                 } else {
                     this.helper.createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
                             AccrualAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL, AccrualAccountsForSavings.INCOME_FROM_FEES,
                             savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, overdraftAmount, isReversal,
-                            feePayments);
+                            feePayments, overdraftTaxPayments);
                     if (isPositive) {
                         this.helper.createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
                                 AccrualAccountsForSavings.SAVINGS_CONTROL, AccrualAccountsForSavings.INCOME_FROM_FEES, savingsProductId,
                                 paymentTypeId, savingsId, transactionId, transactionDate, amount.subtract(overdraftAmount), isReversal,
-                                feePayments);
+                                feePayments, TaxPaymentDTO.remainder(savingsTransactionDTO.getTaxPayments(), overdraftTaxPayments));
                     }
                 }
             }
@@ -242,11 +246,13 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
                 if (penaltyPayments.size() > 0) {
                     this.helper.createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
                             AccrualAccountsForSavings.SAVINGS_CONTROL, AccrualAccountsForSavings.INCOME_FROM_PENALTIES, savingsProductId,
-                            paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal, penaltyPayments);
+                            paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal, penaltyPayments,
+                            savingsTransactionDTO.getTaxPayments());
                 } else {
                     this.helper.createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
                             AccrualAccountsForSavings.SAVINGS_CONTROL, AccrualAccountsForSavings.INCOME_FROM_FEES, savingsProductId,
-                            paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal, feePayments);
+                            paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal, feePayments,
+                            savingsTransactionDTO.getTaxPayments());
                 }
             }
 
