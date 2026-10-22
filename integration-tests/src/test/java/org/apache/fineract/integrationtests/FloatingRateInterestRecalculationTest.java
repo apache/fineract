@@ -28,11 +28,13 @@ import java.util.List;
 import org.apache.fineract.client.models.FloatingRateCreateRequest;
 import org.apache.fineract.client.models.FloatingRateCreateResponse;
 import org.apache.fineract.client.models.FloatingRatePeriodRequest;
+import org.apache.fineract.client.models.FloatingRateUpdateRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -57,6 +59,52 @@ public class FloatingRateInterestRecalculationTest extends FeignLoanTestBase {
     @Test
     public void testOverPaymentRecalculatesEmiOnFloatingRateChange() {
         runFloatingRateRecalculationScenario(true);
+    }
+
+    /**
+     * FINERACT-2921: a floating rate period added after the loan is already active has no repayment to trigger
+     * recalculation - only the nightly "Recalculate Interest For Loans" job selects it. That selection used to filter
+     * on m_floating_rates_periods.created_date, which is never written (the entity only populates created_on_utc via
+     * JPA auditing), so the job never picked up loans affected by a rate change like this one.
+     */
+    @Test
+    public void testScheduledJobRecalculatesEmiOnFloatingRateChangeAddedAfterDisbursement() {
+        runAt("01 February 2024", () -> {
+            Long floatingRateId = createFloatingRateWithSinglePeriod(INITIAL_INTEREST_RATE, "01 March 2024");
+
+            final Account assetAccount = accountHelper.createAssetAccount("floatingRateAsset2");
+            final Account incomeAccount = accountHelper.createIncomeAccount("floatingRateIncome2");
+            final Account expenseAccount = accountHelper.createExpenseAccount("floatingRateExpense2");
+            final Account overpaymentAccount = accountHelper.createLiabilityAccount("floatingRateOverpayment2");
+
+            Integer loanProductId = createCumulativeFloatingRateLoanProduct(floatingRateId, assetAccount, incomeAccount, expenseAccount,
+                    overpaymentAccount);
+            assertNotNull(loanProductId);
+
+            final Long clientId = createClient();
+
+            updateBusinessDate("15 March 2024");
+            final Long loanId = createAndDisburseLoan(clientId, loanProductId, "15 March 2024");
+            assertNotNull(loanId);
+
+            BigDecimal initialEmi = emiForPeriod(getLoanDetails(loanId), 2);
+            assertNotNull(initialEmi, "Could not find initial EMI for period 2");
+
+            // fromDate must be strictly after the business date, so add the period before advancing it - this is
+            // just an input validation rule, unrelated to the bug (which is about created_on_utc, the row's
+            // insert timestamp, not fromDate).
+            addFloatingRatePeriod(floatingRateId, CHANGED_INTEREST_RATE, "17 March 2024");
+            updateBusinessDate("20 March 2024");
+
+            SchedulerJobHelper.executeAndAwaitJob("Recalculate Interest For Loans");
+
+            BigDecimal updatedEmi = emiForPeriod(getLoanDetails(loanId), 2);
+            assertNotNull(updatedEmi, "Could not find updated EMI for period 2");
+            assertTrue(updatedEmi.compareTo(initialEmi) < 0,
+                    "Period 2 EMI (" + updatedEmi + ") should be lower than the initial EMI (" + initialEmi
+                            + ") after the floating rate changed from " + INITIAL_INTEREST_RATE + "% to " + CHANGED_INTEREST_RATE
+                            + "% via the scheduled job, with no repayment to trigger recalculation otherwise");
+        });
     }
 
     private void runFloatingRateRecalculationScenario(boolean overPayment) {
@@ -116,6 +164,35 @@ public class FloatingRateInterestRecalculationTest extends FeignLoanTestBase {
             }
             assertTrue(foundRecalculatedPeriod, "Should have found at least one recalculated period after the rate change");
         });
+    }
+
+    private BigDecimal emiForPeriod(GetLoansLoanIdResponse loan, int periodNumber) {
+        assertNotNull(loan.getRepaymentSchedule());
+        for (GetLoansLoanIdRepaymentPeriod period : loan.getRepaymentSchedule().getPeriods()) {
+            if (period.getPeriod() != null && period.getPeriod() == periodNumber) {
+                return period.getTotalDueForPeriod();
+            }
+        }
+        return null;
+    }
+
+    private Long createFloatingRateWithSinglePeriod(BigDecimal rate, String fromDate) {
+        FloatingRatePeriodRequest period = new FloatingRatePeriodRequest().fromDate(fromDate).interestRate(rate)
+                .isDifferentialToBaseLendingRate(false).locale("en").dateFormat("dd MMMM yyyy");
+        FloatingRateCreateRequest floatingRateRequest = new FloatingRateCreateRequest()
+                .name(Utils.uniqueRandomStringGenerator("FLOAT_RATE_", 6)).isBaseLendingRate(false).isActive(true)
+                .ratePeriods(List.of(period));
+        FloatingRateCreateResponse response = ok(() -> fineractClient().floatingRates().createFloatingRate(floatingRateRequest));
+        assertNotNull(response);
+        assertNotNull(response.getResourceId());
+        return response.getResourceId();
+    }
+
+    private void addFloatingRatePeriod(Long floatingRateId, BigDecimal rate, String fromDate) {
+        FloatingRatePeriodRequest newPeriod = new FloatingRatePeriodRequest().fromDate(fromDate).interestRate(rate)
+                .isDifferentialToBaseLendingRate(false).locale("en").dateFormat("dd MMMM yyyy");
+        FloatingRateUpdateRequest updateRequest = new FloatingRateUpdateRequest().ratePeriods(List.of(newPeriod));
+        ok(() -> fineractClient().floatingRates().updateFloatingRate(floatingRateId, updateRequest));
     }
 
     private Long createFloatingRate() {
