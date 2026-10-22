@@ -21,6 +21,8 @@ Feature: LoanDelinquency - Part1
       | action | startDate       | endDate         |
       | PAUSE  | 16 October 2023 | 30 October 2023 |
       | RESUME | 20 October 2023 |                 |
+    When Loan Pay-off is made on "20 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2964
   Scenario: Verify Loan delinquency pause API - PAUSE and RESUME by loanExternalId
@@ -42,6 +44,8 @@ Feature: LoanDelinquency - Part1
       | action | startDate       | endDate         |
       | PAUSE  | 16 October 2023 | 30 October 2023 |
       | RESUME | 20 October 2023 |                 |
+    When Loan Pay-off is made on "20 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2965
   Scenario: Verify Loan delinquency pause API - PAUSE and RESUME actions supported only
@@ -64,6 +68,8 @@ Feature: LoanDelinquency - Part1
       | action | startDate       | endDate         |
       | PAUSE  | 16 October 2023 | 30 October 2023 |
       | RESUME | 20 October 2023 |                 |
+    When Loan Pay-off is made on "20 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2966
   Scenario: Verify Loan delinquency pause API - PAUSE with start date on actual business date
@@ -79,6 +85,8 @@ Feature: LoanDelinquency - Part1
     Then Delinquency-actions have the following data:
       | action | startDate       | endDate         |
       | PAUSE  | 16 October 2023 | 30 October 2023 |
+    When Loan Pay-off is made on "16 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2967
   Scenario: Verify Loan delinquency pause API - PAUSE with start date later than actual business date
@@ -94,6 +102,8 @@ Feature: LoanDelinquency - Part1
     Then Delinquency-actions have the following data:
       | action | startDate       | endDate         |
       | PAUSE  | 25 October 2023 | 30 October 2023 |
+    When Loan Pay-off is made on "16 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2968
   Scenario: Verify Loan delinquency pause API - PAUSE with start date before than actual business date is possible
@@ -109,6 +119,8 @@ Feature: LoanDelinquency - Part1
     Then Delinquency-actions have the following data:
       | action | startDate       | endDate         |
       | PAUSE  | 14 October 2023 | 30 October 2023 |
+    When Loan Pay-off is made on "16 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2969
   Scenario: Verify Loan delinquency pause API - PAUSE action on non-active loan result an error
@@ -163,7 +175,7 @@ Feature: LoanDelinquency - Part1
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
@@ -174,13 +186,15 @@ Feature: LoanDelinquency - Part1
       | PAUSE  | 16 October 2023 | 30 October 2023 |
     When Admin sets the business date to "20 October 2023"
     Then Overlapping PAUSE periods result an error - startDate: "20 October 2023", endDate: "30 October 2023"
+    When Loan Pay-off is made on "20 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @TestRailId:CXXXX
-  Scenario: Verify Loan delinquency pause API - PAUSE period overlapping with same start date, same end date or containing an existing PAUSE results an error
+  @TestRailId:C115398
+  Scenario: Verify Loan delinquency pause API - PAUSE period overlapping with same start date, same end date or containing an existing PAUSE results an error - UC1
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
@@ -200,6 +214,79 @@ Feature: LoanDelinquency - Part1
       | action | startDate       | endDate         |
       | PAUSE  | 16 October 2023 | 23 October 2023 |
       | PAUSE  | 23 October 2023 | 30 October 2023 |
+    Then Overlapping PAUSE periods result an error - startDate: "23 October 2023", endDate: "30 October 2023"
+    Then Overlapping PAUSE periods result an error - startDate: "23 October 2023", endDate: "15 November 2023"
+    Then Overlapping PAUSE periods result an error - startDate: "27 October 2023", endDate: "29 October 2023"
+    When Loan Pay-off is made on "16 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C115399
+  Scenario: Verify Loan delinquency pause API - PAUSE period overlapping while having with RESUME action with the following Pause at diff day results an error - UC2
+    When Admin sets the business date to "01 October 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
+    When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
+    When Admin sets the business date to "16 October 2023"
+    When Admin initiate a DELINQUENCY PAUSE with startDate: "16 October 2023" and endDate: "30 October 2023"
+    Then Delinquency-actions have the following data:
+      | action | startDate       | endDate         |
+      | PAUSE  | 16 October 2023 | 30 October 2023 |
+    When Admin sets the business date to "20 October 2023"
+    When Admin initiate a DELINQUENCY RESUME by loanExternalId with startDate: "20 October 2023"
+    Then Delinquency-actions have the following data:
+      | action | startDate       | endDate         |
+      | PAUSE  | 16 October 2023 | 30 October 2023 |
+      | RESUME | 20 October 2023 |                 |
+    Then Overlapping PAUSE periods result an error - startDate: "18 October 2023", endDate: "25 October 2023"
+    When Admin initiate a DELINQUENCY PAUSE with startDate: "22 October 2023" and endDate: "25 October 2023"
+    Then Delinquency-actions have the following data:
+      | action | startDate       | endDate         |
+      | PAUSE  | 16 October 2023 | 30 October 2023 |
+      | RESUME | 20 October 2023 |                 |
+      | PAUSE  | 22 October 2023 | 25 October 2023 |
+    Then Overlapping PAUSE periods result an error - startDate: "16 October 2023", endDate: "20 October 2023"
+    Then Overlapping PAUSE periods result an error - startDate: "22 October 2023", endDate: "25 November 2023"
+    Then Overlapping PAUSE periods result an error - startDate: "22 October 2023", endDate: "28 November 2023"
+    Then Overlapping PAUSE periods result an error - startDate: "19 October 2023", endDate: "23 October 2023"
+    When Loan Pay-off is made on "20 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C115400
+  Scenario: Verify Loan delinquency pause API - PAUSE period overlapping while having RESUME action and following additional PAUSE at the same day results an error - UC3
+    When Admin sets the business date to "01 October 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
+    When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
+    When Admin sets the business date to "16 October 2023"
+    When Admin initiate a DELINQUENCY PAUSE with startDate: "16 October 2023" and endDate: "30 October 2023"
+    Then Delinquency-actions have the following data:
+      | action | startDate       | endDate         |
+      | PAUSE  | 16 October 2023 | 30 October 2023 |
+    When Admin sets the business date to "20 October 2023"
+    When Admin initiate a DELINQUENCY RESUME by loanExternalId with startDate: "20 October 2023"
+    Then Delinquency-actions have the following data:
+      | action | startDate       | endDate         |
+      | PAUSE  | 16 October 2023 | 30 October 2023 |
+      | RESUME | 20 October 2023 |                 |
+    Then Overlapping PAUSE periods result an error - startDate: "18 October 2023", endDate: "25 October 2023"
+    When Admin initiate a DELINQUENCY PAUSE with startDate: "20 October 2023" and endDate: "25 October 2023"
+    Then Delinquency-actions have the following data:
+      | action | startDate       | endDate         |
+      | PAUSE  | 16 October 2023 | 30 October 2023 |
+      | RESUME | 20 October 2023 |                 |
+      | PAUSE  | 20 October 2023 | 25 October 2023 |
+    Then Overlapping PAUSE periods result an error - startDate: "16 October 2023", endDate: "20 October 2023"
+    Then Overlapping PAUSE periods result an error - startDate: "20 October 2023", endDate: "25 November 2023"
+    Then Overlapping PAUSE periods result an error - startDate: "19 October 2023", endDate: "23 October 2023"
+    Then Overlapping PAUSE periods result an error - startDate: "22 October 2023", endDate: "31 October 2023"
+    When Loan Pay-off is made on "20 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2972
   Scenario: Verify Loan delinquency pause API - RESUME without an active PAUSE period results an error
@@ -211,6 +298,8 @@ Feature: LoanDelinquency - Part1
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
     Then Initiating a DELINQUENCY RESUME without an active PAUSE period results an error - startDate: "01 October 2023"
+    When Loan Pay-off is made on "01 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2973
   Scenario: Verify Loan delinquency pause API - RESUME with start date before than actual business date results an error
@@ -228,6 +317,8 @@ Feature: LoanDelinquency - Part1
       | PAUSE  | 16 October 2023 | 30 October 2023 |
     When Admin sets the business date to "20 October 2023"
     Then Initiating a DELINQUENCY RESUME with start date other than actual business date results an error - startDate: "01 October 2023"
+    When Loan Pay-off is made on "20 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2974
   Scenario: Verify Loan delinquency pause API - RESUME with start date later than actual business date results an error
@@ -245,6 +336,8 @@ Feature: LoanDelinquency - Part1
       | PAUSE  | 16 October 2023 | 30 October 2023 |
     When Admin sets the business date to "20 October 2023"
     Then Initiating a DELINQUENCY RESUME with start date other than actual business date results an error - startDate: "21 October 2023"
+    When Loan Pay-off is made on "20 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2975
   Scenario: Verify Loan delinquency pause API - RESUME with end date results an error
@@ -262,6 +355,8 @@ Feature: LoanDelinquency - Part1
       | PAUSE  | 16 October 2023 | 30 October 2023 |
     When Admin sets the business date to "20 October 2023"
     Then Initiating a DELINQUENCY RESUME with an endDate results an error - startDate: "20 October 2023", endDate: "30 October 2023"
+    When Loan Pay-off is made on "20 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2992
   Scenario: Verify Loan level loan delinquency - loan goes into delinquency pause then will be resumed
@@ -290,6 +385,8 @@ Feature: LoanDelinquency - Part1
       | RESUME | 01 December 2023 |                  |
     When Admin runs inline COB job for Loan
     Then Admin checks that delinquency range is: "RANGE_30" and has delinquentDate "2023-10-04"
+    When Loan Pay-off is made on "01 December 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2979
   Scenario: Verify Installment level loan delinquency - loan goes into delinquency bucket
@@ -307,6 +404,8 @@ Feature: LoanDelinquency - Part1
       | RANGE_30 | 500.00 |
       | RANGE_60 | 500.00 |
     Then Installment level delinquency event has correct data
+    When Loan Pay-off is made on "16 December 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2980
   Scenario: Verify Installment level loan delinquency - loan goes from one delinquency bucket to an other
@@ -332,6 +431,8 @@ Feature: LoanDelinquency - Part1
       | RANGE_30 | 500.00 |
       | RANGE_60 | 500.00 |
     Then Installment level delinquency event has correct data
+    When Loan Pay-off is made on "16 December 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2981
   Scenario: Verify Installment level loan delinquency - loan goes out from delinquency by late repayment
@@ -353,6 +454,7 @@ Feature: LoanDelinquency - Part1
     And Customer makes "AUTOPAY" repayment on "17 December 2023" with 1000 EUR transaction amount
     Then Installment level delinquency event has correct data
     Then INSTALLMENT level delinquency is null
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2982
   Scenario: Verify Installment level loan delinquency - some of the installments go out from delinquency by late repayment
@@ -375,6 +477,8 @@ Feature: LoanDelinquency - Part1
     Then Loan has the following INSTALLMENT level delinquency data:
       | Range   | Amount |
       | RANGE_3 | 250.00 |
+    When Loan Pay-off is made on "26 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2983
   Scenario: Verify Installment level loan delinquency - loan goes out from delinquency by Goodwill credit transaction
@@ -396,6 +500,7 @@ Feature: LoanDelinquency - Part1
     When Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "17 December 2023" with 1000 EUR transaction amount and system-generated Idempotency key
     Then Installment level delinquency event has correct data
     Then INSTALLMENT level delinquency is null
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2984
   Scenario: Verify Installment level loan delinquency - some of the installments go out from delinquency by Goodwill credit transaction
@@ -418,6 +523,8 @@ Feature: LoanDelinquency - Part1
     Then Loan has the following INSTALLMENT level delinquency data:
       | Range   | Amount |
       | RANGE_3 | 250.00 |
+    When Loan Pay-off is made on "26 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2985
   Scenario: Verify Installment level loan delinquency - loan with charges goes into delinquency bucket
@@ -438,6 +545,8 @@ Feature: LoanDelinquency - Part1
       | RANGE_30 | 520.00 |
       | RANGE_60 | 520.00 |
     Then Installment level delinquency event has correct data
+    When Loan Pay-off is made on "16 December 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2987
   Scenario: Verify Installment level loan delinquency - loan goes into delinquency pause
@@ -488,6 +597,8 @@ Feature: LoanDelinquency - Part1
       | Range    | Amount |
       | RANGE_30 | 500.00 |
       | RANGE_60 | 500.00 |
+    When Loan Pay-off is made on "01 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2988
   Scenario: Verify Installment level loan delinquency - loan goes into delinquency pause then will be resumed
@@ -534,6 +645,8 @@ Feature: LoanDelinquency - Part1
       | RANGE_1  | 250.00 |
       | RANGE_3  | 250.00 |
       | RANGE_30 | 500.00 |
+    When Loan Pay-off is made on "01 December 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2990
   Scenario: Verify that a non-super user with CREATE_DELINQUENCY_ACTION permission can initiate a DELINQUENCY PAUSE
@@ -552,6 +665,8 @@ Feature: LoanDelinquency - Part1
     Then Delinquency-actions have the following data:
       | action | startDate       | endDate         |
       | PAUSE  | 16 October 2023 | 30 October 2023 |
+    When Loan Pay-off is made on "16 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2991
   Scenario: Verify that a non-super user with no CREATE_DELINQUENCY_ACTION permission gets an error when initiate a DELINQUENCY PAUSE
@@ -566,6 +681,8 @@ Feature: LoanDelinquency - Part1
     When Admin creates new user with "NO_CREATE_DELINQUENCY_ACTION_USER" username, "NO_CREATE_DELINQUENCY_ACTION_ROLE" role name and given permissions:
       | REPAYMENT_LOAN |
     Then Created user with no CREATE_DELINQUENCY_ACTION permission gets an error when initiate a DELINQUENCY PAUSE with startDate: "16 October 2023" and endDate: "30 October 2023"
+    When Loan Pay-off is made on "16 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2999
   Scenario: Verify Loan delinquency pause E2E - full PAUSE period
@@ -638,6 +755,8 @@ Feature: LoanDelinquency - Part1
       | Range   | Amount |
       | RANGE_1 | 250.00 |
       | RANGE_3 | 250.00 |
+    When Loan Pay-off is made on "31 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3000
   Scenario: Verify Loan delinquency pause E2E - PAUSE period with RESUME
@@ -688,6 +807,8 @@ Feature: LoanDelinquency - Part1
       | Range   | Amount |
       | RANGE_3 | 250.00 |
     Then Installment level delinquency event has correct data
+    When Loan Pay-off is made on "26 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3001
   Scenario: Verify Loan delinquency pause E2E - PAUSE period with RESUME and second PAUSE
@@ -818,6 +939,8 @@ Feature: LoanDelinquency - Part1
       | RANGE_3  | 500.00 |
       | RANGE_30 | 250.00 |
     Then Installment level delinquency event has correct data
+    When Loan Pay-off is made on "01 December 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3002
   Scenario: Verify Loan delinquency pause E2E - full repayment (late/due date) during PAUSE period
@@ -874,6 +997,8 @@ Feature: LoanDelinquency - Part1
       | classification | delinquentAmount | delinquentDate | delinquentDays | pastDueDays |
       | NO_DELINQUENCY | 0.0              | null           | 0              | 0           |
     Then INSTALLMENT level delinquency is null
+    When Loan Pay-off is made on "16 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3003
   Scenario: Verify Loan delinquency pause E2E - partial repayment during PAUSE period
@@ -933,6 +1058,8 @@ Feature: LoanDelinquency - Part1
     Then Loan has the following INSTALLMENT level delinquency data:
       | Range   | Amount |
       | RANGE_3 | 100.00 |
+    When Loan Pay-off is made on "16 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3004
   Scenario: Verify Loan delinquency pause E2E - full repayment (only late) during PAUSE period then RESUME
@@ -1026,6 +1153,8 @@ Feature: LoanDelinquency - Part1
       | Range   | Amount |
       | RANGE_3 | 500.00 |
     Then Installment level delinquency event has correct data
+    When Loan Pay-off is made on "15 November 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3013
   Scenario: Verify that in case of resume on end/start date of continous pause periods first period ends automatically, second period ended by resume
@@ -1091,6 +1220,8 @@ Feature: LoanDelinquency - Part1
     Then Loan has the following INSTALLMENT level delinquency data:
       | Range   | Amount |
       | RANGE_3 | 500.00 |
+    When Loan Pay-off is made on "31 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3014
   Scenario: Verify that creating a loan with Advanced payment allocation with product no Advanced payment allocation set results an error
@@ -1134,6 +1265,9 @@ Feature: LoanDelinquency - Part1
     Then Loan has the following INSTALLMENT level delinquency data:
       | Range   | Amount |
       | RANGE_3 | 500.00 |
+    When Loan Pay-off is made on "27 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
 
   @TestRailId:C3016
   Scenario: Verify that for pause period calculations business date is being used instead of COB date
@@ -1189,6 +1323,9 @@ Feature: LoanDelinquency - Part1
     Then Delinquency-actions have the following data:
       | action | startDate       | endDate         |
       | PAUSE  | 16 October 2023 | 25 October 2023 |
+    When Loan Pay-off is made on "29 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
 
   @TestRailId:C3018
   Scenario: Verify that if Global configuration: next-payment-due-date is set to: earliest-unpaid-date then in Loan details delinquent.nextPaymentDueDate will be the first unpaid installment date
@@ -1205,6 +1342,9 @@ Feature: LoanDelinquency - Part1
     When Admin sets the business date to "21 October 2023"
     Then Loan details delinquent.nextPaymentDueDate will be "01 October 2023"
     When Global config "next-payment-due-date" value set to "earliest-unpaid-date"
+    When Loan Pay-off is made on "21 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
 
   @TestRailId:C3019
   Scenario: Verify that if Global configuration: next-payment-due-date is set to: next-unpaid-due-date then in Loan details delinquent.nextPaymentDueDate will be the next unpaid installment date regardless of the status of previous installments
@@ -1221,6 +1361,9 @@ Feature: LoanDelinquency - Part1
     When Admin sets the business date to "21 October 2023"
     Then Loan details delinquent.nextPaymentDueDate will be "31 October 2023"
     When Global config "next-payment-due-date" value set to "earliest-unpaid-date"
+    When Loan Pay-off is made on "21 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
 
   @TestRailId:C3032
   Scenario: Verify that delinquencyRange field in LoanAccountDelinquencyRangeDataV1 is not null in case of delinquent Loan
@@ -1237,6 +1380,9 @@ Feature: LoanDelinquency - Part1
     Then Loan has the following LOAN level delinquency data:
       | classification | delinquentAmount | delinquentDate  | delinquentDays | pastDueDays |
       | RANGE_30       | 1000.0           | 04 October 2023 | 58             | 61          |
+    When Loan Pay-off is made on "01 December 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
 
   @TestRailId:C3035
   Scenario: Verify that delinquency is NOT applied after loan submitted and approved
@@ -1264,6 +1410,8 @@ Feature: LoanDelinquency - Part1
     When Admin successfully disburse the loan on "01 February 2024" with "1000" EUR transaction amount
     When Admin sets the business date to "01 April 2024"
     Then In Loan details delinquent.lastRepaymentAmount is 250 EUR with lastRepaymentDate "01 February 2024"
+    When Loan Pay-off is made on "01 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3066 @AdvancedPaymentAllocation
   Scenario: Verify that on Loans in SUBMITTED_AND_PENDING_APPROVAL or APPROVED status delinquency is not applied
@@ -1345,6 +1493,8 @@ Feature: LoanDelinquency - Part1
       | RANGE_30 | 500.00 |
       | RANGE_60 | 500.00 |
     Then Installment level delinquency event has correct data
+    When Loan Pay-off is made on "16 December 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3930
   Scenario: Verify nextPaymentAmount value with repayment on first installment - progressive loan, no interest recalculation, zero interest rate - UC1

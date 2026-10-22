@@ -4079,11 +4079,7 @@ Feature: Buy Down Fees
     When Loan Pay-off is made on "16 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-
-
-    ##
-  ## ISSUE:   Buydown amortizes slower after waiver-reversal
-  @TestRailId:CXXXX
+  @TestRailId:C115396
   Scenario Outline: Verify Buy Down Fee Amortization Works correctly after Buy Down Fee Adjustment Reversal
     ##Create and disburse a loan for 3-month period with buydown fees enabled (2026/03/11).
     When Admin sets the business date to "11 March 2026"

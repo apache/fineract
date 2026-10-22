@@ -65,6 +65,8 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String DEFAULT_LOCALE = "en";
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
+    public static final String RESUME_ACTION_NAME = "resume";
+    public static final String PAUSE_ACTION_NAME = "pause";
 
     private final FineractFeignClient fineractClient;
     private final FineractClientConfiguration fineractClientConfiguration;
@@ -135,15 +137,8 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
     @When("Admin initiate a DELINQUENCY PAUSE with startDate: {string} and endDate: {string}")
     public void delinquencyPause(String startDate, String endDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("pause")//
-                .startDate(startDate)//
-                .endDate(endDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyActionRequest(PAUSE_ACTION_NAME, startDate, endDate);
 
         PostLoansDelinquencyActionResponse response = ok(() -> fineractClient.loans().createDelinquencyActionLoan(loanId, request));
         testContext().set(TestContextKey.LOAN_DELINQUENCY_ACTION_RESPONSE, response);
@@ -152,15 +147,8 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
     @When("Created user with CREATE_DELINQUENCY_ACTION permission initiate a DELINQUENCY PAUSE with startDate: {string} and endDate: {string}")
     public void delinquencyPauseWithCreatedUser(String startDate, String endDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("pause")//
-                .startDate(startDate)//
-                .endDate(endDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyActionRequest(PAUSE_ACTION_NAME, startDate, endDate);
 
         String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
         String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
@@ -173,18 +161,11 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
     @Then("Created user with no CREATE_DELINQUENCY_ACTION permission gets an error when initiate a DELINQUENCY PAUSE with startDate: {string} and endDate: {string}")
     public void delinquencyPauseWithCreatedUserNOPermissionError(String startDate, String endDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyActionRequest(PAUSE_ACTION_NAME, startDate, endDate);
 
         int errorCodeExpected = 403;
         String errorMessageExpected = "User has no authority to CREATE delinquency_actions";
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("pause")//
-                .startDate(startDate)//
-                .endDate(endDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
 
         String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
         String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
@@ -198,20 +179,14 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
                 .as(ErrorMessageHelper.wrongErrorMessage(exception.getDeveloperMessage(), errorMessageExpected))
                 .contains(errorMessageExpected);
 
-        log.debug("ERROR CODE: {}", exception.getStatus());
-        log.debug("ERROR MESSAGE: {}", exception.getDeveloperMessage());
+        log.debug("ERROR CODE in response: {}", exception.getStatus());
+        log.debug("ERROR MESSAGE in response: {}", exception.getDeveloperMessage());
     }
 
     @When("Admin initiate a DELINQUENCY RESUME with startDate: {string}")
     public void delinquencyResume(String startDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("resume")//
-                .startDate(startDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyResumeActionRequest(startDate);
 
         PostLoansDelinquencyActionResponse response = ok(() -> fineractClient.loans().createDelinquencyActionLoan(loanId, request));
         testContext().set(TestContextKey.LOAN_DELINQUENCY_ACTION_RESPONSE, response);
@@ -223,13 +198,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String loanExternalId = loanResponse.getResourceExternalId();
         Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("pause")//
-                .startDate(startDate)//
-                .endDate(endDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
+        PostLoansDelinquencyActionRequest request = buildDelinquencyActionRequest(PAUSE_ACTION_NAME, startDate, endDate);
 
         PostLoansDelinquencyActionResponse response = ok(
                 () -> fineractClient.loans().createDelinquencyActionLoanByExternalId(loanExternalId, request));
@@ -242,12 +211,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String loanExternalId = loanResponse.getResourceExternalId();
         Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("resume")//
-                .startDate(startDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
+        PostLoansDelinquencyActionRequest request = buildDelinquencyResumeActionRequest(startDate);
 
         PostLoansDelinquencyActionResponse response = ok(
                 () -> fineractClient.loans().createDelinquencyActionLoanByExternalId(loanExternalId, request));
@@ -288,15 +252,8 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
     @Then("Initiating a delinquency-action other than PAUSE or RESUME in action field results an error - startDate: {string}, endDate: {string}")
     public void actionFieldError(String startDate, String endDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("TEST")//
-                .startDate(startDate)//
-                .endDate(endDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyActionRequest("TEST", startDate, endDate);
 
         int errorCodeExpected = 400;
         String errorMessageExpected = "Invalid Delinquency Action: TEST";
@@ -305,31 +262,27 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
     @Then("Initiating a DELINQUENCY PAUSE on a non-active loan results an error - startDate: {string}, endDate: {string}")
     public void delinquencyPauseNonActiveLoanError(String startDate, String endDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("pause")//
-                .startDate(startDate)//
-                .endDate(endDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
-
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyActionRequest(PAUSE_ACTION_NAME, startDate, endDate);
         int errorCodeExpected = 400;
         String errorMessageExpected = "Delinquency actions can be created only for active loans.";
         errorMessageAssertationFeign(loanId, request, errorCodeExpected, errorMessageExpected);
     }
 
+    @Then("Initiating a DELINQUENCY PAUSE with duration less then one day result an error - startDate: {string}, endDate: {string}")
+    public void delinquencyPauseDurationLessThenOneDayError(String startDate, String endDate) {
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyActionRequest(PAUSE_ACTION_NAME, startDate, endDate);
+
+        int errorCodeExpected = 400;
+        String errorMessageExpected = "Delinquency pause period must be at least one day";
+        errorMessageAssertationFeign(loanId, request, errorCodeExpected, errorMessageExpected);
+    }
+
     @Then("Initiating a DELINQUENCY RESUME on a non-active loan results an error - startDate: {string}")
     public void delinquencyResumeNonActiveLoanError(String startDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("resume")//
-                .startDate(startDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyResumeActionRequest(startDate);
 
         int errorCodeExpected = 400;
         String errorMessageExpected = "Delinquency actions can be created only for active loans.";
@@ -338,15 +291,8 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
     @Then("Overlapping PAUSE periods result an error - startDate: {string}, endDate: {string}")
     public void delinquencyPauseOverlappingError(String startDate, String endDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("pause")//
-                .startDate(startDate)//
-                .endDate(endDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyActionRequest(PAUSE_ACTION_NAME, startDate, endDate);
 
         int errorCodeExpected = 400;
         String errorMessageExpected = "Delinquency pause period cannot overlap with another pause period";
@@ -355,14 +301,8 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
     @Then("Initiating a DELINQUENCY RESUME without an active PAUSE period results an error - startDate: {string}")
     public void delinquencyResumeWithoutPauseError(String startDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("resume")//
-                .startDate(startDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyResumeActionRequest(startDate);
 
         int errorCodeExpected = 400;
         String errorMessageExpected = "Resume Delinquency Action can only be created during an active pause";
@@ -371,15 +311,8 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
     @Then("Initiating a DELINQUENCY RESUME with start date other than actual business date results an error - startDate: {string}")
     public void delinquencyResumeStartDateError(String startDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("resume")//
-                .startDate(startDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
-
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyResumeActionRequest(startDate);
         int errorCodeExpected = 400;
         String errorMessageExpected = "Start date of the Resume Delinquency action must be the current business date";
         errorMessageAssertationFeign(loanId, request, errorCodeExpected, errorMessageExpected);
@@ -387,18 +320,21 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
     @Then("Initiating a DELINQUENCY RESUME with an endDate results an error - startDate: {string}, endDate: {string}")
     public void delinquencyResumeWithEndDateError(String startDate, String endDate) {
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.getLoanId();
-
-        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest()//
-                .action("resume")//
-                .startDate(startDate)//
-                .endDate(endDate)//
-                .dateFormat(DATE_FORMAT)//
-                .locale(DEFAULT_LOCALE);//
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyActionRequest(RESUME_ACTION_NAME, startDate, endDate);
 
         int errorCodeExpected = 400;
         String errorMessageExpected = "Resume Delinquency action can not have end date";
+        errorMessageAssertationFeign(loanId, request, errorCodeExpected, errorMessageExpected);
+    }
+
+    @Then("Initiating a DELINQUENCY RESUME duplicated results an error - startDate: {string}")
+    public void delinquencyResumeDuplicatedError(String startDate) {
+        Long loanId = getLoanIdFromLoanResponse();
+        PostLoansDelinquencyActionRequest request = buildDelinquencyResumeActionRequest(startDate);
+
+        int errorCodeExpected = 400;
+        String errorMessageExpected = "There is an existing Resume Delinquency Action on this date";
         errorMessageAssertationFeign(loanId, request, errorCodeExpected, errorMessageExpected);
     }
 
@@ -624,4 +560,27 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
         eventAssertion.assertEventRaised(LoanDelinquencyRangeChangeEvent.class, loanId);
     }
+
+    private Long getLoanIdFromLoanResponse() {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        return loanResponse.getLoanId();
+    }
+
+    private PostLoansDelinquencyActionRequest buildDelinquencyResumeActionRequest(String startDate) {
+        return new PostLoansDelinquencyActionRequest()//
+                .action(RESUME_ACTION_NAME)//
+                .startDate(startDate)//
+                .dateFormat(DATE_FORMAT)//
+                .locale(DEFAULT_LOCALE);//
+    }
+
+    private PostLoansDelinquencyActionRequest buildDelinquencyActionRequest(String delinquencyAction, String startDate, String endDate) {
+        return new PostLoansDelinquencyActionRequest()//
+                .action(delinquencyAction)//
+                .startDate(startDate)//
+                .endDate(endDate)//
+                .dateFormat(DATE_FORMAT)//
+                .locale(DEFAULT_LOCALE);//
+    }
+
 }
