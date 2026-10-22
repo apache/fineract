@@ -459,6 +459,34 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
         assertUpdateCodes(json, WCL + "breachGraceDays.override.not.allowed.by.product");
     }
 
+    /** A loan whose bucket and breach were cleared must not inherit the product's ones for the parent check. */
+    @Test
+    void graceDaysAndStartTypesUpdate_WhenLoanHasNoParentButProductHas_ShouldRejectEachOne() {
+        stubOverrides(true, true);
+        final WorkingCapitalLoan loan = submittedLoanWithStrategy(WorkingCapitalPaymentAmountCalculationStrategy.TPV);
+        final JsonObject json = withGraceDaysAndStartTypes(updateJsonObject());
+        assertCodes(() -> validator.validateForUpdate(jsonCommand(json.toString()), loan), json, //
+                WCL + "delinquencyGraceDays." + WorkingCapitalLoanProductConstants.cannotEnableDelinquencyGraceDaysWithoutBucket, //
+                WCL + "delinquencyStartType." + WorkingCapitalLoanProductConstants.cannotEnableDelinquencyStartTypeWithoutBucket, //
+                WCL + "breachGraceDays." + WorkingCapitalLoanProductConstants.cannotEnableBreachGraceDaysWithoutBreach, //
+                WCL + "breachStartType." + WorkingCapitalLoanProductConstants.cannotEnableBreachStartTypeWithoutBreach);
+    }
+
+    @Test
+    void graceDaysAndStartTypesUpdate_WhenLoanHasItsOwnParents_ShouldPass() {
+        stubOverrides(true, true);
+        final WorkingCapitalLoan loan = submittedLoanWithStrategy(WorkingCapitalPaymentAmountCalculationStrategy.TPV);
+        final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();
+        final DelinquencyBucket delinquencyBucket = org.mockito.Mockito.mock(DelinquencyBucket.class);
+        lenient().when(delinquencyBucket.getId()).thenReturn(11L);
+        lenient().when(details.getDelinquencyBucket()).thenReturn(delinquencyBucket);
+        final WorkingCapitalBreach breach = org.mockito.Mockito.mock(WorkingCapitalBreach.class);
+        lenient().when(breach.getId()).thenReturn(21L);
+        lenient().when(details.getBreach()).thenReturn(breach);
+        final JsonObject json = withGraceDaysAndStartTypes(updateJsonObject());
+        assertDoesNotThrow(() -> validator.validateForUpdate(jsonCommand(json.toString()), loan));
+    }
+
     private void stubOverrides(final boolean delinquencyOverridable, final boolean breachOverridable) {
         final WorkingCapitalLoanProduct product = createMockProduct();
         final WorkingCapitalLoanProductConfigurableAttributes attributes = new WorkingCapitalLoanProductConfigurableAttributes();

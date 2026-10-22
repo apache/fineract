@@ -517,12 +517,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         submitLoanUsingCreatedProduct(table, null, breachStartType);
     }
 
-    @When("Admin creates a working capital loan using created product with breachGraceDays {int} and breachStartType {string} and the following data:")
-    public void createWorkingCapitalLoanUsingCreatedProductWithBreachStartType(final int breachGraceDays, final String breachStartType,
-            final DataTable table) {
-        submitLoanUsingCreatedProduct(table, breachGraceDays, breachStartType);
-    }
-
     @When("Admin failed create a working capital loan with disallowed WCLP overrides using created product with breachGraceDays {int} and the following data:")
     public void createWorkingCapitalLoanUsingCreatedProductWithBreachGraceDaysFailure(final int breachGraceDays, final DataTable table) {
         final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequestWithBreachData(table, breachGraceDays, null);
@@ -1237,7 +1231,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     }
 
     @When("Admin failed to modify working capital loan with disallowed WCLP overrides using created product with delinquencyStartType {string}")
-    public void createWorkingCapitalLoanUsingCreatedProductWithDelinquencyStartTypeFailure(final String delinquencyStartType) {
+    public void modifyWorkingCapitalLoanUsingCreatedProductWithDelinquencyStartTypeFailure(final String delinquencyStartType) {
         final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest() //
                 .delinquencyStartType(delinquencyStartType);//
         String errorMessage = ErrorMessageHelper.overrideDisallowedByProductFailure("delinquencyStartType");
@@ -1414,7 +1408,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     }
 
     @When("Admin failed to modify working capital loan with disallowed WCLP overrides using created product with breachStartType {string}")
-    public void createWorkingCapitalLoanUsingCreatedProductWithBreachStartTypeFailure(final String breachStartType) {
+    public void modifyWorkingCapitalLoanUsingCreatedProductWithBreachStartTypeFailure(final String breachStartType) {
         final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest() //
                 .breachStartType(breachStartType);//
         String errorMessage = ErrorMessageHelper.overrideDisallowedByProductFailure("breachStartType");

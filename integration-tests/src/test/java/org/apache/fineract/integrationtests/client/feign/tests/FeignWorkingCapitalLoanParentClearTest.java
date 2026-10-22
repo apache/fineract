@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests.client.feign.tests;
 
+import static org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper.errorCodesOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -25,7 +27,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
+import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignWorkingCapitalTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.WorkingCapitalLoanCommandsApi;
@@ -45,6 +49,7 @@ public class FeignWorkingCapitalLoanParentClearTest extends FeignWorkingCapitalT
 
     private static final String BUSINESS_DATE = "2026-01-01";
     private static final String SUBMIT_DATE = "01 January 2026";
+    private static final String WCL = "validation.msg.WORKINGCAPITALLOAN.";
 
     private final List<Long> createdLoanIds = new ArrayList<>();
 
@@ -84,6 +89,24 @@ public class FeignWorkingCapitalLoanParentClearTest extends FeignWorkingCapitalT
             assertNull(after.getDelinquencyStartType());
             assertNull(after.getBreachGraceDays());
             assertNull(after.getBreachStartType());
+
+            // The cleared loan must not inherit the product's bucket/breach: setting the dependants again is rejected
+            final CallFailedRuntimeException failure = wcLoanHelper.modifyApplicationExpectingFailure(loanId,
+                    new PutWorkingCapitalLoansLoanIdRequest().delinquencyGraceDays(4).delinquencyStartType("LOAN_CREATION")
+                            .breachGraceDays(6).breachStartType("DISBURSEMENT").locale("en").dateFormat("dd MMMM yyyy"));
+            assertEquals(400, failure.getStatus(), "HTTP status — " + failure.getResponseBody());
+            assertEquals(
+                    List.of(WCL + "delinquencyGraceDays.cannot.enable.delinquency.grace.days.without.delinquency.bucket",
+                            WCL + "delinquencyStartType.cannot.enable.delinquency.start.type.without.delinquency.bucket",
+                            WCL + "breachGraceDays.cannot.enable.breach.grace.days.without.breach",
+                            WCL + "breachStartType.cannot.enable.breach.start.type.without.breach"),
+                    errorCodesOf(failure), failure.getResponseBody());
+
+            final GetWorkingCapitalLoansLoanIdResponse afterRejected = wcLoanHelper.getLoanDetails(loanId);
+            assertNull(afterRejected.getDelinquencyGraceDays());
+            assertNull(afterRejected.getDelinquencyStartType());
+            assertNull(afterRejected.getBreachGraceDays());
+            assertNull(afterRejected.getBreachStartType());
         });
     }
 
