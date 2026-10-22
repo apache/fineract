@@ -44,7 +44,7 @@ public class GlobalConfigurationStepDef {
     private FineractFeignClient fineractClient;
 
     // restore the default even when a scenario fails mid-way, so the submitted-date setting cannot leak
-    @After("@WorkingCapitalLoanChargeAccrualFeature")
+    @After("@WorkingCapitalLoanChargeAccrualFeature or @WorkingCapitalTransactionSummaryReportFeature")
     public void restoreChargeAccrualDateConfig() {
         globalConfigurationHelper.setGlobalConfigValueString("charge-accrual-date", "due-date");
         globalConfigurationHelper.setGlobalConfigValueString("wcl-charge-accrual-time", "eod");

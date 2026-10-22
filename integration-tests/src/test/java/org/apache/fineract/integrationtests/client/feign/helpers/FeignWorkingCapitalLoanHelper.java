@@ -319,6 +319,12 @@ public class FeignWorkingCapitalLoanHelper {
         return response.getSubResourceId();
     }
 
+    public Long waiveCharge(Long loanId, Long loanChargeId, PostWorkingCapitalLoansLoanIdChargesChargeIdRequest request) {
+        PostWorkingCapitalLoansLoanIdChargesChargeIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoanCharges().adjustLoanCharge(loanId, loanChargeId, request, "waive"));
+        return response.getSubResourceId();
+    }
+
     public void undoLoanTransaction(Long loanId, Long transactionId, ExecuteWorkingCapitalLoanTransactionCommandRequest request) {
         ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId,
                 transactionId, "undo", request));
