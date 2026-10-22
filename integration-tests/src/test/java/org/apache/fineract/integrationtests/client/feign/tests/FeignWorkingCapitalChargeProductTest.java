@@ -66,7 +66,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
     private static final String TIME_TYPE_SPECIFIED_DUE_DATE_CODE = "chargeTimeType.specifiedDueDate";
     private static final String TIME_TYPE_SPECIFIED_DUE_DATE_LABEL = "Specified due date";
     private static final int TIME_TYPE_INSTALMENT_FEE = 8;
-    private static final int LEGACY_TIME_TYPE_OPTION_COUNT = 15;
+    private static final int LEGACY_TIME_TYPE_OPTION_COUNT = 16;
 
     private static final int CALCULATION_FLAT = 1;
     private static final String CALCULATION_FLAT_CODE = "chargeCalculationType.flat";

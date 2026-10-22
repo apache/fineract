@@ -772,4 +772,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         return this.loanProductTrancheDetails != null && this.loanProductTrancheDetails.isAllowFullTermForTranche();
     }
 
+    public boolean supportsDownPaymentCharges() {
+        return this.loanProductRelatedDetail.isEnableDownPayment()
+                && LoanScheduleType.PROGRESSIVE.equals(this.loanProductRelatedDetail.getLoanScheduleType());
+    }
+
 }

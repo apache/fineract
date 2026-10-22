@@ -186,6 +186,12 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
     @Mock
     private LoanOriginatorLinkingService loanOriginatorLinkingService;
 
+    @Mock
+    private LoanChargeService loanChargeService;
+
+    @Mock
+    private LoanDownPaymentFeeEventNotifier loanDownPaymentFeeEventNotifier;
+
     @InjectMocks
     private LoanWritePlatformServiceJpaRepositoryImpl loanWritePlatformService;
 

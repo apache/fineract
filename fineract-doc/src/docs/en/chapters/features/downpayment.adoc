@@ -38,6 +38,10 @@ Reversing a disbursement also rolls back the associated downpayment transaction.
 
 Charges due on dowpayment date will be added to the first installment, not to the downpayment.
 
+A charge with the 'Down Payment' charge time type is an exception: it is due on the downpayment installment of its tranche. It is supported only for progressive loan products with downpayment enabled.
+
+If such a charge uses the '% Amount' calculation type, the percentage is based on the downpayment amount, not on the disbursed amount.
+
 In case of interest bearing loan, interest will not be realised on downpayment.
 
 == Example
