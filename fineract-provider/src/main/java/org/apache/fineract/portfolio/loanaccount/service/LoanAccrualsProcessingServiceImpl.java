@@ -517,10 +517,14 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             final boolean periodic, final boolean chargeOnDueDate) {
         final LocalDate organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
         final int firstInstallmentNumber = fetchFirstNormalInstallmentNumber(loan.getRepaymentScheduleInstallments());
-        return loan.getRepaymentScheduleInstallments(i -> !i.isDownPayment()
-                && (!chargeOnDueDate || (periodic ? !isBeforePeriod(tillDate, i, i.getInstallmentNumber().equals(firstInstallmentNumber))
-                        : isFullPeriod(tillDate, i)))
-                && !isAfterPeriod(organisationStartDate, i));
+        return loan.getRepaymentScheduleInstallments(i -> {
+            // Down payment periods carry DOWN_PAYMENT fees and must be included for charge accrual once due.
+            if (i.isDownPayment()) {
+                return !DateUtils.isAfter(i.getDueDate(), tillDate) && !isAfterPeriod(organisationStartDate, i);
+            }
+            return (!chargeOnDueDate || (periodic ? !isBeforePeriod(tillDate, i, i.getInstallmentNumber().equals(firstInstallmentNumber))
+                    : isFullPeriod(tillDate, i))) && !isAfterPeriod(organisationStartDate, i);
+        });
     }
 
     private void addInterestAccrual(@NonNull final Loan loan, @NonNull final LocalDate tillDate,
@@ -628,9 +632,17 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             @NonNull final AccrualPeriodsData accrualPeriods) {
         final AccrualPeriodData period = accrualPeriods.getPeriodByInstallmentNumber(installment.getInstallmentNumber());
         final LocalDate dueDate = installment.getDueDate();
-        final Collection<LoanCharge> loanCharges = loan
-                .getLoanCharges(lc -> !lc.isDueAtDisbursement() && (lc.isInstalmentFee() ? !DateUtils.isBefore(tillDate, dueDate)
-                        : isChargeDue(lc, tillDate, chargeOnDueDate, realTimeChargeAccrual, installment, period.isFirstPeriod())));
+        final Collection<LoanCharge> loanCharges;
+        if (installment.isDownPayment()) {
+            // DOWN_PAYMENT fees live on the DP period; match by due date only for this installment.
+            loanCharges = loan.getLoanCharges(lc -> lc.isDueAtDownPayment() && DateUtils.isEqual(dueDate, lc.getDueLocalDate())
+                    && !DateUtils.isAfter(lc.getDueLocalDate(), tillDate));
+        } else {
+            // Exclude DOWN_PAYMENT fees here — they are accrued via the down payment installment above.
+            loanCharges = loan.getLoanCharges(lc -> !lc.isDueAtDisbursement() && !lc.isDueAtDownPayment()
+                    && (lc.isInstalmentFee() ? !DateUtils.isBefore(tillDate, dueDate)
+                            : isChargeDue(lc, tillDate, chargeOnDueDate, realTimeChargeAccrual, installment, period.isFirstPeriod())));
+        }
         for (LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isActive()) {
                 addChargeAccrual(loanCharge, tillDate, chargeOnDueDate, installment, accrualPeriods);

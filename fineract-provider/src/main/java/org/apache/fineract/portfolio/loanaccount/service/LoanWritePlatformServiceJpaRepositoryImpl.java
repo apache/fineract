@@ -291,6 +291,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanBalanceService loanBalanceService;
     private final LoanTransactionService loanTransactionService;
     private final LoanOriginatorLinkingService loanOriginatorLinkingService;
+    private final LoanChargeService loanChargeService;
 
     @Transactional
     @Override
@@ -388,6 +389,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.setNetDisbursalAmount(netDisbursalAmount);
             }
             Money disburseAmount = loanDisbursementService.adjustDisburseAmount(loan, command, actualDisbursementDate);
+            // Ensure DOWN_PAYMENT fees exist for this disbursement (esp. artificial tranches when
+            // disallowExpectedDisbursements) before skip/deactivate and schedule regeneration.
+            loanDisbursementService.createDownPaymentFeesForDisbursement(loan, actualDisbursementDate, disburseAmount.getAmount());
             Money amountToDisburse = disburseAmount.copy();
             boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal());
             final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
@@ -414,6 +418,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 /*
                  * If no schedule, generate one (applicable to non-tranche multi-disbursal loans)
                  */
+                recalculateSchedule = true;
+            }
+
+            if (deactivateSkippedDownPaymentFees(loan, command, actualDisbursementDate)) {
                 recalculateSchedule = true;
             }
 
@@ -456,6 +464,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         downPaymentMoney = Money.roundToMultiplesOf(downPaymentMoney,
                                 loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf());
                     }
+                    downPaymentMoney = downPaymentMoney
+                            .plus(loanChargeService.outstandingDownPaymentFeesDueOn(loan, actualDisbursementDate));
                     final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(actualDisbursementDate,
                             downPaymentMoney.getAmount(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
                             linkedSavingsAccountData.getId(), loan.getId(),
@@ -2448,6 +2458,33 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     }
 
+    /**
+     * When skipDownPaymentFee is true, deactivates active unpaid DOWN_PAYMENT charges due on the disbursement date so
+     * they are not auto-included and can be added manually later.
+     *
+     * @return true if any charge was deactivated (schedule should be regenerated)
+     */
+    private boolean deactivateSkippedDownPaymentFees(final Loan loan, final JsonCommand command, final LocalDate actualDisbursementDate) {
+        if (!command.booleanPrimitiveValueOfParameterNamed(LoanApiConstants.skipDownPaymentFeeParameterName)) {
+            return false;
+        }
+        boolean deactivated = false;
+        for (final LoanCharge loanCharge : Set.copyOf(loan.getActiveCharges())) {
+            if (loanCharge.isDueAtDownPayment() && !loanCharge.isPaid()
+                    && DateUtils.isEqual(actualDisbursementDate, loanCharge.getDueLocalDate())) {
+                loanCharge.setActive(false);
+                deactivated = true;
+            }
+        }
+        if (deactivated) {
+            final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
+            wrapper.reprocess(loan.getCurrency(), loan.getDisbursementDate(), loan.getRepaymentScheduleInstallments(),
+                    loan.getActiveCharges());
+            loanBalanceService.updateLoanSummaryDerivedFields(loan);
+        }
+        return deactivated;
+    }
+
     private void regenerateScheduleOnDisbursement(final JsonCommand command, final Loan loan, final boolean recalculateSchedule,
             final ScheduleGeneratorDTO scheduleGeneratorDTO, final LocalDate nextPossibleRepaymentDate,
             final LocalDate rescheduledRepaymentDate) {
@@ -3538,16 +3575,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
 
         if (loan.isAutoRepaymentForDownPaymentEnabled()) {
-            // identify down-payment amount for the transaction
-            BigDecimal disbursedAmountPercentageForDownPayment = loan.getLoanRepaymentScheduleDetail()
-                    .getDisbursedAmountPercentageForDownPayment();
-            Money downPaymentMoney = Money.of(loan.getCurrency(),
-                    MathUtil.percentageOf(lastDisbursalTransaction.getAmount(), disbursedAmountPercentageForDownPayment, 19));
-
-            // find the latest matching down-payment transaction based on date, amount and transaction type
+            // find the latest matching down-payment transaction based on date and transaction type
             Optional<LoanTransaction> downPaymentTransaction = loan.getLoanTransactions().stream()
-                    .filter(tr -> tr.getTransactionDate().equals(lastDisbursalTransaction.getTransactionDate())
-                            && tr.getTypeOf().isDownPayment() && tr.getAmount().compareTo(downPaymentMoney.getAmount()) == 0)
+                    .filter(tr -> !tr.isReversed()
+                            && DateUtils.isEqual(tr.getTransactionDate(), lastDisbursalTransaction.getTransactionDate())
+                            && tr.isDownPayment())
                     .max(Comparator.comparing(LoanTransaction::getId));
 
             // reverse the down-payment transaction

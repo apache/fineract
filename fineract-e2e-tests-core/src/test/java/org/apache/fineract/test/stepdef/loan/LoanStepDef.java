@@ -1796,6 +1796,18 @@ public class LoanStepDef extends AbstractStepDef {
         eventCheckHelper.loanDisbursalTransactionEventCheck(loanDisburseResponse);
     }
 
+    @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount skipping down payment fee")
+    public void disburseLoanSkippingDownPaymentFee(String actualDisbursementDate, String transactionAmount) throws IOException {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+
+        PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .skipDownPaymentFee(true);
+
+        performLoanDisbursementAndVerifyStatus(loanId, disburseRequest);
+    }
+
     @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount and {string} fixed emi amount")
     public void disburseLoanWithFixedEmiAmount(final String actualDisbursementDate, final String transactionAmount,
             final String fixedEmiAmount) throws IOException {

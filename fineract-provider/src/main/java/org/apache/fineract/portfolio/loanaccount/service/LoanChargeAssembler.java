@@ -41,6 +41,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeWithoutMandatoryFieldException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
@@ -50,6 +51,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTrancheDisbursementCharge;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 
@@ -133,9 +135,21 @@ public class LoanChargeAssembler {
                             chargePaymentModeEnum = ChargePaymentMode.fromInt(chargePaymentMode);
                         }
                         if (!isMultiDisbursal) {
-                            final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition, principal, amount, chargeTime,
-                                    chargeCalculation, dueDate, chargePaymentModeEnum, numberOfRepayments, externalId);
-                            loanCharges.add(loanCharge);
+                            if (chargeDefinition.isDownPaymentCharge()) {
+                                validateDownPaymentEnabled(loanProduct.getLoanProductRelatedDetail().isEnableDownPayment(),
+                                        chargeDefinition);
+                                expectedDisbursementDate = this.fromApiJsonHelper
+                                        .extractLocalDateNamed(LoanApiConstants.expectedDisbursementDateParameterName, element);
+                                final BigDecimal percentageAppliedTo = resolveDownPaymentPercentageBase(principal, loanProduct);
+                                final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition, percentageAppliedTo, amount,
+                                        chargeTime, chargeCalculation, expectedDisbursementDate, chargePaymentModeEnum, numberOfRepayments,
+                                        externalId);
+                                loanCharges.add(loanCharge);
+                            } else {
+                                final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition, principal, amount, chargeTime,
+                                        chargeCalculation, dueDate, chargePaymentModeEnum, numberOfRepayments, externalId);
+                                loanCharges.add(loanCharge);
+                            }
                         } else {
                             if (topLevelJsonElement.has("disbursementData") && topLevelJsonElement.get("disbursementData").isJsonArray()) {
                                 final JsonArray disbursementArray = topLevelJsonElement.get("disbursementData").getAsJsonArray();
@@ -200,6 +214,32 @@ public class LoanChargeAssembler {
                                         loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
                                     }
                                 }
+                            } else if (chargeDefinition.isDownPaymentCharge()) {
+                                validateDownPaymentEnabled(loanProduct.getLoanProductRelatedDetail().isEnableDownPayment(),
+                                        chargeDefinition);
+                                // Multi-disburse with disallowExpectedDisbursements has no disbursementData; fall back
+                                // to
+                                // top-level expectedDisbursementDate (same as non-multi path).
+                                if (expectedDisbursementDate == null) {
+                                    expectedDisbursementDate = this.fromApiJsonHelper
+                                            .extractLocalDateNamed(LoanApiConstants.expectedDisbursementDateParameterName, element);
+                                }
+                                if (CollectionUtils.isEmpty(disbursementDetails)) {
+                                    final BigDecimal percentageAppliedTo = resolveDownPaymentPercentageBase(principal, loanProduct);
+                                    final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition, percentageAppliedTo, amount,
+                                            chargeTime, chargeCalculation, expectedDisbursementDate, chargePaymentModeEnum,
+                                            numberOfRepayments, externalId);
+                                    loanCharges.add(loanCharge);
+                                } else {
+                                    for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
+                                        final BigDecimal percentageAppliedTo = resolveDownPaymentPercentageBase(
+                                                disbursementDetail.getPrincipal(), loanProduct);
+                                        final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition, percentageAppliedTo, amount,
+                                                chargeTime, chargeCalculation, disbursementDetail.expectedDisbursementDateAsLocalDate(),
+                                                chargePaymentModeEnum, numberOfRepayments, externalId);
+                                        loanCharges.add(loanCharge);
+                                    }
+                                }
                             } else {
                                 final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition, principal, amount, chargeTime,
                                         chargeCalculation, dueDate, chargePaymentModeEnum, numberOfRepayments, externalId);
@@ -252,11 +292,20 @@ public class LoanChargeAssembler {
             throw new LoanChargeWithoutMandatoryFieldException("loanCharge", "dueDate", defaultUserMessage, chargeDefinition.getId(),
                     chargeDefinition.getName());
         }
+        if (chargeDefinition.isDownPaymentCharge() && dueDate == null) {
+            final String defaultUserMessage = "Loan charge is missing due date.";
+            throw new LoanChargeWithoutMandatoryFieldException("loanCharge", "dueDate", defaultUserMessage, chargeDefinition.getId(),
+                    chargeDefinition.getName());
+        }
         return createNewFromJson(loan, chargeDefinition, command, dueDate);
     }
 
     public LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command,
             final LocalDate dueDate) {
+        if (chargeDefinition.isDownPaymentCharge()) {
+            validateDownPaymentEnabled(loan.getLoanRepaymentScheduleDetail().isEnableDownPayment(), chargeDefinition);
+        }
+
         final Locale locale = command.extractLocale();
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount", locale);
 
@@ -266,7 +315,9 @@ public class LoanChargeAssembler {
         BigDecimal amountPercentageAppliedTo = BigDecimal.ZERO;
         switch (ChargeCalculationType.fromInt(chargeDefinition.getChargeCalculation())) {
             case PERCENT_OF_AMOUNT:
-                if (command.hasParameter("principal")) {
+                if (chargeDefinition.isDownPaymentCharge()) {
+                    amountPercentageAppliedTo = loanChargeService.calculateDownPaymentAmountBase(loan, dueDate);
+                } else if (command.hasParameter("principal")) {
                     amountPercentageAppliedTo = command.bigDecimalValueOfParameterNamed("principal");
                 } else {
                     amountPercentageAppliedTo = loan.getPrincipal().getAmount();
@@ -327,5 +378,20 @@ public class LoanChargeAssembler {
             final ChargePaymentMode chargePaymentMode, final Integer numberOfRepayments, final ExternalId externalId) {
         return loanChargeService.create(null, chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, dueDate,
                 chargePaymentMode, numberOfRepayments, BigDecimal.ZERO, externalId);
+    }
+
+    private BigDecimal resolveDownPaymentPercentageBase(final BigDecimal disbursementPrincipal, final LoanProduct loanProduct) {
+        final LoanProductRelatedDetail relatedDetail = loanProduct.getLoanProductRelatedDetail();
+        return loanChargeService.calculateDownPaymentAmount(disbursementPrincipal,
+                relatedDetail.getDisbursedAmountPercentageForDownPayment(), relatedDetail.getInstallmentAmountInMultiplesOf(),
+                loanProduct.getCurrency());
+    }
+
+    private void validateDownPaymentEnabled(final boolean enableDownPayment, final Charge chargeDefinition) {
+        if (!enableDownPayment) {
+            final String defaultUserMessage = "Down payment charge cannot be added because down payment is not enabled.";
+            throw new LoanChargeCannotBeAddedException("loanCharge", "down.payment.not.enabled", defaultUserMessage, null,
+                    chargeDefinition.getName());
+        }
     }
 }

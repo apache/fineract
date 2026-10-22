@@ -387,6 +387,11 @@ public final class LoanChargeApiJsonValidator {
                         throw new LoanChargeCannotBeAddedException("loanCharge", "overdue.charge", defaultUserMessage, null,
                                 chargeDefinition.getName());
                     }
+                    if (chargeDefinition.isDownPaymentCharge() && !loanProduct.getLoanProductRelatedDetail().isEnableDownPayment()) {
+                        final String defaultUserMessage = "Down payment charge cannot be added because down payment is not enabled.";
+                        throw new LoanChargeCannotBeAddedException("loanCharge", "down.payment.not.enabled", defaultUserMessage, null,
+                                chargeDefinition.getName());
+                    }
                     final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.amountParameterName,
                             loanChargeElement, locale);
                     baseDataValidator.reset().parameter(LoanApiConstants.chargesParameterName)

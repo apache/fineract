@@ -27,9 +27,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -294,7 +296,9 @@ public class LoanDisbursementService {
                         principal, loan.getNetDisbursalAmount(), false);
                 disbursementDetails.updateLoan(loan);
                 if (!loanDisbursementDetail.equals(disbursementDetails)) {
+                    final LocalDate previousExpectedDate = loanDisbursementDetail.expectedDisbursementDate();
                     loanDisbursementDetail.copy(disbursementDetails);
+                    syncDownPaymentFeesAfterDisbursementDetailChange(loan, previousExpectedDate, expectedDisbursementDate, principal);
                     actualChanges.put("disbursementDetailId", disbursementID);
                     actualChanges.put(RECALCULATE_LOAN_SCHEDULE, true);
                 }
@@ -317,8 +321,88 @@ public class LoanDisbursementService {
                 loanChargeValidator.validateChargeHasValidSpecifiedDateIfApplicable(loan, loanCharge, loan.getDisbursementDate());
                 loanChargeService.addLoanCharge(loan, loanCharge);
             }
+            createDownPaymentFeesForDisbursement(loan, expectedDisbursementDate, principal);
             actualChanges.put(LoanApiConstants.disbursementDataParameterName, expectedDisbursementDate + "-" + principal);
             actualChanges.put(RECALCULATE_LOAN_SCHEDULE, true);
+        }
+    }
+
+    /**
+     * Creates active DOWN_PAYMENT fees for the given disbursement date/principal when down payment is enabled and no
+     * matching active fee already exists for that charge definition and due date. Used both when adding expected
+     * disbursement details and when artificial tranches are created at disburse time
+     * ({@code disallowExpectedDisbursements}).
+     */
+    public void createDownPaymentFeesForDisbursement(final Loan loan, final LocalDate disbursementDate, final BigDecimal principal) {
+        if (!loan.getLoanRepaymentScheduleDetail().isEnableDownPayment() || disbursementDate == null || principal == null) {
+            return;
+        }
+        final LinkedHashSet<Charge> downPaymentChargeDefs = new LinkedHashSet<>();
+        if (loan.getLoanProduct().getCharges() != null) {
+            loan.getLoanProduct().getCharges().stream().filter(Charge::isDownPaymentCharge).filter(Charge::isActive)
+                    .forEach(downPaymentChargeDefs::add);
+        }
+        loan.getCharges().stream().filter(LoanCharge::isDownPaymentCharge).map(LoanCharge::getCharge).forEach(downPaymentChargeDefs::add);
+
+        for (final Charge chargeDefinition : downPaymentChargeDefs) {
+            final boolean exists = loan.getCharges().stream()
+                    .anyMatch(lc -> lc.isActive() && lc.isDownPaymentCharge()
+                            && Objects.equals(lc.getCharge().getId(), chargeDefinition.getId())
+                            && DateUtils.isEqual(disbursementDate, lc.getDueLocalDate()));
+            if (exists) {
+                continue;
+            }
+            ExternalId externalId = ExternalId.empty();
+            if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+                externalId = ExternalId.generate();
+            }
+            final BigDecimal percentageBase = loanChargeService.calculateDownPaymentAmount(principal,
+                    loan.getLoanRepaymentScheduleDetail().getDisbursedAmountPercentageForDownPayment(),
+                    loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf(), loan.getCurrency());
+            final LoanCharge loanCharge = loanChargeService.create(loan, chargeDefinition, percentageBase, null, null, null,
+                    disbursementDate, null, null, BigDecimal.ZERO, externalId);
+            loanChargeValidator.validateChargeAdditionForDisbursedLoan(loan, loanCharge);
+            loanChargeValidator.validateChargeHasValidSpecifiedDateIfApplicable(loan, loanCharge, loan.getDisbursementDate());
+            loanChargeService.addLoanCharge(loan, loanCharge);
+        }
+    }
+
+    /**
+     * After expected disbursement date/principal change: replace DP fees on the previous due date, recreate for the new
+     * date/principal, and restore fees for any other undisbursed detail that still uses the previous date.
+     */
+    private void syncDownPaymentFeesAfterDisbursementDetailChange(final Loan loan, final LocalDate previousDueDate,
+            final LocalDate newDueDate, final BigDecimal newPrincipal) {
+        if (!loan.getLoanRepaymentScheduleDetail().isEnableDownPayment()) {
+            return;
+        }
+        if (previousDueDate != null) {
+            removeDownPaymentFeesDueOn(loan, previousDueDate);
+            if (!DateUtils.isEqual(previousDueDate, newDueDate)) {
+                for (final LoanDisbursementDetails detail : loan.getDisbursementDetails()) {
+                    if (detail.actualDisbursementDate() == null && DateUtils.isEqual(previousDueDate, detail.expectedDisbursementDate())) {
+                        createDownPaymentFeesForDisbursement(loan, previousDueDate, detail.getPrincipal());
+                    }
+                }
+            }
+        }
+        createDownPaymentFeesForDisbursement(loan, newDueDate, newPrincipal);
+    }
+
+    private void removeDownPaymentFeesDueOn(final Loan loan, final LocalDate dueDate) {
+        if (dueDate == null) {
+            return;
+        }
+        final List<LoanCharge> toRemove = new ArrayList<>();
+        for (final LoanCharge loanCharge : loan.getCharges()) {
+            if (loanCharge.isActive() && loanCharge.isDownPaymentCharge() && DateUtils.isEqual(dueDate, loanCharge.getDueLocalDate())) {
+                toRemove.add(loanCharge);
+            }
+        }
+        for (final LoanCharge loanCharge : toRemove) {
+            loanChargeValidator.validateLoanIsNotClosed(loan, loanCharge);
+            loanChargeValidator.validateLoanChargeIsNotWaived(loan, loanCharge);
+            loanChargeService.removeLoanCharge(loan, loanCharge);
         }
     }
 
@@ -353,6 +437,9 @@ public class LoanDisbursementService {
     }
 
     private void removeChargesByDisbursementID(final Loan loan, final Long id) {
+        final LoanDisbursementDetails detail = loan.fetchLoanDisbursementsById(id);
+        final LocalDate expectedDate = detail != null ? detail.expectedDisbursementDate() : null;
+
         loan.getCharges().stream() //
                 .filter(charge -> { //
                     final LoanTrancheDisbursementCharge transCharge = charge.getTrancheDisbursementCharge(); //
@@ -364,6 +451,14 @@ public class LoanDisbursementService {
                     return true; //
                 }) //
                 .forEach(loanCharge -> loanChargeService.removeLoanCharge(loan, loanCharge));
+
+        if (expectedDate != null) {
+            final boolean expectedDateStillUsed = loan.getDisbursementDetails().stream().filter(d -> !Objects.equals(id, d.getId()))
+                    .anyMatch(d -> DateUtils.isEqual(expectedDate, d.expectedDisbursementDate()));
+            if (!expectedDateStillUsed) {
+                removeDownPaymentFeesDueOn(loan, expectedDate);
+            }
+        }
     }
 
     // This method returns date format and locale if present in the JsonCommand

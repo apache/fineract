@@ -50,7 +50,16 @@ public class LoanRepaymentScheduleProcessingWrapper {
                 .filter(repaymentPeriod -> !repaymentPeriod.isDownPayment()).findFirst().orElseThrow();
         for (final LoanRepaymentScheduleInstallment period : repaymentPeriods) {
 
-            if (!period.isDownPayment()) {
+            if (period.isDownPayment()) {
+                final Money feeChargesDueForDownPaymentPeriod = sumDownPaymentFeeChargesDue(period.getDueDate(), loanCharges, currency);
+                final Money feeChargesWaivedForDownPaymentPeriod = sumDownPaymentFeeChargesWaived(period.getDueDate(), loanCharges,
+                        currency);
+                final Money feeChargesWrittenOffForDownPaymentPeriod = sumDownPaymentFeeChargesWrittenOff(period.getDueDate(), loanCharges,
+                        currency);
+                final Money zero = Money.zero(currency);
+                period.updateChargePortion(feeChargesDueForDownPaymentPeriod, feeChargesWaivedForDownPaymentPeriod,
+                        feeChargesWrittenOffForDownPaymentPeriod, zero, zero, zero);
+            } else {
 
                 boolean isFirstNonDownPaymentPeriod = period.equals(firstNormalPeriod);
 
@@ -81,13 +90,49 @@ public class LoanRepaymentScheduleProcessingWrapper {
         }
     }
 
+    private Money sumDownPaymentFeeChargesDue(final LocalDate downPaymentDueDate, final Set<LoanCharge> loanCharges,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanCharge loanCharge : loanCharges) {
+            if (loanCharge.isDueAtDownPayment() && loanCharge.isFeeCharge()
+                    && DateUtils.isEqual(downPaymentDueDate, loanCharge.getDueLocalDate())) {
+                total = total.plus(loanCharge.getAmount(currency));
+            }
+        }
+        return total;
+    }
+
+    private Money sumDownPaymentFeeChargesWaived(final LocalDate downPaymentDueDate, final Set<LoanCharge> loanCharges,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanCharge loanCharge : loanCharges) {
+            if (loanCharge.isDueAtDownPayment() && loanCharge.isFeeCharge()
+                    && DateUtils.isEqual(downPaymentDueDate, loanCharge.getDueLocalDate())) {
+                total = total.plus(loanCharge.getAmountWaived(currency));
+            }
+        }
+        return total;
+    }
+
+    private Money sumDownPaymentFeeChargesWrittenOff(final LocalDate downPaymentDueDate, final Set<LoanCharge> loanCharges,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanCharge loanCharge : loanCharges) {
+            if (loanCharge.isDueAtDownPayment() && loanCharge.isFeeCharge()
+                    && DateUtils.isEqual(downPaymentDueDate, loanCharge.getDueLocalDate())) {
+                total = total.plus(loanCharge.getAmountWrittenOff(currency));
+            }
+        }
+        return total;
+    }
+
     private Money cumulativeFeeChargesDueWithin(final LocalDate periodStart, final LocalDate periodEnd, final Set<LoanCharge> loanCharges,
             final MonetaryCurrency monetaryCurrency, LoanRepaymentScheduleInstallment period, final Money totalPrincipal,
             final Money totalInterest, boolean isInstallmentChargeApplicable, boolean isFirstPeriod) {
 
         Money cumulative = Money.zero(monetaryCurrency);
         for (final LoanCharge loanCharge : loanCharges) {
-            if (loanCharge.isFeeCharge() && !loanCharge.isDueAtDisbursement()) {
+            if (loanCharge.isFeeCharge() && !loanCharge.isDueAtDisbursement() && !loanCharge.isDueAtDownPayment()) {
                 boolean isDue = loanCharge.isDueInPeriod(periodStart, periodEnd, isFirstPeriod);
                 if (loanCharge.isInstalmentFee() && isInstallmentChargeApplicable) {
                     cumulative = cumulative.plus(getInstallmentFee(monetaryCurrency, period, loanCharge));
@@ -173,7 +218,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
     }
 
     private Predicate<LoanCharge> feeCharge() {
-        return loanCharge -> loanCharge.isFeeCharge() && !loanCharge.isDueAtDisbursement();
+        return loanCharge -> loanCharge.isFeeCharge() && !loanCharge.isDueAtDisbursement() && !loanCharge.isDueAtDownPayment();
     }
 
     private Money cumulativePenaltyChargesDueWithin(final LocalDate periodStart, final LocalDate periodEnd,

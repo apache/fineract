@@ -65,6 +65,9 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
     public static final Integer CHARGE_TIME_TYPE_DISBURSEMENT = ChargeTimeType.DISBURSEMENT.value;
     public static final Integer CHARGE_TIME_TYPE_TRANCHE_DISBURSEMENT = ChargeTimeType.TRANCHE_DISBURSEMENT.value;
     public static final Integer CHARGE_TIME_TYPE_INSTALLMENT = ChargeTimeType.INSTALLMENT_FEE.value;
+    public static final Integer CHARGE_TIME_TYPE_DOWN_PAYMENT = ChargeTimeType.DOWN_PAYMENT.value;
+    public static final Double CHARGE_AMOUNT_DOWN_PAYMENT_FLAT = 10D;
+    public static final Double CHARGE_AMOUNT_DOWN_PAYMENT_PERCENTAGE = 10D;
     public static final Integer CHARGE_CALCULATION_TYPE_FLAT = ChargeCalculationType.FLAT.value;
     public static final Integer CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT = ChargeCalculationType.PERCENTAGE_AMOUNT.value;
     public static final Integer CHARGE_CALCULATION_TYPE_PERCENTAGE_INTEREST = ChargeCalculationType.PERCENTAGE_INTEREST.value;
@@ -165,7 +168,14 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
                 () -> TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY_CREATE_RESPONSE,
                         createChargeIfNotExists(charges, ChargeProductAppliesTo.WORKING_CAPITAL_LOAN,
                                 ChargeProductType.WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY.getName(), CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE,
-                                CHARGE_CALCULATION_TYPE_FLAT, 20.0, true, true)));
+                                CHARGE_CALCULATION_TYPE_FLAT, 20.0, true, true)),
+                () -> TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_DOWN_PAYMENT_FEE_CREATE_RESPONSE,
+                        createChargeIfNotExists(charges, CHARGE_APPLIES_TO_LOAN, ChargeProductType.LOAN_DOWN_PAYMENT_FEE.getName(),
+                                CHARGE_TIME_TYPE_DOWN_PAYMENT, CHARGE_CALCULATION_TYPE_FLAT, CHARGE_AMOUNT_DOWN_PAYMENT_FLAT, true, false)),
+                () -> TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_DOWN_PAYMENT_PERCENTAGE_FEE_CREATE_RESPONSE,
+                        createChargeIfNotExists(charges, CHARGE_APPLIES_TO_LOAN,
+                                ChargeProductType.LOAN_DOWN_PAYMENT_PERCENTAGE_FEE.getName(), CHARGE_TIME_TYPE_DOWN_PAYMENT,
+                                CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, CHARGE_AMOUNT_DOWN_PAYMENT_PERCENTAGE, true, false)));
 
         ParallelExecutionHelper.runInParallel(items);
     }
