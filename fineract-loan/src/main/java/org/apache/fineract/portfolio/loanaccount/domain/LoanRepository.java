@@ -28,6 +28,7 @@ import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.data.LoanDataForExternalTransfer;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -106,6 +107,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_ALL_LOAN_IDS_BY_STATUS = "SELECT loan.id FROM Loan loan WHERE loan.loanStatus = :loanStatus";
 
+    String PROGRESSIVE_LOAN_CONDITION = "l.loanRepaymentScheduleDetail.loanScheduleType = :progressiveScheduleType";
+
     String LOANS_FOR_ACCRUAL = "select l from Loan l left join l.loanInterestRecalculationDetails recalcDetails "
             + "where l.loanStatus = :loanStatus and l.isNpa = false and l.chargedOff = false "
             + "and l.loanProduct.accountingRule = :accountingType "
@@ -114,9 +117,11 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
             + "and ((coalesce(ls.interestCharged, 0) - coalesce(ls.interestWaived, 0)) <> coalesce(ls.interestAccrued, 0) "
             + "or (coalesce(ls.feeChargesCharged, 0) - coalesce(ls.feeChargesWaived, 0)) <> coalesce(ls.feeAccrued, 0) "
             + "or (coalesce(ls.penaltyCharges, 0) - coalesce(ls.penaltyChargesWaived, 0)) <> coalesce(ls.penaltyAccrued, 0)) ";
-    String FIND_LOANS_FOR_PERIODIC_ACCRUAL = LOANS_FOR_ACCRUAL
-            + "and (:futureCharges = true or ls.fromDate < :tillDate or (ls.installmentNumber = (select min(lsi.installmentNumber) from LoanRepaymentScheduleInstallment lsi where lsi.loan.id = l.id and lsi.isDownPayment = false) and ls.fromDate = :tillDate))))";
-    String FIND_LOANS_FOR_ADD_ACCRUAL = LOANS_FOR_ACCRUAL + "and (:futureCharges = true or ls.dueDate <= :tillDate)))";
+    String FIND_LOANS_FOR_PERIODIC_ACCRUAL = LOANS_FOR_ACCRUAL + "and (:futureCharges = true or (:progressiveFutureCharges = true and "
+            + PROGRESSIVE_LOAN_CONDITION
+            + ") or ls.fromDate < :tillDate or (ls.installmentNumber = (select min(lsi.installmentNumber) from LoanRepaymentScheduleInstallment lsi where lsi.loan.id = l.id and lsi.isDownPayment = false) and ls.fromDate = :tillDate))))";
+    String FIND_LOANS_FOR_ADD_ACCRUAL = LOANS_FOR_ACCRUAL + "and (:futureCharges = true or (:progressiveFutureCharges = true and "
+            + PROGRESSIVE_LOAN_CONDITION + ") or ls.dueDate <= :tillDate)))";
 
     String FIND_LOAN_BY_EXTERNAL_ID = "SELECT loan FROM Loan loan WHERE loan.externalId = :externalId";
 
@@ -264,11 +269,13 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_LOANS_FOR_PERIODIC_ACCRUAL)
     List<Loan> findLoansForPeriodicAccrual(@Param("accountingType") AccountingRuleType accountingType,
             @Param("tillDate") LocalDate tillDate, @Param("futureCharges") boolean futureCharges,
-            @Param("loanStatus") LoanStatus loanStatus);
+            @Param("progressiveFutureCharges") boolean progressiveFutureCharges,
+            @Param("progressiveScheduleType") LoanScheduleType progressiveScheduleType, @Param("loanStatus") LoanStatus loanStatus);
 
     @Query(FIND_LOANS_FOR_ADD_ACCRUAL)
     List<Loan> findLoansForAddAccrual(@Param("accountingType") AccountingRuleType accountingType, @Param("tillDate") LocalDate tillDate,
-            @Param("futureCharges") boolean futureCharges, @Param("loanStatus") LoanStatus loanStatus);
+            @Param("futureCharges") boolean futureCharges, @Param("progressiveFutureCharges") boolean progressiveFutureCharges,
+            @Param("progressiveScheduleType") LoanScheduleType progressiveScheduleType, @Param("loanStatus") LoanStatus loanStatus);
 
     @Query(FIND_LOAN_BY_EXTERNAL_ID)
     Optional<Loan> findByExternalId(@Param("externalId") ExternalId externalId);

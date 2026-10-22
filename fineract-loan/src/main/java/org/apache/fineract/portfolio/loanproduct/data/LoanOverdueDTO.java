@@ -19,7 +19,9 @@
 package org.apache.fineract.portfolio.loanproduct.data;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 
 public class LoanOverdueDTO {
 
@@ -27,13 +29,15 @@ public class LoanOverdueDTO {
     private final boolean runInterestRecalculation;
     private final LocalDate recalculateFrom;
     private final LocalDate lastChargeAppliedDate;
+    private final List<LoanCharge> appliedCharges;
 
     public LoanOverdueDTO(final Loan loan, final boolean runInterestRecalculation, final LocalDate recalculateFrom,
-            final LocalDate lastChargeAppliedDate) {
+            final LocalDate lastChargeAppliedDate, final List<LoanCharge> appliedCharges) {
         this.loan = loan;
         this.runInterestRecalculation = runInterestRecalculation;
         this.recalculateFrom = recalculateFrom;
         this.lastChargeAppliedDate = lastChargeAppliedDate;
+        this.appliedCharges = List.copyOf(appliedCharges);
     }
 
     public boolean isRunInterestRecalculation() {
@@ -50,5 +54,9 @@ public class LoanOverdueDTO {
 
     public LocalDate getLastChargeAppliedDate() {
         return this.lastChargeAppliedDate;
+    }
+
+    public List<LoanCharge> getAppliedCharges() {
+        return this.appliedCharges;
     }
 }
