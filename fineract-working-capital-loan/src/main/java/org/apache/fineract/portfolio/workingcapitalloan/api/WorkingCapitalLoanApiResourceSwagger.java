@@ -395,6 +395,7 @@ public final class WorkingCapitalLoanApiResourceSwagger {
             public BigDecimal totalDiscountFeeAdjustment;
             public BigDecimal totalExpectedRepayment;
             public BigDecimal totalRepayment;
+            public BigDecimal totalPayment;
             public BigDecimal totalOutstanding;
             public LocalDate overdueSinceDate;
         }

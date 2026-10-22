@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -115,7 +114,16 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
               and t.transactionType in :transactionTypes and t.transactionDate <= :date
             """)
     BigDecimal sumAmountsOfTypesUpTo(@Param("wcLoanId") Long wcLoanId,
-            @Param("transactionTypes") Collection<LoanTransactionType> transactionTypes, @Param("date") LocalDate date);
+            @Param("transactionTypes") List<LoanTransactionType> transactionTypes, @Param("date") LocalDate date);
+
+    @Query("""
+            select coalesce(sum(t.transactionAmount), 0)
+            from WorkingCapitalLoanTransaction t
+            where t.wcLoan.id = :wcLoanId and t.reversed = false
+              and t.transactionType in :transactionTypes
+            """)
+    BigDecimal sumActiveAmountsOfTypes(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
 
     Optional<WorkingCapitalLoanTransaction> findByWcLoan_IdAndExternalId(Long wcLoanId, ExternalId externalId);
 
