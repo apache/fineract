@@ -38,8 +38,9 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
  *
  * <p>
  * A transaction settles a given charge at most once, so the pair is unique: what one transaction put towards one charge
- * belongs in a single row's amount rather than spread over several. Reprocessing deletes a loan's rows before replaying
- * them, so nothing reachable today writes a duplicate - the constraint is there to fail a future path that tries.
+ * belongs in a single row's amount rather than spread over several. Reprocessing deletes the rows of the transactions
+ * it replays before replaying them and never replays a reversed one, so nothing reachable today writes a duplicate -
+ * the constraint is there to fail a future path that tries.
  */
 @Entity
 @Table(name = "m_wc_loan_charge_paid_by", uniqueConstraints = { @UniqueConstraint(columnNames = { "wc_loan_transaction_id",

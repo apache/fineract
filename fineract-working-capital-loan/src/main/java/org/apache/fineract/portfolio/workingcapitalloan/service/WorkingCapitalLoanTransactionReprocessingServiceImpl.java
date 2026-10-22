@@ -246,8 +246,9 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         final Map<Long, WorkingCapitalLoanTransactionData> preReplaySnapshots = captureSnapshots(replayable);
 
         // Reset the paid distribution; the principal/fee/penalty totals stay, only how much of each is paid is
-        // recomputed. The charge-paid-by rows are output for the old distribution, so drop them here and let the
-        // reset+replay below rebuild them (mirrors the core module's clear-and-rewrite of LoanChargePaidBy).
+        // recomputed. The charge-paid-by rows of the replayed transactions are output for the old distribution, so drop
+        // them here and let the reset+replay below rebuild them. A reversed transaction is not replayed and keeps its
+        // rows, as an undone or adjusted LoanTransaction keeps its LoanChargePaidBy in the core module.
         balance.setPrincipalPaid(BigDecimal.ZERO);
         balance.setFeePaid(BigDecimal.ZERO);
         balance.setPenaltyPaid(BigDecimal.ZERO);
@@ -257,7 +258,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
             charge.setAmountPaid(BigDecimal.ZERO);
             charge.setPaid(false);
         }
-        chargePaidByRepository.deleteByLoanId(loan.getId());
+        chargePaidByRepository.deleteOfActiveTransactionsByLoanId(loan.getId());
 
         final List<WorkingCapitalLoanChargePaidBy> rebuiltChargesPaidBy = new ArrayList<>();
 

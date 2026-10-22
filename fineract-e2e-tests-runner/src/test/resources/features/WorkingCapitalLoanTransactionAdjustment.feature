@@ -906,6 +906,9 @@ Feature: Working Capital Loan Transaction Adjustment
       | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
     When Customer adjust "1"th "CHARGE_ADJUSTMENT" transaction made on "10 January 2026" on Working Capital loan with amount "40"
     Then a Working Capital Loan Adjust Transaction business event is raised for the adjusted "chargeAdjustment" with new amount "40"
+    And a Working Capital Loan Adjust Transaction business event for the reversed "CHARGE_ADJUSTMENT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 100.0  |
     And Working Capital Loan Transactions tab has a reversed "CHARGE_ADJUSTMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | INCOME | 404007       | Fee Income              | 100.0 |        |
@@ -921,6 +924,12 @@ Feature: Working Capital Loan Transaction Adjustment
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
       | 10 January 2026 | Charge Adjustment | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
+    And Working Capital Loan reversed "CHARGE_ADJUSTMENT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 100.0  |
+    And Working Capital Loan "CHARGE_ADJUSTMENT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 40.0   |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 60.0            | 40.0     | 0.0            | 0.0                 | 0.0          |

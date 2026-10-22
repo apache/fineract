@@ -330,6 +330,9 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin reverts the last charge adjustment on working capital loan
     Then a Working Capital Loan Adjust Transaction business event is raised for the reversed "chargeAdjustment" transaction
+    And a Working Capital Loan Adjust Transaction business event for the reversed "CHARGE_ADJUSTMENT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 100.0  |
     And Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |

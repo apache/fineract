@@ -296,6 +296,12 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Goodwill Credit | 30.0              | 25.0             | 5.0               | 0.0                   | true     |
       | 10 January 2026 | Goodwill Credit | 25.0              | 20.0             | 5.0               | 0.0                   | false    |
+    And Working Capital Loan reversed "GOODWILL_CREDIT" transaction on "05 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 5.0    |
+    And Working Capital Loan "GOODWILL_CREDIT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 5.0    |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Paid | Fee Outstanding |
       | 5.0        | 5.0      | 0.0             |

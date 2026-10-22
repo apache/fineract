@@ -2331,6 +2331,16 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         eventCheckHelper.workingCapitalLoanAdjustTransactionReversalEventCheck(getCreatedLoanId(), transactionType);
     }
 
+    @Then("a Working Capital Loan Adjust Transaction business event for the reversed {string} transaction on {string} has the following charge paid-by data:")
+    public void aWorkingCapitalLoanAdjustTransactionBusinessEventForReversalHasChargePaidByData(final String transactionType,
+            final String transactionDate, final DataTable table) {
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findSingleTransaction(transactionType, transactionDate, true);
+        final List<List<String>> data = table.asLists();
+        final List<String> headers = data.get(0);
+        eventCheckHelper.workingCapitalLoanAdjustTransactionChargePaidByCheck(transaction.getId(),
+                paidBy -> fetchChargePaidByValues(headers, paidBy.getName(), paidBy.getAmount()), data.subList(1, data.size()));
+    }
+
     @Then("a Working Capital Loan Adjust Transaction business event is raised for the {string} transaction on {string} with principal portion changed from {string} to {string} and fee portion changed from {string} to {string}")
     public void aWorkingCapitalLoanAdjustTransactionBusinessEventIsRaisedForReprocess(final String transactionType,
             final String transactionDate, final String previousPrincipalPortion, final String newPrincipalPortion,
@@ -3269,40 +3279,60 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @And("Working Capital Loan {string} transaction on {string} has the following charge paid-by data:")
     public void workingCapitalLoanTransactionHasChargePaidByData(final String transactionType, final String transactionDate,
             final DataTable table) {
-        final Long loanId = getCreatedLoanId();
-        final TransactionType resolvedType = resolveTransactionType(transactionType);
-        final List<GetWorkingCapitalLoanTransactionIdResponse> matches = findMatchingTransactions(loanId, resolvedType, transactionDate,
-                false);
-        Assertions.assertFalse(matches.isEmpty(),
-                String.format("No non-reversed %s transaction found on %s for loan %s", transactionType, transactionDate, loanId));
-        final GetWorkingCapitalLoanTransactionIdResponse transaction = matches.get(0);
+        verifyTransactionChargePaidByData(transactionType, transactionDate, false, table);
+    }
+
+    @And("Working Capital Loan reversed {string} transaction on {string} has the following charge paid-by data:")
+    public void workingCapitalLoanReversedTransactionHasChargePaidByData(final String transactionType, final String transactionDate,
+            final DataTable table) {
+        verifyTransactionChargePaidByData(transactionType, transactionDate, true, table);
+    }
+
+    private void verifyTransactionChargePaidByData(final String transactionType, final String transactionDate, final boolean reversed,
+            final DataTable table) {
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findSingleTransaction(transactionType, transactionDate, reversed);
+        final String transactionLabel = describeTransaction(transactionType, transactionDate, reversed);
 
         final List<GetWorkingCapitalLoanChargePaidByData> actualPaidBy = transaction.getChargePaidByList() == null ? List.of()
                 : transaction.getChargePaidByList();
 
         final List<List<String>> data = table.asLists();
         final List<String> headers = data.get(0);
-        final List<List<String>> actualRows = actualPaidBy.stream().map(paidBy -> fetchChargePaidByValues(headers, paidBy)).toList();
+        final List<List<String>> actualRows = actualPaidBy.stream()
+                .map(paidBy -> fetchChargePaidByValues(headers, paidBy.getName(), paidBy.getAmount())).toList();
 
         for (int i = 1; i < data.size(); i++) {
             final List<String> expectedValues = data.get(i);
             assertThat(actualRows.contains(expectedValues))
-                    .as("%nNo matching charge paid-by row for %s transaction on %s of loan %s line %s.%nActual rows: %s%nExpected row: %s",
-                            transactionType, transactionDate, loanId, i, actualRows, expectedValues)
+                    .as("%nNo matching charge paid-by row for %s line %s.%nActual rows: %s%nExpected row: %s", transactionLabel, i,
+                            actualRows, expectedValues)
                     .isTrue();
         }
         Assertions.assertEquals(data.size() - 1, actualPaidBy.size(),
-                String.format("Charge paid-by row count mismatch for %s transaction on %s of loan %s. Actual: %s", transactionType,
-                        transactionDate, loanId, actualPaidBy));
+                String.format("Charge paid-by row count mismatch for %s. Actual: %s", transactionLabel, actualPaidBy));
     }
 
-    private List<String> fetchChargePaidByValues(final List<String> headers, final GetWorkingCapitalLoanChargePaidByData paidBy) {
+    private GetWorkingCapitalLoanTransactionIdResponse findSingleTransaction(final String transactionType, final String transactionDate,
+            final boolean reversed) {
+        final List<GetWorkingCapitalLoanTransactionIdResponse> matches = findMatchingTransactions(getCreatedLoanId(),
+                resolveTransactionType(transactionType), transactionDate, reversed);
+        Assertions.assertEquals(1, matches.size(), () -> String.format("Expected exactly one %s, found %s",
+                describeTransaction(transactionType, transactionDate, reversed), matches.size()));
+        return matches.getFirst();
+    }
+
+    private String describeTransaction(final String transactionType, final String transactionDate, final boolean reversed) {
+        return String.format("%s %s transaction on %s of loan %s", reversed ? "reversed" : "non-reversed", transactionType, transactionDate,
+                getCreatedLoanId());
+    }
+
+    private List<String> fetchChargePaidByValues(final List<String> headers, final String name, final BigDecimal amount) {
         final List<String> values = new ArrayList<>();
         for (final String headerName : headers) {
             switch (headerName) {
-                case "Charge Name" -> values.add(paidBy.getName());
-                case "Amount" ->
-                    values.add(paidBy.getAmount() == null ? null : new Utils.DoubleFormatter(paidBy.getAmount().doubleValue()).format());
+                case "Charge Name" -> values.add(name);
+                case "Amount" -> values.add(
+                        Optional.ofNullable(amount).map(value -> new Utils.DoubleFormatter(value.doubleValue()).format()).orElse(null));
                 default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
             }
         }
