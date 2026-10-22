@@ -94,7 +94,6 @@ tasks.named('test') {
 }
 
 tasks.named('cucumber') {
-    dependsOn 'spotlessCheck'
     finalizedBy 'allureReport'
 }
 
