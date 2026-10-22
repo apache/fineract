@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
@@ -38,6 +40,7 @@ import org.apache.fineract.portfolio.tax.exception.TaxMappingNotFoundException;
 
 @Entity
 @Table(name = "m_tax_group")
+@Getter
 public class TaxGroup extends AbstractAuditableCustom {
 
     @Column(name = "name", length = 100)
@@ -104,12 +107,6 @@ public class TaxGroup extends AbstractAuditableCustom {
         return null;
     }
 
-    public Set<TaxGroupMappings> getTaxGroupMappings() {
-        return this.taxGroupMappings;
-    }
 
-    public String getName() {
-        return this.name;
-    }
 
 }
