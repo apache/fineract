@@ -388,6 +388,44 @@ public class MakercheckerTest extends FeignIntegrationTest {
     }
 
     @Test
+    public void testPendingSavingsAccountUpdateIsFoundBySavingsAccountId() {
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        Long pendingId = null;
+        try {
+            Long clientId = clientHelper.createClient(START_DATE_STRING);
+            Long savingsProductId = createSavingsProductDailyPosting();
+            Long savingsId = savingsHelper.submitApplication(clientId, savingsProductId, START_DATE_STRING).getSavingsId();
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("UPDATE_SAVINGSACCOUNT", true));
+
+            Long roleId = FeignRoleHelper.createRole();
+            FeignRoleHelper.addPermissionsToRole(roleId, Map.of("UPDATE_SAVINGSACCOUNT", true));
+            Long staffId = staffHelper.createStaff().getResourceId();
+            String maker = Utils.uniqueRandomStringGenerator("user", 8);
+            Long makerUserId = FeignUserHelper.createUser(roleId, staffId, maker, PASSWORD).getResourceId();
+
+            new FeignSavingsHelper(FineractFeignClientHelper.createNewFineractFeignClient(maker, PASSWORD)).updateSavingsAccount(savingsId,
+                    SavingsRequestBuilders.updateSavingsApplication(clientId, savingsProductId, TRANSACTION_DATE_STRING));
+
+            List<AuditData> pending = retrieveCommands(Map.of("savingsAccountId", savingsId.toString(), "makerId", makerUserId.toString()));
+            assertEquals(1, pending.size(), "The pending savings account update should be found by savingsAccountId");
+            assertEquals("UPDATE", pending.get(0).getActionName());
+            assertEquals("SAVINGSACCOUNT", pending.get(0).getEntityName());
+            assertEquals(savingsId, pending.get(0).getResourceId());
+            assertNotNull(pending.get(0).getSavingsAccountNo());
+            pendingId = pending.get(0).getId();
+        } finally {
+            if (pendingId != null) {
+                Long rejectId = pendingId;
+                ok(() -> fineractClient().makerCheckerOr4EyeFunctionality().approveMakerCheckerEntry(rejectId, "reject"));
+            }
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            updatePermissions(new PutPermissionsRequest().putPermissionsItem("UPDATE_SAVINGSACCOUNT", false));
+        }
+    }
+
+    @Test
     public void testCheckerOnlyUserApprovesAnIdenticalPendingSubmissionThroughTheActionEndpoint() {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
                 new PutGlobalConfigurationsRequest().enabled(true));
