@@ -1,0 +1,138 @@
+= Global Configuration Allowed Values
+
+Some global configurations accept only a fixed set of values in `stringValue`. Updates to these configurations are validated against the allowed values, and the allowed values are exposed in the configuration API.
+
+== Restricted Configurations
+
+[cols="3,3,1,2"]
+|===
+|Configuration |Allowed values |Multiple |When the stored value is invalid
+
+|`charge-accrual-date`
+|`due-date`, `submitted-date`
+|no
+|`due-date` is used
+
+|`next-payment-due-date`
+|`earliest-unpaid-date`, `next-unpaid-due-date`
+|no
+|`earliest-unpaid-date` is used
+
+|`wcl-charge-accrual-time`
+|`eod`, `real-time`
+|no
+|`eod` is used
+
+|`pl-charge-accrual-time`
+|`eod`, `real-time`
+|no
+|`eod` is used
+
+|`account-mapping-for-payment-type`
+|`Asset`, `Liability`, `Expense`
+|yes
+|`Asset` is used
+
+|`account-mapping-for-charge`
+|`Income`, `Liability`, `Expense`
+|yes
+|`Income` is used
+
+|`outstanding-interest-calculation-strategy-for-external-asset-transfer`
+|`TOTAL_OUTSTANDING_INTEREST`, `PAYABLE_OUTSTANDING_INTEREST`
+|no
+|operations that read it fail
+
+|`allowed-loan-statuses-for-external-asset-transfer`
+|any loan status except `INVALID`
+|yes
+|operations that read it fail
+
+|`allowed-loan-statuses-of-delayed-settlement-for-external-asset-transfer`
+|any loan status except `INVALID`
+|yes
+|operations that read it fail
+|===
+
+== Updating a Restricted Configuration
+
+`PUT /configurations/{configId}` and `PUT /configurations/name/{configName}` reject a `stringValue` that is not allowed with HTTP 400 and the error code `validation.msg.globalConfiguration.stringValue.is.not.one.of.expected.enumerations`. Every entry of a comma-separated list is checked, and each invalid entry is reported separately.
+
+Values are matched ignoring case and surrounding whitespace, duplicate list entries are dropped, and the value is stored in the spelling listed in `allowedValues`. For example, `EOD` is stored as `eod`.
+
+A configuration that is locked (a trap door configuration after the first loan, savings or share account was created) is reported as locked before its value is checked.
+
+== Retrieving a Restricted Configuration
+
+Configuration responses carry two additional fields for restricted configurations. Both are omitted for unrestricted configurations.
+
+* `allowedValues` - the allowed values, in the spelling they are stored in
+* `multipleValuesAllowed` - whether `stringValue` holds a comma-separated list of allowed values
+
+[source,json]
+----
+{
+  "name": "wcl-charge-accrual-time",
+  "enabled": true,
+  "stringValue": "eod",
+  "allowedValues": ["eod", "real-time"],
+  "multipleValuesAllowed": false
+}
+----
+
+== Upgrading
+
+Stored values are not rewritten during the upgrade. Values that differ from an allowed value only in case or surrounding whitespace keep working, and get the stored spelling the next time they are updated through the API.
+
+After the tenant databases are upgraded, every restricted configuration of every tenant is checked once at startup, and a blank or invalid value is logged:
+
+* For a configuration with a default, a `WARN` names the default that is used instead.
+* For the external asset transfer configurations, an `ERROR` is logged and the stored value is not replaced: initiating a transfer, or calculating the outstanding interest of a transfer, fails with `error.msg.configuration.property.value.not.allowed` until the value is corrected. Substituting a default would silently change which loans may be transferred, or the amount they are transferred for.
+
+Check the startup log after upgrading and correct any reported value through the configuration API.
+
+Behaviour that changes for an invalid stored value:
+
+[cols="2,3,3"]
+|===
+|Configuration |Before |Now
+
+|`charge-accrual-date` (working capital loans)
+|no charge accruals were created
+|accrues on `due-date`
+
+|`next-payment-due-date`
+|delinquency returned no next payment date
+|`earliest-unpaid-date` is used
+
+|`account-mapping-for-payment-type`, `account-mapping-for-charge`
+|the raw value was returned in the template response
+|the default is returned
+
+|`allowed-loan-statuses-*`
+|transfers failed with an `IllegalArgumentException`
+|transfers fail with `error.msg.configuration.property.value.not.allowed`, naming the configuration and the stored value
+
+|`outstanding-interest-calculation-strategy-for-external-asset-transfer`
+|transfers failed with an `UnsupportedOperationException`, or a `NullPointerException` for a blank value
+|transfers fail with `error.msg.configuration.property.value.not.allowed`, naming the configuration and the stored value
+|===
+
+== Changes for Custom Modules
+
+Custom modules that call the affected Java APIs need to be updated:
+
+* `ConfigurationDomainService` getters return enums instead of strings:
+** `getAllowedLoanStatusesForExternalAssetTransfer()` and `getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer()` return `List<LoanStatus>`
+** `getAccrualDateConfigForCharge()` returns `ChargeAccrualDateConfig`
+** `getNextPaymentDateConfigForLoan()` returns `NextPaymentDueDateConfig`
+** `getAssetOwnerTransferOustandingInterestStrategy()` returns `OutstandingInterestStrategyConfig`
+* `ConfigurationDomainService` has a new method, `getWclChargeAccrualTime()`, which custom implementations of the interface must provide.
+* `TemporaryConfigurationServiceContainer.getAccrualDateConfigForCharge()` was removed; inject `ConfigurationDomainService` instead.
+* `Loan.EARLIEST_UNPAID_DATE` and `Loan.NEXT_UNPAID_DUE_DATE` were removed; use `NextPaymentDueDateConfig`.
+
+== Restricting Another Configuration
+
+. Add an `AllowedValues` constant to `GlobalConfigurationAllowedValues` and list it in `ALL`. Give it a default unless falling back to one could change a financial outcome.
+. Read the value through `resolve` or `resolveAll` instead of parsing the raw string.
+. Make sure the configuration's changelog inserts an allowed value. `GlobalConfigurationTest.testRestrictedConfigurationsHoldAllowedValues` fails otherwise.

@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.configuration.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,11 +43,13 @@ class ConfigurationDomainServiceJpaTest {
     @Test
     void parsesLegacySpellingOfStoredValues() {
         stored(GlobalConfigurationConstants.WCL_CHARGE_ACCRUAL_TIME, "REAL-TIME");
+        stored(GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME, " Real-Time ");
         stored(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE, "Submitted-Date");
         stored(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE, " NEXT-UNPAID-DUE-DATE ");
         stored(GlobalConfigurationConstants.ASSET_OWNER_TRANSFER_OUTSTANDING_INTEREST_CALCULATION_STRATEGY, "payable_outstanding_interest");
 
-        assertEquals(WclChargeAccrualTimeConfig.REAL_TIME, underTest.getWclChargeAccrualTime());
+        assertEquals(ChargeAccrualTimeConfig.REAL_TIME, underTest.getWclChargeAccrualTime());
+        assertTrue(underTest.isPlChargeAccrualRealTime());
         assertEquals(ChargeAccrualDateConfig.SUBMITTED_DATE, underTest.getAccrualDateConfigForCharge());
         assertEquals(NextPaymentDueDateConfig.NEXT_UNPAID_DUE_DATE, underTest.getNextPaymentDateConfigForLoan());
         assertEquals(OutstandingInterestStrategyConfig.PAYABLE_OUTSTANDING_INTEREST,
@@ -55,11 +59,13 @@ class ConfigurationDomainServiceJpaTest {
     @Test
     void usesDefaultsForBlankOrNotAllowedValues() {
         stored(GlobalConfigurationConstants.WCL_CHARGE_ACCRUAL_TIME, "hourly");
+        stored(GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME, "realtime");
         stored(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE, null);
         stored(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE, "");
         stored(GlobalConfigurationConstants.ASSET_OWNER_TRANSFER_OUTSTANDING_INTEREST_CALCULATION_STRATEGY, "UNKNOWN");
 
-        assertEquals(WclChargeAccrualTimeConfig.EOD, underTest.getWclChargeAccrualTime());
+        assertEquals(ChargeAccrualTimeConfig.EOD, underTest.getWclChargeAccrualTime());
+        assertFalse(underTest.isPlChargeAccrualRealTime());
         assertEquals(ChargeAccrualDateConfig.DUE_DATE, underTest.getAccrualDateConfigForCharge());
         assertEquals(NextPaymentDueDateConfig.EARLIEST_UNPAID_DATE, underTest.getNextPaymentDateConfigForLoan());
         assertEquals(OutstandingInterestStrategyConfig.TOTAL_OUTSTANDING_INTEREST,

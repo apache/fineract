@@ -139,6 +139,7 @@ public class GlobalConfigurationApiResource {
     @AlternativeOperationId("updateConfiguration_1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsResponse.class)))
+    @ApiResponse(responseCode = "400", description = "Bad Request: validation.msg.globalConfiguration.stringValue.is.not.one.of.expected.enumerations if stringValue is not one of the configuration's allowedValues")
     public String updateConfiguration(@PathParam("configId") @Parameter(description = "configId") final Long configId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -159,6 +160,7 @@ public class GlobalConfigurationApiResource {
     @Operation(summary = "Update Global Configuration by name", description = "Updates an enable/disable global configuration item by name")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsResponse.class)))
+    @ApiResponse(responseCode = "400", description = "Bad Request: validation.msg.globalConfiguration.stringValue.is.not.one.of.expected.enumerations if stringValue is not one of the configuration's allowedValues")
     public String updateConfigurationByName(@PathParam("configName") @Parameter(description = "configName") final String configName,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 

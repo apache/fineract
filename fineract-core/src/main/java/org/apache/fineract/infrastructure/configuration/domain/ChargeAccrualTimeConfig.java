@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum WclChargeAccrualTimeConfig implements GlobalConfigurationValue {
+public enum ChargeAccrualTimeConfig implements GlobalConfigurationValue {
 
     EOD("eod"), //
     REAL_TIME("real-time"); //

@@ -516,7 +516,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
-    public WclChargeAccrualTimeConfig getWclChargeAccrualTime() {
+    public ChargeAccrualTimeConfig getWclChargeAccrualTime() {
         return resolve(GlobalConfigurationAllowedValues.WCL_CHARGE_ACCRUAL_TIME);
     }
 
@@ -532,8 +532,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     @Override
     public boolean isPlChargeAccrualRealTime() {
-        final String value = getGlobalConfigurationPropertyData(GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME).getStringValue();
-        return GlobalConfigurationConstants.CHARGE_ACCRUAL_TIME_REAL_TIME.equalsIgnoreCase(StringUtils.trimToEmpty(value));
+        return resolve(GlobalConfigurationAllowedValues.PL_CHARGE_ACCRUAL_TIME) == ChargeAccrualTimeConfig.REAL_TIME;
     }
 
     @Override

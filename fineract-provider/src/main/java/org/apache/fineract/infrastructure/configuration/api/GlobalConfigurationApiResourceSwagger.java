@@ -54,7 +54,7 @@ final class GlobalConfigurationApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @Schema(example = "random text")
+        @Schema(description = "Must be one of the configuration's allowedValues, or a comma-separated list of them if multipleValuesAllowed is true, when the configuration lists allowedValues", example = "random text")
         public String stringValue;
     }
 

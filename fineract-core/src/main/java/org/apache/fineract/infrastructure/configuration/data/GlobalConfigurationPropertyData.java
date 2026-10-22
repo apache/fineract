@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.Data;
@@ -48,6 +49,10 @@ public class GlobalConfigurationPropertyData {
     private String description;
     @SuppressWarnings("unused")
     private boolean trapDoor;
+    @Schema(description = "The values stringValue is restricted to, in their canonical spelling. Matching ignores case and surrounding"
+            + " whitespace, and an update stores the canonical spelling. Omitted if the configuration is not restricted.", example = "[\"eod\", \"real-time\"]")
     private List<String> allowedValues;
+    @Schema(description = "Whether stringValue holds a comma-separated list of allowedValues instead of a single one. Omitted if the"
+            + " configuration is not restricted.", example = "false")
     private Boolean multipleValuesAllowed;
 }

@@ -27,14 +27,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
+import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyValueNotAllowedException;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 
 /**
  * Registry of the global configurations whose {@code stringValue} is restricted to a fixed set of values. Values are
  * matched case-insensitively, and the update API stores them in their canonical spelling. Values stored before the
- * restriction existed are not rewritten: one that is blank or not allowed resolves to the configuration's default,
- * which matches the value its changelog inserted, and is reported at startup by
- * {@code GlobalConfigurationAllowedValuesStartupCheck}.
+ * restriction existed are not rewritten, and one that is blank or not allowed is reported at startup by
+ * {@code GlobalConfigurationAllowedValuesStartupCheck}. Reading such a value either resolves to the configuration's
+ * default, which matches the value its changelog inserted, or, for a configuration without a default, fails with
+ * {@link GlobalConfigurationPropertyValueNotAllowedException}. Configurations that decide which loans may be
+ * transferred, or for how much, have no default: silently substituting one would change financial outcomes.
  * <p>
  * Restricting another configuration takes three steps: add a constant here and list it in {@link #ALL}, read it through
  * {@link AllowedValues#resolve} or {@link AllowedValues#resolveAll} instead of parsing the raw string, and make sure
@@ -48,24 +51,24 @@ public final class GlobalConfigurationAllowedValues {
             GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE, ChargeAccrualDateConfig.DUE_DATE);
     public static final AllowedValues<NextPaymentDueDateConfig> NEXT_PAYMENT_DUE_DATE = single(
             GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE, NextPaymentDueDateConfig.EARLIEST_UNPAID_DATE);
-    public static final AllowedValues<WclChargeAccrualTimeConfig> WCL_CHARGE_ACCRUAL_TIME = single(
-            GlobalConfigurationConstants.WCL_CHARGE_ACCRUAL_TIME, WclChargeAccrualTimeConfig.EOD);
-    public static final AllowedValues<OutstandingInterestStrategyConfig> OUTSTANDING_INTEREST_STRATEGY = single(
+    public static final AllowedValues<ChargeAccrualTimeConfig> WCL_CHARGE_ACCRUAL_TIME = single(
+            GlobalConfigurationConstants.WCL_CHARGE_ACCRUAL_TIME, ChargeAccrualTimeConfig.EOD);
+    public static final AllowedValues<ChargeAccrualTimeConfig> PL_CHARGE_ACCRUAL_TIME = single(
+            GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME, ChargeAccrualTimeConfig.EOD);
+    public static final AllowedValues<OutstandingInterestStrategyConfig> OUTSTANDING_INTEREST_STRATEGY = singleWithoutDefault(
             GlobalConfigurationConstants.ASSET_OWNER_TRANSFER_OUTSTANDING_INTEREST_CALCULATION_STRATEGY,
-            OutstandingInterestStrategyConfig.TOTAL_OUTSTANDING_INTEREST);
+            OutstandingInterestStrategyConfig.class);
     public static final AllowedValues<AccountMappingForPaymentTypeConfig> ACCOUNT_MAPPING_FOR_PAYMENT_TYPE = multiple(
             GlobalConfigurationConstants.ACCOUNT_MAPPING_FOR_PAYMENT_TYPE, AccountMappingForPaymentTypeConfig.ASSET);
     public static final AllowedValues<AccountMappingForChargeConfig> ACCOUNT_MAPPING_FOR_CHARGE = multiple(
             GlobalConfigurationConstants.ACCOUNT_MAPPING_FOR_CHARGE, AccountMappingForChargeConfig.INCOME);
     public static final AllowedValues<LoanStatus> ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER = loanStatuses(
-            GlobalConfigurationConstants.ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER, LoanStatus.ACTIVE,
-            LoanStatus.TRANSFER_IN_PROGRESS, LoanStatus.TRANSFER_ON_HOLD);
+            GlobalConfigurationConstants.ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER);
     public static final AllowedValues<LoanStatus> ALLOWED_LOAN_STATUSES_OF_DELAYED_SETTLEMENT_FOR_EXTERNAL_ASSET_TRANSFER = loanStatuses(
-            GlobalConfigurationConstants.ALLOWED_LOAN_STATUSES_OF_DELAYED_SETTLEMENT_FOR_EXTERNAL_ASSET_TRANSFER, LoanStatus.ACTIVE,
-            LoanStatus.TRANSFER_IN_PROGRESS, LoanStatus.TRANSFER_ON_HOLD, LoanStatus.OVERPAID, LoanStatus.CLOSED_OBLIGATIONS_MET);
+            GlobalConfigurationConstants.ALLOWED_LOAN_STATUSES_OF_DELAYED_SETTLEMENT_FOR_EXTERNAL_ASSET_TRANSFER);
 
     public static final List<AllowedValues<?>> ALL = List.of(CHARGE_ACCRUAL_DATE, NEXT_PAYMENT_DUE_DATE, WCL_CHARGE_ACCRUAL_TIME,
-            OUTSTANDING_INTEREST_STRATEGY, ACCOUNT_MAPPING_FOR_PAYMENT_TYPE, ACCOUNT_MAPPING_FOR_CHARGE,
+            PL_CHARGE_ACCRUAL_TIME, OUTSTANDING_INTEREST_STRATEGY, ACCOUNT_MAPPING_FOR_PAYMENT_TYPE, ACCOUNT_MAPPING_FOR_CHARGE,
             ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER, ALLOWED_LOAN_STATUSES_OF_DELAYED_SETTLEMENT_FOR_EXTERNAL_ASSET_TRANSFER);
 
     private static final Map<String, AllowedValues<?>> BY_CONFIG_NAME = ALL.stream()
@@ -91,14 +94,19 @@ public final class GlobalConfigurationAllowedValues {
                 GlobalConfigurationValue::getValue, false, List.of(defaultValue));
     }
 
+    private static <E extends Enum<E> & GlobalConfigurationValue> AllowedValues<E> singleWithoutDefault(final String configName,
+            final Class<E> enumClass) {
+        return new AllowedValues<>(configName, List.of(enumClass.getEnumConstants()), GlobalConfigurationValue::getValue, false, List.of());
+    }
+
     private static <E extends Enum<E> & GlobalConfigurationValue> AllowedValues<E> multiple(final String configName, final E defaultValue) {
         return new AllowedValues<>(configName, List.of(defaultValue.getDeclaringClass().getEnumConstants()),
                 GlobalConfigurationValue::getValue, true, List.of(defaultValue));
     }
 
-    private static AllowedValues<LoanStatus> loanStatuses(final String configName, final LoanStatus... defaultStatuses) {
+    private static AllowedValues<LoanStatus> loanStatuses(final String configName) {
         final List<LoanStatus> statuses = Arrays.stream(LoanStatus.values()).filter(status -> status != LoanStatus.INVALID).toList();
-        return new AllowedValues<>(configName, statuses, Enum::name, true, List.of(defaultStatuses));
+        return new AllowedValues<>(configName, statuses, Enum::name, true, List.of());
     }
 
     /**
@@ -111,7 +119,8 @@ public final class GlobalConfigurationAllowedValues {
      * @param multipleValuesAllowed
      *            whether the config holds a comma-separated list of allowed values instead of a single one
      * @param defaults
-     *            the constants used in place of a stored value that is blank or not allowed
+     *            the constants used in place of a stored value that is blank or not allowed; empty when reading such a
+     *            value must fail instead
      */
     public record AllowedValues<E extends Enum<E>>(String configName, List<E> constants, Function<E, String> toValue,
             boolean multipleValuesAllowed, List<E> defaults) {
@@ -123,6 +132,13 @@ public final class GlobalConfigurationAllowedValues {
             return constants.stream().map(toValue).toList();
         }
 
+        public boolean hasDefault() {
+            return !defaults.isEmpty();
+        }
+
+        /**
+         * @return the canonical form of {@link #defaults}; empty if the configuration has no default
+         */
         public String defaultValue() {
             return join(defaults);
         }
@@ -165,9 +181,14 @@ public final class GlobalConfigurationAllowedValues {
 
         /**
          * @return the constants of a stored value, or {@link #defaults} if it is blank or any element is not allowed
+         * @throws GlobalConfigurationPropertyValueNotAllowedException
+         *             if the stored value is blank or not allowed and the configuration has no default
          */
         public List<E> resolveAll(final String storedValue) {
             if (!isAllowed(storedValue)) {
+                if (!hasDefault()) {
+                    throw new GlobalConfigurationPropertyValueNotAllowedException(configName, storedValue, values());
+                }
                 return defaults;
             }
             return elements(storedValue).stream().map(element -> constantOf(element).orElseThrow()).distinct().toList();
@@ -175,6 +196,8 @@ public final class GlobalConfigurationAllowedValues {
 
         /**
          * @return the constant of a stored single value, or the default if it is blank or not allowed
+         * @throws GlobalConfigurationPropertyValueNotAllowedException
+         *             if the stored value is blank or not allowed and the configuration has no default
          */
         public E resolve(final String storedValue) {
             return resolveAll(storedValue).getFirst();
@@ -182,6 +205,8 @@ public final class GlobalConfigurationAllowedValues {
 
         /**
          * @return the canonical form of a stored value, or {@link #defaultValue()} if it is blank or not allowed
+         * @throws GlobalConfigurationPropertyValueNotAllowedException
+         *             if the stored value is blank or not allowed and the configuration has no default
          */
         public String resolveValue(final String storedValue) {
             return join(resolveAll(storedValue));

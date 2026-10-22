@@ -98,7 +98,8 @@ public class GlobalConfigurationDataValidator {
     /**
      * Checks a {@code stringValue} against the allowed values of the configuration it is sent to. Runs after
      * {@link #validateForUpdate(JsonCommand)}, once the configuration is loaded, so a malformed request still fails
-     * before the configuration is looked up.
+     * before the configuration is looked up, and after the trap door check, so a locked configuration is reported as
+     * such.
      */
     public void validateAllowedValues(final JsonCommand command, final String configName) {
         final AllowedValues<?> allowedValues = GlobalConfigurationAllowedValues.find(configName).orElse(null);

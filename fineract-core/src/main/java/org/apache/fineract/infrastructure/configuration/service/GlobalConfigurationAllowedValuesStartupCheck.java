@@ -33,8 +33,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * Warns at startup about restricted global configurations whose stored {@code stringValue} is blank or not allowed.
- * Such a value is left untouched in the database; it is read as the configuration's default (see
- * {@link AllowedValues#resolve}), so the operator should correct it through the API.
+ * Such a value is left untouched in the database; it is read as the configuration's default, or fails to be read if the
+ * configuration has none (see {@link AllowedValues#resolve}), so the operator should correct it through the API.
  * <p>
  * Never fails the startup: the check only reads and logs.
  */
@@ -60,10 +60,18 @@ public class GlobalConfigurationAllowedValuesStartupCheck implements Initializin
             ThreadLocalContextUtil.setTenant(tenant);
             for (final AllowedValues<?> allowedValues : GlobalConfigurationAllowedValues.ALL) {
                 final GlobalConfigurationProperty property = globalConfigurationRepository.findOneByName(allowedValues.configName());
-                if (property != null && !allowedValues.isAllowed(property.getStringValue())) {
+                if (property == null || allowedValues.isAllowed(property.getStringValue())) {
+                    continue;
+                }
+                if (allowedValues.hasDefault()) {
                     log.warn("Global configuration {} of tenant {} holds '{}', which is not one of {}; '{}' is used instead",
                             allowedValues.configName(), tenant.getTenantIdentifier(), property.getStringValue(), allowedValues.values(),
                             allowedValues.defaultValue());
+                } else {
+                    log.error(
+                            "Global configuration {} of tenant {} holds '{}', which is not one of {}; operations that read it fail"
+                                    + " until it is corrected",
+                            allowedValues.configName(), tenant.getTenantIdentifier(), property.getStringValue(), allowedValues.values());
                 }
             }
         } catch (final RuntimeException e) {

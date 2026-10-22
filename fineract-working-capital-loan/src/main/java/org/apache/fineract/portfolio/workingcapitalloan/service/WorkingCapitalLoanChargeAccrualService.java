@@ -23,8 +23,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.configuration.domain.ChargeAccrualTimeConfig;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.configuration.domain.WclChargeAccrualTimeConfig;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanAccrualTransactionBusinessEvent;
@@ -162,6 +162,6 @@ public class WorkingCapitalLoanChargeAccrualService {
     }
 
     private boolean isRealTimeChargeAccrual() {
-        return configurationDomainService.getWclChargeAccrualTime() == WclChargeAccrualTimeConfig.REAL_TIME;
+        return configurationDomainService.getWclChargeAccrualTime() == ChargeAccrualTimeConfig.REAL_TIME;
     }
 }

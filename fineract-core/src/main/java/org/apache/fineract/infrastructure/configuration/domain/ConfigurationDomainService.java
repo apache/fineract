@@ -157,7 +157,7 @@ public interface ConfigurationDomainService {
 
     ChargeAccrualDateConfig getAccrualDateConfigForCharge();
 
-    WclChargeAccrualTimeConfig getWclChargeAccrualTime();
+    ChargeAccrualTimeConfig getWclChargeAccrualTime();
 
     NextPaymentDueDateConfig getNextPaymentDateConfigForLoan();
 
