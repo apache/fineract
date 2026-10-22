@@ -661,6 +661,84 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
     }
 
     @Test
+    public void testExecuteStandingInstructionsJobFailedTransferRollsBackTheWholeRun() {
+        StandingInstructionsHelper standingInstructionsHelper = new StandingInstructionsHelper();
+
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+        final DateTimeFormatter monthDayFormat = DateTimeFormatter.ofPattern("dd MMMM", Locale.US);
+
+        final LocalDate localDate = LocalDate.now(this.systemTimeZone.toZoneId());
+        ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.systemTimeZone.toZoneId());
+        final String MONTH_DAY = monthDayFormat.format(currentDate.toLocalDate());
+        currentDate = currentDate.minus(Duration.ofDays(7));
+        final String VALID_FROM = dateFormat.format(currentDate);
+        currentDate = currentDate.plus(1, ChronoUnit.YEARS);
+        final String VALID_TO = dateFormat.format(currentDate);
+
+        final Long clientID = clientHelper.createClient();
+        Assertions.assertNotNull(clientID);
+
+        final Long savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Long shortFromSavingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
+        final Long shortToSavingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
+        final Long fundedFromSavingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
+        final Long fundedToSavingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
+
+        final BigDecimal shortFromBalanceBefore = savingsHelper.getSavingsSummary(shortFromSavingsId).getAccountBalance();
+        final BigDecimal shortToBalanceBefore = savingsHelper.getSavingsSummary(shortToSavingsId).getAccountBalance();
+        final BigDecimal fundedFromBalanceBefore = savingsHelper.getSavingsSummary(fundedFromSavingsId).getAccountBalance();
+        final BigDecimal fundedToBalanceBefore = savingsHelper.getSavingsSummary(fundedToSavingsId).getAccountBalance();
+
+        // more than the account holds and no partial transfer, so this one fails with an insufficient balance
+        final String amountBeyondTheBalance = shortFromBalanceBefore.multiply(BigDecimal.valueOf(2)).toPlainString();
+        final Integer failingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(),
+                shortFromSavingsId.toString(), shortToSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM,
+                VALID_TO, MONTH_DAY, amountBeyondTheBalance, false);
+        Assertions.assertNotNull(failingInstructionId);
+        // covered by the balance, so on its own this one would succeed
+        final Integer fundedInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(),
+                fundedFromSavingsId.toString(), fundedToSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS,
+                VALID_FROM, VALID_TO, MONTH_DAY);
+        Assertions.assertNotNull(fundedInstructionId);
+
+        try {
+            final JobDetailHistoryDataSwagger run = SchedulerJobHelper.executeAndAwaitJobWithResult("Execute Standing Instruction");
+            Assertions.assertEquals("failed", run.getStatus(), "Verifying a failed transfer fails the job run");
+
+            // The step runs in one transaction, so the JobExecutionException thrown at the end of the run rolls back
+            // every instruction of it: neither history row survives and no balance moves.
+            Assertions
+                    .assertTrue(
+                            standingInstructionsHelper
+                                    .getStandingInstructionHistory(shortFromSavingsId.intValue(), PortfolioAccountType.SAVINGS.getValue(),
+                                            clientID.intValue(), AccountTransferType.ACCOUNT_TRANSFER.getValue())
+                                    .isEmpty(),
+                            "Verifying the failed instruction left no history row");
+            Assertions
+                    .assertTrue(
+                            standingInstructionsHelper
+                                    .getStandingInstructionHistory(fundedFromSavingsId.intValue(), PortfolioAccountType.SAVINGS.getValue(),
+                                            clientID.intValue(), AccountTransferType.ACCOUNT_TRANSFER.getValue())
+                                    .isEmpty(),
+                            "Verifying the funded instruction of the same run left no history row either");
+            assertAmount(shortFromBalanceBefore, savingsHelper.getSavingsSummary(shortFromSavingsId).getAccountBalance(),
+                    "Verifying the short account balance is unchanged");
+            assertAmount(shortToBalanceBefore, savingsHelper.getSavingsSummary(shortToSavingsId).getAccountBalance(),
+                    "Verifying the short instruction credited nothing");
+            assertAmount(fundedFromBalanceBefore, savingsHelper.getSavingsSummary(fundedFromSavingsId).getAccountBalance(),
+                    "Verifying the funded transfer was rolled back with the run");
+            assertAmount(fundedToBalanceBefore, savingsHelper.getSavingsSummary(fundedToSavingsId).getAccountBalance(),
+                    "Verifying the funded instruction credited nothing");
+        } finally {
+            // an active instruction without balance would fail every later run of the job in this database
+            standingInstructionsHelper.deleteStandingInstruction(failingInstructionId.longValue());
+            standingInstructionsHelper.deleteStandingInstruction(fundedInstructionId.longValue());
+        }
+    }
+
+    @Test
     public void testExecuteStandingInstructionsJobTransfersAvailableBalanceWhenPartialTransferIsAllowed() throws InterruptedException {
         StandingInstructionsHelper standingInstructionsHelper = new StandingInstructionsHelper();
 
