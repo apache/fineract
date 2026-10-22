@@ -185,3 +185,31 @@ Feature: Adjust transaction business event gating by the transaction type event
     When Admin enables external business event "WorkingCapitalLoanAdjustTransactionBusinessEvent"
     When Customer makes credit balance refund on "10 January 2026" with 20.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:C115405 @WorkingCapital
+  Scenario: Verify that disabled Working Capital adjust transaction event suppresses the adjust events of a repayment adjusted to a new amount and of the repayments replayed with it
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 1000            | 100000             | 18                | 0        |
+    When Admin sets the business date to "05 January 2026"
+    And Customer makes repayment on "05 January 2026" with 600.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "10 January 2026" with 600.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "12 January 2026"
+    And Customer makes repayment on "12 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    When Admin sets the business date to "15 January 2026"
+    And Admin disables external business event "WorkingCapitalLoanAdjustTransactionBusinessEvent"
+    And Customer adjust "1"th "REPAYMENT" transaction made on "05 January 2026" on Working Capital loan with amount "300"
+    Then a Working Capital Loan Adjust Transaction business event is not raised for any "repayment" transaction
+    And BulkBusinessEvent is not raised on "15 January 2026"
+    And Working Capital loan status will be "ACTIVE"
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 600.0             | 600.0            | 0.0               | 0.0                   | true     |
+      | 05 January 2026 | Repayment    | 300.0             | 300.0            | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 600.0             | 600.0            | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Repayment    | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+    When Admin enables external business event "WorkingCapitalLoanAdjustTransactionBusinessEvent"
