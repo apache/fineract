@@ -44,6 +44,7 @@ Feature: Loan Year End Retained Earning
     When Admin runs the Retained Earning Job
     Then Trial Balance Summary Report with Asset Owner for date "01 January 2026" shows GL account "404000" closed out
     And The journal entry annual summary table contains 1 row for GL code "320000" with year end date "31 December 2025"
+    And The last Retained Earning Job run was skipped without running the summary step
     # --- New-year accounting continues normally: COB posts fresh January accruals, so 404000 reappears
     #     with only the new period's (small) balance - the closed 2025 total is NOT resurfaced.
     When Admin sets the business date to "05 January 2026"
