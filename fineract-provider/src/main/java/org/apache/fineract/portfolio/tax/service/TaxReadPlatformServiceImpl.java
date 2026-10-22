@@ -47,18 +47,23 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     @Override
     public List<TaxComponentData> retrieveAllTaxComponents() {
-        return taxComponentMapper.map(taxComponentRepository.findAll());
+        return taxComponentMapper.map(taxComponentRepository.findAll()).stream().map(this::withEditable).toList();
     }
 
     @Override
     public TaxComponentData retrieveTaxComponentData(final Long id) {
-        return taxComponentMapper.map(taxComponentRepositoryWrapper.findOneWithNotFoundDetection(id));
+        return withEditable(taxComponentMapper.map(taxComponentRepositoryWrapper.findOneWithNotFoundDetection(id)));
+    }
+
+    private TaxComponentData withEditable(final TaxComponentData taxComponentData) {
+        return TaxComponentData.withEditable(taxComponentData, !taxComponentRepository.isLinked(taxComponentData.getId()));
     }
 
     @Override
     public TaxComponentData retrieveTaxComponentTemplate() {
-        return TaxComponentData.template(this.accountingDropdownReadPlatformService.retrieveAccountMappingOptions(),
-                this.accountingDropdownReadPlatformService.retrieveGLAccountTypeOptions());
+        return TaxComponentData
+                .withEditable(TaxComponentData.template(this.accountingDropdownReadPlatformService.retrieveAccountMappingOptions(),
+                        this.accountingDropdownReadPlatformService.retrieveGLAccountTypeOptions()), true);
     }
 
     @Override
