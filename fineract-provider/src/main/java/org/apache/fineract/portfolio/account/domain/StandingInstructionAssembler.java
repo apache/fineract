@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.account.domain;
 
+import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.allowPartialTransferParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.nameParamName;
@@ -72,9 +73,10 @@ public class StandingInstructionAssembler {
         final MonthDay recurrenceOnMonthDay = command.extractMonthDayNamed(recurrenceOnMonthDayParamName);
         final Integer recurrenceInterval = command.integerValueOfParameterNamed(recurrenceIntervalParamName);
         final String name = command.stringValueOfParameterNamed(nameParamName);
+        final boolean allowPartialTransfer = command.booleanPrimitiveValueOfParameterNamed(allowPartialTransferParamName);
         AccountTransferStandingInstruction accountTransferStandingInstruction = AccountTransferStandingInstruction.create(
                 accountTransferDetails, name, priority, standingInstructionType, status, amount, validFrom, validTill, recurrenceType,
-                recurrenceFrequency, recurrenceInterval, recurrenceOnMonthDay);
+                recurrenceFrequency, recurrenceInterval, recurrenceOnMonthDay, allowPartialTransfer);
         accountTransferDetails.updateAccountTransferStandingInstruction(accountTransferStandingInstruction);
     }
 

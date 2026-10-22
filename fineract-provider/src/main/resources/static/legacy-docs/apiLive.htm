@@ -34871,6 +34871,9 @@ No Request Body:
 				<tr class=alt><td>recurrenceOnMonthDay</td></tr>
 				<tr><td class=fielddesc>The Month and Day of recurrence. Must be provided if the <b>recurrenceFrequency</b> is monthly or yearly</td></tr>
 
+				<tr class=alt><td>allowPartialTransfer</td></tr>
+				<tr><td class=fielddesc>Defaults to false. When true and the from account is a savings account, a run whose amount and withdrawal fee the account cannot cover transfers what it can cover, and the run history records it with status <b>partial</b> instead of <b>success</b>. The run still counts for its date: a periodic instruction does not retry the shortfall before its next due date, while an "As per dues" instruction picks up the remaining dues on its next run. When nothing can be covered, the run fails as it does without this option.</td></tr>
+
 
 			</table>
 	    </div>
@@ -35754,7 +35757,8 @@ No Request Body:
 	"locale":"en",
 	"dateFormat":"dd MMMM yyyy",
 	"recurrenceOnMonthDay":"02 April",
-	"monthDayFormat":"dd MMMM"
+	"monthDayFormat":"dd MMMM",
+	"allowPartialTransfer":false
 }
 	        </code>
 	        <code class="method-response">
@@ -35779,14 +35783,16 @@ No Request Body:
 Content-Type: application/json
 No Request Body:
 {
-	"recurrenceInterval":"2"
+	"recurrenceInterval":"2",
+	"allowPartialTransfer":true
 }
 	        </code>
 	        <code class="method-response">
 {
 	"resourceId":20,
 	"changes":{
-		"recurrenceInterval":2
+		"recurrenceInterval":2,
+		"allowPartialTransfer":true
 	}
 }
 	        </code>
