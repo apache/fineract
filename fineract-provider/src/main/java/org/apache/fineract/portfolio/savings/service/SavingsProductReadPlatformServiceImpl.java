@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -52,34 +52,24 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         this.context.authenticatedUser();
 
-        String sql = "select " + this.savingsProductRowMapper.schema() + "where sp.deposit_type_enum = ?";
+        final String sql = "select " + this.savingsProductRowMapper.schema() + "where sp.deposit_type_enum = ?";
 
-        // Check if branch specific products are enabled. If yes, fetch only
-        // products mapped to current user's office
-        String inClause = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if (inClause != null && !inClause.trim().isEmpty()) {
-            sql += " and sp.id in ( " + inClause + " ) ";
-        }
-
-        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() }); // NOSONAR
+        return visibleToUserOffice(
+                this.jdbcTemplate.query(sql, this.savingsProductRowMapper, DepositAccountType.SAVINGS_DEPOSIT.getValue())); // NOSONAR
     }
 
     @Override
     public Collection<SavingsProductData> retrieveAllForLookup() {
 
-        String sql = "select " + this.savingsProductLookupsRowMapper.schema() + " where sp.deposit_type_enum = ? ";
+        final String sql = "select " + this.savingsProductLookupsRowMapper.schema() + " where sp.deposit_type_enum = ? ";
 
-        // Check if branch specific products are enabled. If yes, fetch only
-        // products mapped to current user's office
-        String inClause = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if (inClause != null && !inClause.trim().isEmpty()) {
-            sql += " and id in ( " + inClause + " ) ";
-        }
+        return visibleToUserOffice(
+                this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, DepositAccountType.SAVINGS_DEPOSIT.getValue())); // NOSONAR
+    }
 
-        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, // NOSONAR
-                new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+    private Collection<SavingsProductData> visibleToUserOffice(final Collection<SavingsProductData> products) {
+        return this.fineractEntityAccessUtil.filterVisibleToOffice_ifGlobalConfigEnabled(
+                FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS, null, products, SavingsProductData::getId);
     }
 
     @Override
@@ -242,34 +232,15 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     public Collection<SavingsProductData> retrieveAllForLookupByType(Boolean isOverdraftType) {
         String sql = "select " + this.savingsProductLookupsRowMapper.schema();
 
-        boolean inClauseAdded = false;
-
-        // Check if branch specific products are enabled. If yes, fetch only
-        // products mapped to current user's office
-        String inClause = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if (inClause != null && !inClause.trim().isEmpty()) {
-            sql += " where id in ( " + inClause + " ) ";
-            inClauseAdded = true;
-        }
-
         if (isOverdraftType != null) {
-            if (inClauseAdded) {
-                sql += " and sp.allow_overdraft=? and sp.deposit_type_enum = ?";
-            } else {
-                sql += " where sp.allow_overdraft=? and sp.deposit_type_enum = ?";
-            }
-            return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, // NOSONAR
-                    new Object[] { isOverdraftType, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+            sql += " where sp.allow_overdraft=? and sp.deposit_type_enum = ?";
+            return visibleToUserOffice(this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, isOverdraftType, // NOSONAR
+                    DepositAccountType.SAVINGS_DEPOSIT.getValue()));
         }
 
-        if (inClauseAdded) {
-            sql += " and sp.deposit_type_enum = ?";
-        } else {
-            sql += " where sp.deposit_type_enum = ?";
-        }
-        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, // NOSONAR
-                new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+        sql += " where sp.deposit_type_enum = ?";
+        return visibleToUserOffice(
+                this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, DepositAccountType.SAVINGS_DEPOSIT.getValue())); // NOSONAR
     }
 
     @Override
@@ -277,16 +248,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         this.context.authenticatedUser();
 
-        String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code= ? ";
+        final String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code= ? ";
 
-        // Check if branch specific products are enabled. If yes, fetch only
-        // products mapped to current user's office
-        String inClause = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if (inClause != null && !inClause.trim().isEmpty()) {
-            sql += " and id in ( " + inClause + " ) ";
-        }
-
-        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { currencyCode }); // NOSONAR
+        return visibleToUserOffice(this.jdbcTemplate.query(sql, this.savingsProductRowMapper, currencyCode)); // NOSONAR
     }
 }
