@@ -16,30 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.test.messaging;
 
-package org.apache.fineract.test.messaging.event.loan.transaction;
+import java.time.LocalDate;
+import java.util.List;
 
-import java.util.function.Function;
-import org.apache.fineract.avro.BulkMessagePayloadV1;
-import org.apache.fineract.test.messaging.event.Event;
-
-public class BulkBusinessEvent implements Event<BulkMessagePayloadV1> {
-
-    public static final String TYPE = "BulkBusinessEvent";
-
-    @Override
-    public String getEventName() {
-        return TYPE;
-    }
-
-    @Override
-    public Class<BulkMessagePayloadV1> getDataClass() {
-        return BulkMessagePayloadV1.class;
-    }
-
-    // not implemented
-    @Override
-    public Function<BulkMessagePayloadV1, Long> getIdExtractor() {
-        throw new UnsupportedOperationException("Not implemented");
-    }
+public record BulkEventMessage(LocalDate businessDate, List<EventMessage<?>> items) {
 }

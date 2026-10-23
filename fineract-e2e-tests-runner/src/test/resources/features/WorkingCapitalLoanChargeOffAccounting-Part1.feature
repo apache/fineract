@@ -1344,6 +1344,10 @@ Feature: Working Capital Charge-Off Accounting Entries - Part1
       | true       |
 # --- Backdated full repayment lifts charge-off; later repayment becomes overpayment ---
     And Customer makes repayment on "02 January 2026" with 9000.0 transaction amount on Working Capital loan
+    Then BulkBusinessEvent is raised on "04 January 2026" with 2 WorkingCapitalLoanAdjustTransactionBusinessEvent
+    And a Working Capital Loan Adjust Transaction business event is raised for the reversed "chargeOff" transaction
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "04 January 2026" with principal portion changed from "1000.0" to "0.0" and fee portion changed from "0.0" to "0.0"
+    And a Working Capital Loan Undo Charge Off business event is raised
     Then Working capital loan account has the correct data:
       | chargedOff |
       | false      |
@@ -1567,6 +1571,9 @@ Feature: Working Capital Charge-Off Accounting Entries - Part1
       | true       |
 # --- Backdated repayment before charge-off changes later allocation ---
     And Customer makes repayment on "02 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then BulkBusinessEvent is raised on "04 January 2026" with 2 WorkingCapitalLoanAdjustTransactionBusinessEvent
+    And a Working Capital Loan Adjust Transaction business event is raised for the "chargeOff" transaction on "03 January 2026" with principal portion changed from "9000.0" to "6000.0" and fee portion changed from "0.0" to "0.0"
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "04 January 2026" with principal portion changed from "9000.0" to "6000.0" and fee portion changed from "0.0" to "0.0"
     Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "02 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit  | Credit |
       | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |

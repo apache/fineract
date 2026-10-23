@@ -302,10 +302,13 @@ Feature: Working Capital Loan Transaction Adjustment
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 12 January 2026 | Repayment    | 270.0             | 230.0            | 15.0              | 25.0                  | false    |
+    When Admin sets the business date to "13 January 2026"
+    And Customer makes repayment on "13 January 2026" with 100.0 transaction amount on Working Capital loan
     When Admin sets the business date to "15 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Customer adjust "1"th "REPAYMENT" transaction made on "12 January 2026" on Working Capital loan with amount "50"
     Then a Working Capital Loan Adjust Transaction business event is raised for the adjusted "repayment" with new amount "50"
+    And a Working Capital Loan Adjust Transaction business event is not raised for the "repayment" transaction on "13 January 2026"
     And Working Capital Loan Transactions tab has a reversed "REPAYMENT" transaction with date "12 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 230.0  |
@@ -329,6 +332,7 @@ Feature: Working Capital Loan Transaction Adjustment
       | 12 January 2026 | Accrual      | 15.0              | 0.0              | 15.0              | 0.0                   | false    |
       | 12 January 2026 | Accrual      | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
       | 12 January 2026 | Repayment    | 50.0              | 10.0             | 15.0              | 25.0                  | false    |
+      | 13 January 2026 | Repayment    | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
      Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
   @TestRailId:C111007
@@ -1021,6 +1025,7 @@ Feature: Working Capital Loan Transaction Adjustment
     And Admin runs inline COB job for Working Capital Loan by loanId
     # Move the D1 overpayment to a later non-overpaying amount (still before D3); the D3 repayment keeps the loan overpaid
     When Customer adjust "1"th "REPAYMENT" transaction made on "04 January 2026" on Working Capital loan with amount "1000" and date "05 January 2026"
+    Then a Working Capital Loan Adjust Transaction business event is not raised for the "repayment" transaction on "06 January 2026"
     Then Working Capital loan status will be "OVERPAID"
     And Working capital loan details has the following field values:
       | overpaidOnDate | 2026-01-06 |
@@ -1107,3 +1112,74 @@ Feature: Working Capital Loan Transaction Adjustment
       | 05 January 2026 | Charge Adjustment  | 80.0              | 0.0              | 80.0              | 0.0                   | true     |
       | 05 January 2026 | Charge Adjustment  | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
 
+
+  @TestRailId:C115403
+  Scenario: Verify adjusting an earlier repayment on an overpaid charge-free loan to a smaller amount replays the later repayments once and reports them in a single bulk event - UC25
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 1000            | 100000             | 18                | 0        |
+    When Admin sets the business date to "05 January 2026"
+    And Customer makes repayment on "05 January 2026" with 600.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "10 January 2026" with 600.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "200.00"
+    When Admin sets the business date to "12 January 2026"
+    And Customer makes repayment on "12 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital loan balance overpaymentAmount is "250.00"
+    When Admin sets the business date to "15 January 2026"
+    # The adjusted repayment is not the last monetary action, so undo and replacement run as one replay of the suffix
+    And Customer adjust "1"th "REPAYMENT" transaction made on "05 January 2026" on Working Capital loan with amount "300"
+    Then a Working Capital Loan Adjust Transaction business event is raised for the adjusted "repayment" with new amount "300"
+    And BulkBusinessEvent is raised on "15 January 2026" with 2 WorkingCapitalLoanAdjustTransactionBusinessEvent
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "10 January 2026" with principal portion changed from "400.0" to "600.0" and fee portion changed from "0.0" to "0.0"
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "12 January 2026" with principal portion changed from "0.0" to "50.0" and fee portion changed from "0.0" to "0.0"
+    And Working Capital loan status will be "ACTIVE"
+    And Working Capital loan balance overpaymentAmount is "0.00"
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null |
+      | timeline.closedOnDate       | null |
+      | timeline.actualMaturityDate | null |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 600.0             | 600.0            | 0.0               | 0.0                   | true     |
+      | 05 January 2026 | Repayment    | 300.0             | 300.0            | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 600.0             | 600.0            | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Repayment    | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+
+  @TestRailId:C115404
+  Scenario: Verify adjusting an earlier repayment down on a closed charge-free loan reopens it through a single replay and raises no adjust event for the unchanged later repayment - UC26
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 1000            | 100000             | 18                | 0        |
+    When Admin sets the business date to "05 January 2026"
+    And Customer makes repayment on "05 January 2026" with 600.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "10 January 2026" with 400.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | timeline.closedOnDate       | 2026-01-10 |
+      | timeline.actualMaturityDate | 2026-01-10 |
+    When Admin sets the business date to "15 January 2026"
+    # Later repayment exists, so the adjustment is one replay; its allocation stays 400 principal and must not be reported
+    And Customer adjust "1"th "REPAYMENT" transaction made on "05 January 2026" on Working Capital loan with amount "500"
+    Then a Working Capital Loan Adjust Transaction business event is raised for the adjusted "repayment" with new amount "500"
+    And a Working Capital Loan Adjust Transaction business event is not raised for the "repayment" transaction on "10 January 2026"
+    And BulkBusinessEvent is not raised on "15 January 2026"
+    And Working Capital loan status will be "ACTIVE"
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null |
+      | timeline.closedOnDate       | null |
+      | timeline.actualMaturityDate | null |
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 100.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 600.0             | 600.0            | 0.0               | 0.0                   | true     |
+      | 05 January 2026 | Repayment    | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 400.0             | 400.0            | 0.0               | 0.0                   | false    |

@@ -2345,6 +2345,19 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 new BigDecimal(newFeeChargesPortion));
     }
 
+    @Then("BulkBusinessEvent is raised on {string} with {int} WorkingCapitalLoanAdjustTransactionBusinessEvent")
+    public void bulkBusinessEventIsRaisedWithWorkingCapitalLoanAdjustTransactionBusinessEvents(final String businessDate,
+            final int expectedCount) {
+        eventCheckHelper.workingCapitalLoanAdjustTransactionBulkEventCheck(getCreatedLoanId(), LocalDate.parse(businessDate, FORMATTER),
+                expectedCount);
+    }
+
+    @Then("a Working Capital Loan Adjust Transaction business event is not raised for the {string} transaction on {string}")
+    public void aWorkingCapitalLoanAdjustTransactionBusinessEventIsNotRaisedForTransaction(final String transactionType,
+            final String transactionDate) {
+        eventCheckHelper.workingCapitalLoanAdjustTransactionNotRaisedCheck(getCreatedLoanId(), transactionType, transactionDate);
+    }
+
     @Then("a Working Capital Loan Accrual transaction business event is raised with {string} EUR amount")
     public void aWorkingCapitalLoanAccrualTransactionBusinessEventIsRaised(final String amount) {
         eventCheckHelper.workingCapitalLoanAccrualTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));

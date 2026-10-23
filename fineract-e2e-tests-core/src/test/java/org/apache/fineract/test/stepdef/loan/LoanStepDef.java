@@ -162,7 +162,6 @@ import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.messaging.event.loan.LoanRescheduledDueAdjustScheduleEvent;
 import org.apache.fineract.test.messaging.event.loan.LoanStatusChangedEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.AbstractLoanTransactionEvent;
-import org.apache.fineract.test.messaging.event.loan.transaction.BulkBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAdjustTransactionBusinessEvent;
@@ -3033,8 +3032,8 @@ public class LoanStepDef extends AbstractStepDef {
     }
 
     @Then("BulkBusinessEvent is not raised on {string}")
-    public void checkLoanBulkBusinessEventNotCreatedBusinessEvent(String date) {
-        eventAssertion.assertEventNotRaised(BulkBusinessEvent.class, em -> FORMATTER.format(em.getBusinessDate()).equals(date));
+    public void checkLoanBulkBusinessEventNotCreatedBusinessEvent(final String date) {
+        eventAssertion.assertBulkEventNotRaised(bulkEvent -> FORMATTER.format(bulkEvent.businessDate()).equals(date));
     }
 
     public GetLoansLoanIdTransactions getLoanTransactionIdByDate(String transactionType, String transactionDate) {
