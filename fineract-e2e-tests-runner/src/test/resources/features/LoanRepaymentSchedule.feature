@@ -1555,3 +1555,254 @@ Feature: Loan repayment schedule handling
       | 19 March 2025    | Credit Balance Refund  | 170.01 | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 19 March 2025    | Chargeback             | 340.02 | 340.02    | 0.0      | 0.0  | 0.0       | 340.02       | false    | false    |
       | 19 March 2025    | Repayment              | 340.02 | 340.02    | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+
+  @TestRailId:C115427 @InterestChargedFromIdealDisbursementDate
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC1: disbursed 31 January 2025, due 28 February 2025, 28 days of interest instead of 31
+    Given Global configuration "interest-charged-from-date-same-as-disbursal-date" is disabled
+    When Admin sets the business date to "31 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 31 January 2025   | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "31 January 2025" with "10000" amount and expected disbursement date on "31 January 2025"
+    And Admin successfully disburse the loan on "31 January 2025" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 31 January 2025  |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 28   | 28 February 2025 |           | 6693.05         | 3306.95       | 92.05    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 2  | 31   | 31 March 2025    |           | 3362.26         | 3330.79       | 68.21    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 3  | 30   | 30 April 2025    |           | 0.0             | 3362.26       | 33.16    | 0.0  | 0.0       | 3395.42 | 0.0  | 0.0        | 0.0  | 3395.42     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 193.42   | 0.0  | 0.0       | 10193.42 | 0.0  | 0.0        | 0.0  | 10193.42    |
+    Then Global configuration "interest-charged-from-date-same-as-disbursal-date" is enabled
+
+  @TestRailId:C115428 @InterestChargedFromIdealDisbursementDate
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC2: disbursed 30 January 2025, due 28 February 2025, 29 days of interest instead of 31
+    Given Global configuration "interest-charged-from-date-same-as-disbursal-date" is disabled
+    When Admin sets the business date to "30 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 30 January 2025   | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "30 January 2025" with "10000" amount and expected disbursement date on "30 January 2025"
+    And Admin successfully disburse the loan on "30 January 2025" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 30 January 2025  |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 29   | 28 February 2025 |           | 6696.34         | 3303.66       | 95.34    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 2  | 30   | 30 March 2025    |           | 3363.39         | 3332.95       | 66.05    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 3  | 31   | 30 April 2025    |           | 0.0             | 3363.39       | 34.28    | 0.0  | 0.0       | 3397.67 | 0.0  | 0.0        | 0.0  | 3397.67     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 195.67   | 0.0  | 0.0       | 10195.67 | 0.0  | 0.0        | 0.0  | 10195.67    |
+    Then Global configuration "interest-charged-from-date-same-as-disbursal-date" is enabled
+
+  @TestRailId:C115430 @InterestChargedFromIdealDisbursementDate
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC3: disbursed 29 January 2025, due 28 February 2025, 30 days of interest instead of 31
+    Given Global configuration "interest-charged-from-date-same-as-disbursal-date" is disabled
+    When Admin sets the business date to "29 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 29 January 2025   | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "29 January 2025" with "10000" amount and expected disbursement date on "29 January 2025"
+    And Admin successfully disburse the loan on "29 January 2025" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 29 January 2025  |           | 10000.0         |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 30   | 28 February 2025 |           | 6699.63         | 3300.37       | 98.63    | 0.0  | 0.0       | 3399.0 | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 2  | 29   | 29 March 2025    |           | 3364.51         | 3335.12       | 63.88    | 0.0  | 0.0       | 3399.0 | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 3  | 31   | 29 April 2025    |           | 0.0             | 3364.51       | 34.29    | 0.0  | 0.0       | 3398.8 | 0.0  | 0.0        | 0.0  | 3398.8      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 196.8    | 0.0  | 0.0       | 10196.8 | 0.0  | 0.0        | 0.0  | 10196.8     |
+    Then Global configuration "interest-charged-from-date-same-as-disbursal-date" is enabled
+
+  @TestRailId:C115431 @InterestChargedFromIdealDisbursementDate
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC4: disbursed 28 January 2025 (no clamp), 31 days of interest (control)
+    Given Global configuration "interest-charged-from-date-same-as-disbursal-date" is disabled
+    When Admin sets the business date to "28 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 28 January 2025   | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "28 January 2025" with "10000" amount and expected disbursement date on "28 January 2025"
+    And Admin successfully disburse the loan on "28 January 2025" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 28 January 2025  |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 31   | 28 February 2025 |           | 6702.92         | 3297.08       | 101.92   | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 2  | 28   | 28 March 2025    |           | 3365.62         | 3337.3        | 61.7     | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 3  | 31   | 28 April 2025    |           | 0.0             | 3365.62       | 34.3     | 0.0  | 0.0       | 3399.92 | 0.0  | 0.0        | 0.0  | 3399.92     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 197.92   | 0.0  | 0.0       | 10197.92 | 0.0  | 0.0        | 0.0  | 10197.92    |
+    Then Global configuration "interest-charged-from-date-same-as-disbursal-date" is enabled
+
+  @TestRailId:C115432 @InterestChargedFromIdealDisbursementDate
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC5: disbursed 31 December 2024, 2-month period, due 28 February 2025, 59 days of interest instead of 61
+    Given Global configuration "interest-charged-from-date-same-as-disbursal-date" is disabled
+    When Admin sets the business date to "31 December 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 31 December 2024  | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 2              | MONTHS                 | 2                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "31 December 2024" with "10000" amount and expected disbursement date on "31 December 2024"
+    And Admin successfully disburse the loan on "31 December 2024" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 31 December 2024 |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 59   | 28 February 2025 |           | 5045.97         | 4954.03       | 193.97   | 0.0  | 0.0       | 5148.0  | 0.0  | 0.0        | 0.0  | 5148.0      |
+      | 2  | 61   | 30 April 2025    |           | 0.0             | 5045.97       | 101.2    | 0.0  | 0.0       | 5147.17 | 0.0  | 0.0        | 0.0  | 5147.17     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 295.17   | 0.0  | 0.0       | 10295.17 | 0.0  | 0.0        | 0.0  | 10295.17    |
+    Then Global configuration "interest-charged-from-date-same-as-disbursal-date" is enabled
+
+  @TestRailId:C115433 @InterestChargedFromIdealDisbursementDate
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC6: disbursed 31 January 2024 (leap year), due 29 February 2024, 29 days of interest instead of 31
+    Given Global configuration "interest-charged-from-date-same-as-disbursal-date" is disabled
+    When Admin sets the business date to "31 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 31 January 2024   | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "31 January 2024" with "10000" amount and expected disbursement date on "31 January 2024"
+    And Admin successfully disburse the loan on "31 January 2024" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 31 January 2024  |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 29   | 29 February 2024 |           | 6696.34         | 3303.66       | 95.34    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 2  | 31   | 31 March 2024    |           | 3365.59         | 3330.75       | 68.25    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 3  | 30   | 30 April 2024    |           | 0.0             | 3365.59       | 33.19    | 0.0  | 0.0       | 3398.78 | 0.0  | 0.0        | 0.0  | 3398.78     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 196.78   | 0.0  | 0.0       | 10196.78 | 0.0  | 0.0        | 0.0  | 10196.78    |
+    Then Global configuration "interest-charged-from-date-same-as-disbursal-date" is enabled
+
+  @TestRailId:C115434 @InterestChargedFromIdealDisbursementDate
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC7: expected disbursement 15 January 2025, actual 31 January 2025, regenerated schedule charges 28 days
+    Given Global configuration "interest-charged-from-date-same-as-disbursal-date" is disabled
+    When Admin sets the business date to "31 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 15 January 2025   | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "15 January 2025" with "10000" amount and expected disbursement date on "15 January 2025"
+    And Admin successfully disburse the loan on "31 January 2025" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 31 January 2025  |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 28   | 28 February 2025 |           | 6693.05         | 3306.95       | 92.05    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 2  | 31   | 31 March 2025    |           | 3362.26         | 3330.79       | 68.21    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 3  | 30   | 30 April 2025    |           | 0.0             | 3362.26       | 33.16    | 0.0  | 0.0       | 3395.42 | 0.0  | 0.0        | 0.0  | 3395.42     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 193.42   | 0.0  | 0.0       | 10193.42 | 0.0  | 0.0        | 0.0  | 10193.42    |
+    Then Global configuration "interest-charged-from-date-same-as-disbursal-date" is enabled
+
+  @TestRailId:C115435 @InterestChargedFromIdealDisbursementDate
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC8: disbursed 31 January 2025, undo disbursal and re-disburse, 28 days of interest kept
+    Given Global configuration "interest-charged-from-date-same-as-disbursal-date" is disabled
+    When Admin sets the business date to "31 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 31 January 2025   | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "31 January 2025" with "10000" amount and expected disbursement date on "31 January 2025"
+    And Admin successfully disburse the loan on "31 January 2025" with "10000" EUR transaction amount
+    And Admin successfully undo disbursal
+    And Admin successfully disburse the loan on "31 January 2025" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 31 January 2025  |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 28   | 28 February 2025 |           | 6693.05         | 3306.95       | 92.05    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 2  | 31   | 31 March 2025    |           | 3362.26         | 3330.79       | 68.21    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 3  | 30   | 30 April 2025    |           | 0.0             | 3362.26       | 33.16    | 0.0  | 0.0       | 3395.42 | 0.0  | 0.0        | 0.0  | 3395.42     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 193.42   | 0.0  | 0.0       | 10193.42 | 0.0  | 0.0        | 0.0  | 10193.42    |
+    Then Global configuration "interest-charged-from-date-same-as-disbursal-date" is enabled
+
+  @TestRailId:C115436 @InterestChargedFromIdealDisbursementDate
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC9: interest recalculation product disbursed 31 January 2025, 28 days of interest instead of 31
+    Given Global configuration "interest-charged-from-date-same-as-disbursal-date" is disabled
+    When Admin sets the business date to "31 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 31 January 2025   | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "31 January 2025" with "10000" amount and expected disbursement date on "31 January 2025"
+    And Admin successfully disburse the loan on "31 January 2025" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 31 January 2025  |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 28   | 28 February 2025 |           | 6693.05         | 3306.95       | 92.05    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 2  | 31   | 31 March 2025    |           | 3362.26         | 3330.79       | 68.21    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 3  | 30   | 30 April 2025    |           | 0.0             | 3362.26       | 33.16    | 0.0  | 0.0       | 3395.42 | 0.0  | 0.0        | 0.0  | 3395.42     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 193.42   | 0.0  | 0.0       | 10193.42 | 0.0  | 0.0        | 0.0  | 10193.42    |
+    Then Global configuration "interest-charged-from-date-same-as-disbursal-date" is enabled
+
+  @TestRailId:C115437 @InterestChargedFromIdealDisbursementDate
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC10: interest calculation period same as repayment, disbursed 31 January 2025, whole-period interest unaffected (control)
+    Given Global configuration "interest-charged-from-date-same-as-disbursal-date" is disabled
+    When Admin sets the business date to "31 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 31 January 2025   | 10000          | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "31 January 2025" with "10000" amount and expected disbursement date on "31 January 2025"
+    And Admin successfully disburse the loan on "31 January 2025" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 31 January 2025  |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 28   | 28 February 2025 |           | 6700.0          | 3300.0        | 100.0    | 0.0  | 0.0       | 3400.0  | 0.0  | 0.0        | 0.0  | 3400.0      |
+      | 2  | 31   | 31 March 2025    |           | 3367.0          | 3333.0        | 67.0     | 0.0  | 0.0       | 3400.0  | 0.0  | 0.0        | 0.0  | 3400.0      |
+      | 3  | 30   | 30 April 2025    |           | 0.0             | 3367.0        | 33.67    | 0.0  | 0.0       | 3400.67 | 0.0  | 0.0        | 0.0  | 3400.67     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 200.67   | 0.0  | 0.0       | 10200.67 | 0.0  | 0.0        | 0.0  | 10200.67    |
+    Then Global configuration "interest-charged-from-date-same-as-disbursal-date" is enabled
+
+  @TestRailId:C115438 @InterestChargedFromIdealDisbursementDate
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC11: 30/360 product disbursed 31 January 2025, whole-period interest unaffected (control)
+    Given Global configuration "interest-charged-from-date-same-as-disbursal-date" is disabled
+    When Admin sets the business date to "31 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_360_30_DECLINING_BALANCE_PERIOD_DAILY_INT_RECALC | 31 January 2025   | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "31 January 2025" with "10000" amount and expected disbursement date on "31 January 2025"
+    And Admin successfully disburse the loan on "31 January 2025" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 31 January 2025  |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 28   | 28 February 2025 |           | 6700.0          | 3300.0        | 100.0    | 0.0  | 0.0       | 3400.0  | 0.0  | 0.0        | 0.0  | 3400.0      |
+      | 2  | 31   | 31 March 2025    |           | 3367.0          | 3333.0        | 67.0     | 0.0  | 0.0       | 3400.0  | 0.0  | 0.0        | 0.0  | 3400.0      |
+      | 3  | 30   | 30 April 2025    |           | 0.0             | 3367.0        | 33.67    | 0.0  | 0.0       | 3400.67 | 0.0  | 0.0        | 0.0  | 3400.67     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 200.67   | 0.0  | 0.0       | 10200.67 | 0.0  | 0.0        | 0.0  | 10200.67    |
+    Then Global configuration "interest-charged-from-date-same-as-disbursal-date" is enabled
+
+  @TestRailId:C115439
+  Scenario: Verify first period interest of cumulative loan with clamped first due date - UC12: global config interest-charged-from-date-same-as-disbursal-date enabled, disbursed 31 January 2025, 28 days of interest (control)
+    When Admin sets the business date to "31 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 31 January 2025   | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "31 January 2025" with "10000" amount and expected disbursement date on "31 January 2025"
+    And Admin successfully disburse the loan on "31 January 2025" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 31 January 2025  |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 28   | 28 February 2025 |           | 6693.05         | 3306.95       | 92.05    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 2  | 31   | 31 March 2025    |           | 3362.26         | 3330.79       | 68.21    | 0.0  | 0.0       | 3399.0  | 0.0  | 0.0        | 0.0  | 3399.0      |
+      | 3  | 30   | 30 April 2025    |           | 0.0             | 3362.26       | 33.16    | 0.0  | 0.0       | 3395.42 | 0.0  | 0.0        | 0.0  | 3395.42     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 193.42   | 0.0  | 0.0       | 10193.42 | 0.0  | 0.0        | 0.0  | 10193.42    |
