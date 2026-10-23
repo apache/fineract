@@ -114,11 +114,6 @@ public class WorkingCapitalLoanDataValidator {
             WorkingCapitalLoanConstants.transactionDateParamName, WorkingCapitalLoanConstants.transactionAmountParamName,
             WorkingCapitalLoanConstants.classificationIdParamName, WorkingCapitalLoanConstants.noteParamName,
             WorkingCapitalLoanConstants.paymentDetailsParamName, WorkingCapitalLoanConstants.externalIdParameterName));
-    public static final Set<String> ADJUST_BY_DELTA_SUPPORTED_PARAMETERS = Set.of("locale", "dateFormat",
-            WorkingCapitalLoanConstants.transactionDateParamName, WorkingCapitalLoanConstants.transactionAmountParamName,
-            WorkingCapitalLoanConstants.classificationIdParamName, WorkingCapitalLoanConstants.noteParamName,
-            WorkingCapitalLoanConstants.reversalExternalIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
-            WorkingCapitalLoanConstants.externalIdParameterName);
     private static final Set<String> RELATED_RESOURCE_PARAMETERS = Set.of(WorkingCapitalLoanConstants.relatedResourceIdParamName,
             WorkingCapitalLoanConstants.relatedExternalResourceIdParamName);
     private static final Set<String> DISCOUNT_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
@@ -801,60 +796,93 @@ public class WorkingCapitalLoanDataValidator {
 
     public void validateAdjustByDelta(final JsonCommand command, final WorkingCapitalLoan loan,
             final WorkingCapitalLoanTransaction transactionToAdjust) {
-        final String json = command.json();
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ADJUST_BY_DELTA_SUPPORTED_PARAMETERS);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        validatePaymentDetailsParameters(typeOfMap, element);
+        final JsonElement element = parseAdjustTransactionJson(command);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
-        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.transactionDateParamName,
-                element);
-        if (transactionDate != null) {
-            if (DateUtils.isDateInTheFuture(transactionDate)) {
-                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
-                        .failWithCode("cannot.be.a.future.date");
-            }
-            if (DateUtils.isBefore(transactionDate, loan.getFirstActualDisbursementDate())) {
-                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
-                        .failWithCode("cannot.be.before.disbursal.date");
-            }
-        }
 
-        final BigDecimal transactionAmount = fromApiJsonHelper
-                .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, command.parsedJson(), new HashSet<>());
-        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName).value(transactionAmount).notNull();
-        if (transactionAmount != null && transactionAmount.compareTo(BigDecimal.ZERO) == 0) {
+        validateTransactionReversible(baseDataValidator, loan, transactionToAdjust,
+                "adjust.by.delta.transaction.not.allowed.for.loan.status");
+
+        // The amount is a signed delta on the transaction's amount. Zero would reverse and recreate the transaction
+        // unchanged.
+        final BigDecimal delta = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
+                element, new HashSet<>());
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName).value(delta).notNull();
+        if (delta != null && delta.compareTo(BigDecimal.ZERO) == 0) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName)
                     .failWithCode("zero.amount.not.supported");
         }
-        if (transactionAmount != null && transactionAmount.add(transactionToAdjust.getTransactionAmount()).compareTo(BigDecimal.ZERO) < 0) {
-            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName)
-                    .failWithCode("delta.amount.should.not.result.in.negative");
-        }
 
-        validateClassificationIdExists(baseDataValidator, element);
-        validateNote(baseDataValidator, element);
-        validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.externalIdParameterName);
+        // The replacement keeps the original's date unless the body moves it, so the date is optional here.
+        validateAdjustTransactionDate(baseDataValidator, loan,
+                this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.transactionDateParamName, element));
         validateTransactionReversalExternalId(baseDataValidator, element);
-        validatePaymentDetails(baseDataValidator, element);
+        validateAdjustReplacementAttributes(baseDataValidator, element);
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
-        if (transactionToAdjust.isReversed()) {
-            baseDataValidator.reset().parameter("transaction").failWithCode("transaction.already.undone", transactionToAdjust.getId());
+        // A well-formed delta that takes off more than the transaction carries breaks a rule of the loan, not of the
+        // request, so it is refused as a domain rule once the request itself is valid.
+        final BigDecimal transactionAmount = transactionToAdjust.getTransactionAmount();
+        if (delta.add(transactionAmount).compareTo(BigDecimal.ZERO) < 0) {
+            throw new GeneralPlatformDomainRuleException("validation.msg.wc.loan.transaction.adjust.delta.exceeds.amount",
+                    "Delta " + delta.stripTrailingZeros().toPlainString() + " exceeds the amount "
+                            + transactionAmount.stripTrailingZeros().toPlainString() + " of the transaction being adjusted.",
+                    delta, transactionAmount);
+        }
+    }
+
+    private JsonElement parseAdjustTransactionJson(final JsonCommand command) {
+        final String json = command.getJsonCommand();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ADJUST_TRANSACTION_SUPPORTED_PARAMETERS);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        validatePaymentDetailsParameters(typeOfMap, element);
+        return element;
+    }
+
+    /**
+     * The guards shared by undo and both adjust commands: the transaction is still live and the loan is in a status a
+     * reversal is allowed in.
+     */
+    private void validateTransactionReversible(final DataValidatorBuilder baseDataValidator, final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transaction, final String statusErrorCode) {
+        if (transaction.isReversed()) {
+            baseDataValidator.reset().parameter("transaction").failWithCode("transaction.already.undone", transaction.getId());
         }
 
         final LoanStatus loanStatus = loan.getLoanStatus();
-        final boolean adjustAllowedForStatus = LoanStatus.ACTIVE.equals(loanStatus) || LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loanStatus)
+        final boolean allowedForStatus = LoanStatus.ACTIVE.equals(loanStatus) || LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loanStatus)
                 || LoanStatus.OVERPAID.equals(loanStatus);
-        if (!adjustAllowedForStatus) {
-            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
-                    .failWithCode("adjust.by.delta.transaction.not.allowed.for.loan.status");
+        if (!allowedForStatus) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName).failWithCode(statusErrorCode);
         }
+    }
 
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    private void validateAdjustTransactionDate(final DataValidatorBuilder baseDataValidator, final WorkingCapitalLoan loan,
+            final LocalDate transactionDate) {
+        if (transactionDate == null) {
+            return;
+        }
+        if (DateUtils.isDateInTheFuture(transactionDate)) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
+                    .failWithCode("cannot.be.a.future.date");
+        }
+        if (loan.getFirstActualDisbursementDate() != null && DateUtils.isBefore(transactionDate, loan.getFirstActualDisbursementDate())) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
+                    .failWithCode("cannot.be.before.disbursal.date");
+        }
+    }
+
+    private void validateAdjustReplacementAttributes(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        validateClassificationIdExists(baseDataValidator, element);
+        validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.externalIdParameterName);
+        validateNote(baseDataValidator, element);
+        validatePaymentDetails(baseDataValidator, element);
     }
 
     private void validateNote(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
@@ -1387,49 +1415,20 @@ public class WorkingCapitalLoanDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
 
-        if (transaction.isReversed()) {
-            baseDataValidator.reset().parameter("transaction").failWithCode("transaction.already.undone", transaction.getId());
-        }
-
-        final LoanStatus loanStatus = loan.getLoanStatus();
-        final boolean undoAllowedForStatus = LoanStatus.ACTIVE.equals(loanStatus) || LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loanStatus)
-                || LoanStatus.OVERPAID.equals(loanStatus);
-        if (!undoAllowedForStatus) {
-            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
-                    .failWithCode("undo.transaction.not.allowed.for.loan.status");
-        }
+        validateTransactionReversible(baseDataValidator, loan, transaction, "undo.transaction.not.allowed.for.loan.status");
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public void validateAdjustTransaction(final JsonCommand command, final WorkingCapitalLoan loan,
             final WorkingCapitalLoanTransaction transaction) {
-        final String json = command.getJsonCommand();
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ADJUST_TRANSACTION_SUPPORTED_PARAMETERS);
-
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        validatePaymentDetailsParameters(typeOfMap, element);
+        final JsonElement element = parseAdjustTransactionJson(command);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
 
-        if (transaction.isReversed()) {
-            baseDataValidator.reset().parameter("transaction").failWithCode("transaction.already.undone", transaction.getId());
-        }
-
-        final LoanStatus loanStatus = loan.getLoanStatus();
-        final boolean adjustAllowedForStatus = LoanStatus.ACTIVE.equals(loanStatus) || LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loanStatus)
-                || LoanStatus.OVERPAID.equals(loanStatus);
-        if (!adjustAllowedForStatus) {
-            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
-                    .failWithCode("adjust.transaction.not.allowed.for.loan.status");
-        }
+        validateTransactionReversible(baseDataValidator, loan, transaction, "adjust.transaction.not.allowed.for.loan.status");
 
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.transactionDateParamName,
                 element);
@@ -1443,24 +1442,10 @@ public class WorkingCapitalLoanDataValidator {
         if (createsReplacement) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate).notNull();
         }
-        if (transactionDate != null) {
-            if (DateUtils.isDateInTheFuture(transactionDate)) {
-                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
-                        .failWithCode("cannot.be.a.future.date");
-            }
-            if (loan.getFirstActualDisbursementDate() != null
-                    && DateUtils.isBefore(transactionDate, loan.getFirstActualDisbursementDate())) {
-                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
-                        .failWithCode("cannot.be.before.disbursal.date");
-            }
-        }
+        validateAdjustTransactionDate(baseDataValidator, loan, transactionDate);
 
-        validateClassificationIdExists(baseDataValidator, element);
         validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.reversalExternalIdParamName);
-        validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.externalIdParameterName);
-        validateNote(baseDataValidator, element);
-
-        validatePaymentDetails(baseDataValidator, element);
+        validateAdjustReplacementAttributes(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

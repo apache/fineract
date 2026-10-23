@@ -846,7 +846,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put("adjustByDelta", true);
 
-        return adjustRepaymentLikeTransaction(loan, transactionToAdjust, newTransactionAmount, command, changes);
+        return adjustRepaymentLikeTransaction(loan, transactionToAdjust, newTransactionAmount, command, changes,
+                LoanTransactionRelationTypeEnum.ADJUSTMENT);
     }
 
     /**
@@ -937,12 +938,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(WorkingCapitalLoanConstants.transactionAmountParamName, newTransactionAmount);
 
-        return adjustRepaymentLikeTransaction(loan, transactionToAdjust, newTransactionAmount, command, changes);
+        return adjustRepaymentLikeTransaction(loan, transactionToAdjust, newTransactionAmount, command, changes,
+                LoanTransactionRelationTypeEnum.REPLAYED);
     }
 
     private CommandProcessingResult adjustRepaymentLikeTransaction(WorkingCapitalLoan loan,
             WorkingCapitalLoanTransaction transactionToAdjust, BigDecimal newTransactionAmount, JsonCommand command,
-            final Map<String, Object> changes) {
+            final Map<String, Object> changes, final LoanTransactionRelationTypeEnum replacementRelationType) {
         final LocalDate businessLocalDate = DateUtils.getBusinessLocalDate();
         final LoanStatus oldStatus = loan.getStatus();
         final LocalDate originalTransactionDate = transactionToAdjust.getTransactionDate();
@@ -967,14 +969,19 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         transactionToAdjust.setReversalExternalId(reversalExternalId);
         transactionToAdjust.setReversedOnDate(businessLocalDate);
 
-        processUndoTransaction(loan, transactionToAdjust);
+        final boolean replacementReplayed = processUndoTransaction(loan, transactionToAdjust, newTransaction);
 
         if (!isReverseOnly) {
 
-            saveNewTransactionRelation(newTransaction, transactionToAdjust, LoanTransactionRelationTypeEnum.REPLAYED);
+            saveNewTransactionRelation(newTransaction, transactionToAdjust, replacementRelationType);
 
-            transactionProcessor.processRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
-                    newTransactionAmount);
+            if (replacementReplayed) {
+                transactionProcessor.completeReplayedRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
+                        newTransactionAmount);
+            } else {
+                transactionProcessor.processRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
+                        newTransactionAmount);
+            }
 
             final WorkingCapitalLoanTransaction overpaidOnDateProbe = DateUtils.isBefore(originalTransactionDate,
                     newTransaction.getTransactionDate()) ? transactionToAdjust : newTransaction;
@@ -1469,10 +1476,28 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     }
 
     private void processUndoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
+        processUndoTransaction(loan, transaction, null);
+    }
+
+    /**
+     * Unwinds a reversed transaction. When an adjustment passes the replacement and the undo replays the history
+     * anyway, the replacement is booked before that replay so the replay allocates it at its own date: the loan is
+     * replayed once with both changes rather than once per change, so later transactions are restated (and reported)
+     * once.
+     *
+     * @return whether the replay already allocated the replacement, leaving only its non-replay effects to the caller
+     */
+    private boolean processUndoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
+            final WorkingCapitalLoanTransaction replacement) {
         final LoanStatus statusBeforeUndo = loan.getLoanStatus();
         final boolean lastMonetaryAction = transactionProcessor.isLastMonetaryAction(transaction);
         final boolean isAccountingOnly = isAccountingOnlyTransaction(transaction);
         final boolean isChargesInvolved = isChargesInvolved(loan);
+        // Decided before the replacement is persisted, so the branch selection below is the plain undo's.
+        final boolean replacementReplayed = replacement != null && !isAccountingOnly && !(lastMonetaryAction && !isChargesInvolved);
+        if (replacementReplayed) {
+            transactionRepository.saveAndFlush(replacement);
+        }
         if (lastMonetaryAction && !isChargesInvolved) {
             // Nothing monetary sorts after this transaction and no charge competes for it, so its whole effect is its
             // own stored allocation: unwinding that in place is exact and no replay is needed.
@@ -1487,8 +1512,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         } else if (!isChargesInvolved) {
             // Later transactions depend on the order, but the loan is charge-free, so only the suffix on/after the
             // reversed transaction's date can have shifted; the prefix is never read. The reversed transaction is still
-            // counted in the balance at this point, so it is passed in to be rewound (but not replayed).
-            transactionReprocessingService.reprocessChargeFreeSuffix(loan, transaction.getTransactionDate(), transaction);
+            // counted in the balance at this point, so it is passed in to be rewound (but not replayed). A replacement
+            // dated earlier than the reversed transaction moves the boundary back to its own date.
+            final LocalDate boundaryDate = replacementReplayed
+                    && DateUtils.isBefore(replacement.getTransactionDate(), transaction.getTransactionDate())
+                            ? replacement.getTransactionDate()
+                            : transaction.getTransactionDate();
+            transactionReprocessingService.reprocessChargeFreeSuffix(loan, boundaryDate, transaction);
         } else {
             // Charges reshuffle across the whole history: only a full reset+replay is correct.
             transactionReprocessingService.reprocessTransactions(loan);
@@ -1508,6 +1538,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
         transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
         transactionProcessor.recalculateSettlementDates(loan);
+        return replacementReplayed;
     }
 
     private boolean isChargesInvolved(WorkingCapitalLoan loan) {

@@ -16,54 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.batch.command.internal;
 
-import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrlWithoutVersion;
-
-import com.google.common.base.Splitter;
-import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.batch.command.CommandStrategy;
-import org.apache.fineract.batch.command.CommandStrategyUtils;
-import org.apache.fineract.batch.domain.BatchRequest;
-import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.workingcapitalloan.api.WorkingCapitalLoanTransactionsApiResource;
-import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+/**
+ * Batches a {@code ?command=} on a working capital loan transaction, with the loan named by id and the transaction by
+ * external id.
+ */
 @Component
-@RequiredArgsConstructor
-public class ExecuteWorkingCapitalLoanTransactionCommandByLoanIdTransactionExternalIdCommandStrategy implements CommandStrategy {
+public class ExecuteWorkingCapitalLoanTransactionCommandByLoanIdTransactionExternalIdCommandStrategy
+        extends WorkingCapitalLoanTransactionCommandStrategy {
 
-    private final WorkingCapitalLoanTransactionsApiResource workingCapitalLoanTransactionsApiResource;
-    private final DefaultToApiJsonSerializer<CommandProcessingResult> toApiJsonSerializer;
+    public ExecuteWorkingCapitalLoanTransactionCommandByLoanIdTransactionExternalIdCommandStrategy(
+            final WorkingCapitalLoanTransactionsApiResource workingCapitalLoanTransactionsApiResource,
+            final DefaultToApiJsonSerializer<CommandProcessingResult> toApiJsonSerializer) {
+        super(workingCapitalLoanTransactionsApiResource, toApiJsonSerializer);
+    }
 
     @Override
-    public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
-        final BatchResponse response = new BatchResponse();
-
-        response.setRequestId(request.getRequestId());
-        response.setHeaders(request.getHeaders());
-
-        final String relativeUrl = relativeUrlWithoutVersion(request);
-        String command = CommandStrategyUtils.getQueryParameters(relativeUrl).get("command");
-        String pathPart = Splitter.on('?').splitToList(relativeUrl).getFirst();
-        List<String> pathParams = Splitter.on('/').splitToList(pathPart);
-
-        Long loanId = Long.parseLong(pathParams.get(1));
-        String transactionExternalId = pathParams.get(4);
-
-        final CommandProcessingResult commandProcessingResult = workingCapitalLoanTransactionsApiResource
-                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionExternalId(loanId, transactionExternalId, command,
-                        request.getBody());
-
-        response.setStatusCode(HttpStatus.SC_OK);
-        response.setBody(toApiJsonSerializer.serialize(commandProcessingResult));
-
-        return response;
+    protected CommandProcessingResult executeCommand(final List<String> pathParameters, final String command,
+            final String apiRequestBodyAsJson) {
+        return workingCapitalLoanTransactionsApiResource.executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionExternalId(
+                Long.parseLong(pathParameters.get(1)), pathParameters.get(4), command, apiRequestBodyAsJson);
     }
 }

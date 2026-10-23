@@ -245,14 +245,15 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String resourceExternalId;
     }
 
-    @Schema(description = "Request for transaction command executed on a transaction named in the path: undo, adjust, discountFee "
-            + "or discountFeeAdjustment. For command=undo use only note and reversalExternalId. "
-            + "For command=adjust dateFormat / locale / transactionDate / transactionAmount / classificationId / externalId / paymentDetails are accepted.")
+    @Schema(description = "Request for transaction command executed on a transaction named in the path: undo, adjust, adjustByDelta, "
+            + "discountFee or discountFeeAdjustment. For command=undo use only note and reversalExternalId. "
+            + "For command=adjust and command=adjustByDelta dateFormat / locale / transactionDate / transactionAmount / classificationId / "
+            + "note / reversalExternalId / externalId / paymentDetails are accepted.")
     public static final class ExecuteWorkingCapitalLoanTransactionCommandRequest {
 
         private ExecuteWorkingCapitalLoanTransactionCommandRequest() {}
 
-        @Schema(example = "loan-ext-001", description = "Optional external id for the reversal (command=undo)")
+        @Schema(example = "loan-ext-001", description = "Optional external id stamped on the reversed transaction (command=undo, adjust, adjustByDelta)")
         public String reversalExternalId;
         @Schema(example = "en_GB")
         public String locale;
@@ -260,19 +261,23 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "28 June 2024", description = "Transaction date (command=discountFeeAdjustment); for command=discountFee it defaults to the date of the related disbursement and, when sent, must be equal to it; "
                 + "command=adjust required when transactionAmount > 0: date of the replacement transaction. "
-                + "Optional when transactionAmount is 0 (undo).")
+                + "Optional when transactionAmount is 0 (undo). "
+                + "command=adjustByDelta optional: moves the replacement to this date; when omitted the replacement keeps the original's date.")
         public String transactionDate;
-        @Schema(example = "100.0", description = "Transaction amount (command=discountFee, discountFeeAdjustment); command=adjust zero reverses the existing transaction (same as undo). A positive amount reverses it and creates a replacement")
+        @Schema(example = "100.0", description = "Transaction amount (command=discountFee, discountFeeAdjustment); command=adjust zero reverses the existing transaction (same as undo). A positive amount reverses it and creates a replacement. "
+                + "command=adjustByDelta: a signed delta on the existing amount (positive increases, negative decreases) - the replacement is "
+                + "existing + transactionAmount; a delta that cancels the existing amount only reverses it, zero is rejected (400) and a "
+                + "decrease beyond the existing amount is refused (403)")
         public BigDecimal transactionAmount;
-        @Schema(example = "12", description = "Optional code value id for transaction classification (command=discountFee, discountFeeAdjustment, adjust)")
+        @Schema(example = "12", description = "Optional code value id for transaction classification (command=discountFee, discountFeeAdjustment, adjust, adjustByDelta)")
         public Long classificationId;
         @Schema(example = "Discount applied")
         public String note;
-        @Schema(example = "replacement-ext-001", description = "Optional external id for the created transaction. For command=adjust this is the id of the replacement when transactionAmount > 0 "
+        @Schema(example = "replacement-ext-001", description = "Optional external id for the created transaction. For command=adjust and command=adjustByDelta this is the id of the replacement, when there is one "
                 + "(same as term-loan adjust). The reversed transaction keeps its original external id. "
                 + "If omitted and auto-generation is enabled, a new id is generated for the replacement.")
         public String externalId;
-        @Schema(description = "Optional nested payment details. If command=adjust then it is for the replacement when transactionAmount > 0. "
+        @Schema(description = "Optional nested payment details. If command=adjust or command=adjustByDelta then it is for the replacement, when there is one. "
                 + "If omitted / null, the original transaction's PaymentDetail is reused.")
         public PostWorkingCapitalLoanTransactionsPaymentDetailRequest paymentDetails;
     }
