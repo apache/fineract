@@ -175,10 +175,9 @@ public class WorkingCapitalLoanProductUpdateUtil {
                 : null;
         if (command.isChangeInStringParameterNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName, currentBreachStartType)) {
             final String newValue = command.stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName);
-            final WorkingCapitalLoanBreachStartType parsedBreachStartType = WorkingCapitalLoanBreachStartType.fromString(newValue);
-            final WorkingCapitalLoanBreachStartType newBreachStartType = parsedBreachStartType != null ? parsedBreachStartType
-                    : WorkingCapitalLoanBreachStartType.DISBURSEMENT;
-            changes.put(WorkingCapitalLoanProductConstants.breachStartTypeParamName, newBreachStartType.getCode());
+            final WorkingCapitalLoanBreachStartType newBreachStartType = WorkingCapitalLoanBreachStartType.fromString(newValue);
+            changes.put(WorkingCapitalLoanProductConstants.breachStartTypeParamName,
+                    newBreachStartType != null ? newBreachStartType.getCode() : null);
             relatedDetail.setBreachStartType(newBreachStartType);
         }
         return changes;

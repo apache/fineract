@@ -72,4 +72,34 @@ public interface WorkingCapitalLoanCommandsApi {
             return "";
         }
     }
+
+    /**
+     * PUT body {@code {"breachId":null,"nearBreachId":null,"delinquencyBucketId":null}}. Clears breach, near-breach and
+     * delinquency bucket together; the assembler then clears grace days and start types. Near-breach must be nulled in
+     * the same request as breach — otherwise validation rejects breach-null while an existing near-breach remains.
+     * Getters are for Jackson (Feign {@code NON_NULL} would otherwise omit these keys).
+     */
+    class ClearBreachNearBreachAndDelinquencyBucketRequest extends LocalizedRequest {
+
+        @JsonInclude(JsonInclude.Include.ALWAYS)
+        private final Long breachId = null;
+
+        @JsonInclude(JsonInclude.Include.ALWAYS)
+        private final Long nearBreachId = null;
+
+        @JsonInclude(JsonInclude.Include.ALWAYS)
+        private final Long delinquencyBucketId = null;
+
+        public Long getBreachId() {
+            return breachId;
+        }
+
+        public Long getNearBreachId() {
+            return nearBreachId;
+        }
+
+        public Long getDelinquencyBucketId() {
+            return delinquencyBucketId;
+        }
+    }
 }

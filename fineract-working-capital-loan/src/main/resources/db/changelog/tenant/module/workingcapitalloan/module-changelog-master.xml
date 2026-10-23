@@ -112,4 +112,5 @@
   <include relativeToChangelogFile="true" file="parts/0088_put_wc_cob_job_in_the_cob_scheduler_group.xml"/>
   <include relativeToChangelogFile="true" file="parts/0089_wc_normalize_repayment_frequency_to_daily.xml"/>
   <include relativeToChangelogFile="true" file="parts/0090_wc_adjust-by-delta-transaction-permission.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0091_wc_clear_dependent_grace_without_parent.xml"/>
 </databaseChangeLog>

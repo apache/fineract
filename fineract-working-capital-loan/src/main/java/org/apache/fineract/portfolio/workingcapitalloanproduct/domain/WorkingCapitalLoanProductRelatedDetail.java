@@ -23,12 +23,14 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import java.math.BigDecimal;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 
 /**
  * WorkingCapitalLoanProductRelatedDetail encapsulates the core product parameters of a
@@ -75,17 +77,41 @@ public class WorkingCapitalLoanProductRelatedDetail {
     @Column(name = "discount", scale = 6, precision = 19)
     private BigDecimal discount;
 
-    @Column(name = "delinquency_grace_days", nullable = false)
-    private Integer delinquencyGraceDays = 0;
+    @Column(name = "delinquency_grace_days")
+    private Integer delinquencyGraceDays;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "delinquency_start_type", nullable = false)
+    @Column(name = "delinquency_start_type")
     private WorkingCapitalLoanDelinquencyStartType delinquencyStartType;
 
-    @Column(name = "breach_grace_days", nullable = true)
+    @Column(name = "breach_grace_days")
     private Integer breachGraceDays;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "breach_start_type", nullable = false)
+    @Column(name = "breach_start_type")
     private WorkingCapitalLoanBreachStartType breachStartType;
+
+    // Clears grace days and start type that depend on a delinquency bucket
+    public void clearDelinquencySettings(final Map<String, Object> changes) {
+        if (this.delinquencyGraceDays != null) {
+            this.delinquencyGraceDays = null;
+            changes.put(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, null);
+        }
+        if (this.delinquencyStartType != null) {
+            this.delinquencyStartType = null;
+            changes.put(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, null);
+        }
+    }
+
+    // Clears grace days and start type that depend on a breach
+    public void clearBreachSettings(final Map<String, Object> changes) {
+        if (this.breachGraceDays != null) {
+            this.breachGraceDays = null;
+            changes.put(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, null);
+        }
+        if (this.breachStartType != null) {
+            this.breachStartType = null;
+            changes.put(WorkingCapitalLoanProductConstants.breachStartTypeParamName, null);
+        }
+    }
 }
