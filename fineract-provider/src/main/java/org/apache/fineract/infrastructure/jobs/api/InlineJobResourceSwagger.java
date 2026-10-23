@@ -31,6 +31,7 @@ final class InlineJobResourceSwagger {
         private InlineJobRequest() {}
 
         public List<Long> loanIds;
+        public List<Long> savingsIds;
     }
 
     @Schema(description = "InlineJobResponse")

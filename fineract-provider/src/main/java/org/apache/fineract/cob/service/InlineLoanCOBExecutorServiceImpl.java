@@ -19,8 +19,10 @@
 package org.apache.fineract.cob.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
+import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
@@ -41,6 +43,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Conditional(LoanCOBEnabledCondition.class)
 public class InlineLoanCOBExecutorServiceImpl extends InlineCommonLockableCOBExecutorService<LoanAccountLock> {
 
+    private final RetrieveLoanIdService retrieveIdService;
+
     public InlineLoanCOBExecutorServiceImpl(LoanAccountLockRepository loanAccountLockRepository,
             InlineLoanCOBExecutionDataParser dataParser, JobOperator jobOperator, JobRegistry jobRegistry, JobRepository jobRepository,
             @Qualifier("requiresNewTransactionTemplate") TransactionTemplate requiresNewTransactionTemplate,
@@ -48,7 +52,13 @@ public class InlineLoanCOBExecutorServiceImpl extends InlineCommonLockableCOBExe
             RetrieveLoanIdService retrieveIdService, FineractProperties fineractProperties,
             RetryConfigurationAssembler retryConfigurationAssembler) {
         super(loanAccountLockRepository, dataParser, jobOperator, jobRegistry, jobRepository, requiresNewTransactionTemplate,
-                customJobParameterRepository, context, retrieveIdService, fineractProperties, retryConfigurationAssembler);
+                customJobParameterRepository, context, fineractProperties, retryConfigurationAssembler);
+        this.retrieveIdService = retrieveIdService;
+    }
+
+    @Override
+    protected List<COBIdAndLastClosedBusinessDate> retrieveAccountIdsBehindDateOrNull(LocalDate cobBusinessDate, List<Long> accountIds) {
+        return retrieveIdService.retrieveLoanIdsBehindDateOrNull(cobBusinessDate, accountIds);
     }
 
     @Override
