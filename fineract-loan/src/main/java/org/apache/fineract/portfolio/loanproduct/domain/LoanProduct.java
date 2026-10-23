@@ -29,6 +29,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
@@ -36,6 +37,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -120,6 +122,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "m_product_loan_charge", joinColumns = @JoinColumn(name = "product_loan_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
+    @OrderBy(value = "id")
     private List<Charge> charges;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -504,6 +507,27 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             this.charges = newProductCharges;
         }
         return updated;
+    }
+
+    /**
+     * A loan product is expected to carry at most one overdue-installment charge. When more than one is configured, the
+     * one with the lowest id is returned, consistent with the migration backfill (see
+     * 1039_add_overdue_charge_amount_to_loan.xml) which also orders by charge id.
+     * <p>
+     * This charge is the one snapshotted on the loan (see Loan#snapshotOverdueCharge) and applied by the Close of
+     * Business "Apply overdue charges" step (LoanChargeWritePlatformServiceImpl#applyOverdueChargesForLoan /
+     * LoanReadPlatformServiceImpl#retrieveAllOverdueInstallmentsForLoan), both of which apply a single charge per loan.
+     * The "Apply penalty to overdue loans" scheduled job (ApplyChargeToOverdueLoanInstallmentTasklet) differs: it
+     * returns one row per overdue-installment charge configured on the product and applies all of them, so on a product
+     * with several such charges the job still applies the others at the product's live amount and calculation type.
+     * Only the charge returned here is covered by the snapshot.
+     */
+    public Charge getOverdueInstallmentCharge() {
+        if (this.charges == null) {
+            return null;
+        }
+        return this.charges.stream().filter(c -> c.isOverdueInstallment() && c.isLoanCharge()).min(Comparator.comparing(Charge::getId))
+                .orElse(null);
     }
 
     public boolean updateRates(final List<Rate> newProductRates) {
