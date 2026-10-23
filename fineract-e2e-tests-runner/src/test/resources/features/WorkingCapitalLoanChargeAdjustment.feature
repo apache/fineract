@@ -645,3 +645,29 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+
+  @TestRailId:C115407
+  Scenario: Verify Working Capital charge adjustment undo replays the later repayments and reports them in a single bulk event
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct                    | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_DUE_FEE_PENALTY_PRINCIPAL | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "10 January 2026" due date and 100.0 transaction amount
+    And Admin makes a charge adjustment for the last added charge with 100.0 amount on working capital loan
+# The charge adjustment settled the fee, so both repayments settle principal only.
+    When Admin sets the business date to "12 January 2026"
+    And Customer makes repayment on "12 January 2026" with 50.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "13 January 2026"
+    And Customer makes repayment on "13 January 2026" with 70.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "15 January 2026"
+# Undoing the charge adjustment puts the fee back to outstanding: the full replay pays it out of the two repayments.
+    And Admin reverts the last charge adjustment on working capital loan
+    Then a Working Capital Loan Adjust Transaction business event is raised for the reversed "chargeAdjustment" transaction
+    And BulkBusinessEvent is raised on "15 January 2026" with 2 WorkingCapitalLoanAdjustTransactionBusinessEvent
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "12 January 2026" with principal portion changed from "50.0" to "0.0" and fee portion changed from "0.0" to "50.0"
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "13 January 2026" with principal portion changed from "70.0" to "20.0" and fee portion changed from "0.0" to "50.0"
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |

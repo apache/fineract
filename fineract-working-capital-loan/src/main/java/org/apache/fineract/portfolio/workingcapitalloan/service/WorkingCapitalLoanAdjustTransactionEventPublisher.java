@@ -63,6 +63,13 @@ public class WorkingCapitalLoanAdjustTransactionEventPublisher {
                 new Data(transactionDataFactory.create(reversedTransaction), transactionDataFactory.create(newTransaction)), wcLoanId));
     }
 
+    /**
+     * Reports the transactions a replay changed, in the order given: a reversed one as a reversal, any other one as the
+     * pair of its pre-replay snapshot and its current state. A transaction without a pre-replay snapshot was allocated
+     * for the first time and is left out. The recording window makes the whole replay reach the consumer as one bulk
+     * event instead of N separate ones. If a window is already open further up the stack - a COB run, say - these
+     * events join that one instead.
+     */
     public void publishReprocessed(final Long wcLoanId, final Map<Long, WorkingCapitalLoanTransactionData> preSnapshots,
             final List<WorkingCapitalLoanTransaction> changedTransactions) {
         if (!isPostingEnabled()) {
@@ -70,33 +77,17 @@ public class WorkingCapitalLoanAdjustTransactionEventPublisher {
         }
         final List<WorkingCapitalLoanTransaction> reported = changedTransactions.stream()
                 .filter(txn -> txn.isReversed() || preSnapshots.containsKey(txn.getId())).toList();
-        final Map<Long, WorkingCapitalLoanTransactionData> postSnapshots = snapshots(reported);
-        publishInRecordingWindow(wcLoanId, reported.stream().map(txn -> txn.isReversed() ? Data.reversal(postSnapshots.get(txn.getId()))
-                : new Data(preSnapshots.get(txn.getId()), postSnapshots.get(txn.getId()))).toList());
-    }
-
-    /**
-     * The recording window makes the whole replay reach the consumer as one bulk event instead of N separate ones. If a
-     * window is already open further up the stack - a COB run, say - these events join that one instead.
-     */
-    public void publishReprocessed(final Long wcLoanId, final List<WorkingCapitalLoanTransactionAdjustment> adjustments) {
-        publishInRecordingWindow(wcLoanId,
-                adjustments.stream().map(adjustment -> new Data(adjustment.previousState(), adjustment.currentState())).toList());
-    }
-
-    private boolean isPostingEnabled() {
-        return businessEventNotifierService.isExternalEventPostingEnabled(WorkingCapitalLoanAdjustTransactionBusinessEvent.TYPE);
-    }
-
-    private void publishInRecordingWindow(final Long wcLoanId, final List<Data> adjustments) {
-        if (adjustments.isEmpty()) {
+        if (reported.isEmpty()) {
             return;
         }
+        final Map<Long, WorkingCapitalLoanTransactionData> postSnapshots = snapshots(reported);
+        final List<Data> adjustments = reported.stream().map(txn -> txn.isReversed() ? Data.reversal(postSnapshots.get(txn.getId()))
+                : new Data(preSnapshots.get(txn.getId()), postSnapshots.get(txn.getId()))).toList();
         businessEventNotifierService.withExternalEventRecording(() -> adjustments.forEach(adjustment -> businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanAdjustTransactionBusinessEvent(adjustment, wcLoanId))));
     }
 
-    public record WorkingCapitalLoanTransactionAdjustment(WorkingCapitalLoanTransactionData previousState,
-            WorkingCapitalLoanTransactionData currentState) {
+    private boolean isPostingEnabled() {
+        return businessEventNotifierService.isExternalEventPostingEnabled(WorkingCapitalLoanAdjustTransactionBusinessEvent.TYPE);
     }
 }

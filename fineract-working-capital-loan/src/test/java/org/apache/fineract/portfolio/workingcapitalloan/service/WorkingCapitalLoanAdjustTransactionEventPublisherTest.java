@@ -29,7 +29,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -39,7 +38,6 @@ import org.apache.fineract.infrastructure.event.business.domain.workingcapitallo
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanAdjustTransactionEventPublisher.WorkingCapitalLoanTransactionAdjustment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -122,51 +120,7 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
     }
 
     @Test
-    void publishReprocessedDoesNotOpenARecordingWindowForAnEmptyAdjustmentList() {
-        publisher.publishReprocessed(LOAN_ID, List.of());
-
-        verifyNoInteractions(transactionDataFactory);
-        verifyNoInteractions(businessEventNotifierService);
-    }
-
-    @Test
-    void publishReprocessedPostsEveryAdjustmentInsideASingleRecordingWindow() {
-        final WorkingCapitalLoanTransactionData firstBefore = transaction(1L);
-        final WorkingCapitalLoanTransactionData firstAfter = transaction(1L);
-        final WorkingCapitalLoanTransactionData secondBefore = transaction(2L);
-        final WorkingCapitalLoanTransactionData secondAfter = transaction(2L);
-
-        publisher.publishReprocessed(LOAN_ID, List.of(new WorkingCapitalLoanTransactionAdjustment(firstBefore, firstAfter),
-                new WorkingCapitalLoanTransactionAdjustment(secondBefore, secondAfter)));
-
-        final List<WorkingCapitalLoanAdjustTransactionBusinessEvent> events = publishedEvents(2);
-        assertThat(events.get(0).getAggregateRootId()).isEqualTo(LOAN_ID);
-        assertThat(events.get(0).get().getTransactionToAdjust()).isSameAs(firstBefore);
-        assertThat(events.get(0).get().getNewTransactionDetail()).isSameAs(firstAfter);
-        assertThat(events.get(1).get().getTransactionToAdjust()).isSameAs(secondBefore);
-        assertThat(events.get(1).get().getNewTransactionDetail()).isSameAs(secondAfter);
-
-        final InOrder inOrder = inOrder(businessEventNotifierService);
-        inOrder.verify(businessEventNotifierService).withExternalEventRecording(any(Runnable.class));
-        inOrder.verify(businessEventNotifierService, times(2)).notifyPostBusinessEvent(any());
-        verifyNoMoreInteractions(businessEventNotifierService);
-    }
-
-    @Test
-    void publishReprocessedRethrowsWhenPublishingFails() {
-        final RuntimeException failure = new RuntimeException("boom");
-        doThrow(failure).when(businessEventNotifierService).notifyPostBusinessEvent(any());
-
-        assertThatThrownBy(() -> publisher.publishReprocessed(LOAN_ID,
-                List.of(new WorkingCapitalLoanTransactionAdjustment(transaction(1L), transaction(1L))))).isSameAs(failure);
-
-        final InOrder inOrder = inOrder(businessEventNotifierService);
-        inOrder.verify(businessEventNotifierService).withExternalEventRecording(any(Runnable.class));
-        inOrder.verify(businessEventNotifierService).notifyPostBusinessEvent(any());
-    }
-
-    @Test
-    void publishReprocessedFromSnapshotsDoesNothingWhenPostingIsDisabled() {
+    void publishReprocessedDoesNothingWhenPostingIsDisabled() {
         postingEnabled(false);
 
         publisher.publishReprocessed(LOAN_ID, Map.of(1L, transaction(1L)), List.of(mock(WorkingCapitalLoanTransaction.class)));
@@ -177,7 +131,7 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
     }
 
     @Test
-    void publishReprocessedFromSnapshotsPairsTheStateBeforeAndAfterTheReplay() {
+    void publishReprocessedPairsTheStateBeforeAndAfterTheReplay() {
         postingEnabled(true);
         final WorkingCapitalLoanTransaction changed = changedTransaction(1L, false);
         final WorkingCapitalLoanTransactionData before = transaction(1L);
@@ -193,7 +147,7 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
     }
 
     @Test
-    void publishReprocessedFromSnapshotsReportsAReversedTransactionAsAReversalWithoutAPreSnapshot() {
+    void publishReprocessedReportsAReversedTransactionAsAReversalWithoutAPreSnapshot() {
         postingEnabled(true);
         final WorkingCapitalLoanTransaction reversed = changedTransaction(2L, true);
         final WorkingCapitalLoanTransactionData after = transaction(2L);
@@ -208,7 +162,7 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
     }
 
     @Test
-    void publishReprocessedFromSnapshotsSkipsATransactionThatHasNoPreSnapshot() {
+    void publishReprocessedSkipsATransactionThatHasNoPreSnapshot() {
         postingEnabled(true);
         final WorkingCapitalLoanTransaction withoutPreSnapshot = changedTransaction(3L, false);
         final WorkingCapitalLoanTransaction changed = changedTransaction(4L, false);
@@ -224,7 +178,7 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
     }
 
     @Test
-    void publishReprocessedFromSnapshotsDoesNotOpenARecordingWindowWhenNoTransactionIsLeft() {
+    void publishReprocessedDoesNotOpenARecordingWindowWhenNoTransactionIsLeft() {
         postingEnabled(true);
 
         publisher.publishReprocessed(LOAN_ID, Map.of(), List.of(changedTransaction(3L, false)));
@@ -234,7 +188,7 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
     }
 
     @Test
-    void publishReprocessedFromSnapshotsPostsInInputOrderInsideASingleRecordingWindow() {
+    void publishReprocessedPostsInInputOrderInsideASingleRecordingWindow() {
         postingEnabled(true);
         final WorkingCapitalLoanTransaction changed = changedTransaction(1L, false);
         final WorkingCapitalLoanTransaction reversed = changedTransaction(2L, true);
@@ -251,10 +205,24 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
         assertThat(events.get(1).get().getTransactionToAdjust()).isSameAs(reversedAfter);
         assertThat(events.get(1).get().getNewTransactionDetail()).isNull();
 
-        verify(businessEventNotifierService).withExternalEventRecording(any(Runnable.class));
         final InOrder inOrder = inOrder(businessEventNotifierService);
         inOrder.verify(businessEventNotifierService).withExternalEventRecording(any(Runnable.class));
         inOrder.verify(businessEventNotifierService, times(2)).notifyPostBusinessEvent(any());
+    }
+
+    @Test
+    void publishReprocessedRethrowsWhenPublishingFails() {
+        postingEnabled(true);
+        final WorkingCapitalLoanTransaction changed = changedTransaction(1L, false);
+        when(transactionDataFactory.create(List.of(changed))).thenReturn(List.of(transaction(1L)));
+        final RuntimeException failure = new RuntimeException("boom");
+        doThrow(failure).when(businessEventNotifierService).notifyPostBusinessEvent(any());
+
+        assertThatThrownBy(() -> publisher.publishReprocessed(LOAN_ID, Map.of(1L, transaction(1L)), List.of(changed))).isSameAs(failure);
+
+        final InOrder inOrder = inOrder(businessEventNotifierService);
+        inOrder.verify(businessEventNotifierService).withExternalEventRecording(any(Runnable.class));
+        inOrder.verify(businessEventNotifierService).notifyPostBusinessEvent(any());
     }
 
     private void postingEnabled(final boolean enabled) {

@@ -56,8 +56,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusinessEventServiceImpl;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanAdjustTransactionEventPublisher;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanAdjustTransactionEventPublisher.WorkingCapitalLoanTransactionAdjustment;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanTransactionDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -210,11 +210,15 @@ class NestedExternalEventRecordingWindowTest {
     }
 
     private void reprocessWorkingCapitalTransactions() {
+        WorkingCapitalLoanTransaction changedTransaction = mock(WorkingCapitalLoanTransaction.class);
+        given(changedTransaction.getId()).willReturn(LOAN_ID);
         WorkingCapitalLoanTransactionData previousState = mock(WorkingCapitalLoanTransactionData.class);
         WorkingCapitalLoanTransactionData currentState = mock(WorkingCapitalLoanTransactionData.class);
+        given(currentState.getId()).willReturn(LOAN_ID);
+        given(transactionDataFactory.create(List.of(changedTransaction))).willReturn(List.of(currentState));
 
         new WorkingCapitalLoanAdjustTransactionEventPublisher(transactionDataFactory, businessEventNotifierService)
-                .publishReprocessed(LOAN_ID, List.of(new WorkingCapitalLoanTransactionAdjustment(previousState, currentState)));
+                .publishReprocessed(LOAN_ID, Map.of(LOAN_ID, previousState), List.of(changedTransaction));
     }
 
     private void registerSteps(Runnable before, Runnable innerWindow, Runnable after) {

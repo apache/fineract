@@ -978,6 +978,10 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             if (replacementReplayed) {
                 transactionProcessor.completeReplayedRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
                         newTransactionAmount);
+                // The undo capped the last breach period before the replacement's repayment was applied to it, so the
+                // cap and the past due amount are re-derived on the final balance.
+                breachScheduleService.recalculatePastDueAmount(loan);
+                breachScheduleService.rederiveNearBreachIfReopened(loan, oldStatus);
             } else {
                 transactionProcessor.processRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
                         newTransactionAmount);
@@ -1485,7 +1489,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
      * replayed once with both changes rather than once per change, so later transactions are restated (and reported)
      * once.
      *
-     * @return whether the replay already allocated the replacement, leaving only its non-replay effects to the caller
+     * @return whether the replay already allocated the replacement, leaving its non-replay effects and the evaluation
+     *         of the final state - status, near breach, settlement dates - to the caller
      */
     private boolean processUndoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
             final WorkingCapitalLoanTransaction replacement) {
@@ -1531,6 +1536,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         accountingProcessor.postReversalJournalEntries(loan, transaction);
 
+        if (replacementReplayed) {
+            // The balance already carries the replacement, so evaluating the status here would close or reopen the loan
+            // as of the business date instead of the replacement's own date. The caller evaluates status, near breach
+            // and settlement dates once, on the final state.
+            return true;
+        }
+
         stateMachine.determineAndTransition(loan, DateUtils.getBusinessLocalDate());
         if (!isAccountingOnly) {
             // The breach undo above ran while the loan was still closed, which the near breach evaluation skips.
@@ -1538,7 +1550,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
         transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
         transactionProcessor.recalculateSettlementDates(loan);
-        return replacementReplayed;
+        return false;
     }
 
     private boolean isChargesInvolved(WorkingCapitalLoan loan) {

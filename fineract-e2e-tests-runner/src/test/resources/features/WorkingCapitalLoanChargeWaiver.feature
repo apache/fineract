@@ -439,3 +439,29 @@ Feature: Working Capital Loan Charge Waiver
       | httpCode | errorMessage                                        |
       | 403      | Charge waiver is not supported for inactive charges |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  @TestRailId:C115408
+  Scenario: Undo of a charge waiver replays the later repayments and reports them in a single bulk event - UC16
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct                    | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_DUE_FEE_PENALTY_PRINCIPAL | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "10 January 2026" due date and 100.0 transaction amount
+    And Admin waives the last added charge on working capital loan
+# While the charge is waived the allocator sees nothing owed on it, so both repayments settle principal.
+    When Admin sets the business date to "12 January 2026"
+    And Customer makes repayment on "12 January 2026" with 50.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "13 January 2026"
+    And Customer makes repayment on "13 January 2026" with 70.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "15 January 2026"
+# Restoring the charge replays both repayments, which now find the fee due and pay it before principal.
+    And Admin reverts the last charge waiver on working capital loan
+    Then a Working Capital Loan Adjust Transaction business event is raised for the reversed "waiveCharges" transaction
+    And BulkBusinessEvent is raised on "15 January 2026" with 2 WorkingCapitalLoanAdjustTransactionBusinessEvent
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "12 January 2026" with principal portion changed from "50.0" to "0.0" and fee portion changed from "0.0" to "50.0"
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "13 January 2026" with principal portion changed from "70.0" to "20.0" and fee portion changed from "0.0" to "50.0"
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
