@@ -71,4 +71,23 @@ public class AnnualSummaryStepDef extends AbstractStepDef {
                         expectedCount, glCode, yearEndDate, office.getOfficeId(), actualCount)
                 .isEqualTo(expectedCount);
     }
+
+    @Then("The journal entry annual summary table contains {int} row(s) for GL code {string} with year end date {string} and product type {string}")
+    public void annualSummaryTableContainsRowsForProductType(final int expectedCount, final String glCode, final String yearEndDateStr,
+            final String productType) {
+        final LocalDate yearEndDate = LocalDate.parse(yearEndDateStr, FORMATTER);
+        final int productTypeId = switch (productType) {
+            case "LOAN" -> 1;
+            case "WORKING_CAPITAL_LOAN" -> 6;
+            default -> throw new IllegalArgumentException("Unsupported product type: " + productType);
+        };
+        final PostOfficesResponse office = testContext().get(TestContextKey.OFFICE_CREATE_RESPONSE);
+        assertThat(office).as("No office was created. Use 'Admin creates a new office' step first.").isNotNull();
+        final Integer actualCount = testJdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM acc_gl_journal_entry_annual_summary WHERE gl_code = ? AND year_end_date = ? AND office_id = ? AND product_type = ?",
+                Integer.class, glCode, yearEndDate, office.getOfficeId(), productTypeId);
+        assertThat(actualCount).as(
+                "acc_gl_journal_entry_annual_summary: expected %d row(s) for gl_code '%s', year_end_date %s, office %s, product_type %s but found %d",
+                expectedCount, glCode, yearEndDate, office.getOfficeId(), productType, actualCount).isEqualTo(expectedCount);
+    }
 }

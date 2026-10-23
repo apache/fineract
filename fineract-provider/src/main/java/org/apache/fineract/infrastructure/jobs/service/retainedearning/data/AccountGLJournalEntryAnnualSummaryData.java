@@ -23,12 +23,15 @@ import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.portfolio.PortfolioProductType;
 
 @Getter
 @Builder(toBuilder = true)
 public class AccountGLJournalEntryAnnualSummaryData {
 
     private Long productId;
+
+    private PortfolioProductType productType;
 
     private String productName;
 
