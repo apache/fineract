@@ -84,8 +84,11 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
         this.validator.validateForCreate(command);
         final WorkingCapitalLoan loan = this.assembler.assembleFrom(command);
         try {
+            // The generated account number is built from the IDENTITY id, so it can only be set after the INSERT.
+            // Until then account_no is NULL, which the unique index lets concurrent creates insert without waiting.
             final WorkingCapitalLoan saved = this.repository.saveAndFlush(loan);
             this.assembler.accountNumberGeneration(saved);
+            // Flush here so a duplicate generated number is reported via handleDataIntegrityIssues below
             this.repository.flush();
             final String submittedOnNote = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.submittedOnNoteParameterName);
             createNote(submittedOnNote, saved);
