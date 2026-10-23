@@ -283,6 +283,24 @@ Feature: Working Capital Batch API
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
 
+  @TestRailId:C115267
+  Scenario: Verify Batch API - UC18: Adjust a Working Capital Loan transaction by delta via Batch API
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "10 January 2026" with 100.0 transaction amount on Working Capital loan
+    # Execute the adjust-by-delta command through the batch endpoint
+    When Batch API adjusts by delta "1"th "REPAYMENT" transaction made on "10 January 2026" on the working capital loan with amount "-40.0"
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 100.0             | 100.0            | 0.0               | 0.0                   | true     |
+      | 10 January 2026 | Repayment    | 60.0              | 60.0             | 0.0               | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+
   @TestRailId:C110973
   Scenario: Verify working capital loan delinquency range schedule via batch with payment full expectedAmount repaid after disbursement day - UC1
     When Admin sets the business date to "01 January 2026"

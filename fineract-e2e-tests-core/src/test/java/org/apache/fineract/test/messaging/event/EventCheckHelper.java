@@ -574,6 +574,20 @@ public class EventCheckHelper {
                 .orElseThrow(() -> new IllegalStateException("No element found"));
     }
 
+    public void workingCapitalLoanAdjustTransactionPartialEventCheck(final Long loanId, final String transactionType,
+            final BigDecimal newAmount, final Long newTransactionId) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse reversedTransaction = findLastWorkingCapitalLoanTransaction(loanId,
+                transactionType, true, "Reversed " + transactionType + " transaction not found");
+        eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, reversedTransaction.getId())//
+                .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
+                .extractingData(data -> data.getTransactionToAdjust().getId()).isEqualTo(reversedTransaction.getId())//
+                .extractingData(data -> data.getTransactionToAdjust().getReversed()).isEqualTo(true)//
+                .extractingData(data -> data.getNewTransactionDetail().getId()).isEqualTo(newTransactionId)//
+                .extractingBigDecimal(data -> data.getNewTransactionDetail().getTransactionAmount()).isEqualTo(newAmount)//
+                .extractingData(data -> data.getNewTransactionDetail().getReversed()).isEqualTo(false);
+    }
+
     private record ExpectedTransferAmounts(BigDecimal totalOutstanding, BigDecimal principal, BigDecimal fee, BigDecimal penalty,
             BigDecimal interest, BigDecimal overpayment) {
 
@@ -1318,20 +1332,6 @@ public class EventCheckHelper {
         return rows.stream().sorted(Comparator.comparing(Object::toString)).toList();
     }
 
-    public void workingCapitalLoanAdjustTransactionPartialEventCheck(final Long loanId, final String transactionType,
-            final BigDecimal newAmount, final Long newTransactionId) {
-        waitForTransactionCommit();
-        final GetWorkingCapitalLoanTransactionIdResponse reversedTransaction = findLastWorkingCapitalLoanTransaction(loanId,
-                transactionType, true, "Reversed " + transactionType + " transaction not found");
-        eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, reversedTransaction.getId())//
-                .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
-                .extractingData(data -> data.getTransactionToAdjust().getId()).isEqualTo(reversedTransaction.getId())//
-                .extractingData(data -> data.getTransactionToAdjust().getReversed()).isEqualTo(true)//
-                .extractingData(data -> data.getNewTransactionDetail().getId()).isEqualTo(newTransactionId)//
-                .extractingBigDecimal(data -> data.getNewTransactionDetail().getTransactionAmount()).isEqualTo(newAmount)//
-                .extractingData(data -> data.getNewTransactionDetail().getReversed()).isEqualTo(false);
-    }
-
     public void workingCapitalLoanAdjustTransactionReprocessEventCheck(final Long loanId, final String transactionType,
             final String transactionDate, final BigDecimal previousPrincipalPortion, final BigDecimal newPrincipalPortion,
             final BigDecimal previousFeeChargesPortion, final BigDecimal newFeeChargesPortion) {
@@ -1474,6 +1474,24 @@ public class EventCheckHelper {
     private static BigDecimal sumJournalEntries(final List<WorkingCapitalLoanJournalEntryDataV1> entries, final String type) {
         return entries.stream().filter(entry -> entry.getType() != null && type.equals(entry.getType().getId()))
                 .map(WorkingCapitalLoanJournalEntryDataV1::getAmount).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public void workingCapitalLoanAdjustTransactionEventNotRaisedCheck(final Long transactionId) {
+        waitForTransactionCommit();
+        eventAssertion.assertEventNotRaised(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transactionId);
+    }
+
+    public void workingCapitalLoanAdjustTransactionEventRaisedOnceCheck(final Long transactionId) {
+        waitForTransactionCommit();
+        // Asserting the event consumes it, so any second one for the same transaction is still there to be caught.
+        eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transactionId);
+        eventAssertion.assertEventNotRaised(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transactionId);
+    }
+
+    public void workingCapitalLoanStatusChangedEventNotRaisedOnCheck(final Long loanId, final LocalDate businessDate) {
+        waitForTransactionCommit();
+        eventAssertion.assertEventNotRaised(WorkingCapitalLoanStatusChangedEvent.class,
+                eventMessage -> loanId.equals(eventMessage.getData().getId()) && businessDate.equals(eventMessage.getBusinessDate()));
     }
 
     public void workingCapitalLoanStatusChangedEventNotRaisedCheck(final Long loanId) {

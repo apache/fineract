@@ -412,4 +412,6 @@ public abstract class TestContextKey {
     public static final String WORKING_CAPITAL_LOAN_DISCOUNT_FEE_RESPONSE_BATCH = "workingCapitalLoanDiscountFeeResponseBatch";
     public static final String WORKING_CAPITAL_LOAN_GET_DETAILS_RESPONSE = "workingCapitalLoanGetDetailsResponse";
     public static final String WORKING_CAPITAL_LOAN_GET_TRANSACTIONS_RESPONSE = "workingCapitalLoanGetTransactionsResponse";
+    public static final String WORKING_CAPITAL_LOAN_ADJUST_BY_DELTA_TRANSACTION_RESPONSE = "workingCapitalLoanAdjustByDeltaTransactionResponse";
+    public static final String WORKING_CAPITAL_LOAN_OUTCOME_PREFIX = "workingCapitalLoanOutcome_";
 }

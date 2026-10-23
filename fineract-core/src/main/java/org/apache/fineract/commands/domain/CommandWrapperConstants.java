@@ -70,6 +70,7 @@ public final class CommandWrapperConstants {
     public static final String ACTION_FORECLOSURE = "FORECLOSURE";
     public static final String ACTION_CREDITBALANCEREFUND = "CREDITBALANCEREFUND";
     public static final String ACTION_UNDO = "UNDO";
+    public static final String ACTION_ADJUST_BY_DELTA = "ADJUSTBYDELTA";
     public static final String ACTION_BOUNCE = "BOUNCE";
     public static final String ACTION_SETFRAUD = "SETFRAUD";
     public static final String ACTION_UNDODISBURSAL = "UNDODISBURSAL";
