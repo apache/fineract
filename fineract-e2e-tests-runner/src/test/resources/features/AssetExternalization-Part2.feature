@@ -1,6 +1,253 @@
 @AssetExternalizationFeature
 Feature: Asset Externalization - Part2
 
+  @TestRailId:C85341
+  Scenario: Verify remaining capitalized income is fully recognized on loan sale to external owner
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2026   | 200            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2026" with "200" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the loan on "01 January 2026" with "100" EUR transaction amount
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 January 2026" with "50" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2026  | Disbursement       | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2026  | Capitalized Income | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+    And Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable            | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 0.0              | 50.0                | 0.0             | 0.0                |
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-01-02     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-01-02     | 1                  | PENDING | 2026-01-01    | 2026-01-02  | SALE             |
+      | 2026-01-02     | 1                  | ACTIVE  | 2026-01-03    | 9999-12-31  | SALE             |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2026  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2026  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 02 January 2026  | Capitalized Income Amortization | 1.11   | 0.0       | 1.11     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2026  | Capitalized Income Amortization | 48.89  | 0.0       | 48.89    | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has 2 a "CAPITALIZED_INCOME_AMORTIZATION" transactions with date "02 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 404000       | Interest Income             |       | 1.11   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 1.11  |        |
+      | INCOME    | 404000       | Interest Income             |       | 48.89  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 48.89 |        |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | buyback          | 2026-01-03     |                    |
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Loan
+    Then Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2026  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2026  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 02 January 2026  | Capitalized Income Amortization | 1.11   | 0.0       | 1.11     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2026  | Capitalized Income Amortization | 48.89  | 0.0       | 48.89    | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "04 January 2026"
+    Then Loan's all installments have obligations met
+
+  @TestRailId:C85342
+  Scenario: Verify remaining buy down fee is fully recognized on loan sale to external owner
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES | 01 January 2026   | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the loan on "01 January 2026" with "100" EUR transaction amount
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2026" with "50" EUR transaction amount
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-01-02     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    When Admin sets the business date to "02 January 2026"
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "02 January 2026" with "20" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2026  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2026  | Buy Down Fee     | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2026  | Buy Down Fee     | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | EXPENSE   | 450280       | Buy Down Expense            | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "02 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | EXPENSE   | 450280       | Buy Down Expense            | 20.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 20.0   |
+    And Buy down fee contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2026 | 50.0       | 0.0              | 50.0                     | 0.0             | 0.0                |
+      | 02 January 2026 | 20.0       | 0.0              | 20.0                     | 0.0             | 0.0                |
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-01-02     | 1                  | PENDING | 2026-01-01    | 2026-01-02  | SALE             |
+      | 2026-01-02     | 1                  | ACTIVE  | 2026-01-03    | 9999-12-31  | SALE             |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2026  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2026  | Buy Down Fee              | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2026  | Buy Down Fee              | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2026  | Buy Down Fee Amortization | 1.33   | 0.0       | 1.33     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2026  | Buy Down Fee Amortization | 68.67  | 0.0       | 68.67    | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has 2 a "BUY_DOWN_FEE_AMORTIZATION" transactions with date "02 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 1.33   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 1.33  |        |
+      | INCOME    | 450281       | Income From Buy Down        |       | 68.67  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 68.67 |        |
+    And Buy down fee contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2026 | 50.0       | 50.0             | 0.0                      | 0.0             | 0.0                |
+      | 02 January 2026 | 20.0       | 20.0             | 0.0                      | 0.0             | 0.0                |
+    When Loan Pay-off is made on "03 January 2026" with transfer external owner
+    Then Loan's all installments have obligations met
+
+  @TestRailId:C85343
+  Scenario: Verify daily COB after loan sale does not create capitalized income amortization adjustment when deferred income is fully recognized
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2026   | 200            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2026" with "200" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the loan on "01 January 2026" with "100" EUR transaction amount
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 January 2026" with "50" EUR transaction amount
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-01-02     | 1                  |
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Loan
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2026  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2026  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 02 January 2026  | Capitalized Income Amortization | 1.11   | 0.0       | 1.11     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2026  | Capitalized Income Amortization | 48.89  | 0.0       | 48.89    | 0.0  | 0.0       | 0.0          | false    |
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Loan
+    Then Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2026  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2026  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 02 January 2026  | Capitalized Income Amortization | 1.11   | 0.0       | 1.11     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2026  | Capitalized Income Amortization | 48.89  | 0.0       | 48.89    | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "04 January 2026" with transfer external owner
+    Then Loan's all installments have obligations met
+
+  @TestRailId:C85344
+  Scenario: Verify daily COB continues amortizing second capitalized income after first is fully recognized on loan sale
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2026   | 200            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2026" with "200" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the loan on "01 January 2026" with "100" EUR transaction amount
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 January 2026" with "50" EUR transaction amount
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-01-02     | 1                  |
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Loan
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "03 January 2026" with "30" EUR transaction amount
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Loan
+    Then Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
+      | 30.0   | 0.33             | 29.67               | 0.0             | 0.0                |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2026  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2026  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 02 January 2026  | Capitalized Income Amortization | 1.11   | 0.0       | 1.11     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2026  | Capitalized Income Amortization | 48.89  | 0.0       | 48.89    | 0.0  | 0.0       | 0.0          | false    |
+      | 03 January 2026  | Capitalized Income              | 30.0   | 30.0      | 0.0      | 0.0  | 0.0       | 180.0        | false    |
+      | 03 January 2026  | Capitalized Income Amortization | 0.34   | 0.0       | 0.34     | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "04 January 2026" with transfer external owner
+    Then Loan's all installments have obligations met
+
+  @TestRailId:C85345
+  Scenario: Verify loan sale with reversed capitalized income and active second entry fully recognizes remaining deferred income without erroneous amortization adjustment
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2026   | 200            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2026" with "200" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the loan on "01 January 2026" with "100" EUR transaction amount
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 January 2026" with "50" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "02 January 2026" with "30" EUR transaction amount
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Loan
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2026  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2026  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 02 January 2026  | Capitalized Income              | 30.0   | 30.0      | 0.0      | 0.0  | 0.0       | 180.0        | false    |
+      | 02 January 2026  | Capitalized Income Amortization | 1.45   | 0.0       | 1.45     | 0.0  | 0.0       | 0.0          | false    |
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-01-03     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    And Customer undo "1"th "Capitalized Income" transaction made on "01 January 2026"
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-01-03     | 1                  | PENDING | 2026-01-03    | 2026-01-03  | SALE             |
+      | 2026-01-03     | 1                  | ACTIVE  | 2026-01-04    | 9999-12-31  | SALE             |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 30.0   | 30.0             | 0.0                 | 0.0             | 0.0                |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                           | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2026  | Disbursement                               | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2026  | Capitalized Income                         | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | true     |
+      | 02 January 2026  | Capitalized Income                         | 30.0   | 30.0      | 0.0      | 0.0  | 0.0       | 130.0        | false    |
+      | 02 January 2026  | Capitalized Income Amortization            | 1.45   | 0.0       | 1.45     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 January 2026  | Capitalized Income Amortization Adjustment | 0.78   | 0.0       | 0.78     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 January 2026  | Capitalized Income Amortization            | 29.33  | 0.0       | 29.33    | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has 1 a "CAPITALIZED_INCOME_AMORTIZATION" transactions with date "03 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 404000       | Interest Income             |       | 29.33  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 29.33 |        |
+    When Loan Pay-off is made on "04 January 2026" with transfer external owner
+    Then Loan's all installments have obligations met
+
   @TestRailId:C3800 @AssetExternalizationJournalEntry
   Scenario: Verify manual journal entry with External Asset Owner empty value if asset-externalization is enabled - UC2
     Given Global configuration "asset-externalization-of-non-active-loans" is enabled
