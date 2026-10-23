@@ -1309,7 +1309,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
                     + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, "
                     + " ls.total_paid_in_advance_derived as totalPaidInAdvanceForPeriod, ls.total_paid_late_derived as totalPaidLateForPeriod, "
-                    + " mc.amount,mc.id as chargeId  from m_loan_repayment_schedule ls " + " inner join m_loan ml on ml.id = ls.loan_id "
+                    + " COALESCE(CASE WHEN ml.overdue_charge_id = mc.id THEN ml.overdue_charge_amount END, mc.amount) as amount,"
+                    + " COALESCE(CASE WHEN ml.overdue_charge_id = mc.id THEN ml.overdue_charge_calculation_type END, mc.charge_calculation_enum) as chargeCalculationType,"
+                    + " mc.id as chargeId  from m_loan_repayment_schedule ls " + " inner join m_loan ml on ml.id = ls.loan_id "
                     + " join m_product_loan_charge plc on plc.product_loan_id = ml.product_id "
                     + " join m_charge mc on mc.id = plc.charge_id ";
 
@@ -1320,6 +1322,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final Long chargeId = rs.getLong("chargeId");
             final Long loanId = rs.getLong("loanId");
             final BigDecimal amount = rs.getBigDecimal("amount");
+            final Integer chargeCalculationType = JdbcSupport.getInteger(rs, "chargeCalculationType");
             final String dateFormat = "yyyy-MM-dd";
             final String dueDate = rs.getString("dueDate");
             final String locale = Locale.ENGLISH.toLanguageTag();
@@ -1341,7 +1344,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final Integer installmentNumber = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "period");
 
             return new OverdueLoanScheduleData(loanId, chargeId, dueDate, amount, dateFormat, locale, principalOutstanding,
-                    interestOutstanding, installmentNumber);
+                    interestOutstanding, installmentNumber, chargeCalculationType);
         }
     }
 
@@ -1637,6 +1640,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             return list;
         }
         final Charge penaltyCharge = optPenaltyCharge.get();
+        final BigDecimal overdueChargeAmount = loan.getOverdueChargeAmountOrDefault(penaltyCharge);
+        final Integer overdueChargeCalculationType = loan.getOverdueChargeCalculationTypeOrDefault(penaltyCharge);
 
         final Long penaltyWaitPeriod = configurationDomainService.retrievePenaltyWaitPeriod();
         final boolean backdatePenalties = configurationDomainService.isBackdatePenaltiesEnabled();
@@ -1655,10 +1660,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 }
 
                 list.add(new OverdueLoanScheduleData(loan.getId(), penaltyCharge.getId(),
-                        DateUtils.DEFAULT_DATE_FORMATTER.format(installment.getDueDate()), penaltyCharge.getAmount(),
+                        DateUtils.DEFAULT_DATE_FORMATTER.format(installment.getDueDate()), overdueChargeAmount,
                         DateUtils.DEFAULT_DATE_FORMAT, Locale.ENGLISH.toLanguageTag(),
                         installment.getPrincipalOutstanding(loan.getCurrency()).getAmount(),
-                        installment.getInterestOutstanding(loan.getCurrency()).getAmount(), installment.getInstallmentNumber()));
+                        installment.getInterestOutstanding(loan.getCurrency()).getAmount(), installment.getInstallmentNumber(),
+                        overdueChargeCalculationType));
             }
         }
         return list;

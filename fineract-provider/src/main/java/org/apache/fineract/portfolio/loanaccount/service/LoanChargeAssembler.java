@@ -261,10 +261,16 @@ public class LoanChargeAssembler {
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount", locale);
 
         final ChargeTimeType chargeTime = null;
-        final ChargeCalculationType chargeCalculation = null;
+        final Integer chargeCalculationTypeValue = command.integerValueSansLocaleOfParameterNamed("chargeCalculationType");
+        // null means "not snapshotted": LoanChargeService#create then falls back to the charge definition's live value
+        final ChargeCalculationType chargeCalculation = chargeCalculationTypeValue == null ? null
+                : ChargeCalculationType.fromInt(chargeCalculationTypeValue);
+        final ChargeCalculationType effectiveChargeCalculation = chargeCalculation == null
+                ? ChargeCalculationType.fromInt(chargeDefinition.getChargeCalculation())
+                : chargeCalculation;
         final ChargePaymentMode chargePaymentMode = null;
         BigDecimal amountPercentageAppliedTo = BigDecimal.ZERO;
-        switch (ChargeCalculationType.fromInt(chargeDefinition.getChargeCalculation())) {
+        switch (effectiveChargeCalculation) {
             case PERCENT_OF_AMOUNT:
                 if (command.hasParameter("principal")) {
                     amountPercentageAppliedTo = command.bigDecimalValueOfParameterNamed("principal");
@@ -297,8 +303,7 @@ public class LoanChargeAssembler {
             if (percentage == null) {
                 percentage = chargeDefinition.getAmount();
             }
-            loanCharge = loanChargeService.calculatePerInstallmentChargeAmount(loan,
-                    ChargeCalculationType.fromInt(chargeDefinition.getChargeCalculation()), percentage);
+            loanCharge = loanChargeService.calculatePerInstallmentChargeAmount(loan, effectiveChargeCalculation, percentage);
         }
 
         // If charge type is specified due date and loan is multi disburment

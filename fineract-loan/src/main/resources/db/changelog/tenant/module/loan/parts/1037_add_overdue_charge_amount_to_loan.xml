@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fineract" id="1037-1">
+        <addColumn tableName="m_loan">
+            <column name="overdue_charge_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="overdue_charge_amount" type="DECIMAL(19, 6)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="overdue_charge_calculation_type" type="SMALLINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="1037-2">
+        <comment>Backfills the overdue-installment charge snapshot using the product's current charge. Historical
+            charge amounts and calculation types are not recoverable, so pre-existing loans are pinned to today's
+            values rather than to the values at their creation date. All loan statuses are backfilled: a loan that is
+            not yet active today may still be approved or disbursed later, and one that is closed today may be
+            reopened, so an unpopulated snapshot would otherwise silently fall back to the live charge.
+            When a product has more than one overdue-installment charge, the one with the lowest id is picked,
+            consistent with LoanProduct#getOverdueInstallmentCharge().</comment>
+        <sql>
+            UPDATE m_loan SET
+                overdue_charge_id = (
+                    SELECT mc.id FROM m_product_loan_charge plc
+                    JOIN m_charge mc ON mc.id = plc.charge_id
+                    -- charge_time_enum = 9 is ChargeTimeType.OVERDUE_INSTALLMENT, charge_applies_to_enum = 1 is loan charges
+                    WHERE plc.product_loan_id = m_loan.product_id AND mc.charge_time_enum = 9 AND mc.charge_applies_to_enum = 1
+                    ORDER BY mc.id LIMIT 1),
+                overdue_charge_amount = (
+                    SELECT mc.amount FROM m_product_loan_charge plc
+                    JOIN m_charge mc ON mc.id = plc.charge_id
+                    WHERE plc.product_loan_id = m_loan.product_id AND mc.charge_time_enum = 9 AND mc.charge_applies_to_enum = 1
+                    ORDER BY mc.id LIMIT 1),
+                overdue_charge_calculation_type = (
+                    SELECT mc.charge_calculation_enum FROM m_product_loan_charge plc
+                    JOIN m_charge mc ON mc.id = plc.charge_id
+                    WHERE plc.product_loan_id = m_loan.product_id AND mc.charge_time_enum = 9 AND mc.charge_applies_to_enum = 1
+                    ORDER BY mc.id LIMIT 1)
+            WHERE EXISTS (
+                SELECT 1 FROM m_product_loan_charge plc JOIN m_charge mc ON mc.id = plc.charge_id
+                WHERE plc.product_loan_id = m_loan.product_id AND mc.charge_time_enum = 9 AND mc.charge_applies_to_enum = 1)
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
