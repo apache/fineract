@@ -97,6 +97,8 @@ public final class GlobalConfigurationConstants {
     public static final String DISALLOW_BACKDATED_TRANSACTIONS = "disallow-backdated-transactions";
     public static final String WCL_CHARGE_ACCRUAL_TIME = "wcl-charge-accrual-time";
     public static final String PL_CHARGE_ACCRUAL_TIME = "pl-charge-accrual-time";
+    public static final String PAYOFF_SCHEDULE_PREVIEW_MAX_PAYOFF_PERIODS = "payoff-schedule-preview-max-payoff-periods";
+    public static final String PAYOFF_SCHEDULE_PREVIEW_MAX_TERM_PERIODS = "payoff-schedule-preview-max-term-periods";
 
     private GlobalConfigurationConstants() {}
 }

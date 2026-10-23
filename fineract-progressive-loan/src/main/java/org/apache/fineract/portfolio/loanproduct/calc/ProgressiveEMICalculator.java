@@ -2006,13 +2006,16 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     private Optional<RepaymentPeriod> getPeriodWithUnrecognizedInterest(RepaymentPeriod lastUnpaidRepaymentPeriod,
             ProgressiveLoanInterestScheduleModel scheduleModelCopy) {
-        for (RepaymentPeriod period : scheduleModelCopy.repaymentPeriods().reversed()) {
+        // Scanned forward for the last match: the interest of a period builds on the previous one, so evaluating the
+        // not yet calculated copy from its end would recurse once per period and overflow the stack on long schedules.
+        Optional<RepaymentPeriod> periodWithUnrecognizedInterest = Optional.empty();
+        for (RepaymentPeriod period : scheduleModelCopy.repaymentPeriods()) {
             if (MathUtil.isGreaterThanZero(period.getUnrecognizedInterest())
                     && period.getDueDate().isAfter(lastUnpaidRepaymentPeriod.getDueDate())) {
-                return Optional.of(period);
+                periodWithUnrecognizedInterest = Optional.of(period);
             }
         }
-        return Optional.empty();
+        return periodWithUnrecognizedInterest;
     }
 
     private BigDecimal calculateRateFactorPlus1NForEmi(final List<RepaymentPeriod> periods,

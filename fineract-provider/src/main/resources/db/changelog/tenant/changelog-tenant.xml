@@ -286,4 +286,6 @@
     <include file="parts/0265_trial_balance_summary_report_filter_retained_earning_by_product_type.xml" relativeToChangelogFile="true" />
     <include file="parts/0266_trial_balance_summary_report_for_working_capital_loans.xml" relativeToChangelogFile="true" />
     <include file="parts/0267_add_retained_earning_wc_report_global_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0268_add_payoff_schedule_preview_max_payoff_periods_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0269_add_payoff_schedule_preview_max_term_periods_configuration.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

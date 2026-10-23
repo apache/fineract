@@ -645,4 +645,14 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(GlobalConfigurationConstants.OFFICE_ID);
         return property.getValue();
     }
+
+    @Override
+    public Long retrievePayoffSchedulePreviewMaxPayoffPeriods() {
+        return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.PAYOFF_SCHEDULE_PREVIEW_MAX_PAYOFF_PERIODS).getValue();
+    }
+
+    @Override
+    public Long retrievePayoffSchedulePreviewMaxTermPeriods() {
+        return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.PAYOFF_SCHEDULE_PREVIEW_MAX_TERM_PERIODS).getValue();
+    }
 }
