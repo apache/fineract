@@ -96,9 +96,11 @@ import org.apache.fineract.client.models.GetLoansLoanIdLoanTransactionRelation;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdSubStatus;
 import org.apache.fineract.client.models.GetLoansLoanIdTimeline;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.IsCatchUpRunningDTO;
 import org.apache.fineract.client.models.LoanAmortizationAllocationResponse;
@@ -178,6 +180,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeOffUn
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanDisbursalTransactionEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionAccrualActivityPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionContractTerminationPostBusinessEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionLoanWithdrawalPostBusinessEvent;
 import org.apache.fineract.test.messaging.store.EventStore;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
@@ -200,6 +203,9 @@ public class LoanStepDef extends AbstractStepDef {
     private static final DateTimeFormatter FORMATTER_EVENTS = DateTimeFormatter.ofPattern(DATE_FORMAT_EVENTS);
     private static final String TRANSACTION_DATE_FORMAT = "dd MMMM yyyy";
     private static final String CONTRACT_TERMINATION_COMMAND = "contractTermination";
+    private static final String LOAN_WITHDRAWAL_COMMAND = "loanWithdrawal";
+    private static final String UNDO_CONTRACT_TERMINATION_COMMAND = "undoContractTermination";
+    private static final String UNDO_LOAN_WITHDRAWAL_COMMAND = "undoLoanWithdrawal";
 
     private final BusinessDateHelper businessDateHelper;
     private final FineractFeignClient fineractClient;
@@ -5487,12 +5493,156 @@ public class LoanStepDef extends AbstractStepDef {
         final PostLoansLoanIdRequest request = loanRequestFactory.defaultContractTerminationUndoRequest();
 
         final PostLoansLoanIdResponse response = ok(
-                () -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", "undoContractTermination")));
+                () -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", UNDO_CONTRACT_TERMINATION_COMMAND)));
         testContext().set(TestContextKey.LOAN_UNDO_CONTRACT_TERMINATION_RESPONSE, response);
         assert targetTransaction != null;
         eventCheckHelper.checkTransactionWithLoanTransactionAdjustmentBizEvent(targetTransaction);
         eventCheckHelper.loanUndoContractTerminationEventCheck(targetTransaction);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
+    @Then("Admin fails to terminate loan contract on {string} because loan withdrawal is already applied")
+    public void loanContractTerminationOnWithdrawnLoanFailure(final String transactionDate) {
+        assertLoanContractTerminationRejected(transactionDate, ErrorMessageHelper.contractTerminationOnWithdrawnLoanFailure());
+    }
+
+    @Then("Admin fails to undo loan contract termination because the loan is not contract terminated")
+    public void undoLoanContractTerminationNotAppliedFailure() {
+        final long loanId = getLoanId();
+        final PostLoansLoanIdRequest request = loanRequestFactory.defaultContractTerminationUndoRequest();
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", UNDO_CONTRACT_TERMINATION_COMMAND)));
+        assertCallRejected(exception, 403, ErrorMessageHelper.undoContractTerminationNotAppliedFailure(loanId));
+    }
+
+    @And("Admin successfully applies loan withdrawal")
+    public void makeLoanWithdrawal() {
+        applyLoanWithdrawalAndAssertEvent(loanRequestFactory.defaultLoanWithdrawalRequest());
+    }
+
+    @And("Admin successfully applies loan withdrawal on {string}")
+    public void makeLoanWithdrawalOnDate(final String transactionDate) {
+        applyLoanWithdrawalAndAssertEvent(loanRequestFactory.defaultLoanWithdrawalRequest().transactionDate(transactionDate))
+                .extractingData(LoanTransactionDataV1::getDate).isEqualTo(FORMATTER_EVENTS.format(FORMATTER.parse(transactionDate)));
+    }
+
+    @Then("Admin fails to apply loan withdrawal on {string} because the date is before the last transaction date")
+    public void loanWithdrawalBeforeLastTransactionDateFailure(final String transactionDate) {
+        assertLoanWithdrawalRejected(transactionDate, ErrorMessageHelper.loanWithdrawalBeforeLastTransactionDateFailure());
+    }
+
+    @Then("Admin fails to apply loan withdrawal on {string} because the date is before the submitted on date of a charge")
+    public void loanWithdrawalBeforeChargeSubmittedOnDateFailure(final String transactionDate) {
+        assertLoanWithdrawalRejected(transactionDate, ErrorMessageHelper.loanWithdrawalBeforeChargeSubmittedOnDateFailure());
+    }
+
+    @Then("Admin fails to apply loan withdrawal on {string} because the date is not before the maturity date")
+    public void loanWithdrawalNotBeforeMaturityDateFailure(final String transactionDate) {
+        assertLoanWithdrawalRejected(transactionDate, ErrorMessageHelper.loanWithdrawalNotBeforeMaturityDateFailure());
+    }
+
+    @Then("Admin fails to apply loan withdrawal on {string} because loan withdrawal is already applied")
+    public void loanWithdrawalAlreadyAppliedFailure(final String transactionDate) {
+        assertLoanWithdrawalRejected(transactionDate, ErrorMessageHelper.loanWithdrawalAlreadyAppliedFailure());
+    }
+
+    @Then("Admin fails to apply loan withdrawal on {string} because the loan contract is already terminated")
+    public void loanWithdrawalOnTerminatedLoanFailure(final String transactionDate) {
+        assertLoanWithdrawalRejected(transactionDate, ErrorMessageHelper.loanWithdrawalOnTerminatedLoanFailure());
+    }
+
+    @And("Admin successfully undoes loan withdrawal")
+    public void undoLoanWithdrawal() {
+        final long loanId = getLoanId();
+        final GetLoansLoanIdTransactions loanWithdrawal = activeLoanWithdrawalTransaction(loanId);
+
+        final PostLoansLoanIdRequest request = loanRequestFactory.defaultLoanWithdrawalUndoRequest();
+        final PostLoansLoanIdResponse response = ok(
+                () -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", UNDO_LOAN_WITHDRAWAL_COMMAND)));
+        testContext().set(TestContextKey.LOAN_UNDO_LOAN_WITHDRAWAL_RESPONSE, response);
+        assertThat(response.getResourceId()).as("Undone loan withdrawal transaction id").isEqualTo(loanWithdrawal.getId());
+
+        eventCheckHelper.checkTransactionWithLoanTransactionAdjustmentBizEvent(loanWithdrawal);
+        eventCheckHelper.loanUndoLoanWithdrawalEventCheck(loanWithdrawal);
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
+    @Then("Admin fails to undo loan withdrawal because the loan has no loan withdrawal applied")
+    public void undoLoanWithdrawalNotAppliedFailure() {
+        assertUndoLoanWithdrawalRejected(ErrorMessageHelper.undoLoanWithdrawalNotAppliedFailure(getLoanId()));
+    }
+
+    @Then("Admin fails to undo loan withdrawal because a user transaction was made after it")
+    public void undoLoanWithdrawalNotLastTransactionFailure() {
+        assertUndoLoanWithdrawalRejected(ErrorMessageHelper.undoLoanWithdrawalNotLastTransactionFailure(getLoanId()));
+    }
+
+    @Then("Loan has sub status {string}")
+    public void loanHasSubStatus(final String subStatusExpected) {
+        final long loanId = getLoanId();
+        final GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId, Map.of()));
+        assertThat(loanDetails.getSubStatus()).as("Loan %s sub status", loanId).isNotNull().extracting(GetLoansLoanIdSubStatus::getValue)
+                .isEqualTo(subStatusExpected);
+    }
+
+    @Then("Loan has no sub status")
+    public void loanHasNoSubStatus() {
+        final long loanId = getLoanId();
+        final GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId, Map.of()));
+        assertThat(loanDetails.getSubStatus()).as("Loan %s sub status", loanId).isNull();
+    }
+
+    @Then("Loan withdrawal preview on {string} has {double} amount, {double} principal and {double} interest")
+    public void loanWithdrawalPreviewCheck(final String transactionDate, final double amountExpected, final double principalExpected,
+            final double interestExpected) {
+        final long loanId = getLoanId();
+        final GetLoansLoanIdTransactionsTemplateResponse preview = ok(
+                () -> fineractClient.loanTransactions().retrieveTemplateLoanTransaction(loanId, Map.<String, Object>of("command",
+                        LOAN_WITHDRAWAL_COMMAND, "transactionDate", transactionDate, "dateFormat", DATE_FORMAT, "locale", DEFAULT_LOCALE)));
+        assertThat(preview.getAmount()).as("Loan withdrawal preview amount on %s", transactionDate).isEqualTo(amountExpected);
+        assertThat(preview.getPrincipalPortion()).as("Loan withdrawal preview principal on %s", transactionDate)
+                .isEqualTo(principalExpected);
+        assertThat(preview.getInterestPortion()).as("Loan withdrawal preview interest on %s", transactionDate).isEqualTo(interestExpected);
+    }
+
+    private EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> applyLoanWithdrawalAndAssertEvent(
+            final PostLoansLoanIdRequest request) {
+        final long loanId = getLoanId();
+        final PostLoansLoanIdResponse response = ok(
+                () -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", LOAN_WITHDRAWAL_COMMAND)));
+        testContext().set(TestContextKey.LOAN_WITHDRAWAL_RESPONSE, response);
+        final Long transactionId = response.getResourceId();
+        // the two early-termination kinds share one code path, so the event must carry the withdrawal flag only
+        return eventAssertion.assertEvent(LoanTransactionLoanWithdrawalPostBusinessEvent.class, transactionId)
+                .extractingData(LoanTransactionDataV1::getLoanId).isEqualTo(loanId) //
+                .extractingData(LoanTransactionDataV1::getId).isEqualTo(transactionId) //
+                .extractingData(data -> data.getType().getLoanWithdrawal()).isEqualTo(true) //
+                .extractingData(data -> data.getType().getContractTermination()).isEqualTo(false);
+    }
+
+    private void assertLoanWithdrawalRejected(final String transactionDate, final String errorMessageExpected) {
+        final long loanId = getLoanId();
+        final PostLoansLoanIdRequest request = loanRequestFactory.defaultLoanWithdrawalRequest().transactionDate(transactionDate);
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", LOAN_WITHDRAWAL_COMMAND)));
+        assertCallRejected(exception, 400, errorMessageExpected);
+    }
+
+    private void assertUndoLoanWithdrawalRejected(final String errorMessageExpected) {
+        final long loanId = getLoanId();
+        final PostLoansLoanIdRequest request = loanRequestFactory.defaultLoanWithdrawalUndoRequest();
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", UNDO_LOAN_WITHDRAWAL_COMMAND)));
+        assertCallRejected(exception, 403, errorMessageExpected);
+    }
+
+    private GetLoansLoanIdTransactions activeLoanWithdrawalTransaction(final long loanId) {
+        final GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
+        return Objects.requireNonNull(loanDetails.getTransactions(), "transactions").stream()
+                .filter(t -> t.getType() != null && Boolean.TRUE.equals(t.getType().getLoanWithdrawal()))
+                .filter(t -> !Boolean.TRUE.equals(t.getManuallyReversed())).findFirst()
+                .orElseThrow(() -> new AssertionError("Loan " + loanId + " has no active loan withdrawal transaction"));
     }
 
     @Then("Capitalized income adjustment with payment type {string} on {string} is forbidden with amount {string} due to future date")

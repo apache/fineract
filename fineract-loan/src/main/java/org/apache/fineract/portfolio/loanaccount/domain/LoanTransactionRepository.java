@@ -458,6 +458,7 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.REAGE,
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION,
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CONTRACT_TERMINATION,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.LOAN_WITHDRAWAL,
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT
                 )
             ORDER BY lt.dateOf, lt.createdDate, lt.id

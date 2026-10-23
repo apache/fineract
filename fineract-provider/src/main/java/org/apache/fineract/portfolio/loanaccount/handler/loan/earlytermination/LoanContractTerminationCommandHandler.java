@@ -16,25 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.handler.loan.contracttermination;
+package org.apache.fineract.portfolio.loanaccount.handler.loan.earlytermination;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.loanaccount.service.contracttermination.LoanContractTerminationServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.earlytermination.LoanEarlyTerminationServiceImpl;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@CommandType(entity = "LOAN", action = "CONTRACT_TERMINATION_UNDO")
-public class UndoLoanContractTerminationCommandHandler implements NewCommandSourceHandler {
+@CommandType(entity = "LOAN", action = "CONTRACT_TERMINATION")
+public class LoanContractTerminationCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanContractTerminationServiceImpl loanContractTerminationService;
+    private final LoanEarlyTerminationServiceImpl loanEarlyTerminationService;
 
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return loanContractTerminationService.undoContractTermination(command);
+    public CommandProcessingResult processCommand(JsonCommand command) {
+        return loanEarlyTerminationService.applyContractTermination(command);
     }
 }

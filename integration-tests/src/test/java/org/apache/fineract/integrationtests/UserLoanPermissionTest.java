@@ -21,11 +21,14 @@ package org.apache.fineract.integrationtests;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.function.Function;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetPermissionsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -162,6 +165,23 @@ public class UserLoanPermissionTest extends FeignLoanTestBase {
             performPermissionTestForRequest("CONTRACT_TERMINATION_UNDO_LOAN",
                     fineractClient -> fineractClient.loans().handleCommandsLoan(loanId,
                             new PostLoansLoanIdRequest().note("Contract Termination Undo Test Note"), "undoContractTermination"));
+        });
+    }
+
+    @Test
+    public void testLoanWithdrawalAndUndoLoanWithdrawalPermission() {
+
+        final List<String> permissionCodes = ok(() -> fineractClient().permissions().retrieveAllPermissions()).stream()
+                .map(GetPermissionsResponse::getCode).toList();
+        assertTrue(permissionCodes.contains("LOAN_WITHDRAWAL_LOAN"), "LOAN_WITHDRAWAL_LOAN permission is registered");
+        assertTrue(permissionCodes.contains("LOAN_WITHDRAWAL_UNDO_LOAN"), "LOAN_WITHDRAWAL_UNDO_LOAN permission is registered");
+
+        runAt("2 January 2025", () -> {
+            performPermissionTestForRequest("LOAN_WITHDRAWAL_LOAN", fineractClient -> fineractClient.loans().handleCommandsLoan(loanId,
+                    new PostLoansLoanIdRequest().note(""), "loanWithdrawal"));
+
+            performPermissionTestForRequest("LOAN_WITHDRAWAL_UNDO_LOAN", fineractClient -> fineractClient.loans().handleCommandsLoan(loanId,
+                    new PostLoansLoanIdRequest().note("Loan Withdrawal Undo Test Note"), "undoLoanWithdrawal"));
         });
     }
 

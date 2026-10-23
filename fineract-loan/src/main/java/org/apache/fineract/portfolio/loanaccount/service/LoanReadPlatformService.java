@@ -121,6 +121,8 @@ public interface LoanReadPlatformService {
 
     LoanTransactionData retrieveLoanPrePaymentTemplate(LoanTransactionType repaymentTransactionType, Long loanId, LocalDate onDate);
 
+    LoanTransactionData retrieveLoanEarlyTerminationTemplate(Long loanId, LocalDate onDate);
+
     boolean isGuaranteeRequired(Long loanId);
 
     LocalDate retrieveMinimumDateOfRepaymentTransaction(Long loanId);

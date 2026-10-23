@@ -36,6 +36,7 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalculationDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
@@ -155,7 +156,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         OutstandingAmountsDTO outstandingAmounts;
 
         if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargeOffOnDate(onDate)
-                && !loan.isContractTerminatedOnDate(onDate)) {
+                && !loan.isTerminatedEarlyOnDate(onDate)) {
             final MathContext mc = MoneyHelper.getMathContext();
 
             final InterestMethod interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod();
@@ -171,6 +172,42 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
             outstandingAmounts = getTotalOutstandingOnLoan(loan);
         }
         return outstandingAmounts;
+    }
+
+    @Override
+    public OutstandingAmountsDTO fetchEarlyTerminationDetail(final ScheduleGeneratorDTO scheduleGeneratorDTO, final LocalDate onDate,
+            final Loan loan) {
+        final LoanRepaymentScheduleInstallment currentInstallment = loan.getRelatedRepaymentScheduleInstallment(onDate);
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() || currentInstallment == null
+                || !DateUtils.isBefore(onDate, loan.getMaturityDate())) {
+            return fetchPrepaymentDetail(scheduleGeneratorDTO, onDate, loan);
+        }
+        // Without interest recalculation the termination prorates the interest of the installment it lands in
+        // and drops the interest of the installments after it.
+        final MonetaryCurrency currency = loan.getCurrency();
+        Money principal = Money.zero(currency);
+        Money interest = Money.zero(currency);
+        Money feeCharges = Money.zero(currency);
+        Money penaltyCharges = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
+            principal = principal.plus(installment.getPrincipalOutstanding(currency));
+            feeCharges = feeCharges.plus(installment.getFeeChargesOutstanding(currency));
+            penaltyCharges = penaltyCharges.plus(installment.getPenaltyChargesOutstanding(currency));
+            if (installment.equals(currentInstallment) && !installment.isAdditional()) {
+                interest = interest.plus(installment.getInterestOutstandingProratedTill(onDate, currency));
+            } else if (installment.equals(currentInstallment) || !DateUtils.isBefore(onDate, installment.getDueDate())) {
+                interest = interest.plus(installment.getInterestOutstanding(currency));
+            } else {
+                // The termination drops the installment fees of the installments after it
+                for (final LoanInstallmentCharge installmentCharge : installment.getInstallmentCharges()) {
+                    if (!installmentCharge.getLoanCharge().isPenaltyCharge()) {
+                        feeCharges = feeCharges.minus(installmentCharge.getAmountOutstanding(currency));
+                    }
+                }
+            }
+        }
+        return new OutstandingAmountsDTO(currency).principal(principal).interest(interest).feeCharges(feeCharges)
+                .penaltyCharges(penaltyCharges);
     }
 
     private OutstandingAmountsDTO getTotalOutstandingOnLoan(Loan loan) {
@@ -216,7 +253,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         progressiveContext.getAlreadyProcessedTransactions().addAll(loanTransactionService.retrieveListOfTransactionsForReprocessing(loan));
         progressiveContext.setChargedOff(loan.isChargedOff());
         progressiveContext.setWrittenOff(loan.isClosedWrittenOff());
-        progressiveContext.setContractTerminated(loan.isContractTermination());
+        progressiveContext.setContractTerminated(loan.isTerminatedEarly());
         ChangedTransactionDetail result = advancedProcessor.processLatestTransaction(loanTransaction, progressiveContext);
         if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
             modelRepository.writeInterestScheduleModel(loan, model);

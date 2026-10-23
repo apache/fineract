@@ -70,6 +70,7 @@ public final class LoanTransactionTypeExternalEvents {
                 LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent.class);
         register(LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT, LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent.class);
         register(LoanTransactionType.CONTRACT_TERMINATION, LoanTransactionContractTerminationPostBusinessEvent.class);
+        register(LoanTransactionType.LOAN_WITHDRAWAL, LoanTransactionLoanWithdrawalPostBusinessEvent.class);
         register(LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT,
                 LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent.class);
         register(LoanTransactionType.BUY_DOWN_FEE, LoanBuyDownFeeTransactionCreatedBusinessEvent.class);

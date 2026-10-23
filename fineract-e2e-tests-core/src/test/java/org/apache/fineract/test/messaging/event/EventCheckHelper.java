@@ -115,6 +115,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransaction
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionMerchantIssuedRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionPayoutRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanUndoContractTerminationBusinessEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanUndoLoanWithdrawalBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.charge.WorkingCapitalLoanAddChargeEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.journalentry.WorkingCapitalLoanJournalEntryCreatedEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.AbstractWorkingCapitalLoanEvent;
@@ -357,6 +358,11 @@ public class EventCheckHelper {
     public void loanUndoContractTerminationEventCheck(final GetLoansLoanIdTransactions transaction) {
         waitForTransactionCommit();
         eventAssertion.assertEventRaised(LoanUndoContractTerminationBusinessEvent.class, transaction.getId());
+    }
+
+    public void loanUndoLoanWithdrawalEventCheck(final GetLoansLoanIdTransactions transaction) {
+        waitForTransactionCommit();
+        eventAssertion.assertEventRaised(LoanUndoLoanWithdrawalBusinessEvent.class, transaction.getId());
     }
 
     private static void assertAmountEquals(final String description, final BigDecimal actual, final BigDecimal expected) {
