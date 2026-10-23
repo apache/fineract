@@ -56,6 +56,7 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
             this.globalConfigurationDataValidator.validateForUpdate(command);
 
             final GlobalConfigurationProperty configItemForUpdate = this.repository.findOneWithNotFoundDetection(configId);
+            this.globalConfigurationDataValidator.validateStringValueForUpdate(configItemForUpdate.getName(), command);
 
             final Map<String, Object> changes = globalConfigurationPropertyUpdateService.update(configItemForUpdate, command);
 
