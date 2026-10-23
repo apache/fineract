@@ -647,3 +647,62 @@ Feature: WorkingCapitalLoanAccount - Part3
       | breachGraceDays | 5               | Failed data validation due to: cannot.enable.breach.grace.days.without.breach. |
       | breachStartType | DISBURSEMENT    | Failed data validation due to: cannot.enable.breach.start.type.without.breach. |
       | breachStartType | LOAN_CREATION   | Failed data validation due to: cannot.enable.breach.start.type.without.breach. |
+
+  @TestRailId:C115407
+  Scenario: Create Working Capital Loan account with an explicit account number - the account number is stored as provided
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with a unique explicit account number and the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               |          |
+    Then Working capital loan creation was successful
+    And Working capital loan account has the stored explicit account number
+
+  @TestRailId:C115408
+  Scenario: Create Working Capital Loan account without account number - the generated account number is the loan id left-padded to 9 digits
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               |          |
+    Then Working capital loan creation was successful
+    And Working capital loan account number is the loan id left-padded to 9 digits
+
+  @TestRailId:C115409
+  Scenario: Create Working Capital Loan account with a blank account number - the account number is generated
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with "" account number and the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               |          |
+    Then Working capital loan creation was successful
+    And Working capital loan account number is the loan id left-padded to 9 digits
+
+  @TestRailId:C115410
+  Scenario: Create Working Capital Loan account with an already used account number is rejected
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with a unique explicit account number and the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               |          |
+    Then Working capital loan creation was successful
+    Then Creating a working capital loan with the stored explicit account number is rejected because the account number is already used with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               |          |
+
+  @TestRailId:C115411
+  Scenario: Modify Working Capital Loan account number - an already used number is rejected and a new unique number is applied
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with a unique explicit account number and the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               |          |
+    Then Working capital loan creation was successful
+    When Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               |          |
+    Then Working capital loan creation was successful
+    And Working capital loan account number is the loan id left-padded to 9 digits
+    Then Updating the working capital loan account number to the stored explicit account number is rejected because the account number is already used
+    When Admin updates the working capital loan account number to a new unique value
+    Then Working capital loan account has the stored explicit account number

@@ -34,6 +34,7 @@ public final class ErrorMessageHelper {
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy");
     public static final String DATA_INTEGRITY_ISSUE_ENTITY_LINKED_CODE = "error.msg.data.integrity.issue.entity.linked";
     public static final String WC_LOAN_DUPLICATE_ACCOUNT_NO_CODE = "error.msg.wc.loan.duplicate.accountNo";
+    public static final String WC_LOAN_ACCOUNT_NO_ALREADY_USED_MESSAGE = "Loan with account number is already registered.";
 
     private ErrorMessageHelper() {}
 
