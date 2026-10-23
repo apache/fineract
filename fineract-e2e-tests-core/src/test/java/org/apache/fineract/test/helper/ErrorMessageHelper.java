@@ -125,8 +125,8 @@ public final class ErrorMessageHelper {
         return "Loan can't be disbursed, disburse amount is exceeding approved principal.";
     }
 
-    public static String loanSubmitDateInFutureFailureMsg() {
-        return "The date on which a loan is submitted cannot be in the future.";
+    public static String disburseWithChargeOutOfRangeFailure() {
+        return "This charge with specified due date cannot be added as the it is not in schedule range.";
     }
 
     public static String loanApproveDateInFutureFailureMsg() {
