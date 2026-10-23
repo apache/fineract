@@ -96,7 +96,6 @@ public final class GlobalConfigurationConstants {
     public static final String DISALLOW_BACKDATED_TRANSACTIONS = "disallow-backdated-transactions";
     public static final String WCL_CHARGE_ACCRUAL_TIME = "wcl-charge-accrual-time";
     public static final String PL_CHARGE_ACCRUAL_TIME = "pl-charge-accrual-time";
-    public static final String CHARGE_ACCRUAL_TIME_REAL_TIME = "real-time";
 
     private GlobalConfigurationConstants() {}
 }

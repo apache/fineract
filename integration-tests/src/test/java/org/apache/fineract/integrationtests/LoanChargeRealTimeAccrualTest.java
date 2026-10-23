@@ -31,6 +31,7 @@ import static org.apache.fineract.integrationtests.client.feign.modules.LoanChar
 import static org.apache.fineract.integrationtests.client.feign.modules.LoanChargeAccrualTestValidators.verifySinglePenaltyCharge;
 import static org.apache.fineract.integrationtests.client.feign.modules.LoanChargeAccrualTestValidators.verifyWaiveChargesTransaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -38,6 +39,7 @@ import java.util.function.Consumer;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -52,8 +54,8 @@ import org.junit.jupiter.api.Test;
 
 public class LoanChargeRealTimeAccrualTest extends FeignLoanTestBase {
 
-    private static final String REAL_TIME = "Real-Time";
-    private static final String EOD = "EOD";
+    private static final String REAL_TIME = "real-time";
+    private static final String EOD = "eod";
     private static final String DISBURSEMENT_DATE = "01 January 2024";
     private static final String PRE_ACTIVATION_DISBURSEMENT_DATE = "05 January 2024";
     private static final double PRINCIPAL = 1000.0;
@@ -73,10 +75,13 @@ public class LoanChargeRealTimeAccrualTest extends FeignLoanTestBase {
 
     @Test
     public void configurationIsSeededWithEodDefaultAndAcceptsRealTime() {
-        verifyConfiguration(globalConfigurationHelper.getGlobalConfigurationByName(GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME),
-                GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME, EOD, true, false);
+        GlobalConfigurationPropertyData seeded = globalConfigurationHelper
+                .getGlobalConfigurationByName(GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME);
+        // seeded as EOD and not rewritten on upgrade; an update through the API stores the canonical eod
+        verifyConfiguration(seeded, GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME, seeded.getStringValue(), true, false);
+        assertTrue(EOD.equalsIgnoreCase(seeded.getStringValue()), "seeded stringValue " + seeded.getStringValue());
 
-        globalConfigurationHelper.updateConfigurationStringValue(GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME, REAL_TIME);
+        globalConfigurationHelper.updateConfigurationStringValue(GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME, "Real-Time");
 
         verifyConfiguration(globalConfigurationHelper.getGlobalConfigurationByName(GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME),
                 GlobalConfigurationConstants.PL_CHARGE_ACCRUAL_TIME, REAL_TIME, true, false);

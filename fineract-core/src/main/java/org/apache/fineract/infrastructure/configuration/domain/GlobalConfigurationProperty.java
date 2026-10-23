@@ -63,8 +63,8 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long>
     }
 
     public GlobalConfigurationPropertyData toData() {
-        return new GlobalConfigurationPropertyData().setName(getName()).setEnabled(isEnabled()).setValue(getValue())
-                .setDateValue(getDateValue()).setStringValue(getStringValue()).setId(this.getId()).setDescription(this.description)
-                .setTrapDoor(this.isTrapDoor);
+        return GlobalConfigurationAllowedValues.withAllowedValues(new GlobalConfigurationPropertyData().setName(getName())
+                .setEnabled(isEnabled()).setValue(getValue()).setDateValue(getDateValue()).setStringValue(getStringValue())
+                .setId(this.getId()).setDescription(this.description).setTrapDoor(this.isTrapDoor));
     }
 }

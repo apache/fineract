@@ -21,15 +21,20 @@ package org.apache.fineract.test.stepdef.common;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FeignException;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.CurrencyUpdateRequest;
+import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.ErrorResponse;
 import org.apache.fineract.test.helper.GlobalConfigurationHelper;
@@ -150,5 +155,57 @@ public class GlobalConfigurationStepDef {
             assertThat(errorDetails.getSingleError().getDeveloperMessageWithoutPrefix())
                     .isEqualTo(ErrorMessageHelper.setCurrencyIncorrectValueFailure(currency));
         }
+    }
+
+    @When("Update global config {string} with stringValue {string} fails with error:")
+    public void updateGlobalConfigInvalidStringValue(String configKey, String configValue, DataTable table) {
+        PutGlobalConfigurationsRequest updateRequest = new PutGlobalConfigurationsRequest().stringValue(configValue);
+        List<Map<String, String>> expectedErrors = table.asMaps();
+        try {
+            fineractClient.globalConfiguration().updateConfigurationByName(configKey, updateRequest, Map.of());
+            throw new AssertionError("Expected FeignException but request succeeded");
+        } catch (FeignException e) {
+            final ErrorResponse errorDetails = ErrorResponse.fromFeignException(e);
+            assertThat(errorDetails.getErrors())
+                    .as("Expected " + expectedErrors.size() + " validation error(s) but got: " + errorDetails.getErrors())
+                    .hasSize(expectedErrors.size());
+            for (int i = 0; i < expectedErrors.size(); i++) {
+                Map<String, String> expected = expectedErrors.get(i);
+                ErrorResponse.ErrorDetail actual = errorDetails.getErrors().get(i);
+                assertThat(errorDetails.getHttpStatusCode())
+                        .as("Expected HTTP " + expected.get("httpCode") + " for invalid stringValue on config " + configKey)
+                        .isEqualTo(Integer.valueOf(expected.get("httpCode")));
+                assertThat(actual.getDeveloperMessageWithoutPrefix()).as(
+                        "Expected errorMessage " + expected.get("errorMessage") + " but got: " + actual.getDeveloperMessageWithoutPrefix())
+                        .isEqualTo(expected.get("errorMessage"));
+            }
+        }
+    }
+
+    @Then("Global config {string} has stringValue {string}")
+    public void globalConfigHasStringValue(String configKey, String expectedValue) {
+        GlobalConfigurationPropertyData configuration = globalConfigurationHelper.getGlobalConfiguration(configKey);
+        assertThat(configuration.getStringValue()).as("Expected stringValue of config " + configKey + " to be " + expectedValue)
+                .isEqualTo(expectedValue);
+    }
+
+    @Then("Global config {string} has allowedValues {string} and multipleValuesAllowed {string}")
+    public void globalConfigHasAllowedValues(String configKey, String allowedValuesCsv, String multipleAllowed) {
+        GlobalConfigurationPropertyData configuration = globalConfigurationHelper.getGlobalConfiguration(configKey);
+        List<String> expectedAllowedValues = Arrays.stream(allowedValuesCsv.split(",")).map(String::trim).toList();
+        assertThat(configuration.getAllowedValues()).as("Expected allowedValues of config " + configKey + " to be " + expectedAllowedValues)
+                .isEqualTo(expectedAllowedValues);
+        assertThat(configuration.getMultipleValuesAllowed())
+                .as("Expected multipleValuesAllowed of config " + configKey + " to be " + multipleAllowed)
+                .isEqualTo(Boolean.valueOf(multipleAllowed));
+    }
+
+    @Then("Global config {string} has no allowedValues")
+    public void globalConfigHasNoAllowedValues(String configKey) {
+        GlobalConfigurationPropertyData configuration = globalConfigurationHelper.getGlobalConfiguration(configKey);
+        assertThat(configuration.getAllowedValues()).as("Expected allowedValues of unrestricted config " + configKey + " to be absent")
+                .isNull();
+        assertThat(configuration.getMultipleValuesAllowed())
+                .as("Expected multipleValuesAllowed of unrestricted config " + configKey + " to be absent").isNull();
     }
 }

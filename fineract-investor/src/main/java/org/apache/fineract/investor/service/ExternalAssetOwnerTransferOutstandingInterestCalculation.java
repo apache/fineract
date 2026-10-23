@@ -54,10 +54,9 @@ public class ExternalAssetOwnerTransferOutstandingInterestCalculation {
             return BigDecimal.ZERO;
         }
 
-        String outstandingInterestCalculationStrategy = configurationDomainService.getAssetOwnerTransferOustandingInterestStrategy();
-        return switch (outstandingInterestCalculationStrategy) {
-            case "TOTAL_OUTSTANDING_INTEREST" -> loan.getSummary().getTotalInterestOutstanding();
-            case "PAYABLE_OUTSTANDING_INTEREST" -> {
+        return switch (configurationDomainService.getAssetOwnerTransferOustandingInterestStrategy()) {
+            case TOTAL_OUTSTANDING_INTEREST -> loan.getSummary().getTotalInterestOutstanding();
+            case PAYABLE_OUTSTANDING_INTEREST -> {
                 LoanAccountData data = loanReadPlatformService.retrieveOne(loan.getId());
                 data = loanReadPlatformService.fetchRepaymentScheduleData(data);
                 Money duePayableAmount = loan
@@ -69,8 +68,6 @@ public class ExternalAssetOwnerTransferOutstandingInterestCalculation {
 
                 yield MathUtil.add(duePayableAmount.getAmount(), notDuePayableAmount);
             }
-            default -> throw new UnsupportedOperationException(
-                    "Unknown outstanding interest calculation: " + outstandingInterestCalculationStrategy);
         };
     }
 }

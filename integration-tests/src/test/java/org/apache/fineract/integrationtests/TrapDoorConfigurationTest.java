@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationDataValidator;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
 import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied;
 import org.apache.fineract.infrastructure.configuration.service.GlobalConfigurationPropertyUpdateService;
@@ -37,6 +38,9 @@ public class TrapDoorConfigurationTest {
 
     @Mock
     private JdbcTemplate jdbcTemplate;
+
+    @Mock
+    private GlobalConfigurationDataValidator globalConfigurationDataValidator;
 
     @InjectMocks
     private GlobalConfigurationPropertyUpdateService propertyUpdateService;

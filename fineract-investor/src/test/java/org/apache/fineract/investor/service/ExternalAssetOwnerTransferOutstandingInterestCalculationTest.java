@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.domain.OutstandingInterestStrategyConfig;
 import org.apache.fineract.organisation.monetary.mapper.CurrencyMapper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -95,7 +96,7 @@ class ExternalAssetOwnerTransferOutstandingInterestCalculationTest {
     void testCalculateOutstandingInterest_WhenLoanDisbursedWithTotalStrategy_ShouldCalculate() {
         // Given - ACTIVE loan with TOTAL_OUTSTANDING_INTEREST strategy
         when(loan.isOpen()).thenReturn(true);
-        when(configurationDomainService.getAssetOwnerTransferOustandingInterestStrategy()).thenReturn("TOTAL_OUTSTANDING_INTEREST");
+        when(configurationDomainService.getAssetOwnerTransferOustandingInterestStrategy()).thenReturn(OutstandingInterestStrategyConfig.TOTAL_OUTSTANDING_INTEREST);
         when(loan.getSummary()).thenReturn(loanSummary);
         BigDecimal expectedInterest = new BigDecimal("150.50");
         when(loanSummary.getTotalInterestOutstanding()).thenReturn(expectedInterest);
