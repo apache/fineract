@@ -48,29 +48,30 @@ public final class WorkingCapitalDependentSettingsValidator {
         }
     }
 
+    /**
+     * Effective delinquency bucket for grace/start-type checks: present {@code delinquencyBucketId} (including
+     * {@code null}) overrides; omitted keeps {@code currentBucketId}. The caller passes the bucket the omitted value
+     * inherits: the product's on product update and loan create, the loan's own on loan update (a cleared loan bucket
+     * must not fall back to the product's).
+     */
     public static Long resolveEffectiveDelinquencyBucketId(final FromJsonHelper fromApiJsonHelper, final JsonElement element,
-            final Long productBucketId, final Long loanBucketId) {
+            final Long currentBucketId) {
         if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, element)) {
             return fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, element);
         }
-        if (loanBucketId != null) {
-            return loanBucketId;
-        }
-        return productBucketId;
+        return currentBucketId;
     }
 
     /**
      * Effective breach for grace/start-type checks. Matches {@code WorkingCapitalLoanAssemblerImpl}: present
-     * {@code breachId} (including {@code null}) overrides; omitted inherits loan then product.
+     * {@code breachId} (including {@code null}) overrides; omitted keeps {@code currentBreachId} (see
+     * {@link #resolveEffectiveDelinquencyBucketId}).
      */
     public static Long resolveEffectiveBreachId(final FromJsonHelper fromApiJsonHelper, final JsonElement element,
-            final Long productBreachId, final Long loanBreachId) {
+            final Long currentBreachId) {
         if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachIdParamName, element)) {
             return fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.breachIdParamName, element);
         }
-        if (loanBreachId != null) {
-            return loanBreachId;
-        }
-        return productBreachId;
+        return currentBreachId;
     }
 }

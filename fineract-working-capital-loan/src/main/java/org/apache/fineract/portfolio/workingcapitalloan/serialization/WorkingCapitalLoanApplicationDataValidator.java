@@ -944,27 +944,33 @@ public class WorkingCapitalLoanApplicationDataValidator {
         }
     }
 
+    // On create the loan inherits the product's bucket; on update only the loan's own bucket counts (it is copied at
+    // creation and never re-inherited, so a cleared loan bucket must not fall back to the product's).
     private Long resolveEffectiveDelinquencyBucketId(final JsonElement element, final WorkingCapitalLoanProduct product,
             final WorkingCapitalLoan existingLoan) {
-        final WorkingCapitalLoanProductRelatedDetails loanDetails = existingLoan != null ? existingLoan.getLoanProductRelatedDetails()
-                : null;
-        final Long loanBucketId = loanDetails != null && loanDetails.getDelinquencyBucket() != null
-                ? loanDetails.getDelinquencyBucket().getId()
-                : null;
-        final Long productBucketId = product != null && product.getDelinquencyBucket() != null ? product.getDelinquencyBucket().getId()
-                : null;
+        final Long currentBucketId;
+        if (existingLoan != null) {
+            final WorkingCapitalLoanProductRelatedDetails loanDetails = existingLoan.getLoanProductRelatedDetails();
+            currentBucketId = loanDetails != null && loanDetails.getDelinquencyBucket() != null ? loanDetails.getDelinquencyBucket().getId()
+                    : null;
+        } else {
+            currentBucketId = product != null && product.getDelinquencyBucket() != null ? product.getDelinquencyBucket().getId() : null;
+        }
         return WorkingCapitalDependentSettingsValidator.resolveEffectiveDelinquencyBucketId(this.fromApiJsonHelper, element,
-                productBucketId, loanBucketId);
+                currentBucketId);
     }
 
+    // Same inheritance rule as resolveEffectiveDelinquencyBucketId.
     private Long resolveEffectiveBreachId(final JsonElement element, final WorkingCapitalLoanProduct product,
             final WorkingCapitalLoan existingLoan) {
-        final WorkingCapitalLoanProductRelatedDetails loanDetails = existingLoan != null ? existingLoan.getLoanProductRelatedDetails()
-                : null;
-        final Long loanBreachId = loanDetails != null && loanDetails.getBreach() != null ? loanDetails.getBreach().getId() : null;
-        final Long productBreachId = product != null && product.getBreach() != null ? product.getBreach().getId() : null;
-        return WorkingCapitalDependentSettingsValidator.resolveEffectiveBreachId(this.fromApiJsonHelper, element, productBreachId,
-                loanBreachId);
+        final Long currentBreachId;
+        if (existingLoan != null) {
+            final WorkingCapitalLoanProductRelatedDetails loanDetails = existingLoan.getLoanProductRelatedDetails();
+            currentBreachId = loanDetails != null && loanDetails.getBreach() != null ? loanDetails.getBreach().getId() : null;
+        } else {
+            currentBreachId = product != null && product.getBreach() != null ? product.getBreach().getId() : null;
+        }
+        return WorkingCapitalDependentSettingsValidator.resolveEffectiveBreachId(this.fromApiJsonHelper, element, currentBreachId);
     }
 
     private void validateOverridables(final JsonElement element, final DataValidatorBuilder baseDataValidator,

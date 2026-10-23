@@ -388,7 +388,7 @@ public class WorkingCapitalLoanProductDataValidator {
         final Long productBucketId = product != null && product.getDelinquencyBucket() != null ? product.getDelinquencyBucket().getId()
                 : null;
         final Long effectiveDelinquencyBucketId = WorkingCapitalDependentSettingsValidator
-                .resolveEffectiveDelinquencyBucketId(this.fromApiJsonHelper, element, productBucketId, null);
+                .resolveEffectiveDelinquencyBucketId(this.fromApiJsonHelper, element, productBucketId);
         if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, element)) {
             baseDataValidator
                     .reset().parameter(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName).value(this.fromApiJsonHelper
@@ -404,7 +404,7 @@ public class WorkingCapitalLoanProductDataValidator {
         final Long productBreachId = product != null && product.getBreach() != null ? product.getBreach().getId() : null;
         // Explicit breachId null clears; omitted keeps existing product breach.
         final Long effectiveBreachId = WorkingCapitalDependentSettingsValidator.resolveEffectiveBreachId(this.fromApiJsonHelper, element,
-                productBreachId, null);
+                productBreachId);
         validateNearBreachField(effectiveBreachId, element, baseDataValidator);
 
         final Locale locale = fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
