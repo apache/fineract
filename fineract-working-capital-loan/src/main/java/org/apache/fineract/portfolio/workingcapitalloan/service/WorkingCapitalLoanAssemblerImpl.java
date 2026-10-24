@@ -121,7 +121,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
         final WorkingCapitalLoanProductRelatedDetails loanProductRelatedDetails = buildLoanProductRelatedDetails(element, product);
 
         final WorkingCapitalLoan loan = new WorkingCapitalLoan();
-        loan.setAccountNumber(accountNo != null ? accountNo : "");
+        loan.setAccountNumber(StringUtils.defaultIfBlank(accountNo, null));
         loan.setExternalId(externalId);
         loan.setClient(client);
         loan.setFund(fund);
@@ -334,7 +334,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
         }
         if (command.isChangeInStringParameterNamed(WorkingCapitalLoanConstants.accountNoParameterName, loan.getAccountNumber())) {
             final String accountNo = fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.accountNoParameterName, element);
-            loan.setAccountNumber(accountNo != null ? accountNo : "");
+            loan.setAccountNumber(accountNo);
             changes.put(WorkingCapitalLoanConstants.accountNoParameterName, loan.getAccountNumber());
         }
         if (command.parameterExists(WorkingCapitalLoanConstants.externalIdParameterName)) {
@@ -542,19 +542,16 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
     }
 
     /**
-     * If accountNo was provided in the request, leave it. Otherwise generate via the same infrastructure as Loan
+     * If the loan already has an account number, leave it. Otherwise generate via the same infrastructure as Loan
      * (AccountNumberFormat + AccountNumberGeneratorService for EntityAccountType.WORKING_CAPITAL_LOAN).
      */
     @Override
-    public void accountNumberGeneration(final JsonCommand command, final WorkingCapitalLoan loan) {
-        final JsonElement element = command.parsedJson();
-        final String accountNo = fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.accountNoParameterName, element);
-        if (!StringUtils.isBlank(accountNo)) {
+    public void accountNumberGeneration(final WorkingCapitalLoan loan) {
+        if (loan.getAccountNumber() != null) {
             return;
         }
         final AccountNumberFormat format = accountNumberFormatLookup.findByAccountType(EntityAccountType.WORKING_CAPITAL_LOAN);
-        final String generated = accountNumberGeneratorService.generate(EntityAccountType.WORKING_CAPITAL_LOAN, loan, format);
-        loan.setAccountNumber(generated);
+        loan.setAccountNumber(accountNumberGeneratorService.generate(EntityAccountType.WORKING_CAPITAL_LOAN, loan, format));
     }
 
     private WorkingCapitalBreach findBreachById(final Long breachId) {

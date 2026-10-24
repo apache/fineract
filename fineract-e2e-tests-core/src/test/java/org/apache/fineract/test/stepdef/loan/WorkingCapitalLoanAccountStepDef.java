@@ -52,6 +52,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.services.JournalEntriesApi;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -148,6 +149,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     private static final String WC_STORED_DISBURSEMENT_TRANSACTION_EXTERNAL_ID = "wcStoredDisbursementTransactionExternalId";
     private static final long NON_EXISTENT_TRANSACTION_ID = 999_999_999L;
     private static final String NON_EXISTENT_TRANSACTION_EXTERNAL_ID = "NonExistentTransactionExtId";
+    private static final int ACCOUNT_NUMBER_COLLISION_ATTEMPTS = 3;
 
     private final FineractFeignClient fineractClient;
     private final WorkingCapitalLoanProductResolver workingCapitalLoanProductResolver;
@@ -281,6 +283,103 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("Creating a working capital loan with the prepared datatable entries is rejected because the CREATE datatable entry is required with the following data:")
     public void createWorkingCapitalLoanWithPreparedDatatableEntriesRejectedForMandatoryCheck(final DataTable table) {
         submitLoanExpectingMandatoryDatatableEntryError(buildCreateLoanRequestWithPreparedDatatables(table));
+    }
+
+    @Then("Creating a working capital loan whose generated account number is already used is rejected with the following data:")
+    public void createWorkingCapitalLoanWithUsedGeneratedAccountNumberRejected(final DataTable table) {
+        final int accountNumberLength = retrieveLoanDetails(getCreatedLoanId()).getAccountNo().length();
+        assertNextGeneratedAccountNumberCollision(table, accountNumberLength, getCreatedLoanId(), ACCOUNT_NUMBER_COLLISION_ATTEMPTS);
+    }
+
+    private void assertNextGeneratedAccountNumberCollision(final DataTable table, final int accountNumberLength, final long lastLoanId,
+            final int attemptsLeft) {
+        final String nextGeneratedAccountNumber = StringUtils.leftPad(String.valueOf(lastLoanId + 2), accountNumberLength, '0');
+        createWorkingCapitalLoanAccount(buildCreateLoanRequest(table).accountNo(nextGeneratedAccountNumber));
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequest(table);
+        final Long createdLoanId;
+        try {
+            createdLoanId = ok(() -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest)).getLoanId();
+        } catch (final CallFailedRuntimeException exception) {
+            assertHttpStatus(exception, 403);
+            assertThat(exception.getUserMessageGlobalisationCode()).isEqualTo(ErrorMessageHelper.WC_LOAN_DUPLICATE_ACCOUNT_NO_CODE);
+            assertThat(exception.getResponseBody()).as("Duplicate account number error names the generated account number")
+                    .contains(nextGeneratedAccountNumber);
+            return;
+        }
+        trackLoanIdIfEnabled(createdLoanId);
+        if (attemptsLeft > 1) {
+            assertNextGeneratedAccountNumberCollision(table, accountNumberLength, createdLoanId, attemptsLeft - 1);
+        } else {
+            Assertions.fail(
+                    "Loan %d did not get account number %s and no attempts are left".formatted(createdLoanId, nextGeneratedAccountNumber));
+        }
+    }
+
+    @When("Admin creates a working capital loan with a unique explicit account number and the following data:")
+    public void createWorkingCapitalLoanWithUniqueExplicitAccountNumber(final DataTable table) {
+        final String accountNo = uniqueExplicitAccountNumber();
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_EXPLICIT_ACCOUNT_NUMBER, accountNo);
+        createWorkingCapitalLoanAccount(buildCreateLoanRequest(table).accountNo(accountNo));
+    }
+
+    @When("Admin creates a working capital loan with {string} account number and the following data:")
+    public void createWorkingCapitalLoanWithAccountNumber(final String accountNo, final DataTable table) {
+        createWorkingCapitalLoanAccount(buildCreateLoanRequest(table).accountNo(accountNo));
+    }
+
+    @Then("Working capital loan account has the stored explicit account number")
+    public void verifyWorkingCapitalLoanHasStoredExplicitAccountNumber() {
+        final String expectedAccountNo = testContext().get(TestContextKey.WORKING_CAPITAL_LOAN_EXPLICIT_ACCOUNT_NUMBER);
+        assertThat(retrieveLoanDetails(getCreatedLoanId()).getAccountNo()).as("accountNo").isEqualTo(expectedAccountNo);
+    }
+
+    @Then("Working capital loan account number is the loan id left-padded to {int} digits")
+    public void verifyWorkingCapitalLoanHasGeneratedAccountNumber(final int length) {
+        final Long loanId = getCreatedLoanId();
+        assertThat(retrieveLoanDetails(loanId).getAccountNo()).as("accountNo")
+                .isEqualTo(StringUtils.leftPad(String.valueOf(loanId), length, '0'));
+    }
+
+    @Then("Creating a working capital loan with the stored explicit account number is rejected because the account number is already used with the following data:")
+    public void createWorkingCapitalLoanWithStoredExplicitAccountNumberRejected(final DataTable table) {
+        final String accountNo = testContext().get(TestContextKey.WORKING_CAPITAL_LOAN_EXPLICIT_ACCOUNT_NUMBER);
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequest(table).accountNo(accountNo);
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        assertAccountNumberAlreadyUsed(exception);
+    }
+
+    @When("Admin updates the working capital loan account number to a new unique value")
+    public void modifyWorkingCapitalLoanAccountNumberToUniqueValue() {
+        final String accountNo = uniqueExplicitAccountNumber();
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .accountNo(accountNo);
+        ok(() -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_EXPLICIT_ACCOUNT_NUMBER, accountNo);
+    }
+
+    @Then("Updating the working capital loan account number to the stored explicit account number is rejected because the account number is already used")
+    public void modifyWorkingCapitalLoanAccountNumberToStoredExplicitRejected() {
+        final String accountNo = testContext().get(TestContextKey.WORKING_CAPITAL_LOAN_EXPLICIT_ACCOUNT_NUMBER);
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest()
+                .accountNo(accountNo);
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(getCreatedLoanId(), modifyRequest, ""));
+        assertAccountNumberAlreadyUsed(exception);
+    }
+
+    /**
+     * Validator pre-check (GeneralPlatformDomainRuleException): the specific code sits in errors[0], the top level is
+     * generic.
+     */
+    private void assertAccountNumberAlreadyUsed(final CallFailedRuntimeException exception) {
+        assertHttpStatus(exception, 403);
+        assertThat(exception.getDeveloperMessage()).as("developerMessage")
+                .contains(ErrorMessageHelper.WC_LOAN_ACCOUNT_NO_ALREADY_USED_MESSAGE);
+    }
+
+    private static String uniqueExplicitAccountNumber() {
+        return "WCL-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
     }
 
     /** Datatable entries collected from a Gherkin table; one row per entry, header = datatable column names. */
