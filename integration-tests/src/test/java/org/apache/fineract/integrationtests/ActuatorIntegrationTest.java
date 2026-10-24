@@ -16,37 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.fineract.client.models.ApiResponse;
+import org.apache.fineract.integrationtests.client.feign.helpers.ServerPagesApi;
+import org.apache.fineract.integrationtests.client.feign.helpers.ServerPagesApi.ActuatorInfo;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Test;
 
-@Slf4j
 public class ActuatorIntegrationTest {
 
-    private static final String INFO_URL = "/fineract-provider/actuator/info";
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-    }
+    private final ServerPagesApi serverPagesApi = FineractFeignClientHelper.createProviderRootFeignClient().create(ServerPagesApi.class);
 
     @Test
     public void testActuatorGitBuildInfo() {
-        log.info(INFO_URL);
-        Response response = RestAssured.given().headers("Content-Type", ContentType.JSON, "Accept", ContentType.JSON).when().get(INFO_URL)
-                .then().contentType(ContentType.JSON).extract().response();
+        ApiResponse<ActuatorInfo> response = serverPagesApi.actuatorInfoWithHttpInfo();
 
-        Map<String, String> gitBuildInfo = response.jsonPath().getMap("git");
+        assertEquals(200, response.getStatusCode());
+        assertEquals("application/json", String.join(",", response.getHeaders().get("Content-Type")));
+        Map<String, Object> gitBuildInfo = response.getData().git();
 
         assertTrue(gitBuildInfo.containsKey("branch"));
         assertTrue(gitBuildInfo.containsKey("remote"));

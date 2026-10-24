@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.integrationtests.common.system;
 
-import static org.apache.fineract.integrationtests.common.Utils.initializeDefaultRequestSpecification;
-import static org.apache.fineract.integrationtests.common.Utils.initializeDefaultResponseSpecification;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import io.restassured.specification.RequestSpecification;
@@ -52,10 +49,6 @@ public class DatatableHelper {
     private final ResponseSpecification responseSpec;
 
     private static final String DATATABLE_URL = "/fineract-provider/api/v1/datatables";
-
-    public DatatableHelper() {
-        this(initializeDefaultRequestSpecification(), initializeDefaultResponseSpecification());
-    }
 
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,

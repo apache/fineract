@@ -18,13 +18,11 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import feign.Response;
+import org.apache.fineract.integrationtests.client.feign.helpers.ServerPagesApi;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -32,20 +30,14 @@ import org.junit.jupiter.api.Test;
  */
 public class SwaggeruiTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
+    private final ServerPagesApi serverPagesApi = FineractFeignClientHelper.createProviderRootFeignClient().create(ServerPagesApi.class);
 
     @Test
     public void testSwaggeruiAccess() {
-        Utils.performServerGet(requestSpec, responseSpec, "/fineract-provider/swagger-ui/index.html", null);
-        Utils.performServerGet(requestSpec, responseSpec, "/fineract-provider/fineract.json", null);
+        try (Response swaggerUi = serverPagesApi.swaggerUi(); Response openApiSpec = serverPagesApi.openApiSpec()) {
+            assertEquals(200, swaggerUi.status());
+            assertEquals(200, openApiSpec.status());
+        }
     }
 
 }
