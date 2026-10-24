@@ -115,6 +115,7 @@ If no tax group is configured on the charge, or the computed tax is zero, the ex
 * Tax is computed at the time the charge amount is set or updated; a later change to the charge amount triggers recomputation.
 * The effective date for tax rate lookup defaults to the charge submission date, falling back to the current business date when the submission date is absent.
 * If the tax group yields a zero total tax (e.g., all components have 0% rate on the effective date), no tax entries are created and the charge behaves as untaxed.
+* When a transaction pays part of a charge, the tax lines are rounded to the currency's scale with the configured rounding mode, cumulatively per charge: each line is the rounded tax on everything paid so far less what earlier payments (or, for accruals, earlier accruals) posted. The lines of each tax component of a fully paid charge sum to that component's tax rounded as a whole. "Earlier" follows the order in which transactions were posted (their ids), not their dates, so for a backdated repayment the posting order decides which line takes the rounding; the total is the same. If an earlier transaction changes after later lines were posted (a reversal or a reprocessing), the total can differ by one minor unit per change and component. The tax stored on the loan charge keeps six decimals.
 
 == Usage Example
 
