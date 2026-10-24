@@ -109,6 +109,7 @@ import org.apache.fineract.client.feign.services.NotificationApi;
 import org.apache.fineract.client.feign.services.OfficesApi;
 import org.apache.fineract.client.feign.services.PasswordPreferencesApi;
 import org.apache.fineract.client.feign.services.PaymentTypeApi;
+import org.apache.fineract.client.feign.services.PayoffSchedulePreviewApi;
 import org.apache.fineract.client.feign.services.PeriodicAccrualAccountingApi;
 import org.apache.fineract.client.feign.services.PermissionsApi;
 import org.apache.fineract.client.feign.services.PovertyLineApi;
@@ -572,6 +573,10 @@ public final class FineractFeignClient {
 
     public PaymentTypeApi paymentType() {
         return create(PaymentTypeApi.class);
+    }
+
+    public PayoffSchedulePreviewApi payoffSchedulePreview() {
+        return create(PayoffSchedulePreviewApi.class);
     }
 
     public PeriodicAccrualAccountingApi periodicAccrualAccounting() {

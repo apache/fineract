@@ -819,6 +819,37 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         };
     }
 
+    @Override
+    public CommandProcessingResult adjustByDeltaTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
+        final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        final WorkingCapitalLoanTransaction transaction = transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
+                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
+                        "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
+
+        return switch (transaction.getTypeOf()) {
+            case REPAYMENT, GOODWILL_CREDIT, CHARGE_ADJUSTMENT, PAYOUT_REFUND ->
+                adjustByDeltaRepaymentLikeTransaction(loan, transaction, command);
+            default -> throw new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.adjust.not.supported",
+                    "Adjust is not supported for transaction type " + transaction.getTypeOf(),
+                    WorkingCapitalLoanConstants.transactionTypeParamName);
+        };
+    }
+
+    private CommandProcessingResult adjustByDeltaRepaymentLikeTransaction(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transactionToAdjust, final JsonCommand command) {
+        this.validator.validateAdjustByDelta(command, loan, transactionToAdjust);
+
+        final BigDecimal deltaAmount = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
+                command.parsedJson(), new HashSet<>());
+        final BigDecimal newTransactionAmount = transactionToAdjust.getTransactionAmount().add(deltaAmount);
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put("adjustByDelta", true);
+
+        return adjustRepaymentLikeTransaction(loan, transactionToAdjust, newTransactionAmount, command, changes,
+                LoanTransactionRelationTypeEnum.ADJUSTMENT);
+    }
+
     /**
      * Deliberately not routed through the generic {@code undoTransaction}: none of its branches gives the waived bucket
      * back, and the two that rewind a balance reach {@code updateBalanceAfterUndo}, which throws on any type outside
@@ -907,12 +938,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(WorkingCapitalLoanConstants.transactionAmountParamName, newTransactionAmount);
 
-        return adjustRepaymentLikeTransaction(loan, transactionToAdjust, newTransactionAmount, command, changes);
+        return adjustRepaymentLikeTransaction(loan, transactionToAdjust, newTransactionAmount, command, changes,
+                LoanTransactionRelationTypeEnum.REPLAYED);
     }
 
     private CommandProcessingResult adjustRepaymentLikeTransaction(WorkingCapitalLoan loan,
             WorkingCapitalLoanTransaction transactionToAdjust, BigDecimal newTransactionAmount, JsonCommand command,
-            final Map<String, Object> changes) {
+            final Map<String, Object> changes, final LoanTransactionRelationTypeEnum replacementRelationType) {
         final LocalDate businessLocalDate = DateUtils.getBusinessLocalDate();
         final LoanStatus oldStatus = loan.getStatus();
         final LocalDate originalTransactionDate = transactionToAdjust.getTransactionDate();
@@ -930,25 +962,38 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             changes.put("reversed", true);
             changes.put("reversalExternalId", reversalExternalId);
             changes.put("reversedOnDate", businessLocalDate);
+            propagateChangesByTransaction(transactionToAdjust, changes);
         }
 
         transactionToAdjust.setReversed(true);
         transactionToAdjust.setReversalExternalId(reversalExternalId);
         transactionToAdjust.setReversedOnDate(businessLocalDate);
 
-        processUndoTransaction(loan, transactionToAdjust);
+        final boolean replacementReplayed = processUndoTransaction(loan, transactionToAdjust, newTransaction);
 
         if (!isReverseOnly) {
 
-            saveNewTransactionRelation(newTransaction, transactionToAdjust, LoanTransactionRelationTypeEnum.REPLAYED);
+            saveNewTransactionRelation(newTransaction, transactionToAdjust, replacementRelationType);
 
-            transactionProcessor.processRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
-                    newTransactionAmount);
+            if (replacementReplayed) {
+                transactionProcessor.completeReplayedRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
+                        newTransactionAmount);
+                // The undo capped the last breach period before the replacement's repayment was applied to it, so the
+                // cap and the past due amount are re-derived on the final balance.
+                breachScheduleService.recalculatePastDueAmount(loan);
+                breachScheduleService.rederiveNearBreachIfReopened(loan, oldStatus);
+            } else {
+                transactionProcessor.processRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
+                        newTransactionAmount);
+            }
 
             final WorkingCapitalLoanTransaction overpaidOnDateProbe = DateUtils.isBefore(originalTransactionDate,
                     newTransaction.getTransactionDate()) ? transactionToAdjust : newTransaction;
             transactionProcessor.recalculateOverpaidOnDate(loan, overpaidOnDateProbe);
             transactionProcessor.recalculateSettlementDates(loan);
+
+            propagateChangesByTransaction(newTransaction, changes);
+            changes.put("adjustedTransaction", propagateChangesByTransaction(transactionToAdjust, new HashMap<>()));
         }
 
         changes.put("status", loan.getLoanStatus());
@@ -984,6 +1029,21 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 .build();
     }
 
+    private Map<String, Object> propagateChangesByTransaction(final WorkingCapitalLoanTransaction transaction,
+            final Map<String, Object> changes) {
+        if (transaction.getExternalId() != null) {
+            changes.put(WorkingCapitalLoanConstants.externalIdParameterName, transaction.getExternalId().getValue());
+        }
+        if (transaction.getReversalExternalId() != null) {
+            changes.put(WorkingCapitalLoanConstants.reversalExternalIdParamName, transaction.getReversalExternalId().getValue());
+        }
+        changes.put(WorkingCapitalLoanConstants.transactionAmountParamName, transaction.getTransactionAmount());
+        if (transaction.getClassification() != null) {
+            changes.put(WorkingCapitalLoanConstants.classificationIdParamName, transaction.getClassification().getId());
+        }
+        return changes;
+    }
+
     private WorkingCapitalLoanTransaction resolveNewTransaction(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction transactionToAdjust,
             BigDecimal adjustedTransactionAmount, JsonCommand command, Map<String, Object> changes) {
         final ExternalId txnExternalId = this.externalIdFactory.createFromCommand(command,
@@ -991,7 +1051,6 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         PaymentDetail paymentDetail = createAndPersistPaymentDetailFromCommand(command, changes);
         final PaymentDetail newPaymentDetail = paymentDetail == null ? transactionToAdjust.getPaymentDetail() : paymentDetail;
-        changes.put("paymentDetail", paymentDetail);
 
         final Long classificationId = command.longValueOfParameterNamed(WorkingCapitalLoanConstants.classificationIdParamName);
         final CodeValue newClassification = classificationId != null
@@ -1421,10 +1480,29 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     }
 
     private void processUndoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
+        processUndoTransaction(loan, transaction, null);
+    }
+
+    /**
+     * Unwinds a reversed transaction. When an adjustment passes the replacement and the undo replays the history
+     * anyway, the replacement is booked before that replay so the replay allocates it at its own date: the loan is
+     * replayed once with both changes rather than once per change, so later transactions are restated (and reported)
+     * once.
+     *
+     * @return whether the replay already allocated the replacement, leaving its non-replay effects and the evaluation
+     *         of the final state - status, near breach, settlement dates - to the caller
+     */
+    private boolean processUndoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
+            final WorkingCapitalLoanTransaction replacement) {
         final LoanStatus statusBeforeUndo = loan.getLoanStatus();
         final boolean lastMonetaryAction = transactionProcessor.isLastMonetaryAction(transaction);
         final boolean isAccountingOnly = isAccountingOnlyTransaction(transaction);
         final boolean isChargesInvolved = isChargesInvolved(loan);
+        // Decided before the replacement is persisted, so the branch selection below is the plain undo's.
+        final boolean replacementReplayed = replacement != null && !isAccountingOnly && !(lastMonetaryAction && !isChargesInvolved);
+        if (replacementReplayed) {
+            transactionRepository.saveAndFlush(replacement);
+        }
         if (lastMonetaryAction && !isChargesInvolved) {
             // Nothing monetary sorts after this transaction and no charge competes for it, so its whole effect is its
             // own stored allocation: unwinding that in place is exact and no replay is needed.
@@ -1439,8 +1517,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         } else if (!isChargesInvolved) {
             // Later transactions depend on the order, but the loan is charge-free, so only the suffix on/after the
             // reversed transaction's date can have shifted; the prefix is never read. The reversed transaction is still
-            // counted in the balance at this point, so it is passed in to be rewound (but not replayed).
-            transactionReprocessingService.reprocessChargeFreeSuffix(loan, transaction.getTransactionDate(), transaction);
+            // counted in the balance at this point, so it is passed in to be rewound (but not replayed). A replacement
+            // dated earlier than the reversed transaction moves the boundary back to its own date.
+            final LocalDate boundaryDate = replacementReplayed
+                    && DateUtils.isBefore(replacement.getTransactionDate(), transaction.getTransactionDate())
+                            ? replacement.getTransactionDate()
+                            : transaction.getTransactionDate();
+            transactionReprocessingService.reprocessChargeFreeSuffix(loan, boundaryDate, transaction);
         } else {
             // Charges reshuffle across the whole history: only a full reset+replay is correct.
             transactionReprocessingService.reprocessTransactions(loan);
@@ -1453,6 +1536,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         accountingProcessor.postReversalJournalEntries(loan, transaction);
 
+        if (replacementReplayed) {
+            // The balance already carries the replacement, so evaluating the status here would close or reopen the loan
+            // as of the business date instead of the replacement's own date. The caller evaluates status, near breach
+            // and settlement dates once, on the final state.
+            return true;
+        }
+
         stateMachine.determineAndTransition(loan, DateUtils.getBusinessLocalDate());
         if (!isAccountingOnly) {
             // The breach undo above ran while the loan was still closed, which the near breach evaluation skips.
@@ -1460,6 +1550,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
         transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
         transactionProcessor.recalculateSettlementDates(loan);
+        return false;
     }
 
     private boolean isChargesInvolved(WorkingCapitalLoan loan) {

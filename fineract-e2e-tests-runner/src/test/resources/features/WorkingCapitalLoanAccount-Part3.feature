@@ -257,7 +257,6 @@ Feature: WorkingCapitalLoanAccount - Part3
       | ASSET     | 112601       | Loans Receivable          | 9000.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
 
-
   @TestRailId:C106721
   Scenario: Discount fee reversal and journal entry is correct via undo disbursement after undone repayment - separate discount fee application
     When Admin sets the business date to "01 January 2026"
@@ -586,3 +585,65 @@ Feature: WorkingCapitalLoanAccount - Part3
     Then Creating a working capital loan with LP overridable disabled and with the following data will result an error:
       | LoanProduct                       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId   | repaymentEvery | repaymentFrequencyType |
       | WCLP_DISALLOW_ATTRIBUTES_OVERRIDE | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      | WC_DELINQUENCY_BUCKET | 1              | MONTHS                 |
+
+  @TestRailId:C115392
+  Scenario Outline: Verify WC Loan creation fails when delinquency grace/start type set without delinquency bucket
+    When Admin sets the business date to "01 January 2027"
+    And Admin creates a client with random data
+    Then Creating a working capital loan with "<wcl_field_name>" "<wcl_field_value>" without delinquency bucket on "01 January 2027" will result with error "<wcl_error_message>"
+
+    Examples:
+      | wcl_field_name         | wcl_field_value | wcl_error_message                                                                               |
+      | delinquencyGraceDays   | 0               | Failed data validation due to: cannot.enable.delinquency.grace.days.without.delinquency.bucket. |
+      | delinquencyGraceDays   | 3               | Failed data validation due to: cannot.enable.delinquency.grace.days.without.delinquency.bucket. |
+      | delinquencyStartType   | DISBURSEMENT    | Failed data validation due to: cannot.enable.delinquency.start.type.without.delinquency.bucket. |
+      | delinquencyStartType   | LOAN_CREATION   | Failed data validation due to: cannot.enable.delinquency.start.type.without.delinquency.bucket. |
+
+  @TestRailId:C115393
+  Scenario Outline: Verify WC Loan creation fails when breach grace/start type set without breach
+    When Admin sets the business date to "01 January 2027"
+    And Admin creates a client with random data
+    Then Creating a working capital loan with "<wcl_field_name>" "<wcl_field_value>" without breach on "01 January 2027" will result with error "<wcl_error_message>"
+
+    Examples:
+      | wcl_field_name  | wcl_field_value | wcl_error_message                                                              |
+      | breachGraceDays | 0               | Failed data validation due to: cannot.enable.breach.grace.days.without.breach. |
+      | breachGraceDays | 5               | Failed data validation due to: cannot.enable.breach.grace.days.without.breach. |
+      | breachStartType | DISBURSEMENT    | Failed data validation due to: cannot.enable.breach.start.type.without.breach. |
+      | breachStartType | LOAN_CREATION   | Failed data validation due to: cannot.enable.breach.start.type.without.breach. |
+
+  @TestRailId:C115394
+  Scenario Outline: Verify WC Loan modify fails when delinquency grace/start type set without delinquency bucket
+    When Admin sets the business date to "01 January 2027"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product without delinquency bucket for loan test
+    And Admin creates a working capital loan with the grace days product and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2027 | 01 January 2027          | 100             | 100                | 1                 |          |
+    Then Working capital loan creation was successful
+    Then Modifying the working capital loan with "<wcl_field_name>" "<wcl_field_value>" will result with error "<wcl_error_message>"
+
+    Examples:
+      | wcl_field_name         | wcl_field_value | wcl_error_message                                                                               |
+      | delinquencyGraceDays   | 0               | Failed data validation due to: cannot.enable.delinquency.grace.days.without.delinquency.bucket. |
+      | delinquencyGraceDays   | 3               | Failed data validation due to: cannot.enable.delinquency.grace.days.without.delinquency.bucket. |
+      | delinquencyStartType   | DISBURSEMENT    | Failed data validation due to: cannot.enable.delinquency.start.type.without.delinquency.bucket. |
+      | delinquencyStartType   | LOAN_CREATION   | Failed data validation due to: cannot.enable.delinquency.start.type.without.delinquency.bucket. |
+
+  @TestRailId:C115395
+  Scenario Outline: Verify WC Loan modify fails when breach grace/start type set without breach
+    When Admin sets the business date to "01 January 2027"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product without breach for loan test
+    And Admin creates a working capital loan with the grace days product and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2027 | 01 January 2027          | 100             | 100                | 1                 |          |
+    Then Working capital loan creation was successful
+    Then Modifying the working capital loan with "<wcl_field_name>" "<wcl_field_value>" will result with error "<wcl_error_message>"
+
+    Examples:
+      | wcl_field_name  | wcl_field_value | wcl_error_message                                                              |
+      | breachGraceDays | 0               | Failed data validation due to: cannot.enable.breach.grace.days.without.breach. |
+      | breachGraceDays | 5               | Failed data validation due to: cannot.enable.breach.grace.days.without.breach. |
+      | breachStartType | DISBURSEMENT    | Failed data validation due to: cannot.enable.breach.start.type.without.breach. |
+      | breachStartType | LOAN_CREATION   | Failed data validation due to: cannot.enable.breach.start.type.without.breach. |

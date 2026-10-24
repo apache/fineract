@@ -19,12 +19,15 @@
 package org.apache.fineract.portfolio.delinquency.helper;
 
 import static java.time.Month.JANUARY;
+import static java.time.Month.NOVEMBER;
+import static java.time.Month.OCTOBER;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.junit.jupiter.api.Test;
@@ -79,4 +82,72 @@ class DelinquencyEffectivePauseHelperTest {
         assertEquals(effectivePeriods.get(2).getEndDate(), LocalDate.of(2023, 1, 20));
     }
 
+    @Test
+    public void testResumeDoesNotEndPauseCreatedAfterIt() {
+        List<LoanDelinquencyAction> delinquencyActions = List.of(
+                savedAction(1L, PAUSE, LocalDate.of(2023, OCTOBER, 16), LocalDate.of(2023, OCTOBER, 30)),
+                savedAction(2L, RESUME, LocalDate.of(2023, OCTOBER, 20), null),
+                savedAction(3L, PAUSE, LocalDate.of(2023, OCTOBER, 20), LocalDate.of(2023, OCTOBER, 25)));
+
+        List<LoanDelinquencyActionData> effectivePeriods = underTest.calculateEffectiveDelinquencyList(delinquencyActions);
+
+        assertEquals(2, effectivePeriods.size());
+        assertEquals(LocalDate.of(2023, OCTOBER, 16), effectivePeriods.get(0).getStartDate());
+        assertEquals(LocalDate.of(2023, OCTOBER, 20), effectivePeriods.get(0).getEndDate());
+        assertEquals(LocalDate.of(2023, OCTOBER, 20), effectivePeriods.get(1).getStartDate());
+        assertEquals(LocalDate.of(2023, OCTOBER, 25), effectivePeriods.get(1).getEndDate());
+        assertEquals(9L,
+                underTest.getPausedDaysWithinRange(effectivePeriods, LocalDate.of(2023, OCTOBER, 16), LocalDate.of(2023, OCTOBER, 31)));
+    }
+
+    @Test
+    public void testResumeEndsEveryPauseCreatedBeforeItThatContainsItsDate() {
+        List<LoanDelinquencyAction> delinquencyActions = List.of(
+                savedAction(1L, PAUSE, LocalDate.of(2023, OCTOBER, 25), LocalDate.of(2023, NOVEMBER, 5)),
+                savedAction(2L, PAUSE, LocalDate.of(2023, OCTOBER, 30), LocalDate.of(2023, NOVEMBER, 15)),
+                savedAction(3L, RESUME, LocalDate.of(2023, OCTOBER, 31), null));
+
+        List<LoanDelinquencyActionData> effectivePeriods = underTest.calculateEffectiveDelinquencyList(delinquencyActions);
+
+        assertEquals(2, effectivePeriods.size());
+        assertEquals(LocalDate.of(2023, OCTOBER, 25), effectivePeriods.get(0).getStartDate());
+        assertEquals(LocalDate.of(2023, OCTOBER, 31), effectivePeriods.get(0).getEndDate());
+        assertEquals(LocalDate.of(2023, OCTOBER, 30), effectivePeriods.get(1).getStartDate());
+        assertEquals(LocalDate.of(2023, OCTOBER, 31), effectivePeriods.get(1).getEndDate());
+    }
+
+    @Test
+    public void testResumeEndsPauseCreatedBeforeItStartingOnItsDate() {
+        List<LoanDelinquencyAction> delinquencyActions = List.of(
+                savedAction(1L, PAUSE, LocalDate.of(2023, OCTOBER, 25), LocalDate.of(2023, OCTOBER, 30)),
+                savedAction(2L, PAUSE, LocalDate.of(2023, OCTOBER, 30), LocalDate.of(2023, NOVEMBER, 15)),
+                savedAction(3L, RESUME, LocalDate.of(2023, OCTOBER, 30), null));
+
+        List<LoanDelinquencyActionData> effectivePeriods = underTest.calculateEffectiveDelinquencyList(delinquencyActions);
+
+        assertEquals(2, effectivePeriods.size());
+        assertEquals(LocalDate.of(2023, OCTOBER, 25), effectivePeriods.get(0).getStartDate());
+        assertEquals(LocalDate.of(2023, OCTOBER, 30), effectivePeriods.get(0).getEndDate());
+        assertEquals(LocalDate.of(2023, OCTOBER, 30), effectivePeriods.get(1).getStartDate());
+        assertEquals(LocalDate.of(2023, OCTOBER, 30), effectivePeriods.get(1).getEndDate());
+    }
+
+    @Test
+    public void testResumeEndsContainingPauseWhenCreationOrderIsUnknown() {
+        List<LoanDelinquencyAction> delinquencyActions = List.of(
+                new LoanDelinquencyAction(null, RESUME, LocalDate.of(2023, OCTOBER, 20), null),
+                new LoanDelinquencyAction(null, PAUSE, LocalDate.of(2023, OCTOBER, 16), LocalDate.of(2023, OCTOBER, 30)));
+
+        List<LoanDelinquencyActionData> effectivePeriods = underTest.calculateEffectiveDelinquencyList(delinquencyActions);
+
+        assertEquals(1, effectivePeriods.size());
+        assertEquals(LocalDate.of(2023, OCTOBER, 16), effectivePeriods.get(0).getStartDate());
+        assertEquals(LocalDate.of(2023, OCTOBER, 20), effectivePeriods.get(0).getEndDate());
+    }
+
+    private LoanDelinquencyAction savedAction(Long id, DelinquencyAction action, LocalDate startDate, LocalDate endDate) {
+        LoanDelinquencyAction loanDelinquencyAction = new LoanDelinquencyAction(null, action, startDate, endDate);
+        loanDelinquencyAction.setId(id);
+        return loanDelinquencyAction;
+    }
 }

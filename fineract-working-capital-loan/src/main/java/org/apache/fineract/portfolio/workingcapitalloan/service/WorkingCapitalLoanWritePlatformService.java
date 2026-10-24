@@ -47,6 +47,8 @@ public interface WorkingCapitalLoanWritePlatformService {
 
     CommandProcessingResult adjustTransaction(Long loanId, Long transactionId, JsonCommand command);
 
+    CommandProcessingResult adjustByDeltaTransaction(Long loanId, Long transactionId, JsonCommand command);
+
     CommandProcessingResult creditBalanceRefund(Long loanId, JsonCommand command);
 
     CommandProcessingResult makeGoodwillCredit(Long loanId, JsonCommand command);

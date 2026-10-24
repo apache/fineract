@@ -23,6 +23,7 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ADJUST;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ADJUSTMENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ADJUSTTRANSACTION;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ADJUST_BY_DELTA;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ALLOCATECASHIER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ALLOCATECASHTOCASHIER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_APPLYANNUALFEE;
@@ -89,6 +90,8 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_INTERESTPAYMENTWAIVER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_INTERMEDIARYSALE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_INVALIDATE;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_LOAN_WITHDRAWAL;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_LOAN_WITHDRAWAL_UNDO;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_MANUAL_INTEREST_REFUND_TRANSACTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_MERCHANTISSUEDREFUND;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_PAY;
@@ -890,6 +893,15 @@ public class CommandWrapperBuilder {
         this.entityId = transactionId;
         this.loanId = loanId;
         this.href = "/working-capital-loans/" + loanId + "/transactions/" + transactionId + "?command=undo";
+        return this;
+    }
+
+    public CommandWrapperBuilder adjustByDeltaWorkingCapitalLoanTransaction(final Long loanId, final Long transactionId) {
+        this.actionName = ACTION_ADJUST_BY_DELTA;
+        this.entityName = ENTITY_WORKINGCAPITALLOANTRANSACTION;
+        this.entityId = transactionId;
+        this.loanId = loanId;
+        this.href = "/working-capital-loans/" + loanId + "/transactions/" + transactionId + "?command=adjust-by-delta";
         return this;
     }
 
@@ -4096,6 +4108,24 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder undoContractTermination(final Long loanId) {
         this.actionName = ACTION_CONTRACT_TERMINATION_UNDO;
+        this.entityName = ENTITY_LOAN;
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder applyLoanWithdrawal(final Long loanId) {
+        this.actionName = ACTION_LOAN_WITHDRAWAL;
+        this.entityName = ENTITY_LOAN;
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder undoLoanWithdrawal(final Long loanId) {
+        this.actionName = ACTION_LOAN_WITHDRAWAL_UNDO;
         this.entityName = ENTITY_LOAN;
         this.entityId = loanId;
         this.loanId = loanId;

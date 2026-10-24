@@ -52,6 +52,7 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepository;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.loanaccount.domain.ExpectedDisbursementDateValidator;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
@@ -59,6 +60,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanApplicationDataValidator;
+import org.apache.fineract.portfolio.workingcapitalloanbreach.domain.WorkingCapitalBreach;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
@@ -457,12 +459,47 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
         assertUpdateCodes(json, WCL + "breachGraceDays.override.not.allowed.by.product");
     }
 
+    /** A loan whose bucket and breach were cleared must not inherit the product's ones for the parent check. */
+    @Test
+    void graceDaysAndStartTypesUpdate_WhenLoanHasNoParentButProductHas_ShouldRejectEachOne() {
+        stubOverrides(true, true);
+        final WorkingCapitalLoan loan = submittedLoanWithStrategy(WorkingCapitalPaymentAmountCalculationStrategy.TPV);
+        final JsonObject json = withGraceDaysAndStartTypes(updateJsonObject());
+        assertCodes(() -> validator.validateForUpdate(jsonCommand(json.toString()), loan), json, //
+                WCL + "delinquencyGraceDays." + WorkingCapitalLoanProductConstants.cannotEnableDelinquencyGraceDaysWithoutBucket, //
+                WCL + "delinquencyStartType." + WorkingCapitalLoanProductConstants.cannotEnableDelinquencyStartTypeWithoutBucket, //
+                WCL + "breachGraceDays." + WorkingCapitalLoanProductConstants.cannotEnableBreachGraceDaysWithoutBreach, //
+                WCL + "breachStartType." + WorkingCapitalLoanProductConstants.cannotEnableBreachStartTypeWithoutBreach);
+    }
+
+    @Test
+    void graceDaysAndStartTypesUpdate_WhenLoanHasItsOwnParents_ShouldPass() {
+        stubOverrides(true, true);
+        final WorkingCapitalLoan loan = submittedLoanWithStrategy(WorkingCapitalPaymentAmountCalculationStrategy.TPV);
+        final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();
+        final DelinquencyBucket delinquencyBucket = org.mockito.Mockito.mock(DelinquencyBucket.class);
+        lenient().when(delinquencyBucket.getId()).thenReturn(11L);
+        lenient().when(details.getDelinquencyBucket()).thenReturn(delinquencyBucket);
+        final WorkingCapitalBreach breach = org.mockito.Mockito.mock(WorkingCapitalBreach.class);
+        lenient().when(breach.getId()).thenReturn(21L);
+        lenient().when(details.getBreach()).thenReturn(breach);
+        final JsonObject json = withGraceDaysAndStartTypes(updateJsonObject());
+        assertDoesNotThrow(() -> validator.validateForUpdate(jsonCommand(json.toString()), loan));
+    }
+
     private void stubOverrides(final boolean delinquencyOverridable, final boolean breachOverridable) {
         final WorkingCapitalLoanProduct product = createMockProduct();
         final WorkingCapitalLoanProductConfigurableAttributes attributes = new WorkingCapitalLoanProductConfigurableAttributes();
         attributes.setDelinquencyBucketClassification(delinquencyOverridable);
         attributes.setBreach(breachOverridable);
         lenient().when(product.getConfigurableAttributes()).thenReturn(attributes);
+        // Parent bucket/breach must be present so override-gate tests are not also rejected by the parent-gate.
+        final DelinquencyBucket delinquencyBucket = org.mockito.Mockito.mock(DelinquencyBucket.class);
+        lenient().when(delinquencyBucket.getId()).thenReturn(10L);
+        lenient().when(product.getDelinquencyBucket()).thenReturn(delinquencyBucket);
+        final WorkingCapitalBreach breach = org.mockito.Mockito.mock(WorkingCapitalBreach.class);
+        lenient().when(breach.getId()).thenReturn(20L);
+        lenient().when(product.getBreach()).thenReturn(breach);
         lenient().when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
     }
 

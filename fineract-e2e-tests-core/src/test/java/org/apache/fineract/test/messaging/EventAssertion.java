@@ -24,9 +24,13 @@ import static org.awaitility.Awaitility.await;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,45 +60,32 @@ public class EventAssertion {
         internalAssertEventNotRaised(eventClazz, id);
     }
 
-    private <R, T extends Event<R>> void internalAssertEventRaised(Class<T> eventClazz, Long id, boolean removeEventIfFound) {
+    private <R, T extends Event<R>> void internalAssertEventRaised(final Class<T> eventClazz, final Long id,
+            final boolean removeEventIfFound) {
         if (eventProperties.isEventVerificationDisabled()) {
             return;
         }
-        T event = eventFactory.create(eventClazz);
-        try {
-            await().atMost(Duration.ofMillis(eventProperties.getWaitTimeoutInMillis())).until(() -> {
-                if (removeEventIfFound) {
-                    return eventStore.removeEventById(event, id).isPresent();
-                } else {
-                    return eventStore.findEventById(event, id).isPresent();
-                }
-            });
-        } catch (ConditionTimeoutException e) {
-            Assertions.fail(
-                    event.getEventName() + " hasn't been received within " + eventProperties.getWaitTimeoutInMillis() / 1000 + " seconds");
-        }
+        final T event = eventFactory.create(eventClazz);
+        awaitRaised(() -> {
+            if (removeEventIfFound) {
+                return eventStore.removeEventById(event, id).isPresent();
+            } else {
+                return eventStore.findEventById(event, id).isPresent();
+            }
+        }, event.getEventName());
     }
 
-    private <R, T extends Event<R>> void internalAssertEventNotRaised(Class<T> eventClazz, Long id) {
+    private <R, T extends Event<R>> void internalAssertEventNotRaised(final Class<T> eventClazz, final Long id) {
         if (eventProperties.isEventVerificationDisabled()) {
             return;
         }
-        T event = eventFactory.create(eventClazz);
-        try {
-            await().atMost(Duration.ofMillis(eventProperties.getWaitTimeoutInMillis())).until(() -> {
-                if (id == null) {
-                    return !eventStore.findByType(event).isEmpty();
-                }
-                return eventStore.findByType(event).stream().anyMatch(em -> event.getIdExtractor().apply(em.getData()).equals(id));
-            });
-
-            String receivedEventsLogParam = eventStore.getReceivedEvents().stream().map(LoggedEvent::new).map(LoggedEvent::toString)
-                    .reduce("", (s, e) -> format("%s%s%n", s, e));
-            Assertions.fail("%s has been received, but it was unexpected. Events received but not verified: %s", event.getEventName(),
-                    receivedEventsLogParam);
-        } catch (ConditionTimeoutException e) {
-            // This is the expected outcome here!
-        }
+        final T event = eventFactory.create(eventClazz);
+        assertNeverRaised(() -> {
+            if (id == null) {
+                return !eventStore.findByType(event).isEmpty();
+            }
+            return eventStore.findByType(event).stream().anyMatch(em -> event.getIdExtractor().apply(em.getData()).equals(id));
+        }, () -> unexpectedEventsMessage(event.getEventName()));
     }
 
     public <R, T extends Event<R>> EventAssertionBuilder<R> assertEvent(Class<T> eventClazz, Long id) {
@@ -114,41 +105,71 @@ public class EventAssertion {
      * Like {@link #assertEvent(Class, Long)}, but also accepts an event that an earlier step has already verified (and
      * so removed from the store), for steps that inspect the payload of an event raised by a previous action step.
      */
-    public <R, T extends Event<R>> EventAssertionBuilder<R> assertEventReceived(Class<T> eventClazz, Long id) {
+    public <R, T extends Event<R>> EventAssertionBuilder<R> assertEventReceived(final Class<T> eventClazz, final Long id) {
         if (eventProperties.isEventVerificationDisabled()) {
             return new EventAssertionBuilder<>((EventMessage<R>) new EmptyEventMessage());
         }
-        T event = eventFactory.create(eventClazz);
-        AtomicReference<EventMessage<R>> eventMessage = new AtomicReference<>();
-        try {
-            await().atMost(Duration.ofMillis(eventProperties.getWaitTimeoutInMillis())).until(() -> {
-                eventStore.removeEventById(event, id).or(() -> eventStore.findVerifiedEventById(event, id)).ifPresent(eventMessage::set);
-                return eventMessage.get() != null;
-            });
-        } catch (ConditionTimeoutException e) {
-            Assertions.fail(
-                    event.getEventName() + " hasn't been received within " + eventProperties.getWaitTimeoutInMillis() / 1000 + " seconds");
-        }
+        final T event = eventFactory.create(eventClazz);
+        final AtomicReference<EventMessage<R>> eventMessage = new AtomicReference<>();
+        awaitRaised(() -> {
+            eventStore.removeEventById(event, id).or(() -> eventStore.findVerifiedEventById(event, id)).ifPresent(eventMessage::set);
+            return eventMessage.get() != null;
+        }, event.getEventName());
         log.debug("Assert event: {}", eventMessage.get().getIdempotencyKey());
         return new EventAssertionBuilder<>(eventMessage.get());
     }
 
-    public <R, T extends Event<R>> void assertEventNotRaised(Class<T> eventClazz, Predicate<? super EventMessage<R>> filter) {
+    public <R, T extends Event<R>> void assertEventNotRaised(final Class<T> eventClazz, final Predicate<? super EventMessage<R>> filter) {
         if (eventProperties.isEventVerificationDisabled()) {
             return;
         }
-        T event = eventFactory.create(eventClazz);
-        try {
-            await().atMost(Duration.ofMillis(eventProperties.getWaitTimeoutInMillis()))
-                    .until(() -> eventStore.findByType(event).stream().anyMatch(filter));
+        final T event = eventFactory.create(eventClazz);
+        assertNeverRaised(() -> eventStore.findByType(event).stream().anyMatch(filter),
+                () -> unexpectedEventsMessage(event.getEventName()));
+    }
 
-            String receivedEventsLogParam = eventStore.getReceivedEvents().stream().map(LoggedEvent::new).map(LoggedEvent::toString)
-                    .reduce("", (s, e) -> format("%s%s%n", s, e));
-            Assertions.fail("%s has been received, but it was unexpected. Events received but not verified: %s", event.getEventName(),
-                    receivedEventsLogParam);
+    public List<BulkEventMessage> assertBulkEvent(final Predicate<BulkEventMessage> filter) {
+        if (eventProperties.isEventVerificationDisabled()) {
+            return List.of();
+        }
+        awaitRaised(() -> !eventStore.findBulkEvents(filter).isEmpty(), EventStore.BULK_BUSINESS_EVENT_TYPE);
+        return eventStore.findBulkEvents(filter);
+    }
+
+    public void assertBulkEventNotRaised(final Predicate<BulkEventMessage> filter) {
+        if (eventProperties.isEventVerificationDisabled()) {
+            return;
+        }
+        assertNeverRaised(() -> !eventStore.findBulkEvents(filter).isEmpty(),
+                () -> format("%s has been received, but it was unexpected. Items of the unexpected bulk events: %s",
+                        EventStore.BULK_BUSINESS_EVENT_TYPE,
+                        loggedLines(eventStore.findBulkEvents(filter).stream().flatMap(bulkEvent -> bulkEvent.items().stream()))));
+    }
+
+    private void awaitRaised(final Callable<Boolean> raised, final String eventName) {
+        try {
+            await().atMost(Duration.ofMillis(eventProperties.getWaitTimeoutInMillis())).until(raised);
+        } catch (ConditionTimeoutException e) {
+            Assertions.fail(eventName + " hasn't been received within " + eventProperties.getWaitTimeoutInMillis() / 1000 + " seconds");
+        }
+    }
+
+    private void assertNeverRaised(final Callable<Boolean> raised, final Supplier<String> failureMessage) {
+        try {
+            await().atMost(Duration.ofMillis(eventProperties.getWaitTimeoutInMillis())).until(raised);
+            Assertions.fail(failureMessage.get());
         } catch (ConditionTimeoutException e) {
             // This is the expected outcome here!
         }
+    }
+
+    private String unexpectedEventsMessage(final String eventName) {
+        return format("%s has been received, but it was unexpected. Events received but not verified: %s", eventName,
+                loggedLines(eventStore.getReceivedEvents().stream()));
+    }
+
+    private static String loggedLines(final Stream<? extends EventMessage<?>> events) {
+        return events.map(LoggedEvent::new).map(LoggedEvent::toString).reduce("", (s, e) -> format("%s%s%n", s, e));
     }
 
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

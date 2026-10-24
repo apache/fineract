@@ -555,6 +555,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     @Override
     public LoanTransactionData retrieveLoanPrePaymentTemplate(final LoanTransactionType repaymentTransactionType, final Long loanId,
             LocalDate onDate) {
+        return retrieveLoanPayOffTemplate(repaymentTransactionType, loanId, onDate, false);
+    }
+
+    @Override
+    public LoanTransactionData retrieveLoanEarlyTerminationTemplate(final Long loanId, final LocalDate onDate) {
+        return retrieveLoanPayOffTemplate(LoanTransactionType.REPAYMENT, loanId, onDate, true);
+    }
+
+    private LoanTransactionData retrieveLoanPayOffTemplate(final LoanTransactionType repaymentTransactionType, final Long loanId,
+            final LocalDate onDate, final boolean earlyTermination) {
 
         this.context.authenticatedUser();
         this.loanUtilService.validateRepaymentTransactionType(repaymentTransactionType);
@@ -569,8 +579,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         final LocalDate earliestUnpaidInstallmentDate = DateUtils.getBusinessLocalDate();
         final LocalDate recalculateFrom = null;
         final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-        final OutstandingAmountsDTO outstandingAmounts = loadTransactionProcessingService.fetchPrepaymentDetail(scheduleGeneratorDTO,
-                onDate, loan);
+        final OutstandingAmountsDTO outstandingAmounts = earlyTermination
+                ? loadTransactionProcessingService.fetchEarlyTerminationDetail(scheduleGeneratorDTO, onDate, loan)
+                : loadTransactionProcessingService.fetchPrepaymentDetail(scheduleGeneratorDTO, onDate, loan);
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(repaymentTransactionType);
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         final BigDecimal outstandingLoanBalance = outstandingAmounts.principal().getAmount();

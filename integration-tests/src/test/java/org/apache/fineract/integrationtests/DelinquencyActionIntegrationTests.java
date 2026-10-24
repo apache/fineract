@@ -338,11 +338,246 @@ public class DelinquencyActionIntegrationTests extends FeignLoanTestBase {
             // Create Delinquency Pause for the Loan
             createLoanDelinquencyAction(loanId, PAUSE, "01 January 2023", "15 January 2023");
 
-            // Create overlapping Delinquency Pause for the Loan
-            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> createLoanDelinquencyAction(loanId, PAUSE, "01 January 2023", "15 January 2023"));
-            assertTrue(exception.getMessage().contains("Delinquency pause period cannot overlap with another pause period"));
+            assertPauseRejectedAsOverlapping(loanId, "01 January 2023", "15 January 2023");
         });
+    }
+
+    @Test
+    public void testOverlappingPauseWithSameStartAndLongerEndIsRejected() {
+        runAt("01 October 2023", () -> {
+            Long loanId = createAndDisburseProgressiveLoan("01 October 2023");
+            updateBusinessDate("16 October 2023");
+
+            createLoanDelinquencyAction(loanId, PAUSE, "16 October 2023", "23 October 2023");
+
+            assertPauseRejectedAsOverlapping(loanId, "16 October 2023", "30 October 2023");
+
+            List<GetDelinquencyActionsResponse> actions = getLoanDelinquencyActions(loanId);
+            assertEquals(1, actions.size());
+            assertDelinquencyAction(actions.get(0), PAUSE, "16 October 2023", "23 October 2023");
+        });
+    }
+
+    @Test
+    public void testEveryOverlapGeometryAgainstFutureDatedPauseIsRejected() {
+        runAt("01 October 2023", () -> {
+            Long loanId = createAndDisburseProgressiveLoan("01 October 2023");
+            updateBusinessDate("16 October 2023");
+
+            createLoanDelinquencyAction(loanId, PAUSE, "18 October 2023", "25 October 2023");
+
+            assertPauseRejectedAsOverlapping(loanId, "16 October 2023", "25 October 2023");
+            assertPauseRejectedAsOverlapping(loanId, "16 October 2023", "30 October 2023");
+            assertPauseRejectedAsOverlapping(loanId, "19 October 2023", "24 October 2023");
+            assertPauseRejectedAsOverlapping(loanId, "18 October 2023", "25 October 2023");
+            assertPauseRejectedAsOverlapping(loanId, "18 October 2023", "20 October 2023");
+            assertPauseRejectedAsOverlapping(loanId, "14 October 2023", "20 October 2023");
+            assertPauseRejectedAsOverlapping(loanId, "20 October 2023", "30 October 2023");
+
+            List<GetDelinquencyActionsResponse> actions = getLoanDelinquencyActions(loanId);
+            assertEquals(1, actions.size());
+            assertDelinquencyAction(actions.get(0), PAUSE, "18 October 2023", "25 October 2023");
+        });
+    }
+
+    @Test
+    public void testBackToBackPausesAreAccepted() {
+        runAt("01 October 2023", () -> {
+            Long loanId = createAndDisburseProgressiveLoan("01 October 2023");
+            updateBusinessDate("19 October 2023");
+
+            createLoanDelinquencyAction(loanId, PAUSE, "18 October 2023", "25 October 2023");
+            createLoanDelinquencyAction(loanId, PAUSE, "25 October 2023", "30 October 2023");
+            createLoanDelinquencyAction(loanId, PAUSE, "10 October 2023", "18 October 2023");
+
+            List<GetDelinquencyActionsResponse> actions = getLoanDelinquencyActions(loanId);
+            assertEquals(3, actions.size());
+            assertDelinquencyAction(actions.get(0), PAUSE, "18 October 2023", "25 October 2023");
+            assertDelinquencyAction(actions.get(1), PAUSE, "25 October 2023", "30 October 2023");
+            assertDelinquencyAction(actions.get(2), PAUSE, "10 October 2023", "18 October 2023");
+
+            validateLoanDelinquencyPausePeriods(loanId, //
+                    pausePeriods("10 October 2023", "18 October 2023", false), //
+                    pausePeriods("18 October 2023", "25 October 2023", true), //
+                    pausePeriods("25 October 2023", "30 October 2023", false) //
+            );
+        });
+    }
+
+    @Test
+    public void testOverlapBetweenBackdatedPausesIsRejected() {
+        runAt("01 October 2023", () -> {
+            Long loanId = createAndDisburseProgressiveLoan("01 October 2023");
+            updateBusinessDate("30 October 2023");
+
+            createLoanDelinquencyAction(loanId, PAUSE, "05 October 2023", "15 October 2023");
+
+            assertPauseRejectedAsOverlapping(loanId, "05 October 2023", "20 October 2023");
+            assertPauseRejectedAsOverlapping(loanId, "10 October 2023", "12 October 2023");
+            assertPauseRejectedAsOverlapping(loanId, "01 October 2023", "15 October 2023");
+
+            List<GetDelinquencyActionsResponse> actions = getLoanDelinquencyActions(loanId);
+            assertEquals(1, actions.size());
+            assertDelinquencyAction(actions.get(0), PAUSE, "05 October 2023", "15 October 2023");
+        });
+    }
+
+    @Test
+    public void testOverlapIsCheckedAgainstResumeShortenedPauseEnd() {
+        runAt("01 October 2023", () -> {
+            Long loanId = createAndDisburseProgressiveLoan("01 October 2023");
+            updateBusinessDate("16 October 2023");
+
+            createLoanDelinquencyAction(loanId, PAUSE, "16 October 2023", "30 October 2023");
+
+            updateBusinessDate("20 October 2023");
+            createLoanDelinquencyAction(loanId, RESUME, "20 October 2023");
+
+            assertPauseRejectedAsOverlapping(loanId, "18 October 2023", "25 October 2023");
+            createLoanDelinquencyAction(loanId, PAUSE, "22 October 2023", "25 October 2023");
+
+            List<GetDelinquencyActionsResponse> actions = getLoanDelinquencyActions(loanId);
+            assertEquals(3, actions.size());
+            assertDelinquencyAction(actions.get(0), PAUSE, "16 October 2023", "30 October 2023");
+            assertDelinquencyAction(actions.get(1), RESUME, "20 October 2023", null);
+            assertDelinquencyAction(actions.get(2), PAUSE, "22 October 2023", "25 October 2023");
+
+            validateLoanDelinquencyPausePeriods(loanId, //
+                    pausePeriods("16 October 2023", "20 October 2023", true), //
+                    pausePeriods("22 October 2023", "25 October 2023", false) //
+            );
+        });
+    }
+
+    @Test
+    public void testPauseStartingOnResumeDateIsNotShortenedByThatResume() {
+        runAt("01 October 2023", () -> {
+            Long loanId = createAndDisburseProgressiveLoan("01 October 2023");
+            updateBusinessDate("16 October 2023");
+
+            createLoanDelinquencyAction(loanId, PAUSE, "16 October 2023", "30 October 2023");
+
+            updateBusinessDate("20 October 2023");
+            createLoanDelinquencyAction(loanId, RESUME, "20 October 2023");
+            createLoanDelinquencyAction(loanId, PAUSE, "20 October 2023", "25 October 2023");
+
+            updateBusinessDate("22 October 2023");
+            assertPauseRejectedAsOverlapping(loanId, "21 October 2023", "24 October 2023");
+
+            List<GetDelinquencyActionsResponse> actions = getLoanDelinquencyActions(loanId);
+            assertEquals(3, actions.size());
+            assertDelinquencyAction(actions.get(0), PAUSE, "16 October 2023", "30 October 2023");
+            assertDelinquencyAction(actions.get(1), RESUME, "20 October 2023", null);
+            assertDelinquencyAction(actions.get(2), PAUSE, "20 October 2023", "25 October 2023");
+
+            validateLoanDelinquencyPausePeriods(loanId, //
+                    pausePeriods("16 October 2023", "20 October 2023", false), //
+                    pausePeriods("20 October 2023", "25 October 2023", true) //
+            );
+        });
+    }
+
+    @Test
+    public void testPauseCreatedAfterSameDateResumeCanBeResumedThatDay() {
+        runAt("01 October 2023", () -> {
+            Long loanId = createAndDisburseProgressiveLoan("01 October 2023");
+            updateBusinessDate("16 October 2023");
+
+            createLoanDelinquencyAction(loanId, PAUSE, "16 October 2023", "30 October 2023");
+
+            updateBusinessDate("20 October 2023");
+            createLoanDelinquencyAction(loanId, RESUME, "20 October 2023");
+            createLoanDelinquencyAction(loanId, PAUSE, "20 October 2023", "25 October 2023");
+            createLoanDelinquencyAction(loanId, RESUME, "20 October 2023");
+
+            List<GetDelinquencyActionsResponse> actions = getLoanDelinquencyActions(loanId);
+            assertEquals(4, actions.size());
+            assertDelinquencyAction(actions.get(0), PAUSE, "16 October 2023", "30 October 2023");
+            assertDelinquencyAction(actions.get(1), RESUME, "20 October 2023", null);
+            assertDelinquencyAction(actions.get(2), PAUSE, "20 October 2023", "25 October 2023");
+            assertDelinquencyAction(actions.get(3), RESUME, "20 October 2023", null);
+
+            validateLoanDelinquencyPausePeriods(loanId, //
+                    pausePeriods("16 October 2023", "20 October 2023", true), //
+                    pausePeriods("20 October 2023", "20 October 2023", true) //
+            );
+        });
+    }
+
+    @Test
+    public void testDuplicateResumeOnSameDateIsRejected() {
+        runAt("01 October 2023", () -> {
+            Long loanId = createAndDisburseProgressiveLoan("01 October 2023");
+            updateBusinessDate("16 October 2023");
+
+            createLoanDelinquencyAction(loanId, PAUSE, "16 October 2023", "30 October 2023");
+
+            updateBusinessDate("20 October 2023");
+            createLoanDelinquencyAction(loanId, RESUME, "20 October 2023");
+
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> createLoanDelinquencyAction(loanId, RESUME, "20 October 2023"));
+            assertEquals(400, exception.getStatus());
+            assertTrue(exception.getResponseBody().contains("validation.msg.loanDelinquencyAction.resume.should.be.unique"),
+                    exception.getResponseBody());
+            assertTrue(exception.getMessage().contains("There is an existing Resume Delinquency Action on this date"),
+                    exception.getMessage());
+
+            List<GetDelinquencyActionsResponse> actions = getLoanDelinquencyActions(loanId);
+            assertEquals(2, actions.size());
+            assertDelinquencyAction(actions.get(0), PAUSE, "16 October 2023", "30 October 2023");
+            assertDelinquencyAction(actions.get(1), RESUME, "20 October 2023", null);
+        });
+    }
+
+    @Test
+    public void testPauseIsAcceptedOverPauseResumedOnItsStartDate() {
+        runAt("01 October 2023", () -> {
+            Long loanId = createAndDisburseProgressiveLoan("01 October 2023");
+            updateBusinessDate("16 October 2023");
+
+            createLoanDelinquencyAction(loanId, PAUSE, "16 October 2023", "30 October 2023");
+            createLoanDelinquencyAction(loanId, RESUME, "16 October 2023");
+
+            updateBusinessDate("20 October 2023");
+            createLoanDelinquencyAction(loanId, PAUSE, "15 October 2023", "18 October 2023");
+
+            List<GetDelinquencyActionsResponse> actions = getLoanDelinquencyActions(loanId);
+            assertEquals(3, actions.size());
+            assertDelinquencyAction(actions.get(0), PAUSE, "16 October 2023", "30 October 2023");
+            assertDelinquencyAction(actions.get(1), RESUME, "16 October 2023", null);
+            assertDelinquencyAction(actions.get(2), PAUSE, "15 October 2023", "18 October 2023");
+
+            validateLoanDelinquencyPausePeriods(loanId, //
+                    pausePeriods("15 October 2023", "18 October 2023", false), //
+                    pausePeriods("16 October 2023", "16 October 2023", false) //
+            );
+        });
+    }
+
+    private Long createAndDisburseProgressiveLoan(String date) {
+        Long clientId = createClient();
+        Long loanProductId = createLoanProduct(create4IProgressive());
+        Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, date, 1000.0, 10.0, 4, null);
+        disburseLoan(loanId, BigDecimal.valueOf(1000.00), date);
+        return loanId;
+    }
+
+    private void assertPauseRejectedAsOverlapping(Long loanId, String startDate, String endDate) {
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> createLoanDelinquencyAction(loanId, PAUSE, startDate, endDate),
+                "Pause " + startDate + " - " + endDate + " must be rejected as overlapping");
+        assertEquals(400, exception.getStatus());
+        assertTrue(exception.getResponseBody().contains("validation.msg.loanDelinquencyAction.overlapping"), exception.getResponseBody());
+        assertTrue(exception.getMessage().contains("Delinquency pause period cannot overlap with another pause period"),
+                exception.getMessage());
+    }
+
+    private void assertDelinquencyAction(GetDelinquencyActionsResponse actual, DelinquencyAction expectedAction, String expectedStartDate,
+            String expectedEndDate) {
+        assertEquals(expectedAction.name(), actual.getAction());
+        assertEquals(LocalDate.parse(expectedStartDate, dateTimeFormatter), actual.getStartDate());
+        assertEquals(expectedEndDate == null ? null : LocalDate.parse(expectedEndDate, dateTimeFormatter), actual.getEndDate());
     }
 
     @Test

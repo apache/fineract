@@ -111,6 +111,30 @@ class RepaymentPeriodTest {
     }
 
     @Test
+    void hashCodeIsStableWhileMoneyFieldsAreUnset() {
+        LocalDate from = LocalDate.of(2026, 3, 15);
+        RepaymentPeriod period = RepaymentPeriod.create(null, from, from.plusMonths(1), ZERO, MC, loanProductRelatedDetail);
+
+        // the next period's memos depend on this hash code, so a changing one would make them recalculate every time
+        assertEquals(period.hashCode(), period.hashCode());
+    }
+
+    @Test
+    void hashCodeIsUnchangedByTheMemosBeingCreated() {
+        LocalDate from = LocalDate.of(2026, 3, 15);
+        RepaymentPeriod period = RepaymentPeriod.create(null, from, from.plusMonths(1), ZERO, MC, loanProductRelatedDetail);
+        period.getInterestPeriods().add(InterestPeriod.withEmptyAmounts(period, from, from.plusMonths(1)));
+        int hashCodeBeforeCalculation = period.hashCode();
+
+        period.getRateFactorPlus1();
+        period.getCalculatedDueInterest();
+        period.getDueInterest();
+        period.getOutstandingLoanBalance();
+
+        assertEquals(hashCodeBeforeCalculation, period.hashCode());
+    }
+
+    @Test
     void testEmptyRepaymentPeriod() {
         // Create an empty repayment period with all null fields
         RepaymentPeriod period = new RepaymentPeriod(null, // previous

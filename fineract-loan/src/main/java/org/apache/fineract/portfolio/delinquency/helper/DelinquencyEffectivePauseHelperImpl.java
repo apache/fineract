@@ -93,11 +93,17 @@ public class DelinquencyEffectivePauseHelperImpl implements DelinquencyEffective
     private Optional<LoanDelinquencyAction> findMatchingResume(LoanDelinquencyAction pause, List<LoanDelinquencyAction> resumes) {
         if (resumes != null && !resumes.isEmpty()) {
             for (LoanDelinquencyAction resume : resumes) {
-                if (!pause.getStartDate().isAfter(resume.getStartDate()) && !resume.getStartDate().isAfter(pause.getEndDate())) {
+                if (isCreatedBefore(pause, resume) && !pause.getStartDate().isAfter(resume.getStartDate())
+                        && !resume.getStartDate().isAfter(pause.getEndDate())) {
                     return Optional.of(resume);
                 }
             }
         }
         return Optional.empty();
+    }
+
+    // Without ids the creation order is unknown, so the resume applies to any pause containing its date.
+    private boolean isCreatedBefore(LoanDelinquencyAction pause, LoanDelinquencyAction resume) {
+        return pause.getId() == null || resume.getId() == null || pause.getId() < resume.getId();
     }
 }

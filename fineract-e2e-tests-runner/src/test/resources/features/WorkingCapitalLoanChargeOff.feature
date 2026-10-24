@@ -439,6 +439,7 @@ Feature: Working Capital Loan Charge-off
     When Customer makes "REPAYMENT" transaction on "10 January 2026" with 60.0 transaction amount on Working Capital loan
     Then a Working Capital Loan Undo Charge Off business event is raised
     And a Working Capital Loan Adjust Transaction business event is raised for the reversed "chargeOff" transaction
+    And BulkBusinessEvent is not raised on "15 January 2026"
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount | chargedOff | chargedOffOnDate | chargeOffReason.name |
       | WCLP         | 2026-01-01      | 2026-01-01               | 100.0     | 100.0             | 1000.0             | 18.0              | null     | false      | null             | null                 |

@@ -1402,6 +1402,14 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | overpaidOnDate              | null |
       | timeline.closedOnDate       | null |
       | timeline.actualMaturityDate | null |
+    When Admin adds Discount fee adjustment with "50" amount on transaction date "04 January 2026" on Working Capital loan account for last discount
+    Then Working Capital loan status will be "ACTIVE"
+    When Customer adjust "1"th "REPAYMENT" transaction made on "02 January 2026" on Working Capital loan with amount "9950" and date "02 January 2026"
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null       |
+      | timeline.closedOnDate       | 2026-01-02 |
+      | timeline.actualMaturityDate | 2026-01-02 |
 
   @TestRailId:C106809
   Scenario: Verify settlement dates - a discount fee adjustment that settles the loan exactly dates the closure, a later extra payment keeps it and the refund closes it on its own date
@@ -1438,3 +1446,30 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | overpaidOnDate              | null       |
       | timeline.closedOnDate       | 2026-01-06 |
       | timeline.actualMaturityDate | 2026-01-06 |
+
+  @TestRailId:C115409
+  Scenario: Verify a discount fee adjustment that overpays the loan replays the repayments and reports them in a single bulk event
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "02 January 2026" with 9950.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "03 January 2026" with 30.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# The adjustment lowers the principal due to 9900 while 9980 is paid: the replay moves the excess of both repayments to overpayment.
+    And Admin adds Discount fee adjustment with "100" amount on transaction date "04 January 2026" on Working Capital loan account for last discount
+    Then BulkBusinessEvent is raised on "04 January 2026" with 2 WorkingCapitalLoanAdjustTransactionBusinessEvent
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "02 January 2026" with principal portion changed from "9950.0" to "9900.0" and fee portion changed from "0.0" to "0.0"
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "03 January 2026" with principal portion changed from "30.0" to "0.0" and fee portion changed from "0.0" to "0.0"
+    And Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "80.00"

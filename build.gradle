@@ -252,7 +252,12 @@ allprojects  {
             target '*.gradle', '**/*.gradle'
             targetExclude '**/build/**', '/**/build.gradle','**/static-weaving.gradle' // TODO: temporary disabled on build.gradle until someone fix this issue: https://github.com/diffplug/spotless/issues/1807
             // Formatter versions pinned to what Spotless 6.25 used by default, so the Spotless upgrade reformats nothing.
-            greclipse('4.29')
+            // Eclipse archived the 4.29 update site off download.eclipse.org to archive.eclipse.org, leaving a redirect
+            // the P2 client doesn't follow, so point it at the archive directly instead of bumping the formatter version.
+            greclipse('4.29').withP2Mirrors([
+                'https://download.eclipse.org/eclipse/updates/4.29/': 'https://archive.eclipse.org/eclipse/updates/4.29/',
+                'https://groovy.jfrog.io/artifactory/plugins-release/org/codehaus/groovy/groovy-eclipse-integration/': 'https://groovy.jfrog.io/artifactory/plugins-release/org/codehaus/groovy/groovy-eclipse-integration/',
+            ])
             leadingTabsToSpaces(4)
             endWithNewline()
             trimTrailingWhitespace()

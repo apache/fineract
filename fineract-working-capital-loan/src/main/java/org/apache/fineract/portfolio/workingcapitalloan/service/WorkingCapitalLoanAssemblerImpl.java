@@ -202,19 +202,16 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                 && !product.getConfigurableAttributes().isDiscountDefaultOverridable()) {
             detail.setDiscountProposed(productDetail.getDiscount());
         }
-        final Long breachId = fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachIdParamName, element)
-                ? fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.breachIdParamName, element)
-                : null;
-        if (breachId != null) {
-            detail.setBreach(findBreachById(breachId));
+        // Present (even as null) overrides product; omitted inherits. Matches delinquency bucket and loan update.
+        if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachIdParamName, element)) {
+            final Long breachId = fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.breachIdParamName, element);
+            detail.setBreach(breachId != null ? findBreachById(breachId) : null);
         } else {
             detail.setBreach(product.getBreach());
         }
-        final Long nearBreachId = fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.nearBreachIdParamName, element)
-                ? fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.nearBreachIdParamName, element)
-                : null;
-        if (nearBreachId != null) {
-            detail.setNearBreach(findNearBreachById(nearBreachId));
+        if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.nearBreachIdParamName, element)) {
+            final Long nearBreachId = fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.nearBreachIdParamName, element);
+            detail.setNearBreach(nearBreachId != null ? findNearBreachById(nearBreachId) : null);
         } else {
             detail.setNearBreach(product.getNearBreach());
         }
@@ -227,20 +224,21 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                 ? fromApiJsonHelper.extractIntegerNamed(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, element,
                         new HashSet<>())
                 : productDetail.getBreachGraceDays());
-        final String delinquencyStartTypeValue = fromApiJsonHelper
-                .parameterExists(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element)
-                        ? fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element)
-                        : null;
-        if (delinquencyStartTypeValue != null) {
-            detail.setDelinquencyStartType(WorkingCapitalLoanDelinquencyStartType.fromString(delinquencyStartTypeValue));
+        // Present (including null) overrides product; omitted inherits — same contract as parents/grace days.
+        if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element)) {
+            final String delinquencyStartTypeValue = fromApiJsonHelper
+                    .extractStringNamed(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element);
+            detail.setDelinquencyStartType(
+                    delinquencyStartTypeValue != null ? WorkingCapitalLoanDelinquencyStartType.fromString(delinquencyStartTypeValue)
+                            : null);
         } else {
             detail.setDelinquencyStartType(productDetail.getDelinquencyStartType());
         }
-        final String breachStartTypeValue = fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachStartTypeParamName,
-                element) ? fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element)
-                        : null;
-        if (breachStartTypeValue != null) {
-            detail.setBreachStartType(WorkingCapitalLoanBreachStartType.fromString(breachStartTypeValue));
+        if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element)) {
+            final String breachStartTypeValue = fromApiJsonHelper
+                    .extractStringNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element);
+            detail.setBreachStartType(
+                    breachStartTypeValue != null ? WorkingCapitalLoanBreachStartType.fromString(breachStartTypeValue) : null);
         } else {
             detail.setBreachStartType(productDetail.getBreachStartType());
         }
@@ -251,6 +249,15 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
             detail.setDelinquencyBucket(workingCapitalDelinquencyBucketResolver.findWorkingCapitalBucketByIdIfProvided(bucketId));
         } else {
             detail.setDelinquencyBucket(product.getDelinquencyBucket());
+        }
+        if (detail.getDelinquencyBucket() == null) {
+            detail.setDelinquencyGraceDays(null);
+            detail.setDelinquencyStartType(null);
+        }
+        if (detail.getBreach() == null) {
+            detail.setBreachGraceDays(null);
+            detail.setBreachStartType(null);
+            detail.setNearBreach(null);
         }
 
         return detail;
@@ -446,6 +453,13 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                 final Long breachId = fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.breachIdParamName, element);
                 detail.setBreach(breachId != null ? findBreachById(breachId) : null);
                 changes.put(WorkingCapitalLoanProductConstants.breachIdParamName, breachId);
+                if (breachId == null) {
+                    detail.clearBreachSettings(changes);
+                    if (detail.getNearBreach() != null) {
+                        detail.setNearBreach(null);
+                        changes.put(WorkingCapitalLoanProductConstants.nearBreachIdParamName, null);
+                    }
+                }
             }
             final Long existingNearBreachId = detail.getNearBreach() != null ? detail.getNearBreach().getId() : null;
             if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.nearBreachIdParamName, element) && command
@@ -462,6 +476,9 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                         element);
                 detail.setDelinquencyBucket(workingCapitalDelinquencyBucketResolver.findWorkingCapitalBucketByIdIfProvided(bucketId));
                 changes.put(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, bucketId);
+                if (bucketId == null) {
+                    detail.clearDelinquencySettings(changes);
+                }
             }
             if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, element)) {
                 final Integer delinquencyGraceDays = fromApiJsonHelper
@@ -508,9 +525,8 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                         detail.setBreachStartType(type);
                         changes.put(WorkingCapitalLoanProductConstants.breachStartTypeParamName, type.getCode());
                     } else {
-                        detail.setBreachStartType(WorkingCapitalLoanBreachStartType.DISBURSEMENT);
-                        changes.put(WorkingCapitalLoanProductConstants.breachStartTypeParamName,
-                                WorkingCapitalLoanBreachStartType.DISBURSEMENT.getCode());
+                        detail.setBreachStartType(null);
+                        changes.put(WorkingCapitalLoanProductConstants.breachStartTypeParamName, null);
                     }
                 }
             }

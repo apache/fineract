@@ -26,4 +26,5 @@
     <include file="parts/5001_create_progressive_loan_model.xml" relativeToChangelogFile="true"/>
     <include file="parts/5002_add_contract_termination_transaction.xml" relativeToChangelogFile="true"/>
     <include file="parts/5003_add_model_version.xml" relativeToChangelogFile="true"/>
+    <include file="parts/5004_add_loan_withdrawal_transaction.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

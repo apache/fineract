@@ -83,6 +83,7 @@ public enum LoanTransactionType {
     DISCOUNT_FEE_AMORTIZATION(45, "loanTransactionType.discountFeeAmortization"), //
     DISCOUNT_FEE_ADJUSTMENT(46, "loanTransactionType.discountFeeAdjustment"), //
     DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT(47, "loanTransactionType.discountFeeAmortizationAdjustment"), //
+    LOAN_WITHDRAWAL(48, "loanTransactionType.loanWithdrawal"), //
     ;
 
     private final Integer value;
@@ -146,6 +147,7 @@ public enum LoanTransactionType {
             case 45 -> LoanTransactionType.DISCOUNT_FEE_AMORTIZATION;
             case 46 -> LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT;
             case 47 -> LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT;
+            case 48 -> LoanTransactionType.LOAN_WITHDRAWAL;
             default -> LoanTransactionType.INVALID;
         };
     }
@@ -273,6 +275,10 @@ public enum LoanTransactionType {
 
     public boolean isContractTermination() {
         return this == LoanTransactionType.CONTRACT_TERMINATION;
+    }
+
+    public boolean isLoanWithdrawal() {
+        return this == LoanTransactionType.LOAN_WITHDRAWAL;
     }
 
     public boolean isBuyDownFee() {

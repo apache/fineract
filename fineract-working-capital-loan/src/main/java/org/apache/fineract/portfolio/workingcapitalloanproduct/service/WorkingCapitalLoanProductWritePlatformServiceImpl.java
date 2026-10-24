@@ -287,6 +287,9 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
                     .findWorkingCapitalBucketByIdIfProvided(delinquencyBucketId);
             product.setDelinquencyBucket(delinquencyBucket);
             changes.put(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, delinquencyBucketId);
+            if (delinquencyBucket == null && product.getRelatedDetail() != null) {
+                product.getRelatedDetail().clearDelinquencySettings(changes);
+            }
         }
 
         final Long existingBreachId = product.getBreach() != null ? product.getBreach().getId() : null;
@@ -295,6 +298,15 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
             final WorkingCapitalBreach breach = findBreachByIdIfProvided(breachId);
             product.setBreach(breach);
             changes.put(WorkingCapitalLoanProductConstants.breachIdParamName, breachId);
+            if (breach == null) {
+                if (product.getRelatedDetail() != null) {
+                    product.getRelatedDetail().clearBreachSettings(changes);
+                }
+                if (product.getNearBreach() != null) {
+                    product.setNearBreach(null);
+                    changes.put(WorkingCapitalLoanProductConstants.nearBreachIdParamName, null);
+                }
+            }
         }
 
         final Long existingNearBreachId = product.getNearBreach() != null ? product.getNearBreach().getId() : null;
@@ -415,20 +427,24 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
         final BigDecimal discount = command.parameterExists(WorkingCapitalLoanProductConstants.discountParamName)
                 ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.discountParamName)
                 : null;
-        final Integer delinquencyGraceDays = command
+        // Without parent these fields stay null. With parent, omitted breach defaults remain 0 / DISBURSEMENT.
+        final Integer delinquencyGraceDaysValue = command
                 .integerValueOfParameterNamed(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName);
+        final Integer delinquencyGraceDays = delinquencyBucket != null ? delinquencyGraceDaysValue : null;
         final String delinquencyStartTypeValue = command
                 .stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName);
-        final WorkingCapitalLoanDelinquencyStartType delinquencyStartType = WorkingCapitalLoanDelinquencyStartType
+        final WorkingCapitalLoanDelinquencyStartType parsedDelinquencyStartType = WorkingCapitalLoanDelinquencyStartType
                 .fromString(delinquencyStartTypeValue);
+        final WorkingCapitalLoanDelinquencyStartType delinquencyStartType = delinquencyBucket != null ? parsedDelinquencyStartType : null;
         final Integer breachGraceDaysValue = command
                 .integerValueOfParameterNamed(WorkingCapitalLoanProductConstants.breachGraceDaysParamName);
-        final Integer breachGraceDays = breachGraceDaysValue != null ? breachGraceDaysValue : Integer.valueOf(0);
+        final Integer breachGraceDays = breach != null ? (breachGraceDaysValue != null ? breachGraceDaysValue : Integer.valueOf(0)) : null;
         final String breachStartTypeValue = command
                 .stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName);
         final WorkingCapitalLoanBreachStartType parsedBreachStartType = WorkingCapitalLoanBreachStartType.fromString(breachStartTypeValue);
-        final WorkingCapitalLoanBreachStartType breachStartType = parsedBreachStartType != null ? parsedBreachStartType
-                : WorkingCapitalLoanBreachStartType.DISBURSEMENT;
+        final WorkingCapitalLoanBreachStartType breachStartType = breach != null
+                ? (parsedBreachStartType != null ? parsedBreachStartType : WorkingCapitalLoanBreachStartType.DISBURSEMENT)
+                : null;
 
         final WorkingCapitalLoanProductRelatedDetail relatedDetail = new WorkingCapitalLoanProductRelatedDetail(amortizationType,
                 paymentAmountCalculationStrategy, annualEir, paymentAmount, npvDayCount, principal, periodPaymentRate, repaymentEvery,

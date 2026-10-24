@@ -83,7 +83,7 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
         Optional<LoanRepaymentScheduleInstallment> currentRepaymentPeriod = getRelatedRepaymentScheduleInstallment(loan, businessDate);
 
         if (currentRepaymentPeriod.isPresent()) {
-            if (loan.isChargedOff() || loan.hasContractTerminationTransaction()) {
+            if (loan.isChargedOff() || loan.hasEarlyTerminationTransaction()) {
                 if (currentRepaymentPeriod.get().getDueDate().isEqual(businessDate)) {
                     return BigDecimal.ZERO;
                 } else {

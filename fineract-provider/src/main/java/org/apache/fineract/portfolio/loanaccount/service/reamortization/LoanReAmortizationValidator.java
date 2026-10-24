@@ -148,6 +148,11 @@ public class LoanReAmortizationValidator {
                     "Loan re-amortization is not allowed on contract terminated loan.", loan.getId());
         }
 
+        if (loan.isLoanWithdrawal()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.not.allowed.on.loan.withdrawal",
+                    "Loan re-amortization is not allowed after loan withdrawal has been applied to the loan account.", loan.getId());
+        }
+
         // validate there are overdue installments to re-amortize
         boolean hasOverdueInstallments = loan.getRepaymentScheduleInstallments().stream()
                 .anyMatch(installment -> installment.getDueDate().isBefore(getBusinessLocalDate())

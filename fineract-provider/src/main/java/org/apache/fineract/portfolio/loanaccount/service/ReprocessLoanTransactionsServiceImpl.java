@@ -103,7 +103,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
                         new ChangedTransactionDetail(), savedModel.get(), loan.getActiveLoanTermVariations());
                 progressiveTransactionCtx.setChargedOff(loan.isChargedOff());
                 progressiveTransactionCtx.setWrittenOff(loan.isClosedWrittenOff());
-                progressiveTransactionCtx.setContractTerminated(loan.isContractTermination());
+                progressiveTransactionCtx.setContractTerminated(loan.isTerminatedEarly());
                 transactionCtx = progressiveTransactionCtx;
             }
         } else {

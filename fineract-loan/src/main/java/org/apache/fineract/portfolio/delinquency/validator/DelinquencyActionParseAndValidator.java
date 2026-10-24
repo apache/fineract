@@ -86,7 +86,7 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         throwExceptionIfValidationWarningsExist(dataValidator);
         validateResumeNoEndDate(parsedDelinquencyAction, dataValidator);
         throwExceptionIfValidationWarningsExist(dataValidator);
-        validateResumeDoesNotExist(parsedDelinquencyAction, savedDelinquencyActions, dataValidator);
+        validateResumeDoesNotExist(parsedDelinquencyAction, savedDelinquencyActions, effectiveDelinquencyList, dataValidator);
         throwExceptionIfValidationWarningsExist(dataValidator);
         validateResumeShouldBeOnActivePause(parsedDelinquencyAction, effectiveDelinquencyList, dataValidator);
     }
@@ -109,11 +109,15 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
     }
 
     private void validateResumeDoesNotExist(final LoanDelinquencyAction parsedDelinquencyAction,
-            final List<LoanDelinquencyAction> savedDelinquencyActions, final DataValidatorBuilder dataValidator) {
+            final List<LoanDelinquencyAction> savedDelinquencyActions, final List<LoanDelinquencyActionData> effectiveDelinquencyList,
+            final DataValidatorBuilder dataValidator) {
+        final LocalDate resumeDate = parsedDelinquencyAction.getStartDate();
         final boolean match = savedDelinquencyActions.stream() //
                 .filter(action -> DelinquencyAction.RESUME.equals(action.getAction())) //
-                .anyMatch(action -> parsedDelinquencyAction.getStartDate().isEqual(action.getStartDate()));
-        if (match) {
+                .anyMatch(action -> resumeDate.isEqual(action.getStartDate()));
+        final boolean pauseRunningOnResumeDate = effectiveDelinquencyList.stream().anyMatch(
+                pause -> !DateUtils.isBefore(resumeDate, pause.getStartDate()) && DateUtils.isBefore(resumeDate, pause.getEndDate()));
+        if (match && !pauseRunningOnResumeDate) {
             failGeneralValidation(dataValidator, "resume.should.be.unique", "There is an existing Resume Delinquency Action on this date");
         }
     }
@@ -167,39 +171,11 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
         }
     }
 
-    /**
-     * <pre>
-     *  we have an overlap when
-     *  (parsed.endDate &gt; existing.startDate AND parsed.endDate &lt; existing.endDate)
-     *
-     *  existing       |------------|
-     *  parsed               |----------------|
-     *
-     *  we also  have an overlap when
-     *  (parsed.startDate &gt; existing.startDate AND parsed.startDate &lt; existing.endDate)
-     *
-     *  existing            |------------|
-     *  parsed    |----------------|
-     *
-     *  There is no overlap like when they are right after each other:
-     *
-     *  existing  |------------|
-     *  parsed                 |----------------|
-     *
-     *  or
-     *
-     *  existing               |------------|
-     *  parsed   |-------------|
-     * </pre>
-     *
-     * @param parsed
-     * @param existing
-     * @return
-     */
+    // End dates are exclusive: back-to-back pauses do not overlap, and a pause resumed on its start date covers no day.
     private boolean isOverlapping(final LoanDelinquencyAction parsed, final LoanDelinquencyActionData existing) {
-        return (parsed.getEndDate().isAfter(existing.getStartDate()) && parsed.getEndDate().isBefore(existing.getEndDate()))
-                || (parsed.getStartDate().isAfter(existing.getStartDate()) && parsed.getStartDate().isBefore(existing.getEndDate()))
-                || (parsed.getStartDate().isEqual(existing.getStartDate()) && parsed.getEndDate().isEqual(existing.getEndDate()));
+        return DateUtils.isBefore(existing.getStartDate(), existing.getEndDate())
+                && DateUtils.isBefore(parsed.getStartDate(), existing.getEndDate())
+                && DateUtils.isAfter(parsed.getEndDate(), existing.getStartDate());
     }
 
     @NonNull

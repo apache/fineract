@@ -397,7 +397,7 @@ Feature: LoanRepayment - Part4
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 250.0 | 0.0        | 0.0  | 750.0       |
 
-  @TestRailId:CXXXX @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+  @TestRailId:C115397 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-vertical two repayment and prepayment with NEXT_INSTALLMENT strategy
     When Admin sets the business date to "23 February 2026"
     When Admin creates a client with random data

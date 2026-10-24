@@ -16,25 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.handler.loan.contracttermination;
+
+package org.apache.fineract.portfolio.workingcapitalloan.handler;
+
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ADJUST_BY_DELTA;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_WORKINGCAPITALLOANTRANSACTION;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.loanaccount.service.contracttermination.LoanContractTerminationServiceImpl;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanWritePlatformService;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@CommandType(entity = "LOAN", action = "CONTRACT_TERMINATION_UNDO")
-public class UndoLoanContractTerminationCommandHandler implements NewCommandSourceHandler {
+@CommandType(entity = ENTITY_WORKINGCAPITALLOANTRANSACTION, action = ACTION_ADJUST_BY_DELTA)
+public class AdjustByDeltaWorkingCapitalLoanTransactionCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanContractTerminationServiceImpl loanContractTerminationService;
+    private final WorkingCapitalLoanWritePlatformService writePlatformService;
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return loanContractTerminationService.undoContractTermination(command);
+        return writePlatformService.adjustByDeltaTransaction(command.getLoanId(), command.entityId(), command);
     }
 }

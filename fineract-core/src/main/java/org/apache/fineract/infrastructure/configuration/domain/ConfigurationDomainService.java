@@ -189,6 +189,8 @@ public interface ConfigurationDomainService {
 
     String getRetainedEarningUsedByReportName();
 
+    String getRetainedEarningWorkingCapitalUsedByReportName();
+
     Long getOfficeId();
 
     boolean isAllowCashAndNonCashAccrual();
@@ -198,4 +200,8 @@ public interface ConfigurationDomainService {
     boolean isBackdatedTransactionsDisallowed();
 
     Long retrieveBackdatedTransactionsToleranceDays();
+
+    Long retrievePayoffSchedulePreviewMaxPayoffPeriods();
+
+    Long retrievePayoffSchedulePreviewMaxTermPeriods();
 }

@@ -687,6 +687,14 @@ public class GlobalConfigurationHelper {
         retainedEarningUsedByReportName.put("string_value", "Trial Balance Summary Report with Asset Owner");
         defaults.add(retainedEarningUsedByReportName);
 
+        HashMap<String, Object> retainedEarningWorkingCapitalUsedByReportName = new HashMap<>();
+        retainedEarningWorkingCapitalUsedByReportName.put("name", GlobalConfigurationConstants.RETAINED_EARNING_WC_USED_BY_REPORT_NAME);
+        retainedEarningWorkingCapitalUsedByReportName.put("value", 0L);
+        retainedEarningWorkingCapitalUsedByReportName.put("enabled", true);
+        retainedEarningWorkingCapitalUsedByReportName.put("trapDoor", false);
+        retainedEarningWorkingCapitalUsedByReportName.put("string_value", "Trial Balance Summary Report for Working Capital Loans");
+        defaults.add(retainedEarningWorkingCapitalUsedByReportName);
+
         HashMap<String, Object> isDisallowBackdatedTransactions = new HashMap<>();
         isDisallowBackdatedTransactions.put("name", GlobalConfigurationConstants.DISALLOW_BACKDATED_TRANSACTIONS);
         isDisallowBackdatedTransactions.put("value", 0L);
@@ -709,6 +717,20 @@ public class GlobalConfigurationHelper {
         plChargeAccrualTime.put("trapDoor", false);
         plChargeAccrualTime.put("string_value", "EOD");
         defaults.add(plChargeAccrualTime);
+
+        HashMap<String, Object> payoffSchedulePreviewMaxPayoffPeriods = new HashMap<>();
+        payoffSchedulePreviewMaxPayoffPeriods.put("name", GlobalConfigurationConstants.PAYOFF_SCHEDULE_PREVIEW_MAX_PAYOFF_PERIODS);
+        payoffSchedulePreviewMaxPayoffPeriods.put("value", 1200L);
+        payoffSchedulePreviewMaxPayoffPeriods.put("enabled", true);
+        payoffSchedulePreviewMaxPayoffPeriods.put("trapDoor", false);
+        defaults.add(payoffSchedulePreviewMaxPayoffPeriods);
+
+        HashMap<String, Object> payoffSchedulePreviewMaxTermPeriods = new HashMap<>();
+        payoffSchedulePreviewMaxTermPeriods.put("name", GlobalConfigurationConstants.PAYOFF_SCHEDULE_PREVIEW_MAX_TERM_PERIODS);
+        payoffSchedulePreviewMaxTermPeriods.put("value", 1200L);
+        payoffSchedulePreviewMaxTermPeriods.put("enabled", true);
+        payoffSchedulePreviewMaxTermPeriods.put("trapDoor", false);
+        defaults.add(payoffSchedulePreviewMaxTermPeriods);
 
         return defaults;
     }
