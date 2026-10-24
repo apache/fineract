@@ -39,6 +39,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ParameterType;
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
@@ -2297,6 +2298,31 @@ public class LoanStepDef extends AbstractStepDef {
         }
     }
 
+    @Then("Loan Repayment schedule has {int} periods, with the following due dates only:")
+    public void loanRepaymentScheduleDueDatesOnlyCheck(int linesExpected, DataTable table) {
+
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.getLoanId();
+
+        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "repaymentSchedule")));
+        List<GetLoansLoanIdRepaymentPeriod> repaymentPeriods = loanDetailsResponse.getRepaymentSchedule().getPeriods();
+
+        List<List<String>> data = table.asLists();
+        int linesActual = (int) repaymentPeriods.stream().filter(r -> r.getPeriod() != null).count();
+        assertThat(linesActual)
+                .as(ErrorMessageHelper.wrongNumberOfLinesInRepaymentSchedule(String.valueOf(loanId), linesActual, linesExpected))
+                .isEqualTo(linesExpected);
+
+        for (int i = 1; i < data.size(); i++) {
+            List<String> expectedValues = data.get(i);
+            String dueDateExpected = expectedValues.get(1);
+            boolean found = repaymentPeriods.stream().filter(r -> r.getPeriod() != null)
+                    .anyMatch(r -> dueDateExpected.equals(FORMATTER.format(r.getDueDate())));
+            assertThat(found).as("Expected due date %s not found in repayment schedule", dueDateExpected).isTrue();
+        }
+    }
+
     @Then("Loan Repayment schedule has the following data in Total row:")
     public void loanRepaymentScheduleAmountCheck(DataTable table) {
         List<List<String>> data = table.asLists();
@@ -3647,6 +3673,85 @@ public class LoanStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_PRODUCT_CREATE_REQUEST, request);
     }
 
+    @When("Admin creates a new Loan Product with monthEndDueDateStrategy {string}")
+    public void createLoanProductWithMonthEndDueDateStrategy(String monthEndDueDateStrategy) {
+        final PostLoanProductsRequest request = loanProductsRequestFactory.defaultLoanProductsRequestLP1()//
+                .monthEndDueDateStrategy(PostLoanProductsRequest.MonthEndDueDateStrategyEnum.fromValue(monthEndDueDateStrategy));
+        final PostLoanProductsResponse response = ok(() -> fineractClient.loanProducts().createLoanProduct(request));
+        testContext().set(TestContextKey.LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.LOAN_PRODUCT_CREATE_REQUEST, request);
+    }
+
+    @Then("Loan Product {string} has monthEndDueDateStrategy {string}")
+    public void verifyLoanProductMonthEndDueDateStrategy(String loanProductName, String expectedStrategy) {
+        final DefaultLoanProduct product = DefaultLoanProduct.valueOf(loanProductName);
+        final Long loanProductId = loanProductResolver.resolve(product);
+        final GetLoanProductsProductIdResponse response = ok(() -> fineractClient.loanProducts().retrieveOneLoanProduct(loanProductId));
+        assertThat(response.getMonthEndDueDateStrategy()).isNotNull();
+        assertThat(response.getMonthEndDueDateStrategy().getId()).isEqualTo(expectedStrategy);
+    }
+
+    @Then("created Loan Product has monthEndDueDateStrategy {string}")
+    public void verifyCreatedLoanProductMonthEndDueDateStrategy(String expectedStrategy) {
+        final PostLoanProductsResponse createResponse = testContext().get(TestContextKey.LOAN_PRODUCT_CREATE_RESPONSE);
+        final GetLoanProductsProductIdResponse response = ok(
+                () -> fineractClient.loanProducts().retrieveOneLoanProduct(createResponse.getResourceId()));
+        assertThat(response.getMonthEndDueDateStrategy()).isNotNull();
+        assertThat(response.getMonthEndDueDateStrategy().getId()).isEqualTo(expectedStrategy);
+    }
+
+    @When("Admin updates created Loan Product monthEndDueDateStrategy to {string}")
+    public void updateCreatedLoanProductMonthEndDueDateStrategy(String monthEndDueDateStrategy) {
+        final PostLoanProductsResponse createResponse = testContext().get(TestContextKey.LOAN_PRODUCT_CREATE_RESPONSE);
+        final PutLoanProductsProductIdRequest request = new PutLoanProductsProductIdRequest()//
+                .monthEndDueDateStrategy(PutLoanProductsProductIdRequest.MonthEndDueDateStrategyEnum.fromValue(monthEndDueDateStrategy));
+        ok(() -> fineractClient.loanProducts().updateLoanProduct(createResponse.getResourceId(), request));
+    }
+
+    @Given("Loan product {string} dedicated to this scenario exists with monthEndDueDateStrategy {string}")
+    public void ensureDedicatedMonthEndDueDateLoanProduct(String loanProductName, String monthEndDueDateStrategy) {
+        final Optional<Long> existingId = findLoanProductIdByName(loanProductName);
+        if (existingId.isPresent()) {
+            // a previous run may have left it changed, so start from the requested strategy
+            updateLoanProductMonthEndDueDateStrategy(loanProductName, monthEndDueDateStrategy);
+            return;
+        }
+        final PostLoanProductsRequest request = loanProductsRequestFactory.defaultLoanProductsRequestLP2MonthEndDueDateRollActual()//
+                .name(loanProductName)//
+                .monthEndDueDateStrategy(PostLoanProductsRequest.MonthEndDueDateStrategyEnum.fromValue(monthEndDueDateStrategy));
+        ok(() -> fineractClient.loanProducts().createLoanProduct(request));
+    }
+
+    @When("Admin updates {string} loan product monthEndDueDateStrategy to {string}")
+    public void updateLoanProductMonthEndDueDateStrategy(String loanProductName, String monthEndDueDateStrategy) {
+        final Long loanProductId = resolveLoanProductId(loanProductName);
+        final PutLoanProductsProductIdRequest request = new PutLoanProductsProductIdRequest()//
+                .monthEndDueDateStrategy(PutLoanProductsProductIdRequest.MonthEndDueDateStrategyEnum.fromValue(monthEndDueDateStrategy));
+        ok(() -> fineractClient.loanProducts().updateLoanProduct(loanProductId, request));
+    }
+
+    @When("Admin retrieves the Loan Product template for monthEndDueDateStrategy")
+    public void retrieveLoanProductTemplateForMonthEndDueDateStrategy() {
+        final GetLoanProductsTemplateResponse template = ok(() -> fineractClient.loanProducts().retrieveTemplateLoanProduct(false));
+        testContext().set(TestContextKey.LOAN_PRODUCT_MONTH_END_TEMPLATE_RESPONSE, template);
+    }
+
+    @Then("Loan Product template has monthEndDueDateStrategy options:")
+    public void verifyLoanProductTemplateMonthEndDueDateStrategyOptions(DataTable table) {
+        final GetLoanProductsTemplateResponse template = testContext().get(TestContextKey.LOAN_PRODUCT_MONTH_END_TEMPLATE_RESPONSE);
+        final List<String> expectedOptions = table.asList();
+        final List<String> actualOptions = template.getMonthEndDueDateStrategyOptions().stream().map(option -> option.getId()).toList();
+        assertThat(actualOptions).containsExactlyInAnyOrderElementsOf(expectedOptions);
+    }
+
+    @Then("Loan has monthEndDueDateStrategy {string}")
+    public void verifyLoanMonthEndDueDateStrategy(String expectedStrategy) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanResponse.getLoanId(), Map.of()));
+        assertThat(loanDetails.getMonthEndDueDateStrategy()).isNotNull();
+        assertThat(loanDetails.getMonthEndDueDateStrategy().getId()).isEqualTo(expectedStrategy);
+    }
+
     @When("Admin retrieves the Loan Product template")
     public void retrieveLoanProductTemplate() {
         final Long loanProductId = loanProductResolver.resolve(DefaultLoanProduct.LP1);
@@ -3713,6 +3818,23 @@ public class LoanStepDef extends AbstractStepDef {
         return request;
     }
 
+    /**
+     * A default product by its {@link DefaultLoanProduct} name, or a product created on-the-fly by its name.
+     */
+    private Long resolveLoanProductId(final String loanProductName) {
+        try {
+            return loanProductResolver.resolve(DefaultLoanProduct.valueOf(loanProductName));
+        } catch (IllegalArgumentException e) {
+            return findLoanProductIdByName(loanProductName)
+                    .orElseThrow(() -> new IllegalArgumentException("Loan product [%s] not found".formatted(loanProductName), e));
+        }
+    }
+
+    private Optional<Long> findLoanProductIdByName(final String loanProductName) {
+        final List<GetLoanProductsResponse> products = ok(() -> fineractClient.loanProducts().retrieveAllLoanProducts(Map.of()));
+        return products.stream().filter(product -> loanProductName.equals(product.getName())).findAny().map(GetLoanProductsResponse::getId);
+    }
+
     private void createCustomizedLoan(final List<List<String>> loanData, final String emiStr) {
         final PostClientsResponse clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
         final Long clientId = clientResponse.getClientId();
@@ -3722,17 +3844,7 @@ public class LoanStepDef extends AbstractStepDef {
             String value = loanData.getLast().get(i);
             switch (loanData.getFirst().get(i)) {
                 case "LoanProduct" -> {
-                    Long loanProductId;
-                    try {
-                        final DefaultLoanProduct product = DefaultLoanProduct.valueOf(value);
-                        loanProductId = loanProductResolver.resolve(product);
-                    } catch (IllegalArgumentException e) {
-                        // Dedicated product created on-the-fly: resolve by name
-                        List<GetLoanProductsResponse> products = ok(() -> fineractClient.loanProducts().retrieveAllLoanProducts(Map.of()));
-                        loanProductId = products.stream().filter(p -> value.equals(p.getName())).findAny()
-                                .orElseThrow(() -> new IllegalArgumentException("Loan product [%s] not found".formatted(value))).getId();
-                    }
-                    loansRequest.productId(loanProductId);
+                    loansRequest.productId(resolveLoanProductId(value));
                 }
                 case "submitted on date" -> {
                     loansRequest.submittedOnDate(value);
@@ -3797,6 +3909,11 @@ public class LoanStepDef extends AbstractStepDef {
                 case "Repayment start date type" -> {
                     final RepaymentStartDateType repaymentStartDateType = RepaymentStartDateType.valueOf(value);
                     loansRequest.repaymentStartDateType(repaymentStartDateType.getValue());
+                }
+                case "monthEndDueDateStrategy" -> {
+                    final PostLoansRequest.MonthEndDueDateStrategyEnum monthEndDueDateStrategy = PostLoansRequest.MonthEndDueDateStrategyEnum
+                            .fromValue(value);
+                    loansRequest.monthEndDueDateStrategy(monthEndDueDateStrategy);
                 }
                 case "withLinkedSavingsAccountId" -> {
                     boolean withLinkedSavingsAccountId = Boolean.parseBoolean(value);

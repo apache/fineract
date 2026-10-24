@@ -204,7 +204,7 @@ public class PayoffSchedulePreviewServiceImpl implements PayoffSchedulePreviewSe
         return new LoanRepaymentScheduleModelData(parameters.startDate(), parameters.currency(), parameters.amount(),
                 parameters.startDate(), numberOfRepayments, parameters.frequency().value(), parameters.frequency().unit().name(),
                 parameters.annualNominalInterestRate(), false, parameters.daysInMonthType(), parameters.daysInYearType(), null, null, null,
-                false, null, InterestMethod.DECLINING_BALANCE, true, false);
+                false, null, InterestMethod.DECLINING_BALANCE, true, false, null);
     }
 
     private PlatformApiDataValidationException validationError(final String parameterName, final Object value, final String code,

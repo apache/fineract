@@ -49,6 +49,7 @@ import org.apache.fineract.infrastructure.core.serialization.gson.JsonExclude;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.common.domain.MonthlyDueDateResolver;
 import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 
 @Data
@@ -479,7 +480,8 @@ public class ProgressiveLoanInterestScheduleModel {
 
     public Function<Long, LocalDate> resolveRepaymentPeriodLengthGeneratorFunction(final LocalDate instance) {
         return switch (loanProductRelatedDetail.getRepaymentPeriodFrequencyType()) {
-            case MONTHS -> instance::plusMonths;
+            case MONTHS ->
+                months -> MonthlyDueDateResolver.plusMonths(instance, months, loanProductRelatedDetail.getMonthEndDueDateStrategy());
             case WEEKS -> instance::plusWeeks;
             case DAYS -> instance::plusDays;
             default -> throw new UnsupportedOperationException();

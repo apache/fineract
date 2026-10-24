@@ -34,6 +34,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeCalculationType;
@@ -174,6 +175,10 @@ public class LoanProductRelatedDetail {
     @Column(name = "days_in_year_custom_strategy")
     private DaysInYearCustomStrategyType daysInYearCustomStrategy;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "month_end_due_date_strategy")
+    private MonthEndDueDateStrategy monthEndDueDateStrategy;
+
     @Column(name = "enable_income_capitalization")
     private boolean enableIncomeCapitalization = false;
 
@@ -229,7 +234,8 @@ public class LoanProductRelatedDetail {
             final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType,
             final Integer installmentAmountInMultiplesOf, final boolean enableBuyDownFee,
             final LoanBuyDownFeeCalculationType buyDownFeeCalculationType, final LoanBuyDownFeeStrategy buyDownFeeStrategy,
-            final LoanBuyDownFeeIncomeType buyDownFeeIncomeType, final boolean merchantBuyDownFee) {
+            final LoanBuyDownFeeIncomeType buyDownFeeIncomeType, final boolean merchantBuyDownFee,
+            final MonthEndDueDateStrategy monthEndDueDateStrategy) {
 
         final MonetaryCurrency currency = MonetaryCurrency.fromCurrencyData(currencyData);
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
@@ -241,7 +247,8 @@ public class LoanProductRelatedDetail {
                 loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
                 chargeOffBehaviour, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
                 capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, installmentAmountInMultiplesOf,
-                enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee);
+                enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee,
+                monthEndDueDateStrategy);
     }
 
     protected LoanProductRelatedDetail() {
@@ -267,7 +274,8 @@ public class LoanProductRelatedDetail {
             final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType,
             final Integer installmentAmountInMultiplesOf, final boolean enableBuyDownFee,
             final LoanBuyDownFeeCalculationType buyDownFeeCalculationType, final LoanBuyDownFeeStrategy buyDownFeeStrategy,
-            final LoanBuyDownFeeIncomeType buyDownFeeIncomeType, final boolean merchantBuyDownFee) {
+            final LoanBuyDownFeeIncomeType buyDownFeeIncomeType, final boolean merchantBuyDownFee,
+            final MonthEndDueDateStrategy monthEndDueDateStrategy) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -315,6 +323,7 @@ public class LoanProductRelatedDetail {
         this.buyDownFeeStrategy = buyDownFeeStrategy;
         this.buyDownFeeIncomeType = buyDownFeeIncomeType;
         this.merchantBuyDownFee = merchantBuyDownFee;
+        this.monthEndDueDateStrategy = monthEndDueDateStrategy;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {

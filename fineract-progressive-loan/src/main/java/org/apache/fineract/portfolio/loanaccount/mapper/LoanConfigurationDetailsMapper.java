@@ -22,7 +22,9 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.service.LoanMeetingCalendarService;
 import org.apache.fineract.portfolio.loanproduct.data.LoanConfigurationDetails;
 import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanPreCloseInterestCalculationStrategy;
@@ -33,7 +35,7 @@ public final class LoanConfigurationDetailsMapper {
 
     private LoanConfigurationDetailsMapper() {}
 
-    public static ILoanConfigurationDetails map(Loan loan) {
+    public static ILoanConfigurationDetails map(Loan loan, LoanMeetingCalendarService loanMeetingCalendarService) {
         if (loan == null) {
             return null;
         }
@@ -57,7 +59,21 @@ public final class LoanConfigurationDetailsMapper {
                 loanProductRelatedDetail.getNumberOfRepayments(), loanProductRelatedDetail.isInterestRecognitionOnDisbursementDate(),
                 loanProductRelatedDetail.getDaysInYearCustomStrategy(), loanProductRelatedDetail.isAllowPartialPeriodInterestCalculation(),
                 loan.isInterestRecalculationEnabled(), getRestFrequencyType(loan), getPreCloseInterestCalculationStrategy(loan),
-                loan.isAllowFullTermForTranche(), loan.getLoanProductRelatedDetail().getLoanScheduleProcessingType());
+                loan.isAllowFullTermForTranche(), loan.getLoanProductRelatedDetail().getLoanScheduleProcessingType(),
+                monthEndDueDateStrategy(loan, loanMeetingCalendarService));
+    }
+
+    /**
+     * The strategy the loan's dates and interest periods follow: none for a loan following a meeting calendar, since
+     * the calendar decides its due dates. The calendar is only looked up when the strategy would make a difference.
+     */
+    public static MonthEndDueDateStrategy monthEndDueDateStrategy(final Loan loan,
+            final LoanMeetingCalendarService loanMeetingCalendarService) {
+        final MonthEndDueDateStrategy monthEndDueDateStrategy = loan.getLoanProductRelatedDetail().getMonthEndDueDateStrategy();
+        if (MonthEndDueDateStrategy.rollsForward(monthEndDueDateStrategy) && loanMeetingCalendarService.isLinkedToMeetingCalendar(loan)) {
+            return null;
+        }
+        return monthEndDueDateStrategy;
     }
 
     private static RecalculationFrequencyType getRestFrequencyType(Loan loan) {

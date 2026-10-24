@@ -49,6 +49,8 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
+import org.apache.fineract.portfolio.common.domain.MonthlyDueDateResolver;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProcessingException;
@@ -304,6 +306,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .daysInMonthType(DaysInMonthType.fromInt(loanProductRelatedDetail.getDaysInMonthType()))
                 .daysInYearType(DaysInYearType.fromInt(loanProductRelatedDetail.getDaysInYearType()))
                 .daysInYearCustomStrategy(loanProductRelatedDetail.getDaysInYearCustomStrategy())
+                .monthEndDueDateStrategy(loanProductRelatedDetail.getMonthEndDueDateStrategy())
                 // Flags & options
                 .isDownPaymentEnabled(false)
                 .allowPartialPeriodInterestCalculation(loanProductRelatedDetail.isAllowPartialPeriodInterestCalculation())
@@ -1110,7 +1113,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         return switch (loanApplicationTerms.getRepaymentPeriodFrequencyType()) {
             case DAYS -> repaymentStartDate.plusDays(loanApplicationTerms.getFixedLength() + variationDays);
             case WEEKS -> repaymentStartDate.plusWeeks(loanApplicationTerms.getFixedLength() + variationDays);
-            case MONTHS -> repaymentStartDate.plusMonths(loanApplicationTerms.getFixedLength() + variationDays);
+            case MONTHS -> MonthlyDueDateResolver.plusMonths(repaymentStartDate, loanApplicationTerms.getFixedLength() + variationDays,
+                    loanApplicationTerms.getMonthEndDueDateStrategy());
             case YEARS -> repaymentStartDate.plusYears(loanApplicationTerms.getFixedLength() + variationDays);
             case INVALID, WHOLE_TERM -> throw new IllegalArgumentException(
                     "Unsupported period frequency type for fixed length: " + loanApplicationTerms.getRepaymentPeriodFrequencyType());
@@ -1582,6 +1586,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             ChronoUnit chronoUnit, MathContext mc) {
 
         LocalDate seedDate = calculateSeedDate(scheduleModel, repaymentPeriod);
+        final MonthEndDueDateStrategy monthEndDueDateStrategy = scheduleModel.loanProductRelatedDetail().getMonthEndDueDateStrategy();
         int numberOfPeriodBetweenSeedDateAndActualRepaymentPeriod = switch (chronoUnit) {
             case DAYS, WEEKS, YEARS -> DateUtils.getExactDifference(seedDate, repaymentPeriod.getFromDate(), chronoUnit);
             case MONTHS -> {
@@ -1603,13 +1608,13 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         int multiplicator = numberOfPeriodBetweenSeedDateAndActualRepaymentPeriod + 1;
         LocalDate fromDate = repaymentPeriod.getFromDate();
         while (fromDate.isBefore(repaymentPeriod.getDueDate())) {
-            fromDate = seedDate.plus(multiplicator, chronoUnit);
+            fromDate = MonthlyDueDateResolver.plusPeriods(seedDate, multiplicator, chronoUnit, monthEndDueDateStrategy);
             if (!fromDate.isAfter(repaymentPeriod.getDueDate())) {
                 multiplicator++;
             } else {
                 LocalDate fullPeriodDate = fromDate;
                 multiplicator = multiplicator - numberOfPeriodBetweenSeedDateAndActualRepaymentPeriod - 1;
-                fromDate = seedDate.plus(multiplicator, chronoUnit);
+                fromDate = MonthlyDueDateResolver.plusPeriods(seedDate, multiplicator, chronoUnit, monthEndDueDateStrategy);
                 final long differenceInDays = DateUtils.getDifferenceInDays(fromDate, repaymentPeriod.getDueDate());
                 final long fullPeriodDifferenceInDays = DateUtils.getDifferenceInDays(fromDate, fullPeriodDate);
                 return BigDecimal.valueOf(differenceInDays).divide(BigDecimal.valueOf(fullPeriodDifferenceInDays), mc)
@@ -1622,6 +1627,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     private static LocalDate calculateSeedDate(ProgressiveLoanInterestScheduleModel scheduleModel, RepaymentPeriod repaymentPeriod) {
         LocalDate seedDate = scheduleModel.getStartDate();
+        final MonthEndDueDateStrategy monthEndDueDateStrategy = scheduleModel.loanProductRelatedDetail().getMonthEndDueDateStrategy();
         LocalDate calculatedDate;
         int multiplicator = 1;
         ChronoUnit chronoUnit = switch (scheduleModel.loanProductRelatedDetail().getRepaymentPeriodFrequencyType()) {
@@ -1633,13 +1639,17 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                     "Unsupported repayment frequency: " + scheduleModel.loanProductRelatedDetail().getRepaymentPeriodFrequencyType());
         };
         do {
-            calculatedDate = seedDate.plus(multiplicator, chronoUnit);
+            calculatedDate = MonthlyDueDateResolver.plusPeriods(seedDate, multiplicator, chronoUnit, monthEndDueDateStrategy);
             multiplicator++;
         } while (calculatedDate.isBefore(repaymentPeriod.getDueDate()));
-        return calculatedDate.equals(repaymentPeriod.getDueDate()) && calculatedDate
-                .minus(scheduleModel.loanProductRelatedDetail().getRepayEvery(), chronoUnit).isEqual(repaymentPeriod.getFromDate())
-                        ? seedDate
-                        : repaymentPeriod.getFromDate();
+        final int repayEvery = scheduleModel.loanProductRelatedDetail().getRepayEvery();
+        // a date rolled forward to the 1st cannot be stepped back from: 1 March minus one month is 1 February
+        final LocalDate previousCalculatedDate = MonthEndDueDateStrategy.rollsForward(monthEndDueDateStrategy)
+                ? MonthlyDueDateResolver.plusPeriods(seedDate, multiplicator - 1 - repayEvery, chronoUnit, monthEndDueDateStrategy)
+                : calculatedDate.minus(repayEvery, chronoUnit);
+        return calculatedDate.equals(repaymentPeriod.getDueDate()) && previousCalculatedDate.isEqual(repaymentPeriod.getFromDate())
+                ? seedDate
+                : repaymentPeriod.getFromDate();
     }
 
     /**
@@ -2345,7 +2355,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
         // insert new reaged repayment periods
         for (int i = 0; i < numberOfInstallmentsToAdd; i++) {
-            final LocalDate dueDate = scheduledDateGenerator.getRepaymentPeriodDate(frequencyType, frequency * i, startDate);
+            final LocalDate dueDate = scheduledDateGenerator.getRepaymentPeriodDate(frequencyType, frequency * i, startDate,
+                    interestSchedule.loanProductRelatedDetail().getMonthEndDueDateStrategy());
             final RepaymentPeriod repaymentPeriod = RepaymentPeriod.create(previous, previous.getDueDate(), dueDate,
                     interestSchedule.zero(), interestSchedule.mc(), previous.getLoanProductRelatedDetail());
             repaymentPeriod.setTotalCapitalizedIncomeAmount(previous.getTotalCapitalizedIncomeAmount());
