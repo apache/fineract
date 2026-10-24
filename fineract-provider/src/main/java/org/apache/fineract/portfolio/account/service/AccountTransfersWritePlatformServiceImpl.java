@@ -544,7 +544,20 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     transaction.getToLoanTransaction(), parameter, null, new HashMap<>());
             transaction.reverse();
         } else if (isLoanToSavingsAccountTransfer(fromAccountType, toAccountType)) {
-            throw new UnsupportedOperationException("Undo Loan to Savings Account Transfer is not implemented");
+            if (transaction.getFromLoanTransaction().isDisbursement()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.account.transfer.undo.loan.disbursement.not.supported",
+                        "Undoing a loan disbursement transferred to a savings account is not supported", accountTransferId);
+            }
+            this.savingsAccountWritePlatformService.undoTransaction(transaction.getToSavingsTransaction().getSavingsAccount().getId(),
+                    transaction.getToSavingsTransaction().getId(), true);
+            final ExternalId reversalTxnExternalId = externalIdFactory.create();
+            LoanAdjustmentParameter parameter = LoanAdjustmentParameter.builder().transactionAmount(BigDecimal.ZERO)
+                    .paymentDetail(paymentDetail).transactionDate(transaction.getFromLoanTransaction().getTransactionDate())
+                    .txnExternalId(transaction.getFromLoanTransaction().getExternalId()).reversalTxnExternalId(reversalTxnExternalId)
+                    .noteText(null).build();
+            this.loanAdjustmentService.adjustLoanTransaction(transaction.getFromLoanTransaction().getLoan(),
+                    transaction.getFromLoanTransaction(), parameter, null, new HashMap<>());
+            transaction.reverse();
         }
 
         final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder() //
