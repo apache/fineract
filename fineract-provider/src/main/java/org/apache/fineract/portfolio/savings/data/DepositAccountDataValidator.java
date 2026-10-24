@@ -30,6 +30,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.interes
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.interestPostingPeriodInMonthsParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isCalendarInheritedParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isRateChartOverriddenParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.linkedAccountParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.mandatoryRecommendedDepositAmountParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.maturityInstructionIdParamName;
@@ -576,6 +577,8 @@ public class DepositAccountDataValidator {
                 element);
         baseDataValidator.reset().parameter(depositPeriodFrequencyIdParamName).value(depositPeriodFrequencyId)
                 .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
+
+        validateRateChartOverride(element, baseDataValidator, false);
     }
 
     private void validateDepositTermDeatilForUpdate(final JsonElement element, final DataValidatorBuilder baseDataValidator,
@@ -601,6 +604,25 @@ public class DepositAccountDataValidator {
                     element);
             baseDataValidator.reset().parameter(depositPeriodFrequencyIdParamName).value(depositPeriodFrequencyId)
                     .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
+        }
+
+        validateRateChartOverride(element, baseDataValidator, true);
+    }
+
+    private void validateRateChartOverride(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            final boolean isUpdate) {
+        if (fromApiJsonHelper.parameterExists(isRateChartOverriddenParamName, element)) {
+            final Boolean isRateChartOverridden = this.fromApiJsonHelper.extractBooleanNamed(isRateChartOverriddenParamName, element);
+            baseDataValidator.reset().parameter(isRateChartOverriddenParamName).value(isRateChartOverridden).notNull();
+
+            if (Boolean.TRUE.equals(isRateChartOverridden)) {
+                if (!isUpdate || fromApiJsonHelper.parameterExists(nominalAnnualInterestRateParamName, element)) {
+                    final BigDecimal nominalAnnualInterestRate = this.fromApiJsonHelper
+                            .extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateParamName, element);
+                    baseDataValidator.reset().parameter(nominalAnnualInterestRateParamName).value(nominalAnnualInterestRate).notNull()
+                            .positiveAmount();
+                }
+            }
         }
     }
 

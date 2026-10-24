@@ -208,37 +208,39 @@ public class RecurringDepositAccount extends SavingsAccount {
     protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate interestPostingUpToDate,
             final boolean isPreMatureClosure) {
 
-        boolean applyPreMaturePenalty = false;
-        BigDecimal penalInterest = BigDecimal.ZERO;
-        LocalDate depositCloseDate = calculateMaturityDate();
-        if (isPreMatureClosure) {
-            if (this.accountTermAndPreClosure.isPreClosurePenalApplicable()) {
-                applyPreMaturePenalty = true;
-                penalInterest = this.accountTermAndPreClosure.depositPreClosureDetail().preClosurePenalInterest();
-                final PreClosurePenalInterestOnType preClosurePenalInterestOnType = this.accountTermAndPreClosure.depositPreClosureDetail()
-                        .preClosurePenalInterestOnType();
-                if (preClosurePenalInterestOnType == PreClosurePenalInterestOnType.WHOLE_TERM) {
-                    depositCloseDate = interestCalculatedUpto();
-                } else if (preClosurePenalInterestOnType == PreClosurePenalInterestOnType.TILL_PREMATURE_WITHDRAWAL) {
-                    depositCloseDate = interestPostingUpToDate;
+        BigDecimal applicableInterestRate = this.nominalAnnualInterestRate;
+        if (this.chart != null && !this.accountTermAndPreClosure.isRateChartOverridden()) {
+            boolean applyPreMaturePenalty = false;
+            BigDecimal penalInterest = BigDecimal.ZERO;
+            LocalDate depositCloseDate = calculateMaturityDate();
+            if (isPreMatureClosure) {
+                if (this.accountTermAndPreClosure.isPreClosurePenalApplicable()) {
+                    applyPreMaturePenalty = true;
+                    penalInterest = this.accountTermAndPreClosure.depositPreClosureDetail().preClosurePenalInterest();
+                    final PreClosurePenalInterestOnType preClosurePenalInterestOnType = this.accountTermAndPreClosure
+                            .depositPreClosureDetail().preClosurePenalInterestOnType();
+                    if (preClosurePenalInterestOnType == PreClosurePenalInterestOnType.WHOLE_TERM) {
+                        depositCloseDate = interestCalculatedUpto();
+                    } else if (preClosurePenalInterestOnType == PreClosurePenalInterestOnType.TILL_PREMATURE_WITHDRAWAL) {
+                        depositCloseDate = interestPostingUpToDate;
+                    }
                 }
             }
+
+            if (depositCloseDate == null) {
+                depositCloseDate = DateUtils.getBusinessLocalDate();
+            }
+
+            final BigDecimal depositAmount = accountTermAndPreClosure.depositAmount();
+            applicableInterestRate = this.chart.getApplicableInterestRate(depositAmount, depositStartDate(), depositCloseDate, this.client);
+
+            if (applyPreMaturePenalty) {
+                applicableInterestRate = applicableInterestRate.subtract(penalInterest);
+                applicableInterestRate = applicableInterestRate.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : applicableInterestRate;
+            }
+
+            this.nominalAnnualInterestRate = applicableInterestRate;
         }
-
-        if (depositCloseDate == null) {
-            depositCloseDate = DateUtils.getBusinessLocalDate();
-        }
-
-        final BigDecimal depositAmount = accountTermAndPreClosure.depositAmount();
-        BigDecimal applicableInterestRate = this.chart.getApplicableInterestRate(depositAmount, depositStartDate(), depositCloseDate,
-                this.client);
-
-        if (applyPreMaturePenalty) {
-            applicableInterestRate = applicableInterestRate.subtract(penalInterest);
-            applicableInterestRate = applicableInterestRate.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : applicableInterestRate;
-        }
-
-        this.nominalAnnualInterestRate = applicableInterestRate;
 
         return applicableInterestRate.divide(BigDecimal.valueOf(100L), mc);
     }
@@ -1039,7 +1041,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME);
         LocalDate maturityDate = calculateMaturityDate();
-        if (this.chart != null) {
+        if (this.chart != null && !this.accountTermAndPreClosure.isRateChartOverridden()) {
             final LocalDate chartFromDate = this.chart.getFromDate();
             LocalDate chartEndDate = this.chart.getEndDate();
             chartEndDate = chartEndDate == null ? DateUtils.getBusinessLocalDate() : chartEndDate;

@@ -31,6 +31,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.deposit
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.expectedFirstDepositOnDateParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isCalendarInheritedParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isRateChartOverriddenParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.mandatoryRecommendedDepositAmountParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.maturityInstructionIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
@@ -404,9 +405,10 @@ public class DepositAccountAssembler {
                 ? DepositAccountOnClosureType.fromInt(accountOnClosureTypeId)
                 : null;
         final Long transferToSavingsId = command.longValueOfParameterNamed(transferToSavingsIdParamName);
+        final boolean isRateChartOverridden = command.booleanPrimitiveValueOfParameterNamed(isRateChartOverriddenParamName);
         return DepositAccountTermAndPreClosure.createNew(updatedProductPreClosure, updatedProductTerm, account, depositAmount,
                 maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType,
-                trasferInterest, transferToSavingsId);
+                trasferInterest, transferToSavingsId, isRateChartOverridden);
     }
 
     public DepositAccountRecurringDetail assembleAccountRecurringDetail(final JsonCommand command,
