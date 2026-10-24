@@ -114,7 +114,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.InstallmentNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeAdjustmentException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeDeactivationException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeRefundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
@@ -1326,40 +1325,10 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
     private void loanChargeAdjustmentEntranceValidation(final LoanCharge loanCharge, final BigDecimal transactionAmount) {
         final Loan loan = loanCharge.getLoan();
-        if (!(loan.isOpen() || loan.getStatus().isClosedObligationsMet() || loan.getStatus().isOverpaid())) {
-            final String errorCode = "loan.charge.adjustment.invalid.status";
-            throw new LoanChargeAdjustmentException(errorCode,
-                    "Adjustment is not supported for the status of " + loan.getStatus().toString());
-        }
-
-        if (transactionAmount.compareTo(loanCharge.amount()) > 0) {
-            final String errorCode = "loan.charge.adjustment.invalid.amount";
-            throw new LoanChargeAdjustmentException(errorCode,
-                    "Transaction amount cannot be higher than the charge amount: " + loanCharge.amount());
-        }
-
-        BigDecimal availableAmountForAdjustment = calculateAvailableAmountForChargeAdjustment(loanCharge);
-        if (transactionAmount.compareTo(availableAmountForAdjustment) > 0) {
-            final String errorCode = "loan.charge.adjustment.invalid.amount";
-            throw new LoanChargeAdjustmentException(errorCode,
-                    "Transaction amount cannot be higher than the available charge amount for adjustment: " + availableAmountForAdjustment);
-        }
+        loanChargeValidator.validateLoanStatusForChargeAdjustment(loan);
+        loanChargeValidator.validateChargeAdjustmentAmount(loanCharge, transactionAmount, null);
         checkClientOrGroupActive(loan);
         loanDownPaymentTransactionValidator.validateAccountStatus(loan, LoanEvent.LOAN_CHARGE_ADJUSTMENT);
-    }
-
-    private BigDecimal calculateAvailableAmountForChargeAdjustment(final LoanCharge loanCharge) {
-        BigDecimal availableAmountForAdjustment = loanCharge.amount();
-        for (LoanTransaction loanTransaction : loanCharge.getLoan().getLoanTransactions()) {
-            if (loanTransaction.isNotReversed() && loanTransaction.getTypeOf().isChargeAdjustment()) {
-                LoanTransactionRelation loanTransactionRelation = loanTransaction.getLoanTransactionRelations().stream()
-                        .filter(e -> e.getToCharge() != null).findFirst().orElseThrow();
-                if (loanCharge.equals(loanTransactionRelation.getToCharge())) {
-                    availableAmountForAdjustment = availableAmountForAdjustment.subtract(loanTransaction.getAmount());
-                }
-            }
-        }
-        return availableAmountForAdjustment;
     }
 
     private void throwLoanChargeRefundException(String errorMessage, Integer installmentNumber, LocalDate dueDate) {
