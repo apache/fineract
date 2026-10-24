@@ -220,14 +220,24 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
                                                             */);
         final Collection<EnumOptionData> statusOptions = Arrays.asList(standingInstructionStatus(StandingInstructionStatus.ACTIVE),
                 standingInstructionStatus(StandingInstructionStatus.DISABLED));
-        final Collection<EnumOptionData> instructionTypeOptions = Arrays.asList(standingInstructionType(StandingInstructionType.FIXED),
-                standingInstructionType(StandingInstructionType.DUES));
         final Collection<EnumOptionData> priorityOptions = Arrays.asList(standingInstructionPriority(StandingInstructionPriority.URGENT),
                 standingInstructionPriority(StandingInstructionPriority.HIGH),
                 standingInstructionPriority(StandingInstructionPriority.MEDIUM),
                 standingInstructionPriority(StandingInstructionPriority.LOW));
-        final Collection<EnumOptionData> recurrenceTypeOptions = Arrays.asList(recurrenceType(AccountTransferRecurrenceType.PERIODIC),
-                recurrenceType(AccountTransferRecurrenceType.AS_PER_DUES));
+
+        Collection<EnumOptionData> instructionTypeOptions = null;
+        Collection<EnumOptionData> recurrenceTypeOptions = null;
+
+        if (accountTransferType.isAccountTransfer()) {
+            instructionTypeOptions = Arrays.asList(standingInstructionType(StandingInstructionType.FIXED));
+            recurrenceTypeOptions = Arrays.asList(recurrenceType(AccountTransferRecurrenceType.PERIODIC));
+        } else {
+            instructionTypeOptions = Arrays.asList(standingInstructionType(StandingInstructionType.FIXED),
+                    standingInstructionType(StandingInstructionType.DUES));
+            recurrenceTypeOptions = Arrays.asList(recurrenceType(AccountTransferRecurrenceType.PERIODIC),
+                    recurrenceType(AccountTransferRecurrenceType.AS_PER_DUES));
+        }
+
         final Collection<EnumOptionData> recurrenceFrequencyOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
 
         return StandingInstructionData.template(fromOffice, fromClient, fromAccountTypeData, fromAccount, transferDate, toOffice, toClient,
