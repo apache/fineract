@@ -36,6 +36,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 public class SavingsAccountActivationServiceImpl implements SavingsAccountActivationService {
 
     private final SavingsAccountPostInterestService savingsAccountPostInterestService;
+    private final SavingsAccountInterestCalculationService savingsAccountInterestCalculationService;
 
     @Override
     public void processAccountUponActivation(final SavingsAccount account, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
@@ -75,8 +76,9 @@ public class SavingsAccountActivationServiceImpl implements SavingsAccountActiva
                         backdatedTxnsAllowedTill, postReversals);
             } else {
                 final LocalDate today = DateUtils.getBusinessLocalDate();
-                account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                        financialYearBeginningMonth, postInterestAsOnDate, backdatedTxnsAllowedTill, postReversals);
+                this.savingsAccountInterestCalculationService.calculateInterestUsing(account, mc, today, isInterestTransfer,
+                        isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestAsOnDate,
+                        backdatedTxnsAllowedTill, postReversals);
             }
         }
     }
