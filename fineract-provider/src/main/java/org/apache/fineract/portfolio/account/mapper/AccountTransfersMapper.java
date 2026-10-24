@@ -22,6 +22,9 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -41,7 +44,8 @@ public final class AccountTransfersMapper implements RowMapper<AccountTransferDa
 
     private static final String ACCOUNT_TRANSFER_SCHEMA = """
             att.id as id, att.is_reversed as isReversed,
-            att.transaction_date as transferDate, att.amount as transferAmount,
+            att.transaction_date as transferDate, att.transaction_time as transferTime,
+            att.transaction_time_offset as transferTimeOffset, att.amount as transferAmount,
             att.description as transferDescription,
             att.currency_code as currencyCode, att.currency_digits as currencyDigits,
             att.currency_multiplesof as inMultiplesOf,
@@ -94,6 +98,7 @@ public final class AccountTransfersMapper implements RowMapper<AccountTransferDa
         final boolean reversed = rs.getBoolean("isReversed");
 
         final LocalDate transferDate = JdbcSupport.getLocalDate(rs, "transferDate");
+        final OffsetTime transferTime = getOffsetTime(rs, "transferTime", "transferTimeOffset");
         final BigDecimal transferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "transferAmount");
         final String transferDescription = rs.getString("transferDescription");
 
@@ -166,7 +171,13 @@ public final class AccountTransfersMapper implements RowMapper<AccountTransferDa
             toAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
         }
 
-        return AccountTransferData.instance(id, reversed, transferDate, currency, transferAmount, transferDescription, fromOffice, toOffice,
-                fromClient, toClient, fromAccountType, fromAccount, toAccountType, toAccount, paymentDetailData);
+        return AccountTransferData.instance(id, reversed, transferDate, transferTime, currency, transferAmount, transferDescription,
+                fromOffice, toOffice, fromClient, toClient, fromAccountType, fromAccount, toAccountType, toAccount, paymentDetailData);
+    }
+
+    private static OffsetTime getOffsetTime(final ResultSet rs, final String timeColumn, final String offsetColumn) throws SQLException {
+        final LocalTime time = JdbcSupport.getLocalTime(rs, timeColumn);
+        final Integer offset = JdbcSupport.getInteger(rs, offsetColumn);
+        return time == null ? null : OffsetTime.of(time, ZoneOffset.ofTotalSeconds(offset));
     }
 }
