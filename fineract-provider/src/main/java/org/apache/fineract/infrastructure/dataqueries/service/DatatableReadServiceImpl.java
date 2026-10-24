@@ -92,8 +92,9 @@ public class DatatableReadServiceImpl implements DatatableReadService {
             final String registeredDatatableName = rowSet.getString("registered_table_name");
             final String entitySubType = rowSet.getString("entity_subtype");
             final List<ResultsetColumnHeaderData> columnHeaderData = genericDataService.fillResultsetColumnHeaders(registeredDatatableName);
+            final boolean multiRow = datatableUtil.isMultirowDatatable(columnHeaderData);
 
-            datatables.add(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData));
+            datatables.add(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData, multiRow));
         }
 
         return datatables;
@@ -119,8 +120,9 @@ public class DatatableReadServiceImpl implements DatatableReadService {
             final String entitySubType = rowSet.getString("entity_subtype");
             final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
                     .fillResultsetColumnHeaders(registeredDatatableName);
+            final boolean multiRow = datatableUtil.isMultirowDatatable(columnHeaderData);
 
-            datatableData = DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData);
+            datatableData = DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData, multiRow);
         }
 
         return datatableData;
