@@ -144,13 +144,8 @@ public class TaxComponent extends AbstractAuditableCustom {
 
     }
 
-    public BigDecimal getPercentage() {
-        return this.percentage;
-    }
 
-    public LocalDate startDate() {
-        return this.startDate;
-    }
+
 
     public BigDecimal getApplicablePercentage(final LocalDate date) {
         BigDecimal percentage = null;
@@ -168,20 +163,14 @@ public class TaxComponent extends AbstractAuditableCustom {
     }
 
     private boolean occursOnDayFrom(final LocalDate target) {
-        return DateUtils.isAfter(target, startDate());
+        return DateUtils.isAfter(target, getStartDate());
     }
 
-    public Set<TaxComponentHistory> getTaxComponentHistories() {
-        return this.taxComponentHistories;
-    }
 
-    public Set<TaxGroupMappings> getTaxGroupMappings() {
-        return this.taxGroupMappings;
-    }
 
     public Collection<LocalDate> allStartDates() {
         List<LocalDate> dates = new ArrayList<>();
-        dates.add(startDate());
+        dates.add(getStartDate());
         for (TaxComponentHistory componentHistory : taxComponentHistories) {
             dates.add(componentHistory.startDate());
         }
@@ -189,19 +178,6 @@ public class TaxComponent extends AbstractAuditableCustom {
         return dates;
     }
 
-    public Integer getDebitAccountType() {
-        return this.debitAccountType;
-    }
 
-    public GLAccount getDebitAccount() {
-        return this.debitAccount;
-    }
 
-    public Integer getCreditAccountType() {
-        return this.creditAccountType;
-    }
-
-    public GLAccount getCreditAccount() {
-        return this.creditAccount;
-    }
 }

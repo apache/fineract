@@ -58,7 +58,7 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
     public CommandProcessingResult updateTaxComponent(final Long id, final JsonCommand command) {
         this.validator.validateForTaxComponentUpdate(command.json());
         final TaxComponent taxComponent = this.taxComponentRepositoryWrapper.findOneWithNotFoundDetection(id);
-        this.validator.validateStartDate(taxComponent.startDate(), command);
+        this.validator.validateStartDate(taxComponent.getStartDate(), command);
         Map<String, Object> changes = taxComponent.update(command);
         this.validator.validateTaxComponentForUpdate(taxComponent);
         this.taxComponentRepository.saveAndFlush(taxComponent);
