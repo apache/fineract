@@ -18,27 +18,31 @@
  */
 package org.apache.fineract.portfolio.calendar.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.calendar.data.CalendarUpdateRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarUpdateResponse;
 import org.apache.fineract.portfolio.calendar.service.CalendarWritePlatformService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 
-@Service
-@CommandType(entity = "CALENDAR", action = "UPDATE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class UpdateCalendarCommandHandler implements NewCommandSourceHandler {
+public class CalendarUpdateCommandHandler implements CommandHandler<CalendarUpdateRequest, CalendarUpdateResponse> {
 
-    private final CalendarWritePlatformService calendarWritePlatformService;
+    private final CalendarWritePlatformService writeService;
 
-    @Transactional
+    @Retry(name = "commandCalendarUpdate", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        return this.calendarWritePlatformService.updateCalendar(command);
+    public CalendarUpdateResponse handle(Command<CalendarUpdateRequest> command) {
+        return writeService.updateCalendar(command.getPayload());
     }
 
+    @Override
+    public CalendarUpdateResponse fallback(Command<CalendarUpdateRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
+    }
 }
