@@ -118,6 +118,11 @@ public final class LoanProductsApiResourceSwagger {
         public Double maxInterestRatePerPeriod;
         @Schema(example = "1")
         public Integer repaymentEvery;
+        @Schema(example = "10", description = "First due day of the month of a semi-monthly product, between 1 and 27.")
+        public Integer firstRepaymentDayOfMonth;
+        @Schema(example = "25", description = "Second due day of the month of a semi-monthly product, between 2 and 31 and "
+                + "greater than the first one. A day the month lacks falls on its last day, so 31 is the last day of every month.")
+        public Integer secondRepaymentDayOfMonth;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "true")
@@ -691,6 +696,11 @@ public final class LoanProductsApiResourceSwagger {
         public Integer maxNumberOfRepayments;
         @Schema(example = "7")
         public Integer repaymentEvery;
+        @Schema(example = "10", description = "First due day of the month of a semi-monthly product, between 1 and 27.")
+        public Integer firstRepaymentDayOfMonth;
+        @Schema(example = "25", description = "Second due day of the month of a semi-monthly product, between 2 and 31 and "
+                + "greater than the first one. A day the month lacks falls on its last day, so 31 is the last day of every month.")
+        public Integer secondRepaymentDayOfMonth;
         public GetLoanProductsRepaymentFrequencyType repaymentFrequencyType;
         @Schema(example = "10")
         public Integer fixedLength;
@@ -1443,6 +1453,11 @@ public final class LoanProductsApiResourceSwagger {
         public Integer maxNumberOfRepayments;
         @Schema(example = "7")
         public Integer repaymentEvery;
+        @Schema(example = "10", description = "First due day of the month of a semi-monthly product, between 1 and 27.")
+        public Integer firstRepaymentDayOfMonth;
+        @Schema(example = "25", description = "Second due day of the month of a semi-monthly product, between 2 and 31 and "
+                + "greater than the first one. A day the month lacks falls on its last day, so 31 is the last day of every month.")
+        public Integer secondRepaymentDayOfMonth;
         public GetLoanProductsResponse.GetLoanProductsRepaymentFrequencyType repaymentFrequencyType;
         @Schema(example = "10")
         public Integer fixedLength;
@@ -1645,6 +1660,11 @@ public final class LoanProductsApiResourceSwagger {
         public Double maxInterestRatePerPeriod;
         @Schema(example = "1")
         public Integer repaymentEvery;
+        @Schema(example = "10", description = "First due day of the month of a semi-monthly product, between 1 and 27.")
+        public Integer firstRepaymentDayOfMonth;
+        @Schema(example = "25", description = "Second due day of the month of a semi-monthly product, between 2 and 31 and "
+                + "greater than the first one. A day the month lacks falls on its last day, so 31 is the last day of every month.")
+        public Integer secondRepaymentDayOfMonth;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "true")

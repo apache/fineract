@@ -1115,6 +1115,87 @@ class ProgressiveEMICalculatorTest {
         checkPeriod(interestSchedule, 3, 0, 250.0, 0.0, 0.0, 250.0, 0.0);
     }
 
+    /**
+     * With 30-day months every semi-monthly period counts as 15 days whatever its actual length (16 days in January, 13
+     * in February), so 24% a year gives the same 1% rate factor for each period and a regular annuity.
+     */
+    @Test
+    public void test_disbursedAmt1000_dayInYears360_daysInMonth30_repayEverySemiMonthly() {
+
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
+                periodData(LocalDate.of(2023, 1, 15), LocalDate.of(2023, 1, 31)),
+                periodData(LocalDate.of(2023, 1, 31), LocalDate.of(2023, 2, 15)),
+                periodData(LocalDate.of(2023, 2, 15), LocalDate.of(2023, 2, 28)),
+                periodData(LocalDate.of(2023, 2, 28), LocalDate.of(2023, 3, 15)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(24);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.SEMI_MONTHLY);
+        Mockito.when(loanProductRelatedDetail.getFirstRepaymentDayOfMonth()).thenReturn(15);
+        Mockito.when(loanProductRelatedDetail.getSecondRepaymentDayOfMonth()).thenReturn(31);
+        Mockito.when(loanProductRelatedDetail.semiMonthlyDueDays()).thenCallRealMethod();
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrencyData()).thenReturn(currency);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                expectedRepaymentPeriods, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+
+        final Money disbursedAmount = toMoney(1000.0);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2023, 1, 15), disbursedAmount);
+
+        checkPeriod(interestSchedule, 0, 256.28, 10.0, 246.28, 753.72, false);
+        checkPeriod(interestSchedule, 1, 256.28, 7.54, 248.74, 504.98, false);
+        checkPeriod(interestSchedule, 2, 256.28, 5.05, 251.23, 253.75, false);
+        checkPeriod(interestSchedule, 3, 256.29, 2.54, 253.75, 0.0, false);
+    }
+
+    /**
+     * With interest calculated "same as repayment period" every semi-monthly period is charged 1/24 of the annual rate,
+     * and the EMI is derived from that same rate, as monthly (1/12) and weekly (1/52) do. Without it the EMI would take
+     * a 15/365 factor (0.986% instead of 1%) and rely on the EMI evening-out to make up the difference.
+     */
+    @Test
+    public void test_disbursedAmt1000_dayInYears365_daysInMonth30_sameAsRepaymentPeriod_repayEverySemiMonthly() {
+
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
+                periodData(LocalDate.of(2023, 1, 15), LocalDate.of(2023, 1, 31)),
+                periodData(LocalDate.of(2023, 1, 31), LocalDate.of(2023, 2, 15)),
+                periodData(LocalDate.of(2023, 2, 15), LocalDate.of(2023, 2, 28)),
+                periodData(LocalDate.of(2023, 2, 28), LocalDate.of(2023, 3, 15)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(24);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getInterestCalculationPeriodMethod())
+                .thenReturn(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_365.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.SEMI_MONTHLY);
+        Mockito.when(loanProductRelatedDetail.getFirstRepaymentDayOfMonth()).thenReturn(15);
+        Mockito.when(loanProductRelatedDetail.getSecondRepaymentDayOfMonth()).thenReturn(31);
+        Mockito.doCallRealMethod().when(loanProductRelatedDetail).semiMonthlyDueDays();
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrencyData()).thenReturn(currency);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                expectedRepaymentPeriods, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+
+        final Money disbursedAmount = toMoney(1000.0);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2023, 1, 15), disbursedAmount);
+
+        // The EMI rate factor of every period is the same 1% the interest is charged with. The first repayment period
+        // opens with the zero-length interest period of the disbursement day.
+        checkPeriod(interestSchedule, 0, 1, 256.28, 0.01, 10.0, 10.0, 246.28, 753.72);
+        checkPeriod(interestSchedule, 1, 0, 256.28, 0.01, 7.5372, 7.54, 248.74, 504.98);
+        checkPeriod(interestSchedule, 2, 0, 256.28, 0.01, 5.0498, 5.05, 251.23, 253.75);
+        checkPeriod(interestSchedule, 3, 0, 256.29, 0.01, 2.5375, 2.54, 253.75, 0.0);
+    }
+
     @Test
     public void test_disbursedAmt100_dayInYears364_daysInMonthActual_repayEvery1Week() {
 

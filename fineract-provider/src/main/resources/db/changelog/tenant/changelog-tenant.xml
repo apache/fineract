@@ -288,4 +288,5 @@
     <include file="parts/0267_add_retained_earning_wc_report_global_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0268_add_payoff_schedule_preview_max_payoff_periods_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0269_add_payoff_schedule_preview_max_term_periods_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0270_add_semi_monthly_repayment_frequency.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
