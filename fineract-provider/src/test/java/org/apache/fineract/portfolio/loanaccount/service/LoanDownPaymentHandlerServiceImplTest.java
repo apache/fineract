@@ -21,7 +21,10 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -120,6 +123,9 @@ public class LoanDownPaymentHandlerServiceImplTest {
     @Mock
     private LoanJournalEntryPoster loanJournalEntryPoster;
 
+    @Mock
+    private LoanChargeService loanChargeService;
+
     private LoanDownPaymentHandlerServiceImpl underTest;
 
     @BeforeEach
@@ -127,7 +133,7 @@ public class LoanDownPaymentHandlerServiceImplTest {
         underTest = new LoanDownPaymentHandlerServiceImpl(loanTransactionRepository, businessEventNotifierService,
                 loanDownPaymentTransactionValidator, loanScheduleService, loanRefundService, loanRefundValidator,
                 reprocessLoanTransactionsService, loanTransactionProcessingService, loanLifecycleStateMachine, loanBalanceService,
-                loanTransactionService, loanJournalEntryPoster);
+                loanTransactionService, loanJournalEntryPoster, loanChargeService);
         moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.UP));
         moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.UP);
         tempConfigServiceMock.when(TemporaryConfigurationServiceContainer::isExternalIdAutoGenerationEnabled).thenReturn(true);
@@ -180,7 +186,13 @@ public class LoanDownPaymentHandlerServiceImplTest {
         when(disbursement.getOverPaymentPortion(loanCurrency)).thenReturn(overPaymentPortionMoney);
 
         when(downPaymentMoney.minus(overPaymentPortionMoney)).thenReturn(calculatedMoney);
-        mathUtilMock.when(() -> MathUtil.negativeToZero(any(Money.class))).thenReturn(mockAdjustedDownPaymentMoney);
+        when(command.localDateValueOfParameterNamed(any())).thenReturn(LocalDate.of(2024, 11, 19));
+        when(disbursement.getAmount()).thenReturn(BigDecimal.valueOf(1000));
+        mathUtilMock.when(() -> MathUtil.percentageOf(any(), any(), anyInt())).thenReturn(BigDecimal.valueOf(100));
+        mathUtilMock.when(() -> MathUtil.negativeToZero(nullable(Money.class))).thenReturn(mockAdjustedDownPaymentMoney);
+        final Money zeroFees = Mockito.mock(Money.class);
+        doReturn(zeroFees).when(loanChargeService).outstandingDownPaymentFeesDueOn(any(Loan.class), nullable(LocalDate.class));
+        when(mockAdjustedDownPaymentMoney.plus(nullable(Money.class))).thenReturn(mockAdjustedDownPaymentMoney);
         when(mockAdjustedDownPaymentMoney.isGreaterThanZero()).thenReturn(true);
 
         dateUtilsMock.when(DateUtils::getBusinessLocalDate).thenReturn(LocalDate.of(2024, 11, 19));
@@ -234,7 +246,13 @@ public class LoanDownPaymentHandlerServiceImplTest {
         when(disbursement.getOverPaymentPortion(loanCurrency)).thenReturn(overPaymentPortionMoney);
 
         when(downPaymentMoney.minus(overPaymentPortionMoney)).thenReturn(calculatedMoney);
-        mathUtilMock.when(() -> MathUtil.negativeToZero(any(Money.class))).thenReturn(mockAdjustedDownPaymentMoney);
+        when(command.localDateValueOfParameterNamed(any())).thenReturn(LocalDate.of(2024, 11, 19));
+        when(disbursement.getAmount()).thenReturn(BigDecimal.valueOf(1000));
+        mathUtilMock.when(() -> MathUtil.percentageOf(any(), any(), anyInt())).thenReturn(BigDecimal.valueOf(100));
+        mathUtilMock.when(() -> MathUtil.negativeToZero(nullable(Money.class))).thenReturn(mockAdjustedDownPaymentMoney);
+        final Money zeroFees = Mockito.mock(Money.class);
+        doReturn(zeroFees).when(loanChargeService).outstandingDownPaymentFeesDueOn(any(Loan.class), nullable(LocalDate.class));
+        when(mockAdjustedDownPaymentMoney.plus(nullable(Money.class))).thenReturn(mockAdjustedDownPaymentMoney);
         when(mockAdjustedDownPaymentMoney.isGreaterThanZero()).thenReturn(false);
 
         dateUtilsMock.when(DateUtils::getBusinessLocalDate).thenReturn(LocalDate.of(2024, 11, 19));

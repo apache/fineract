@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -125,7 +126,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final String loanTransactionProcessingStrategyCode = command.stringValueOfParameterNamed("transactionProcessingStrategyCode");
 
             final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
-            final List<Charge> charges = assembleListOfProductCharges(command, currencyCode);
+            final boolean enableDownPayment = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT);
+            final List<Charge> charges = assembleListOfProductCharges(command, currencyCode, enableDownPayment);
             final List<Rate> rates = assembleListOfProductRates(command);
             final List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules = advancedPaymentJsonParser
                     .assembleLoanProductPaymentAllocationRules(command, loanTransactionProcessingStrategyCode);
@@ -253,7 +255,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             }
 
             if (changes.containsKey("charges")) {
-                final List<Charge> productCharges = assembleListOfProductCharges(command, product.getCurrency().getCode());
+                final List<Charge> productCharges = assembleListOfProductCharges(command, product.getCurrency().getCode(),
+                        product.getLoanProductRelatedDetail().isEnableDownPayment());
                 final boolean updated = product.update(productCharges);
                 if (!updated) {
                     changes.remove("charges");
@@ -354,7 +357,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         return isChangeFromFloatingToFlatOrViceVersa || isChangeInCriticalFloatingRateParams;
     }
 
-    private List<Charge> assembleListOfProductCharges(final JsonCommand command, final String currencyCode) {
+    private List<Charge> assembleListOfProductCharges(final JsonCommand command, final String currencyCode,
+            final boolean enableDownPayment) {
 
         final List<Charge> charges = new ArrayList<>();
 
@@ -377,6 +381,12 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                         if (!loanProductCurrencyCode.equals(charge.getCurrencyCode())) {
                             final String errorMessage = "Charge and Loan Product must have the same currency.";
                             throw new InvalidCurrencyException("charge", "attach.to.loan.product", errorMessage);
+                        }
+                        if (charge.isDownPaymentCharge() && !enableDownPayment) {
+                            throw new GeneralPlatformDomainRuleException(
+                                    "error.msg.loan.product.down.payment.charge.requires.enable.down.payment",
+                                    "Down payment charge cannot be attached to a loan product when down payment is not enabled.",
+                                    charge.getId());
                         }
                         charges.add(charge);
                     }

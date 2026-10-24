@@ -42,7 +42,9 @@ public enum ChargeProductType {
     LOAN_INSTALLMENT_FEE_PERCENTAGE_INTEREST("Installment percentage interest fee"), //
     LOAN_DISBURSEMENT_PERCENTAGE_AMOUNT_PLUS_INTEREST_FEE("Disbursement percentage amount + interest fee"), //
     WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE("Working Capital Loan Fee"), //
-    WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY("Working Capital Loan Penalty"); //
+    WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY("Working Capital Loan Penalty"), //
+    LOAN_DOWN_PAYMENT_FEE("Down Payment Fee"), //
+    LOAN_DOWN_PAYMENT_PERCENTAGE_FEE("Down Payment percentage fee"); //
 
     public final String name;
 

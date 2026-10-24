@@ -74,6 +74,18 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
         return isTransaction() && loanTransaction.get().isAccrualActivity();
     }
 
+    private boolean isDownPaymentFee() {
+        return isCharge() && loanCharge.map(LoanCharge::isDueAtDownPayment).orElse(false);
+    }
+
+    private boolean isDownPaymentTransaction() {
+        return isTransaction() && loanTransaction.map(LoanTransaction::isDownPayment).orElse(false);
+    }
+
+    private boolean isDownPaymentFeeBeforeDownPaymentTransaction(final ChangeOperation other) {
+        return isDownPaymentFee() && other.isDownPaymentTransaction();
+    }
+
     private boolean isBackdatedCharge() {
         return isCharge() && loanCharge.isPresent() && loanCharge.get().getDueDate() != null
                 && DateUtils.isBefore(loanCharge.get().getDueDate(), loanCharge.get().getSubmittedOnDate());
@@ -134,6 +146,15 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
                 return -1;
             }
             if (this.isCharge() && this.isInstallmentFee() && otherIsDisb) {
+                return 1;
+            }
+
+            // Down payment fees must apply before down-payment transactions on the same day so reverse-replay
+            // can allocate an adjusted auto DP amount (or a same-day manual DP) to the fee.
+            if (isDownPaymentFeeBeforeDownPaymentTransaction(o)) {
+                return -1;
+            }
+            if (o.isDownPaymentFeeBeforeDownPaymentTransaction(this)) {
                 return 1;
             }
 
