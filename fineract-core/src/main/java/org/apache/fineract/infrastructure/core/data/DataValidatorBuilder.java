@@ -311,25 +311,7 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder isOneOfTheseStringValues(final Object... values) {
-        if (this.value == null && this.ignoreNullValue) {
-            return this;
-        }
-
-        final List<Object> rawValuesList = Arrays.asList(values);
-
-        if (this.value == null || !rawValuesList.contains(this.value.toString().toLowerCase())) {
-            final List<String> valuesList = Arrays.stream(values).map(Object::toString).toList();
-            final String valuesListStr = String.join(", ", valuesList);
-            String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".is.not.one.of.expected.enumerations";
-            String defaultEnglishMessage = "The parameter `" + this.parameter + "` must be one of [ " + valuesListStr + " ] " + ".";
-
-            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, this.parameter,
-                    this.value, values);
-
-            this.dataValidationErrors.add(error);
-        }
-
-        return this;
+        return isOneOfTheseStringValues(Arrays.stream(values).map(Object::toString).toList());
     }
 
     public DataValidatorBuilder isOneOfTheseStringValues(final List<String> valuesList) {
