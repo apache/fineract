@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
 import java.util.List;
+import java.util.Set;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,6 +33,9 @@ public interface WorkingCapitalLoanBreachActionRepository extends JpaRepository<
 
     List<WorkingCapitalLoanBreachAction> findByWorkingCapitalLoanIdAndActionOrderByIdDesc(Long workingCapitalLoanId,
             WorkingCapitalLoanBreachActionType action);
+
+    List<WorkingCapitalLoanBreachAction> findByWorkingCapitalLoanIdAndActionInOrderById(Long workingCapitalLoanId,
+            Set<WorkingCapitalLoanBreachActionType> actions);
 
     /**
      * True while a Breach Disable is active: a DISABLE action that has not been closed by an enable (no end date).
