@@ -133,15 +133,8 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
                     // another transaction to handle this.
                     currentInstallment.waiveInterestComponent(transactionDate, currentInstallment.getInterestCharged(currency));
                 }
-
-                loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
-
                 transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
             }
-
-            // 1. pay of principal with over payment.
-            principalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
-            transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 
             interestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
