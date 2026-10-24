@@ -99,6 +99,7 @@ final class LoansApiResourceSwagger {
         public Long clientOfficeId;
         public GetLoansTemplateTimeline timeline;
         public Set<GetLoansTemplateProductOptions> productOptions;
+        public List<StringEnumOptionData> daysInYearCustomStrategyOptions;
     }
 
     @Schema(description = "GetLoansLoanIdResponse")
@@ -1317,6 +1318,7 @@ final class LoansApiResourceSwagger {
         public StringEnumOptionData chargeOffBehaviour;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        public StringEnumOptionData daysInYearCustomStrategy;
         @Schema(example = "false")
         public Boolean enableIncomeCapitalization;
         @Schema(example = "FLAT")
@@ -1713,6 +1715,8 @@ final class LoansApiResourceSwagger {
         public Boolean enableAutoRepaymentForDownPayment;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        @Schema(example = "FULL_LEAP_YEAR", allowableValues = { "FULL_LEAP_YEAR", "FEB_29_PERIOD_ONLY" })
+        public String daysInYearCustomStrategy;
 
         static final class PutLoansLoanIdChargeData {
 

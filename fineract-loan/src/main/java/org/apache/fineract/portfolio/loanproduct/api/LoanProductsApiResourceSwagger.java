@@ -1173,7 +1173,10 @@ public final class LoanProductsApiResourceSwagger {
         public Set<GetLoanProductsValueConditionTypeOptions> valueConditionTypeOptions;
         public Set<StringEnumOptionData> daysInMonthTypeOptions;
         public Set<GetLoanProductsInterestTemplateType> daysInYearTypeOptions;
+        @Deprecated
+        @Schema(deprecated = true, description = "Never returned by the API; use daysInYearCustomStrategyOptions")
         public Set<StringEnumOptionData> daysInYearTypeCustomStrategyOptions;
+        public Set<StringEnumOptionData> daysInYearCustomStrategyOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsInterestRecalculationCompoundingType> interestRecalculationCompoundingTypeOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsRescheduleStrategyType> rescheduleStrategyTypeOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsInterestRecalculationCompoundingFrequencyType> interestRecalculationFrequencyTypeOptions;

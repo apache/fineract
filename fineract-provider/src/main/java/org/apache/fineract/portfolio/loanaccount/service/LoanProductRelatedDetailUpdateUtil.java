@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -272,12 +273,7 @@ public class LoanProductRelatedDetailUpdateUtil {
             loanRepaymentScheduleDetail.setDaysInYearType(newValue);
         }
 
-        if (command.parameterExists(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME)) {
-            final DaysInYearCustomStrategyType newValue = DaysInYearCustomStrategyType
-                    .valueOf(command.stringValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME));
-            actualChanges.put(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, newValue.name());
-            loanRepaymentScheduleDetail.setDaysInYearCustomStrategy(newValue);
-        }
+        updateDaysInYearCustomStrategy(loanRepaymentScheduleDetail, command, actualChanges);
 
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME,
                 loanRepaymentScheduleDetail.isInterestRecalculationEnabled())) {
@@ -367,6 +363,19 @@ public class LoanProductRelatedDetailUpdateUtil {
         }
 
         return actualChanges;
+    }
+
+    public void updateDaysInYearCustomStrategy(final LoanProductRelatedDetail loanRepaymentScheduleDetail, final JsonCommand command,
+            final Map<String, Object> actualChanges) {
+        if (command.parameterExists(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME)) {
+            final DaysInYearCustomStrategyType newValue = command.enumValueOfParameterNamed(
+                    LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, DaysInYearCustomStrategyType.class);
+            if (!Objects.equals(newValue, loanRepaymentScheduleDetail.getDaysInYearCustomStrategy())) {
+                actualChanges.put(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME,
+                        newValue != null ? newValue.name() : null);
+                loanRepaymentScheduleDetail.setDaysInYearCustomStrategy(newValue);
+            }
+        }
     }
 
     public void updateInterestRateDerivedFields(final LoanProductRelatedDetail loanRepaymentScheduleDetail,
