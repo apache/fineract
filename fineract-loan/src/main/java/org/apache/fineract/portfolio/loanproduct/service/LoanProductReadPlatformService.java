@@ -36,6 +36,8 @@ public interface LoanProductReadPlatformService {
 
     Collection<LoanProductData> retrieveAllLoanProductsForLookup(boolean activeOnly);
 
+    Collection<LoanProductData> retrieveAllLoanProductsForLookup(boolean activeOnly, Long officeId);
+
     LoanProductData retrieveLoanProduct(Long productId);
 
     LoanProduct retrieveLoanProductByExternalId(ExternalId externalId);
