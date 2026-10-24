@@ -37,6 +37,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDa
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterAll;
@@ -524,7 +525,7 @@ public class FeignWorkingCapitalLoanScheduleRestatementTest extends FeignIntegra
     private Long createProductAllowingDiscount() {
         final Long productId = productHelper.createWorkingCapitalLoanProduct(
                 new WorkingCapitalLoanProductTestBuilder().withName("WCL Restate " + UUID.randomUUID().toString().substring(0, 8))
-                        .withShortName(UUID.randomUUID().toString().replace("-", "").substring(0, 4))
+                        .withShortName(Utils.uniqueRandomStringGenerator("", 4))
                         .withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build())
                 .getResourceId();
         createdProductIds.add(productId);
