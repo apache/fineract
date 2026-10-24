@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.accounting;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Calendar;
+import java.util.List;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetGLAccountsResponse;
@@ -120,6 +122,27 @@ public class GLAccountIntegrationTest extends FeignLoanTestBase {
             assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage().contains("error.msg.glaccount.glcode.invalid.delete.transactions.logged"));
         });
+    }
+
+    @Test
+    public void searchGLAccountsBySearchParamTest() {
+        String uniqueNameOne = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);
+        final PostGLAccountsResponse accountOne = createGLAccount(uniqueNameOne);
+        String uniqueNameTwo = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);
+        final PostGLAccountsResponse accountTwo = createGLAccount(uniqueNameTwo);
+
+        List<GetGLAccountsResponse> foundByName = accountHelper.searchGLAccounts(uniqueNameOne.substring(uniqueNameOne.length() - 5));
+        assertEquals(1, foundByName.size());
+        assertEquals(accountOne.getResourceId(), foundByName.getFirst().getId());
+
+        List<GetGLAccountsResponse> foundByGlCode = accountHelper.searchGLAccounts(uniqueNameTwo.substring(uniqueNameTwo.length() - 5));
+        assertEquals(1, foundByGlCode.size());
+        assertEquals(accountTwo.getResourceId(), foundByGlCode.getFirst().getId());
+
+        assertNull(foundByName.getFirst().getTagId());
+
+        accountHelper.deleteGLAccount(accountOne.getResourceId());
+        accountHelper.deleteGLAccount(accountTwo.getResourceId());
     }
 
     private PostGLAccountsResponse createGLAccount(String uniqueString) {
