@@ -132,6 +132,7 @@ import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -1502,9 +1503,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    public void applyChargeDue(final Long savingsAccountChargeId, final Long accountId) {
+    public LocalDate applyChargeDue(final Long savingsAccountChargeId, final Long accountId) {
         // always use current date as transaction date for batch job
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository
@@ -1512,9 +1513,14 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MM yyyy").withZone(DateUtils.getDateTimeZoneOfTenant());
 
-        while (savingsAccountCharge.isNotFullyPaid() && DateUtils.isBefore(savingsAccountCharge.getDueDate(), transactionDate)) {
+        if (isDue(savingsAccountCharge, transactionDate)) {
             payCharge(savingsAccountCharge, transactionDate, savingsAccountCharge.amoutOutstanding(), fmt, false);
         }
+        return isDue(savingsAccountCharge, transactionDate) ? savingsAccountCharge.getDueDate() : null;
+    }
+
+    private boolean isDue(final SavingsAccountCharge charge, final LocalDate transactionDate) {
+        return charge.isNotFullyPaid() && DateUtils.isBefore(charge.getDueDate(), transactionDate);
     }
 
     private SavingsAccountTransaction payCharge(final SavingsAccountCharge savingsAccountCharge, final LocalDate transactionDate,
