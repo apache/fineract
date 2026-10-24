@@ -2,16 +2,8 @@
 
 == Description
 
-As discussed in https://issues.apache.org/jira/browse/FINERACT-1154[FINERACT-1154], now that everything is final, please do the following to remove the release branch (and just keep the tag), and make sure that everything on the release tag is merged to develop and that e.g. `git describe` works:
+As discussed in https://issues.apache.org/jira/browse/FINERACT-1154[FINERACT-1154], now that everything is final, create a PR to merge the release branch into our main integration branch (`develop`).
 
-[source,bash,subs="attributes+,+macros"]
-----
-git switch develop
-git merge release/{revnumber} <1>
-git push origin develop
-git branch -D release/{revnumber}
-git push origin :release/{revnumber}
-git describe <2>
-----
-<1> This merge ensures all future commits and releases descend from the tagged commit used to build this release.
-<2> The output must refer to the most recent release. For example, if your working copy is checked out to the `develop` branch, the current commit is `0762a012e`, and the latest release tag (28 commits ago) was `1.12.1`, the output of `git describe` would be `1.12.1-28-g0762a012e`.
+This merge ensures all future commits and releases descend from the tagged commit used to build this release.
+
+After merging, check your work with `git describe`. The output must refer to the most recent release. For example, if your working copy is checked out to the `develop` branch, the current commit is `0762a012e`, and the latest release tag (28 commits ago) was `1.12.1`, the output of `git describe` will be `1.12.1-28-g0762a012e`.
