@@ -97,7 +97,7 @@ class AdvancedPaymentScheduleReAgeMappingTest {
     @BeforeEach
     void setUp() {
         underTest = new AdvancedPaymentScheduleTransactionProcessor(mock(EMICalculator.class), null, null,
-                mock(LoanScheduleComponent.class), null, null, null, null, null);
+                mock(LoanScheduleComponent.class), null, null, null, null, null, null);
 
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);

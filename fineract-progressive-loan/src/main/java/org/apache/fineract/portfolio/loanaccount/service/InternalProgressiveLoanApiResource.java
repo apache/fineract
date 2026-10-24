@@ -55,6 +55,7 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
     private final InterestScheduleModelRepositoryWrapper writePlatformService;
     private final InterestScheduleModelRepositoryWrapper interestScheduleModelRepositoryWrapper;
     private final LoanScheduleService loanScheduleService;
+    private final LoanMeetingCalendarService loanMeetingCalendarService;
 
     @Override
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
@@ -78,7 +79,7 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
         if (!loan.isProgressiveSchedule()) {
             throw new IllegalArgumentException("The loan is not progressive.");
         }
-        ILoanConfigurationDetails loanConfigurationDetails = LoanConfigurationDetailsMapper.map(loan);
+        ILoanConfigurationDetails loanConfigurationDetails = LoanConfigurationDetailsMapper.map(loan, loanMeetingCalendarService);
         return writePlatformService.readProgressiveLoanInterestScheduleModel(loanId, loanConfigurationDetails,
                 loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf()).orElse(null);
     }

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanproduct.domain;
 import java.math.BigDecimal;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 
@@ -68,6 +69,8 @@ public interface ILoanConfigurationDetails {
     boolean isInterestRecognitionOnDisbursementDate();
 
     DaysInYearCustomStrategyType getDaysInYearCustomStrategy();
+
+    MonthEndDueDateStrategy getMonthEndDueDateStrategy();
 
     boolean isInterestRecalculationEnabled();
 
