@@ -19,12 +19,14 @@
 
 package org.apache.fineract.infrastructure.core.config.cache;
 
+import static org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper.CONFIG_BY_NAME_CACHE_NAME;
 import static org.apache.fineract.infrastructure.event.external.repository.ExternalEventConfigurationRepository.EXTERNAL_EVENT_CONFIGURATION_CACHE_NAME;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,6 +35,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.cache.service.TransactionBoundCacheManager;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.ExpiryPolicyBuilder;
@@ -53,7 +56,13 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class CacheConfig {
 
-    public static final String CONFIG_BY_NAME_CACHE_NAME = "configByName";
+    /**
+     * Caches served by the transaction-bound manager. They are also registered in Ehcache explicitly, since not all of
+     * them are declared through {@code @Cacheable} (the global configuration cache is accessed programmatically) and
+     * the single-node mode would otherwise have no cache to store them in.
+     */
+    static final List<String> TRANSACTION_BOUND_CACHE_NAMES = List.of(CONFIG_BY_NAME_CACHE_NAME, EXTERNAL_EVENT_CONFIGURATION_CACHE_NAME);
+
     @Autowired
     private FineractProperties fineractProperties;
 
@@ -62,7 +71,7 @@ public class CacheConfig {
         SpecifiedCacheSupportingCacheManager cacheManager = new SpecifiedCacheSupportingCacheManager();
         cacheManager.setNoOpCacheManager(new NoOpCacheManager());
         cacheManager.setDelegateCacheManager(ehCacheManager);
-        cacheManager.setSupportedCaches(CONFIG_BY_NAME_CACHE_NAME, EXTERNAL_EVENT_CONFIGURATION_CACHE_NAME);
+        cacheManager.setSupportedCaches(TRANSACTION_BOUND_CACHE_NAMES.toArray(String[]::new));
         return new TransactionBoundCacheManager(cacheManager);
     }
 
@@ -100,6 +109,7 @@ public class CacheConfig {
         cacheNames.addAll(annotatedCacheConfigClasses.stream()
                 .map(clazz -> clazz.getAnnotation(org.springframework.cache.annotation.CacheConfig.class))
                 .flatMap(annotation -> Arrays.stream(annotation.cacheNames())).collect(Collectors.toSet()));
+        cacheNames.addAll(TRANSACTION_BOUND_CACHE_NAMES);
         // Register the caches into the cache manager
         cacheNames.forEach(cacheName -> {
             if (cacheManager.getCache(cacheName) == null) {
