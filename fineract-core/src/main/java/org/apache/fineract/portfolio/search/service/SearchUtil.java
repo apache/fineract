@@ -271,7 +271,14 @@ public class SearchUtil {
                 }
                 return columnValue;
             } else if (columnHeader.isCodeLookupDisplayType()) {
-                final Integer codeLookup = Integer.valueOf(columnValue);
+                final Integer codeLookup;
+                try {
+                    codeLookup = Integer.valueOf(columnValue);
+                } catch (NumberFormatException e) {
+                    ApiParameterError error = ApiParameterError.parameterError("error.msg.invalid.columnValue",
+                            "Value not found in Allowed Value list", columnHeader.getColumnName(), columnValue);
+                    throw new PlatformApiDataValidationException(errorCode, errorMsg, List.of(error));
+                }
                 if (!columnHeader.isColumnCodeAllowed(codeLookup)) {
                     ApiParameterError error = ApiParameterError.parameterError("error.msg.invalid.columnValue",
                             "Value not found in Allowed Value list", columnHeader.getColumnName(), columnValue);
