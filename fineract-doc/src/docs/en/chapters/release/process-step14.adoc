@@ -3,5 +3,3 @@
 == Description
 
 Finally update the https://fineract.apache.org website with the latest release details. The website's HTML source code is available at https://github.com/apache/fineract-site.
-
-CAUTION: This step is not yet automated. We are working on a static site generator setup.
