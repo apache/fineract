@@ -1,16 +1,14 @@
 = Step 15: Announcement Email
 
+Use the ATR to announce the release.
+
 == Description
 
-Manually draft an email using your Apache ID. This works best if you use plain text since the Apache announcements list rejects HTML. Use `format=flowed` for readability, following instructions at https://useplaintext.email. Follow a https://lists.apache.org/thread/0xrtf2tgbcgczx1w6rlt9lxqvx68bfg3[recent example], substituting:
+Send the email To: dev@fineract.apache.org, Cc: announce@apache.org. These should be selected by default, per our https://releases.apache.org/projects/fineract?tab=finish[project settings].
 
-****
-* [ ] version number in subject
-* [ ] version number in intro paragraph
-* [ ] number of issues addressed (get this number from the release page on confluence -- the github release page includes unresolved issues since issues can span multiple PRs)
-* [ ] version number in release page link
-* [ ] version number (aka git tag) in link to "Contributors, changelog, and pull requests" (github release page)
-* [ ] use your own email signature, or omit the email signature altogether
-****
+Replace each `FIXME` with the actual value.
 
-Send the email to dev@fineract.apache.org and announce@apache.org.
+. For `This release addressed FIXME issues.`, sub in the count of JIRA issues with Fix Version/s: {revnumber}. You can find this JIRA query under the "Issues resolved" list on the release page on confluence. Don't try to get this count from github -- the github release page includes unresolved issues since issues can span multiple PRs.
+. For `Release wiki page, issues: FIXME`, sub in the short/convenient link to the release wiki page on confluence.
+
+You may also draft and send an email directly from your email client using your Apache email address. Use plain text since the Apache announcements list rejects HTML. Use `format=flowed` for readability, following instructions at https://useplaintext.email.
