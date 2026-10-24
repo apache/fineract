@@ -55,6 +55,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @RequiredArgsConstructor
 public class ExecuteStandingInstructionsTasklet implements Tasklet {
 
+    static final int ERROR_LOG_MAX_LENGTH = 500;
+
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
@@ -129,9 +131,6 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
     private boolean transferAmount(final List<Throwable> errors, final AccountTransferDTO accountTransferDTO, final Long instructionId) {
         boolean transferCompleted = true;
         StringBuilder errorLog = new StringBuilder();
-        StringBuilder updateQuery = new StringBuilder(
-                "INSERT INTO m_account_transfer_standing_instructions_history (standing_instruction_id, " + sqlGenerator.escape("status")
-                        + ", amount,execution_time, error_log) VALUES (");
         try {
             accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         } catch (final PlatformApiDataValidationException e) {
@@ -152,18 +151,30 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
             errorLog.append("Exception while trasfering funds ").append(e.getMessage());
 
         }
-        updateQuery.append(instructionId).append(",");
+        final String status;
         if (errorLog.length() > 0) {
             transferCompleted = false;
-            updateQuery.append("'failed'").append(",");
+            status = "failed";
         } else {
-            updateQuery.append("'success'").append(",");
+            status = "success";
         }
-        updateQuery.append(accountTransferDTO.getTransactionAmount().doubleValue());
-        updateQuery.append(", now(),");
-        updateQuery.append("'").append(errorLog).append("')");
-        jdbcTemplate.update(updateQuery.toString());
+        // Bind the values instead of inlining them: an exception message may contain quotes, and the amount must keep
+        // its BigDecimal precision. execution_time stays as now() so the recorded date behaviour does not change.
+        final String insertHistory = "INSERT INTO m_account_transfer_standing_instructions_history (standing_instruction_id, "
+                + sqlGenerator.escape("status") + ", amount, execution_time, error_log) VALUES (?, ?, ?, now(), ?)";
+        jdbcTemplate.update(insertHistory, instructionId, status, accountTransferDTO.getTransactionAmount(), truncateErrorLog(errorLog));
         return transferCompleted;
+    }
+
+    /**
+     * The error_log column is VARCHAR(500); a longer message would make the INSERT fail and abort the remaining
+     * instructions of the run. On success the log is stored as an empty string, as it always was.
+     */
+    private static String truncateErrorLog(final StringBuilder errorLog) {
+        if (errorLog.length() <= ERROR_LOG_MAX_LENGTH) {
+            return errorLog.toString();
+        }
+        return errorLog.substring(0, ERROR_LOG_MAX_LENGTH);
     }
 
     public boolean isDueForTransfer(StandingInstructionDuesData standingInstructionDuesData) {
