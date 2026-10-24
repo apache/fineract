@@ -502,6 +502,18 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         return updated;
     }
 
+    /**
+     * A loan product is expected to carry at most one overdue-installment charge; the rest of the overdue handling
+     * assumes the same (see LoanChargeWritePlatformServiceImpl#applyOverdueChargesForLoan and
+     * LoanReadPlatformServiceImpl#retrieveAllOverdueInstallmentsForLoan, which both pick the first match).
+     */
+    public Charge getOverdueInstallmentCharge() {
+        if (this.charges == null) {
+            return null;
+        }
+        return this.charges.stream().filter(c -> c.isOverdueInstallment() && c.isLoanCharge()).findFirst().orElse(null);
+    }
+
     public boolean updateRates(final List<Rate> newProductRates) {
         if (newProductRates == null) {
             return false;
