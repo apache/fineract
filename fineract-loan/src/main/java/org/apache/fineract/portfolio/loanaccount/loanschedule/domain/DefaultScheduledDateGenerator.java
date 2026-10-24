@@ -390,7 +390,11 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case MONTHS:
                 if (loanCalendar == null) {
-                    idealDisbursementDate = firstRepaymentDate.minusMonths(repaidEvery);
+                    // Mirror the forward generation (plusMonths + month-end clamp): when the first due date was
+                    // clamped into a shorter month (e.g. 31 Jan -> 28 Feb), plain minusMonths would land before the
+                    // anchor day (28 Jan) and charge first-period interest from before the disbursement date.
+                    idealDisbursementDate = (LocalDate) adjustDate(firstRepaymentDate.minusMonths(repaidEvery),
+                            loanApplicationTerms.getSeedDate(), repaymentPeriodFrequencyType);
                 } else {
                     idealDisbursementDate = CalendarUtils.getNewRepaymentMeetingDate(loanCalendar.getRecurrence(),
                             firstRepaymentDate.minusMonths(repaidEvery), firstRepaymentDate.minusMonths(repaidEvery), repaidEvery,

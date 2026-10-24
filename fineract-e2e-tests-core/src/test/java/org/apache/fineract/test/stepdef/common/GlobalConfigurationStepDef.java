@@ -74,6 +74,13 @@ public class GlobalConfigurationStepDef {
         globalConfigurationHelper.enableGlobalConfiguration("enable-instant-delinquency-calculation", 0L);
     }
 
+    // interest-charged-from-date-same-as-disbursal-date is seeded enabled; the clamped-first-due-date schedule scenarios disable it to
+    // reach the ideal-disbursement-date path, so restore it even when a scenario fails mid-way
+    @After("@InterestChargedFromIdealDisbursementDate")
+    public void restoreInterestChargedFromDateConfig() {
+        globalConfigurationHelper.enableGlobalConfiguration("interest-charged-from-date-same-as-disbursal-date", 0L);
+    }
+
     @Given("Global configuration {string} is disabled")
     public void disableGlobalConfiguration(String configKey) {
         globalConfigurationHelper.disableGlobalConfiguration(configKey, 0L);
