@@ -23,4 +23,6 @@ import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 public interface PlatformPasswordEncoder {
 
     String encode(PlatformUser appUser);
+
+    boolean matches(String rawPassword, String encodedPassword);
 }

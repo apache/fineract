@@ -40,4 +40,9 @@ public class DefaultPlatformPasswordEncoder implements PlatformPasswordEncoder {
     public String encode(final PlatformUser appUser) {
         return this.passwordEncoder.encode(appUser.getPassword());
     }
+
+    @Override
+    public boolean matches(final String rawPassword, final String encodedPassword) {
+        return this.passwordEncoder.matches(rawPassword, encodedPassword);
+    }
 }
