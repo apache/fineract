@@ -66,14 +66,8 @@ public class TaxAssembler {
         if (debitAccountType != null) {
             debitGlAccountType = GLAccountType.fromInt(debitAccountType);
         }
-        GLAccount debitGlAccount = null;
-        if (debitAccountId != null) {
-            debitGlAccount = this.glAccountRepositoryWrapper.findOneWithNotFoundDetection(debitAccountId);
-            if (!debitGlAccount.getType().equals(debitAccountType) || debitGlAccount.isHeaderAccount()) {
-                baseDataValidator.parameter(TaxApiConstants.debitAccountIdParamName).value(debitAccountId)
-                        .failWithCode("not.a.valid.account");
-            }
-        }
+        final GLAccount debitGlAccount = assembleGlAccount(debitAccountType, debitAccountId, TaxApiConstants.debitAccountIdParamName,
+                baseDataValidator);
 
         final Integer creditAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(TaxApiConstants.creditAccountTypeParamName,
                 element);
@@ -82,14 +76,8 @@ public class TaxAssembler {
             creditGlAccountType = GLAccountType.fromInt(creditAccountType);
         }
         final Long creditAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.creditAccountIdParamName, element);
-        GLAccount creditGlAccount = null;
-        if (creditAccountId != null) {
-            creditGlAccount = this.glAccountRepositoryWrapper.findOneWithNotFoundDetection(creditAccountId);
-            if (!creditGlAccount.getType().equals(creditAccountType) || creditGlAccount.isHeaderAccount()) {
-                baseDataValidator.parameter(TaxApiConstants.creditAccountIdParamName).value(creditAccountId)
-                        .failWithCode("not.a.valid.account");
-            }
-        }
+        final GLAccount creditGlAccount = assembleGlAccount(creditAccountType, creditAccountId, TaxApiConstants.creditAccountIdParamName,
+                baseDataValidator);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.startDateParamName, element);
         if (startDate == null) {
@@ -98,6 +86,27 @@ public class TaxAssembler {
 
         return TaxComponent.createTaxComponent(name, percentage, debitGlAccountType, debitGlAccount, creditGlAccountType, creditGlAccount,
                 startDate);
+    }
+
+    public GLAccount assembleGlAccountFrom(final JsonCommand command, final String accountTypeParamName, final String accountIdParamName) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.component");
+        final GLAccount glAccount = assembleGlAccount(command.integerValueSansLocaleOfParameterNamed(accountTypeParamName),
+                command.longValueOfParameterNamed(accountIdParamName), accountIdParamName, baseDataValidator);
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+        return glAccount;
+    }
+
+    private GLAccount assembleGlAccount(final Integer accountType, final Long accountId, final String accountIdParamName,
+            final DataValidatorBuilder baseDataValidator) {
+        if (accountId == null) {
+            return null;
+        }
+        final GLAccount glAccount = this.glAccountRepositoryWrapper.findOneWithNotFoundDetection(accountId);
+        if (!glAccount.getType().equals(accountType) || glAccount.isHeaderAccount()) {
+            baseDataValidator.parameter(accountIdParamName).value(accountId).failWithCode("not.a.valid.account");
+        }
+        return glAccount;
     }
 
     public TaxGroup assembleTaxGroupFrom(final JsonCommand command) {

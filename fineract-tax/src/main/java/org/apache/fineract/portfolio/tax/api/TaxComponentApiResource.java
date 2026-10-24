@@ -114,7 +114,7 @@ public class TaxComponentApiResource {
     @Path("{taxComponentId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update Tax Component", operationId = "updateTaxComponent", description = "Updates Tax component. Debit and credit account details cannot be modified. All the future tax components would be replaced with the new percentage.")
+    @Operation(summary = "Update Tax Component", operationId = "updateTaxComponent", description = "Updates Tax component. Once the component is linked to a charge, savings product or savings account, or used in a tax transaction, only the name can be modified. All the future tax components would be replaced with the new percentage.")
     @AlternativeOperationId("updateTaxCompoent")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TaxComponentApiResourceSwagger.PutTaxesComponentsTaxComponentIdRequest.class)))
     @ApiResponses({
