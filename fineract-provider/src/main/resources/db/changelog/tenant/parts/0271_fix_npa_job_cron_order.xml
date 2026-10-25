@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet author="fineract" id="1">
+        <!-- "Update Non Performing Assets" reads m_loan_arrears_aging, so it must run after "Update Loan Arrears
+             Ageing" has refreshed that table for the day. Move it to the same 00:01 fire time, rather than a
+             later one: paired with 0265_put_arrears_ageing_in_npa_scheduler_group.xml, which puts both jobs in
+             the same single-threaded scheduler group, Quartz orders same-time triggers by task_priority (arrears
+             ageing highest), so arrears ageing runs first. "Add Accrual Transactions" and "Add Accrual
+             Transactions For Loans With Income Posted As Transactions" are also in that group at 00:01 and skip
+             NPA loans - they must still run after NPA, not before it, so NPA's own task_priority (seeded higher
+             than theirs) needs to be compared at the same fire time. A later time (e.g. 00:02) would instead put
+             NPA behind them by fire time regardless of priority. Only touch tenants still on the seeded default
+             cron - a tenant that customized it via the scheduler API (updates_allowed=true on this job) keeps
+             its own schedule. -->
+        <update tableName="job">
+            <column name="cron_expression" value="0 1 0 1/1 * ? *"/>
+            <where>name='Update Non Performing Assets' AND cron_expression='0 0 0 1/1 * ? *'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

@@ -1053,6 +1053,9 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
 
         final Boolean isNPABefore = loanHelper.getLoanDetails(loanID).getIsNPA();
         Assertions.assertFalse(isNPABefore);
+        // "Update Non Performing Assets" requires "Update Loan Arrears Ageing" to have run successfully first -
+        // run it explicitly rather than relying on test execution order.
+        SchedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
         String JobName = "Update Non Performing Assets";
         SchedulerJobHelper.executeAndAwaitJob(JobName);
         final Boolean isNPAAfter = loanHelper.getLoanDetails(loanID).getIsNPA();
