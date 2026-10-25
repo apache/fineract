@@ -23,6 +23,7 @@ public interface SchedulerServiceConstants {
     String JOB_KEY_SEPERATOR = " _ ";
     String TRIGGER_TYPE_CRON = "cron";
     String TRIGGER_TYPE_APPLICATION = "application";
+    String TRIGGER_TYPE_MISFIRE = "misfire";
     String TRIGGER_TYPE_REFERENCE = "TRIGGER_TYPE_REFERENCE";
     String SCHEDULER_EXCEPTION = "SchedulerException";
     String JOB_EXECUTION_EXCEPTION = "JobExecutionException";
