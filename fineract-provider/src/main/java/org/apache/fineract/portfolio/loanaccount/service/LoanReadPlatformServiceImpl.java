@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1862,7 +1863,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 LEFT JOIN m_loan_reschedule_request lrr ON lrr.loan_id = l.id
                 -- this is to identify the applicable rates when base rate is changed
                 LEFT JOIN m_floating_rates bfr ON bfr.is_base_lending_rate = TRUE
-                LEFT JOIN m_floating_rates_periods bfrp ON bfr.id = bfrp.floating_rates_id AND bfrp.created_date >= ?
+                LEFT JOIN m_floating_rates_periods bfrp ON bfr.id = bfrp.floating_rates_id AND bfrp.created_on_utc >= ?
                 WHERE l.loan_status_id = ?
                   AND l.is_npa = FALSE
                   AND l.is_charged_off = FALSE
@@ -1876,7 +1877,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                         -- float rate changes
                         (fr.is_active = TRUE
                             AND frp.is_active = TRUE
-                            AND (frp.created_date >= ?
+                            AND (frp.created_on_utc >= ?
                                  OR (bfrp.id IS NOT NULL
                                      AND frp.is_differential_to_base_lending_rate = TRUE
                                      AND frp.from_date >= bfrp.from_date))
@@ -1886,8 +1887,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 """;
         try {
             LocalDate currentdate = DateUtils.getBusinessLocalDate();
-            // will look only for yesterday modified rates
-            LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
+            // will look only for yesterday modified rates; compared against created_on_utc (a UTC timestamp), so
+            // bind the tenant's actual start-of-day boundary rather than a bare date, which the DB would otherwise
+            // interpret in its own session time zone instead of the tenant's.
+            OffsetDateTime yesterday = DateUtils.getOffsetDateTimeOfTenantFromLocalDate(DateUtils.getBusinessLocalDate().minusDays(1));
             return this.jdbcTemplate.queryForList(sql, Long.class, yesterday, LoanStatus.ACTIVE.getValue(), currentdate, currentdate,
                     currentdate, yesterday);
         } catch (final EmptyResultDataAccessException e) {
@@ -1898,8 +1901,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     @Override
     public List<Long> fetchLoansForInterestRecalculation(Integer pageSize, Long maxLoanIdInList, String officeHierarchy) {
         LocalDate currentdate = DateUtils.getBusinessLocalDate();
-        // will look only for yesterday modified rates
-        LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
+        // will look only for yesterday modified rates; compared against created_on_utc (a UTC timestamp), so bind
+        // the tenant's actual start-of-day boundary rather than a bare date, which the DB would otherwise interpret
+        // in its own session time zone instead of the tenant's.
+        OffsetDateTime yesterday = DateUtils.getOffsetDateTimeOfTenantFromLocalDate(DateUtils.getBusinessLocalDate().minusDays(1));
         final String sql = """
                 SELECT l.id
                 FROM m_loan l
@@ -1918,7 +1923,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 LEFT JOIN m_loan_reschedule_request lrr ON lrr.loan_id = l.id
                 -- this is to identify the applicable rates when base rate is changed
                 LEFT JOIN m_floating_rates bfr ON bfr.is_base_lending_rate = TRUE
-                LEFT JOIN m_floating_rates_periods bfrp ON bfr.id = bfrp.floating_rates_id AND bfrp.created_date >= ?
+                LEFT JOIN m_floating_rates_periods bfrp ON bfr.id = bfrp.floating_rates_id AND bfrp.created_on_utc >= ?
                 WHERE l.loan_status_id = ?
                     AND l.is_npa = FALSE
                     AND l.is_charged_off = FALSE
@@ -1930,7 +1935,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                         OR
                          (fr.is_active = TRUE
                              AND frp.is_active = TRUE
-                             AND (frp.created_date >= ?
+                             AND (frp.created_on_utc >= ?
                                   OR (bfrp.id IS NOT NULL
                                       AND frp.is_differential_to_base_lending_rate = TRUE
                                       AND frp.from_date >= bfrp.from_date))
