@@ -629,6 +629,112 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
     }
 
     @Test
+    public void testExecuteStandingInstructionsJobTransfersAvailableBalanceWhenPartialTransferIsAllowed() throws InterruptedException {
+        StandingInstructionsHelper standingInstructionsHelper = new StandingInstructionsHelper();
+
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+        final DateTimeFormatter monthDayFormat = DateTimeFormatter.ofPattern("dd MMMM", Locale.US);
+
+        final LocalDate localDate = LocalDate.now(this.systemTimeZone.toZoneId());
+        ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.systemTimeZone.toZoneId());
+        final String MONTH_DAY = monthDayFormat.format(currentDate.toLocalDate());
+        currentDate = currentDate.minus(Duration.ofDays(7));
+        final String VALID_FROM = dateFormat.format(currentDate);
+        currentDate = currentDate.plus(1, ChronoUnit.YEARS);
+        final String VALID_TO = dateFormat.format(currentDate);
+
+        final Long clientID = clientHelper.createClient();
+        Assertions.assertNotNull(clientID);
+
+        final Long savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Long fromSavingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
+        final Long toSavingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
+
+        BigDecimal fromSavingsBalanceBefore = savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance();
+        BigDecimal toSavingsBalanceBefore = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
+
+        // ask for more than the account holds, so the transfer can only be covered in part
+        final String amountBeyondTheBalance = fromSavingsBalanceBefore.multiply(BigDecimal.valueOf(2)).toPlainString();
+        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
+                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY,
+                amountBeyondTheBalance, true);
+        Assertions.assertNotNull(standingInstructionId);
+
+        SchedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");
+
+        BigDecimal fromSavingsBalanceAfter = savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance();
+        BigDecimal toSavingsBalanceAfter = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
+
+        assertAmount(BigDecimal.ZERO, fromSavingsBalanceAfter, "Verifying the whole available balance was transferred");
+        assertAmount(toSavingsBalanceBefore.add(fromSavingsBalanceBefore), toSavingsBalanceAfter,
+                "Verifying the receiving account was credited with the available balance");
+
+        Set<GetStandingInstructionHistoryPageItemsResponse> standingInstructionHistoryData = standingInstructionsHelper
+                .getStandingInstructionHistory(fromSavingsId.intValue(), PortfolioAccountType.SAVINGS.getValue(), clientID.intValue(),
+                        AccountTransferType.ACCOUNT_TRANSFER.getValue());
+        Assertions.assertEquals(1, standingInstructionHistoryData.size(),
+                "Verifying the no of standing instruction transactions logged for the client");
+        GetStandingInstructionHistoryPageItemsResponse loggedTransaction = standingInstructionHistoryData.iterator().next();
+        Assertions.assertEquals("partial", loggedTransaction.getStatus(),
+                "Verifying a partly covered transfer is distinguishable from a fully covered one");
+        assertAmount(fromSavingsBalanceBefore, new BigDecimal(String.valueOf(loggedTransaction.getAmount())),
+                "Verifying the logged amount is what was actually transferred, not what was due");
+    }
+
+    @Test
+    public void testExecuteStandingInstructionsJobUsesTheOverdraftLimitWhenPartialTransferIsAllowed() throws InterruptedException {
+        StandingInstructionsHelper standingInstructionsHelper = new StandingInstructionsHelper();
+
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+        final DateTimeFormatter monthDayFormat = DateTimeFormatter.ofPattern("dd MMMM", Locale.US);
+
+        final LocalDate localDate = LocalDate.now(this.systemTimeZone.toZoneId());
+        ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.systemTimeZone.toZoneId());
+        final String MONTH_DAY = monthDayFormat.format(currentDate.toLocalDate());
+        currentDate = currentDate.minus(Duration.ofDays(7));
+        final String VALID_FROM = dateFormat.format(currentDate);
+        currentDate = currentDate.plus(1, ChronoUnit.YEARS);
+        final String VALID_TO = dateFormat.format(currentDate);
+
+        final Long clientID = clientHelper.createClient();
+        Assertions.assertNotNull(clientID);
+
+        final Long overdraftProductID = savingsProductHelper
+                .createSavingsProduct(savingsProduct(SavingsTestData.InterestPostingPeriodType.MONTHLY, MINIMUM_OPENING_BALANCE)
+                        .allowOverdraft(true).overdraftLimit(new BigDecimal("1000")))
+                .getResourceId();
+        final Long fromSavingsId = applyApproveAndActivateSavings(clientID, overdraftProductID);
+        final Long toSavingsId = applyApproveAndActivateSavings(clientID, createSavingsProduct(MINIMUM_OPENING_BALANCE));
+
+        BigDecimal fromSavingsBalanceBefore = savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance();
+        BigDecimal toSavingsBalanceBefore = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
+
+        // more than the balance but within the overdraft limit, so the whole amount is covered
+        final BigDecimal amount = fromSavingsBalanceBefore.add(new BigDecimal("500"));
+        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
+                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY,
+                amount.toPlainString(), true);
+        Assertions.assertNotNull(standingInstructionId);
+
+        SchedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");
+
+        assertAmount(fromSavingsBalanceBefore.subtract(amount), savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance(),
+                "Verifying the overdraft account was debited with the whole amount");
+        assertAmount(toSavingsBalanceBefore.add(amount), savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance(),
+                "Verifying the receiving account was credited with the whole amount");
+
+        Set<GetStandingInstructionHistoryPageItemsResponse> standingInstructionHistoryData = standingInstructionsHelper
+                .getStandingInstructionHistory(fromSavingsId.intValue(), PortfolioAccountType.SAVINGS.getValue(), clientID.intValue(),
+                        AccountTransferType.ACCOUNT_TRANSFER.getValue());
+        Assertions.assertEquals(1, standingInstructionHistoryData.size(),
+                "Verifying the no of standing instruction transactions logged for the client");
+        Assertions.assertEquals("success", standingInstructionHistoryData.iterator().next().getStatus(),
+                "Verifying a run the overdraft limit covers is not recorded as partial");
+    }
+
+    @Test
     public void testApplyPenaltyForOverdueLoansJobOutcome() throws InterruptedException {
         final Long clientID = clientHelper.createClient();
         Assertions.assertNotNull(clientID);

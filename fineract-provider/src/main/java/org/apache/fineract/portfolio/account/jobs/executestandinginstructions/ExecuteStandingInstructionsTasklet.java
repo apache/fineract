@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.account.jobs.executestandinginstructions;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -36,6 +38,7 @@ import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionHistoryStatus;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
@@ -44,6 +47,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.StepContribution;
@@ -59,6 +63,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
+    private final SavingsAccountAssembler savingsAccountAssembler;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -103,7 +108,21 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
             }
 
             if (isDueForTransfer && transactionAmount != null && transactionAmount.compareTo(BigDecimal.ZERO) > 0) {
-                final SavingsAccount fromSavingsAccount = null;
+                SavingsAccount fromSavingsAccount = null;
+                StandingInstructionHistoryStatus statusIfTransferred = StandingInstructionHistoryStatus.SUCCESS;
+                if (data.isAllowPartialTransfer() && PortfolioAccountType.SAVINGS.equals(data.getFromAccountTypeEnum())) {
+                    // transferFunds uses this instance instead of assembling the account again
+                    fromSavingsAccount = savingsAccountAssembler.assembleFrom(data.getFromAccount().getId(), false);
+                    final BigDecimal coverableAmount = coverableAmount(fromSavingsAccount, transactionAmount);
+                    // when nothing can be covered the full amount is attempted, so the run is recorded as failed as
+                    // before
+                    if (MathUtil.isGreaterThanZero(coverableAmount) && MathUtil.isLessThan(coverableAmount, transactionAmount)) {
+                        log.warn("Standing instruction {} transfers only {} of the {} due from savings account {}", data.getId(),
+                                coverableAmount, transactionAmount, data.getFromAccount().getId());
+                        transactionAmount = coverableAmount;
+                        statusIfTransferred = StandingInstructionHistoryStatus.PARTIAL;
+                    }
+                }
                 final boolean isRegularTransaction = true;
                 final boolean isExceptionForBalanceCheck = false;
                 AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount,
@@ -111,7 +130,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                         data.getToAccount().getId(), data.getName() + " Standing instruction trasfer ", null, null, null, null,
                         data.toTransferType(), null, null, data.getTransferTypeEnum().getValue(), null, null, ExternalId.empty(), null,
                         null, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
-                final boolean transferCompleted = transferAmount(errors, accountTransferDTO, data.getId());
+                final boolean transferCompleted = transferAmount(errors, accountTransferDTO, data.getId(), statusIfTransferred);
 
                 if (transferCompleted) {
                     final String updateQuery = "UPDATE m_account_transfer_standing_instructions SET last_run_date = ? where id = ?";
@@ -126,7 +145,8 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
         return RepeatStatus.FINISHED;
     }
 
-    private boolean transferAmount(final List<Throwable> errors, final AccountTransferDTO accountTransferDTO, final Long instructionId) {
+    private boolean transferAmount(final List<Throwable> errors, final AccountTransferDTO accountTransferDTO, final Long instructionId,
+            final StandingInstructionHistoryStatus statusIfTransferred) {
         boolean transferCompleted = true;
         StringBuilder errorLog = new StringBuilder();
         StringBuilder updateQuery = new StringBuilder(
@@ -153,17 +173,32 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
 
         }
         updateQuery.append(instructionId).append(",");
+        StandingInstructionHistoryStatus status = statusIfTransferred;
         if (errorLog.length() > 0) {
             transferCompleted = false;
-            updateQuery.append("'failed'").append(",");
-        } else {
-            updateQuery.append("'success'").append(",");
+            status = StandingInstructionHistoryStatus.FAILED;
         }
+        updateQuery.append("'").append(status.getValue()).append("',");
         updateQuery.append(accountTransferDTO.getTransactionAmount().doubleValue());
         updateQuery.append(", now(),");
         updateQuery.append("'").append(errorLog).append("')");
         jdbcTemplate.update(updateQuery.toString());
         return transferCompleted;
+    }
+
+    /**
+     * The most the savings account can transfer of the given amount: all of it when the amount and its withdrawal fee
+     * fit in the withdrawable balance, which already allows for the overdraft limit, an enforced minimum balance and
+     * holds. Otherwise the withdrawable balance less the fee on it; the fee only grows with the amount, so that always
+     * leaves enough for the fee on the smaller transfer.
+     */
+    static BigDecimal coverableAmount(final SavingsAccount account, final BigDecimal amount) {
+        final BigDecimal withdrawable = account.getWithdrawableBalance();
+        if (!MathUtil.isGreaterThan(amount.add(account.calculateWithdrawalFee(amount)), withdrawable)) {
+            return amount;
+        }
+        return withdrawable.subtract(account.calculateWithdrawalFee(withdrawable)).setScale(account.getCurrency().getDigitsAfterDecimal(),
+                RoundingMode.DOWN);
     }
 
     public boolean isDueForTransfer(StandingInstructionDuesData standingInstructionDuesData) {

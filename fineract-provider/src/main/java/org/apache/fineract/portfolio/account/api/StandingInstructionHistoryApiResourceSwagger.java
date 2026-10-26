@@ -106,7 +106,8 @@ final class StandingInstructionHistoryApiResourceSwagger {
             public GetStandingInstructionHistoryToClient toClient;
             @Schema(example = "10")
             public Float amount;
-            @Schema(example = "success")
+            @Schema(example = "success", description = "success, partial (only the part of the amount the savings account could cover was "
+                    + "transferred, see allowPartialTransfer) or failed")
             public String status;
             @Schema(example = "[2014, 6, 30]")
             public LocalDate executionTime;
