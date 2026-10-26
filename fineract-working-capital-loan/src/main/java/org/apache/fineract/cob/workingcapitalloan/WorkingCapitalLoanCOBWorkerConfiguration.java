@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.springbatch.StepRetryPolicyFactory;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanModelProcessingService;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.ChunkOrientedStepBuilder;
@@ -72,18 +73,14 @@ public class WorkingCapitalLoanCOBWorkerConfiguration {
     private final ResetContextTasklet resetContextTasklet;
 
     @Bean(WORKING_CAPITAL_LOAN_COB_WORKER_STEP)
-    public Step workingCapitalLoanCOBWorkerStep(final COBBusinessStepService cobBusinessStepService,
-            final WorkingCapitalLoanModelProcessingService modelProcessingService) {
-        WorkingCapitalLoanCOBWorkerItemReader reader = new WorkingCapitalLoanCOBWorkerItemReader(workingCapitalLoanRepository,
-                new BeforeStepLockingItemReaderHelper(retrieveIdService, wpcLoanLockingService));
-        WorkingCapitalLoanCOBWorkerItemProcessor processor = new WorkingCapitalLoanCOBWorkerItemProcessor(cobBusinessStepService,
-                modelProcessingService);
+    public Step workingCapitalLoanCOBWorkerStep(final WorkingCapitalLoanCOBWorkerItemReader reader,
+            final WorkingCapitalLoanCOBWorkerItemProcessor processor, final WorkingCapitalLoanCOBWorkerItemWriter writer) {
         final ChunkOrientedStepBuilder<WorkingCapitalLoan, WorkingCapitalLoan> stepBuilder = stepBuilderFactory
                 .get(WORKING_CAPITAL_LOAN_COB_WORKER_STEP).inputChannel(inboundRequests)
                 .<WorkingCapitalLoan, WorkingCapitalLoan>chunk(propertyService.getChunkSize(WORKING_CAPITAL_JOB_NAME)) //
                 .reader(reader) //
                 .processor(processor) //
-                .writer(new WorkingCapitalLoanCOBWorkerItemWriter(wpcLoanLockingService, workingCapitalLoanRepository)) //
+                .writer(writer) //
                 .faultTolerant() //
                 .retryPolicy(StepRetryPolicyFactory.immediateRetryPolicy(propertyService.getRetryLimit(WORKING_CAPITAL_JOB_NAME),
                         Exception.class)) //
@@ -114,5 +111,29 @@ public class WorkingCapitalLoanCOBWorkerConfiguration {
     public ApplyWorkingCapitalLoanLockTasklet applyWorkingCapitalLoanLock() {
         return new ApplyWorkingCapitalLoanLockTasklet(fineractProperties, wpcLoanLockingService, retrieveIdService,
                 requiresNewTransactionJdbcTemplate);
+    }
+
+    // Step-scoped, as in LoanCOBWorkerConfiguration: partitions of one job can run at the same time on one instance,
+    // and
+    // each needs its own reader queue and processor state. A shared reader lets a second partition's beforeStep replace
+    // the first one's queue, leaving the first partition's loans locked and never processed.
+    @Bean
+    @StepScope
+    public WorkingCapitalLoanCOBWorkerItemReader workingCapitalLoanCOBWorkerItemReader() {
+        return new WorkingCapitalLoanCOBWorkerItemReader(workingCapitalLoanRepository,
+                new BeforeStepLockingItemReaderHelper(retrieveIdService, wpcLoanLockingService));
+    }
+
+    @Bean
+    @StepScope
+    public WorkingCapitalLoanCOBWorkerItemProcessor workingCapitalLoanCOBWorkerItemProcessor(
+            final COBBusinessStepService cobBusinessStepService, final WorkingCapitalLoanModelProcessingService modelProcessingService) {
+        return new WorkingCapitalLoanCOBWorkerItemProcessor(cobBusinessStepService, modelProcessingService);
+    }
+
+    @Bean
+    @StepScope
+    public WorkingCapitalLoanCOBWorkerItemWriter workingCapitalLoanCOBWorkerItemWriter() {
+        return new WorkingCapitalLoanCOBWorkerItemWriter(wpcLoanLockingService, workingCapitalLoanRepository);
     }
 }

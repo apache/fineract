@@ -26,8 +26,13 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
+import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBWorkerItemProcessor;
+import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBWorkerItemReader;
+import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanInlineCOBWorkerItemProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanModelProcessingService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -57,12 +62,23 @@ class CobStepListenerRegistrationTest {
         BeforeStepLockingItemReaderHelper lockingHelper = mock(BeforeStepLockingItemReaderHelper.class);
         COBBusinessStepService businessStepService = mock(COBBusinessStepService.class);
         ProgressiveLoanModelProcessingService modelProcessingService = mock(ProgressiveLoanModelProcessingService.class);
+        WorkingCapitalLoanRepository workingCapitalLoanRepository = mock(WorkingCapitalLoanRepository.class);
+        WorkingCapitalLoanModelProcessingService workingCapitalModelProcessingService = mock(
+                WorkingCapitalLoanModelProcessingService.class);
 
         return Stream.of(//
                 Arguments.of("LoanItemReader", new LoanItemReader(loanRepository, lockingHelper)), //
                 Arguments.of("InlineCOBLoanItemReader", new InlineCOBLoanItemReader(loanRepository)), //
                 Arguments.of("LoanItemProcessor", new LoanItemProcessor(businessStepService, modelProcessingService)), //
-                Arguments.of("InlineCOBLoanItemProcessor", new InlineCOBLoanItemProcessor(businessStepService, modelProcessingService)));
+                Arguments.of("InlineCOBLoanItemProcessor", new InlineCOBLoanItemProcessor(businessStepService, modelProcessingService)), //
+                Arguments.of("WorkingCapitalLoanCOBWorkerItemReader",
+                        new WorkingCapitalLoanCOBWorkerItemReader(workingCapitalLoanRepository, lockingHelper)), //
+                Arguments.of("WorkingCapitalInlineCOBLoanItemReader",
+                        new WorkingCapitalInlineCOBLoanItemReader(workingCapitalLoanRepository)), //
+                Arguments.of("WorkingCapitalLoanCOBWorkerItemProcessor",
+                        new WorkingCapitalLoanCOBWorkerItemProcessor(businessStepService, workingCapitalModelProcessingService)), //
+                Arguments.of("WorkingCapitalLoanInlineCOBWorkerItemProcessor",
+                        new WorkingCapitalLoanInlineCOBWorkerItemProcessor(businessStepService, workingCapitalModelProcessingService)));
     }
 
     @ParameterizedTest(name = "{0} registers exactly once as a step listener")
