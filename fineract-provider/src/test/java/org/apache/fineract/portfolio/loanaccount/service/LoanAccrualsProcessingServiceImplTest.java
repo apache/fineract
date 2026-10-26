@@ -48,6 +48,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ChargeAccrualDate
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
@@ -902,6 +903,92 @@ public class LoanAccrualsProcessingServiceImplTest {
                 .setInterestAccruable(accruable).setInterestAccrued(accrued);
         accrualPeriods.addPeriod(period);
         return period;
+    }
+
+    /**
+     * One catch-up accrual dated today covers installments that fell due earlier. Reprocessing must attribute it to
+     * them in order and must NOT reverse it, although its date lies in today's installment.
+     */
+    @Test
+    void reallocateCumulativeAccruals_ShouldFillEarlierInstallmentsFromACatchUpWithoutReversingIt() {
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+        final LoanRepaymentScheduleInstallment first = dailyInstallment(1, today.minusDays(2));
+        final LoanRepaymentScheduleInstallment second = dailyInstallment(2, today.minusDays(1));
+        final LoanRepaymentScheduleInstallment third = dailyInstallment(3, today);
+        when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(first, second, third));
+        when(loan.isClosed()).thenReturn(false);
+        when(loan.isInterestBearing()).thenReturn(true);
+        // One catch-up dated today for all three installments' interest.
+        final LoanTransaction catchUp = accrual(today, "24.66", false);
+
+        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateCumulativeAccruals", loan, List.of(catchUp), today, true);
+
+        verify(catchUp, never()).reverse();
+        verify(first).setInterestAccrued(new BigDecimal("8.22"));
+        verify(second).setInterestAccrued(new BigDecimal("8.22"));
+        verify(third).setInterestAccrued(new BigDecimal("8.22"));
+    }
+
+    @Test
+    void reallocateCumulativeAccruals_ShouldReverseTheLatestAccrualWhenOverAccrued() {
+        // After a reschedule only 8.22 is accruable by today, but 16.44 was accrued: the latest accrual goes.
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+        final LoanRepaymentScheduleInstallment first = dailyInstallment(1, today);
+        final LoanRepaymentScheduleInstallment later = dailyInstallment(2, today.plusDays(30));
+        when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(first, later));
+        when(loan.isClosed()).thenReturn(false);
+        when(loan.isInterestBearing()).thenReturn(false);
+        final LoanTransaction older = accrual(today.minusDays(1), "8.22", false);
+        final LoanTransaction latest = accrual(today, "8.22", false);
+
+        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateCumulativeAccruals", loan, List.of(older, latest),
+                today.plusDays(30), false);
+
+        verify(latest).reverse();
+        verify(older, never()).reverse();
+        verify(first).setInterestAccrued(new BigDecimal("8.22"));
+        verify(later).setInterestAccrued(new BigDecimal("0.00"));
+    }
+
+    @Test
+    void reallocateCumulativeAccruals_ShouldNetAccrualAdjustments() {
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+        final LoanRepaymentScheduleInstallment first = dailyInstallment(1, today.minusDays(1));
+        final LoanRepaymentScheduleInstallment second = dailyInstallment(2, today);
+        when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(first, second));
+        when(loan.isClosed()).thenReturn(false);
+        final LoanTransaction accrual = accrual(today.minusDays(1), "16.44", false);
+        final LoanTransaction adjustment = accrual(today, "8.22", true);
+
+        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateCumulativeAccruals", loan, List.of(accrual, adjustment),
+                today, true);
+
+        verify(accrual, never()).reverse();
+        verify(first).setInterestAccrued(new BigDecimal("8.22"));
+        verify(second).setInterestAccrued(new BigDecimal("0.00"));
+    }
+
+    private static LoanRepaymentScheduleInstallment dailyInstallment(final int number, final LocalDate dueDate) {
+        final LoanRepaymentScheduleInstallment installment = mock(LoanRepaymentScheduleInstallment.class);
+        when(installment.getInstallmentNumber()).thenReturn(number);
+        when(installment.getFromDate()).thenReturn(dueDate.minusDays(1));
+        when(installment.getDueDate()).thenReturn(dueDate);
+        when(installment.getInterestCharged()).thenReturn(new BigDecimal("8.22"));
+        when(installment.getInterestWaived()).thenReturn(BigDecimal.ZERO);
+        when(installment.getFeeChargesCharged()).thenReturn(BigDecimal.ZERO);
+        when(installment.getPenaltyCharges()).thenReturn(BigDecimal.ZERO);
+        return installment;
+    }
+
+    private static LoanTransaction accrual(final LocalDate date, final String interest, final boolean adjustment) {
+        final LoanTransaction transaction = mock(LoanTransaction.class);
+        when(transaction.getTransactionDate()).thenReturn(date);
+        when(transaction.getInterestPortion()).thenReturn(new BigDecimal(interest));
+        when(transaction.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(transaction.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(transaction.isAccrual()).thenReturn(!adjustment);
+        when(transaction.isAccrualAdjustment()).thenReturn(adjustment);
+        return transaction;
     }
 
     private static Stream<Arguments> loanStatusTestCases() {
