@@ -127,6 +127,26 @@ public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBa
     }
 
     @Test
+    public void testHoldOnOverdrawnAccountIsNotReversedByInterestPostingJob() {
+        final Long savingsId = createActiveSavings(START_DATE, overdraftDailyPostingProduct());
+
+        withdraw(savingsId, "100", START_DATE);
+        final Long holdTransactionId = savingsTransactionHelper.holdAmount(savingsId, "50", START_DATE, "manual hold").getResourceId();
+        assertNotNull(holdTransactionId);
+
+        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+
+        final SavingsAccountTransactionData holdTransaction = savingsTransactionHelper.getTransaction(savingsId, holdTransactionId);
+        assertEquals(Boolean.FALSE, holdTransaction.getReversed(), "Interest posting must not reverse the hold transaction");
+        SavingsTestValidators.verifyAmount(new BigDecimal("-100"), holdTransaction.getRunningBalance(),
+                "Hold running balance must remain equal to the ledger balance");
+        assertEquals(0,
+                BigDecimal.ZERO
+                        .compareTo(holdTransaction.getOverdraftAmount() == null ? BigDecimal.ZERO : holdTransaction.getOverdraftAmount()),
+                "Hold transaction must not carry an overdraft amount");
+    }
+
+    @Test
     public void testAccountBalanceWithWithdrawalFeeAfterInterestPostingJob() {
         businessDateHelper.runAt(POSTING_JOB_BUSINESS_DATE.toString(), () -> {
             final Long savingsId = createActiveDailyPostingSavingsWithWithdrawalFee();
