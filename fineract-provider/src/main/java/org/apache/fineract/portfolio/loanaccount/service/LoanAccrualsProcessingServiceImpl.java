@@ -316,6 +316,19 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     }
 
     /**
+     * method recognises, on receipt, the interest an open NPA loan has been paid but never accrued
+     */
+    @Override
+    public void processAccrualsOnNpaLoanRepayment(@NonNull final Loan loan) {
+        if (!loan.isOpen() || !loan.isNpa()) {
+            return;
+        }
+        final boolean realTimeChargeAccrual = isRealTimeChargeAccrual(loan);
+        addAccruals(loan, DateUtils.getBusinessLocalDate(), true, false, true,
+                resolveChargeOnDueDate(isChargeOnDueDate(), realTimeChargeAccrual), realTimeChargeAccrual);
+    }
+
+    /**
      * method calculates accruals for loan on loan fore closure
      */
     @Override
@@ -375,10 +388,13 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
     private void addAccruals(@NonNull final Loan loan, @NonNull LocalDate tillDate, final boolean periodic, final boolean isFinal,
             final boolean addJournal, final boolean chargeOnDueDate, final boolean realTimeChargeAccrual) {
-        if ((!isFinal && !loan.isOpen()) || loan.isNpa() || loan.isChargedOff()
-                || !loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
+        if ((!isFinal && !loan.isOpen()) || loan.isChargedOff() || !loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
             return;
         }
+        // An NPA loan stops accruing, but interest it actually receives is income on receipt: while NPA only the paid,
+        // not yet accrued interest is recognised, and the final accrual on closure still runs. Otherwise the repayment
+        // clears more Interest Receivable than was ever accrued and that interest never reaches income.
+        final boolean npaIncomeOnReceipt = loan.isNpa() && !isFinal;
 
         final LoanInterestRecalculationDetails recalculationDetails = loan.getLoanInterestRecalculationDetails();
         if (recalculationDetails != null && recalculationDetails.isCompoundingToBePostedAsTransaction()) {
@@ -416,6 +432,9 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
         final AccrualPeriodsData accrualPeriods = calculateAccrualAmounts(loan, tillDate, periodic, isFinal, chargeOnDueDate,
                 realTimeChargeAccrual);
+        if (npaIncomeOnReceipt) {
+            limitAccrualsToReceivedInterest(loan, accrualPeriods);
+        }
         final boolean mergeTransactions = isFinal || progressiveAccrual;
         final MonetaryCurrency currency = loan.getLoanProductRelatedDetail().getCurrency();
         List<LoanTransaction> accrualTransactions = new ArrayList<>();
@@ -447,7 +466,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 if (!isFinal && DateUtils.isAfter(dueDate, tillDate) && DateUtils.isBefore(tillDate, accruedTill)) {
                     continue;
                 }
-                final LocalDate periodAccrualDate = DateUtils.isBefore(dueDate, accrualDate) ? dueDate : accrualDate;
+                // income recognised on receipt is dated on receipt, never back into an earlier (possibly closed) period
+                final LocalDate periodAccrualDate = !npaIncomeOnReceipt && DateUtils.isBefore(dueDate, accrualDate) ? dueDate : accrualDate;
                 final LoanTransaction accrualTransaction = addAccrualTransaction(loan, periodAccrualDate, period, interestPortion,
                         feePortion, penaltyPortion, false);
                 if (accrualTransaction != null) {
@@ -470,7 +490,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             return;
         }
 
-        if (!isFinal || progressiveAccrual) {
+        // the unpaid interest of an NPA loan is still unaccrued, so accruedTill must not move past it
+        if (!npaIncomeOnReceipt && (!isFinal || progressiveAccrual)) {
             loan.setAccruedTill(isFinal ? accrualDate : tillDate);
         }
 
@@ -486,6 +507,23 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 // Create journal entries immediately for this transaction
                 journalEntryPoster.postJournalEntriesForLoanTransaction(accrualTransaction, false, false);
             }
+        }
+    }
+
+    /**
+     * Caps each period's accruable interest at the interest already paid on its installment (never below what is
+     * already accrued), and leaves fees and penalties unaccrued, so an NPA loan recognises only income it received.
+     */
+    private void limitAccrualsToReceivedInterest(@NonNull final Loan loan, @NonNull final AccrualPeriodsData accrualPeriods) {
+        final MonetaryCurrency currency = accrualPeriods.getCurrency();
+        for (AccrualPeriodData period : accrualPeriods.getPeriods()) {
+            final Money interestAccruable = period.getInterestAccruable();
+            if (interestAccruable != null) {
+                final LoanRepaymentScheduleInstallment installment = loan.fetchRepaymentScheduleInstallment(period.getInstallmentNumber());
+                final Money interestReceived = MathUtil.min(interestAccruable, installment.getInterestPaid(currency), false);
+                period.setInterestAccruable(MathUtil.max(interestReceived, period.getInterestAccrued(), true));
+            }
+            period.getCharges().forEach(charge -> charge.setChargeAccruable(charge.getChargeAccrued()));
         }
     }
 
