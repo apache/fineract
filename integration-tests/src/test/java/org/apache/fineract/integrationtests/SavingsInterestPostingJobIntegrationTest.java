@@ -24,9 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Comparator;
 import java.util.List;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
@@ -34,6 +37,8 @@ import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestVali
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @Order(2)
 public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBase {
@@ -173,6 +178,40 @@ public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBa
             SavingsTestValidators.verifyAmount(balanceAfterFirstRun, balanceAfterSecondRun,
                     "Account balance must not change when job runs twice on the same business date");
         });
+    }
+
+    @ParameterizedTest(name = "interest posted on the period end date: {0}")
+    @ValueSource(booleans = { false, true })
+    public void testPostInterestJobDoesNotPostManuallyPostedInterestAgain(final boolean postAtPeriodEnd) {
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.SAVINGS_INTEREST_POSTING_CURRENT_PERIOD_END,
+                new PutGlobalConfigurationsRequest().enabled(postAtPeriodEnd));
+        final Long savingsId = createActiveSavings("01 March 2019",
+                createSavingsProduct(SavingsRequestBuilders
+                        .savingsProduct(SavingsTestData.InterestCompoundingPeriodType.MONTHLY,
+                                SavingsTestData.InterestPostingPeriodType.MONTHLY, SavingsTestData.InterestCalculationType.DAILY_BALANCE)
+                        .nominalAnnualInterestRate(11.0)).getResourceId());
+        deposit(savingsId, "20013", "01 March 2019");
+        // posting as on a past date would also post the interest due up to the business date, leaving nothing to the
+        // job
+        runAt("25 March 2019", () -> savingsTransactionHelper.postInterestAsOn(savingsId, "25 March 2019"));
+        runAt("01 April 2019", () -> schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME));
+
+        final List<SavingsAccountTransactionData> interestPostings = savingsTransactionHelper.getTransactions(savingsId).stream()
+                .filter(transaction -> Boolean.TRUE.equals(transaction.getTransactionType().getInterestPosting()))
+                .filter(transaction -> !Boolean.TRUE.equals(transaction.getReversed()))
+                .sorted(Comparator.comparing(SavingsAccountTransactionData::getDate)).toList();
+        final int postingDayOffset = postAtPeriodEnd ? 1 : 0;
+
+        assertEquals(2, interestPostings.size(), "The manual posting and the posting for the rest of March");
+        // 20013 x 11% x 24 / 365 for 1 to 24 March
+        SavingsTestValidators.verifyAmount(new BigDecimal("144.7516"), interestPostings.get(0).getAmount(), "Manually posted interest");
+        assertEquals(LocalDate.of(2019, Month.MARCH, 25).minusDays(postingDayOffset), interestPostings.get(0).getDate(),
+                "Date of the manual posting");
+        // 20013 x 11% x 7 / 365 for 25 to 31 March
+        SavingsTestValidators.verifyAmount(new BigDecimal("42.2192"), interestPostings.get(1).getAmount(),
+                "The job must post only the interest of the days after the manual posting");
+        assertEquals(LocalDate.of(2019, Month.APRIL, 1).minusDays(postingDayOffset), interestPostings.get(1).getDate(),
+                "Date of the posting by the job");
     }
 
     private long countActiveTransactionsOn(final Long savingsId, final LocalDate date) {

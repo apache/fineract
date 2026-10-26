@@ -811,8 +811,8 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
     private Long createAccrualProduct(final boolean withDiscount) {
         WorkingCapitalLoanProductTestBuilder builder = new WorkingCapitalLoanProductTestBuilder()
                 .withName("WCL UndoCash " + UUID.randomUUID().toString().substring(0, 8))
-                .withShortName(UUID.randomUUID().toString().replace("-", "").substring(0, 4))
-                .withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM).withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
+                .withShortName(Utils.uniqueRandomStringGenerator("", 4)).withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)
+                .withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
                 .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())
                 .withTransfersInSuspenseAccountId(transfersSuspenseAccount.getAccountID().longValue())
                 .withIncomeFromDiscountFeeAccountId(incomeFromDiscountFeeAccount.getAccountID().longValue())

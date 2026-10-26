@@ -36,6 +36,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDa
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterAll;
@@ -293,10 +294,11 @@ public class FeignWorkingCapitalLoanAmortizationNormalizationTest extends FeignI
     }
 
     private Long createProduct() {
-        final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder()
-                .withName("WCL Norm " + unique()).withShortName(UUID.randomUUID().toString().replace("-", "").substring(0, 4))
-                .withRepaymentEvery(1).withRepaymentFrequencyType("DAYS").withPeriodPaymentRate(RATE)
-                .withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build()).getResourceId();
+        final Long productId = productHelper
+                .createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName("WCL Norm " + unique())
+                        .withShortName(Utils.uniqueRandomStringGenerator("", 4)).withRepaymentEvery(1).withRepaymentFrequencyType("DAYS")
+                        .withPeriodPaymentRate(RATE).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build())
+                .getResourceId();
         createdProductIds.add(productId);
         return productId;
     }

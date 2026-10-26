@@ -611,7 +611,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final Long officeId = rs.getLong("officeId");
                     final BigDecimal cumulativeBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "cumulativeBalance");
 
-                    final boolean postInterestAsOn = false;
+                    final boolean manualTransaction = rs.getBoolean("manualTransaction");
 
                     PaymentDetailData paymentDetailData = null;
                     if (transactionType.isDepositOrWithdrawal()) {
@@ -626,7 +626,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
                     savingsAccountTransactionData = SavingsAccountTransactionData.create(transactionId, transactionType, paymentDetailData,
                             id, accountNo, date, currency, amount, outstandingChargeAmount, runningBalance, reversed, transSubmittedOnDate,
-                            postInterestAsOn, cumulativeBalance, balanceEndDate);
+                            manualTransaction, cumulativeBalance, balanceEndDate);
                     savingsAccountTransactionData.setOverdraftAmount(overdraftAmount);
 
                     transMap.put("id", transactionId);

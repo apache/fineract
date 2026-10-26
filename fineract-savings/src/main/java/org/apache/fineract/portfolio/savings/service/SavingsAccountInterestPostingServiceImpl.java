@@ -272,6 +272,10 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                 .fromInt(savingsAccountData.getInterestCalculationDaysInYearTypeId());
 
         List<LocalDate> postedAsOnDates = getManualPostingDates(savingsAccountData);
+        if (isSavingsInterestPostingAtCurrentPeriodEnd) {
+            // With this configuration manual postings are dated on their period end, not on the day after it
+            postedAsOnDates.replaceAll(postedAsOnDate -> postedAsOnDate.plusDays(1));
+        }
         if (postInterestOnDate != null) {
             postedAsOnDates.add(postInterestOnDate);
         }
