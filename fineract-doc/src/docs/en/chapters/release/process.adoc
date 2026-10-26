@@ -1,7 +1,5 @@
 = Release Process
 
-CAUTION: Fineract release plugin Gradle tasks are experimental and incomplete.
-
 .Release Process Diagram
 [plantuml,format=svg]
 ----

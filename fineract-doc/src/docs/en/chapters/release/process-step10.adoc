@@ -2,14 +2,4 @@
 
 == Description
 
-Initiate voting with https://release-test.apache.org[the ATR (ASF Trusted Releases) tool].
-
-== Gradle Task
-
-.Command
-[source,bash,subs="attributes+,+macros"]
-----
-./gradlew fineractReleaseStep10
-----
-
-NOTE: Use the ATR for this task.
+Initiate voting via https://releases.apache.org[ATR (Apache Trusted Releases)].

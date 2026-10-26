@@ -153,7 +153,7 @@ distributions {
                         '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', 
                         '**/.externalToolbuilders', '.theia', 'LICENSE_RELEASE', 
                         'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', 
-                        '**/.gitkeep', '*.swp', '.atr-rat-excludes-bin.txt'
+                        '**/.gitkeep', '*.swp', '.atr-rat-excludes-bin.txt', '.claude'
                 
                 // Ensure consistent file paths for caching
                 eachFile { details ->

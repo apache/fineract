@@ -2,9 +2,9 @@
 
 == Description
 
-The RM should, if one doesn't already exist, first create a new release umbrella issue in JIRA. This issue is dedicated to tracking (a summary of) any discussion related to the planned new release. An example of such an issue is https://issues.apache.org/jira/browse/FINERACT-873[FINERACT-873].
+The RM should, if one doesn't already exist, first create a new release umbrella issue in JIRA. This issue is dedicated to tracking (a summary of) any discussion related to the planned new release. An example of such an issue is https://issues.apache.org/jira/browse/FINERACT-2943[FINERACT-2943].
 
-Next, the RM logs in to https://release-test.apache.org[the ATR (ASF Trusted Releases)] tool and clicks "+ Start a new release", naming the release `{revnumber}`.
+Next, the RM logs in to https://releases.apache.org[ATR (Apache Trusted Releases)] and clicks "+ Start a new release", naming the release `{revnumber}`.
 
 The RM then creates a list of resolved issues & features through an initial check in JIRA for already resolved issues for the release, and then setup a timeline for release branch point. The time for the day the issue list is created to the release branch point must be at least two weeks in order to give the community a chance to prioritize and commit any last minute features and issues they would like to see in the upcoming release.
 
@@ -12,17 +12,21 @@ The RM must then send the pointer to the umbrella issue along with the tentative
 
 The RM should then inform users when the git branch is planned to be created, by sending an email based on this template:
 
-[source,text]
+[source,text,subs="attributes+"]
 ----
-include::{rootdir}/buildSrc/src/main/resources/email/release.step01.headsup.subject.ftl[lines=21..]
+Subject: [FINERACT] [PROPOSAL] 📦 New release {revnumber}
 
-include::{rootdir}/buildSrc/src/main/resources/email/release.step01.headsup.message.ftl[lines=21..]
-----
+Hello everyone,
 
-== Gradle Task
+... based on our release process (https://fineract.apache.org/docs/current/#_releases), I will create a release/{revnumber} branch off develop in our git repository at https://github.com/apache/fineract on <planned branch date, e. g. "Monday, April 25, 2022">.
 
-.Command
-[source,bash,subs="attributes+,+macros"]
-----
-./gradlew fineractReleaseStep1 -Pfineract.release.issue=1234 -Pfineract.releaseBranch.date="Monday, April 25, 2022" -Pfineract.release.version={revnumber}
+The release tracking umbrella issue for tracking all activity in JIRA is FINERACT-<issue number> (https://issues.apache.org/jira/browse/FINERACT-<issue number>).
+
+If you have any work in progress that you would like to see included in this release, please add "blocking" links to the release JIRA issue.
+
+I am the release manager for this release.
+
+Cheers,
+
+<your name>
 ----

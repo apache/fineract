@@ -14,11 +14,3 @@ git push origin tag {revnumber} <2>
 <2> You may opt to wait to push the tag until just before <<Step 10: Start Vote>>. By that time you'll be done with <<Step 9: Verify Distribution Staging>>, so it's less likely you'd need to try to move the tag. Git tags are meant to be immutable and they tend to spread like viruses. Moving them can be painful or tricky.
 
 CAUTION: It is important to create so called annotated tags (vs. lightweight) for releases.
-
-== Gradle Task
-
-.Command
-[source,bash,subs="attributes+,+macros"]
-----
-./gradlew fineractReleaseStep5 -Pfineract.release.version={revnumber}
-----

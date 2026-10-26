@@ -18,7 +18,7 @@
 # Path patterns to exclude from RAT checks run by ATR.
 #
 # RAT = Release Audit Tool (https://creadur.apache.org/rat/)
-# ATR = ASF Trusted Releases (https://release-test.apache.org , https://github.com/apache/tooling-trusted-releases/)
+# ATR = ASF Trusted Releases (https://releases.apache.org , https://github.com/apache/tooling-trusted-releases/)
 #
 # This duplicates exclusions in build.gradle.
 # This is probably only necessary until both RAT and org.nosphere.apache.rat plugin are using 0.17.
