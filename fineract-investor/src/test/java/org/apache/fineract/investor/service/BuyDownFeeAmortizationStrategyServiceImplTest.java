@@ -47,7 +47,7 @@ class BuyDownFeeAmortizationStrategyServiceImplTest {
     private static final Long LOAN_PRODUCT_ID = 22L;
 
     @Mock
-    private ExternalAssetOwnerLoanProductAttributesReadService externalAssetOwnerLoanProductAttributesReadService;
+    private ExternalAssetOwnerLoanAttributesReadService externalAssetOwnerLoanAttributesReadService;
 
     @Mock
     private ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
@@ -71,16 +71,16 @@ class BuyDownFeeAmortizationStrategyServiceImplTest {
         assertFalse(underTest.shouldRecognizeImmediately(loan));
 
         verify(externalAssetOwnerTransferRepository).findActiveByLoanId(LOAN_ID);
-        verifyNoInteractions(externalAssetOwnerLoanProductAttributesReadService);
+        verifyNoInteractions(externalAssetOwnerLoanAttributesReadService);
     }
 
     @ParameterizedTest
     @MethodSource("soldLoanAttributeProvider")
-    void shouldRecognizeImmediately_whenLoanSold_usesProductAttribute(final String attributeValue, final boolean expectedResult) {
+    void shouldRecognizeImmediately_whenLoanSold_usesResolvedAttribute(final String attributeValue, final boolean expectedResult) {
         when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.productId()).thenReturn(LOAN_PRODUCT_ID);
         when(externalAssetOwnerTransferRepository.findActiveByLoanId(LOAN_ID)).thenReturn(Optional.of(new ExternalAssetOwnerTransfer()));
-        when(externalAssetOwnerLoanProductAttributesReadService.getAttributeValue(LOAN_PRODUCT_ID, IMMEDIATE.getAttributeKey()))
+        when(externalAssetOwnerLoanAttributesReadService.resolveAttributeValue(LOAN_ID, LOAN_PRODUCT_ID, IMMEDIATE.getAttributeKey()))
                 .thenReturn(Optional.ofNullable(attributeValue));
 
         assertEquals(expectedResult, underTest.shouldRecognizeImmediately(loan));

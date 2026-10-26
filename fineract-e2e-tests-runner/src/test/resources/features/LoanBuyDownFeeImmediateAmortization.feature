@@ -204,7 +204,7 @@ Feature: Immediate Buy Down Fee Amortization
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 03 January 2026 | 50.0       | 0.57             | 49.43                    | 0.0             | 0.0                |
     # --- Switch to IMMEDIATE and post new fee ---
-    When Admin set external asset owner loan product attribute "BUY_DOWN_FEE_AMORTIZATION_STRATEGY" value "IMMEDIATE" for loan product "LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES"
+    When Admin sets external asset owner loan attribute "BUY_DOWN_FEE_AMORTIZATION_STRATEGY" value "IMMEDIATE" for the loan
     When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "04 January 2026" with "5" EUR transaction amount
     Then Loan Transactions tab has the following data without accruals:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
@@ -497,7 +497,7 @@ Feature: Immediate Buy Down Fee Amortization
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 03 January 2026 | 50.0       | 0.57             | 49.43                    | 0.0             | 0.0                |
     # --- Switch to IMMEDIATE and post 2nd buy down fee on still-sold loan: fully amortized at once ---
-    When Admin set external asset owner loan product attribute "BUY_DOWN_FEE_AMORTIZATION_STRATEGY" value "IMMEDIATE" for loan product "LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES"
+    When Admin sets external asset owner loan attribute "BUY_DOWN_FEE_AMORTIZATION_STRATEGY" value "IMMEDIATE" for the loan
     When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "04 January 2026" with "5" EUR transaction amount
     Then Loan Transactions tab has the following data without accruals:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |

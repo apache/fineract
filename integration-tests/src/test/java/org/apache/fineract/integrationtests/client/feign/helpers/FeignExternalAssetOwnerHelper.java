@@ -18,17 +18,24 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import feign.Headers;
+import feign.Param;
+import feign.RequestLine;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.ExternalAssetOwnerLoanAttributesData;
 import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.ExternalAssetOwnerSearchRequest;
 import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
@@ -45,6 +52,7 @@ import org.apache.fineract.client.models.PostExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.PostExternalAssetOwnerResponse;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
+import org.apache.fineract.client.models.PutExternalAssetOwnerLoanAttributeRequest;
 import org.apache.fineract.client.models.PutExternalAssetOwnerLoanProductAttributeRequest;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 
@@ -58,6 +66,8 @@ public class FeignExternalAssetOwnerHelper {
     private static final String EFFECTIVE_ATTRIBUTE = "effective";
     private static final String SETTLEMENT_ATTRIBUTE = "settlement";
     private static final String CANCEL_COMMAND = "cancel";
+    private static final String ATTRIBUTE_KEY = "attributeKey";
+    private static final String ATTRIBUTE_VALUE = "attributeValue";
 
     private final FineractFeignClient fineractClient;
 
@@ -96,6 +106,61 @@ public class FeignExternalAssetOwnerHelper {
     public PageExternalTransferLoanProductAttributesData retrieveLoanProductAttributes(Long loanProductId, String attributeKey) {
         return ok(() -> fineractClient.externalAssetOwnerLoanProductAttributes()
                 .retrieveAllExternalAssetOwnerLoanProductAttributes(loanProductId, attributeKey));
+    }
+
+    public ExternalAssetOwnerLoanAttributesData retrieveLoanAttributes(Long loanId) {
+        return ok(() -> fineractClient.externalAssetOwners().retrieveExternalAssetOwnerLoanAttributes(loanId));
+    }
+
+    public ExternalAssetOwnerLoanAttributesData retrieveLoanAttributesByLoanExternalId(String loanExternalId) {
+        return ok(() -> fineractClient.externalAssetOwners().retrieveExternalAssetOwnerLoanAttributesByLoanExternalId(loanExternalId));
+    }
+
+    public CallFailedRuntimeException retrieveLoanAttributesFailure(Long loanId) {
+        return fail(() -> fineractClient.externalAssetOwners().retrieveExternalAssetOwnerLoanAttributes(loanId));
+    }
+
+    public CallFailedRuntimeException retrieveLoanAttributesByLoanExternalIdFailure(String loanExternalId) {
+        return fail(() -> fineractClient.externalAssetOwners().retrieveExternalAssetOwnerLoanAttributesByLoanExternalId(loanExternalId));
+    }
+
+    public CommandProcessingResult updateLoanAttribute(Long loanId, String attributeKey, String attributeValue) {
+        return updateLoanAttributeAs(fineractClient, loanId, attributeKey, attributeValue);
+    }
+
+    public CommandProcessingResult updateLoanAttributeAs(FineractFeignClient client, Long loanId, String attributeKey,
+            String attributeValue) {
+        return ok(() -> client.externalAssetOwners().updateExternalAssetOwnerLoanAttribute(loanId,
+                new PutExternalAssetOwnerLoanAttributeRequest().attributeKey(attributeKey).attributeValue(attributeValue)));
+    }
+
+    public CallFailedRuntimeException updateLoanAttributeFailure(Long loanId, String attributeKey, String attributeValue) {
+        return updateLoanAttributeAsFailure(fineractClient, loanId, attributeKey, attributeValue);
+    }
+
+    public CallFailedRuntimeException updateLoanAttributeFailure(Long loanId, Map<String, Object> request) {
+        return fail(() -> fineractClient.create(RawLoanAttributeApi.class).updateLoanAttribute(loanId, request));
+    }
+
+    public CallFailedRuntimeException updateLoanAttributeAsFailure(FineractFeignClient client, Long loanId, String attributeKey,
+            String attributeValue) {
+        return fail(() -> client.externalAssetOwners().updateExternalAssetOwnerLoanAttribute(loanId,
+                new PutExternalAssetOwnerLoanAttributeRequest().attributeKey(attributeKey).attributeValue(attributeValue)));
+    }
+
+    public static Map<String, Object> loanAttributeRequest(String attributeKey, String attributeValue) {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put(ATTRIBUTE_KEY, attributeKey);
+        request.put(ATTRIBUTE_VALUE, attributeValue);
+        return request;
+    }
+
+    // Raw request body allows sending parameters the generated request model does not have.
+    @Headers({ "Accept: application/json", "Content-Type: application/json" })
+    public interface RawLoanAttributeApi {
+
+        @RequestLine("PUT /v1/external-asset-owners/loans/{loanId}/attributes")
+        CommandProcessingResult updateLoanAttribute(@Param("loanId") Long loanId, Map<String, Object> request);
     }
 
     public List<ExternalTransferOwnerData> retrieveExternalAssetOwners() {

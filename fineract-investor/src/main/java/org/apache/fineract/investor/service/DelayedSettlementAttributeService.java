@@ -20,5 +20,5 @@ package org.apache.fineract.investor.service;
 
 public interface DelayedSettlementAttributeService {
 
-    boolean isEnabled(Long loanProductId);
+    boolean isEnabled(Long loanId, Long loanProductId);
 }

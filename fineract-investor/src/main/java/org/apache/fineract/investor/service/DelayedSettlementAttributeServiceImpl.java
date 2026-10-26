@@ -27,12 +27,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DelayedSettlementAttributeServiceImpl implements DelayedSettlementAttributeService {
 
-    private final ExternalAssetOwnerLoanProductAttributesReadService externalAssetOwnerLoanProductAttributesReadService;
+    private final ExternalAssetOwnerLoanAttributesReadService externalAssetOwnerLoanAttributesReadService;
 
     @Override
-    public boolean isEnabled(final Long loanProductId) {
+    public boolean isEnabled(final Long loanId, final Long loanProductId) {
         // values stored before validation became case sensitive may be lower case
-        return externalAssetOwnerLoanProductAttributesReadService.getAttributeValue(loanProductId, DELAYED_SETTLEMENT.getAttributeKey())
+        return externalAssetOwnerLoanAttributesReadService
+                .resolveAttributeValue(loanId, loanProductId, DELAYED_SETTLEMENT.getAttributeKey())
                 .map(value -> DELAYED_SETTLEMENT.getAttributeValue().equalsIgnoreCase(value)).orElse(false);
     }
 }

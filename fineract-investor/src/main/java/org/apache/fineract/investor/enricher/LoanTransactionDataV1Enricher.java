@@ -82,6 +82,6 @@ public class LoanTransactionDataV1Enricher implements DataEnricher<LoanTransacti
                     data.getLoanId(), data.getId());
             return false;
         }
-        return excludedTransactionTypesService.isExcluded(loanProductId, transactionType);
+        return excludedTransactionTypesService.isExcluded(data.getLoanId(), loanProductId, transactionType);
     }
 }

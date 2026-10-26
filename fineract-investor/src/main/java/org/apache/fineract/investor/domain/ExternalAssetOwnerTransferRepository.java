@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.investor.domain;
 
+import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -70,6 +72,12 @@ public interface ExternalAssetOwnerTransferRepository
     @Query("SELECT e FROM ExternalAssetOwnerTransfer e WHERE e.loanId = :loanId AND e.status IN :statuses"
             + " AND e.effectiveDateTo = :effectiveDateTo ORDER BY e.id ASC")
     List<ExternalAssetOwnerTransfer> findAllByLoanIdAndStatusInAndEffectiveDateTo(@Param("loanId") Long loanId,
+            @Param("statuses") Collection<ExternalTransferStatus> statuses, @Param("effectiveDateTo") LocalDate effectiveDateTo);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT e FROM ExternalAssetOwnerTransfer e WHERE e.loanId = :loanId AND e.status IN :statuses"
+            + " AND e.effectiveDateTo = :effectiveDateTo")
+    List<ExternalAssetOwnerTransfer> findAllForUpdateByLoanIdAndStatusInAndEffectiveDateTo(@Param("loanId") Long loanId,
             @Param("statuses") Collection<ExternalTransferStatus> statuses, @Param("effectiveDateTo") LocalDate effectiveDateTo);
 
     @Query("SELECT e FROM ExternalAssetOwnerTransfer e WHERE e.loanId = :loanId AND e.settlementDate = :settlementDate"

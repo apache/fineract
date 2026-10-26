@@ -35,6 +35,7 @@ import org.mockito.MockitoAnnotations;
 
 public class DelayedSettlementAttributeServiceImplTest {
 
+    private static final Long LOAN_ID = 2L;
     private static final Long LOAN_PRODUCT_ID = 1L;
 
     private static Stream<Arguments> attributesDataProvider() {
@@ -58,11 +59,11 @@ public class DelayedSettlementAttributeServiceImplTest {
         // given
         TestContext testContext = new TestContext();
 
-        when(testContext.externalAssetOwnerLoanProductAttributesReadService.getAttributeValue(LOAN_PRODUCT_ID,
+        when(testContext.externalAssetOwnerLoanAttributesReadService.resolveAttributeValue(LOAN_ID, LOAN_PRODUCT_ID,
                 DELAYED_SETTLEMENT.getAttributeKey())).thenReturn(Optional.ofNullable(attributeValue));
 
         // when
-        boolean result = testContext.testSubject.isEnabled(LOAN_PRODUCT_ID);
+        boolean result = testContext.testSubject.isEnabled(LOAN_ID, LOAN_PRODUCT_ID);
 
         // then
         assertEquals(expectedResult, result);
@@ -71,7 +72,7 @@ public class DelayedSettlementAttributeServiceImplTest {
     private static class TestContext {
 
         @Mock
-        private ExternalAssetOwnerLoanProductAttributesReadService externalAssetOwnerLoanProductAttributesReadService;
+        private ExternalAssetOwnerLoanAttributesReadService externalAssetOwnerLoanAttributesReadService;
 
         @InjectMocks
         private DelayedSettlementAttributeServiceImpl testSubject;
