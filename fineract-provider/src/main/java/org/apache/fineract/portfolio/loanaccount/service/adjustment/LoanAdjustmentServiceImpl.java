@@ -294,7 +294,8 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
         if (!transactionForAdjustment.isAccrualRelated() && transactionForAdjustment.isNotRepaymentLikeType()
                 && transactionForAdjustment.isNotWaiver() && transactionForAdjustment.isNotCreditBalanceRefund()
                 && !transactionForAdjustment.isDeferredIncome() && !transactionForAdjustment.isCapitalizedIncomeAdjustment()
-                && !transactionForAdjustment.isBuyDownFeeAdjustment() && !transactionForAdjustment.isChargeback()) {
+                && !transactionForAdjustment.isBuyDownFeeAdjustment() && !transactionForAdjustment.isChargeback()
+                && !transactionForAdjustment.isRefund()) {
             final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee, buy down fee adjustment or chargeback can be adjusted.";
             throw new InvalidLoanTransactionTypeException("transaction",
                     "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.or.capitalizedIncome.or.capitalizedIncomeAdjustment.or.buyDownFee.or.buyDownFeeAdjustment.or.chargeback.transactions",
