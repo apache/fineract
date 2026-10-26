@@ -3078,6 +3078,11 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         } else {
             chargeTransaction = SavingsAccountTransaction.charge(this, office(), transactionDate, transactionAmount);
         }
+        final TaxGroup chargeTaxGroup = savingsAccountCharge.getCharge().getTaxGroup();
+        if (chargeTaxGroup != null) {
+            SavingsAccountTransaction.updateTaxDetails(TaxUtils.splitTax(transactionAmount.getAmount(), transactionDate,
+                    chargeTaxGroup.getTaxGroupMappings(), transactionAmount.getAmount().scale()), chargeTransaction);
+        }
 
         handleChargeTransactions(savingsAccountCharge, chargeTransaction, backdatedTxnsAllowedTill);
         return chargeTransaction;
