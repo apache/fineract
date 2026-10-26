@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.client;
 
-import com.google.common.base.Splitter;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -38,8 +40,11 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSe
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecksRepository;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableReadService;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.search.service.SearchUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -53,10 +58,11 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class ClientPersonImportHandler implements ImportHandler {
 
-    public static final String SEPARATOR = "-";
     private static final Logger LOG = LoggerFactory.getLogger(ClientPersonImportHandler.class);
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ExternalIdFactory externalIdFactory;
+    private final EntityDatatableChecksRepository entityDatatableChecksRepository;
+    private final DatatableReadService datatableReadService;
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
@@ -77,6 +83,22 @@ public class ClientPersonImportHandler implements ImportHandler {
             }
         }
         return clients;
+    }
+
+    /**
+     * Extracts the code value ID out of a "Name (id)" formatted dropdown cell, as written by
+     * {@link org.apache.fineract.infrastructure.bulkimport.populator.client.ClientPersonWorkbookPopulator}.
+     */
+    private Long parseIdFromDisplayValue(final String displayValue, final String fieldName) {
+        if (displayValue == null) {
+            return null;
+        }
+        String idPart = SearchUtil.extractIdFromDisplayValue(displayValue);
+        if (idPart != null && idPart.matches("\\d+")) {
+            return Long.valueOf(idPart);
+        }
+        LOG.warn("Bulk upload: Could not extract ID from {}. Row data: {}", fieldName, displayValue);
+        return null;
     }
 
     private ClientData readClient(final Workbook workbook, final Row row, final String locale, final String dateFormat) {
@@ -108,43 +130,18 @@ public class ClientPersonImportHandler implements ImportHandler {
         LocalDate dob = ImportHandlerUtils.readAsDate(ClientPersonConstants.DOB_COL, row);
 
         String clientType = ImportHandlerUtils.readAsString(ClientPersonConstants.CLIENT_TYPE_COL, row);
-        Long clientTypeId = null;
-        if (clientType != null) {
-            List<String> clientTypeAr = Splitter.on(SEPARATOR).splitToList(clientType);
-            if (clientTypeAr.size() > 1 && clientTypeAr.get(1) != null) {
-                clientTypeId = Long.parseLong(clientTypeAr.get(1));
-            }
-        }
+        Long clientTypeId = parseIdFromDisplayValue(clientType, "clientType");
         String gender = ImportHandlerUtils.readAsString(ClientPersonConstants.GENDER_COL, row);
-        Long genderId = null;
-        if (gender != null) {
-            List<String> genderAr = Splitter.on(SEPARATOR).splitToList(gender);
-            if (genderAr.size() > 1 && genderAr.get(1) != null) {
-                genderId = Long.parseLong(genderAr.get(1));
-            }
-        }
+        Long genderId = parseIdFromDisplayValue(gender, "gender");
         String clientClassification = ImportHandlerUtils.readAsString(ClientPersonConstants.CLIENT_CLASSIFICATION_COL, row);
-        Long clientClassificationId = null;
-        if (clientClassification != null) {
-            List<String> clientClassificationAr = Splitter.on(SEPARATOR).splitToList(clientClassification);
-            if (clientClassificationAr.size() > 1 && clientClassificationAr.get(1) != null) {
-                clientClassificationId = Long.parseLong(clientClassificationAr.get(1));
-            }
-        }
+        Long clientClassificationId = parseIdFromDisplayValue(clientClassification, "clientClassification");
         Boolean isStaff = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.IS_STAFF_COL, row);
 
         AddressData addressDataObj = null;
         Collection<AddressData> addressList = null;
         if (ImportHandlerUtils.readAsBoolean(ClientPersonConstants.ADDRESS_ENABLED_COL, row)) {
             String addressType = ImportHandlerUtils.readAsString(ClientPersonConstants.ADDRESS_TYPE_COL, row);
-            Long addressTypeId = null;
-            if (addressType != null) {
-                List<String> addressTypeAr = Splitter.on(SEPARATOR).splitToList(addressType);
-
-                if (addressTypeAr.size() > 1 && addressTypeAr.get(1) != null) {
-                    addressTypeId = Long.parseLong(addressTypeAr.get(1));
-                }
-            }
+            Long addressTypeId = parseIdFromDisplayValue(addressType, "addressType");
             String street = ImportHandlerUtils.readAsString(ClientPersonConstants.STREET_COL, row);
             String addressLine1 = ImportHandlerUtils.readAsString(ClientPersonConstants.ADDRESS_LINE_1_COL, row);
             String addressLine2 = ImportHandlerUtils.readAsString(ClientPersonConstants.ADDRESS_LINE_2_COL, row);
@@ -155,24 +152,9 @@ public class ClientPersonImportHandler implements ImportHandler {
             Boolean isActiveAddress = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.IS_ACTIVE_ADDRESS_COL, row);
 
             String stateProvince = ImportHandlerUtils.readAsString(ClientPersonConstants.STATE_PROVINCE_COL, row);
-            Long stateProvinceId = null;
-            if (stateProvince != null) {
-                List<String> stateProvinceAr = Splitter.on(SEPARATOR).splitToList(stateProvince);
-                // Arkansas-AL <-- expected format of the cell
-                // but probably it's either an empty cell or it is missing a
-                // hyphen
-                if (stateProvinceAr.size() > 1 && stateProvinceAr.get(1) != null) {
-                    stateProvinceId = Long.parseLong(stateProvinceAr.get(1));
-                }
-            }
+            Long stateProvinceId = parseIdFromDisplayValue(stateProvince, "stateProvince");
             String country = ImportHandlerUtils.readAsString(ClientPersonConstants.COUNTRY_COL, row);
-            Long countryId = null;
-            if (country != null) {
-                List<String> countryAr = Splitter.on(SEPARATOR).splitToList(country);
-                if (countryAr.size() > 1 && countryAr.get(1) != null) {
-                    countryId = Long.parseLong(countryAr.get(1));
-                }
-            }
+            Long countryId = parseIdFromDisplayValue(country, "country");
             addressDataObj = new AddressData(addressTypeId, street, addressLine1, addressLine2, addressLine3, city, postalCode,
                     isActiveAddress, stateProvinceId, countryId);
             addressList = new ArrayList<>(List.of(addressDataObj));
@@ -192,7 +174,32 @@ public class ClientPersonImportHandler implements ImportHandler {
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
         for (ClientData client : clients) {
             try {
+                // Get the client row once for validation and datatable reading
+                Row clientRow = clientSheet.getRow(client.getRowIndex());
+                if (clientRow != null) {
+                    // Validate required datatables before attempting client creation
+                    String validationError = ImportHandlerUtils.validateRequiredDatatables(workbook, clientSheet, clientRow, "Person",
+                            entityDatatableChecksRepository, datatableReadService);
+                    if (validationError != null) {
+                        throw new RuntimeException(validationError);
+                    }
+                }
+
                 String payload = gsonBuilder.create().toJson(client);
+
+                // Read datatables from the Excel row and add to payload
+                // Ensure all configured client datatables are included, even if empty
+                if (clientRow != null) {
+                    List<Map<String, Object>> datatables = ImportHandlerUtils.readDatatablesFromRowWithAllConfigured(clientSheet, clientRow,
+                            locale, dateFormat, entityDatatableChecksRepository, datatableReadService, "Person");
+                    if (datatables != null && !datatables.isEmpty()) {
+                        // Parse JSON and add datatables array
+                        JsonObject jsonObject = JsonParser.parseString(payload).getAsJsonObject();
+                        jsonObject.add("datatables", gsonBuilder.create().toJsonTree(datatables));
+                        payload = gsonBuilder.create().toJson(jsonObject);
+                    }
+                }
+
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .createClient() //
                         .withJson(payload) //
