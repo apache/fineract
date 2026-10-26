@@ -235,6 +235,9 @@ public class WorkingCapitalLoanDataValidator {
         }
         if (currentDiscount == null) {
             validateDiscountAmountWithProductDiscount(discountAmount, loan.getLoanProduct().getRelatedDetail(), baseDataValidator);
+        } else if (discountAmount != null && discountAmount.compareTo(currentDiscount) > 0) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.discountAmountParamName)
+                    .failWithCode("amount.cannot.exceed.approved.discount");
         }
 
         WorkingCapitalLoanDiscountValidation.validateDiscountDoesNotExceedPrincipal(discountAmount, loan.getFirstActualDisbursementAmount(),

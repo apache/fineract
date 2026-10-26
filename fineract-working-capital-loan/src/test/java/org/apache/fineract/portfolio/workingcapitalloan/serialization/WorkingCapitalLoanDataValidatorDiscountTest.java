@@ -39,10 +39,13 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public class WorkingCapitalLoanDataValidatorDiscountTest {
 
@@ -219,6 +222,58 @@ public class WorkingCapitalLoanDataValidatorDiscountTest {
 
         assertThat(exception.getErrors())
                 .anyMatch(error -> error.getUserMessageGlobalisationCode().contains("amount.cannot.exceed.principal"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "53, 54", "0, 1" })
+    public void discountFeeTransactionRejectsAnAmountAboveTheApprovedDiscount(final BigDecimal approvedDiscount,
+            final BigDecimal discountAmount) {
+        final WorkingCapitalLoan loan = disbursedLoanWithOverridableDiscount();
+        loan.getLoanProductRelatedDetails().setDiscountApproved(approvedDiscount);
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateDiscountTransaction(loan, "{}", discountAmount, null));
+
+        assertThat(exception.getErrors()).extracting(error -> error.getUserMessageGlobalisationCode())
+                .containsExactly("validation.msg.WORKINGCAPITALLOAN.discountAmount.amount.cannot.exceed.approved.discount");
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "53, 53", "53, 52", "53.00, 53.000" })
+    public void discountFeeTransactionAcceptsAnAmountWithinTheApprovedDiscount(final BigDecimal approvedDiscount,
+            final BigDecimal discountAmount) {
+        final WorkingCapitalLoan loan = disbursedLoanWithOverridableDiscount();
+        loan.getLoanProductRelatedDetails().setDiscountApproved(approvedDiscount);
+
+        assertDoesNotThrow(() -> validator.validateDiscountTransaction(loan, "{}", discountAmount, null));
+    }
+
+    @Test
+    public void discountFeeTransactionUsesTheProductLimitWhenTheApprovedDiscountIsMissing() {
+        final WorkingCapitalLoan loan = disbursedLoanWithOverridableDiscount();
+        loan.getLoanProductRelatedDetails().setDiscountApproved(null);
+        final WorkingCapitalLoanProductRelatedDetail productDetails = mock(WorkingCapitalLoanProductRelatedDetail.class);
+        when(productDetails.getDiscount()).thenReturn(new BigDecimal("53"));
+        when(loan.getLoanProduct().getRelatedDetail()).thenReturn(productDetails);
+
+        assertDoesNotThrow(() -> validator.validateDiscountTransaction(loan, "{}", new BigDecimal("53"), null));
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateDiscountTransaction(loan, "{}", new BigDecimal("54"), null));
+
+        assertThat(exception.getErrors()).extracting(error -> error.getUserMessageGlobalisationCode())
+                .containsExactly("validation.msg.WORKINGCAPITALLOAN.discountAmount.amount.cannot.exceed.product.discount");
+    }
+
+    private static WorkingCapitalLoan disbursedLoanWithOverridableDiscount() {
+        final WorkingCapitalLoan loan = configuredLoan();
+        final WorkingCapitalLoanProductConfigurableAttributes attributes = new WorkingCapitalLoanProductConfigurableAttributes();
+        attributes.setDiscountDefaultOverridable(true);
+        when(loan.getLoanProduct().getConfigurableAttributes()).thenReturn(attributes);
+        final WorkingCapitalLoanDisbursementDetails detail = disbursementDetail(BUSINESS_DATE);
+        detail.setActualAmount(new BigDecimal("1000"));
+        loan.getDisbursementDetails().add(detail);
+        return loan;
     }
 
     private static JsonElement parsedBody(final String json) {
