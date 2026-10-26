@@ -40,6 +40,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
@@ -174,6 +175,15 @@ class WorkingCapitalLoanDataValidatorRecoveryPaymentTest {
                 () -> validator.validateRecoveryPayment(recoveryCommand(BUSINESS_DATE, "0"), loan));
         assertThat(ex.getErrors())
                 .anyMatch(error -> error.getParameterName().equals(WorkingCapitalLoanConstants.transactionAmountParamName));
+    }
+
+    @Test
+    void shouldRejectAnAmountFinerThanTheCurrency() {
+        when(loan.getCurrency()).thenReturn(new MonetaryCurrency("USD", 2, null));
+        final PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateRecoveryPayment(recoveryCommand(BUSINESS_DATE, "40.005"), loan));
+        assertThat(ex.getErrors()).anyMatch(error -> error.getParameterName().equals(WorkingCapitalLoanConstants.transactionAmountParamName)
+                && error.getUserMessageGlobalisationCode().endsWith("scale.is.greater.than.2"));
     }
 
     @Test
