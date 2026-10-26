@@ -114,4 +114,5 @@
   <include relativeToChangelogFile="true" file="parts/0090_wc_adjust-by-delta-transaction-permission.xml"/>
   <include relativeToChangelogFile="true" file="parts/0091_wc_clear_dependent_grace_without_parent.xml"/>
   <include relativeToChangelogFile="true" file="parts/0092_wc_loan_account_no_named_unique.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0093_wc_loan_accounts_stayed_locked_external_event.xml"/>
 </databaseChangeLog>

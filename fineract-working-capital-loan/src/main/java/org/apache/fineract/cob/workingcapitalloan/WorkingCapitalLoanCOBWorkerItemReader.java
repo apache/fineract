@@ -30,13 +30,13 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-import org.springframework.batch.core.annotation.BeforeStep;
+import org.springframework.batch.core.listener.StepExecutionListener;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.infrastructure.item.ItemReader;
 
 @Slf4j
 @RequiredArgsConstructor
-public class WorkingCapitalLoanCOBWorkerItemReader implements ItemReader<WorkingCapitalLoan> {
+public class WorkingCapitalLoanCOBWorkerItemReader implements ItemReader<WorkingCapitalLoan>, StepExecutionListener {
 
     private final WorkingCapitalLoanRepository repository;
     private final BeforeStepLockingItemReaderHelper itemReaderHelper;
@@ -58,8 +58,7 @@ public class WorkingCapitalLoanCOBWorkerItemReader implements ItemReader<Working
         return null;
     }
 
-    @BeforeStep
-    @SuppressWarnings({ "unchecked" })
+    @Override
     public void beforeStep(@NonNull StepExecution stepExecution) {
         setRemainingData(itemReaderHelper.filterRemainingData(stepExecution));
     }
