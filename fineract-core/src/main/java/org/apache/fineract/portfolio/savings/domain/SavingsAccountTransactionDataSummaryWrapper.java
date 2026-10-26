@@ -34,7 +34,8 @@ public final class SavingsAccountTransactionDataSummaryWrapper {
     public BigDecimal calculateTotalDeposits(final CurrencyData currency, final List<SavingsAccountTransactionData> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransactionData transaction : transactions) {
-            if (transaction.isDepositAndNotReversed() || transaction.isDividendPayoutAndNotReversed()) {
+            if ((transaction.isDepositAndNotReversed() || transaction.isDividendPayoutAndNotReversed())
+                    && !transaction.isReversalTransaction()) {
                 total = total.plus(transaction.getAmount());
             }
         }
