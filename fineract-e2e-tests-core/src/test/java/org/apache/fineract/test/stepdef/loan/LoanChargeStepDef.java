@@ -28,6 +28,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +55,12 @@ import org.apache.fineract.test.factory.LoanChargeRequestFactory;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.ErrorResponse;
 import org.apache.fineract.test.messaging.EventAssertion;
+import org.apache.fineract.test.messaging.EventMessage;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
+import org.apache.fineract.test.messaging.event.loan.charge.AbstractLoanChargeEvent;
 import org.apache.fineract.test.messaging.event.loan.charge.LoanAddChargeEvent;
+import org.apache.fineract.test.messaging.event.loan.charge.LoanDeleteChargeEvent;
+import org.apache.fineract.test.messaging.event.loan.charge.LoanUpdateChargeEvent;
 import org.apache.fineract.test.messaging.store.EventStore;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
@@ -345,6 +350,51 @@ public class LoanChargeStepDef extends AbstractStepDef {
         GetLoansLoanIdChargesChargeIdResponse loanChargeAmount = ok(
                 () -> fineractClient.loanCharges().retrieveOneLoanCharge(response.getLoanId(), Long.valueOf(response.getResourceId())));
         assertThat(loanChargeAmount.getAmount()).as("Charge amount is wrong").isEqualByComparingTo(Double.valueOf(chargeAmount));
+    }
+
+    @Then("LoanAddChargeBusinessEvent is raised for the {string} charge due on {string}")
+    public void checkLoanAddChargeBusinessEventForChargeDueOn(String chargeName, String dueDate) {
+        // Charges created by the system (e.g. down payment fee of a later tranche) must raise the same event as a
+        // manual add
+        checkChargeEventOfActiveCharge(LoanAddChargeEvent.class, chargeName, dueDate);
+    }
+
+    @Then("LoanUpdateChargeBusinessEvent is raised for the {string} charge due on {string}")
+    public void checkLoanUpdateChargeBusinessEventForChargeDueOn(final String chargeName, final String dueDate) {
+        checkChargeEventOfActiveCharge(LoanUpdateChargeEvent.class, chargeName, dueDate);
+    }
+
+    @Then("LoanDeleteChargeBusinessEvent is raised for the {string} charge due on {string}")
+    public void checkLoanDeleteChargeBusinessEventForChargeDueOn(final String chargeName, final String dueDate) {
+        // The API does not return a deactivated or deleted charge and the delete event carries only its id, so the id
+        // is taken from the event raised when the charge was created
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.getLoanId();
+        final String eventDueDate = LocalDate.parse(dueDate, DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT))
+                .format(DateTimeFormatter.ofPattern(DATE_FORMAT_EVENTS));
+        final Long chargeId = eventStore.<LoanChargeDataV1, LoanAddChargeEvent>findReceivedAndVerifiedByType(new LoanAddChargeEvent())
+                .stream().map(EventMessage::getData)
+                .filter(data -> Long.valueOf(loanId).equals(data.getLoanId()) && chargeName.equals(data.getName())
+                        && eventDueDate.equals(data.getDueDate()))
+                .map(LoanChargeDataV1::getId).reduce((first, second) -> second).orElseThrow(() -> new IllegalStateException(
+                        "No LoanAddChargeBusinessEvent of loan %s for the %s charge due on %s".formatted(loanId, chargeName, dueDate)));
+
+        eventAssertion.assertEventRaised(LoanDeleteChargeEvent.class, chargeId);
+    }
+
+    private void checkChargeEventOfActiveCharge(final Class<? extends AbstractLoanChargeEvent> eventClazz, final String chargeName,
+            final String dueDate) {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
+        GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "charges")));
+        GetLoansLoanIdLoanChargeData charge = loanDetails.getCharges().stream()
+                .filter(c -> chargeName.equals(c.getName()) && dueDate.equals(formatter.format(c.getDueDate()))).findFirst()
+                .orElseThrow(() -> new IllegalStateException("Loan %s has no %s charge due on %s".formatted(loanId, chargeName, dueDate)));
+
+        eventAssertion.assertEvent(eventClazz, charge.getId()).extractingData(LoanChargeDataV1::getName).isEqualTo(chargeName)
+                .extractingData(LoanChargeDataV1::getLoanId).isEqualTo(loanId);
     }
 
     private void addChargeEventCheck(PostLoansLoanIdChargesResponse loanChargeResponse) throws IOException {

@@ -74,12 +74,17 @@ public class EventStore {
     }
 
     public <R, T extends Event<R>> long countReceivedEventsById(T type, Long id) {
-        return Stream.concat(receivedEvents.stream(), verifiedEvents.stream()).filter(em -> em.getType().equals(type.getEventName()))
-                .map(em -> (EventMessage<R>) em).filter(em -> id.equals(type.getIdExtractor().apply(em.getData()))).count();
+        return findReceivedAndVerifiedByType(type).stream().filter(em -> id.equals(type.getIdExtractor().apply(em.getData()))).count();
     }
 
     public <R, T extends Event<R>> List<EventMessage<R>> findAllEventsById(T type, Long id) {
         return findByType(type).stream().filter(em -> id.equals(type.getIdExtractor().apply(em.getData()))).collect(Collectors.toList());
+    }
+
+    // Received and already verified events of the type, for a step that needs the payload of an earlier event
+    public <R, T extends Event<R>> List<EventMessage<R>> findReceivedAndVerifiedByType(T type) {
+        return Stream.concat(receivedEvents.stream(), verifiedEvents.stream()).filter(em -> em.getType().equals(type.getEventName()))
+                .map(em -> (EventMessage<R>) em).collect(Collectors.toList());
     }
 
     public <R, T extends Event<R>> List<EventMessage<R>> findByType(T type) {

@@ -58,6 +58,7 @@ import org.apache.fineract.test.data.accounttype.DefaultAccountType;
 import org.apache.fineract.test.data.codevalue.CodeValueResolver;
 import org.apache.fineract.test.data.codevalue.DefaultCodeValue;
 import org.apache.fineract.test.data.delinquency.DelinquencyBucketResolver;
+import org.apache.fineract.test.data.loanproduct.DefaultLoanProduct;
 import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
 import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
 import org.apache.fineract.test.helper.CodeHelper;
@@ -1990,7 +1991,37 @@ public class LoanProductsRequestFactory {
                 .monthEndDueDateStrategy(monthEndDueDateStrategy);
     }
 
+    /**
+     * LP2 with auto down payment and advanced payment allocation, the given charge attached at product level
+     * (LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_DP_FEE_ON_PRODUCT)
+     */
+    public PostLoanProductsRequest defaultLoanProductsRequestLP2DownPaymentFeeOnProduct(final Long chargeId) {
+        return defaultLoanProductsRequestLP2()//
+                .name(DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_DP_FEE_ON_PRODUCT.getName())//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                .loanScheduleType("PROGRESSIVE")//
+                .charges(List.of(new LoanProductChargeData().id(chargeId)))//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+    }
+
+    /**
+     * Progressive LP2 without down payment, the given charge attached at product level
+     */
+    public PostLoanProductsRequest defaultLoanProductsRequestLP2WithoutDownPayment(final Long chargeId) {
+        return defaultLoanProductsRequestLP2InterestDailyRecalculation()//
+                .charges(List.of(new LoanProductChargeData().id(chargeId)))//
+                .paymentAllocation(createDefaultPaymentAllocation());//
+    }
+
     private List<AdvancedPaymentData> createDefaultPaymentAllocation() {
+        return List.of(createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"));
+    }
+
+    private AdvancedPaymentData createPaymentAllocation(final String transactionType, final String futureInstallmentAllocationRule) {
         List<PaymentAllocationOrder> allocationOrder = List.of(
                 new PaymentAllocationOrder().paymentAllocationRule("PAST_DUE_PENALTY").order(1),
                 new PaymentAllocationOrder().paymentAllocationRule("PAST_DUE_FEE").order(2),
@@ -2004,8 +2035,8 @@ public class LoanProductsRequestFactory {
                 new PaymentAllocationOrder().paymentAllocationRule("IN_ADVANCE_FEE").order(10),
                 new PaymentAllocationOrder().paymentAllocationRule("IN_ADVANCE_PRINCIPAL").order(11),
                 new PaymentAllocationOrder().paymentAllocationRule("IN_ADVANCE_INTEREST").order(12));
-        return List.of(new AdvancedPaymentData().transactionType("DEFAULT").futureInstallmentAllocationRule("NEXT_INSTALLMENT")
-                .paymentAllocationOrder(allocationOrder));
+        return new AdvancedPaymentData().transactionType(transactionType).futureInstallmentAllocationRule(futureInstallmentAllocationRule)
+                .paymentAllocationOrder(allocationOrder);
     }
 
     public String generateShortNameSafely() {

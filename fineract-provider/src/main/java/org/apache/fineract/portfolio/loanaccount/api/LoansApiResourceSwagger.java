@@ -1777,6 +1777,8 @@ final class LoansApiResourceSwagger {
 
             private PutLoansLoanIdDisbursementData() {}
 
+            @Schema(example = "1")
+            public Long id;
             @Schema(example = "dd MMMM yyyy")
             public String dateFormat;
             @Schema(example = "en")

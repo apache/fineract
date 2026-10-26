@@ -199,6 +199,34 @@ public class DownPaymentFeesTest {
         assertEquals(0, new BigDecimal("9").compareTo(amount.getAmount()));
     }
 
+    @Test
+    public void testFeeOfUndisbursedTrancheAwaitsItsDisbursement() {
+        final LoanDisbursementDetails expectedTranche = new LoanDisbursementDetails(JAN_1, null, BigDecimal.valueOf(500), null, false);
+        final LoanCharge fee = new LoanCharge();
+        fee.setChargeTime(ChargeTimeType.DOWN_PAYMENT.getValue());
+        fee.setDisbursementDetail(expectedTranche);
+
+        assertTrue(fee.isDownPaymentFeeAwaitingDisbursement());
+        expectedTranche.updateActualDisbursementDate(JAN_2);
+        assertFalse(fee.isDownPaymentFeeAwaitingDisbursement());
+        expectedTranche.updateActualDisbursementDate(null);
+        fee.setChargeTime(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue());
+        assertFalse(fee.isDownPaymentFeeAwaitingDisbursement());
+        fee.setChargeTime(ChargeTimeType.DOWN_PAYMENT.getValue());
+        fee.setDisbursementDetail(null);
+        assertFalse(fee.isDownPaymentFeeAwaitingDisbursement());
+    }
+
+    @Test
+    public void testDueOnSkipsFeesAwaitingTheirTranche() {
+        final LoanCharge disbursed = mockFee(10L, flatFee, JAN_1);
+        final LoanCharge awaiting = mockFee(20L, flatFee, JAN_1);
+        when(awaiting.isDownPaymentFeeAwaitingDisbursement()).thenReturn(true);
+
+        assertEquals(List.of(disbursed), DownPaymentFees.dueOn(List.of(disbursed, awaiting), JAN_1));
+        assertEquals(List.of(disbursed), DownPaymentFees.ofPeriod(List.of(disbursed, awaiting), JAN_1, 0, 1));
+    }
+
     private void mockAmounts(final LoanCharge fee, final String amount, final String outstanding) {
         // Money is built before stubbing: Money.of calls the static MoneyHelper mock
         final Money amountMoney = Money.of(currency, new BigDecimal(amount));
