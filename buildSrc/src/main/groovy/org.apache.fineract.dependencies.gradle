@@ -103,7 +103,11 @@ dependencyManagement {
             'org.apache.commons:commons-compress',
             'xml-apis:xml-apis',
         ]
-        ['tika-parser-miscoffice-module', 'tika-parser-microsoft-module', 'tika-parser-image-module'].each { module ->
+        [
+            'tika-parser-miscoffice-module',
+            'tika-parser-microsoft-module',
+            'tika-parser-image-module'
+        ].each { module ->
             dependency("org.apache.tika:$module:3.3.0") {
                 tikaParserExcludes.each { exclude it }
             }
