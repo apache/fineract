@@ -1475,7 +1475,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     }
 
     @Override
-    public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId, final Long clientId, final Long groupId) {
+    public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId, final Long clientId, final Long groupId,
+            final Long officeId) {
 
         this.context.authenticatedUser();
 
@@ -1509,10 +1510,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         Collection<ChargeData> chargeOptions = null;
         if (loanProduct.getMultiDisburseLoan()) {
             chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
-                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
+                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT }, officeId);
         } else {
             chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
-                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT });
+                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT }, officeId);
         }
 
         Integer loanCycleCounter = null;
@@ -1531,7 +1532,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             activeLoanOptions = this.accountDetailsReadPlatformService.retrieveGroupActiveLoanAccountSummary(groupId);
         }
 
-        return new LoanAccountData().withProductData(loanProduct, loanCycleCounter) //
+        LoanAccountData loanAccountData = new LoanAccountData().withProductData(loanProduct, loanCycleCounter) //
                 .setTermFrequencyTypeOptions(loanTermFrequencyTypeOptions) //
                 .setRepaymentFrequencyTypeOptions(repaymentFrequencyTypeOptions) //
                 .setRepaymentFrequencyNthDayTypeOptions(repaymentFrequencyNthDayTypeOptions) //
@@ -1548,6 +1549,21 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 .setClientActiveLoanOptions(activeLoanOptions) //
                 .setLoanScheduleTypeOptions(LoanScheduleType.getValuesAsEnumOptionDataList()) //
                 .setLoanScheduleProcessingTypeOptions(LoanScheduleProcessingType.getValuesAsEnumOptionDataList()); //
+
+        if (officeId != null) {
+            final Set<Long> visibleChargeIds = this.chargeReadPlatformService.retrieveLoanProductCharges(productId, officeId).stream()
+                    .map(ChargeData::getId).collect(Collectors.toSet());
+            if (loanAccountData.getCharges() != null) {
+                loanAccountData.setCharges(
+                        loanAccountData.getCharges().stream().filter(charge -> visibleChargeIds.contains(charge.getChargeId())).toList());
+            }
+            if (loanAccountData.getOverdueCharges() != null) {
+                loanAccountData.setOverdueCharges(
+                        loanAccountData.getOverdueCharges().stream().filter(charge -> visibleChargeIds.contains(charge.getId())).toList());
+            }
+        }
+
+        return loanAccountData;
     }
 
     @Override

@@ -36,7 +36,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -146,22 +146,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     @Override
     public Collection<LoanProductData> retrieveAllLoanProducts() {
-
         this.context.authenticatedUser();
-
         final LoanProductMapper rm = new LoanProductMapper(null, null, null, null, null, null);
-
-        String sql = "select " + rm.loanProductSchema();
-
-        // Check if branch specific products are enabled. If yes, fetch only
-        // products mapped to current user's office
-        String inClause = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if (inClause != null && !inClause.trim().isEmpty()) {
-            sql += " where lp.id in ( " + inClause + " ) ";
-        }
-
-        return this.jdbcTemplate.query(sql, rm); // NOSONAR
+        final String sql = "select " + rm.loanProductSchema();
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm), null); // NOSONAR
     }
 
     @Override
@@ -189,30 +177,20 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     @Override
     public Collection<LoanProductData> retrieveAllLoanProductsForLookup(final boolean activeOnly) {
+        return retrieveAllLoanProductsForLookup(activeOnly, null);
+    }
+
+    @Override
+    public Collection<LoanProductData> retrieveAllLoanProductsForLookup(final boolean activeOnly, final Long officeId) {
         this.context.authenticatedUser();
-
         final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
+        final String sql = "select " + (activeOnly ? rm.activeOnlySchema() : rm.schema());
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm), officeId); // NOSONAR
+    }
 
-        String sql = "select ";
-        if (activeOnly) {
-            sql += rm.activeOnlySchema();
-        } else {
-            sql += rm.schema();
-        }
-
-        // Check if branch specific products are enabled. If yes, fetch only
-        // products mapped to current user's office
-        String inClause = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if (inClause != null && !inClause.trim().isEmpty()) {
-            if (activeOnly) {
-                sql += " and id in ( " + inClause + " )";
-            } else {
-                sql += " where id in ( " + inClause + " ) ";
-            }
-        }
-
-        return this.jdbcTemplate.query(sql, rm); // NOSONAR
+    private List<LoanProductData> visibleToOffice(final List<LoanProductData> products, final Long officeId) {
+        return this.fineractEntityAccessUtil.filterVisibleToOffice_ifGlobalConfigEnabled(
+                FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, officeId, products, LoanProductData::getId);
     }
 
     @Override
@@ -739,17 +717,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         final LoanProductMapper rm = new LoanProductMapper(null, null, null, null, null, null);
 
-        String sql = "select " + rm.loanProductSchema() + " where lp.currency_code= ? ";
-
-        // Check if branch specific products are enabled. If yes, fetch only
-        // products mapped to current user's office
-        String inClause = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if (inClause != null && !inClause.trim().isEmpty()) {
-            sql += " and id in (" + inClause + ") ";
-        }
-
-        return this.jdbcTemplate.query(sql, rm, currencyCode); // NOSONAR
+        final String sql = "select " + rm.loanProductSchema() + " where lp.currency_code= ? ";
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, currencyCode), null); // NOSONAR
     }
 
     @Override
@@ -759,17 +728,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
-        String sql = "Select " + rm.productMixSchema();
-
-        // Check if branch specific products are enabled. If yes, fetch only
-        // products mapped to current user's office
-        String inClause = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if (inClause != null && !inClause.trim().isEmpty()) {
-            sql += " and lp.id in ( " + inClause + " ) ";
-        }
-
-        return this.jdbcTemplate.query(sql, rm); // NOSONAR
+        final String sql = "Select " + rm.productMixSchema();
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm), null); // NOSONAR
     }
 
     @Override
@@ -779,26 +739,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
-        String sql = "Select " + rm.restrictedProductsSchema() + " where pm.product_id=? ";
-        // Check if branch specific products are enabled. If yes, fetch only
-        // products mapped to current user's office
-        String inClause1 = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if (inClause1 != null && !inClause1.trim().isEmpty()) {
-            sql += " and rp.id in ( " + inClause1 + " ) ";
-        }
-
-        sql += " UNION Select " + rm.derivedRestrictedProductsSchema() + " where pm.restricted_product_id=?";
-
-        // Check if branch specific products are enabled. If yes, fetch only
-        // products mapped to current user's office
-        String inClause2 = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if (inClause2 != null && !inClause2.trim().isEmpty()) {
-            sql += " and lp.id in ( " + inClause2 + " ) ";
-        }
-
-        return this.jdbcTemplate.query(sql, rm, productId, productId); // NOSONAR
+        final String sql = "Select " + rm.restrictedProductsSchema() + " where pm.product_id=? UNION Select "
+                + rm.derivedRestrictedProductsSchema() + " where pm.restricted_product_id=?";
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, productId, productId), null); // NOSONAR
     }
 
     @Override
@@ -808,20 +751,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
-        String sql = "Select " + rm.schema() + " where ";
-
-        // Check if branch specific products are enabled. If yes, fetch only
-        // products mapped to current user's office
-        String inClause = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if (inClause != null && !inClause.trim().isEmpty()) {
-            sql += " lp.id in ( " + inClause + " ) and ";
-        }
-
-        sql += "lp.id not in (" + "Select pm.restricted_product_id from m_product_mix pm where pm.product_id=? " + "UNION "
+        final String sql = "Select " + rm.schema() + " where lp.id not in ("
+                + "Select pm.restricted_product_id from m_product_mix pm where pm.product_id=? " + "UNION "
                 + "Select pm.product_id from m_product_mix pm where pm.restricted_product_id=?)";
-
-        return this.jdbcTemplate.query(sql, rm, productId, productId); // NOSONAR
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, productId, productId), null); // NOSONAR
     }
 
     @Override

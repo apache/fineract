@@ -356,9 +356,6 @@ public class LoansApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
-        // template
-        final Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup(onlyActive);
-
         // options
         Collection<StaffData> allowedLoanOfficers;
         Collection<CodeValueData> loanCollateralOptions;
@@ -368,9 +365,14 @@ public class LoansApiResource {
         Long officeId = null;
         Collection<PortfolioAccountData> accountLinkingOptions = null;
         boolean isRatesEnabled = this.configurationDomainService.isSubRatesEnabled();
+        if (clientId != null && ("individual".equals(templateType) || "jlg".equals(templateType))) {
+            officeId = this.clientReadPlatformService.retrieveOne(clientId).getOfficeId();
+        } else if (groupId != null && ("group".equals(templateType) || "jlgbulk".equals(templateType))) {
+            officeId = this.groupReadPlatformService.retrieveOne(groupId).getOfficeId();
+        }
 
         if (productId != null) {
-            newLoanAccount = this.loanReadPlatformService.retrieveLoanProductDetailsTemplate(productId, clientId, groupId);
+            newLoanAccount = this.loanReadPlatformService.retrieveLoanProductDetailsTemplate(productId, clientId, groupId, officeId);
         }
 
         if (templateType == null) {
@@ -427,6 +429,9 @@ public class LoansApiResource {
                     throw new NotSupportedLoanTemplateTypeException(errorMsg, templateType);
                 }
             }
+
+            final Collection<LoanProductData> productOptions = this.loanProductReadPlatformService
+                    .retrieveAllLoanProductsForLookup(onlyActive, officeId);
 
             allowedLoanOfficers = this.loanReadPlatformService.retrieveAllowedLoanOfficers(officeId, staffInSelectedOfficeOnly);
 
@@ -1210,10 +1215,14 @@ public class LoansApiResource {
         Collection<PortfolioAccountData> accountLinkingOptions = null;
         PaidInAdvanceData paidInAdvanceTemplate;
         Collection<LoanAccountSummaryData> clientActiveLoanOptions = null;
+        Long officeId = loanBasicDetails.getClientOfficeId();
+        if (officeId == null && loanBasicDetails.getGroup() != null) {
+            officeId = loanBasicDetails.getGroup().getOfficeId();
+        }
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
-            productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
+            productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup(false, officeId);
             product = this.loanProductReadPlatformService.retrieveLoanProduct(loanBasicDetails.getLoanProductId());
             loanBasicDetails.setProduct(product);
             loanTermFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
@@ -1241,11 +1250,6 @@ public class LoansApiResource {
             }
             chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
 
-            Long officeId = loanBasicDetails.getClientOfficeId();
-
-            if (officeId == null && loanBasicDetails.getGroup() != null) {
-                officeId = loanBasicDetails.getGroup().getOfficeId();
-            }
             allowedLoanOfficers = this.loanReadPlatformService.retrieveAllowedLoanOfficers(officeId, staffInSelectedOfficeOnly);
 
             loanPurposeOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanPurpose");
@@ -1276,7 +1280,7 @@ public class LoansApiResource {
         }
 
         Collection<ChargeData> overdueCharges = this.chargeReadPlatformService
-                .retrieveLoanProductCharges(loanBasicDetails.getLoanProductId(), ChargeTimeType.OVERDUE_INSTALLMENT);
+                .retrieveLoanProductCharges(loanBasicDetails.getLoanProductId(), ChargeTimeType.OVERDUE_INSTALLMENT, officeId);
 
         paidInAdvanceTemplate = this.loanReadPlatformService.retrieveTotalPaidInAdvance(resolvedLoanId);
 

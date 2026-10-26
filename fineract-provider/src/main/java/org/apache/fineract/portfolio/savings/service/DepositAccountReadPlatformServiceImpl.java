@@ -346,13 +346,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     .retrievewithdrawalFeeTypeOptions();
 
             final Collection<SavingsAccountTransactionData> transactions = null;
-            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId);
+            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId, officeId);
             // update charges from Product charges
             final Collection<SavingsAccountChargeData> charges = fromChargesToSavingsCharges(productCharges);
 
             final boolean feeChargesOnly = false;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsProductApplicableCharges(feeChargesOnly);
+                    .retrieveSavingsProductApplicableCharges(feeChargesOnly, officeId);
 
             final Collection<EnumOptionData> maturityInstructionOptions = this.depositsDropdownReadPlatformService
                     .maturityInstructionOptions();
@@ -433,7 +433,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             final boolean feeChargesOnly = true;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsProductApplicableCharges(feeChargesOnly);
+                    .retrieveSavingsProductApplicableCharges(feeChargesOnly, officeId);
 
             if (depositAccountType == DepositAccountType.FIXED_DEPOSIT) {
 

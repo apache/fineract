@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityT
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -66,6 +67,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
 
     @Override
     @Transactional
+    @CacheEvict(value = FineractEntityAccessReadServiceImpl.OFFICE_ENTITY_ACCESS_CACHE_NAME, allEntries = true)
     public CommandProcessingResult createEntityToEntityMapping(Long relId, JsonCommand command) {
         try {
             this.fromApiJsonDeserializer.validateForCreate(command.json());
@@ -102,6 +104,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
 
     @Override
     @Transactional
+    @CacheEvict(value = FineractEntityAccessReadServiceImpl.OFFICE_ENTITY_ACCESS_CACHE_NAME, allEntries = true)
     public CommandProcessingResult updateEntityToEntityMapping(Long mapId, JsonCommand command) {
         try {
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
@@ -135,6 +138,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
 
     @Transactional
     @Override
+    @CacheEvict(value = FineractEntityAccessReadServiceImpl.OFFICE_ENTITY_ACCESS_CACHE_NAME, allEntries = true)
     public CommandProcessingResult deleteEntityToEntityMapping(Long mapId) {
         // TODO Auto-generated method stub
 
