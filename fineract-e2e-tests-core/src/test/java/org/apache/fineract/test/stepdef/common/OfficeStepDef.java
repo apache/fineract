@@ -30,6 +30,7 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.PostGlClosuresRequest;
 import org.apache.fineract.client.models.PostOfficesRequest;
 import org.apache.fineract.client.models.PostOfficesResponse;
+import org.apache.fineract.client.models.PutOfficesOfficeIdRequest;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
@@ -52,6 +53,16 @@ public class OfficeStepDef extends AbstractStepDef {
 
         final PostOfficesResponse response = ok(() -> fineractClient.offices().createOffice(request));
         testContext().set(TestContextKey.OFFICE_CREATE_RESPONSE, response);
+    }
+
+    @When("Admin renames the last created office")
+    public void renameLastCreatedOffice() {
+        final PostOfficesResponse office = testContext().get(TestContextKey.OFFICE_CREATE_RESPONSE);
+        assertThat(office).as("No office was created. Use 'Admin creates a new office' step first.").isNotNull();
+        final PutOfficesOfficeIdRequest request = new PutOfficesOfficeIdRequest()//
+                .name(Utils.randomStringGenerator("Office_", 5));//
+
+        ok(() -> fineractClient.offices().updateOffice(office.getOfficeId(), request));
     }
 
     @When("Admin closes accounting for the last created office on {string}")
