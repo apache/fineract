@@ -1,0 +1,12 @@
+{
+    "name": "WorkingCapitalLoanAccountsStayedLockedDataV1",
+    "namespace": "org.apache.fineract.avro.workingcapitalloan.v1",
+    "type": "record",
+    "fields": [{
+        "name": "workingCapitalLoanAccounts",
+        "type": {
+            "type": "array",
+            "items": "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanAccountStayedLockedDataV1"
+        }
+    }]
+}

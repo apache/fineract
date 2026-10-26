@@ -34,6 +34,7 @@ import org.apache.fineract.cob.conditions.BatchManagerCondition;
 import org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLock;
 import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
 import org.apache.fineract.cob.service.AccountLockService;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.Job;
@@ -69,6 +70,7 @@ public class WorkingCapitalLoanCOBManagerConfiguration {
     private final PropertyService propertyService;
     private final WorkingCapitalLoanRetrieveIdService retrieveIdService;
     private final AccountLockService<WorkingCapitalLoanAccountLock> accountLockService;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Bean(WORKING_CAPITAL_LOAN_COB_PARTITIONER)
     @StepScope
@@ -84,8 +86,20 @@ public class WorkingCapitalLoanCOBManagerConfiguration {
                 .listener(new COBExecutionListenerRunner(applicationContext, WORKING_CAPITAL_LOAN_COB_JOB.name())) //
                 .start(resolveCustomJobParametersForWorkingCapitalStep()) //
                 .next(workingCapitalLoanCOBStep(workingCapitalLoanCOBPartitioner)) //
+                .next(stayedLockedWorkingCapitalLoansStep()) //
                 .next(unlockProcessedWorkingCapitalLoansStep()) //
                 .build();
+    }
+
+    @Bean
+    public Step stayedLockedWorkingCapitalLoansStep() {
+        return new StepBuilder("Stayed locked working capital loan accounts - Step", jobRepository)
+                .tasklet(stayedLockedWorkingCapitalLoansTasklet(), transactionManager).build();
+    }
+
+    @Bean
+    public StayedLockedWorkingCapitalLoansTasklet stayedLockedWorkingCapitalLoansTasklet() {
+        return new StayedLockedWorkingCapitalLoansTasklet(businessEventNotifierService, retrieveIdService);
     }
 
     @Bean
