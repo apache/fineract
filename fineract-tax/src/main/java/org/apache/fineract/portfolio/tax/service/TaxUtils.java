@@ -40,16 +40,12 @@ public final class TaxUtils {
             final Set<TaxGroupMappings> taxGroupMappings, final int scale) {
         Map<TaxComponent, BigDecimal> map = new HashMap<>(3);
         if (amount != null) {
-            final double amountVal = amount.doubleValue();
-            double cent_percentage = Double.parseDouble("100.0");
             for (TaxGroupMappings groupMappings : taxGroupMappings) {
                 if (groupMappings.occursOnDayFromAndUpToAndIncluding(date)) {
                     TaxComponent component = groupMappings.getTaxComponent();
                     BigDecimal percentage = component.getApplicablePercentage(date);
                     if (percentage != null) {
-                        double percentageVal = percentage.doubleValue();
-                        double tax = amountVal * percentageVal / cent_percentage;
-                        map.put(component, BigDecimal.valueOf(tax).setScale(scale, MoneyHelper.getRoundingMode()));
+                        map.put(component, calculateTax(amount, percentage, scale));
                     }
                 }
             }
@@ -61,21 +57,22 @@ public final class TaxUtils {
             final Set<TaxGroupMappingsData> taxGroupMappings, final int scale) {
         Map<TaxComponentData, BigDecimal> map = new HashMap<>(3);
         if (amount != null) {
-            final double amountVal = amount.doubleValue();
-            double cent_percentage = Double.parseDouble("100.0");
             for (TaxGroupMappingsData groupMappings : taxGroupMappings) {
                 if (groupMappings.occursOnDayFromAndUpToAndIncluding(date)) {
                     TaxComponentData component = groupMappings.getTaxComponent();
                     BigDecimal percentage = component.getApplicablePercentage(date);
                     if (percentage != null) {
-                        double percentageVal = percentage.doubleValue();
-                        double tax = amountVal * percentageVal / cent_percentage;
-                        map.put(component, BigDecimal.valueOf(tax).setScale(scale, MoneyHelper.getRoundingMode()));
+                        map.put(component, calculateTax(amount, percentage, scale));
                     }
                 }
             }
         }
         return map;
+    }
+
+    private static BigDecimal calculateTax(final BigDecimal amount, final BigDecimal percentage, final int scale) {
+        // exact product, rounded once to the requested scale
+        return amount.multiply(percentage).movePointLeft(2).setScale(scale, MoneyHelper.getRoundingMode());
     }
 
     public static BigDecimal incomeAmount(final BigDecimal amount, final LocalDate date, final Set<TaxGroupMappings> taxGroupMappings,
