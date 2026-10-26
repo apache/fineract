@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -123,8 +125,49 @@ public class TaxComponent extends AbstractAuditableCustom {
             this.taxComponentHistories.add(history);
             this.percentage = newValue;
 
+        } else if (command.isChangeInLocalDateParameterNamed(TaxApiConstants.startDateParamName, this.startDate)) {
+            final LocalDate newStartDate = command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName);
+            if (newStartDate != null) {
+                findPreviousRate().ifPresent(previousRate -> previousRate.updateEndDate(newStartDate));
+                changes.put(TaxApiConstants.startDateParamName, newStartDate);
+                this.startDate = newStartDate;
+            }
         }
 
+        return changes;
+    }
+
+    public Optional<TaxComponentHistory> findPreviousRate() {
+        return this.taxComponentHistories.stream().filter(history -> DateUtils.isEqual(history.endDate(), this.startDate)).findFirst();
+    }
+
+    public Map<String, Object> updateDebitAccount(final Integer accountType, final GLAccount account) {
+        final Map<String, Object> changes = accountChanges(TaxApiConstants.debitAccountTypeParamName, this.debitAccountType,
+                TaxApiConstants.debitAccountIdParamName, this.debitAccount, accountType, account);
+        this.debitAccountType = accountType;
+        this.debitAccount = account;
+        return changes;
+    }
+
+    public Map<String, Object> updateCreditAccount(final Integer accountType, final GLAccount account) {
+        final Map<String, Object> changes = accountChanges(TaxApiConstants.creditAccountTypeParamName, this.creditAccountType,
+                TaxApiConstants.creditAccountIdParamName, this.creditAccount, accountType, account);
+        this.creditAccountType = accountType;
+        this.creditAccount = account;
+        return changes;
+    }
+
+    private static Map<String, Object> accountChanges(final String accountTypeParamName, final Integer currentAccountType,
+            final String accountIdParamName, final GLAccount currentAccount, final Integer newAccountType, final GLAccount newAccount) {
+        final Map<String, Object> changes = new HashMap<>();
+        if (!Objects.equals(currentAccountType, newAccountType)) {
+            changes.put(accountTypeParamName, newAccountType);
+        }
+        final Long currentAccountId = currentAccount == null ? null : currentAccount.getId();
+        final Long newAccountId = newAccount == null ? null : newAccount.getId();
+        if (!Objects.equals(currentAccountId, newAccountId)) {
+            changes.put(accountIdParamName, newAccountId);
+        }
         return changes;
     }
 

@@ -44,6 +44,9 @@ public final class TaxComponentData implements Serializable {
     private final LocalDate startDate;
     private final Collection<TaxComponentHistoryData> taxComponentHistories;
 
+    // Edit control flag: false once the component is linked to a charge, savings product, savings account or tax detail
+    private final boolean editable;
+
     // template options
     private final Map<String, List<GLAccountData>> glAccountOptions;
     private final Collection<EnumOptionData> glAccountTypeOptions;
@@ -54,7 +57,12 @@ public final class TaxComponentData implements Serializable {
         final Map<String, List<GLAccountData>> glAccountOptions = null;
         final Collection<EnumOptionData> glAccountTypeOptions = null;
         return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
+                taxComponentHistories, false, glAccountOptions, glAccountTypeOptions);
+    }
+
+    public static TaxComponentData withEditable(final TaxComponentData data, final boolean editable) {
+        return new TaxComponentData(data.id, data.name, data.percentage, data.debitAccountType, data.debitAccount, data.creditAccountType,
+                data.creditAccount, data.startDate, data.taxComponentHistories, editable, data.glAccountOptions, data.glAccountTypeOptions);
     }
 
     public static TaxComponentData lookup(final Long id, final String name) {
@@ -68,7 +76,7 @@ public final class TaxComponentData implements Serializable {
         final Map<String, List<GLAccountData>> glAccountOptions = null;
         final Collection<EnumOptionData> glAccountTypeOptions = null;
         return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
+                taxComponentHistories, false, glAccountOptions, glAccountTypeOptions);
     }
 
     public static TaxComponentData template(final Map<String, List<GLAccountData>> glAccountOptions,
@@ -83,7 +91,7 @@ public final class TaxComponentData implements Serializable {
         final LocalDate startDate = null;
         final Collection<TaxComponentHistoryData> taxComponentHistories = null;
         return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
+                taxComponentHistories, false, glAccountOptions, glAccountTypeOptions);
     }
 
     private TaxComponentData(final Long id, final BigDecimal percentage, final GLAccountData debitAccount,
@@ -97,6 +105,7 @@ public final class TaxComponentData implements Serializable {
         this.creditAccount = creditAccount;
         this.startDate = null;
         this.taxComponentHistories = null;
+        this.editable = false;
         this.glAccountOptions = null;
         this.glAccountTypeOptions = null;
     }
