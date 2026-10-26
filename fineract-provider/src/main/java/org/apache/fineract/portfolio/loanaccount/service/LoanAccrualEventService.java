@@ -66,6 +66,9 @@ public class LoanAccrualEventService {
                 log.debug("Loan balance change on accrual for loan {}", loan.getId());
                 loanAccrualsProcessingService.processAccrualsOnLoanClosure(loan, true);
                 loanAccrualActivityProcessingService.processAccrualActivityForLoanClosure(loan);
+            } else if (loan.isNpa()) {
+                log.debug("Loan balance change on NPA accrual for loan {}", loan.getId());
+                loanAccrualsProcessingService.processAccrualsOnNpaLoanRepayment(loan);
             }
         }
     }
