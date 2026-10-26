@@ -218,7 +218,8 @@ public final class ExternalEventConfigurationTestData {
             "WorkingCapitalLoanDelinquencyResetBusinessEvent", //
             "WorkingCapitalLoanDelinquencyUndoResetBusinessEvent", //
             "WorkingCapitalLoanAccrualTransactionBusinessEvent", //
-            "WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent"//
+            "WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent", //
+            "WorkingCapitalLoanAccountsStayedLockedBusinessEvent"//
     );
 
     private ExternalEventConfigurationTestData() {}

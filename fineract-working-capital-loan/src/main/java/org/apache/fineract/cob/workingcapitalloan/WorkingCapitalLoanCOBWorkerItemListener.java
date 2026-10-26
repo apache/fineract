@@ -21,10 +21,10 @@ package org.apache.fineract.cob.workingcapitalloan;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.listener.AbstractLoanItemListener;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.springframework.transaction.support.TransactionTemplate;
 
-public class WorkingCapitalLoanCOBWorkerItemListener extends AbstractLoanItemListener<Loan> {
+public class WorkingCapitalLoanCOBWorkerItemListener extends AbstractLoanItemListener<WorkingCapitalLoan> {
 
     public WorkingCapitalLoanCOBWorkerItemListener(LockingService lockingService, TransactionTemplate requiresNewTransactionJdbcTemplate) {
         super(lockingService, requiresNewTransactionJdbcTemplate);
