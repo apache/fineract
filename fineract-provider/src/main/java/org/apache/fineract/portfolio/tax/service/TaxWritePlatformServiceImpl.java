@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepositoryWrapper;
@@ -58,8 +59,22 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
     public CommandProcessingResult updateTaxComponent(final Long id, final JsonCommand command) {
         this.validator.validateForTaxComponentUpdate(command.json());
         final TaxComponent taxComponent = this.taxComponentRepositoryWrapper.findOneWithNotFoundDetection(id);
-        this.validator.validateStartDate(taxComponent.startDate(), command);
+        this.validator.validateTaxComponentChanges(taxComponent, command, this.taxComponentRepository.isLinked(id));
         Map<String, Object> changes = taxComponent.update(command);
+        if (command.parameterExists(TaxApiConstants.debitAccountTypeParamName)
+                || command.parameterExists(TaxApiConstants.debitAccountIdParamName)) {
+            changes.putAll(taxComponent.updateDebitAccount(
+                    command.integerValueSansLocaleOfParameterNamed(TaxApiConstants.debitAccountTypeParamName),
+                    this.taxAssembler.assembleGlAccountFrom(command, TaxApiConstants.debitAccountTypeParamName,
+                            TaxApiConstants.debitAccountIdParamName)));
+        }
+        if (command.parameterExists(TaxApiConstants.creditAccountTypeParamName)
+                || command.parameterExists(TaxApiConstants.creditAccountIdParamName)) {
+            changes.putAll(taxComponent.updateCreditAccount(
+                    command.integerValueSansLocaleOfParameterNamed(TaxApiConstants.creditAccountTypeParamName),
+                    this.taxAssembler.assembleGlAccountFrom(command, TaxApiConstants.creditAccountTypeParamName,
+                            TaxApiConstants.creditAccountIdParamName)));
+        }
         this.validator.validateTaxComponentForUpdate(taxComponent);
         this.taxComponentRepository.saveAndFlush(taxComponent);
         return new CommandProcessingResultBuilder() //

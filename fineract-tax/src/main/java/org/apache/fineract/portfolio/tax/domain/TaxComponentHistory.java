@@ -70,6 +70,10 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
         return this.endDate;
     }
 
+    public void updateEndDate(final LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
     public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
         return DateUtils.isAfter(target, startDate()) && (endDate == null || !DateUtils.isAfter(target, endDate()));
     }
