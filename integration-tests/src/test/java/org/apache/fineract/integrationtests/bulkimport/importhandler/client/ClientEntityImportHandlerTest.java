@@ -18,36 +18,27 @@
  */
 package org.apache.fineract.integrationtests.bulkimport.importhandler.client;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.infrastructure.bulkimport.constants.ClientEntityConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.integrationtests.bulkimport.importhandler.BulkImportOutputTemplateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBulkImportHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCodeHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,23 +47,17 @@ public class ClientEntityImportHandlerTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientEntityImportHandlerTest.class);
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+    private static final String DATE_FORMAT = "dd MMMM yyyy";
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
+    private final FineractFeignClient fineractClient = FineractFeignClientHelper.getFineractFeignClient();
+    private final FeignBulkImportHelper bulkImportHelper = new FeignBulkImportHelper(fineractClient);
+    private final FeignCodeHelper codeHelper = new FeignCodeHelper(fineractClient);
 
     @Test
     public void testClientImport() throws InterruptedException, IOException, ParseException {
 
         // in order to populate helper sheets
-        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec, responseSpec);
+        Long outcome_staff_creation = new FeignStaffHelper(fineractClient).createStaff().getResourceId();
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
         // in order to populate helper sheets
@@ -82,22 +67,22 @@ public class ClientEntityImportHandlerTest {
 
         // in order to populate helper columns in client entity sheet
         // create constitution
-        CodeHelper.retrieveOrCreateCodeValue(24, requestSpec, responseSpec);
+        codeHelper.retrieveOrCreateCodeValueId(24L);
         // create client classification
-        CodeHelper.retrieveOrCreateCodeValue(17, requestSpec, responseSpec);
+        codeHelper.retrieveOrCreateCodeValueId(17L);
         // create client types
-        CodeHelper.retrieveOrCreateCodeValue(16, requestSpec, responseSpec);
+        codeHelper.retrieveOrCreateCodeValueId(16L);
         // create Address types
-        CodeHelper.retrieveOrCreateCodeValue(29, requestSpec, responseSpec);
+        codeHelper.retrieveOrCreateCodeValueId(29L);
         // create State
-        CodeHelper.retrieveOrCreateCodeValue(27, requestSpec, responseSpec);
+        codeHelper.retrieveOrCreateCodeValueId(27L);
         // create Country
-        CodeHelper.retrieveOrCreateCodeValue(28, requestSpec, responseSpec);
+        codeHelper.retrieveOrCreateCodeValueId(28L);
         // create Main business line
-        CodeHelper.retrieveOrCreateCodeValue(25, requestSpec, responseSpec);
+        codeHelper.retrieveOrCreateCodeValueId(25L);
 
-        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-        Workbook workbook = clientHelper.getClientEntityWorkbook(GlobalEntityType.CLIENTS_ENTITY, "dd MMMM yyyy");
+        Workbook workbook = bulkImportHelper.downloadTemplate("clients",
+                Map.of("legalFormType", GlobalEntityType.CLIENTS_ENTITY.toString(), "dateFormat", DATE_FORMAT));
 
         // insert dummy data into client entity sheet
         Sheet clientEntitySheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
@@ -126,23 +111,14 @@ public class ClientEntityImportHandlerTest {
         firstClientRow.createCell(ClientEntityConstants.SUBMITTED_ON_COL).setCellValue(submittedDate);
         firstClientRow.createCell(ClientEntityConstants.ADDRESS_ENABLED).setCellValue("False");
 
-        Path filePath = Files.createTempFile("ClientEntity-", ".xls");
-        File file = filePath.toFile();
-        String importDocumentId;
-        try {
-            try (OutputStream outputStream = Files.newOutputStream(filePath)) {
-                workbook.write(outputStream);
-            }
-            importDocumentId = clientHelper.importClientEntityTemplate(file);
-        } finally {
-            Files.deleteIfExists(filePath);
-        }
+        Long importDocumentId = bulkImportHelper.uploadTemplate("clients",
+                Map.of("legalFormType", GlobalEntityType.CLIENTS_ENTITY.toString()), workbook, "ClientEntity.xls", "en", DATE_FORMAT);
         Assertions.assertNotNull(importDocumentId);
 
         // check status column of output excel
         try (Workbook outputWorkbook = BulkImportOutputTemplateHelper.waitForWorkbook(
-                () -> clientHelper.downloadOutputTemplate(importDocumentId), TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME, 1,
-                ClientEntityConstants.STATUS_COL)) {
+                () -> bulkImportHelper.downloadOutputTemplate(importDocumentId), TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME,
+                1, ClientEntityConstants.STATUS_COL)) {
             Sheet outputClientEntitySheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
             Row row = outputClientEntitySheet.getRow(1);
             String status = row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue();
