@@ -57,6 +57,9 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.portfolio.loanaccount.data.AccrualChargeData;
+import org.apache.fineract.portfolio.loanaccount.data.AccrualPeriodData;
+import org.apache.fineract.portfolio.loanaccount.data.AccrualPeriodsData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
@@ -826,6 +829,79 @@ public class LoanAccrualsProcessingServiceImplTest {
                         ChargeAccrualDateConfig.DUE_DATE, beforeDueDate, "10"),
                 Arguments.of("eod submitted-date, submitted before disbursement, after due date -> not accrued", beforeDisbursement, false,
                         ChargeAccrualDateConfig.SUBMITTED_DATE, afterDueDate, "0"));
+    }
+
+    /**
+     * While a loan is NPA, only interest the installment has been paid is recognised; what was accrued before NPA
+     * stays, unpaid interest stays unaccrued, and fees/penalties are not accrued.
+     */
+    @Test
+    void limitAccrualsToReceivedInterest_ShouldRecogniseOnlyPaidInterest_WhileNpa() {
+        // Given: 8.22 interest per installment
+        MonetaryCurrency currency = new MonetaryCurrency("USD", 2, 1);
+        Money interest = Money.of(currency, new BigDecimal("8.22"));
+        Money zero = Money.zero(currency);
+        AccrualPeriodsData accrualPeriods = new AccrualPeriodsData(currency);
+        // 1: accrued before NPA, now paid
+        AccrualPeriodData accruedAndPaid = npaPeriod(accrualPeriods, 1, interest, interest, interest);
+        // 2: never accrued (NPA), now paid
+        AccrualPeriodData unaccruedAndPaid = npaPeriod(accrualPeriods, 2, interest, zero, interest);
+        // 3: never accrued (NPA), still unpaid
+        AccrualPeriodData unaccruedAndUnpaid = npaPeriod(accrualPeriods, 3, interest, zero, zero);
+        // 4: never accrued (NPA), partly paid
+        AccrualPeriodData unaccruedAndPartlyPaid = npaPeriod(accrualPeriods, 4, interest, zero, Money.of(currency, new BigDecimal("3.00")));
+        AccrualChargeData fee = new AccrualChargeData(1L, null, false).setChargeAmount(Money.of(currency, BigDecimal.TEN))
+                .setChargeAccruable(Money.of(currency, BigDecimal.TEN)).setChargeAccrued(zero);
+        unaccruedAndPaid.addCharge(fee);
+
+        // When
+        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "limitAccrualsToReceivedInterest", loan, accrualPeriods);
+
+        // Then
+        assertThat(accruedAndPaid.getInterestAccruable().getAmount()).isEqualByComparingTo("8.22");
+        assertThat(unaccruedAndPaid.getInterestAccruable().getAmount()).isEqualByComparingTo("8.22");
+        assertThat(unaccruedAndUnpaid.getInterestAccruable().getAmount()).isEqualByComparingTo("0");
+        assertThat(unaccruedAndPartlyPaid.getInterestAccruable().getAmount()).isEqualByComparingTo("3.00");
+        assertThat(fee.getChargeAccruable().getAmount()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void processAccrualsOnNpaLoanRepayment_ShouldNotProceed_WhenLoanIsNotNpa() {
+        // Given
+        when(loan.isOpen()).thenReturn(true);
+        when(loan.isNpa()).thenReturn(false);
+
+        // When
+        accrualsProcessingService.processAccrualsOnNpaLoanRepayment(loan);
+
+        // Then
+        verify(loan, never()).isPeriodicAccrualAccountingEnabledOnLoanProduct();
+        verify(loan, never()).addLoanTransaction(any());
+    }
+
+    @Test
+    void processAccrualsOnNpaLoanRepayment_ShouldNotProceed_WhenLoanIsNotOpen() {
+        // Given
+        when(loan.isOpen()).thenReturn(false);
+        when(loan.isNpa()).thenReturn(true);
+
+        // When
+        accrualsProcessingService.processAccrualsOnNpaLoanRepayment(loan);
+
+        // Then
+        verify(loan, never()).isPeriodicAccrualAccountingEnabledOnLoanProduct();
+        verify(loan, never()).addLoanTransaction(any());
+    }
+
+    private AccrualPeriodData npaPeriod(AccrualPeriodsData accrualPeriods, int installmentNumber, Money accruable, Money accrued,
+            Money paid) {
+        LoanRepaymentScheduleInstallment installment = mock(LoanRepaymentScheduleInstallment.class);
+        when(installment.getInterestPaid(any())).thenReturn(paid);
+        when(loan.fetchRepaymentScheduleInstallment(installmentNumber)).thenReturn(installment);
+        AccrualPeriodData period = new AccrualPeriodData(installmentNumber, installmentNumber == 1, null, null)
+                .setInterestAccruable(accruable).setInterestAccrued(accrued);
+        accrualPeriods.addPeriod(period);
+        return period;
     }
 
     private static Stream<Arguments> loanStatusTestCases() {
