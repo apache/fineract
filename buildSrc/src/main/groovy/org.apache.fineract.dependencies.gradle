@@ -45,6 +45,7 @@ dependencyManagement {
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.4.0'
         mavenBom 'org.testcontainers:testcontainers-bom:1.21.4'
         mavenBom 'org.glassfish.jersey:jersey-bom:4.0.2'
+        mavenBom 'org.springframework.modulith:spring-modulith-bom:2.1.1'
     }
 
     dependencies {
@@ -255,6 +256,7 @@ dependencyManagement {
         dependency 'com.mysql:mysql-connector-j:9.7.0'
 
         dependency 'org.assertj:assertj-core:3.27.7'
+        dependency 'com.tngtech.archunit:archunit:1.4.2'
 
         dependency 'org.apache.commons:commons-math3:3.6.1'
         dependency 'commons-beanutils:commons-beanutils:1.11.0'
