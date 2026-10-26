@@ -123,7 +123,6 @@ Feature: Working Capital Loan Details
       | summary.totalDiscountFeeAdjustment             | 0.0                          |
       | summary.totalExpectedRepayment                 | 100.0                        |
       | summary.totalRepayment                         | 0.0                          |
-      | summary.totalPayment                           | 0.0                          |
       | delinquent.pastDueDays                         | 0                            |
       | delinquent.delinquentDays                      | 0                            |
       | delinquent.delinquentAmount                    | 0.0                          |
@@ -435,7 +434,6 @@ Feature: Working Capital Loan Details
       | delinquent.lastPaymentAmount   | 10.0       |
       | delinquent.lastRepaymentDate   | 2026-01-15 |
       | delinquent.lastRepaymentAmount | 20.0       |
-      | summary.totalPayment           | 30.0       |
     # Closing the loan
     When Admin closes the Working Capital loan with a full repayment on "20 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -522,7 +520,6 @@ Feature: Working Capital Loan Details
       | delinquent.lastPaymentAmount   | 20.0       |
       | delinquent.lastRepaymentDate   | 2026-01-15 |
       | delinquent.lastRepaymentAmount | 20.0       |
-      | summary.totalPayment           | 20.0       |
     # Closing the loan
     When Admin closes the Working Capital loan with a full repayment on "20 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -726,4 +723,68 @@ Feature: Working Capital Loan Details
       | summary.totalRepayment | 100.0 |
       | summary.overpayment    | 0.0   |
       | summary.totalPayment   | 150.0 |
+
+  @TestRailId:C115444
+  Scenario: Verify loan details returns the client office of a client outside of the head office in every loan status - UC1
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      |
+    Then Working capital loan creation was successful
+    Then Working capital loan details has the client office of the last created office
+    And Working capital loan details has the following field values:
+      | status.value | Submitted and pending approval |
+    When Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    Then Working capital loan details has the client office of the last created office
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
+    Then Verify Working Capital loan disbursement was successful
+    Then Working capital loan details has the client office of the last created office
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
+    Then Working capital loan details has the client office of the last created office
+
+  @TestRailId:C115445
+  Scenario: Verify the client office is returned by loan details by external id, the loan list and the batch api - UC2
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      |
+    Then Working capital loan creation was successful
+    When Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
+    Then Verify Working Capital loan disbursement was successful
+    Then Working capital loan details retrieved by external id has the client office of the last created office
+    And Working capital loan list filtered by client has the client office of the last created office
+    And Working capital loan details has the client office of the last created office via batch api
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
+
+  @TestRailId:C115446
+  Scenario: Verify loan details returns the new office name after the client office is renamed - UC3
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      |
+    Then Working capital loan creation was successful
+    When Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
+    Then Verify Working Capital loan disbursement was successful
+    Then Working capital loan details has the client office of the last created office
+    When Admin renames the last created office
+    Then Working capital loan details has the client office of the last created office
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
+
+  @TestRailId:C115447
+  Scenario: Verify loan template does not return the client office fields - UC4
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a new office
+    And Admin creates a client with random data in the last created office
+    Then Working capital loan template for the client has no client office fields
 

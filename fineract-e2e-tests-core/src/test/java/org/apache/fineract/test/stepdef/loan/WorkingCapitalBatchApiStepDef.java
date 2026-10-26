@@ -991,6 +991,15 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
         workingCapitalLoanAccountStepDef.validateWorkingCapitalLoanDetailFieldValuesResponse(table, response);
     }
 
+    @Then("Working capital loan details has the client office of the last created office via batch api")
+    public void verifyClientOfficeOfLastCreatedOffice() {
+        Long loanId = workingCapitalDelinquencyStepDef.extractLoanId();
+        List<BatchResponse> ok = handleBatchRequestByUrlForGetApi(WCL_BASE_URL + "/" + loanId);
+
+        GetWorkingCapitalLoansLoanIdResponse response = parseBatchResponse(ok, new TypeReference<>() {});
+        workingCapitalLoanAccountStepDef.verifyClientOfficeOfLastCreatedOffice(response);
+    }
+
     private <T> T parseBatchResponse(List<BatchResponse> ok, TypeReference<T> typeReference) {
         try {
             return OBJECT_MAPPER.readValue(ok.getFirst().getBody(), typeReference);

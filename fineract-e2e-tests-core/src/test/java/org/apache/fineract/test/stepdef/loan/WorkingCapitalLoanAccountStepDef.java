@@ -64,11 +64,14 @@ import org.apache.fineract.client.models.GetBalance;
 import org.apache.fineract.client.models.GetCodeValuesDataResponse;
 import org.apache.fineract.client.models.GetDisbursementDetail;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanChargePaidByData;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetWorkingCapitalLoansPagedResponse;
+import org.apache.fineract.client.models.GetWorkingCapitalLoansTemplateResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.LoanTransactionEnumData;
 import org.apache.fineract.client.models.MarkWorkingCapitalLoanAsFraudRequest;
@@ -77,6 +80,7 @@ import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostCodeValueDataResponse;
 import org.apache.fineract.client.models.PostCodeValuesDataRequest;
+import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsPaymentDetailRequest;
@@ -762,6 +766,49 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertThat(response.getAccountNo()).as("accountNo").isNotNull();
         assertThat(response.getExternalId()).as("externalId").isNotNull();
         assertThat(response.getClientId()).as("clientId").isNotNull();
+    }
+
+    @Then("Working capital loan details has the client office of the last created office")
+    public void verifyClientOfficeOfLastCreatedOffice() {
+        verifyClientOfficeOfLastCreatedOffice(retrieveLoanDetails(getCreatedLoanId()));
+    }
+
+    @Then("Working capital loan details retrieved by external id has the client office of the last created office")
+    public void verifyClientOfficeOfLastCreatedOfficeByExternalId() {
+        final String loanExternalId = retrieveLoanExternalId(getCreatedLoanId());
+        final GetWorkingCapitalLoansLoanIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanByExternalId(loanExternalId));
+        verifyClientOfficeOfLastCreatedOffice(response);
+    }
+
+    @Then("Working capital loan list filtered by client has the client office of the last created office")
+    public void verifyClientOfficeOfLastCreatedOfficeInLoanList() {
+        final GetWorkingCapitalLoansPagedResponse page = ok(
+                () -> fineractClient.workingCapitalLoans().retrieveAllWorkingCapitalLoans(null, null, extractClientId(), null));
+        assertThat(page.getContent()).as("WC loans of the client").hasSize(1);
+        verifyClientOfficeOfLastCreatedOffice(page.getContent().getFirst());
+    }
+
+    @Then("Working capital loan template for the client has no client office fields")
+    public void verifyLoanTemplateHasNoClientOfficeFields() {
+        final Long clientId = extractClientId();
+        final GetWorkingCapitalLoansTemplateResponse template = ok(
+                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanTemplate(null, clientId));
+        final GetWorkingCapitalLoansLoanIdResponse loanData = template.getLoanData();
+
+        // the template exposes the client object instead of the flat client fields of loan details
+        assertThat(loanData.getClient().getId()).as("template client.id").isEqualTo(clientId);
+        assertThat(loanData.getClientOfficeId()).as("template clientOfficeId").isNull();
+        assertThat(loanData.getClientOfficeName()).as("template clientOfficeName").isNull();
+    }
+
+    public void verifyClientOfficeOfLastCreatedOffice(final GetWorkingCapitalLoansLoanIdResponse response) {
+        final PostOfficesResponse officeResponse = testContext().get(TestContextKey.OFFICE_CREATE_RESPONSE);
+        assertThat(officeResponse).as("No office was created. Use 'Admin creates a new office' step first.").isNotNull();
+        final GetOfficesResponse office = ok(() -> fineractClient.offices().retrieveOneOffice(officeResponse.getOfficeId()));
+
+        assertThat(response.getClientOfficeId()).as("clientOfficeId").isEqualTo(office.getId());
+        assertThat(response.getClientOfficeName()).as("clientOfficeName").isEqualTo(office.getName());
     }
 
     @Then("Working capital loan details has annual EIR {string}")
