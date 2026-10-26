@@ -100,6 +100,19 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                 default -> { // no fields need to get cleared
                 }
             }
+            clearNpaOnSettlement(loan, newStatus);
+        }
+    }
+
+    /**
+     * A closed or overpaid loan has nothing left in arrears, so it is no longer a non-performing asset. The flag is
+     * cleared in the transaction that settles the loan, because the NPA processing only evaluates active loans and
+     * would otherwise leave it set for good.
+     */
+    private void clearNpaOnSettlement(final Loan loan, final LoanStatus newStatus) {
+        if (loan.isNpa() && (newStatus.isClosed() || newStatus.isOverpaid())) {
+            log.debug("Loan {} leaves NPA on transition to {}", loan.getId(), newStatus);
+            loan.clearNpa();
         }
     }
 
