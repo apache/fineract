@@ -115,7 +115,9 @@ public class LoanRepaymentScheduleProcessingWrapper {
                             amount = amount.add(totalPrincipal.getAmount());
                         }
                     }
-                    BigDecimal loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
+                    // capped like the charge's own amount, so the installment never carries more than the charge
+                    BigDecimal loanChargeAmt = loanCharge
+                            .minimumAndMaximumCap(amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100)));
                     cumulative = cumulative.plus(loanChargeAmt);
                 } else if (isDue) {
                     cumulative = cumulative.plus(loanCharge.amount());
@@ -198,7 +200,8 @@ public class LoanRepaymentScheduleProcessingWrapper {
                     } else {
                         amount = amount.add(totalPrincipal.getAmount());
                     }
-                    BigDecimal loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
+                    BigDecimal loanChargeAmt = loanCharge
+                            .minimumAndMaximumCap(amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100)));
                     cumulative = cumulative.plus(loanChargeAmt);
                 } else if (isDue) {
                     cumulative = cumulative.plus(loanCharge.amount());

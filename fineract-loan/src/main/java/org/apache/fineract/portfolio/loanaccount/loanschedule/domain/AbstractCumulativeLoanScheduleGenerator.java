@@ -2120,7 +2120,9 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
         } else {
             amount = amount.add(principalDisbursed.getAmount());
         }
-        BigDecimal loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100), mc);
+        // capped like the charge's own amount, so the installment never carries more than the charge
+        BigDecimal loanChargeAmt = loanCharge
+                .minimumAndMaximumCap(amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100), mc));
         cumulative = cumulative.plus(loanChargeAmt);
         return cumulative;
     }
