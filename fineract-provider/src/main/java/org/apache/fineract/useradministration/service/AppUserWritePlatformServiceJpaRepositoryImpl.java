@@ -51,6 +51,7 @@ import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.apache.fineract.useradministration.domain.Role;
 import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.apache.fineract.useradministration.domain.UserDomainService;
+import org.apache.fineract.useradministration.exception.PasswordMustBeDifferentException;
 import org.apache.fineract.useradministration.exception.PasswordPreviouslyUsedException;
 import org.apache.fineract.useradministration.exception.RoleNotFoundException;
 import org.apache.fineract.useradministration.exception.UserNotFoundException;
@@ -150,6 +151,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             final AppUser userToUpdate = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
             final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
             final Map<String, Object> changes = userToUpdate.changePassword(command, this.platformPasswordEncoder);
+            if (changes.isEmpty() && command.hasParameter(AppUserConstants.PASSWORD)) {
+                throw new PasswordMustBeDifferentException();
+            }
             if (!changes.isEmpty()) {
                 userToUpdate.updatePasswordResetRequired(false);
                 this.appUserRepository.saveAndFlush(userToUpdate);

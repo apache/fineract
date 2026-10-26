@@ -53,6 +53,7 @@ import org.apache.fineract.useradministration.domain.AppUserPreviousPasswordRepo
 import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.apache.fineract.useradministration.domain.UserDomainService;
+import org.apache.fineract.useradministration.exception.PasswordMustBeDifferentException;
 import org.apache.fineract.useradministration.exception.PasswordPreviouslyUsedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -212,6 +213,30 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
         assertEquals(USER_ID, result.getResourceId());
         verify(appUserRepository).saveAndFlush(user);
         verify(appUserPreviewPasswordRepository).save(any(AppUserPreviousPassword.class));
+    }
+
+    @Test
+    void changeUserPasswordThrowsWhenPasswordIsTheCurrentOne() {
+        when(command.hasParameter(AppUserConstants.PASSWORD)).thenReturn(true);
+        when(user.changePassword(command, platformPasswordEncoder)).thenReturn(Map.of());
+
+        assertThrows(PasswordMustBeDifferentException.class, () -> underTest.changeUserPassword(USER_ID, command));
+
+        verify(user, never()).updatePasswordResetRequired(false);
+        verify(appUserRepository, never()).saveAndFlush(user);
+        verify(appUserPreviewPasswordRepository, never()).save(any(AppUserPreviousPassword.class));
+    }
+
+    @Test
+    void changeUserPasswordChangesNothingWhenPasswordIsMissing() {
+        stubOffice();
+        when(user.changePassword(command, platformPasswordEncoder)).thenReturn(Map.of());
+
+        CommandProcessingResult result = underTest.changeUserPassword(USER_ID, command);
+
+        assertEquals(USER_ID, result.getResourceId());
+        verify(appUserRepository, never()).saveAndFlush(user);
+        verify(appUserPreviewPasswordRepository, never()).save(any(AppUserPreviousPassword.class));
     }
 
     @Test
