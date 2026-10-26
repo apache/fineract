@@ -169,10 +169,9 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                             break;
                         }
                     }
-                    if (!isMappingUpdated && principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion)
-                            .isGreaterThanZero()) {
+                    if (!isMappingUpdated && principalPortion.isGreaterThanZero()) {
                         transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, installment,
-                                principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
+                                principalPortion, interestPortion, Money.zero(currency), Money.zero(currency)));
                     }
                 }
             }
