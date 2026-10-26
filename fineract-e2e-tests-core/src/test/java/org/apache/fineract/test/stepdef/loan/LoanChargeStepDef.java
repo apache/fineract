@@ -347,6 +347,23 @@ public class LoanChargeStepDef extends AbstractStepDef {
         assertThat(loanChargeAmount.getAmount()).as("Charge amount is wrong").isEqualByComparingTo(Double.valueOf(chargeAmount));
     }
 
+    @Then("LoanAddChargeBusinessEvent is raised for the {string} charge due on {string}")
+    public void checkLoanAddChargeBusinessEventForChargeDueOn(String chargeName, String dueDate) {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
+        GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "charges")));
+        GetLoansLoanIdLoanChargeData charge = loanDetails.getCharges().stream()
+                .filter(c -> chargeName.equals(c.getName()) && dueDate.equals(formatter.format(c.getDueDate()))).findFirst()
+                .orElseThrow(() -> new IllegalStateException("Loan %s has no %s charge due on %s".formatted(loanId, chargeName, dueDate)));
+
+        // Charges created by the system (e.g. down payment fee of a later tranche) must raise the same event as a
+        // manual add
+        eventAssertion.assertEvent(LoanAddChargeEvent.class, charge.getId()).extractingData(LoanChargeDataV1::getName).isEqualTo(chargeName)
+                .extractingData(LoanChargeDataV1::getLoanId).isEqualTo(loanId);
+    }
+
     private void addChargeEventCheck(PostLoansLoanIdChargesResponse loanChargeResponse) throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_EVENTS);
         GetLoansLoanIdChargesChargeIdResponse chargeDetails = ok(() -> fineractClient.loanCharges()
