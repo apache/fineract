@@ -147,4 +147,7 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
             ORDER BY sa.lastClosedBusinessDate ASC
             """)
     List<COBIdAndLastClosedBusinessDate> findAllSavingsIdsOldestCobProcessed();
+
+    @Query("select coalesce(co.id, go.id) from SavingsAccount sa left join sa.client c left join c.office co left join sa.group g left join g.office go where sa.id = :savingsAccountId")
+    Long findOfficeIdBySavingsAccountId(@Param("savingsAccountId") Long savingsAccountId);
 }

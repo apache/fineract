@@ -19,20 +19,26 @@
 package org.apache.fineract.infrastructure.entityaccess.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
+import org.apache.fineract.infrastructure.entityaccess.data.FineractOfficeEntityAccessData;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepositoryWrapper;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMappingRepository;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +70,7 @@ public class FineractEntityAccessUtil {
     }
 
     @Transactional
+    @CacheEvict(value = FineractEntityAccessReadServiceImpl.OFFICE_ENTITY_ACCESS_CACHE_NAME, allEntries = true)
     public void checkConfigurationAndAddProductResrictionsForUserOffice(final FineractEntityAccessType fineractEntityAccessType,
             final Long productOrChargeId) {
 
@@ -98,27 +105,22 @@ public class FineractEntityAccessUtil {
 
     }
 
-    public String getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType fineractEntityType) {
-        String inClause = "";
-
+    public <T> List<T> filterVisibleToOffice_ifGlobalConfigEnabled(final FineractEntityAccessType accessType, final Long officeId,
+            final Collection<T> entities, final Function<T, Long> idExtractor) {
         final GlobalConfigurationProperty property = this.globalConfigurationRepository
                 .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED);
-
-        if (property.isEnabled()) {
-            // Get 'SQL In Clause' for fetching only products/charges that are
-            // relevant for current user's office
-            if (fineractEntityType.equals(FineractEntityType.SAVINGS_PRODUCT)) {
-                inClause = fineractEntityAccessReadService
-                        .getSQLQueryInClauseIDList_ForSavingsProductsForOffice(this.context.authenticatedUser().getOffice().getId(), false);
-            } else if (fineractEntityType.equals(FineractEntityType.LOAN_PRODUCT)) {
-                inClause = fineractEntityAccessReadService
-                        .getSQLQueryInClauseIDList_ForLoanProductsForOffice(this.context.authenticatedUser().getOffice().getId(), false);
-            } else if (fineractEntityType.equals(FineractEntityType.CHARGE)) {
-                inClause = fineractEntityAccessReadService
-                        .getSQLQueryInClauseIDList_ForChargesForOffice(this.context.authenticatedUser().getOffice().getId(), false);
-            }
+        if (!property.isEnabled()) {
+            return new ArrayList<>(entities);
         }
-        return inClause;
+        final FineractOfficeEntityAccessData access = officeId != null
+                ? this.fineractEntityAccessReadService.retrieveOfficeEntityAccess(accessType, officeId, false)
+                : this.fineractEntityAccessReadService.retrieveOfficeEntityAccess(accessType,
+                        this.context.authenticatedUser().getOffice().getId(), true);
+        return entities.stream().filter(entity -> access.isVisible(idExtractor.apply(entity))).collect(Collectors.toList());
     }
 
+    public boolean isVisibleToOffice_ifGlobalConfigEnabled(final FineractEntityAccessType accessType, final Long officeId,
+            final Long entityId) {
+        return !filterVisibleToOffice_ifGlobalConfigEnabled(accessType, officeId, List.of(entityId), Function.identity()).isEmpty();
+    }
 }
