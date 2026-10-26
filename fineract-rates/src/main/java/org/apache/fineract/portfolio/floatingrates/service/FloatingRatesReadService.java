@@ -30,8 +30,6 @@ public interface FloatingRatesReadService {
 
     FloatingRateData retrieveOne(Long floatingRateId);
 
-    List<FloatingRateData> retrieveAllActive();
-
     FloatingRateData retrieveBaseLendingRate();
 
     List<InterestRatePeriodData> retrieveInterestRatePeriods(Long productId);
