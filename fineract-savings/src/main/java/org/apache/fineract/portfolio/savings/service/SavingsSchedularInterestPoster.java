@@ -27,6 +27,7 @@ import io.github.resilience4j.retry.annotation.Retry;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -212,14 +213,18 @@ public class SavingsSchedularInterestPoster {
                     UUID uuid = UUID.randomUUID();
                     savingsAccountTransactionData.setRefNo(uuid.toString());
                     transRefNo.add(uuid.toString());
+                    final OffsetTime transactionTime = savingsAccountTransactionData.getTransactionTime();
                     insertionParams.add(new Object[] { savingsAccountData.getId(), savingsAccountData.getOfficeId(),
                             savingsAccountTransactionData.isReversed(), savingsAccountTransactionData.getTransactionType().getId(),
-                            savingsAccountTransactionData.getTransactionDate(), savingsAccountTransactionData.getAmount(),
-                            savingsAccountTransactionData.getBalanceEndDate(), savingsAccountTransactionData.getBalanceNumberOfDays(),
-                            savingsAccountTransactionData.getRunningBalance(), savingsAccountTransactionData.getCumulativeBalance(),
-                            auditTime, userId, auditTime, userId, savingsAccountTransactionData.isManualTransaction(),
-                            savingsAccountTransactionData.getRefNo(), savingsAccountTransactionData.isReversalTransaction(),
-                            savingsAccountTransactionData.getOverdraftAmount(), currentDate });
+                            savingsAccountTransactionData.getTransactionDate(),
+                            transactionTime == null ? null : transactionTime.toLocalTime(),
+                            transactionTime == null ? null : transactionTime.getOffset().getTotalSeconds(),
+                            savingsAccountTransactionData.getAmount(), savingsAccountTransactionData.getBalanceEndDate(),
+                            savingsAccountTransactionData.getBalanceNumberOfDays(), savingsAccountTransactionData.getRunningBalance(),
+                            savingsAccountTransactionData.getCumulativeBalance(), auditTime, userId, auditTime, userId,
+                            savingsAccountTransactionData.isManualTransaction(), savingsAccountTransactionData.getRefNo(),
+                            savingsAccountTransactionData.isReversalTransaction(), savingsAccountTransactionData.getOverdraftAmount(),
+                            currentDate });
                 } else {
                     updateParams.add(new Object[] { savingsAccountTransactionData.isReversed(), savingsAccountTransactionData.getAmount(),
                             savingsAccountTransactionData.getOverdraftAmount(), savingsAccountTransactionData.getBalanceEndDate(),
@@ -276,11 +281,11 @@ public class SavingsSchedularInterestPoster {
     }
 
     private String batchQueryForTransactionInsertion() {
-        return "INSERT INTO m_savings_account_transaction (savings_account_id, office_id, is_reversed, transaction_type_enum, transaction_date, amount, balance_end_date_derived, "
+        return "INSERT INTO m_savings_account_transaction (savings_account_id, office_id, is_reversed, transaction_type_enum, transaction_date, transaction_time, transaction_time_offset, amount, balance_end_date_derived, "
                 + "balance_number_of_days_derived, running_balance_derived, cumulative_balance_derived, " + CREATED_DATE_DB_FIELD + ", "
                 + CREATED_BY_DB_FIELD + ", " + LAST_MODIFIED_DATE_DB_FIELD + ", " + LAST_MODIFIED_BY_DB_FIELD
                 + ", is_manual, ref_no, is_reversal, "
-                + "overdraft_amount_derived, submitted_on_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "overdraft_amount_derived, submitted_on_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     }
 
     private String batchQueryForSavingsSummaryUpdate() {

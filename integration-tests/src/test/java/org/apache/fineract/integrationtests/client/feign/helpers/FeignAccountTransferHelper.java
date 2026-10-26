@@ -56,6 +56,10 @@ public class FeignAccountTransferHelper {
                         .getPageItems());
     }
 
+    public GetAccountTransfersPageItems getAccountTransfer(Long transferId) {
+        return ok(() -> fineractClient.accountTransfers().retrieveOneAccountTransfer(transferId));
+    }
+
     /**
      * Refunds an overpaid loan by transferring the overpayment into a savings account of the same client.
      */
