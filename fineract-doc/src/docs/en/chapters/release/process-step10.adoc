@@ -2,4 +2,4 @@
 
 == Description
 
-Initiate voting with https://releases.apache.org[the ATR (ASF Trusted Releases) tool].
+Initiate voting via https://releases.apache.org[ATR (Apache Trusted Releases)].

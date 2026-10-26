@@ -2,7 +2,7 @@
 
 == Description
 
-Confirm the ATR moved the release candidate into the proper final destination.
+Confirm ATR moved the release candidate into the proper final destination.
 
 https://dist.apache.org/repos/dist/release/fineract/{revnumber}/
 

@@ -1,6 +1,6 @@
 = Step 15: Announcement Email
 
-Use the ATR to announce the release.
+Use ATR to announce the release.
 
 == Description
 
