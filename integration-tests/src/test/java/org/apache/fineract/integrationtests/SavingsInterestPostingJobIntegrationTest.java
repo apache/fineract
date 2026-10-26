@@ -20,13 +20,19 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
+import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
@@ -173,6 +179,32 @@ public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBa
             SavingsTestValidators.verifyAmount(balanceAfterFirstRun, balanceAfterSecondRun,
                     "Account balance must not change when job runs twice on the same business date");
         });
+    }
+
+    @Test
+    public void testForceFlagSurvivesInterestPostingJobReplacement() {
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT,
+                new PutGlobalConfigurationsRequest().value(1000L).enabled(true));
+
+        final String forcedWithdrawalDate = "12 April 2022";
+        final Long savingsId = createActiveDailyPostingSavings(START_DATE);
+
+        deposit(savingsId, "100", START_DATE);
+        final PostSavingsAccountTransactionsResponse forced = savingsTransactionHelper.forceWithdraw(savingsId, "110",
+                forcedWithdrawalDate);
+        deposit(savingsId, "60", forcedWithdrawalDate);
+
+        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+
+        final boolean originalWasReplaced = savingsTransactionHelper.getTransactions(savingsId).stream()
+                .anyMatch(t -> forced.getResourceId().equals(t.getId()) && Boolean.TRUE.equals(t.getReversed()));
+        assertTrue(originalWasReplaced, "The job did not replace the forced withdrawal, so this test does not exercise the copy");
+
+        final String today = Utils.getLocalDateOfTenant().format(DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH));
+        final PostSavingsAccountTransactionsResponse regular = savingsTransactionHelper.withdraw(savingsId, "3", today);
+        assertNotNull(regular.getResourceId(), "Regular withdrawal failed after the job replaced the forced withdrawal");
     }
 
     private long countActiveTransactionsOn(final Long savingsId, final LocalDate date) {
