@@ -62,6 +62,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
 
@@ -159,6 +160,51 @@ public class DefaultScheduledDateGeneratorTest {
             assertThat(r.getChangedActualRepaymentDate()).isEqualTo(LocalDate.of(2023, 11, 26));
             assertThat(r.getNextRepaymentPeriodDueDate()).isEqualTo(LocalDate.of(2023, 12, 26));
         });
+    }
+
+    /**
+     * FINERACT-2968: when the disbursement falls on the 29th-31st the first due date is clamped into a shorter month
+     * (31 Jan -> 28 Feb). The ideal disbursement date (first due date minus one period) must snap back onto the anchor
+     * day, otherwise first-period interest starts before the money was disbursed.
+     */
+    @ParameterizedTest(name = "disbursed {0}, every {1} month(s): first due {2}, ideal disbursement {3}")
+    @WithSystemTimeZone(EUROPE_BERLIN_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    @CsvSource({ //
+            "2025-01-31, 1, 2025-02-28, 2025-01-31", // clamped by 3 days
+            "2025-01-30, 1, 2025-02-28, 2025-01-30", // clamped by 2 days
+            "2024-12-31, 2, 2025-02-28, 2024-12-31", // multi-month period
+            "2025-01-15, 1, 2025-02-15, 2025-01-15" }) // not clamped: unchanged
+    public void test_idealDisbursementDate_snapsOntoAnchorDay_whenFirstDueDateIsClamped(LocalDate expectedDisbursementDate, int repaidEvery,
+            LocalDate expectedFirstRepaymentDate, LocalDate expectedIdealDisbursementDate) {
+        // given
+        HolidayDetailDTO holidayDetailDTO = createHolidayDTO();
+        LoanApplicationTerms loanApplicationTerms = createLoanApplicationTermsWithoutFirstRepaymentDate(expectedDisbursementDate,
+                repaidEvery, holidayDetailDTO);
+
+        // when
+        LocalDate firstRepaymentDate = underTest.generateNextRepaymentDate(expectedDisbursementDate, loanApplicationTerms, true);
+        LocalDate idealDisbursementDate = underTest.idealDisbursementDateBasedOnFirstRepaymentDate(MONTHS, repaidEvery, firstRepaymentDate,
+                null, holidayDetailDTO, loanApplicationTerms);
+
+        // then
+        assertThat(firstRepaymentDate).isEqualTo(expectedFirstRepaymentDate);
+        assertThat(idealDisbursementDate).isEqualTo(expectedIdealDisbursementDate);
+    }
+
+    private LoanApplicationTerms createLoanApplicationTermsWithoutFirstRepaymentDate(LocalDate expectedDisbursementDate, int repaidEvery,
+            HolidayDetailDTO holidayDetailDTO) {
+        ApplicationCurrency dollarCurrency = new ApplicationCurrency("USD", "US Dollar", 2, 0, "currency.USD", "$");
+        Money principalAmount = Money.of(fromApplicationCurrency(dollarCurrency), BigDecimal.valueOf(10_000L));
+
+        return LoanApplicationTerms.assembleFrom(dollarCurrency.toData(), repaidEvery, MONTHS, 4, repaidEvery, MONTHS, null, INVALID,
+                EQUAL_PRINCIPAL, FLAT, ZERO, MONTHS, ZERO, SAME_AS_REPAYMENT_PERIOD, false, principalAmount, expectedDisbursementDate, null,
+                null, null, null, null, null, null, Money.of(fromApplicationCurrency(dollarCurrency), ZERO), false, null, EMPTY_LIST,
+                BigDecimal.valueOf(36_000L), null, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null, null, null, ZERO,
+                null, NONE, null, ZERO, EMPTY_LIST, false, 0, false, holidayDetailDTO, false, false, false, null, false, false, null, false,
+                DISBURSEMENT_DATE, expectedDisbursementDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, null, false, null, null,
+                false, null, false, null, null, null, false, null, null, null, false, false, null);
     }
 
     private LoanApplicationTerms createLoanApplicationTerms(LocalDate dueRepaymentPeriodDate, HolidayDetailDTO holidayDetailDTO) {
