@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.jobs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -38,12 +39,14 @@ import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.infrastructure.jobs.config.FineractDataFieldMaxValueIncrementerFactory;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.example.batch.UnlistedCobParameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.batch.core.repository.dao.JacksonExecutionContextStringSerializer;
 import org.springframework.jdbc.support.incrementer.AbstractDataFieldMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
+import tools.jackson.databind.exc.InvalidTypeIdException;
 
 /**
  * Pins the two things that let a Spring Batch 5 and a Spring Batch 6 instance share one database, so that upgrading
@@ -87,6 +90,23 @@ public class BatchMetadataCompatibilityTest {
     @Test
     public void thisBuildCanReadWhatSpringBatch5Wrote() throws IOException {
         assertRestoresTheCobContext(deserialize(writeWithSpringBatch5Mapper(cobContext())));
+    }
+
+    @Test
+    public void restrictsAnnotatedTypesToTheExecutionContextAllowList() {
+        // the subtype must exist: an unknown class name fails to resolve whether or not the validator is restrictive
+        String json = "{\"@class\":\"" + UnlistedCobParameter.class.getName() + "\",\"minAccountId\":1,\"maxAccountId\":100}";
+
+        assertThatThrownBy(() -> ScheduledJobRunnerConfig.executionContextMapper().readValue(json, COBParameter.class))
+                .isInstanceOf(InvalidTypeIdException.class).hasMessageContaining("denied resolution");
+    }
+
+    @Test
+    public void resolvesFineractClassesNamedByAnnotatedTypes() {
+        String json = "{\"@class\":\"org.apache.fineract.cob.data.COBParameter\",\"minAccountId\":1,\"maxAccountId\":100}";
+
+        assertThat(ScheduledJobRunnerConfig.executionContextMapper().readValue(json, COBParameter.class))
+                .isEqualTo(new COBParameter(1L, 100L));
     }
 
     /**
