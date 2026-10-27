@@ -37,6 +37,7 @@ import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter;
+import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 
 @Getter
@@ -57,7 +58,31 @@ public class LoanCreditAllocationRule extends AbstractAuditableWithUTCDateTimeCu
     private CreditAllocationTransactionType transactionType;
 
     @Convert(converter = AllocationTypeListConverter.class)
-    @Column(name = "allocation_types", nullable = false)
+    @Column(name = "allocation_types")
     private List<AllocationType> allocationTypes;
+
+    @Column(name = "allocation_strategy", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CreditAllocationStrategy allocationStrategy;
+
+    /**
+     * Resolves the credit allocation strategy for credit transactions of the given type. Without a configured rule the
+     * whole amount is allocated to principal, so that case resolves to {@link CreditAllocationStrategy#PRINCIPAL_ONLY}.
+     * Callers are expected to switch exhaustively on the result, so a new strategy cannot silently fall into an
+     * existing branch.
+     */
+    public static CreditAllocationStrategy resolveAllocationStrategy(final List<LoanCreditAllocationRule> rules,
+            final LoanTransactionType transactionType) {
+        if (rules == null) {
+            return CreditAllocationStrategy.PRINCIPAL_ONLY;
+        }
+        return rules.stream().filter(rule -> rule.getTransactionType().getLoanTransactionType() == transactionType).findFirst()
+                .map(rule -> {
+                    if (rule.getAllocationStrategy() == null) {
+                        throw new IllegalStateException("Credit allocation rule " + rule.getId() + " has no allocation strategy");
+                    }
+                    return rule.getAllocationStrategy();
+                }).orElse(CreditAllocationStrategy.PRINCIPAL_ONLY);
+    }
 
 }

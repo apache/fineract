@@ -31,21 +31,21 @@ public class CreditAllocationsValidator {
 
     public static final String ADVANCED_PAYMENT_ALLOCATION_STRATEGY = "advanced-payment-allocation-strategy";
 
-    public void validate(List<LoanProductCreditAllocationRule> rules, String code) {
+    public void validate(List<CreditAllocationRequest> requests, String code) {
         if (isAdvancedPaymentStrategy(code)) {
-            if (hasDuplicateTransactionTypes(rules)) {
+            if (hasDuplicateTransactionTypes(requests)) {
                 raiseValidationError("advanced-payment-strategy-with-duplicate-credit-allocation",
                         "The same transaction type must be provided only once");
             }
 
-            if (rules != null) {
-                for (LoanProductCreditAllocationRule rule : rules) {
-                    validateAllocationRule(rule);
+            if (requests != null) {
+                for (CreditAllocationRequest request : requests) {
+                    validateAllocationRule(request);
                 }
             }
 
         } else {
-            if (hasLoanProductCreditAllocationRule(rules)) {
+            if (hasCreditAllocationRequest(requests)) {
                 raiseValidationError("credit_allocation.must.not.be.provided.when.allocation.strategy.is.not.advanced-payment-strategy",
                         "In case '" + code + "' payment strategy, creditAllocation must not be provided");
             }
@@ -69,15 +69,36 @@ public class CreditAllocationsValidator {
         }
     }
 
-    private boolean hasDuplicateTransactionTypes(List<LoanProductCreditAllocationRule> rules) {
-        return rules != null
-                && rules.stream().map(LoanProductCreditAllocationRule::getTransactionType).distinct().toList().size() != rules.size();
+    private boolean hasDuplicateTransactionTypes(List<CreditAllocationRequest> requests) {
+        return requests != null
+                && requests.stream().map(CreditAllocationRequest::transactionType).distinct().toList().size() != requests.size();
     }
 
-    private void validateAllocationRule(LoanProductCreditAllocationRule rule) {
-        if (rule.getTransactionType() == null) {
+    private void validateAllocationRule(CreditAllocationRequest request) {
+        if (request.transactionType() == null) {
             raiseValidationError("advanced-payment-strategy.with.not.valid.transaction.type",
                     "Credit allocation was provided with a not valid transaction type");
+        }
+        validateAllocationStrategy(request);
+    }
+
+    private void validateAllocationStrategy(CreditAllocationRequest request) {
+        CreditAllocationStrategy strategy = request.allocationStrategy();
+        switch (strategy) {
+            case RULE_BASED -> {
+                if (!request.creditAllocationOrderProvided()) {
+                    raiseValidationError("advanced-payment-strategy.rule_based_credit_allocation.must.contain.credit_allocation_order",
+                            "Credit allocation with '" + strategy + "' strategy must contain creditAllocationOrder");
+                }
+            }
+            case PRINCIPAL_ONLY -> {
+                if (request.creditAllocationOrderProvided()) {
+                    raiseValidationError("advanced-payment-strategy.credit_allocation_order.must.not.be.provided.for.strategy",
+                            "Credit allocation with '" + strategy + "' strategy must not contain creditAllocationOrder");
+                }
+            }
+            case null -> raiseValidationError("advanced-payment-strategy.with.not.valid.credit.allocation.strategy",
+                    "Credit allocation was provided with a not valid credit allocation strategy");
         }
     }
 
@@ -85,8 +106,8 @@ public class CreditAllocationsValidator {
         return ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(code);
     }
 
-    private boolean hasLoanProductCreditAllocationRule(List<LoanProductCreditAllocationRule> rules) {
-        return rules != null && !rules.isEmpty();
+    private boolean hasCreditAllocationRequest(List<CreditAllocationRequest> requests) {
+        return requests != null && !requests.isEmpty();
     }
 
     private void raiseValidationError(String globalisationMessageCode, String msg) {

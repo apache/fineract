@@ -27,7 +27,9 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.client.models.CreditAllocationOrder;
+import org.apache.fineract.client.models.EnumOptionData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoanProductsTemplateResponse;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
@@ -42,6 +44,9 @@ import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanTestBase {
+
+    private static final String RULE_BASED = "RULE_BASED";
+    private static final String PRINCIPAL_ONLY = "PRINCIPAL_ONLY";
 
     @Test
     public void testCreateAndReadLoanProductWithAdvancedPaymentAndCreditAllocations() {
@@ -60,7 +65,7 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         // then
         Assertions.assertNotNull(loanProduct.getCreditAllocation());
         Assertions.assertEquals(1, loanProduct.getCreditAllocation().size());
-        Assertions.assertEquals(createChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
+        Assertions.assertEquals(expectedRuleBasedChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
     }
 
     @Test
@@ -83,7 +88,7 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         loanProduct = retrieveLoanProduct(loanProductId);
         Assertions.assertNotNull(loanProduct.getCreditAllocation());
         Assertions.assertEquals(1, loanProduct.getCreditAllocation().size());
-        Assertions.assertEquals(createChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
+        Assertions.assertEquals(expectedRuleBasedChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
     }
 
     @Test
@@ -101,7 +106,7 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
         Assertions.assertNotNull(loanProduct.getCreditAllocation());
         Assertions.assertEquals(1, loanProduct.getCreditAllocation().size());
-        Assertions.assertEquals(createChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
+        Assertions.assertEquals(expectedRuleBasedChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
 
         CreditAllocationData updated = createChargebackAllocation();
         List<CreditAllocationOrder> updatedOrder = createCreditAllocationOrders("FEE", "INTEREST", "PRINCIPAL", "PENALTY");
@@ -129,7 +134,7 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
         Assertions.assertNotNull(loanProduct.getCreditAllocation());
         Assertions.assertEquals(1, loanProduct.getCreditAllocation().size());
-        Assertions.assertEquals(createChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
+        Assertions.assertEquals(expectedRuleBasedChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
 
         PutLoanProductsProductIdRequest putLoanProductsProductIdRequest = updateLoanProductRequest(new CreditAllocationData[] {});
         updateLoanProduct(loanProductId, putLoanProductsProductIdRequest);
@@ -164,7 +169,7 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
         Assertions.assertNotNull(loanProduct.getCreditAllocation());
         Assertions.assertEquals(1, loanProduct.getCreditAllocation().size());
-        Assertions.assertEquals(createChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
+        Assertions.assertEquals(expectedRuleBasedChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
         PutLoanProductsProductIdRequest putLoanProductsProductIdRequest = updateLoanProductRequest("mifos-standard-strategy");
         putLoanProductsProductIdRequest.setPaymentAllocation(List.of());
 
@@ -176,6 +181,136 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         // then
         Assertions.assertTrue(callFailedRuntimeException.getMessage()
                 .contains("In case 'mifos-standard-strategy' payment strategy, creditAllocation must not be provided"));
+    }
+
+    @Test
+    public void testCreateAndReadLoanProductWithPrincipalOnlyCreditAllocation() {
+        // given
+        AdvancedPaymentData defaultAllocation = createCustomDefaultPaymentAllocation();
+        AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
+
+        // when
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct()
+                .addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation)
+                .addCreditAllocations(createPrincipalOnlyChargebackAllocation()).buildRequest();
+        Long loanProductId = createLoanProduct(loanProductRequest);
+        Assertions.assertNotNull(loanProductId);
+        GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
+
+        // then
+        Assertions.assertEquals(1, loanProduct.getCreditAllocation().size());
+        CreditAllocationData creditAllocation = loanProduct.getCreditAllocation().get(0);
+        Assertions.assertEquals("CHARGEBACK", creditAllocation.getTransactionType());
+        Assertions.assertEquals(PRINCIPAL_ONLY, creditAllocation.getCreditAllocationStrategy());
+        Assertions.assertEquals(List.of(), creditAllocation.getCreditAllocationOrder());
+    }
+
+    @Test
+    public void testSwitchCreditAllocationStrategy() {
+        // given
+        AdvancedPaymentData defaultAllocation = createCustomDefaultPaymentAllocation();
+        AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct()
+                .addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation)
+                .addCreditAllocations(createChargebackAllocation()).buildRequest();
+        Long loanProductId = createLoanProduct(loanProductRequest);
+
+        // rule based -> principal only
+        updateLoanProduct(loanProductId, updateLoanProductRequest(createPrincipalOnlyChargebackAllocation()));
+        GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
+        Assertions.assertEquals(1, loanProduct.getCreditAllocation().size());
+        Assertions.assertEquals(PRINCIPAL_ONLY, loanProduct.getCreditAllocation().get(0).getCreditAllocationStrategy());
+        Assertions.assertEquals(List.of(), loanProduct.getCreditAllocation().get(0).getCreditAllocationOrder());
+
+        // principal only -> rule based
+        CreditAllocationData ruleBased = createChargebackAllocation().creditAllocationStrategy(RULE_BASED);
+        updateLoanProduct(loanProductId, updateLoanProductRequest(ruleBased));
+        loanProduct = retrieveLoanProduct(loanProductId);
+        Assertions.assertEquals(1, loanProduct.getCreditAllocation().size());
+        Assertions.assertEquals(expectedRuleBasedChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
+    }
+
+    @Test
+    public void testPrincipalOnlyCreditAllocationWithCreditAllocationOrderIsRejected() {
+        // given
+        CreditAllocationData creditAllocation = createChargebackAllocation().creditAllocationStrategy(PRINCIPAL_ONLY);
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct()
+                .addAdvancedPaymentAllocation(createCustomDefaultPaymentAllocation(), createRepaymentPaymentAllocation())
+                .addCreditAllocations(creditAllocation).buildRequest();
+
+        // when
+        List<Map<String, String>> loanProductError = getLoanProductError(loanProductRequest, "errors");
+
+        // then
+        Assertions.assertEquals("Credit allocation with 'PRINCIPAL_ONLY' strategy must not contain creditAllocationOrder",
+                loanProductError.get(0).get("defaultUserMessage"));
+    }
+
+    @Test
+    public void testRuleBasedCreditAllocationWithoutCreditAllocationOrderIsRejected() {
+        // given
+        CreditAllocationData creditAllocation = new CreditAllocationData().transactionType("CHARGEBACK");
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct()
+                .addAdvancedPaymentAllocation(createCustomDefaultPaymentAllocation(), createRepaymentPaymentAllocation())
+                .addCreditAllocations(creditAllocation).buildRequest();
+
+        // when
+        List<Map<String, String>> loanProductError = getLoanProductError(loanProductRequest, "errors");
+
+        // then
+        Assertions.assertEquals("Credit allocation with 'RULE_BASED' strategy must contain creditAllocationOrder",
+                loanProductError.get(0).get("defaultUserMessage"));
+    }
+
+    @Test
+    public void testUnknownCreditAllocationStrategyIsRejected() {
+        // given
+        CreditAllocationData creditAllocation = new CreditAllocationData().transactionType("CHARGEBACK")
+                .creditAllocationStrategy("UNKNOWN");
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct()
+                .addAdvancedPaymentAllocation(createCustomDefaultPaymentAllocation(), createRepaymentPaymentAllocation())
+                .addCreditAllocations(creditAllocation).buildRequest();
+
+        // when
+        List<Map<String, String>> loanProductError = getLoanProductError(loanProductRequest, "errors");
+
+        // then
+        Assertions.assertEquals("Credit allocation was provided with a not valid credit allocation strategy",
+                loanProductError.get(0).get("defaultUserMessage"));
+    }
+
+    @Test
+    public void testCreditAllocationWithoutOrderOnNonAdvancedPaymentStrategyReportsThePaymentStrategy() {
+        // given
+        CreditAllocationData creditAllocation = new CreditAllocationData().transactionType("CHARGEBACK");
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct().withRepaymentStrategy("mifos-standard-strategy")
+                .withLoanScheduleType(LoanScheduleType.CUMULATIVE).addCreditAllocations(creditAllocation).buildRequest();
+
+        // when
+        List<Map<String, String>> loanProductError = getLoanProductError(loanProductRequest, "errors");
+
+        // then
+        Assertions.assertEquals("In case 'mifos-standard-strategy' payment strategy, creditAllocation must not be provided",
+                loanProductError.get(0).get("defaultUserMessage"));
+    }
+
+    @Test
+    public void testTemplateContainsCreditAllocationStrategyOptions() {
+        // when
+        GetLoanProductsTemplateResponse template = loanHelper.getLoanProductTemplate(false);
+
+        // then
+        Assertions.assertNotNull(template.getCreditAllocationStrategyOptions());
+        Assertions.assertEquals(List.of(RULE_BASED, PRINCIPAL_ONLY),
+                template.getCreditAllocationStrategyOptions().stream().map(EnumOptionData::getCode).toList());
+    }
+
+    private CreditAllocationData createPrincipalOnlyChargebackAllocation() {
+        return new CreditAllocationData().transactionType("CHARGEBACK").creditAllocationStrategy(PRINCIPAL_ONLY);
+    }
+
+    private CreditAllocationData expectedRuleBasedChargebackAllocation() {
+        return createChargebackAllocation().creditAllocationStrategy(RULE_BASED);
     }
 
     private CreditAllocationData createChargebackAllocation() {

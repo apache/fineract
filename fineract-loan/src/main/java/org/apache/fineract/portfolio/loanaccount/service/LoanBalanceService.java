@@ -32,6 +32,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -39,7 +40,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentSchedulePro
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
-import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
+import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationStrategy;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -75,10 +76,13 @@ public class LoanBalanceService {
                     totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getOverPaymentPortion(currency));
                 }
             } else if (loanTransaction.isChargeback()) {
-                if (loanTransaction.getPrincipalPortion(currency).isZero() && loan.getCreditAllocationRules().stream() //
-                        .filter(car -> car.getTransactionType().equals(CreditAllocationTransactionType.CHARGEBACK)) //
-                        .findAny() //
-                        .isEmpty()) {
+                final CreditAllocationStrategy creditAllocationStrategy = LoanCreditAllocationRule
+                        .resolveAllocationStrategy(loan.getCreditAllocationRules(), loanTransaction.getTypeOf());
+                final boolean overpaymentCoversPrincipalOnly = switch (creditAllocationStrategy) {
+                    case PRINCIPAL_ONLY -> true;
+                    case RULE_BASED -> false;
+                };
+                if (loanTransaction.getPrincipalPortion(currency).isZero() && overpaymentCoversPrincipalOnly) {
                     totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getOverPaymentPortion(currency));
                 }
             }
@@ -180,17 +184,19 @@ public class LoanBalanceService {
             } else if (loanTransaction.isChargeback() || loanTransaction.isCreditBalanceRefund()) {
                 Money transactionOutstanding = loanTransaction.getPrincipalPortion(loan.getCurrency());
                 if (loanTransaction.isOverPaid()) {
-                    // in case of advanced payment strategy and creditAllocations the full amount is recognized first
-                    if (loan.getCreditAllocationRules() != null && !loan.getCreditAllocationRules().isEmpty()) {
-                        Money payedPrincipal = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream() //
-                                .map(mapping -> mapping.getPrincipalPortion(loan.getCurrency())) //
-                                .reduce(Money.zero(loan.getCurrency()), Money::plus);
-                        transactionOutstanding = loanTransaction.getPrincipalPortion(loan.getCurrency()).minus(payedPrincipal);
-                    } else {
+                    CreditAllocationStrategy creditAllocationStrategy = LoanCreditAllocationRule
+                            .resolveAllocationStrategy(loan.getCreditAllocationRules(), loanTransaction.getTypeOf());
+                    transactionOutstanding = switch (creditAllocationStrategy) {
+                        // in case of advanced payment strategy and creditAllocations the full amount is recognized
+                        // first
+                        case RULE_BASED -> loanTransaction.getPrincipalPortion(loan.getCurrency())
+                                .minus(loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream() //
+                                        .map(mapping -> mapping.getPrincipalPortion(loan.getCurrency())) //
+                                        .reduce(Money.zero(loan.getCurrency()), Money::plus));
                         // in case legacy payment strategy
-                        transactionOutstanding = loanTransaction.getAmount(loan.getCurrency())
-                                .minus(loanTransaction.getOverPaymentPortion(loan.getCurrency()));
-                    }
+                        case PRINCIPAL_ONLY ->
+                            loanTransaction.getAmount(loan.getCurrency()).minus(loanTransaction.getOverPaymentPortion(loan.getCurrency()));
+                    };
                     if (transactionOutstanding.isLessThanZero()) {
                         transactionOutstanding = Money.zero(loan.getCurrency());
                     }

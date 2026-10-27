@@ -87,6 +87,11 @@ public class LoanProductCreditAllocationRuleMerger {
             changed = true;
         }
 
+        if (!Objects.equals(into.getAllocationStrategy(), newElement.getAllocationStrategy())) {
+            into.setAllocationStrategy(newElement.getAllocationStrategy());
+            changed = true;
+        }
+
         return changed;
     }
 }

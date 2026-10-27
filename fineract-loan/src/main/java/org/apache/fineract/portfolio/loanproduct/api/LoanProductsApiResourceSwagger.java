@@ -1190,6 +1190,7 @@ public final class LoanProductsApiResourceSwagger {
         public List<EnumOptionData> loanScheduleProcessingTypeOptions;
 
         public List<EnumOptionData> creditAllocationAllocationTypes;
+        public List<EnumOptionData> creditAllocationStrategyOptions;
         public List<EnumOptionData> creditAllocationTransactionTypes;
 
         public List<StringEnumOptionData> supportedInterestRefundTypes;
@@ -1908,6 +1909,8 @@ public final class LoanProductsApiResourceSwagger {
 
         @Schema(example = "Chargeback")
         public String transactionType;
+        @Schema(example = "RULE_BASED", description = "RULE_BASED (default) requires creditAllocationOrder, PRINCIPAL_ONLY must not have it")
+        public String creditAllocationStrategy;
         @Schema(example = "[]")
         public List<CreditAllocationOrder> creditAllocationOrder;
     }

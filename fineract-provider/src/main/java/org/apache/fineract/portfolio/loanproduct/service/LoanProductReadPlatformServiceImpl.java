@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -664,17 +665,21 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private static final class CreditAllocationDataMapper implements RowMapper<CreditAllocationData> {
 
         public String schema() {
-            return "transaction_type, allocation_types from m_loan_product_credit_allocation_rule";
+            return "transaction_type, allocation_strategy, allocation_types from m_loan_product_credit_allocation_rule";
         }
 
         @Override
         public CreditAllocationData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final String transactionType = rs.getString("transaction_type");
+            final String allocationStrategy = rs.getString("allocation_strategy");
             final String allocationTypes = rs.getString("allocation_types");
-            return new CreditAllocationData(transactionType, convert(allocationTypes));
+            return new CreditAllocationData(transactionType, allocationStrategy, convert(allocationTypes));
         }
 
         private List<CreditAllocationData.CreditAllocationOrder> convert(String allocationOrders) {
+            if (StringUtils.isBlank(allocationOrders)) {
+                return List.of();
+            }
             String[] allocationRule = allocationOrders.split(",");
             AtomicInteger order = new AtomicInteger(1);
             return Arrays.stream(allocationRule) //

@@ -54,7 +54,11 @@ public class LoanProductCreditAllocationRule extends AbstractAuditableWithUTCDat
     private CreditAllocationTransactionType transactionType;
 
     @Convert(converter = AllocationTypeListConverter.class)
-    @Column(name = "allocation_types", nullable = false)
+    @Column(name = "allocation_types")
     private List<AllocationType> allocationTypes;
+
+    @Column(name = "allocation_strategy", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CreditAllocationStrategy allocationStrategy;
 
 }
