@@ -113,10 +113,9 @@ public class WorkingCapitalLoanCOBWorkerConfiguration {
                 requiresNewTransactionJdbcTemplate);
     }
 
-    // Step-scoped, as in LoanCOBWorkerConfiguration: partitions of one job can run at the same time on one instance,
-    // and
-    // each needs its own reader queue and processor state. A shared reader lets a second partition's beforeStep replace
-    // the first one's queue, leaving the first partition's loans locked and never processed.
+    // Step-scoped, as in LoanCOBWorkerConfiguration: partitions of one job can run at the same time on one
+    // instance, and each needs its own reader queue and processor state. A shared reader lets a second partition's
+    // beforeStep replace the first one's queue, leaving the first partition's loans locked and never processed.
     @Bean
     @StepScope
     public WorkingCapitalLoanCOBWorkerItemReader workingCapitalLoanCOBWorkerItemReader() {
