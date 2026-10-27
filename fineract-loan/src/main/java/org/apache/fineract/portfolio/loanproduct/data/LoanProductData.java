@@ -64,6 +64,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
@@ -210,6 +211,7 @@ public class LoanProductData implements Serializable {
 
     private final List<EnumOptionData> creditAllocationTransactionTypes;
     private final List<EnumOptionData> creditAllocationAllocationTypes;
+    private final List<EnumOptionData> creditAllocationStrategyOptions;
 
     private final List<EnumOptionData> loanScheduleTypeOptions;
     private final List<EnumOptionData> loanScheduleProcessingTypeOptions;
@@ -1067,6 +1069,7 @@ public class LoanProductData implements Serializable {
         this.advancedPaymentAllocationTypes = PaymentAllocationType.getValuesAsEnumOptionDataList();
         this.creditAllocationTransactionTypes = CreditAllocationTransactionType.getValuesAsEnumOptionDataList();
         this.creditAllocationAllocationTypes = AllocationType.getValuesAsEnumOptionDataList();
+        this.creditAllocationStrategyOptions = CreditAllocationStrategy.getValuesAsEnumOptionDataList();
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
         this.loanScheduleType = loanScheduleType;
         this.loanScheduleProcessingType = loanScheduleProcessingType;
@@ -1116,7 +1119,7 @@ public class LoanProductData implements Serializable {
             final List<EnumOptionData> advancedPaymentAllocationFutureInstallmentAllocationRules,
             final List<EnumOptionData> advancedPaymentAllocationTypes, final List<EnumOptionData> loanScheduleTypeOptions,
             final List<EnumOptionData> loanScheduleProcessingTypeOptions, final List<EnumOptionData> creditAllocationTransactionTypes,
-            final List<EnumOptionData> creditAllocationAllocationTypes,
+            final List<EnumOptionData> creditAllocationAllocationTypes, final List<EnumOptionData> creditAllocationStrategyOptions,
             final List<StringEnumOptionData> supportedInterestRefundTypesOptions,
             final List<StringEnumOptionData> chargeOffBehaviourOptions, final List<CodeValueData> chargeOffReasonOptions,
             final List<StringEnumOptionData> daysInYearCustomStrategyOptions,
@@ -1280,6 +1283,7 @@ public class LoanProductData implements Serializable {
         this.advancedPaymentAllocationFutureInstallmentAllocationRules = advancedPaymentAllocationFutureInstallmentAllocationRules;
         this.advancedPaymentAllocationTypes = advancedPaymentAllocationTypes;
         this.creditAllocationAllocationTypes = creditAllocationAllocationTypes;
+        this.creditAllocationStrategyOptions = creditAllocationStrategyOptions;
         this.creditAllocationTransactionTypes = creditAllocationTransactionTypes;
         this.enableInstallmentLevelDelinquency = productData.enableInstallmentLevelDelinquency;
         this.loanScheduleType = productData.getLoanScheduleType();

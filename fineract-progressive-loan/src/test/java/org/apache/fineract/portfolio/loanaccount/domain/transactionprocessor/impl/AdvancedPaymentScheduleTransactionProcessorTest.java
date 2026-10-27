@@ -93,6 +93,7 @@ import org.apache.fineract.portfolio.loanproduct.calc.data.PeriodDueDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.calc.data.RepaymentPeriod;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
+import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
@@ -297,8 +298,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Loan loan = mock(Loan.class);
         LoanTransaction chargebackTransaction = createChargebackTransaction(loan, 25.0);
 
-        LoanCreditAllocationRule mockCreditAllocationRule = createMockCreditAllocationRule(PRINCIPAL, PENALTY, FEE, INTEREST);
-        when(loan.getCreditAllocationRules()).thenReturn(List.of(mockCreditAllocationRule));
+        LoanCreditAllocationRule creditAllocationRule = createRuleBasedCreditAllocationRule(PRINCIPAL, PENALTY, FEE, INTEREST);
+        when(loan.getCreditAllocationRules()).thenReturn(List.of(creditAllocationRule));
         LoanTransaction repayment = createRepayment(loan, chargebackTransaction, 10, 0, 20, 5);
         lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
 
@@ -350,13 +351,103 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     }
 
     @Test
+    public void testProcessCreditTransactionWithPrincipalOnlyAllocationRule() {
+        // given
+        Loan loan = mock(Loan.class);
+        LoanTransaction chargebackTransaction = createChargebackTransaction(loan, 25.0);
+
+        LoanCreditAllocationRule creditAllocationRule = createPrincipalOnlyCreditAllocationRule();
+        when(loan.getCreditAllocationRules()).thenReturn(List.of(creditAllocationRule));
+        LoanTransaction repayment = createRepayment(loan, chargebackTransaction, 10, 0, 20, 5);
+        lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
+
+        MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(MONETARY_CURRENCY));
+        List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
+        LoanRepaymentScheduleInstallment installment = createMockInstallment(LocalDate.of(2023, 1, 31), false);
+        installments.add(installment);
+
+        // when
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null,
+                loan.getActiveLoanTermVariations());
+        underTest.processCreditTransaction(chargebackTransaction, ctx);
+
+        // then the full amount is recognized as principal, regardless of the original repayment portions
+        Mockito.verify(installment, times(1)).addToCreditedPrincipal(new BigDecimal("25.00"));
+        ArgumentCaptor<Money> moneyCaptor = ArgumentCaptor.forClass(Money.class);
+        Mockito.verify(installment, times(1)).addToPrincipal(eq(LocalDate.of(2023, 1, 1)), moneyCaptor.capture());
+        assertEquals(0, moneyCaptor.getValue().getAmount().compareTo(BigDecimal.valueOf(25.0)));
+        Mockito.verify(installment, never()).addToCreditedFee(any());
+        Mockito.verify(installment, never()).addToCreditedPenalty(any());
+        Mockito.verify(installment, never()).addToCreditedInterest(any());
+
+        verifyChargebackComponents(chargebackTransaction, 25.0, 0.0, 0.0, 0.0);
+    }
+
+    @Test
+    public void testProcessCreditTransactionWithEmiCalculatorAndPrincipalOnlyAllocationRule() {
+        // given
+        Loan loan = mock(Loan.class);
+        when(loan.isInterestRecalculationEnabled()).thenReturn(true);
+        LoanTransaction chargebackTransaction = createChargebackTransaction(loan, 25.0);
+
+        LoanCreditAllocationRule creditAllocationRule = createPrincipalOnlyCreditAllocationRule();
+        when(loan.getCreditAllocationRules()).thenReturn(List.of(creditAllocationRule));
+        LoanTransaction repayment = createRepayment(loan, chargebackTransaction, 10, 0, 20, 5);
+        lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
+
+        List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
+        LoanRepaymentScheduleInstallment installment = createMockInstallment(LocalDate.of(2023, 1, 31), false);
+        lenient().when(installment.getFromDate()).thenReturn(LocalDate.of(2023, 1, 1));
+        installments.add(installment);
+
+        ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
+        when(model.getMaturityDate()).thenReturn(LocalDate.of(2023, 1, 31));
+
+        // when
+        ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(MONETARY_CURRENCY, installments, Set.of(),
+                new MoneyHolder(Money.zero(MONETARY_CURRENCY)), null, model, loan.getActiveLoanTermVariations());
+        underTest.processCreditTransaction(chargebackTransaction, ctx);
+
+        // then the full amount is credited as principal
+        ArgumentCaptor<Money> principalCaptor = ArgumentCaptor.forClass(Money.class);
+        Mockito.verify(emiCalculator, times(1)).creditPrincipal(eq(model), eq(LocalDate.of(2023, 1, 1)), principalCaptor.capture());
+        assertEquals(0, principalCaptor.getValue().getAmount().compareTo(BigDecimal.valueOf(25.0)));
+        Mockito.verify(emiCalculator, never()).creditInterest(any(), any(), any());
+        Mockito.verify(installment, never()).addToCreditedFee(any());
+        Mockito.verify(installment, never()).addToCreditedPenalty(any());
+
+        verifyChargebackComponents(chargebackTransaction, 25.0, 0.0, 0.0, 0.0);
+    }
+
+    @Test
+    public void testProcessCreditTransactionWithRuleBasedAllocationRuleWithoutOrderFails() {
+        // given
+        Loan loan = mock(Loan.class);
+        LoanTransaction chargebackTransaction = createChargebackTransaction(loan, 25.0);
+        when(loan.getCreditAllocationRules()).thenReturn(List.of(createRuleBasedCreditAllocationRule()));
+        LoanTransaction repayment = createRepayment(loan, chargebackTransaction, 10, 0, 20, 5);
+        lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
+
+        List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
+        installments.add(createMockInstallment(LocalDate.of(2023, 1, 31), false));
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, new MoneyHolder(Money.zero(MONETARY_CURRENCY)), null,
+                loan.getActiveLoanTermVariations());
+
+        // when / then an empty order would leave every portion at zero, so it must not be processed silently
+        IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class,
+                () -> underTest.processCreditTransaction(chargebackTransaction, ctx));
+        Assertions.assertTrue(exception.getMessage().contains("has no allocation order"));
+        Mockito.verify(chargebackTransaction, never()).updateComponents(any(), any(), any(), any());
+    }
+
+    @Test
     public void testProcessCreditTransactionWithAllocationRulePenaltyFeePrincipalInterest() {
         // given
         Loan loan = mock(Loan.class);
         LoanTransaction chargebackTransaction = createChargebackTransaction(loan, 25.0);
 
-        LoanCreditAllocationRule mockCreditAllocationRule = createMockCreditAllocationRule(PENALTY, FEE, PRINCIPAL, INTEREST);
-        when(loan.getCreditAllocationRules()).thenReturn(List.of(mockCreditAllocationRule));
+        LoanCreditAllocationRule creditAllocationRule = createRuleBasedCreditAllocationRule(PENALTY, FEE, PRINCIPAL, INTEREST);
+        when(loan.getCreditAllocationRules()).thenReturn(List.of(creditAllocationRule));
         LoanTransaction repayment = createRepayment(loan, chargebackTransaction, 10, 0, 20, 5);
         lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
 
@@ -405,8 +496,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Loan loan = mock(Loan.class);
         LoanTransaction chargebackTransaction = createChargebackTransaction(loan, 25.0);
 
-        LoanCreditAllocationRule mockCreditAllocationRule = createMockCreditAllocationRule(PRINCIPAL, PENALTY, FEE, INTEREST);
-        when(loan.getCreditAllocationRules()).thenReturn(List.of(mockCreditAllocationRule));
+        LoanCreditAllocationRule creditAllocationRule = createRuleBasedCreditAllocationRule(PRINCIPAL, PENALTY, FEE, INTEREST);
+        when(loan.getCreditAllocationRules()).thenReturn(List.of(creditAllocationRule));
         LoanTransaction repayment = createRepayment(loan, chargebackTransaction, 10, 0, 20, 5);
         lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
 
@@ -1013,11 +1104,29 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     }
 
     @NonNull
-    private LoanCreditAllocationRule createMockCreditAllocationRule(AllocationType... allocationTypes) {
-        LoanCreditAllocationRule mockCreditAllocationRule = mock(LoanCreditAllocationRule.class);
-        lenient().when(mockCreditAllocationRule.getTransactionType()).thenReturn(CreditAllocationTransactionType.CHARGEBACK);
-        lenient().when(mockCreditAllocationRule.getAllocationTypes()).thenReturn(Arrays.asList(allocationTypes));
-        return mockCreditAllocationRule;
+    private LoanCreditAllocationRule createRuleBasedCreditAllocationRule(AllocationType... allocationTypes) {
+        return new LoanCreditAllocationRule(null, CreditAllocationTransactionType.CHARGEBACK, Arrays.asList(allocationTypes),
+                CreditAllocationStrategy.RULE_BASED);
+    }
+
+    @NonNull
+    private LoanCreditAllocationRule createPrincipalOnlyCreditAllocationRule() {
+        return new LoanCreditAllocationRule(null, CreditAllocationTransactionType.CHARGEBACK, List.of(),
+                CreditAllocationStrategy.PRINCIPAL_ONLY);
+    }
+
+    private void verifyChargebackComponents(LoanTransaction chargebackTransaction, double expectedPrincipal, double expectedInterest,
+            double expectedFee, double expectedPenalty) {
+        ArgumentCaptor<Money> principal = ArgumentCaptor.forClass(Money.class);
+        ArgumentCaptor<Money> interest = ArgumentCaptor.forClass(Money.class);
+        ArgumentCaptor<Money> fee = ArgumentCaptor.forClass(Money.class);
+        ArgumentCaptor<Money> penalty = ArgumentCaptor.forClass(Money.class);
+        Mockito.verify(chargebackTransaction, times(1)).updateComponents(principal.capture(), interest.capture(), fee.capture(),
+                penalty.capture());
+        assertEquals(0, principal.getValue().getAmount().compareTo(BigDecimal.valueOf(expectedPrincipal)));
+        assertEquals(0, interest.getValue().getAmount().compareTo(BigDecimal.valueOf(expectedInterest)));
+        assertEquals(0, fee.getValue().getAmount().compareTo(BigDecimal.valueOf(expectedFee)));
+        assertEquals(0, penalty.getValue().getAmount().compareTo(BigDecimal.valueOf(expectedPenalty)));
     }
 
     private LoanTransaction createRepayment(Loan loan, LoanTransaction toTransaction, double principalPortion, double interestPortion,

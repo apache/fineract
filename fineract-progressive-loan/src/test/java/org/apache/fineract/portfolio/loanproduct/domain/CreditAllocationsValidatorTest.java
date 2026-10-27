@@ -74,21 +74,20 @@ public class CreditAllocationsValidatorTest {
     public void testValidateThrowsErrorWhenPaymentAllocationProvidedWithOtherStrategy() {
         assertPlatformValidationException("In case 'some-other-strategy' payment strategy, creditAllocation must not be provided",
                 "credit_allocation.must.not.be.provided.when.allocation.strategy.is.not.advanced-payment-strategy",
-                () -> underTest.validate(List.of(createLoanProductCreditAllocationRule1()), "some-other-strategy"));
+                () -> underTest.validate(List.of(ruleBasedRequest()), "some-other-strategy"));
     }
 
     @Test
     public void testValidateThrowsErrorWhenTransactionTypeEmpty() {
-        LoanProductCreditAllocationRule lpcar = createLoanProductCreditAllocationRule1();
-        lpcar.setTransactionType(null);
+        CreditAllocationRequest request = request(null, CreditAllocationStrategy.RULE_BASED, true);
         assertPlatformValidationException("Credit allocation was provided with a not valid transaction type",
                 "advanced-payment-strategy.with.not.valid.transaction.type",
-                () -> underTest.validate(List.of(lpcar), ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+                () -> underTest.validate(List.of(request), ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
     }
 
     @Test
     public void testValidateNoError() {
-        underTest.validate(List.of(createLoanProductCreditAllocationRule1()), ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+        underTest.validate(List.of(ruleBasedRequest()), ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
     }
 
     @Test
@@ -100,8 +99,54 @@ public class CreditAllocationsValidatorTest {
     public void testValidateThrowsErrorWhenDuplicate() {
         assertPlatformValidationException("The same transaction type must be provided only once",
                 "advanced-payment-strategy-with-duplicate-credit-allocation",
-                () -> underTest.validate(List.of(createLoanProductCreditAllocationRule1(), createLoanProductCreditAllocationRule1()),
-                        ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+                () -> underTest.validate(List.of(ruleBasedRequest(), ruleBasedRequest()), ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+    }
+
+    @Test
+    public void testValidateThrowsErrorWhenCreditAllocationStrategyIsNotValid() {
+        CreditAllocationRequest request = request(CHARGEBACK, null, false);
+        assertPlatformValidationException("Credit allocation was provided with a not valid credit allocation strategy",
+                "advanced-payment-strategy.with.not.valid.credit.allocation.strategy",
+                () -> underTest.validate(List.of(request), ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+    }
+
+    @Test
+    public void testValidateThrowsErrorWhenRuleBasedWithoutCreditAllocationOrder() {
+        CreditAllocationRequest request = request(CHARGEBACK, CreditAllocationStrategy.RULE_BASED, false);
+        assertPlatformValidationException("Credit allocation with 'RULE_BASED' strategy must contain creditAllocationOrder",
+                "advanced-payment-strategy.rule_based_credit_allocation.must.contain.credit_allocation_order",
+                () -> underTest.validate(List.of(request), ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+    }
+
+    @Test
+    public void testValidateThrowsErrorWhenPrincipalOnlyWithCreditAllocationOrder() {
+        CreditAllocationRequest request = request(CHARGEBACK, CreditAllocationStrategy.PRINCIPAL_ONLY, true);
+        assertPlatformValidationException("Credit allocation with 'PRINCIPAL_ONLY' strategy must not contain creditAllocationOrder",
+                "advanced-payment-strategy.credit_allocation_order.must.not.be.provided.for.strategy",
+                () -> underTest.validate(List.of(request), ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+    }
+
+    @Test
+    public void testValidatePrincipalOnlyNoError() {
+        underTest.validate(List.of(request(CHARGEBACK, CreditAllocationStrategy.PRINCIPAL_ONLY, false)),
+                ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+    }
+
+    @Test
+    public void testValidateReportsPaymentStrategyBeforeStrategyAndOrderProblems() {
+        // a rule based entry without an order on a product that must not have credit allocations at all
+        CreditAllocationRequest request = request(CHARGEBACK, CreditAllocationStrategy.RULE_BASED, false);
+        assertPlatformValidationException("In case 'some-other-strategy' payment strategy, creditAllocation must not be provided",
+                "credit_allocation.must.not.be.provided.when.allocation.strategy.is.not.advanced-payment-strategy",
+                () -> underTest.validate(List.of(request), "some-other-strategy"));
+    }
+
+    @Test
+    public void testValidateReportsTransactionTypeBeforeStrategyProblems() {
+        CreditAllocationRequest request = request(null, null, false);
+        assertPlatformValidationException("Credit allocation was provided with a not valid transaction type",
+                "advanced-payment-strategy.with.not.valid.transaction.type",
+                () -> underTest.validate(List.of(request), ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
     }
 
     @NonNull
@@ -111,11 +156,21 @@ public class CreditAllocationsValidatorTest {
     }
 
     @NonNull
-    private static LoanProductCreditAllocationRule createLoanProductCreditAllocationRule1() {
-        LoanProductCreditAllocationRule lpcr1 = new LoanProductCreditAllocationRule();
-        lpcr1.setTransactionType(CHARGEBACK);
-        lpcr1.setAllocationTypes(EnumSet.allOf(AllocationType.class).stream().toList());
-        return lpcr1;
+    private static CreditAllocationRequest ruleBasedRequest() {
+        return request(CHARGEBACK, CreditAllocationStrategy.RULE_BASED, true);
+    }
+
+    /**
+     * Builds a request the way the parser does: the allocation order is only parsed for a rule based request that sent
+     * one.
+     */
+    @NonNull
+    private static CreditAllocationRequest request(CreditAllocationTransactionType transactionType, CreditAllocationStrategy strategy,
+            boolean creditAllocationOrderProvided) {
+        List<AllocationType> allocationTypes = CreditAllocationStrategy.RULE_BASED.equals(strategy) && creditAllocationOrderProvided
+                ? EnumSet.allOf(AllocationType.class).stream().toList()
+                : List.of();
+        return new CreditAllocationRequest(transactionType, strategy, allocationTypes, creditAllocationOrderProvided);
     }
 
     private void assertPlatformValidationException(String message, String code, Executable executable) {

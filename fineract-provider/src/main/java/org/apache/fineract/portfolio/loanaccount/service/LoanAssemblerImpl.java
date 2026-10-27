@@ -443,7 +443,9 @@ public class LoanAssemblerImpl implements LoanAssembler {
 
             if (loanProduct.getCreditAllocationRules() != null && !loanProduct.getCreditAllocationRules().isEmpty()) {
                 List<LoanCreditAllocationRule> loanCreditAllocationRules = loanProduct.getCreditAllocationRules().stream()
-                        .map(r -> new LoanCreditAllocationRule(loanApplication, r.getTransactionType(), r.getAllocationTypes())).toList();
+                        .map(r -> new LoanCreditAllocationRule(loanApplication, r.getTransactionType(), r.getAllocationTypes(),
+                                r.getAllocationStrategy()))
+                        .toList();
                 List<LoanCreditAllocationRule> creditAllocationRules = loanApplication.getCreditAllocationRules();
                 creditAllocationRules.clear();
                 creditAllocationRules.addAll(loanCreditAllocationRules);
