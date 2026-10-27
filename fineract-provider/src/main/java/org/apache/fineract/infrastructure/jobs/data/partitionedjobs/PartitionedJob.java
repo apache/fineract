@@ -21,11 +21,13 @@ package org.apache.fineract.infrastructure.jobs.data.partitionedjobs;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
+import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBConstant;
 
 @RequiredArgsConstructor
 public enum PartitionedJob {
 
-    LOAN_COB(LoanCOBConstant.LOAN_COB_PARTITIONER_STEP);
+    LOAN_COB(LoanCOBConstant.LOAN_COB_PARTITIONER_STEP), //
+    WORKING_CAPITAL_LOAN_COB_JOB(WorkingCapitalLoanCOBConstant.WORKING_CAPITAL_LOAN_COB_PARTITIONER_STEP);
 
     @Getter
     private final String partitionerStepName;
