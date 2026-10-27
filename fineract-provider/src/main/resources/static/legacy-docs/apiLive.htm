@@ -37184,7 +37184,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Update Entry in Data Table (One to Many)</h4>
-					<p>Updates the row (if it exists) of the data table.</p>
+					<p>Updates the row (if it exists) of the data table. A data table that is one-to-one with the application table refuses an entry id.</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -37242,8 +37242,9 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Delete Entry in Datatable (One to Many)</h4>
-					<p>Deletes the entry (if it exists) for data tables that are
-						one to many with the application table.</p>
+					<p>Deletes the entry for data tables that are one to many with the application table.
+						An entry that does not belong to apptableId is not found. A data table that is
+						one-to-one with the application table refuses an entry id.</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
