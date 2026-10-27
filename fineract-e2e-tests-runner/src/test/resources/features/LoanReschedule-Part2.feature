@@ -871,3 +871,56 @@ Feature: LoanReschedule - Part2
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    |
     When Loan Pay-off is made on "02 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:CTBD
+  Scenario: Verify that chained reschedules on a Progressive loan keep the second due date variation applicable from the first adjusted due date
+    When Admin sets the business date to "21 January 2026"
+    When Admin creates a client with random data
+    When Admin set "LP1_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                            | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP1_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 21 January 2026   | 150            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 15                | MONTHS                | 1              | MONTHS                 | 15                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "21 January 2026" with "150" amount and expected disbursement date on "21 January 2026"
+    When Admin successfully disburse the loan on "21 January 2026" with "150" EUR transaction amount
+    Then Loan has 150.0 outstanding amount
+    # --- Reschedule 1: 21 Feb -> 22 Mar ---
+    When Admin sets the business date to "23 January 2026"
+    When Admin creates and approves Loan reschedule with the following data:
+      | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
+      | 21 February 2026   | 23 January 2026 | 22 March 2026   |                  |                 |            |                 |
+    Then Loan term variations has 1 variation, with the following data:
+      | Term Type Id | Term Type Code       | Term Type Value | Applicable From  | Decimal Value | Date Value    | Is Specific To Installment | Is Processed |
+      | 4            | loanTermType.dueDate | dueDate         | 21 February 2026 |               | 22 March 2026 | false                      |              |
+    # --- Reschedule 2: 22 Mar -> 13 Jul (business date moved before the second request) ---
+    When Admin sets the business date to "15 February 2026"
+    When Admin creates and approves Loan reschedule with the following data:
+      | rescheduleFromDate | submittedOnDate  | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
+      | 22 March 2026      | 15 February 2026 | 13 July 2026    |                  |                 |            |                 |
+    Then Loan has 150.0 outstanding amount
+    # The second variation must chain from the first adjusted due date, not from the original 21 February due date
+    Then Loan term variations has 2 variation, with the following data:
+      | Term Type Id | Term Type Code       | Term Type Value | Applicable From  | Decimal Value | Date Value    | Is Specific To Installment | Is Processed |
+      | 4            | loanTermType.dueDate | dueDate         | 21 February 2026 |               | 22 March 2026 | false                      |              |
+      | 4            | loanTermType.dueDate | dueDate         | 22 March 2026    |               | 13 July 2026  | false                      |              |
+    # The rescheduled installment lands on 13 July and the remaining installments follow monthly from it
+    Then Loan Repayment schedule has 15 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
+      |    |      | 21 January 2026   |           | 150.0           |               |          | 0.0  |           | 0.0  | 0.0  |            |      |             |
+      | 1  | 173  | 13 July 2026      |           | 140.0           | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 2  | 31   | 13 August 2026    |           | 130.0           | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 3  | 31   | 13 September 2026 |           | 120.0           | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 4  | 30   | 13 October 2026   |           | 110.0           | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 5  | 31   | 13 November 2026  |           | 100.0           | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 6  | 30   | 13 December 2026  |           | 90.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 7  | 31   | 13 January 2027   |           | 80.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 8  | 31   | 13 February 2027  |           | 70.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 9  | 28   | 13 March 2027     |           | 60.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 10 | 31   | 13 April 2027     |           | 50.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 11 | 30   | 13 May 2027       |           | 40.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 12 | 31   | 13 June 2027      |           | 30.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 13 | 30   | 13 July 2027      |           | 20.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 14 | 31   | 13 August 2027    |           | 10.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+      | 15 | 31   | 13 September 2027 |           | 0.0             | 10.0          | 0.0      | 0.0  | 0.0       | 10.0 | 0.0  | 0.0        | 0.0  | 10.0        |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      | 150.0         | 0.0      | 0.0  | 0.0       | 150.0 | 0.0  | 0.0        | 0.0  | 150.0       |
