@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.dataqueries.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface DatatableWriteService {
@@ -53,6 +54,13 @@ public interface DatatableWriteService {
     CommandProcessingResult deleteDatatableEntries(String datatable, Long appTableId, JsonCommand command);
 
     CommandProcessingResult deleteDatatableEntry(String datatable, Long appTableId, Long datatableId, JsonCommand command);
+
+    /**
+     * Deletes the entries of every datatable registered on the given entity for one of its records. Meant for the
+     * deletion of the record itself, so unlike {@link #deleteDatatableEntries} it also clears datatables that an entity
+     * datatable check makes mandatory.
+     */
+    void deleteDatatableEntriesOfEntity(EntityTables entityTable, Long appTableId);
 
     CommandProcessingResult createPPIEntry(String datatable, Long appTableId, JsonCommand command);
 
