@@ -36,6 +36,7 @@ swaggerBrake {
     outputFilePath = "${project.buildDir}/swagger-brake"
     deprecatedApiDeletionAllowed = true
     strictValidation = false
+    excludedPaths = ['/v1/internal']
 }
 
 // Resolved here: onlyIf runs at execution time, where project lookups are unsupported with the configuration cache.

@@ -802,7 +802,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 if (rp.getDueDate().isAfter(targetDate)) {
                     if (rp.equals(repaymentPeriod)) {
                         rp.findInterestPeriod(targetDate).ifPresent(ip -> {
-                            ip.setDueDate(targetDate);
+                            scheduleModelCopy.updateInterestPeriodDueDate(ip, targetDate);
                             int index = rp.getInterestPeriods().indexOf(ip);
                             int nextIdx = index + 1;
                             boolean thereIsInterestPeriodFromDateOnTargetDate = ip.getRepaymentPeriod().getInterestPeriods()
@@ -824,7 +824,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                         // period
                         // if so, we need to retain that interest period, but need to update due date to match with from
                         // date -> 0 interest
-                        rp.getInterestPeriods().getFirst().setDueDate(rp.getInterestPeriods().getFirst().getFromDate());
+                        scheduleModelCopy.updateInterestPeriodDueDate(rp.getInterestPeriods().getFirst(),
+                                rp.getInterestPeriods().getFirst().getFromDate());
                         if (rp.getInterestPeriods().size() > 1) {
                             rp.getInterestPeriods().subList(1, rp.getInterestPeriods().size()).clear();
                         }
@@ -1981,10 +1982,10 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         return new EmiAdjustment(repaymentPeriods.getFirst().getEmi(), repaymentPeriods.getFirst().getEmi().copy(0.0), repaymentPeriods, 0);
     }
 
-    private void calculateRateFactorForScheduleTillDateInclusive(ProgressiveLoanInterestScheduleModel scheduleModelCopy,
-            LocalDate targetDate) {
+    private void calculateRateFactorForScheduleTillDateInclusive(final ProgressiveLoanInterestScheduleModel scheduleModelCopy,
+            final LocalDate targetDate) {
         scheduleModelCopy.findRepaymentPeriod(targetDate).flatMap(rp -> rp.findInterestPeriod(targetDate))
-                .ifPresent(ip -> ip.setDueDate(targetDate));
+                .ifPresent(ip -> scheduleModelCopy.updateInterestPeriodDueDate(ip, targetDate));
 
         calculateRateFactorForPeriods(scheduleModelCopy.repaymentPeriods(), scheduleModelCopy);
 

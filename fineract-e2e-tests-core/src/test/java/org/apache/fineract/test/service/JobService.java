@@ -20,6 +20,7 @@ package org.apache.fineract.test.service;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
@@ -62,26 +63,37 @@ public class JobService {
         executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, new ExecuteJobRequest(), queryParams));
     }
 
-    public void executeAndWait(Job job) {
-        Long jobId = jobResolver.resolve(job);
-        Long previousRunHistoryId = getRunHistoryId(getLatestJobRunHistory(jobId));
-        execute(jobId);
-        waitUntilJobIsFinished(job, jobId, previousRunHistoryId);
+    public void executeAndWait(final Job job) {
+        executeAndWaitForHistory(job);
     }
 
-    private void waitUntilJobIsFinished(Job job, Long jobId, Long previousRunHistoryId) {
-        String jobName = job.getName();
-        await().atMost(Duration.ofMillis(jobPollingProperties.getTimeoutInMillis())) //
+    public void executeAndWaitForSuccess(final Job job) {
+        final JobDetailHistoryDataSwagger runHistory = executeAndWaitForHistory(job);
+        assertThat(runHistory.getStatus()).as("Job '%s' run %s did not succeed: %s", job.getName(), runHistory.getId(), runHistory)
+                .isEqualTo("success");
+    }
+
+    private JobDetailHistoryDataSwagger executeAndWaitForHistory(final Job job) {
+        final Long jobId = jobResolver.resolve(job);
+        final Long previousRunHistoryId = getRunHistoryId(getLatestJobRunHistory(jobId));
+        execute(jobId);
+        return waitUntilJobIsFinished(job, jobId, previousRunHistoryId);
+    }
+
+    private JobDetailHistoryDataSwagger waitUntilJobIsFinished(final Job job, final Long jobId, final Long previousRunHistoryId) {
+        final String jobName = job.getName();
+        return await().atMost(Duration.ofMillis(jobPollingProperties.getTimeoutInMillis())) //
                 .alias("%s didn't finish on time".formatted(jobName)) //
                 .pollInterval(Duration.ofMillis(jobPollingProperties.getIntervalInMillis())) //
                 .pollDelay(Duration.ofMillis(jobPollingProperties.getDelayInMillis())) //
                 .until(() -> {
                     log.debug("Waiting for job {} to finish", jobName);
-                    JobDetailHistoryDataSwagger latestRunHistory = getLatestJobRunHistory(jobId);
+                    return getLatestJobRunHistory(jobId);
+                }, (final JobDetailHistoryDataSwagger latestRunHistory) -> {
                     if (latestRunHistory == null || latestRunHistory.getJobRunEndTime() == null) {
                         return false;
                     }
-                    Long runHistoryId = latestRunHistory.getId();
+                    final Long runHistoryId = latestRunHistory.getId();
                     return runHistoryId != null && (previousRunHistoryId == null || runHistoryId > previousRunHistoryId);
                 });
     }
