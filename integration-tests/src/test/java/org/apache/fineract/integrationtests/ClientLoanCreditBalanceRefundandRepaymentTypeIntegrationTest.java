@@ -23,12 +23,14 @@ import static org.apache.fineract.integrationtests.common.loans.LoanProductTestB
 import static org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder.DEFAULT_STRATEGY;
 import static org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -607,9 +609,9 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
             Assertions.assertNotNull(loanTransactionResponse);
             Assertions.assertNotNull(loanTransactionResponse.getResourceId());
 
-            CallFailedRuntimeException exception = adjustLoanTransactionExpectingError(disbursedLoanID,
-                    loanTransactionResponse.getResourceId(), transactionDate, 10.0);
-            assertEquals(403, exception.getStatus());
+            Long adjustedTransactionId = transactionHelper
+                    .adjustLoanTransaction(disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate, 10.0).getResourceId();
+            verifyAdjustedToSameType(disbursedLoanID, loanTransactionResponse.getResourceId(), adjustedTransactionId, 10.0);
         });
     }
 
@@ -629,9 +631,9 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
             Assertions.assertNotNull(loanTransactionResponse);
             Assertions.assertNotNull(loanTransactionResponse.getResourceId());
 
-            CallFailedRuntimeException exception = adjustLoanTransactionExpectingError(disbursedLoanID,
-                    loanTransactionResponse.getResourceId(), transactionDate, 10.0);
-            assertEquals(403, exception.getStatus());
+            Long adjustedTransactionId = transactionHelper
+                    .adjustLoanTransaction(disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate, 10.0).getResourceId();
+            verifyAdjustedToSameType(disbursedLoanID, loanTransactionResponse.getResourceId(), adjustedTransactionId, 10.0);
         });
     }
 
@@ -651,9 +653,9 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
             Assertions.assertNotNull(loanTransactionResponse);
             Assertions.assertNotNull(loanTransactionResponse.getResourceId());
 
-            CallFailedRuntimeException exception = adjustLoanTransactionExpectingError(disbursedLoanID,
-                    loanTransactionResponse.getResourceId(), transactionDate, 10.0);
-            assertEquals(403, exception.getStatus());
+            Long adjustedTransactionId = transactionHelper
+                    .adjustLoanTransaction(disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate, 10.0).getResourceId();
+            verifyAdjustedToSameType(disbursedLoanID, loanTransactionResponse.getResourceId(), adjustedTransactionId, 10.0);
         });
     }
 
@@ -819,6 +821,21 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                     transaction(1.0, "Chargeback", "06 March 2024", 0.01, 0.01, 0.0, 0.0, 0.0, 0.0, 0.99) //
             );
         });
+    }
+
+    private void verifyAdjustedToSameType(Long loanId, Long originalTransactionId, Long adjustedTransactionId, double expectedAmount) {
+        List<GetLoansLoanIdTransactions> transactions = getLoanDetails(loanId).getTransactions();
+        assertNotNull(transactions);
+        GetLoansLoanIdTransactions original = transactions.stream().filter(tx -> originalTransactionId.equals(tx.getId())).findFirst()
+                .orElseThrow();
+        GetLoansLoanIdTransactions adjusted = transactions.stream().filter(tx -> adjustedTransactionId.equals(tx.getId())).findFirst()
+                .orElseThrow();
+
+        assertNotNull(original.getType());
+        assertNotNull(adjusted.getType());
+        assertEquals(Boolean.TRUE, original.getManuallyReversed());
+        assertEquals(original.getType().getValue(), adjusted.getType().getValue());
+        assertEquals(expectedAmount, Utils.getDoubleValue(adjusted.getAmount()));
     }
 
     private static Stream<Arguments> loanProductFactory() {

@@ -23,6 +23,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.apache.fineract.test.data.paymenttype.DefaultPaymentType.AUTOPAY;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -651,7 +652,8 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         int nthItem = transactionNumber - 1;
         Assert.notNull(transactions, "Transactions list should be NOT null.");
         GetLoansLoanIdTransactions targetTransaction = transactions.stream()
-                .filter(t -> t.getType() != null && transactionType.getValue().equalsIgnoreCase(t.getType().getValue()))
+                .filter(t -> t.getType() != null
+                        && transactionType.getValue().replace(" ", "").equalsIgnoreCase(t.getType().getValue().replace(" ", "")))
                 .filter(t -> originalDate.equals(t.getDate())).toList().get(nthItem);
 
         PostLoansLoanIdTransactionsTransactionIdRequest repaymentUndoRequest = loanRequestFactory
@@ -662,6 +664,32 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
                 targetTransaction.getId(), repaymentUndoRequest, Map.of("command", "adjust")));
         Assert.notNull(result, "Result of adjust loan transaction should be NOT null.");
         testContext().set(TestContextKey.LOAN_ADJUST_TRANSACTION_RESPONSE, result);
+    }
+
+    @Then("Customer is forbidden to adjust {string}th {string} transaction made on {string} with {double} EUR transaction amount due to a validation error:")
+    public void makeTransactionAdjustForbidden(String nthItemStr, String transactionType, String transactionDate, double transactionAmount,
+            DataTable table) throws IOException {
+        eventStore.reset();
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+        GetLoansLoanIdTransactions targetTransaction = eventCheckHelper.findNthTransaction(nthItemStr, transactionType, transactionDate,
+                loanId);
+
+        PostLoansLoanIdTransactionsTransactionIdRequest adjustRequest = loanRequestFactory.defaultRepaymentAdjustRequest(transactionAmount)
+                .transactionDate(transactionDate);
+
+        CallFailedRuntimeException exception = fail(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId,
+                targetTransaction.getId(), adjustRequest, Map.<String, Object>of("command", "adjust")));
+
+        List<List<String>> data = table.asLists();
+        int httpCodeExpected = Integer.parseInt(data.get(0).get(1));
+        String errorMessageExpected = data.get(1).get(1);
+
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.wrongErrorCode(exception.getStatus(), httpCodeExpected))
+                .isEqualTo(httpCodeExpected);
+        assertThat(exception.getDeveloperMessage())
+                .as(ErrorMessageHelper.wrongErrorMessage(exception.getDeveloperMessage(), errorMessageExpected))
+                .contains(errorMessageExpected);
     }
 
     @Then("Adjusted transaction is created with {double} amount and {string} payment type")
