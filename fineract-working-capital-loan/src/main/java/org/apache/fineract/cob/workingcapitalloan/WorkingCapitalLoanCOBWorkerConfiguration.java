@@ -28,16 +28,19 @@ import org.apache.fineract.cob.common.ResetContextTasklet;
 import org.apache.fineract.cob.conditions.BatchWorkerCondition;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.listener.CobWorkerStepListener;
+import org.apache.fineract.cob.processor.ItemTransactionProcessor;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.infrastructure.springbatch.StepRetryPolicyFactory;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanModelProcessingService;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.ChunkOrientedStepBuilder;
+import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.batch.integration.partition.RemotePartitioningWorkerStepBuilderFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +48,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
@@ -70,7 +74,8 @@ public class WorkingCapitalLoanCOBWorkerConfiguration {
 
     @Bean(WORKING_CAPITAL_LOAN_COB_WORKER_STEP)
     public Step workingCapitalLoanCOBWorkerStep(final WorkingCapitalLoanCOBWorkerItemReader reader,
-            final WorkingCapitalLoanCOBWorkerItemProcessor processor, final WorkingCapitalLoanCOBWorkerItemWriter writer) {
+            final ItemTransactionProcessor<WorkingCapitalLoan> processor,
+            @Qualifier("workingCapitalLoanCOBWorkerItemWriter") final ItemWriter<WorkingCapitalLoan> writer) {
         final ChunkOrientedStepBuilder<WorkingCapitalLoan, WorkingCapitalLoan> stepBuilder = stepBuilderFactory
                 .get(WORKING_CAPITAL_LOAN_COB_WORKER_STEP).inputChannel(inboundRequests)
                 .<WorkingCapitalLoan, WorkingCapitalLoan>chunk(propertyService.getChunkSize(WORKING_CAPITAL_JOB_NAME)) //
@@ -87,8 +92,9 @@ public class WorkingCapitalLoanCOBWorkerConfiguration {
                 .transactionManager(transactionManager);
 
         // No task executor is registered, deliberately and unconditionally - see the comment in
-        // LoanCOBWorkerConfiguration#loanCOBWorkerStep. Concurrent item processing would take COB business step
-        // writes out of the chunk transaction, so it stays sequential and is not configurable. See FINERACT-2684.
+        // LoanCOBWorkerConfiguration#loanCOBWorkerStep. Each loan commits in a transaction of its own
+        // (ItemTransactionProcessor), but the COB context is set on the step thread only, so item processing stays
+        // sequential and is not configurable.
 
         return stepBuilder.build();
     }
@@ -126,14 +132,19 @@ public class WorkingCapitalLoanCOBWorkerConfiguration {
 
     @Bean
     @StepScope
-    public WorkingCapitalLoanCOBWorkerItemProcessor workingCapitalLoanCOBWorkerItemProcessor(
+    public ItemTransactionProcessor<WorkingCapitalLoan> workingCapitalLoanCOBWorkerItemProcessor(
             final COBBusinessStepService cobBusinessStepService, final WorkingCapitalLoanModelProcessingService modelProcessingService) {
-        return new WorkingCapitalLoanCOBWorkerItemProcessor(cobBusinessStepService, modelProcessingService);
+        final TransactionTemplate requiresNewTransactionTemplate = new TransactionTemplate(transactionManager);
+        requiresNewTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return new ItemTransactionProcessor<>(new WorkingCapitalLoanCOBWorkerItemProcessor(cobBusinessStepService, modelProcessingService),
+                new WorkingCapitalLoanCOBWorkerItemWriter(wpcLoanLockingService, workingCapitalLoanRepository),
+                loanId -> workingCapitalLoanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId)),
+                requiresNewTransactionTemplate);
     }
 
     @Bean
     @StepScope
-    public WorkingCapitalLoanCOBWorkerItemWriter workingCapitalLoanCOBWorkerItemWriter() {
-        return new WorkingCapitalLoanCOBWorkerItemWriter(wpcLoanLockingService, workingCapitalLoanRepository);
+    public ItemWriter<WorkingCapitalLoan> workingCapitalLoanCOBWorkerItemWriter() {
+        return ItemTransactionProcessor.noOpWriter();
     }
 }

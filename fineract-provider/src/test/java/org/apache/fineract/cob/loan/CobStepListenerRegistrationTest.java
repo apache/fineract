@@ -25,6 +25,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.domain.LockingService;
+import org.apache.fineract.cob.processor.ItemTransactionProcessor;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
@@ -34,6 +36,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.batch.core.listener.StepExecutionListener;
 import org.springframework.batch.core.listener.StepListener;
 import org.springframework.batch.core.listener.StepListenerFactoryBean;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Guards the COB item components against double step-listener registration.
@@ -62,7 +65,11 @@ class CobStepListenerRegistrationTest {
                 Arguments.of("LoanItemReader", new LoanItemReader(loanRepository, lockingHelper)), //
                 Arguments.of("InlineCOBLoanItemReader", new InlineCOBLoanItemReader(loanRepository)), //
                 Arguments.of("LoanItemProcessor", new LoanItemProcessor(businessStepService, modelProcessingService)), //
-                Arguments.of("InlineCOBLoanItemProcessor", new InlineCOBLoanItemProcessor(businessStepService, modelProcessingService)));
+                Arguments.of("InlineCOBLoanItemProcessor", new InlineCOBLoanItemProcessor(businessStepService, modelProcessingService)), //
+                Arguments.of("ItemTransactionProcessor",
+                        new ItemTransactionProcessor<>(new LoanItemProcessor(businessStepService, modelProcessingService),
+                                new LoanItemWriter(mock(LockingService.class), loanRepository), loanId -> null,
+                                mock(TransactionTemplate.class))));
     }
 
     @ParameterizedTest(name = "{0} registers exactly once as a step listener")

@@ -23,12 +23,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Stream;
+import org.apache.fineract.cob.processor.ItemTransactionProcessor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.Step;
+import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -46,8 +48,10 @@ public class WorkingCapitalLoanCOBWorkerStepScopeTest {
     private static Stream<Arguments> perPartitionComponents() {
         return Stream.of(//
                 Arguments.of(WorkingCapitalLoanCOBWorkerItemReader.class), //
-                Arguments.of(WorkingCapitalLoanCOBWorkerItemProcessor.class), //
-                Arguments.of(WorkingCapitalLoanCOBWorkerItemWriter.class));
+                // the processor runs the WC processor and writer per loan in a transaction of its own; the step's
+                // writer is a no-op
+                Arguments.of(ItemTransactionProcessor.class), //
+                Arguments.of(ItemWriter.class));
     }
 
     @ParameterizedTest(name = "{0} must be a @StepScope bean")
@@ -70,9 +74,7 @@ public class WorkingCapitalLoanCOBWorkerStepScopeTest {
                 .filter(method -> method.getReturnType().equals(Step.class));
 
         assertThat(stepFactories).as("the worker step must take the reader, processor and writer as injected step-scoped beans")
-                .singleElement()
-                .satisfies(method -> assertThat(method.getParameterTypes()).containsExactlyInAnyOrder(
-                        WorkingCapitalLoanCOBWorkerItemReader.class, WorkingCapitalLoanCOBWorkerItemProcessor.class,
-                        WorkingCapitalLoanCOBWorkerItemWriter.class));
+                .singleElement().satisfies(method -> assertThat(method.getParameterTypes()).containsExactlyInAnyOrder(
+                        WorkingCapitalLoanCOBWorkerItemReader.class, ItemTransactionProcessor.class, ItemWriter.class));
     }
 }

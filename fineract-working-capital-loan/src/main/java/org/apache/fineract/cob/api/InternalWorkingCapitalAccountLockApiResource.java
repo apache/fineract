@@ -21,6 +21,7 @@ package org.apache.fineract.cob.api;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -30,6 +31,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -64,6 +66,13 @@ public class InternalWorkingCapitalAccountLockApiResource implements Initializin
         log.warn("DO NOT USE THIS IN PRODUCTION!");
         log.warn("                                                            ");
         log.warn("------------------------------------------------------------");
+    }
+
+    @GET
+    @Path("locked")
+    @Produces({ MediaType.APPLICATION_JSON })
+    public List<WorkingCapitalLoanAccountLock> retrieveLockedWorkingCapitalLoanAccounts() {
+        return workingCapitalAccountLockRepository.findAll();
     }
 
     @POST
