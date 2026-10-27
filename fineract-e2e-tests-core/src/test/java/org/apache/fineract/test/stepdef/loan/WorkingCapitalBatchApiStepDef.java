@@ -123,7 +123,7 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
     private void batchApiCreateWCLoanInternal(DataTable table, String externalId) throws IOException {
         final List<String> loanData = table.asLists().get(1);
         final Long clientId = extractClientId();
-        final Long productId = workingCapitalLoanProductResolver.resolve(DefaultWorkingCapitalLoanProduct.valueOf(loanData.get(0)));
+        final Long productId = workingCapitalLoanAccountStepDef.resolveLoanProductId(loanData.get(0));
 
         final PostWorkingCapitalLoansRequest request = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansRequest(clientId)
                 .productId(productId).submittedOnDate(loanData.get(1)).expectedDisbursementDate(loanData.get(2))

@@ -12,17 +12,17 @@ Feature: Working Capital Loan Year End Retained Earning
   @TestRailId:C115382
   Scenario: Verify that year-end close zeroes working capital income accounts into retained earnings, is idempotent and next year starts clean - UC1
     Given any existing year-end retained earnings close for fiscal year ending "31 December 2028" is removed
-    When Admin sets the business date to "01 December 2028"
+    When Admin sets the business date to "29 December 2028"
     And Admin creates a new office
     And Admin points the Retained Earning Job at the last created office
     And Admin creates a client with random data in the last created office
     And Admin creates a working capital loan with the following data:
       | LoanProduct         | submittedOnDate  | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ACC_DEF_REV_AM | 01 December 2028 | 01 December 2028         | 1000            | 100000             | 18                | 0        |
-    And Admin successfully approves the working capital loan on "01 December 2028" with "1000" amount and expected disbursement date on "01 December 2028"
-    And Admin successfully disburse the Working Capital loan on "01 December 2028" with "1000" EUR transaction amount
-    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 December 2028" due date and 50.0 transaction amount
-    When Admin sets the business date to "02 December 2028"
+      | WCLP_ACC_DEF_REV_AM | 29 December 2028 | 29 December 2028         | 1000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "29 December 2028" with "1000" amount and expected disbursement date on "29 December 2028"
+    And Admin successfully disburse the Working Capital loan on "29 December 2028" with "1000" EUR transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "29 December 2028" due date and 50.0 transaction amount
+    When Admin sets the business date to "30 December 2028"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Trial Balance Summary Report for Working Capital Loans for date "31 December 2028" has a row for GL account "404007" with non-zero ending balance
     And Trial Balance Summary Report for Working Capital Loans for date "31 December 2028" has a row for GL account "145023" with non-zero ending balance
@@ -46,17 +46,17 @@ Feature: Working Capital Loan Year End Retained Earning
   @TestRailId:C115383
   Scenario: Verify working capital year-end close moves income into the Retained Earnings Prior Year row with exact balances and carries it into the next year - UC2
     Given any existing year-end retained earnings close for fiscal year ending "31 December 2030" is removed
-    When Admin sets the business date to "01 December 2030"
+    When Admin sets the business date to "29 December 2030"
     And Admin creates a new office
     And Admin points the Retained Earning Job at the last created office
     And Admin creates a client with random data in the last created office
     And Admin creates a working capital loan with the following data:
       | LoanProduct         | submittedOnDate  | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ACC_DEF_REV_AM | 01 December 2030 | 01 December 2030         | 1000            | 100000             | 18                | 0        |
-    And Admin successfully approves the working capital loan on "01 December 2030" with "1000" amount and expected disbursement date on "01 December 2030"
-    And Admin successfully disburse the Working Capital loan on "01 December 2030" with "1000" EUR transaction amount
-    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 December 2030" due date and 50.0 transaction amount
-    When Admin sets the business date to "02 December 2030"
+      | WCLP_ACC_DEF_REV_AM | 29 December 2030 | 29 December 2030         | 1000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "29 December 2030" with "1000" amount and expected disbursement date on "29 December 2030"
+    And Admin successfully disburse the Working Capital loan on "29 December 2030" with "1000" EUR transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "29 December 2030" due date and 50.0 transaction amount
+    When Admin sets the business date to "30 December 2030"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Trial Balance Summary Report for Working Capital Loans for date "31 December 2030" has originatorId and the following data:
       | PostingDate | Product             | glAcct | Description               | AssetOwner | BeginningBalance | DebitMovement | CreditMovement | EndingBalance | originator_external_ids |
@@ -150,17 +150,17 @@ Feature: Working Capital Loan Year End Retained Earning
   Scenario: Verify two consecutive working capital year-end closes accumulate the Retained Earnings Prior Year balance - UC4
     Given any existing year-end retained earnings close for fiscal year ending "31 December 2032" is removed
     Given any existing year-end retained earnings close for fiscal year ending "31 December 2033" is removed
-    When Admin sets the business date to "01 December 2032"
+    When Admin sets the business date to "29 December 2032"
     And Admin creates a new office
     And Admin points the Retained Earning Job at the last created office
     And Admin creates a client with random data in the last created office
     And Admin creates a working capital loan with the following data:
       | LoanProduct         | submittedOnDate  | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ACC_DEF_REV_AM | 01 December 2032 | 01 December 2032         | 1000            | 100000             | 18                | 0        |
-    And Admin successfully approves the working capital loan on "01 December 2032" with "1000" amount and expected disbursement date on "01 December 2032"
-    And Admin successfully disburse the Working Capital loan on "01 December 2032" with "1000" EUR transaction amount
-    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 December 2032" due date and 50.0 transaction amount
-    When Admin sets the business date to "02 December 2032"
+      | WCLP_ACC_DEF_REV_AM | 29 December 2032 | 29 December 2032         | 1000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "29 December 2032" with "1000" amount and expected disbursement date on "29 December 2032"
+    And Admin successfully disburse the Working Capital loan on "29 December 2032" with "1000" EUR transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "29 December 2032" due date and 50.0 transaction amount
+    When Admin sets the business date to "30 December 2032"
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Admin sets the business date to "02 January 2033"
     And Admin runs the Retained Earning Job
@@ -170,8 +170,8 @@ Feature: Working Capital Loan Year End Retained Earning
       | 2033-01-01  | WCLP_ACC_DEF_REV_AM | 112603 | Interest/Fee Receivable      | self       | 50.0             | 0.0           | 0.0            | 50.0          |                         |
       | 2033-01-01  | WCLP_ACC_DEF_REV_AM | 145023 | Suspense/Clearing account    | self       | -1000.0          | 0.0           | 0.0            | -1000.0       |                         |
       | 2033-01-01  | WCLP_ACC_DEF_REV_AM | 320000 | Retained Earnings Prior Year | self       | -50.0            | 0.0           | 0.0            | -50.0         |                         |
-    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 December 2033" due date and 30.0 transaction amount
-    When Admin sets the business date to "02 December 2033"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "02 January 2033" due date and 30.0 transaction amount
+    When Admin sets the business date to "03 January 2033"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Trial Balance Summary Report for Working Capital Loans for date "31 December 2033" has originatorId and the following data:
       | PostingDate | Product             | glAcct | Description                  | AssetOwner | BeginningBalance | DebitMovement | CreditMovement | EndingBalance | originator_external_ids |
