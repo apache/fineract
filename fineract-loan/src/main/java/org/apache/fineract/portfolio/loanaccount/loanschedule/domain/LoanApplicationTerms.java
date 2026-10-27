@@ -1314,8 +1314,11 @@ public final class LoanApplicationTerms {
                 principalPerPeriod = principalPerPeriod.zero();
             }
             if (!isPrincipalGraceApplicableForThisPeriod(periodNumber) && currentPeriodFixedPrincipalAmount != null) {
-                this.adjustPrincipalForFlatLoans = this.adjustPrincipalForFlatLoans.plus(principalPerPeriod
-                        .minus(currentPeriodFixedPrincipalAmount).dividedBy(this.actualNumberOfRepayments - periodNumber, mc));
+                final int remainingPeriods = this.actualNumberOfRepayments - periodNumber;
+                if (remainingPeriods > 0) {
+                    this.adjustPrincipalForFlatLoans = this.adjustPrincipalForFlatLoans
+                            .plus(principalPerPeriod.minus(currentPeriodFixedPrincipalAmount).dividedBy(remainingPeriods, mc));
+                }
                 principalPerPeriod = this.principal.zero().plus(currentPeriodFixedPrincipalAmount);
 
             }
