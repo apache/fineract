@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -312,7 +311,7 @@ class WorkingCapitalLoanAdjustByDeltaReplayTest {
     }
 
     private void givenDelta(final String delta) {
-        when(fromApiJsonHelper.extractBigDecimalNamed(eq(WorkingCapitalLoanConstants.transactionAmountParamName), any(), anySet()))
+        when(fromApiJsonHelper.extractBigDecimalWithLocaleNamed(eq(WorkingCapitalLoanConstants.transactionAmountParamName), any()))
                 .thenReturn(new BigDecimal(delta));
     }
 

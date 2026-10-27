@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
@@ -142,7 +141,7 @@ class WorkingCapitalLoanRecoveryPaymentWriteServiceTest {
         // Accounting off by default: most tests are about the balance mutation and the events, not the ledger.
         when(loanProduct.getAccountingRule()).thenReturn(WorkingCapitalAccountingRuleType.NONE);
         when(command.localDateValueOfParameterNamed(any())).thenReturn(businessDate);
-        when(fromApiJsonHelper.extractBigDecimalNamed(eq(WorkingCapitalLoanConstants.transactionAmountParamName), any(), anySet()))
+        when(fromApiJsonHelper.extractBigDecimalWithLocaleNamed(eq(WorkingCapitalLoanConstants.transactionAmountParamName), any()))
                 .thenReturn(AMOUNT);
     }
 
