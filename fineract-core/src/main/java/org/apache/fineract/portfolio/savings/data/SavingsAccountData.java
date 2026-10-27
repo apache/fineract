@@ -976,4 +976,12 @@ public final class SavingsAccountData implements Serializable {
         return this.isDormancyTrackingActive;
     }
 
+    /**
+     * An unmapped GL account is read as 0 by the interest posting row mapper, but may also be left null, so both mean
+     * the product has no interest receivable mapping.
+     */
+    public boolean hasInterestReceivableMapping() {
+        return this.glAccountIdForInterestReceivable != null && this.glAccountIdForInterestReceivable != 0L;
+    }
+
 }
