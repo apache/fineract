@@ -2315,6 +2315,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
         // close all open repayment period while keep paid amounts
         interestSchedule.repaymentPeriods().forEach(rp -> {
+            // Interest deferred here from a paid in advance period is already part of the re-aged amounts
+            rp.setFutureUnrecognizedInterest(zero);
             rp.getInterestPeriods().getLast()
                     .addCreditedInterestAmount(MathUtil.min(rp.getOutstandingInterest(), rp.getCreditedInterest(), false).negated());
             rp.setEmi(rp.getTotalPaidAmount());
