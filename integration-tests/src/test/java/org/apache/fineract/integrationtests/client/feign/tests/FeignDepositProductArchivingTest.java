@@ -34,6 +34,7 @@ import org.apache.fineract.client.models.GetFixedDepositProductsProductIdRespons
 import org.apache.fineract.client.models.GetRecurringDepositAccountsAccountIdResponse;
 import org.apache.fineract.client.models.GetRecurringDepositAccountsTemplateResponse;
 import org.apache.fineract.client.models.GetRecurringDepositProductsProductIdResponse;
+import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PostFixedDepositAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PostFixedDepositAccountsRequest;
 import org.apache.fineract.client.models.PostFixedDepositProductsChartSlabs;
@@ -51,6 +52,7 @@ import org.apache.fineract.client.models.PutRecurringDepositProductsRequest;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSchedulerHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Test;
@@ -417,7 +419,13 @@ public class FeignDepositProductArchivingTest extends FeignIntegrationTest {
         return Utils.dateFormatter.format(date);
     }
 
+    // the server uses the stored BUSINESS_DATE only while business date is enabled, otherwise the tenant date
     private LocalDate businessDate() {
-        return new FeignBusinessDateHelper(fineractClient()).getBusinessDate("BUSINESS_DATE").getDate();
+        final GlobalConfigurationPropertyData businessDateConfig = new FeignGlobalConfigurationHelper(fineractClient())
+                .getGlobalConfigurationByName("enable-business-date");
+        if (businessDateConfig != null && Boolean.TRUE.equals(businessDateConfig.getEnabled())) {
+            return new FeignBusinessDateHelper(fineractClient()).getBusinessDate("BUSINESS_DATE").getDate();
+        }
+        return Utils.getLocalDateOfTenant();
     }
 }
