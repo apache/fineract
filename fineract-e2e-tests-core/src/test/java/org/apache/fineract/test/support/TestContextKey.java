@@ -214,6 +214,8 @@ public abstract class TestContextKey {
     public static final String CHARGE_FOR_LOAN_PERCENT_LATE_CREATE_RESPONSE = "ChargeForLoanPercentLateCreateResponse";
     public static final String CHARGE_FOR_LOAN_PERCENT_LATE_AMOUNT_PLUS_INTEREST_CREATE_RESPONSE = "ChargeForLoanPercentLateAmountPlusInterestCreateResponse";
     public static final String CHARGE_FOR_LOAN_PERCENT_PROCESSING_CREATE_RESPONSE = "ChargeForLoanPercentProcessingCreateResponse";
+    public static final String CHARGE_FOR_LOAN_PERCENT_AMOUNT_DUE_DATE_CREATE_RESPONSE = "ChargeForLoanPercentAmountDueDateCreateResponse";
+    public static final String CHARGE_FOR_LOAN_PERCENT_INTEREST_DUE_DATE_CREATE_RESPONSE = "ChargeForLoanPercentInterestDueDateCreateResponse";
     public static final String CHARGE_FOR_LOAN_FIXED_LATE_CREATE_RESPONSE = "ChargeForLoanFixedLateCreateResponse";
     public static final String CHARGE_FOR_LOAN_FIXED_RETURNED_PAYMENT_CREATE_RESPONSE = "ChargeForLoanFixedReturnedPaymentCreateResponse";
     public static final String CHARGE_FOR_LOAN_SNOOZE_FEE_CREATE_RESPONSE = "ChargeForLoanSnoozeFeeCreateResponse";

@@ -711,6 +711,12 @@ public class LoanStepDef extends AbstractStepDef {
         createFullyCustomizedLoanWithCharges(data.get(1));
     }
 
+    @When("Admin creates a fully customized loan with due date charge and following data:")
+    public void createFullyCustomizedLoanWithDueDateCharge(final DataTable table) {
+        final List<List<String>> data = table.asLists();
+        createFullyCustomizedLoanWithCharges(data.get(1));
+    }
+
     @When("Admin creates a fully customized loan with charges and disbursement details and following data:")
     public void createFullyCustomizedLoanWithChargesAndDisbursementDetails(final DataTable table) {
         final List<List<String>> data = table.asLists();
@@ -1478,6 +1484,32 @@ public class LoanStepDef extends AbstractStepDef {
         final GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
                 Map.of("staffInSelectedOfficeOnly", "false", "associations", "charges")));
 
+        final PutLoansLoanIdRequest putLoansLoanIdRequest = modifyLoanRequestWithExistingCharges(loanDetails)//
+                .interestRatePerPeriod(new BigDecimal(newInterestRate));
+
+        final PutLoansLoanIdResponse responseMod = ok(
+                () -> fineractClient.loans().updateLoanApplication(loanId, putLoansLoanIdRequest, Map.of()));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, responseMod);
+    }
+
+    @When("Admin modifies the loan and adds {string} due date charge with {string} due date and {double} EUR transaction amount")
+    public void modifyLoanAddDueDateCharge(final String chargeType, final String dueDate, final double amount) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final Long loanId = loanResponse.getResourceId();
+
+        final GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "charges")));
+
+        final Long chargeId = chargeProductResolver.resolve(ChargeProductType.valueOf(chargeType));
+        final PutLoansLoanIdRequest putLoansLoanIdRequest = modifyLoanRequestWithExistingCharges(loanDetails)//
+                .addChargesItem(new PutLoansLoanIdChargeData().chargeId(chargeId).dueDate(dueDate).amount(BigDecimal.valueOf(amount)));
+
+        final PutLoansLoanIdResponse responseMod = ok(
+                () -> fineractClient.loans().updateLoanApplication(loanId, putLoansLoanIdRequest, Map.of()));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, responseMod);
+    }
+
+    private PutLoansLoanIdRequest modifyLoanRequestWithExistingCharges(final GetLoansLoanIdResponse loanDetails) {
         final PutLoansLoanIdRequest putLoansLoanIdRequest = new PutLoansLoanIdRequest()//
                 .productId(loanDetails.getLoanProductId())//
                 .principal(loanDetails.getPrincipal().longValue())//
@@ -1486,7 +1518,7 @@ public class LoanStepDef extends AbstractStepDef {
                 .numberOfRepayments(loanDetails.getNumberOfRepayments())//
                 .repaymentEvery(loanDetails.getRepaymentEvery())//
                 .repaymentFrequencyType(loanDetails.getRepaymentFrequencyType().getId().intValue())//
-                .interestRatePerPeriod(new BigDecimal(newInterestRate))//
+                .interestRatePerPeriod(loanDetails.getInterestRatePerPeriod())//
                 .interestType(loanDetails.getInterestType().getId().intValue())//
                 .interestCalculationPeriodType(loanDetails.getInterestCalculationPeriodType().getId().intValue())//
                 .amortizationType(loanDetails.getAmortizationType().getId().intValue())//
@@ -1507,10 +1539,7 @@ public class LoanStepDef extends AbstractStepDef {
                         .dueDate(charge.getDueDate().format(FORMATTER)).amount(charge.getAmountOrPercentage()));
             }
         }
-
-        final PutLoansLoanIdResponse responseMod = ok(
-                () -> fineractClient.loans().updateLoanApplication(loanId, putLoansLoanIdRequest, Map.of()));
-        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, responseMod);
+        return putLoansLoanIdRequest;
     }
 
     @Then("Admin fails to create a new customised Loan submitted on date: {string}, with Principal: {string}, a loanTermFrequency: {int} months, and numberOfRepayments: {int}")
@@ -1872,6 +1901,15 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(undoDisbursalResponse.getChanges().getStatus().getValue()).isEqualTo(LOAN_STATE_APPROVED);
     }
 
+    private void validateDisburseLoanWithInvalidDataFailure(final long loanId, final PostLoansLoanIdRequest disburseRequest,
+            final int errorCode, final String errorMessage) {
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient.loans().handleCommandsLoan(loanId, disburseRequest, Map.of("command", "disburse")));
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(errorCode);
+        assertThat(exception.getDeveloperMessage()).containsPattern(errorMessage);
+        log.debug("Error message while disburse loan with invalid data: {}", exception.getDeveloperMessage());
+    }
+
     @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount because of wrong date")
     public void disburseLoanFailureWithDate(String actualDisbursementDate, String transactionAmount) {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -1879,10 +1917,8 @@ public class LoanStepDef extends AbstractStepDef {
         PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
                 .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
 
-        CallFailedRuntimeException exception = fail(
-                () -> fineractClient.loans().handleCommandsLoan(loanId, disburseRequest, Map.of("command", "disburse")));
-        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
-        assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.disburseDateFailure((int) loanId));
+        final String errorMessage = ErrorMessageHelper.disburseDateFailure((int) loanId);
+        validateDisburseLoanWithInvalidDataFailure(loanId, disburseRequest, 403, errorMessage);
     }
 
     @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount because of wrong amount")
@@ -1892,11 +1928,8 @@ public class LoanStepDef extends AbstractStepDef {
         PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
                 .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
 
-        CallFailedRuntimeException exception = fail(
-                () -> fineractClient.loans().handleCommandsLoan(loanId, disburseRequest, Map.of("command", "disburse")));
-        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
-        assertThat(exception.getDeveloperMessage()).containsPattern(ErrorMessageHelper.disburseMaxAmountFailure());
-        log.debug("Error message: {}", exception.getDeveloperMessage());
+        final String errorMessage = ErrorMessageHelper.disburseMaxAmountFailure();
+        validateDisburseLoanWithInvalidDataFailure(loanId, disburseRequest, 403, errorMessage);
     }
 
     @Then("Admin fails to disburse the loan on {string} with {string} amount")
@@ -1906,10 +1939,8 @@ public class LoanStepDef extends AbstractStepDef {
         PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest().actualDisbursementDate(disbursementDate)
                 .transactionAmount(new BigDecimal(disbursementAmount));
 
-        CallFailedRuntimeException exception = fail(
-                () -> fineractClient.loans().handleCommandsLoan(loanId, disburseRequest, Map.of("command", "disburse")));
-        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(400);
-        assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.disburseIsNotAllowedFailure());
+        final String errorMessage = ErrorMessageHelper.disburseIsNotAllowedFailure();
+        validateDisburseLoanWithInvalidDataFailure(loanId, disburseRequest, 400, errorMessage);
     }
 
     @Then("Admin fails to disburse the loan on {string} with {string} amount due to exceed approved amount")
@@ -1919,10 +1950,8 @@ public class LoanStepDef extends AbstractStepDef {
         final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
                 .actualDisbursementDate(disbursementDate).transactionAmount(new BigDecimal(disbursementAmount));
 
-        final CallFailedRuntimeException exception = fail(
-                () -> fineractClient.loans().handleCommandsLoan(loanId, disburseRequest, Map.of("command", "disburse")));
-        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
-        assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.disburseIsNotAllowedExceedApprovedAmountFailure());
+        final String errorMessage = ErrorMessageHelper.disburseIsNotAllowedExceedApprovedAmountFailure();
+        validateDisburseLoanWithInvalidDataFailure(loanId, disburseRequest, 403, errorMessage);
     }
 
     @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount because of charge-off that was performed for the loan")
@@ -1932,11 +1961,8 @@ public class LoanStepDef extends AbstractStepDef {
         PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
                 .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
 
-        CallFailedRuntimeException exception = fail(
-                () -> fineractClient.loans().handleCommandsLoan(loanId, disburseRequest, Map.of("command", "disburse")));
-        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
-        assertThat(exception.getDeveloperMessage()).containsPattern(ErrorMessageHelper.disburseChargedOffLoanFailure());
-        log.debug("Error message: {}", exception.getDeveloperMessage());
+        final String errorMessage = ErrorMessageHelper.disburseChargedOffLoanFailure();
+        validateDisburseLoanWithInvalidDataFailure(loanId, disburseRequest, 403, errorMessage);
     }
 
     @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount because disbursement date is earlier than {string}")
@@ -1947,11 +1973,8 @@ public class LoanStepDef extends AbstractStepDef {
                 .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
 
         String futureApproveDateISO = FORMATTER_EVENTS.format(FORMATTER.parse(futureApproveDate));
-        CallFailedRuntimeException exception = fail(
-                () -> fineractClient.loans().handleCommandsLoan(loanId, disburseRequest, Map.of("command", "disburse")));
-        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
-        assertThat(exception.getDeveloperMessage())
-                .contains(ErrorMessageHelper.disbursePastDateFailure((int) loanId, futureApproveDateISO));
+        final String errorMessage = ErrorMessageHelper.disbursePastDateFailure((int) loanId, futureApproveDateISO);
+        validateDisburseLoanWithInvalidDataFailure(loanId, disburseRequest, 403, errorMessage);
     }
 
     @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount due to exceed approved amount")
@@ -1961,10 +1984,8 @@ public class LoanStepDef extends AbstractStepDef {
         PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
                 .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
 
-        CallFailedRuntimeException exception = fail(
-                () -> fineractClient.loans().handleCommandsLoan(loanId, disburseRequest, Map.of("command", "disburse")));
-        assertThat(exception.getStatus()).as(ErrorMessageHelper.addDisbursementExceedApprovedAmountFailure()).isEqualTo(403);
-        assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.addDisbursementExceedApprovedAmountFailure());
+        final String errorMessage = ErrorMessageHelper.addDisbursementExceedApprovedAmountFailure();
+        validateDisburseLoanWithInvalidDataFailure(loanId, disburseRequest, 403, errorMessage);
     }
 
     @Then("Admin fails to disburse the loan on {string} with {string} EUR trn amount with total disb amount {string} and max disb amount {string} due to exceed max applied amount")
@@ -1975,13 +1996,20 @@ public class LoanStepDef extends AbstractStepDef {
         PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
                 .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
 
-        CallFailedRuntimeException exception = fail(
-                () -> fineractClient.loans().handleCommandsLoan(loanId, disburseRequest, Map.of("command", "disburse")));
-        assertThat(exception.getStatus())
-                .as(ErrorMessageHelper.addDisbursementExceedMaxAppliedAmountFailure(totalDisbursalAmount, maxDisbursalAmount))
-                .isEqualTo(403);
-        assertThat(exception.getDeveloperMessage())
-                .contains(ErrorMessageHelper.addDisbursementExceedMaxAppliedAmountFailure(totalDisbursalAmount, maxDisbursalAmount));
+        final String errorMessage = ErrorMessageHelper.addDisbursementExceedMaxAppliedAmountFailure(totalDisbursalAmount,
+                maxDisbursalAmount);
+        validateDisburseLoanWithInvalidDataFailure(loanId, disburseRequest, 403, errorMessage);
+    }
+
+    @Then("Admin fails to disburse the loan on {string} with {string} EUR trn amount due to charge due date created before is out of range")
+    public void disbursementForbiddenWithChargeOutOfRangeFailure(String disbursementDate, String disbursementAmount) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.getLoanId();
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(disbursementDate).transactionAmount(new BigDecimal(disbursementAmount));
+
+        final String errorMessage = ErrorMessageHelper.disburseWithChargeOutOfRangeFailure();
+        validateDisburseLoanWithInvalidDataFailure(loanId, disburseRequest, 403, errorMessage);
     }
 
     @And("Admin does charge-off the loan on {string}")
@@ -4202,7 +4230,9 @@ public class LoanStepDef extends AbstractStepDef {
         Long chargeId = chargeProductResolver.resolve(chargeProductType);
 
         List<PostLoansRequestChargeData> charges = new ArrayList<>();
-        charges.add(new PostLoansRequestChargeData().chargeId(chargeId).amount(chargesAmount));
+        // an optional 19th column holds the due date of a specified due date charge
+        final String chargeDueDate = loanData.size() > 18 ? loanData.get(18) : null;
+        charges.add(new PostLoansRequestChargeData().chargeId(chargeId).amount(chargesAmount).dueDate(chargeDueDate));
 
         final PostLoansRequest loansRequest = loanRequestFactory//
                 .defaultLoansRequest(clientId)//
