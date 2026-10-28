@@ -52,6 +52,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         final int numberOfRepayments = loanApplicationTerms.getNumberOfRepayments();
         final ArrayList<LoanScheduleModelRepaymentPeriod> repaymentPeriods = new ArrayList<>(numberOfRepayments);
         LocalDate lastRepaymentDate = scheduleStartDate;
+        LocalDate lastAdjustedRepaymentDate = scheduleStartDate;
         LocalDate nextRepaymentDate;
         boolean isFirstRepayment = true;
         for (int repaymentPeriodNumber = 1; repaymentPeriodNumber <= numberOfRepayments; repaymentPeriodNumber++) {
@@ -62,12 +63,14 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                         && loanApplicationTerms.calculateMaxDateForFixedLength().compareTo(nextRepaymentDate) != 0) {
                     nextRepaymentDate = loanApplicationTerms.calculateMaxDateForFixedLength();
                 }
-                nextRepaymentDate = adjustRepaymentDate(nextRepaymentDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
             }
-            nextRepaymentDate = applyLoanTermVariations(loanApplicationTerms, nextRepaymentDate);
-            repaymentPeriods.add(LoanScheduleModelRepaymentPeriod.repayment(repaymentPeriodNumber, lastRepaymentDate, nextRepaymentDate,
-                    zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, false, mc));
+            LocalDate adjustRepaymentDate = adjustRepaymentDate(nextRepaymentDate, loanApplicationTerms, holidayDetailDTO)
+                    .getChangedScheduleDate();
+            adjustRepaymentDate = applyLoanTermVariations(loanApplicationTerms, adjustRepaymentDate);
+            repaymentPeriods.add(LoanScheduleModelRepaymentPeriod.repayment(repaymentPeriodNumber, lastAdjustedRepaymentDate,
+                    adjustRepaymentDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, false, mc));
             lastRepaymentDate = nextRepaymentDate;
+            lastAdjustedRepaymentDate = adjustRepaymentDate;
             isFirstRepayment = false;
         }
         return repaymentPeriods;
