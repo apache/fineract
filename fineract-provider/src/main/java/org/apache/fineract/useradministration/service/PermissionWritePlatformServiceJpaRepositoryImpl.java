@@ -84,12 +84,19 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
 
     private Permission findPermissionInCollectionByCode(final Collection<Permission> allPermissions, final String permissionCode) {
 
+        Permission caseInsensitiveMatch = null;
         if (allPermissions != null) {
             for (final Permission permission : allPermissions) {
-                if (permission.hasCode(permissionCode)) {
+                if (permission.getCode().equals(permissionCode)) {
                     return permission;
                 }
+                if (caseInsensitiveMatch == null && permission.hasCode(permissionCode)) {
+                    caseInsensitiveMatch = permission;
+                }
             }
+        }
+        if (caseInsensitiveMatch != null) {
+            return caseInsensitiveMatch;
         }
 
         throw new PermissionNotFoundException(permissionCode);
