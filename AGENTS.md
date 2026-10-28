@@ -61,3 +61,19 @@ Background and instructions:
 
 Where the documentation and the reference implementations
 disagree, follow the reference implementations.
+
+## Skills
+
+Step-by-step instructions for some common tasks are kept as
+skills, one `SKILL.md` per folder under
+[`.agents/skills`](./.agents/skills). Most agents that support
+skills load them from there; Claude Code loads them from
+`.claude/skills`, which links to the same files. An agent that
+does not load skills should read the matching `SKILL.md`
+before it starts the task:
+
+- [fineract-testing](./.agents/skills/fineract-testing/SKILL.md):
+  choosing, writing, running and verifying tests
+- [fineract-database](./.agents/skills/fineract-database/SKILL.md):
+  Liquibase changelogs, schema and seed data changes, and the
+  database checks in CI
