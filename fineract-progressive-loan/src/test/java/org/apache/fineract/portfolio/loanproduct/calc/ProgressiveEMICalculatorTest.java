@@ -5592,6 +5592,76 @@ class ProgressiveEMICalculatorTest {
     }
 
     /**
+     * Bullet loan, actual days over a 360-day year, rescheduled from 20% to 15% on 1 May 2026.
+     *
+     * <p>
+     * Grace covers every repayment except the last, so each of those installments is interest only and the outstanding
+     * principal stays 100,000. Interest due on a row must be the interest that row accrued:
+     * {@code 100,000 × rate × actual days ÷ 360}, rounded half-even to the cent. The rate is still applied from the day
+     * before the submitted date, so the repayment due 1 May covers 29 days at 20% and 30 April at 15%. The balloon
+     * bills only its own accrual plus the 100,000 principal. Carrying unpaid interest onto the balloon fails this test.
+     */
+    @Test
+    public void test_principalGrace_bullet_interestRateChange_billsPeriodAccrual() {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+        LocalDate cursor = LocalDate.of(2026, 1, 1);
+        for (int i = 0; i < 12; i++) {
+            final LocalDate next = cursor.plusMonths(1);
+            expectedRepaymentPeriods.add(periodData(cursor, next));
+            cursor = next;
+        }
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(BigDecimal.valueOf(20.0));
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.ACTUAL.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getNumberOfRepayments()).thenReturn(12);
+        Mockito.when(loanProductRelatedDetail.getGraceOnPrincipalPayment()).thenReturn(11);
+        Mockito.when(loanProductRelatedDetail.getGraceOnInterestPayment()).thenReturn(0);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator
+                .generatePeriodInterestScheduleModel(expectedRepaymentPeriods, loanProductRelatedDetail, null, mc);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2026, 1, 1), toMoney(100_000.0));
+        emiCalculator.changeInterestRate(interestSchedule, LocalDate.of(2026, 5, 1), BigDecimal.valueOf(15));
+
+        double principal = 100_000.0;
+        checkPeriod(interestSchedule, 0, accrued(principal, 0.20, 31), accrued(principal, 0.20, 31), 0.0, principal, false);
+        checkPeriod(interestSchedule, 1, accrued(principal, 0.20, 28), accrued(principal, 0.20, 28), 0.0, principal, false);
+        checkPeriod(interestSchedule, 2, accrued(principal, 0.20, 31), accrued(principal, 0.20, 31), 0.0, principal, false);
+        // Submitted 1 May is still effective 30 April: 29 days at 20% and 1 day at 15%.
+        final double aprilInterest = roundMoney(unroundedAccrual(principal, 0.20, 29) + unroundedAccrual(principal, 0.15, 1));
+        checkPeriod(interestSchedule, 3, aprilInterest, aprilInterest, 0.0, principal, false);
+
+        // 31, 30, 31, 31, 30, 31, 30, 31 days from 1 May through the 1 Jan balloon.
+        final int[] daysAfterChange = { 31, 30, 31, 31, 30, 31, 30, 31 };
+        for (int offset = 0; offset < daysAfterChange.length; offset++) {
+            final int periodIdx = 4 + offset;
+            final double interest = accrued(principal, 0.15, daysAfterChange[offset]);
+            final RepaymentPeriod period = interestSchedule.repaymentPeriods().get(periodIdx);
+            Assertions.assertEquals(interest, toDouble(period.getDueInterest()), 0.001, "Period due " + period.getDueDate()
+                    + " must bill its accrual. The current cap leaves part of that interest unrecognized.");
+            final boolean balloon = periodIdx == 11;
+            checkPeriod(interestSchedule, periodIdx, balloon ? roundMoney(principal + interest) : interest, interest,
+                    balloon ? principal : 0.0, balloon ? 0.0 : principal, false);
+            Assertions.assertEquals(0.0, toDouble(interestSchedule.repaymentPeriods().get(periodIdx).getUnrecognizedInterest()), 0.001,
+                    "Period " + periodIdx + " must bill its accrual, leaving nothing unrecognized");
+        }
+    }
+
+    private static double accrued(final double principal, final double annualRate, final int days) {
+        return roundMoney(unroundedAccrual(principal, annualRate, days));
+    }
+
+    private static double unroundedAccrual(final double principal, final double annualRate, final int days) {
+        return principal * annualRate * days / 360.0;
+    }
+
+    private static double roundMoney(final double amount) {
+        return BigDecimal.valueOf(amount).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
+    }
+
+    /**
      * Rate change whose related suffix is only the balloon installment (due 1 September). The last period must keep
      * amortizing; it must not be re-marked interest-only from min(grace, suffixSize).
      */

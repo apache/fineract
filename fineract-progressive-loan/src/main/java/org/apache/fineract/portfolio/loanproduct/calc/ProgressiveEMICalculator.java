@@ -1869,7 +1869,16 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             // Only rewrite EMI for periods inside the slice being recalculated. Periods before the slice keep
             // whatever principal they already have (e.g. after re-amortization); the grace sticker follows that.
             if (!period.getDueDate().isBefore(sliceFirstDueDate)) {
-                final Money interestOnlyEmi = period.getDueInterest();
+                // Due interest is already limited by the installment just solved. A grace row has to bill the
+                // interest this period accrued, including when that is more than the solved installment, or the
+                // difference is unrecognized and pushed onto a later repayment. The solved installment may still
+                // be charging principal on earlier rows in this slice, so refresh this row's balance from the
+                // previous row after that row's installment has been raised, then bill the uncapped interest.
+                period.getInterestPeriods().forEach(InterestPeriod::updateOutstandingLoanBalance);
+                final MathContext mc = scheduleModel.mc();
+                final Money paidFloor = MathUtil.negativeToZero(
+                        MathUtil.plus(period.getPaidInterest(), period.getPaidPrincipal()).minus(period.getTotalCreditedAmount(), mc));
+                final Money interestOnlyEmi = MathUtil.max(period.getCalculatedDueInterest(), paidFloor, true);
                 period.setEmi(interestOnlyEmi);
                 period.setOriginalEmi(interestOnlyEmi);
                 period.setPrincipalPaymentGrace(true);
