@@ -1206,7 +1206,13 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             FixedDepositAccount fdAccount = ((FixedDepositAccount) account);
             // handle maturity instructions
 
-            if (fdAccount.isMatured() && (fdAccount.isReinvestOnClosure() || fdAccount.isTransferToSavingsOnClosure())) {
+            final boolean skipReinvestmentForArchivedProduct = fdAccount.isMatured() && fdAccount.isReinvestOnClosure()
+                    && !this.depositAccountAssembler.isProductOpenForApplication(fdAccount.maturityDate(), fdAccount.savingsProduct());
+            if (skipReinvestmentForArchivedProduct) {
+                log.warn("Skipping reinvestment at maturity for FD account {}: product is archived", fdAccount.getId());
+            }
+            if (fdAccount.isMatured() && !skipReinvestmentForArchivedProduct
+                    && (fdAccount.isReinvestOnClosure() || fdAccount.isTransferToSavingsOnClosure())) {
                 DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 Map<String, Object> changes = new HashMap<>();
                 final AppUser user = context.authenticatedUser();

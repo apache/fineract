@@ -350,6 +350,10 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             if (!changes.isEmpty()) {
                 updateFDAndRDCommonChanges(changes, command, account);
+                if (changes.containsKey(org.apache.fineract.portfolio.savings.SavingsApiConstants.productIdParamName)
+                        || changes.containsKey(org.apache.fineract.portfolio.savings.SavingsApiConstants.submittedOnDateParamName)) {
+                    this.depositAccountAssembler.validateProductApplicationDate(account.getSubmittedOnDate(), account.savingsProduct());
+                }
                 final MathContext mc = MathContext.DECIMAL64;
                 final boolean isPreMatureClosure = false;
                 account.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
@@ -440,6 +444,10 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             if (!changes.isEmpty()) {
                 updateFDAndRDCommonChanges(changes, command, account);
+                if (changes.containsKey(org.apache.fineract.portfolio.savings.SavingsApiConstants.productIdParamName)
+                        || changes.containsKey(org.apache.fineract.portfolio.savings.SavingsApiConstants.submittedOnDateParamName)) {
+                    this.depositAccountAssembler.validateProductApplicationDate(account.getSubmittedOnDate(), account.savingsProduct());
+                }
                 final MathContext mc = MathContext.DECIMAL64;
                 final CalendarInstance calendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
                         accountId, CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());

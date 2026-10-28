@@ -80,6 +80,10 @@ final class RecurringDepositProductsApiResourceSwagger {
         public String shortName;
         @Schema(example = "Daily compounding using Daily Balance, 5% per year, 365 days in year")
         public String description;
+        @Schema(example = "10 July 2022")
+        public String startDate;
+        @Schema(example = "10 July 2022")
+        public String closeDate;
         @Schema(example = "USD")
         public String currencyCode;
         @Schema(example = "2")
@@ -88,6 +92,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         public Integer inMultiplesOf;
         @Schema(example = "en")
         public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
         @Schema(example = "1")
         public Integer interestCompoundingPeriodType;
         @Schema(example = "4")
@@ -167,8 +173,14 @@ final class RecurringDepositProductsApiResourceSwagger {
 
         @Schema(example = "Recurring deposit product new offerings")
         public String description;
+        @Schema(example = "10 July 2022")
+        public String startDate;
+        @Schema(example = "10 July 2022")
+        public String closeDate;
         @Schema(example = "en")
         public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
         @Schema(example = "5")
         public Integer minDepositTerm;
         @Schema(example = "1")
@@ -186,6 +198,10 @@ final class RecurringDepositProductsApiResourceSwagger {
 
             @Schema(example = "Recurring deposit product new offerings")
             public String description;
+            @Schema(example = "10 July 2022")
+            public String startDate;
+            @Schema(example = "10 July 2022")
+            public String closeDate;
             @Schema(example = "5")
             public Integer minDepositTerm;
         }
@@ -324,6 +340,12 @@ final class RecurringDepositProductsApiResourceSwagger {
         public String shortName;
         @Schema(example = "RD01")
         public String description;
+        @Schema(example = "[2013, 9, 2]")
+        public LocalDate startDate;
+        @Schema(example = "[2014, 2, 7]")
+        public LocalDate closeDate;
+        @Schema(example = "savingsProduct.active")
+        public String status;
         public GetRecurringDepositProductsCurrency currency;
         @Schema(example = "1")
         public Integer recurringDepositFrequency;
@@ -552,6 +574,12 @@ final class RecurringDepositProductsApiResourceSwagger {
         public String shortName;
         @Schema(example = "Daily compounding using Daily Balance, 5% per year, 365 days in year")
         public String description;
+        @Schema(example = "[2013, 9, 2]")
+        public LocalDate startDate;
+        @Schema(example = "[2014, 2, 7]")
+        public LocalDate closeDate;
+        @Schema(example = "savingsProduct.active")
+        public String status;
         public GetRecurringDepositProductsProductIdCurrency currency;
         public GetRecurringDepositProductsProductIdInterestCompoundingPeriodType interestCompoundingPeriodType;
         public GetRecurringDepositProductsResponse.GetRecurringDepositProductsInterestPostingPeriodType interestPostingPeriodType;

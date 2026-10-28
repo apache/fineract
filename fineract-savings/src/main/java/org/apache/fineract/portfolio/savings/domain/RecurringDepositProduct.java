@@ -26,6 +26,7 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -66,7 +67,8 @@ public class RecurringDepositProduct extends FixedDepositProduct {
             final SavingsPeriodFrequencyType lockinPeriodFrequencyType, final AccountingRuleType accountingRuleType,
             final Set<Charge> charges, final DepositProductTermAndPreClosure productTermAndPreClosure,
             final DepositProductRecurringDetail recurringDetail, final Set<InterestRateChart> charts,
-            BigDecimal minBalanceForInterestCalculation, final TaxGroup taxGroup, final boolean withHoldTax) {
+            BigDecimal minBalanceForInterestCalculation, final TaxGroup taxGroup, final boolean withHoldTax, LocalDate startDate,
+            LocalDate closeDate) {
 
         final BigDecimal minRequiredOpeningBalance = null;
         final boolean withdrawalFeeApplicableForTransfer = false;
@@ -77,7 +79,7 @@ public class RecurringDepositProduct extends FixedDepositProduct {
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges,
                 productTermAndPreClosure, recurringDetail, charts, allowOverdraft, overdraftLimit, minBalanceForInterestCalculation,
-                withHoldTax, taxGroup);
+                withHoldTax, taxGroup, startDate, closeDate);
     }
 
     protected RecurringDepositProduct(final String name, final String shortName, final String description, final MonetaryCurrency currency,
@@ -88,12 +90,13 @@ public class RecurringDepositProduct extends FixedDepositProduct {
             final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
             final DepositProductTermAndPreClosure productTermAndPreClosure, final DepositProductRecurringDetail recurringDetail,
             final Set<InterestRateChart> charts, final boolean allowOverdraft, final BigDecimal overdraftLimit,
-            final BigDecimal minBalanceForInterestCalculation, final boolean withHoldTax, final TaxGroup taxGroup) {
+            final BigDecimal minBalanceForInterestCalculation, final boolean withHoldTax, final TaxGroup taxGroup, LocalDate startDate,
+            LocalDate closeDate) {
 
         super(name, shortName, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges, productTermAndPreClosure,
-                charts, allowOverdraft, overdraftLimit, minBalanceForInterestCalculation, withHoldTax, taxGroup);
+                charts, allowOverdraft, overdraftLimit, minBalanceForInterestCalculation, withHoldTax, taxGroup, startDate, closeDate);
 
         this.recurringDetail = recurringDetail;
     }
