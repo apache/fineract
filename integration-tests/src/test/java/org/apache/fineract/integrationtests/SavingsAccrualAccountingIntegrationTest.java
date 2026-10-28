@@ -27,6 +27,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
@@ -62,6 +63,8 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
     private static final Double INTEREST_RATE = 10.0;
     private static final Double OVERDRAFT_INTEREST_RATE = 21.0;
     private static final BigDecimal OVERDRAFT_LIMIT = new BigDecimal("10000");
+    private static final BigDecimal OVERDRAWN_BY = new BigDecimal("10");
+    private static final int DAYS_IN_CREDIT = 7;
 
     private static final BigDecimal PERCENT = new BigDecimal("100");
     private static final int DIGITS_AFTER_DECIMAL = 4;
@@ -201,6 +204,68 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         });
     }
 
+    @Test
+    public void testPostInterestJobCreditsInterestThatPaysDownAnOverdraftToOverdraftPortfolioControl() {
+        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            final PostSavingsProductsRequest product = withCashMappings(accrualProduct(INTEREST_RATE), accounts);
+            final Long savingsAccountId = createAccountOverdrawnAtPostingDate(product);
+
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
+
+            final SavingsAccountTransactionData posting = interestPostingOf(savingsAccountId);
+            final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(posting);
+            assertHasEntry(journalEntries, CREDIT, accounts.overdraftPortfolioControl(), OVERDRAWN_BY,
+                    "CREDIT to Overdraft Portfolio Control (Asset) Account not found for the interest that paid down the overdraft.");
+            assertHasEntry(journalEntries, CREDIT, accounts.savingsControl(), posting.getAmount().subtract(OVERDRAWN_BY),
+                    "CREDIT to Savings Control (Liability) Account not found for the rest of the interest.");
+            assertHasEntry(journalEntries, DEBIT, accounts.interestOnSavings(), OVERDRAWN_BY,
+                    "DEBIT to Interest on Savings (Expense) Account not found for the interest that paid down the overdraft.");
+        });
+    }
+
+    @Test
+    public void testPostInterestJobCreditsAccrualInterestThatPaysDownAnOverdraftToOverdraftPortfolioControl() {
+        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            final PostSavingsProductsRequest product = withMappings(accrualProduct(INTEREST_RATE), accounts);
+            final Long savingsAccountId = createAccountOverdrawnAtPostingDate(product);
+
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
+
+            final SavingsAccountTransactionData posting = interestPostingOf(savingsAccountId);
+            final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(posting);
+            assertHasEntry(journalEntries, CREDIT, accounts.overdraftPortfolioControl(), OVERDRAWN_BY,
+                    "CREDIT to Overdraft Portfolio Control (Asset) Account not found for the interest that paid down the overdraft.");
+            assertHasEntry(journalEntries, CREDIT, accounts.savingsControl(), posting.getAmount().subtract(OVERDRAWN_BY),
+                    "CREDIT to Savings Control (Liability) Account not found for the rest of the interest.");
+            // the interest was already expensed when it accrued, so both parts still come out of Interest Payable
+            assertHasEntry(journalEntries, DEBIT, accounts.interestPayable(), OVERDRAWN_BY,
+                    "DEBIT to Interest Payable (Liability) Account not found for the interest that paid down the overdraft.");
+        });
+    }
+
+    /**
+     * The deposit earns interest for a week, then a withdrawal leaves the account overdrawn until the month end
+     * posting, so the posted interest first pays down the overdraft. No overdraft interest is charged, which keeps the
+     * overdraft at exactly the amount withdrawn beyond the deposit.
+     */
+    private Long createAccountOverdrawnAtPostingDate(final PostSavingsProductsRequest product) {
+        final Long savingsProductId = savingsProductHelper.createSavingsProduct(product//
+                .allowOverdraft(true)//
+                .overdraftLimit(OVERDRAFT_LIMIT)//
+                .nominalAnnualInterestRateOverdraft(BigDecimal.ZERO)).getResourceId();
+        assertNotNull(savingsProductId, "Failed to create savings product with overdraft.");
+
+        final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
+        deposit(savingsAccountId, AMOUNT, startDateString());
+        withdraw(savingsAccountId, new BigDecimal(AMOUNT).add(OVERDRAWN_BY).toPlainString(),
+                DATE_FORMATTER.format(TODAY.minusDays(DAYS_TO_SUBTRACT).plusDays(DAYS_IN_CREDIT)));
+        return savingsAccountId;
+    }
+
     private SavingsAccountTransactionData interestPostingOf(final Long savingsAccountId) {
         return firstPostingOf(savingsAccountId, transaction -> Boolean.TRUE.equals(transaction.getTransactionType().getInterestPosting()));
     }
@@ -214,7 +279,8 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         final List<SavingsAccountTransactionData> postings = savingsTransactionHelper.getTransactions(savingsAccountId).stream()
                 .filter(transaction -> transaction.getTransactionType() != null).filter(type).toList();
         assertFalse(postings.isEmpty(), "The Post Interest job did not post interest.");
-        return postings.get(0);
+        // the API lists the newest transaction first
+        return postings.stream().min(Comparator.comparing(SavingsAccountTransactionData::getId)).orElseThrow();
     }
 
     private void verifyEveryAccrualIsOneDayOfInterest(final List<SavingsAccountTransactionData> accrualTransactions,
@@ -246,6 +312,17 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         final Long expectedAccountId = SavingsRequestBuilders.accountId(account);
         assertTrue(journalEntries.stream().anyMatch(entry -> entry.getEntryType() != null
                 && entryType.equals(entry.getEntryType().getValue()) && expectedAccountId.equals(entry.getGlAccountId())), message);
+    }
+
+    private void assertHasEntry(final List<JournalEntryTransactionItem> journalEntries, final String entryType, final Account account,
+            final BigDecimal amount, final String message) {
+        final Long expectedAccountId = SavingsRequestBuilders.accountId(account);
+        assertTrue(
+                journalEntries.stream()
+                        .anyMatch(entry -> entry.getEntryType() != null && entryType.equals(entry.getEntryType().getValue())
+                                && expectedAccountId.equals(entry.getGlAccountId()) && entry.getAmount() != null
+                                && amount.compareTo(BigDecimal.valueOf(entry.getAmount())) == 0),
+                () -> message + " Amount " + amount + ", entries " + journalEntries);
     }
 
     /**
