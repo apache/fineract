@@ -138,7 +138,9 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
         } else {
             baseAmount = getBaseAmount(loanCharge, totalPrincipal.getAmount(), totalInterest.getAmount());
         }
-        return Money.of(currency, MathUtil.percentageOf(baseAmount, loanCharge.getPercentage(), MoneyHelper.getMathContext()));
+        // capped like the charge's own amount, so the installment never carries more than the charge
+        final BigDecimal chargeAmount = MathUtil.percentageOf(baseAmount, loanCharge.getPercentage(), MoneyHelper.getMathContext());
+        return Money.of(currency, loanCharge.minimumAndMaximumCap(chargeAmount));
     }
 
     private Money calcChargeWaived(final LocalDate periodStart, final LocalDate periodEnd, final LoanCharge loanCharge,

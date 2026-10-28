@@ -121,6 +121,30 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapperTest {
         customVerify(period2, "0.0", "0.0", "0.0", "0.0", "0.0", "0.0");
     }
 
+    @Test
+    public void testPercentageSpecifiedDueDateFeeIsCappedAtMaxCap() {
+        LocalDate disbursementDate = LocalDate.of(2023, 1, 1);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(new EnumMap<>(Map.of(BusinessDateType.BUSINESS_DATE, disbursementDate))));
+
+        LoanRepaymentScheduleInstallment period = createPeriod(1, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 30));
+        // 10% of 1000 = 100, capped at 50
+        underTest.reprocess(currency, disbursementDate, List.of(period), createPercentageCharge(null, new BigDecimal(50)));
+
+        customVerify(period, "50.0", "0.0", "0.0", "0.0", "0.0", "0.0");
+    }
+
+    @Test
+    public void testPercentageSpecifiedDueDateFeeIsRaisedToMinCap() {
+        LocalDate disbursementDate = LocalDate.of(2023, 1, 1);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(new EnumMap<>(Map.of(BusinessDateType.BUSINESS_DATE, disbursementDate))));
+
+        LoanRepaymentScheduleInstallment period = createPeriod(1, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 30));
+        // 10% of 1000 = 100, raised to 150
+        underTest.reprocess(currency, disbursementDate, List.of(period), createPercentageCharge(new BigDecimal(150), null));
+
+        customVerify(period, "150.0", "0.0", "0.0", "0.0", "0.0", "0.0");
+    }
+
     private void customVerify(LoanRepaymentScheduleInstallment period, String expectedFeeChargesDue, String expectedFeeChargesWaived,
             String expectedFeeChargesWrittenOff, String expectedPenaltyChargesDue, String expectedPenaltyChargesWaived,
             String expectedPenaltyChargesWrittenOff) {
@@ -154,6 +178,21 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapperTest {
 
         return loanChargeService.create(loan, charge, new BigDecimal(1000), new BigDecimal(10), ChargeTimeType.SPECIFIED_DUE_DATE,
                 ChargeCalculationType.FLAT, LocalDate.of(2023, 1, 15), ChargePaymentMode.REGULAR, 1, null, null);
+    }
+
+    @NonNull
+    private LoanCharge createPercentageCharge(BigDecimal minCap, BigDecimal maxCap) {
+        Charge charge = mock(Charge.class);
+        when(charge.getId()).thenReturn(1L);
+        when(charge.getName()).thenReturn("charge a");
+        when(charge.getCurrencyCode()).thenReturn("UDS");
+        when(charge.getMinCap()).thenReturn(minCap);
+        when(charge.getMaxCap()).thenReturn(maxCap);
+        Loan loan = mock(Loan.class);
+        when(loan.isInterestBearing()).thenReturn(false);
+
+        return loanChargeService.create(loan, charge, new BigDecimal(1000), new BigDecimal(10), ChargeTimeType.SPECIFIED_DUE_DATE,
+                ChargeCalculationType.PERCENT_OF_AMOUNT, LocalDate.of(2023, 1, 15), ChargePaymentMode.REGULAR, 1, BigDecimal.ZERO, null);
     }
 
     @NonNull

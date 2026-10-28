@@ -461,8 +461,9 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         } else {
             amount = amount.add(principalDisbursed.getAmount());
         }
+        // capped like the charge's own amount, so the installment never carries more than the charge
         Money loanChargeAmt = Money.of(cumulative.getCurrency(),
-                amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100), mc));
+                loanCharge.minimumAndMaximumCap(amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100), mc)));
         cumulative = cumulative.plus(loanChargeAmt);
         return cumulative;
     }
