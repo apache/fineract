@@ -99,6 +99,7 @@ public final class GlobalConfigurationConstants {
     public static final String PL_CHARGE_ACCRUAL_TIME = "pl-charge-accrual-time";
     public static final String PAYOFF_SCHEDULE_PREVIEW_MAX_PAYOFF_PERIODS = "payoff-schedule-preview-max-payoff-periods";
     public static final String PAYOFF_SCHEDULE_PREVIEW_MAX_TERM_PERIODS = "payoff-schedule-preview-max-term-periods";
+    public static final String IDEMPOTENCY_RECOVERABLE_ERROR_CODES = "idempotency-recoverable-error-codes";
 
     private GlobalConfigurationConstants() {}
 }
