@@ -1667,14 +1667,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     @SuppressWarnings("deprecation")
     @Override
     public Integer retriveLoanCounter(final Long groupId, final Integer loanType, Long productId) {
-        final String sql = "Select MAX(l.loan_product_counter) from m_loan l where l.group_id = ?  and l.loan_type_enum = ? and l.product_id=?";
+        final String sql = "Select COALESCE(MAX(l.loan_product_counter), 0) from m_loan l where l.group_id = ?  and l.loan_type_enum = ? and l.product_id=?";
         return this.jdbcTemplate.queryForObject(sql, new Object[] { groupId, loanType, productId }, Integer.class);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public Integer retriveLoanCounter(final Long clientId, Long productId) {
-        final String sql = "Select MAX(l.loan_product_counter) from m_loan l where l.client_id = ? and l.product_id=?";
+        final String sql = "Select COALESCE(MAX(l.loan_product_counter), 0) from m_loan l where l.client_id = ? and l.product_id=?";
         return this.jdbcTemplate.queryForObject(sql, new Object[] { clientId, productId }, Integer.class);
     }
 
