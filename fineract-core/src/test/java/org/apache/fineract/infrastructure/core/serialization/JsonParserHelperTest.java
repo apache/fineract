@@ -20,6 +20,10 @@ package org.apache.fineract.infrastructure.core.serialization;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import java.time.MonthDay;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -91,5 +95,50 @@ class JsonParserHelperTest {
         Assertions.assertFalse(onTestUnit.parameterHasValue("arrayList", jsonValuesMissing));
         Assertions.assertFalse(onTestUnit.parameterHasValue("localDate", jsonValuesMissing));
         Assertions.assertFalse(onTestUnit.parameterHasValue("keyValue", jsonValuesMissing));
+    }
+
+    @Test
+    void extractMonthDayNamedParsesWithMonthDayFormatAndLocale() {
+        JsonElement json = JsonParser.parseString("{\"feeOnMonthDay\": \"15 March\", \"monthDayFormat\": \"dd MMMM\", \"locale\": \"en\"}");
+
+        Assertions.assertEquals(MonthDay.of(3, 15), onTestUnit.extractMonthDayNamed("feeOnMonthDay", json));
+    }
+
+    @Test
+    void extractMonthDayNamedRejectsMissingMonthDayFormat() {
+        JsonElement json = JsonParser.parseString("{\"feeOnMonthDay\": \"15 March\", \"locale\": \"en\"}");
+
+        List<ApiParameterError> errors = Assertions
+                .assertThrows(PlatformApiDataValidationException.class, () -> onTestUnit.extractMonthDayNamed("feeOnMonthDay", json))
+                .getErrors();
+
+        Assertions.assertEquals(1, errors.size());
+        Assertions.assertEquals("validation.msg.missing.monthDayFormat.parameter", errors.get(0).getUserMessageGlobalisationCode());
+        Assertions.assertEquals("feeOnMonthDay", errors.get(0).getParameterName());
+    }
+
+    @Test
+    void extractMonthDayNamedRejectsMissingLocale() {
+        JsonElement json = JsonParser.parseString("{\"feeOnMonthDay\": \"15 March\", \"monthDayFormat\": \"dd MMMM\"}");
+
+        List<ApiParameterError> errors = Assertions
+                .assertThrows(PlatformApiDataValidationException.class, () -> onTestUnit.extractMonthDayNamed("feeOnMonthDay", json))
+                .getErrors();
+
+        Assertions.assertEquals(1, errors.size());
+        Assertions.assertEquals("validation.msg.missing.locale.parameter", errors.get(0).getUserMessageGlobalisationCode());
+    }
+
+    @Test
+    void extractMonthDayNamedRejectsValueNotMatchingMonthDayFormat() {
+        JsonElement json = JsonParser.parseString("{\"feeOnMonthDay\": \"14 Oc\", \"monthDayFormat\": \"dd MMMM\", \"locale\": \"en\"}");
+
+        List<ApiParameterError> errors = Assertions
+                .assertThrows(PlatformApiDataValidationException.class, () -> onTestUnit.extractMonthDayNamed("feeOnMonthDay", json))
+                .getErrors();
+
+        Assertions.assertEquals("validation.msg.invalid.month.day", errors.get(0).getUserMessageGlobalisationCode());
+        Assertions.assertEquals("feeOnMonthDay", errors.get(0).getParameterName());
+        Assertions.assertEquals("14 Oc", errors.get(0).getValue());
     }
 }

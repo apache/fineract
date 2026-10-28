@@ -366,13 +366,14 @@ public class JsonParserHelper {
                 final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                 final String valueAsString = primitive.getAsString();
                 if (StringUtils.isNotBlank(valueAsString)) {
+                    validateMonthDayFormatAndLocale(parameterName, dateFormat, clientApplicationLocale);
                     try {
                         final DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
                                 .appendPattern(dateFormat).toFormatter(clientApplicationLocale).withResolverStyle(ResolverStyle.STRICT);
                         value = MonthDay.parse(valueAsString, formatter);
                     } catch (final IllegalArgumentException | DateTimeException e) {
                         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-                        final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.month.day",
+                        final ApiParameterError error = ApiParameterError.parameterErrorWithValue("validation.msg.invalid.month.day",
                                 "The parameter `" + parameterName + "` is invalid based on the monthDayFormat: `" + dateFormat
                                         + "` and locale: `" + clientApplicationLocale + "` provided:",
                                 parameterName, valueAsString, dateFormat);
@@ -615,6 +616,23 @@ public class JsonParserHelper {
         }
 
         return eventLocalDateTime;
+    }
+
+    private static void validateMonthDayFormatAndLocale(final String parameterName, final String monthDayFormat,
+            final Locale clientApplicationLocale) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        if (StringUtils.isBlank(monthDayFormat)) {
+            dataValidationErrors.add(ApiParameterError.parameterError("validation.msg.missing.monthDayFormat.parameter",
+                    "The parameter `" + parameterName + "` requires a `monthDayFormat` parameter to be passed with it.", parameterName));
+        }
+        if (clientApplicationLocale == null) {
+            dataValidationErrors.add(ApiParameterError.parameterError("validation.msg.missing.locale.parameter",
+                    "The parameter `" + parameterName + "` requires a `locale` parameter to be passed with it.", parameterName));
+        }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
     private static void validateDateFormatAndLocale(final String parameterName, final String dateFormat,
