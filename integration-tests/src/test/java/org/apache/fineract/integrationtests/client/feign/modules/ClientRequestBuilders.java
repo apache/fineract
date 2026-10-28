@@ -54,6 +54,14 @@ public final class ClientRequestBuilders {
                 .locale(LoanTestData.LOCALE);
     }
 
+    /**
+     * Active person client with a unique external id and no {@code submittedOnDate}, so it defaults to the business
+     * date.
+     */
+    public static PostClientsRequest createActivePersonClientWithExternalId(String activationDate) {
+        return createActivePersonClient(activationDate).externalId(UUID.randomUUID().toString());
+    }
+
     public static PostClientsRequest defaultClient() {
         return new PostClientsRequest()//
                 .officeId(ClientTestData.DEFAULT_OFFICE_ID)//

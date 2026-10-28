@@ -30,6 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import io.github.resilience4j.retry.Retry;
@@ -37,6 +38,7 @@ import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import org.apache.fineract.batch.exception.ErrorInfo;
@@ -50,10 +52,12 @@ import org.apache.fineract.commands.provider.CommandHandlerProvider;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.TransactionBoundApplicationEventPublisher;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -73,6 +77,12 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 public class SynchronousCommandProcessingServiceTest {
+
+    private static final String IDK = "idk";
+    private CommandWrapper commandWrapper;
+    private JsonCommand jsonCommand;
+    private AppUser appUser;
+    private NewCommandSourceHandler failingHandler;
 
     @Mock
     private PlatformSecurityContext context;
@@ -101,6 +111,9 @@ public class SynchronousCommandProcessingServiceTest {
 
     @Mock
     private RetryConfigurationAssembler retryConfigurationAssembler;
+
+    @Mock
+    private RecoverableErrorClassifier recoverableErrorClassifier;
 
     @Spy
     private FineractRequestContextHolder fineractRequestContextHolder;
@@ -164,6 +177,7 @@ public class SynchronousCommandProcessingServiceTest {
         reset(idempotencyKeyResolver);
         reset(commandSourceService);
         reset(retryConfigurationAssembler);
+        reset(recoverableErrorClassifier);
     }
 
     @Test
@@ -714,5 +728,132 @@ public class SynchronousCommandProcessingServiceTest {
 
         // The deferred path was not taken: no TransactionSynchronization should have been registered.
         assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+    }
+
+    @Test
+    public void recoverableFailure_savesErrorThroughRenamingSave() {
+        CommandSource commandSource = failingCommand(null);
+        PlatformApiDataValidationException failure = activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(failure)).thenReturn(true);
+
+        assertThrows(PlatformApiDataValidationException.class, () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
+
+        verify(recoverableErrorClassifier).isRecoverable(failure);
+        verify(commandSource).setResultStatusCode(400);
+        verify(commandSource).setStatus(CommandProcessingResultType.ERROR);
+        verify(commandSourceService).saveRecoverableErrorResult(commandSource);
+        verify(commandSourceService, never()).saveResult(commandSource);
+    }
+
+    @Test
+    public void nonRecoverableFailure_keepsKeyThroughPlainSave() {
+        CommandSource commandSource = failingCommand(null);
+        PlatformApiDataValidationException failure = activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(failure)).thenReturn(false);
+
+        assertThrows(PlatformApiDataValidationException.class, () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
+
+        verify(commandSource).setStatus(CommandProcessingResultType.ERROR);
+        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSourceService, never()).saveRecoverableErrorResult(any());
+        verify(commandSource, never()).setIdempotencyKey(anyString());
+    }
+
+    @Test
+    public void recoverableFailureInsideEnclosingTransaction_savesNothing() {
+        CommandSource commandSource = failingCommand(null);
+        activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(any())).thenReturn(true);
+        when(commandSourceService.getInitialCommandSource(commandWrapper, jsonCommand, appUser, IDK)).thenReturn(commandSource);
+
+        BatchRequestContextHolder.setIsEnclosingTransaction(true);
+        try {
+            assertThrows(PlatformApiDataValidationException.class, () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
+        } finally {
+            BatchRequestContextHolder.resetIsEnclosingTransaction();
+        }
+
+        verify(commandSourceService).getInitialCommandSource(commandWrapper, jsonCommand, appUser, IDK);
+        verify(commandSourceService, never()).saveInitial(any(), any(), any(), anyString());
+        verify(commandSourceService, never()).saveResult(any(CommandSource.class));
+        verify(commandSourceService, never()).saveRecoverableErrorResult(any());
+        verifyNoInteractions(recoverableErrorClassifier);
+    }
+
+    @Test
+    public void recoverableFailureWhileApprovingMakerRow_doesNotRenameMakerKey() {
+        long makerCommandId = 7L;
+        CommandSource commandSource = failingCommand(makerCommandId);
+        when(commandSourceService.getCommandSource(makerCommandId)).thenReturn(commandSource);
+        activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(any())).thenReturn(true);
+
+        assertThrows(PlatformApiDataValidationException.class, () -> underTest.executeCommand(commandWrapper, jsonCommand, true));
+
+        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSourceService, never()).saveRecoverableErrorResult(any());
+    }
+
+    @Test
+    public void classifierFailure_fallsBackToPlainSaveAndKeepsOriginalError() {
+        CommandSource commandSource = failingCommand(null);
+        PlatformApiDataValidationException failure = activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(failure)).thenThrow(new IllegalStateException("config lookup failed"));
+
+        PlatformApiDataValidationException thrown = assertThrows(PlatformApiDataValidationException.class,
+                () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
+
+        assertEquals(failure, thrown);
+        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSourceService, never()).saveRecoverableErrorResult(any());
+    }
+
+    @Test
+    public void renameFailure_fallsBackToPlainSaveAndKeepsOriginalError() {
+        CommandSource commandSource = failingCommand(null);
+        PlatformApiDataValidationException failure = activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(failure)).thenReturn(true);
+        when(commandSourceService.saveRecoverableErrorResult(commandSource)).thenThrow(new IllegalStateException("rename failed"));
+
+        PlatformApiDataValidationException thrown = assertThrows(PlatformApiDataValidationException.class,
+                () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
+
+        assertEquals(failure, thrown);
+        verify(commandSourceService).saveRecoverableErrorResult(commandSource);
+        verify(commandSourceService).saveResult(commandSource);
+    }
+
+    private CommandSource failingCommand(Long approvedCommandId) {
+        commandWrapper = getCommandWrapper();
+        jsonCommand = Mockito.mock(JsonCommand.class);
+        when(jsonCommand.commandId()).thenReturn(approvedCommandId);
+        failingHandler = Mockito.mock(NewCommandSourceHandler.class);
+        when(commandHandlerProvider.getHandler(Mockito.any(), Mockito.any())).thenReturn(failingHandler);
+        when(configurationDomainService.isMakerCheckerEnabledForTask(Mockito.any())).thenReturn(false);
+        when(idempotencyKeyResolver.resolve(commandWrapper)).thenReturn(IDK);
+        when(commandSourceService.findCommandSource(commandWrapper, IDK)).thenReturn(null);
+
+        CommandSource commandSource = Mockito.mock(CommandSource.class);
+        when(commandSource.getId()).thenReturn(1L);
+        when(commandSource.getIdempotencyKey()).thenReturn(IDK);
+        when(commandSourceService.getCommandSource(1L)).thenReturn(commandSource);
+
+        appUser = Mockito.mock(AppUser.class);
+        when(appUser.getId()).thenReturn(1L);
+        when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
+        when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, IDK)).thenReturn(commandSource);
+
+        ErrorInfo validationErrorInfo = mock(ErrorInfo.class);
+        when(validationErrorInfo.getMessage()).thenReturn("{\"httpStatusCode\":\"400\"}");
+        when(validationErrorInfo.getStatusCode()).thenReturn(400);
+        when(commandSourceService.generateErrorInfo(any())).thenReturn(validationErrorInfo);
+        return commandSource;
+    }
+
+    private PlatformApiDataValidationException activationInFuture() {
+        PlatformApiDataValidationException failure = new PlatformApiDataValidationException(List.of(ApiParameterError.parameterError(
+                "error.msg.clients.activationDate.in.the.future", "Activation date cannot be in the future.", "activationDate")));
+        when(failingHandler.processCommand(jsonCommand)).thenThrow(failure);
+        return failure;
     }
 }
