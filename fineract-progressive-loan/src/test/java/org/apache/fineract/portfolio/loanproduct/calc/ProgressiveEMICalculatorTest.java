@@ -5281,6 +5281,22 @@ class ProgressiveEMICalculatorTest {
         Assertions.assertEquals(totalInterestDue, toDouble(interestScheduleModel.getTotalDueInterest()));
     }
 
+    private static void checkTotalInterest(final ProgressiveLoanInterestScheduleModel interestScheduleModel, final double totalInterestDue,
+            final double totalInterestPaid) {
+        Assertions.assertEquals(totalInterestDue, toDouble(interestScheduleModel.getTotalDueInterest()), 0.001,
+                "Total interest due after the rate change");
+        Assertions.assertEquals(totalInterestPaid, toDouble(interestScheduleModel.getTotalPaidInterest()), 0.001,
+                "Total interest already paid after the rate change");
+    }
+
+    private static double sumMoney(final double... amounts) {
+        BigDecimal total = BigDecimal.ZERO;
+        for (final double amount : amounts) {
+            total = total.add(new BigDecimal(Double.toString(amount)));
+        }
+        return total.setScale(2, RoundingMode.HALF_EVEN).doubleValue();
+    }
+
     private static void checkPeriod(final ProgressiveLoanInterestScheduleModel interestScheduleModel, final int repaymentIdx,
             final int interestIdx, final double emiValue, final double rateFactor, final double interestDue, final double principalDue,
             final double remaingBalance) {
@@ -5589,6 +5605,263 @@ class ProgressiveEMICalculatorTest {
                 "A lone amortizing balloon period must not re-equalize onto grace periods");
         final double totalPrincipal = repaymentPeriods.stream().mapToDouble(rp -> toDouble(rp.getDuePrincipal())).sum();
         Assertions.assertEquals(100.0, totalPrincipal, 0.01, "All principal must still be scheduled");
+    }
+
+    /**
+     * Bullet loan, actual days over a 360-day year, rescheduled from 20% to 15% on 1 May 2026.
+     *
+     * <p>
+     * Grace covers every repayment except the last, so each of those installments is interest only and the outstanding
+     * principal stays 100,000. Interest due on a row must be the interest that row accrued:
+     * {@code 100,000 × rate × actual days ÷ 360}, rounded half-even to the cent. The rate is still applied from the day
+     * before the submitted date, so the repayment due 1 May covers 29 days at 20% and 30 April at 15%. The balloon
+     * bills only its own accrual plus the 100,000 principal. Carrying unpaid interest onto the balloon fails this test.
+     */
+    @Test
+    public void test_principalGrace_bullet_interestRateChange_billsPeriodAccrual() {
+        final ProgressiveLoanInterestScheduleModel interestSchedule = bulletSchedule();
+        emiCalculator.changeInterestRate(interestSchedule, LocalDate.of(2026, 5, 1), BigDecimal.valueOf(15));
+
+        double principal = 100_000.0;
+        checkPeriod(interestSchedule, 0, accrued(principal, 0.20, 31), accrued(principal, 0.20, 31), 0.0, principal, false);
+        checkPeriod(interestSchedule, 1, accrued(principal, 0.20, 28), accrued(principal, 0.20, 28), 0.0, principal, false);
+        checkPeriod(interestSchedule, 2, accrued(principal, 0.20, 31), accrued(principal, 0.20, 31), 0.0, principal, false);
+        // Submitted 1 May is still effective 30 April: 29 days at 20% and 1 day at 15%.
+        final double aprilInterest = roundMoney(unroundedAccrual(principal, 0.20, 29) + unroundedAccrual(principal, 0.15, 1));
+        checkPeriod(interestSchedule, 3, aprilInterest, aprilInterest, 0.0, principal, false);
+
+        // 31, 30, 31, 31, 30, 31, 30, 31 days from 1 May through the 1 Jan balloon.
+        final int[] daysAfterChange = { 31, 30, 31, 31, 30, 31, 30, 31 };
+        for (int offset = 0; offset < daysAfterChange.length; offset++) {
+            final int periodIdx = 4 + offset;
+            final double interest = accrued(principal, 0.15, daysAfterChange[offset]);
+            final RepaymentPeriod period = interestSchedule.repaymentPeriods().get(periodIdx);
+            Assertions.assertEquals(interest, toDouble(period.getDueInterest()), 0.001, "Period due " + period.getDueDate()
+                    + " must bill its accrual. The current cap leaves part of that interest unrecognized.");
+            final boolean balloon = periodIdx == 11;
+            checkPeriod(interestSchedule, periodIdx, balloon ? roundMoney(principal + interest) : interest, interest,
+                    balloon ? principal : 0.0, balloon ? 0.0 : principal, false);
+            Assertions.assertEquals(0.0, toDouble(interestSchedule.repaymentPeriods().get(periodIdx).getUnrecognizedInterest()), 0.001,
+                    "Period " + periodIdx + " must bill its accrual, leaving nothing unrecognized");
+        }
+        double totalDue = sumMoney(accrued(principal, 0.20, 31), accrued(principal, 0.20, 28), accrued(principal, 0.20, 31), aprilInterest);
+        for (final int days : daysAfterChange) {
+            totalDue = sumMoney(totalDue, accrued(principal, 0.15, days));
+        }
+        checkTotalInterest(interestSchedule, totalDue, 0.0);
+    }
+
+    private static double accrued(final double principal, final double annualRate, final int days) {
+        return roundMoney(unroundedAccrual(principal, annualRate, days));
+    }
+
+    private static double unroundedAccrual(final double principal, final double annualRate, final int days) {
+        return principal * annualRate * days / 360.0;
+    }
+
+    private static double roundMoney(final double amount) {
+        return BigDecimal.valueOf(amount).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
+    }
+
+    /**
+     * The paid floor on a grace row has to hold when that row's interest is already paid and a later rate change would
+     * otherwise drop the installment below the amount collected.
+     *
+     * <p>
+     * May (due 1 June) is paid in full at 20%. The rate then changes to 15% with effect 15 May, so that row is partly
+     * at the old rate and partly at the new one and its accrual falls below what was paid. The installment stays at the
+     * amount paid, the payment stays on that row, principal due stays 0, and every later grace row still bills only its
+     * own 15% accrual.
+     */
+    @Test
+    public void test_principalGrace_bullet_interestRateChange_paidGraceRow_keepsInstallmentAtAmountPaid() {
+        final ProgressiveLoanInterestScheduleModel interestSchedule = bulletSchedule();
+        final double principal = 100_000.0;
+        final RepaymentPeriod mayPeriod = interestSchedule.repaymentPeriods().get(4);
+        final double mayInterestPaid = accrued(principal, 0.20, 31);
+        Assertions.assertEquals(mayInterestPaid, toDouble(mayPeriod.getDueInterest()), 0.001);
+        emiCalculator.payInterest(interestSchedule, mayPeriod.getFromDate(), mayPeriod.getDueDate(), LocalDate.of(2026, 5, 10),
+                toMoney(mayInterestPaid));
+
+        // Submitted 16 May is effective 15 May, inside the period due 1 June.
+        emiCalculator.changeInterestRate(interestSchedule, LocalDate.of(2026, 5, 16), BigDecimal.valueOf(15));
+
+        checkPeriod(interestSchedule, 0, accrued(principal, 0.20, 31), accrued(principal, 0.20, 31), 0.0, principal, false);
+        checkPeriod(interestSchedule, 1, accrued(principal, 0.20, 28), accrued(principal, 0.20, 28), 0.0, principal, false);
+        checkPeriod(interestSchedule, 2, accrued(principal, 0.20, 31), accrued(principal, 0.20, 31), 0.0, principal, false);
+        checkPeriod(interestSchedule, 3, accrued(principal, 0.20, 30), accrued(principal, 0.20, 30), 0.0, principal, false);
+
+        final RepaymentPeriod paidMay = interestSchedule.repaymentPeriods().get(4);
+        Assertions.assertTrue(paidMay.isPrincipalPaymentGrace(), "The paid May row must stay principal grace");
+        Assertions.assertEquals(mayInterestPaid, toDouble(paidMay.getEmi()), 0.001,
+                "A rate cut must not drop the installment below interest already paid");
+        Assertions.assertEquals(mayInterestPaid, toDouble(paidMay.getDueInterest()), 0.001);
+        Assertions.assertEquals(mayInterestPaid, toDouble(paidMay.getPaidInterest()), 0.001, "The May payment must stay on May");
+        Assertions.assertEquals(0.0, toDouble(paidMay.getDuePrincipal()), 0.001, "The paid grace row must not pick up principal");
+        Assertions.assertEquals(principal, toDouble(paidMay.getOutstandingLoanBalance()), 0.01);
+        Assertions.assertEquals(0.0, toDouble(paidMay.getUnrecognizedInterest()), 0.001);
+        Assertions.assertTrue(paidMay.isFullyPaid());
+
+        // 30, 31, 31, 30, 31, 30, 31 days from 1 June through the 1 January balloon, all at 15%.
+        final int[] daysAfterMay = { 30, 31, 31, 30, 31, 30, 31 };
+        for (int offset = 0; offset < daysAfterMay.length; offset++) {
+            final int periodIdx = 5 + offset;
+            final double interest = accrued(principal, 0.15, daysAfterMay[offset]);
+            final RepaymentPeriod period = interestSchedule.repaymentPeriods().get(periodIdx);
+            final boolean balloon = periodIdx == 11;
+            checkPeriod(interestSchedule, periodIdx, balloon ? roundMoney(principal + interest) : interest, interest,
+                    balloon ? principal : 0.0, balloon ? 0.0 : principal, false);
+            Assertions.assertEquals(0.0, toDouble(period.getPaidInterest()), 0.001,
+                    "Period " + periodIdx + " must not receive May's payment");
+            Assertions.assertEquals(0.0, toDouble(period.getUnrecognizedInterest()), 0.001,
+                    "Period " + periodIdx + " must bill its own accrual");
+        }
+        // May stays at the interest already collected, which is higher than the rewritten accrual.
+        double totalDue = sumMoney(accrued(principal, 0.20, 31), accrued(principal, 0.20, 28), accrued(principal, 0.20, 31),
+                accrued(principal, 0.20, 30), mayInterestPaid);
+        for (final int days : daysAfterMay) {
+            totalDue = sumMoney(totalDue, accrued(principal, 0.15, days));
+        }
+        checkTotalInterest(interestSchedule, totalDue, mayInterestPaid);
+    }
+
+    /**
+     * Till-rest-frequency prepay parks outstanding interest on an already closed grace row. One hundred of January's
+     * interest is still unpaid, so that is the leftover stored on the row due 1 June. The paid floor has to subtract
+     * it: the installment becomes the amount paid minus that leftover, which is below both the amount paid and the
+     * floor that ignores the leftover.
+     */
+    @Test
+    public void test_principalGrace_bullet_interestRateChange_futureUnrecognizedInterest_lowersPaidFloor() {
+        final ProgressiveLoanInterestScheduleModel interestSchedule = bulletSchedule();
+        final double principal = 100_000.0;
+        final double leftover = 100.0;
+        payPeriodInterest(interestSchedule, 0, roundMoney(accrued(principal, 0.20, 31) - leftover));
+        payPeriodInterest(interestSchedule, 1, accrued(principal, 0.20, 28));
+        payPeriodInterest(interestSchedule, 2, accrued(principal, 0.20, 31));
+        payPeriodInterest(interestSchedule, 3, accrued(principal, 0.20, 30));
+        final RepaymentPeriod mayPeriod = interestSchedule.repaymentPeriods().get(4);
+        final double mayInterestPaid = accrued(principal, 0.20, 31);
+        // An in-period prepay under "calculate till rest frequency" is applied as of the installment due date.
+        payPeriodInterest(interestSchedule, 4, mayInterestPaid);
+        Assertions.assertTrue(mayPeriod.isFullyPaid(), "The row due 1 June is closed before the prepay measures leftover interest");
+
+        final OutstandingDetails outstandingTillDue = emiCalculator.getOutstandingAmountsTillDate(interestSchedule, mayPeriod.getDueDate());
+        Assertions.assertEquals(leftover, toDouble(outstandingTillDue.getOutstandingInterest()), 0.001);
+        mayPeriod.setFutureUnrecognizedInterest(outstandingTillDue.getOutstandingInterest());
+        final Money futureUnrecognizedInterest = mayPeriod.getFutureUnrecognizedInterest();
+
+        emiCalculator.changeInterestRate(interestSchedule, LocalDate.of(2026, 5, 16), BigDecimal.valueOf(15));
+
+        final RepaymentPeriod paidMay = interestSchedule.repaymentPeriods().get(4);
+        final Money paidFloor = paidFloor(paidMay, futureUnrecognizedInterest);
+        final Money expectedEmi = paidMay.getCalculatedDueInterest().isGreaterThan(paidFloor) ? paidMay.getCalculatedDueInterest()
+                : paidFloor;
+        Assertions.assertEquals(toDouble(expectedEmi), toDouble(paidMay.getEmi()), 0.001);
+        Assertions.assertEquals(roundMoney(mayInterestPaid - leftover), toDouble(paidMay.getEmi()), 0.001,
+                "The installment must fall by the leftover. Ignoring it would leave the bill at the amount paid");
+        Assertions.assertTrue(paidMay.isPrincipalPaymentGrace());
+        Assertions.assertEquals(0.0, toDouble(paidMay.getDuePrincipal()), 0.001, "The leftover must not become principal due");
+        Assertions.assertEquals(principal, toDouble(interestSchedule.repaymentPeriods().get(11).getDuePrincipal()), 0.01,
+                "The balloon must still carry the full principal");
+        final double scheduledPrincipal = interestSchedule.repaymentPeriods().stream().mapToDouble(rp -> toDouble(rp.getDuePrincipal()))
+                .sum();
+        Assertions.assertEquals(principal, scheduledPrincipal, 0.01, "Principal must not be created or dropped");
+        // January still bills its full accrual. The unpaid 100 is that row's outstanding interest, not a second charge
+        // on May. May stays at the amount collected.
+        final double januaryDue = accrued(principal, 0.20, 31);
+        final int[] daysAfterMay = { 30, 31, 31, 30, 31, 30, 31 };
+        double totalDue = sumMoney(januaryDue, accrued(principal, 0.20, 28), accrued(principal, 0.20, 31), accrued(principal, 0.20, 30),
+                mayInterestPaid);
+        for (final int days : daysAfterMay) {
+            totalDue = sumMoney(totalDue, accrued(principal, 0.15, days));
+        }
+        final double totalPaid = sumMoney(roundMoney(januaryDue - leftover), accrued(principal, 0.20, 28), accrued(principal, 0.20, 31),
+                accrued(principal, 0.20, 30), mayInterestPaid);
+        checkTotalInterest(interestSchedule, totalDue, totalPaid);
+    }
+
+    /**
+     * The same prepay with every earlier grace row still unpaid stores all of that outstanding interest on the closed
+     * row. The leftover is larger than what was paid, so the floor drops to zero. The installment is this period's own
+     * accrual, and the leftover stays beside it, so it does not become principal and the balloon keeps the 100,000.
+     * Interest due on the row still includes the leftover, because calculated interest already does. That inclusion is
+     * unchanged here.
+     */
+    @Test
+    public void test_principalGrace_bullet_interestRateChange_futureUnrecognizedInterest_doesNotBecomePrincipal() {
+        final ProgressiveLoanInterestScheduleModel interestSchedule = bulletSchedule();
+        final double principal = 100_000.0;
+        final RepaymentPeriod mayPeriod = interestSchedule.repaymentPeriods().get(4);
+        final double mayInterestPaid = accrued(principal, 0.20, 31);
+        payPeriodInterest(interestSchedule, 4, mayInterestPaid);
+        Assertions.assertTrue(mayPeriod.isFullyPaid());
+
+        final OutstandingDetails outstandingTillDue = emiCalculator.getOutstandingAmountsTillDate(interestSchedule, mayPeriod.getDueDate());
+        Assertions.assertEquals(6_666.67, toDouble(outstandingTillDue.getOutstandingInterest()), 0.001);
+        mayPeriod.setFutureUnrecognizedInterest(outstandingTillDue.getOutstandingInterest());
+        final Money futureUnrecognizedInterest = mayPeriod.getFutureUnrecognizedInterest();
+
+        emiCalculator.changeInterestRate(interestSchedule, LocalDate.of(2026, 5, 16), BigDecimal.valueOf(15));
+
+        final RepaymentPeriod paidMay = interestSchedule.repaymentPeriods().get(4);
+        final Money paidFloor = paidFloor(paidMay, futureUnrecognizedInterest);
+        Assertions.assertTrue(paidFloor.isZero(), "The leftover is larger than the amount paid, so the floor is zero");
+        // 1 May through 14 May stay at 20%; 15 May through 31 May are at 15%.
+        final double mayAccrual = roundMoney(unroundedAccrual(principal, 0.20, 14) + unroundedAccrual(principal, 0.15, 17));
+        Assertions.assertEquals(mayAccrual, toDouble(paidMay.getEmi()), 0.001,
+                "The leftover stays beside the installment, so the installment is this period's own accrual");
+        final double earlierInterest = sumMoney(accrued(principal, 0.20, 31), accrued(principal, 0.20, 28), accrued(principal, 0.20, 31),
+                accrued(principal, 0.20, 30));
+        final double mayDueInterest = sumMoney(mayAccrual, earlierInterest);
+        // Known existing behaviour, not the charge this change intends: calculated interest already includes the
+        // leftover, so this row's interest due includes January–April interest that those rows also bill.
+        Assertions.assertEquals(mayDueInterest, toDouble(paidMay.getDueInterest()), 0.001,
+                "Calculated interest still includes the leftover, so interest due on this row includes it too");
+        Assertions.assertEquals(0.0, toDouble(paidMay.getUnrecognizedInterest()), 0.001,
+                "The leftover is inside interest due, so it must not also spill onto the next repayment");
+        Assertions.assertTrue(paidMay.isPrincipalPaymentGrace());
+        Assertions.assertEquals(0.0, toDouble(paidMay.getDuePrincipal()), 0.001,
+                "Future unrecognized interest must not be billed as principal on a grace row");
+        Assertions.assertEquals(principal, toDouble(interestSchedule.repaymentPeriods().get(11).getDuePrincipal()), 0.01);
+        final double scheduledPrincipal = interestSchedule.repaymentPeriods().stream().mapToDouble(rp -> toDouble(rp.getDuePrincipal()))
+                .sum();
+        Assertions.assertEquals(principal, scheduledPrincipal, 0.01, "The balloon must not lose principal to the grace row");
+        Assertions.assertEquals(mayInterestPaid, toDouble(interestSchedule.getTotalPaidInterest()), 0.001,
+                "Cash collected is only the May payment");
+    }
+
+    private void payPeriodInterest(final ProgressiveLoanInterestScheduleModel interestSchedule, final int periodIndex,
+            final double interest) {
+        final RepaymentPeriod period = interestSchedule.repaymentPeriods().get(periodIndex);
+        emiCalculator.payInterest(interestSchedule, period.getFromDate(), period.getDueDate(), period.getDueDate(), toMoney(interest));
+    }
+
+    private Money paidFloor(final RepaymentPeriod period, final Money futureUnrecognizedInterest) {
+        final Money raw = period.getTotalPaidAmount().minus(period.getTotalCreditedAmount(), mc).minus(futureUnrecognizedInterest, mc);
+        return raw.isLessThanZero() ? raw.zero() : raw;
+    }
+
+    private ProgressiveLoanInterestScheduleModel bulletSchedule() {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+        LocalDate cursor = LocalDate.of(2026, 1, 1);
+        for (int i = 0; i < 12; i++) {
+            final LocalDate next = cursor.plusMonths(1);
+            expectedRepaymentPeriods.add(periodData(cursor, next));
+            cursor = next;
+        }
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(BigDecimal.valueOf(20.0));
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.ACTUAL.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getNumberOfRepayments()).thenReturn(12);
+        Mockito.when(loanProductRelatedDetail.getGraceOnPrincipalPayment()).thenReturn(11);
+        Mockito.when(loanProductRelatedDetail.getGraceOnInterestPayment()).thenReturn(0);
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator
+                .generatePeriodInterestScheduleModel(expectedRepaymentPeriods, loanProductRelatedDetail, null, mc);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2026, 1, 1), toMoney(100_000.0));
+        return interestSchedule;
     }
 
     /**
@@ -5986,6 +6259,65 @@ class ProgressiveEMICalculatorTest {
         for (int idx = 0; idx < count; idx++) {
             periods.get(idx).addPaidPrincipalAmount(toMoney(20.0));
         }
+    }
+
+    /**
+     * Principal grace and interest-payment grace together. The first two rows defer their interest and must not bill it
+     * as principal. The third row is still principal grace, so it bills that deferred interest once and still takes no
+     * principal.
+     */
+    @Test
+    public void test_principalGraceAndInterestGrace_interestGraceRowsHaveNoPrincipalDue() {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(BigDecimal.valueOf(7.0));
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getNumberOfRepayments()).thenReturn(6);
+        Mockito.when(loanProductRelatedDetail.getGraceOnPrincipalPayment()).thenReturn(3);
+        Mockito.when(loanProductRelatedDetail.getGraceOnInterestPayment()).thenReturn(2);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator
+                .generatePeriodInterestScheduleModel(expectedRepaymentPeriods, loanProductRelatedDetail, null, mc);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), toMoney(100.0));
+
+        for (int idx = 0; idx < 2; idx++) {
+            final RepaymentPeriod period = interestSchedule.repaymentPeriods().get(idx);
+            Assertions.assertTrue(period.isInterestPaymentGrace(), "Period " + idx + " is inside interest-payment grace");
+            Assertions.assertTrue(period.isPrincipalPaymentGrace(), "Period " + idx + " is inside principal grace");
+            Assertions.assertEquals(0.0, toDouble(period.getEmi()), 0.001,
+                    "Period " + idx + " defers its interest, so the installment is 0");
+            Assertions.assertEquals(0.0, toDouble(period.getDueInterest()), 0.001);
+            Assertions.assertEquals(0.0, toDouble(period.getDuePrincipal()), 0.001,
+                    "Deferred interest must not be billed as principal on an interest-grace row");
+            Assertions.assertEquals(100.0, toDouble(period.getOutstandingLoanBalance()), 0.01);
+        }
+
+        final RepaymentPeriod firstRowAfterInterestGrace = interestSchedule.repaymentPeriods().get(2);
+        Assertions.assertFalse(firstRowAfterInterestGrace.isInterestPaymentGrace());
+        Assertions.assertTrue(firstRowAfterInterestGrace.isPrincipalPaymentGrace());
+        Assertions.assertEquals(0.0, toDouble(firstRowAfterInterestGrace.getDuePrincipal()), 0.001,
+                "The row after interest grace is still principal grace");
+        Assertions.assertEquals(0.0, toDouble(firstRowAfterInterestGrace.getUnrecognizedInterest()), 0.001,
+                "The deferred interest is billed on this row, not pushed on again");
+        final double ownAccrual = firstRowAfterInterestGrace.getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest)
+                .reduce(BigDecimal.ZERO, BigDecimal::add).doubleValue();
+        Assertions.assertTrue(toDouble(firstRowAfterInterestGrace.getDueInterest()) > ownAccrual,
+                "This row bills the interest deferred from the interest-grace rows as well as its own accrual");
+        Assertions.assertEquals(toDouble(firstRowAfterInterestGrace.getCalculatedDueInterest()),
+                toDouble(firstRowAfterInterestGrace.getDueInterest()), 0.001);
+
+        final double scheduledPrincipal = interestSchedule.repaymentPeriods().stream().mapToDouble(rp -> toDouble(rp.getDuePrincipal()))
+                .sum();
+        Assertions.assertEquals(100.0, scheduledPrincipal, 0.01, "Principal grace must not create or drop principal");
     }
 
     @Test

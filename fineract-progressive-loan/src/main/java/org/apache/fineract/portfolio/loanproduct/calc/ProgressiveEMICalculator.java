@@ -1869,7 +1869,39 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             // Only rewrite EMI for periods inside the slice being recalculated. Periods before the slice keep
             // whatever principal they already have (e.g. after re-amortization); the grace sticker follows that.
             if (!period.getDueDate().isBefore(sliceFirstDueDate)) {
-                final Money interestOnlyEmi = period.getDueInterest();
+                // Due interest is already limited by the installment just solved. A grace row has to bill the
+                // interest this period accrued, including when that is more than the solved installment, or the
+                // difference is unrecognized and pushed onto a later repayment. The solved installment may still
+                // be charging principal on earlier rows in this slice, so refresh this row's balance from the
+                // previous row after that row's installment has been raised, then bill the uncapped interest.
+                period.getInterestPeriods().forEach(InterestPeriod::updateOutstandingLoanBalance);
+                if (period.isInterestPaymentGrace()) {
+                    // Interest-payment grace defers this row's accrual to the next row as unrecognized interest.
+                    // getDueInterest() is the interest already paid, which is zero at origination. Billing the
+                    // calculated accrual would make principal due equal that accrual, and the next row would bill
+                    // the same interest again.
+                    final Money deferredInstallment = period.getDueInterest();
+                    period.setEmi(deferredInstallment);
+                    period.setOriginalEmi(deferredInstallment);
+                    period.setPrincipalPaymentGrace(true);
+                    return;
+                }
+                final MathContext mc = scheduleModel.mc();
+                // A row is fully paid when emi + credited + future unrecognized interest == total paid, so the
+                // installment cannot fall below total paid − credited − future unrecognized interest. Leaving the
+                // last term out holds the installment too high by exactly that leftover. getTotalPaidAmount() is
+                // paid principal + paid interest. negativeToZero covers a leftover larger than the net paid amount.
+                final Money paidFloor = MathUtil.negativeToZero(period.getTotalPaidAmount().minus(period.getTotalCreditedAmount(), mc)
+                        .minus(period.getFutureUnrecognizedInterest(), mc));
+                // Calculated due interest already includes future unrecognized interest, and the effective
+                // installment (emi + credited + future unrecognized interest) adds that leftover again. Putting
+                // the whole calculated figure into the installment makes the difference principal due. Keep the
+                // leftover beside the installment. The floor still subtracts it, so money paid toward the leftover
+                // does not hold the installment up. Due interest is left as it is: a row is fully paid only when
+                // emi + credited + the full leftover equals total paid.
+                final Money interestInsideInstallment = MathUtil
+                        .negativeToZero(period.getCalculatedDueInterest().minus(period.getFutureUnrecognizedInterest(), mc));
+                final Money interestOnlyEmi = MathUtil.max(interestInsideInstallment, paidFloor, true);
                 period.setEmi(interestOnlyEmi);
                 period.setOriginalEmi(interestOnlyEmi);
                 period.setPrincipalPaymentGrace(true);
