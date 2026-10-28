@@ -599,6 +599,23 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
         return deleteDatatableEntries(dataTableName, appTableId, datatableId, command);
     }
 
+    @Transactional
+    @Override
+    public void deleteDatatableEntriesOfEntity(final EntityTables entityTable, final Long appTableId) {
+        final List<String> dataTableNames = jdbcTemplate.queryForList(
+                "SELECT registered_table_name FROM x_registered_table WHERE application_table_name = ?", String.class,
+                entityTable.getName());
+        final String fkColumn = datatableUtil.getFKField(entityTable);
+        for (final String dataTableName : dataTableNames) {
+            datatableUtil.validateDatatableName(dataTableName);
+            final String sql = "DELETE FROM " + sqlGenerator.escape(dataTableName) + " WHERE " + sqlGenerator.escape(fkColumn) + " = ?";
+            if (jdbcTemplate.update(sql, appTableId) > 0) { // NOSONAR
+                businessEventNotifierService.notifyPostBusinessEvent(new DatatableEntryDeletedBusinessEvent(
+                        new DatatableEntryDetails(dataTableName, entityTable, null, appTableId, null)));
+            }
+        }
+    }
+
     private void registerDataTable(final String entityName, final String dataTableName, final String entitySubType,
             final Integer category) {
         datatableUtil.resolveEntity(entityName);

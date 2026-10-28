@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableWriteService;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanApplicationModifiedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanCreatedBusinessEvent;
@@ -61,13 +62,14 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
     private final Optional<LoanOriginatorLinkingService> loanOriginatorLinkingService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final DatatableWriteService datatableWriteService;
 
     public WorkingCapitalLoanApplicationWritePlatformServiceImpl(WorkingCapitalLoanApplicationDataValidator validator,
             WorkingCapitalLoanRepository repository, WorkingCapitalLoanAssembler assembler, WorkingCapitalLoanNoteRepository noteRepository,
             ProjectedAmortizationLoanModelRepository projectedAmortizationLoanModelRepository,
             @Qualifier("workingCapitalLoanOriginatorLinkingServiceImpl") Optional<LoanOriginatorLinkingService> loanOriginatorLinkingService,
             EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
-            BusinessEventNotifierService businessEventNotifierService) {
+            BusinessEventNotifierService businessEventNotifierService, DatatableWriteService datatableWriteService) {
         this.validator = validator;
         this.repository = repository;
         this.assembler = assembler;
@@ -76,6 +78,7 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
         this.loanOriginatorLinkingService = loanOriginatorLinkingService;
         this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
         this.businessEventNotifierService = businessEventNotifierService;
+        this.datatableWriteService = datatableWriteService;
     }
 
     @Transactional
@@ -160,6 +163,8 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
         final List<WorkingCapitalLoanNote> relatedNotes = this.noteRepository.findByWcLoanId(loan.getId());
         this.noteRepository.deleteAllInBatch(relatedNotes);
         projectedAmortizationLoanModelRepository.findByLoanId(loan.getId()).ifPresent(projectedAmortizationLoanModelRepository::delete);
+        // a datatable entry references the loan, so it goes first
+        this.datatableWriteService.deleteDatatableEntriesOfEntity(EntityTables.WC_LOAN, loan.getId());
         this.repository.delete(loan);
 
         return new CommandProcessingResultBuilder() //
