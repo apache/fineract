@@ -63,6 +63,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapita
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.serialization.WorkingCapitalAmountScaleValidator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -222,6 +223,8 @@ public class WorkingCapitalLoanDataValidator {
 
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.discountAmountParamName).value(discountAmount).ignoreIfNull()
                 .zeroOrPositiveAmount();
+        WorkingCapitalAmountScaleValidator.validateNotFinerThanCurrency(baseDataValidator,
+                WorkingCapitalLoanConstants.discountAmountParamName, discountAmount, currencyDigitsOf(loan));
 
         final BigDecimal currentDiscount = loan.getLoanProductRelatedDetails() != null
                 ? loan.getLoanProductRelatedDetails().getDiscountApproved()
@@ -279,6 +282,8 @@ public class WorkingCapitalLoanDataValidator {
 
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName).value(amount).notNull()
                 .positiveAmount();
+        WorkingCapitalAmountScaleValidator.validateNotFinerThanCurrency(baseDataValidator,
+                WorkingCapitalLoanConstants.transactionAmountParamName, amount, currencyDigitsOf(loan));
         if (amount != null && remainingDiscountAmount != null && amount.compareTo(remainingDiscountAmount) > 0) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName)
                     .failWithCode("cannot.be.more.than.discount.fee");
@@ -601,6 +606,8 @@ public class WorkingCapitalLoanDataValidator {
                 .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, element, new HashSet<>());
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName).value(transactionAmount).notNull()
                 .positiveAmount();
+        WorkingCapitalAmountScaleValidator.validateNotFinerThanCurrency(baseDataValidator,
+                WorkingCapitalLoanConstants.transactionAmountParamName, transactionAmount, currencyDigitsOf(loan));
         if (transactionAmount != null && loan.getApprovedPrincipal() != null
                 && transactionAmount.compareTo(loan.getApprovedPrincipal()) > 0) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName)
@@ -612,6 +619,8 @@ public class WorkingCapitalLoanDataValidator {
                     .extractBigDecimalNamed(WorkingCapitalLoanConstants.discountAmountParamName, element, new HashSet<>());
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.discountAmountParamName).value(discountAmount).ignoreIfNull()
                     .zeroOrPositiveAmount();
+            WorkingCapitalAmountScaleValidator.validateNotFinerThanCurrency(baseDataValidator,
+                    WorkingCapitalLoanConstants.discountAmountParamName, discountAmount, currencyDigitsOf(loan));
 
             // discountAmount must be >= 0 and <= approved discount (approval-time) discount
             final BigDecimal currentDiscount = loan.getLoanProductRelatedDetails() != null
@@ -810,6 +819,8 @@ public class WorkingCapitalLoanDataValidator {
         final BigDecimal delta = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
                 element, new HashSet<>());
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName).value(delta).notNull();
+        WorkingCapitalAmountScaleValidator.validateNotFinerThanCurrency(baseDataValidator,
+                WorkingCapitalLoanConstants.transactionAmountParamName, delta, currencyDigitsOf(loan));
         if (delta != null && delta.compareTo(BigDecimal.ZERO) == 0) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName)
                     .failWithCode("zero.amount.not.supported");
@@ -939,6 +950,8 @@ public class WorkingCapitalLoanDataValidator {
                 .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, element, new HashSet<>());
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName).value(transactionAmount).notNull()
                 .positiveAmount();
+        WorkingCapitalAmountScaleValidator.validateNotFinerThanCurrency(baseDataValidator,
+                WorkingCapitalLoanConstants.transactionAmountParamName, transactionAmount, currencyDigitsOf(loan));
 
         validateClassificationIdExists(baseDataValidator, element);
 
@@ -1103,6 +1116,8 @@ public class WorkingCapitalLoanDataValidator {
                 .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, element, new HashSet<>());
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName).value(transactionAmount).notNull()
                 .positiveAmount();
+        WorkingCapitalAmountScaleValidator.validateNotFinerThanCurrency(baseDataValidator,
+                WorkingCapitalLoanConstants.transactionAmountParamName, transactionAmount, currencyDigitsOf(loan));
 
         final WorkingCapitalLoanBalance balance = loan.getBalance();
         if (transactionAmount != null && balance != null) {
@@ -1196,6 +1211,8 @@ public class WorkingCapitalLoanDataValidator {
                 .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, element, new HashSet<>());
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName).value(transactionAmount).notNull()
                 .positiveAmount();
+        WorkingCapitalAmountScaleValidator.validateNotFinerThanCurrency(baseDataValidator,
+                WorkingCapitalLoanConstants.transactionAmountParamName, transactionAmount, currencyDigitsOf(loan));
 
         final Integer classificationId = this.fromApiJsonHelper
                 .extractIntegerSansLocaleNamed(WorkingCapitalLoanConstants.classificationIdParamName, element);
@@ -1436,6 +1453,8 @@ public class WorkingCapitalLoanDataValidator {
                 .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, element, new HashSet<>());
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionAmountParamName).value(transactionAmount).notNull()
                 .zeroOrPositiveAmount();
+        WorkingCapitalAmountScaleValidator.validateNotFinerThanCurrency(baseDataValidator,
+                WorkingCapitalLoanConstants.transactionAmountParamName, transactionAmount, currencyDigitsOf(loan));
 
         // Zero amount is undo: transactionDate is unused. A positive amount creates a replacement and requires a date.
         final boolean createsReplacement = MathUtil.isGreaterThanZero(transactionAmount);
@@ -1542,5 +1561,9 @@ public class WorkingCapitalLoanDataValidator {
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private static Integer currencyDigitsOf(final WorkingCapitalLoan loan) {
+        return loan.getCurrency() != null ? loan.getCurrency().getDigitsAfterDecimal() : null;
     }
 }

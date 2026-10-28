@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -38,6 +39,7 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -127,6 +129,15 @@ class WorkingCapitalLoanDataValidatorAdjustByDeltaTest {
 
         assertThat(ex.getErrors()).extracting(ApiParameterError::getUserMessageGlobalisationCode)
                 .containsExactly("validation.msg.WORKINGCAPITALLOAN.transactionDate.cannot.be.a.future.date");
+    }
+
+    @Test
+    void shouldRejectADeltaFinerThanTheCurrency() {
+        when(loan.getCurrency()).thenReturn(new MonetaryCurrency("USD", 2, null));
+        final PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateAdjustByDelta(deltaCommand("-40.005"), loan, transaction));
+        assertThat(ex.getErrors()).anyMatch(error -> error.getParameterName().equals(WorkingCapitalLoanConstants.transactionAmountParamName)
+                && error.getUserMessageGlobalisationCode().endsWith("scale.is.greater.than.2"));
     }
 
     @Test
