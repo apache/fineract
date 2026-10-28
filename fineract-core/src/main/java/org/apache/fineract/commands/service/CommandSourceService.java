@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
@@ -50,12 +51,16 @@ import org.springframework.transaction.annotation.Transactional;
  * Command source persistence and transactional command execution helpers. The initial command source is persisted
  * separately for idempotency, while command execution and successful result persistence run in one transaction.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CommandSourceService {
 
     public static final String COMMAND_MASK_VALUE = "***";
     public static final String COMMAND_SANITIZE_ALL = "SANITIZE_ALL";
+    private static final String RECOVERABLE_ERROR_KEY_SUFFIX = "_RE";
+    private static final String LIKE_ESCAPE = "!";
+    private static final int MAX_RECOVERABLE_RENAME_ATTEMPTS = 3;
 
     private final ConfigurationDomainService configurationDomainService;
     private final CommandSourceRepository commandSourceRepository;
@@ -68,12 +73,50 @@ public class CommandSourceService {
             CommandSource initialCommandSource = getInitialCommandSource(wrapper, jsonCommand, maker, idempotencyKey);
             return commandSourceRepository.saveAndFlush(initialCommandSource);
         } catch (JpaSystemException jse) {
-            final String message = (jse.getRootCause() != null) ? jse.getRootCause().getMessage() : null;
-            if (message != null && message.toUpperCase(Locale.ROOT).contains("UNIQUE_PORTFOLIO_COMMAND_SOURCE")) {
+            if (isIdempotencyKeyConflict(jse)) {
                 throw new IdempotentCommandProcessUnderProcessingException(wrapper, idempotencyKey, jse);
             }
             throw jse;
         }
+    }
+
+    @NonNull
+    public CommandSource saveRecoverableErrorResult(@NonNull CommandSource commandSource) {
+        String idempotencyKey = commandSource.getIdempotencyKey();
+        long renameNumber = commandSourceRepository.countRecoverableRenames(commandSource.getActionName(), commandSource.getEntityName(),
+                escapeLikePattern(idempotencyKey) + LIKE_ESCAPE + RECOVERABLE_ERROR_KEY_SUFFIX + "%") + 1;
+        for (int attempt = 0; attempt < MAX_RECOVERABLE_RENAME_ATTEMPTS; attempt++) {
+            String renamedKey = idempotencyKey + RECOVERABLE_ERROR_KEY_SUFFIX + (renameNumber + attempt);
+            if (renamedKey.length() > CommandSource.IDEMPOTENCY_KEY_LENGTH) {
+                break;
+            }
+            commandSource.setIdempotencyKey(renamedKey);
+            try {
+                return commandSourceRepository.saveAndFlush(commandSource);
+            } catch (JpaSystemException jse) {
+                if (!isIdempotencyKeyConflict(jse)) {
+                    commandSource.setIdempotencyKey(idempotencyKey);
+                    throw jse;
+                }
+                log.debug("Idempotency key {} already taken, trying the next number", renamedKey);
+            } catch (RuntimeException e) {
+                commandSource.setIdempotencyKey(idempotencyKey);
+                throw e;
+            }
+        }
+        log.warn("Could not rename idempotency key {} after a recoverable error, storing the failure under the original key",
+                idempotencyKey);
+        commandSource.setIdempotencyKey(idempotencyKey);
+        return commandSourceRepository.saveAndFlush(commandSource);
+    }
+
+    private static boolean isIdempotencyKeyConflict(JpaSystemException jse) {
+        final String message = (jse.getRootCause() != null) ? jse.getRootCause().getMessage() : null;
+        return message != null && message.toUpperCase(Locale.ROOT).contains("UNIQUE_PORTFOLIO_COMMAND_SOURCE");
+    }
+
+    private static String escapeLikePattern(String value) {
+        return value.replace(LIKE_ESCAPE, LIKE_ESCAPE + LIKE_ESCAPE).replace("_", LIKE_ESCAPE + "_").replace("%", LIKE_ESCAPE + "%");
     }
 
     @Transactional
