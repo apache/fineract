@@ -18,18 +18,14 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.REPAYMENT;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
@@ -60,13 +56,14 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
     private final LoanUtilService loanUtilService;
     private final LoanTransactionProcessingService loanTransactionProcessingService;
 
-    private static void simulateRepaymentForDisbursements(LoanTransaction lt, final AtomicReference<BigDecimal> refundFinal,
-            List<LoanTransaction> collect) {
+    private static void copyTransactionForSimulation(LoanTransaction lt, List<LoanTransaction> collect) {
+        // The refunded amount is kept at full value here; it is applied as an amortizable principal reduction by
+        // reprocessProgressiveLoanTransactions below (see ProgressiveTransactionCtx for why).
         LoanTransaction copy = new LoanTransaction(lt.getLoan(), lt.getLoan().getOffice(), lt.getTypeOf(), lt.getDateOf(), lt.getAmount(),
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null, null);
         if (LoanTransactionType.CHARGE_PAYMENT.equals(copy.getTypeOf())
                 || LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.equals(copy.getTypeOf())) {
-            copy.getLoanChargesPaid().addAll(copy.getLoanChargesPaid());
+            copy.getLoanChargesPaid().addAll(lt.getLoanChargesPaid());
         }
         if (LoanTransactionType.REAGE.equals(copy.getTypeOf())) {
             copy.setLoanReAgeParameter(lt.getLoanReAgeParameter().getCopy(copy));
@@ -75,28 +72,18 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
             copy.setLoanReAmortizationParameter(lt.getLoanReAmortizationParameter());
         }
         collect.add(copy);
-        if (lt.getTypeOf().isDisbursement() && MathUtil.isGreaterThanZero(refundFinal.get())) {
-            if (lt.getAmount().compareTo(refundFinal.get()) <= 0) {
-                collect.add(new LoanTransaction(lt.getLoan(), lt.getLoan().getOffice(), REPAYMENT, lt.getDateOf(), lt.getAmount(),
-                        BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null, null));
-                refundFinal.set(refundFinal.get().subtract(lt.getAmount()));
-            } else {
-                collect.add(new LoanTransaction(lt.getLoan(), lt.getLoan().getOffice(), REPAYMENT, lt.getDateOf(), refundFinal.get(),
-                        BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null, null));
-                refundFinal.set(BigDecimal.ZERO);
-            }
-        }
     }
 
     private Money recalculateTotalInterest(AdvancedPaymentScheduleTransactionProcessor processor, Loan loan,
-            LocalDate relatedRefundTransactionDate, List<LoanTransaction> transactionsToReprocess) {
+            LocalDate relatedRefundTransactionDate, List<LoanTransaction> transactionsToReprocess, Money amortizablePrincipalReduction) {
 
         final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
         loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
 
         Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> reprocessResult = processor
                 .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), relatedRefundTransactionDate, transactionsToReprocess,
-                        loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
+                        loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                        amortizablePrincipalReduction);
 
         final List<LoanTransaction> newTransactions = reprocessResult.getLeft().getTransactionChanges().stream()
                 .map(TransactionChangeData::getNewTransaction).toList().stream().filter(LoanTransaction::isNotReversed).toList();
@@ -143,14 +130,13 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
                         .map(LoanTransaction::copyTransactionProperties)) //
                 .toList();
 
-        final AtomicReference<BigDecimal> refundFinal = new AtomicReference<>(
-                transactions.stream().filter(lt -> interestRefundTypes.contains(lt.getTypeOf())) //
-                        .map(LoanTransaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add));
+        BigDecimal refundTotal = transactions.stream().filter(lt -> interestRefundTypes.contains(lt.getTypeOf())) //
+                .map(LoanTransaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         transactions.stream().filter(loanTransaction -> !interestRefundTypes.contains(loanTransaction.getTypeOf())) //
-                .forEach(lt -> simulateRepaymentForDisbursements(lt, refundFinal, transactionsToReprocess)); //
+                .forEach(lt -> copyTransactionForSimulation(lt, transactionsToReprocess)); //
 
         return recalculateTotalInterest((AdvancedPaymentScheduleTransactionProcessor) processor, loan, relatedRefundTransactionDate,
-                transactionsToReprocess);
+                transactionsToReprocess, Money.of(loan.getCurrency(), refundTotal));
     }
 }
