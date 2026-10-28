@@ -222,7 +222,7 @@ public class LoanProductUpdateUtil {
         final String externalIdTypeParamName = "externalId";
         if (command.isChangeInExternalIdParameterNamed(externalIdTypeParamName, loanProduct.getExternalId())) {
             final ExternalId newValue = ExternalIdFactory.produce(command.stringValueOfParameterNamed(externalIdTypeParamName));
-            actualChanges.put(accountingTypeParamName, newValue);
+            actualChanges.put(externalIdTypeParamName, newValue);
             loanProduct.setExternalId(newValue);
         }
         trancheDetailsUpdateUtil.update(loanProduct.getLoanProductTrancheDetails(), command, actualChanges);
