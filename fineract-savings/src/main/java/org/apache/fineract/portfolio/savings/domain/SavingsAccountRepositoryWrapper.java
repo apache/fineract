@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
@@ -48,6 +49,7 @@ public class SavingsAccountRepositoryWrapper {
 
     private final SavingsAccountRepository repository;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
+    private final PlatformSecurityContext context;
 
     @Transactional(readOnly = true)
     public SavingsAccount findOneWithNotFoundDetection(final Long savingsId) {
@@ -83,6 +85,13 @@ public class SavingsAccountRepositoryWrapper {
             }
         }
 
+        return account;
+    }
+
+    @Transactional
+    public SavingsAccount findOneInUserScope(final Long savingsId, final boolean backdatedTxnsAllowedTill) {
+        final SavingsAccount account = findSavingsWithNotFoundDetection(savingsId, backdatedTxnsAllowedTill);
+        this.context.validateAccessRights(account.office().getHierarchy());
         return account;
     }
 

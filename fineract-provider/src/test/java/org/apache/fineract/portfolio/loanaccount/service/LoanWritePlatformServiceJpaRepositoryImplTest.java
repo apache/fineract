@@ -221,7 +221,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(loanProduct.getLoanProductRelatedDetail()).thenReturn(loanProductDetail);
         loan = new LoanBuilder(loanProduct).withId(LOAN_ID).build();
 
-        when(loanAssembler.assembleFrom(anyLong())).thenReturn(loan);
+        when(loanAssembler.assembleFromInUserScope(anyLong())).thenReturn(loan);
 
         command = mock(JsonCommand.class);
 
@@ -239,7 +239,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(loanProduct.getLoanProductRelatedDetail()).thenReturn(loanProductDetail);
         loan = new LoanBuilder(loanProduct).withId(LOAN_ID).withLoanStatus(LoanStatus.ACTIVE).withChargedOff(true).build();
 
-        when(loanAssembler.assembleFrom(anyLong())).thenReturn(loan);
+        when(loanAssembler.assembleFromInUserScope(anyLong())).thenReturn(loan);
 
         command = mock(JsonCommand.class);
 
@@ -262,7 +262,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
 
         loan = new LoanBuilder(loanProduct).withId(LOAN_ID).withLoanStatus(LoanStatus.ACTIVE).withLoanTransactions(List.of(t1)).build();
 
-        when(loanAssembler.assembleFrom(anyLong())).thenReturn(loan);
+        when(loanAssembler.assembleFromInUserScope(anyLong())).thenReturn(loan);
 
         command = mock(JsonCommand.class);
         when(command.localDateValueOfParameterNamed("transactionDate")).thenReturn(DateUtils.parseLocalDate("2025-05-14"));
@@ -287,7 +287,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
 
         loan = new LoanBuilder(loanProduct).withId(LOAN_ID).withLoanStatus(LoanStatus.ACTIVE).withLoanTransactions(List.of(t1)).build();
 
-        when(loanAssembler.assembleFrom(anyLong())).thenReturn(loan);
+        when(loanAssembler.assembleFromInUserScope(anyLong())).thenReturn(loan);
 
         command = mock(JsonCommand.class);
         when(command.localDateValueOfParameterNamed("transactionDate")).thenReturn(DateUtils.parseLocalDate("2025-05-24"));
@@ -324,7 +324,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         loan.addLoanTransaction(t1);
         loan.addLoanTransaction(t2);
 
-        when(loanAssembler.assembleFrom(anyLong())).thenReturn(loan);
+        when(loanAssembler.assembleFromInUserScope(anyLong())).thenReturn(loan);
 
         command = mock(JsonCommand.class);
         when(command.localDateValueOfParameterNamed("transactionDate")).thenReturn(DateUtils.parseLocalDate("2025-05-12"));
@@ -402,7 +402,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(command.dateFormat()).thenReturn("dd MMMM yyyy");
 
         // Setup service mocks
-        when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
+        when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
         when(loanLifecycleStateMachine.dryTransition(any(), any())).thenReturn(LoanStatus.ACTIVE);
         when(loanDisbursementService.adjustDisburseAmount(any(), any(), any())).thenReturn(Money.of(currency, BigDecimal.valueOf(20000)));
         when(externalIdFactory.createFromCommand(any(), any())).thenReturn(ExternalId.empty());
@@ -486,7 +486,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(command.dateFormat()).thenReturn("dd MMMM yyyy");
 
         // Setup service mocks
-        when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
+        when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
         when(loanLifecycleStateMachine.dryTransition(any(), any())).thenReturn(LoanStatus.ACTIVE);
         when(loanDisbursementService.adjustDisburseAmount(any(), any(), any())).thenReturn(Money.of(currency, BigDecimal.valueOf(20000)));
         when(externalIdFactory.createFromCommand(any(), any())).thenReturn(ExternalId.empty());
@@ -567,7 +567,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(command.dateFormat()).thenReturn("dd MMMM yyyy");
 
         // Setup service mocks
-        when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
+        when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
         when(loanLifecycleStateMachine.dryTransition(any(), any())).thenReturn(LoanStatus.ACTIVE);
         when(loanDisbursementService.adjustDisburseAmount(any(), any(), any())).thenReturn(Money.of(currency, BigDecimal.valueOf(20000)));
         when(externalIdFactory.createFromCommand(any(), any())).thenReturn(ExternalId.empty());
@@ -730,7 +730,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         fixture.command = mock(JsonCommand.class);
         fixture.loan = loan;
 
-        when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
+        when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
         when(loan.loanProduct()).thenReturn(loanProduct);
         when(loan.getLoanProduct()).thenReturn(loanProduct);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);

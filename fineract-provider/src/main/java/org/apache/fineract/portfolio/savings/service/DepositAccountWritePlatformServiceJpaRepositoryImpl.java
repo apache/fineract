@@ -344,7 +344,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         // this.context.authenticatedUser();
         this.depositAccountTransactionDataValidator.validate(command, DepositAccountType.FIXED_DEPOSIT);
 
-        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.FIXED_DEPOSIT);
         checkClientOrGroupActive(account);
 
@@ -407,7 +407,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         this.depositAccountTransactionDataValidator.validate(command, DepositAccountType.RECURRING_DEPOSIT);
 
-        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.RECURRING_DEPOSIT);
         checkClientOrGroupActive(account);
 
@@ -455,7 +455,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Map<String, Object> changes = new LinkedHashMap<>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        final SavingsAccount account = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
+        final SavingsAccount account = this.depositAccountAssembler.assembleFromInUserScope(savingsId, depositAccountType);
 
         checkClientOrGroupActive(account);
 
@@ -506,7 +506,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     @Override
     public CommandProcessingResult postInterest(final Long savingsId, final DepositAccountType depositAccountType) {
 
-        final SavingsAccount account = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
+        final SavingsAccount account = this.depositAccountAssembler.assembleFromInUserScope(savingsId, depositAccountType);
         checkClientOrGroupActive(account);
         postInterest(account);
         return new CommandProcessingResultBuilder() //
@@ -547,7 +547,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
 
-        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.FIXED_DEPOSIT);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
@@ -613,7 +613,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
 
-        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.RECURRING_DEPOSIT);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
@@ -713,7 +713,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final LocalDate today = DateUtils.getBusinessLocalDate();
         final MathContext mc = MathContext.DECIMAL64;
 
-        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.FIXED_DEPOSIT);
         if (!account.isTransactionsAllowed()) {
             throwValidationForActiveStatus(SavingsApiConstants.adjustTransactionAction);
@@ -809,7 +809,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final LocalDate today = DateUtils.getBusinessLocalDate();
 
-        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.RECURRING_DEPOSIT);
         if (account.isNotActive()) {
             throwValidationForActiveStatus(SavingsApiConstants.adjustTransactionAction);
@@ -910,7 +910,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Map<String, Object> changes = new LinkedHashMap<>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.FIXED_DEPOSIT);
         checkClientOrGroupActive(account);
 
@@ -943,7 +943,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Map<String, Object> changes = new LinkedHashMap<>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.RECURRING_DEPOSIT);
         checkClientOrGroupActive(account);
 
@@ -976,7 +976,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Map<String, Object> changes = new LinkedHashMap<>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.FIXED_DEPOSIT);
         checkClientOrGroupActive(account);
 
@@ -1009,7 +1009,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Map<String, Object> changes = new LinkedHashMap<>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.RECURRING_DEPOSIT);
         checkClientOrGroupActive(account);
         if (account.maturityDate() == null) {
@@ -1266,17 +1266,17 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         }
         if (accountTransactionDTO.getAccountType().equals(DepositAccountType.RECURRING_DEPOSIT.getValue())) {
             RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler
-                    .assembleFrom(accountTransactionDTO.getSavingsAccountId(), DepositAccountType.RECURRING_DEPOSIT);
+                    .assembleFromInUserScope(accountTransactionDTO.getSavingsAccountId(), DepositAccountType.RECURRING_DEPOSIT);
             return this.depositAccountDomainService.handleRDDeposit(account, accountTransactionDTO.getFormatter(),
                     accountTransactionDTO.getTransactionDate(), accountTransactionDTO.getTransactionAmount(), paymentDetail,
                     isRegularTransaction);
         }
         SavingsAccount account = null;
         if (accountTransactionDTO.getAccountType().equals(DepositAccountType.SAVINGS_DEPOSIT.getValue())) {
-            account = this.depositAccountAssembler.assembleFrom(accountTransactionDTO.getSavingsAccountId(),
+            account = this.depositAccountAssembler.assembleFromInUserScope(accountTransactionDTO.getSavingsAccountId(),
                     DepositAccountType.SAVINGS_DEPOSIT);
         } else {
-            account = this.depositAccountAssembler.assembleFrom(accountTransactionDTO.getSavingsAccountId(),
+            account = this.depositAccountAssembler.assembleFromInUserScope(accountTransactionDTO.getSavingsAccountId(),
                     DepositAccountType.CURRENT_DEPOSIT);
         }
         return this.depositAccountDomainService.handleSavingDeposit(account, accountTransactionDTO.getFormatter(),

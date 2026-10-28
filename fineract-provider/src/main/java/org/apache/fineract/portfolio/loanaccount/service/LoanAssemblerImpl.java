@@ -152,6 +152,11 @@ public class LoanAssemblerImpl implements LoanAssembler {
     }
 
     @Override
+    public Loan assembleFromInUserScope(final Long accountId) {
+        return loanRepository.findOneInUserScope(accountId, true);
+    }
+
+    @Override
     public Loan assembleFrom(final ExternalId externalId) {
         return loanRepository.findOneWithNotFoundDetection(externalId, true);
     }

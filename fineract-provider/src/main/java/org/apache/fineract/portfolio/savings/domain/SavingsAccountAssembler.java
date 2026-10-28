@@ -348,6 +348,11 @@ public class SavingsAccountAssembler {
         return loadTransactionsToSavingsAccount(account, backdatedTxnsAllowedTill);
     }
 
+    public SavingsAccount assembleFromInUserScope(final Long savingsId, final boolean backdatedTxnsAllowedTill) {
+        SavingsAccount account = this.savingsAccountRepository.findOneInUserScope(savingsId, backdatedTxnsAllowedTill);
+        return loadTransactionsToSavingsAccount(account, backdatedTxnsAllowedTill);
+    }
+
     public SavingsAccount loadTransactionsToSavingsAccount(final SavingsAccount account, final boolean backdatedTxnsAllowedTill) {
         List<SavingsAccountTransaction> savingsAccountTransactions = null;
         if (backdatedTxnsAllowedTill) {

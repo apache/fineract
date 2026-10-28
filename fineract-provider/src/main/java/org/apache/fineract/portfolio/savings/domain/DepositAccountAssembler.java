@@ -404,6 +404,12 @@ public class DepositAccountAssembler {
         return account;
     }
 
+    public SavingsAccount assembleFromInUserScope(final Long savingsId, DepositAccountType depositAccountType) {
+        final SavingsAccount account = assembleFrom(savingsId, depositAccountType);
+        this.context.validateAccessRights(account.office().getHierarchy());
+        return account;
+    }
+
     public void assignSavingAccountHelpers(final SavingsAccount savingsAccount) {
         savingsAccount.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper, this.configurationDomainService);
     }
