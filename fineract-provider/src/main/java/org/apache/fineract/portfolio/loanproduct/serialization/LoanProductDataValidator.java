@@ -790,8 +790,8 @@ public final class LoanProductDataValidator {
                     .extractBooleanNamed(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING, element);
             baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING).value(enableAccrualActivityPosting)
                     .ignoreIfNull().validateForBooleanValue();
-            if (!AccountingValidations.isAccrualBasedAccounting(accountingRuleType)) {
-                baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING).isOneOfTheseValues(Boolean.TRUE)
+            if (Boolean.TRUE.equals(enableAccrualActivityPosting)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING)
                         .failWithCode("should be false for non accrual accounting");
             }
         }
