@@ -111,6 +111,33 @@ public final class AuditHelper {
         )));
     }
 
+    public static List<AuditData> getAuditDetailsByMaker(final String actionName, final String entityName, final Long makerId) {
+        return pageItems(ok(() -> FineractFeignClientHelper.getFineractFeignClient().audits().retrieveAuditEntries(actionName, // actionName
+                entityName, // entityName
+                null, // resourceId
+                makerId, // makerId
+                null, // makerDateTimeFrom
+                null, // makerDateTimeTo
+                null, // checkerId
+                null, // checkerDateTimeFrom
+                null, // checkerDateTimeTo
+                null, // status
+                null, // clientId
+                null, // loanId
+                null, // officeId
+                null, // groupId
+                null, // savingsAccountId
+                null, // processingResult
+                null, // dateFormat
+                null, // locale
+                null, // offset
+                null, // limit
+                "id", // orderBy
+                "ASC", // sortOrder
+                true // paged
+        )));
+    }
+
     private static List<AuditData> pageItems(final String response) {
         try {
             final JsonNode pageItemsNode = MAPPER.readTree(response).get("pageItems");

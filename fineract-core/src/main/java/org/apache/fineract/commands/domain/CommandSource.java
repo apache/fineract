@@ -47,6 +47,8 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Table(name = "m_portfolio_command_source")
 public class CommandSource extends AbstractPersistableCustom<Long> {
 
+    public static final int IDEMPOTENCY_KEY_LENGTH = 64;
+
     @Column(name = "action_name", nullable = true, length = 100)
     private String actionName;
 
@@ -120,7 +122,7 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
     @Column(name = "job_name")
     private String jobName;
 
-    @Column(name = "idempotency_key", length = 50)
+    @Column(name = "idempotency_key", length = IDEMPOTENCY_KEY_LENGTH)
     private String idempotencyKey;
 
     @Column(name = "resource_external_id")
