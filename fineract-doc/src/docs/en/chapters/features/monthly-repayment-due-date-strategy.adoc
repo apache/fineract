@@ -1,0 +1,163 @@
+
+= Monthly Repayment Due Date Strategy
+:toc:
+:toclevels: 2
+
+https://issues.apache.org/jira/browse/FINERACT-2816[FINERACT-2816]
+
+== Goal
+
+Apache Fineract currently adjusts monthly repayment due dates to the last day of the month when the original repayment day does not exist.
+
+For example, a loan disbursed on *30 January* with monthly repayments has its first repayment due on *28 February*.
+
+The goal is to introduce a configurable loan product strategy that allows the repayment due date to roll forward to the *first day of the following month* (1 March in this example), while preserving the original repayment day for subsequent installments.
+
+The functionality must support both *cumulative* and *progressive* loan schedules and respect the configured interest calculation convention:
+
+* *360/30:* Interest per regular monthly period remains unchanged under the specified monthly convention.
+* *Actual/Actual:* Interest reflects the actual number of calendar days between repayment dates.
+
+== Requirements
+
+=== Functional Requirements
+
+==== Repayment Due Date Configuration
+
+Introduce a new loan product attribute: `monthEndDueDateStrategy`.
+
+Supported values:
+
+* `LAST_DAY_OF_MONTH` (default): Use the last day of the target month when the original repayment day does not exist.
+* `FIRST_DAY_OF_NEXT_MONTH`: Roll the repayment due date to the first day of the following month.
+
+The functionality must:
+
+* Apply to monthly repayment frequencies only.
+* Support cumulative and progressive loan schedules.
+* Preserve the original repayment day for subsequent installments.
+* Apply to all repayment periods, including the final installment.
+* Respect existing meeting calendar, holiday, and working-day adjustment rules.
+
+==== Repayment Date Example
+
+Loan disbursed on 30 January 2025 with monthly repayments:
+
+[cols="1,2,2",options="header"]
+|===
+|Period |LAST_DAY_OF_MONTH |FIRST_DAY_OF_NEXT_MONTH
+
+|1 |28 February |1 March
+|2 |30 March |30 March
+|3 |30 April |30 April
+|===
+
+==== Interest Calculation — 360/30
+
+Given a loan product configured with 360 days per year and 30 days per month, rolling a repayment date must not change the interest calculated for each regular monthly period under the specified 360/30 convention.
+
+[cols="1,2,2,1",options="header"]
+|===
+|Period |LAST_DAY_OF_MONTH |FIRST_DAY_OF_NEXT_MONTH |Interest fraction
+
+|1 |30 Jan - 28 Feb |30 Jan - 1 Mar |30/360
+|2 |28 Feb - 30 Mar |1 Mar - 30 Mar |30/360
+|===
+
+*Expected result:* Interest per period remains unchanged, assuming equivalent outstanding principal balances.
+
+==== Interest Calculation — Actual/Actual
+
+Given a loan product configured with Actual/Actual, interest must be calculated using the actual number of calendar days between repayment dates.
+
+[cols="1,2,2",options="header"]
+|===
+|Period |LAST_DAY_OF_MONTH |FIRST_DAY_OF_NEXT_MONTH
+
+|1 |29/365 (30 Jan - 28 Feb) |30/365 (30 Jan - 1 Mar)
+|2 |30/365 (28 Feb - 30 Mar) |29/365 (1 Mar - 30 Mar)
+|===
+
+*Expected result:*
+
+* The first period accrues one additional day of interest on the higher outstanding principal balance.
+* The second period accrues one fewer day of interest on the reduced outstanding principal balance.
+* Total interest may increase because interest is calculated on different outstanding principal balances.
+
+==== API and Persistence
+
+* Expose `monthEndDueDateStrategy` in loan product create, update, read, and template APIs.
+* Store the configured strategy on both the loan product and loan account.
+* Loan accounts must inherit the strategy from the loan product at submission.
+* Changing the loan product configuration must not affect existing loans.
+* Schedule regeneration and interest recalculation must reuse the strategy stored on the loan account.
+
+=== Non-Functional Requirements
+
+* *Backward compatibility:* Existing loan products and loans must retain their current repayment schedules and interest calculations.
+* *Financial accuracy:* The new strategy must respect existing day-count conventions, rounding rules, and principal-interest allocation.
+* *Consistency:* Initial schedule generation, rescheduling, fixed-length maturity calculations, and holiday processing must apply the strategy consistently.
+* *Test coverage:* Automated tests must cover both schedule types, leap years, month-end dates, 360/30, Actual/Actual, and schedule regeneration.
+* *Performance:* The new configuration must not introduce significant overhead during repayment schedule generation.
+
+== Configuration
+
+=== Loan Product Attribute
+
+The repayment due date strategy is configured at the loan product level using the `monthEndDueDateStrategy` attribute.
+
+=== Available Values
+
+[cols="1,2",options="header"]
+|===
+|Value |Description
+
+|`LAST_DAY_OF_MONTH`
+|Moves the repayment due date to the last day of the target month when the original repayment day does not exist. This is the default behavior.
+
+|`FIRST_DAY_OF_NEXT_MONTH`
+|Moves the repayment due date to the first day of the following month when the original repayment day does not exist.
+|===
+
+=== Example Loan Product Configuration
+
+[source,json]
+----
+{
+  "repaymentEvery": 1,
+  "repaymentFrequencyType": 2,
+  "monthEndDueDateStrategy": "FIRST_DAY_OF_NEXT_MONTH"
+}
+----
+
+The example contains only the relevant configuration attributes, not a complete loan product creation request.
+
+=== Configuration Rules
+
+* The default strategy is `LAST_DAY_OF_MONTH`.
+* The configuration applies only to monthly repayment frequencies.
+* Both cumulative and progressive loan products are supported.
+* The strategy applies to all repayment due dates, including the final installment.
+* The original repayment anchor day is preserved.
+* Loan accounts inherit the strategy from the loan product at submission.
+* Changing the loan product configuration does not affect existing loans.
+* Schedule regeneration uses the strategy stored on the loan account.
+* Meeting calendars take precedence over the configured strategy.
+* Existing working-day and holiday adjustments continue to apply.
+
+=== Interaction with Interest Calculation
+
+The `monthEndDueDateStrategy` attribute controls repayment due dates and does not modify the loan product's interest calculation configuration.
+
+[cols="1,2",options="header"]
+|===
+|Day-count convention |Expected behavior
+
+|360/30
+|Interest per regular monthly period remains unchanged under the specified 30/360 monthly convention.
+
+|Actual/Actual
+|Interest is calculated using the actual calendar days between consecutive repayment dates. Rolling a due date can change the interest amount.
+|===
+
+NOTE: The expected 360/30 behavior must be verified against Fineract's day-count implementation, especially for periods such as 1 March to 30 March.
