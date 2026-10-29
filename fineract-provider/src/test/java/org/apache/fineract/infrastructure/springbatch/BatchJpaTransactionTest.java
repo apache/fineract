@@ -52,6 +52,8 @@ import org.apache.fineract.infrastructure.jobs.ScheduledJobRunnerConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.parameters.JobParameters;
@@ -68,6 +70,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -159,6 +162,34 @@ public class BatchJpaTransactionTest {
         })).isInstanceOf(IllegalStateException.class).hasMessage("force chunk rollback");
         assertThat(jdbc.queryForObject("select count(*) from visibility_probe", Integer.class)).isZero();
         assertThat(repository.getStepExecution(step.getId()).getExecutionContext().containsKey("checkpoint")).isFalse();
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 1, 2 })
+    public void requiresNewNeedsAnAdditionalConnectionWhileOuterTransactionHoldsOne(int poolSize) {
+        pool.setMaximumPoolSize(poolSize);
+        pool.setMinimumIdle(0);
+        pool.setConnectionTimeout(500);
+        pool.getHikariPoolMXBean().softEvictConnections();
+        var innerTransaction = new TransactionTemplate(transactionManager);
+        innerTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+        assertThatThrownBy(() -> new TransactionTemplate(transactionManager).executeWithoutResult(outerStatus -> {
+            var entityManager = EntityManagerFactoryUtils.getTransactionalEntityManager(factory.getObject());
+            entityManager.persist(new VisibilityProbe(2L, "outer transaction"));
+            entityManager.flush();
+            innerTransaction.executeWithoutResult(
+                    innerStatus -> jdbc.update("insert into visibility_probe (id, name) values (?, ?)", 1L, "committed installment"));
+            throw new IllegalStateException("outer rollback");
+        })).satisfies(failure -> {
+            if (poolSize == 1) {
+                assertThat(failure).hasStackTraceContaining("Connection is not available");
+            } else {
+                assertThat(failure).isInstanceOf(IllegalStateException.class).hasMessage("outer rollback");
+            }
+        });
+
+        assertThat(jdbc.queryForObject("select count(*) from visibility_probe", Integer.class)).isEqualTo(poolSize == 1 ? 0 : 1);
     }
 
     @Test
