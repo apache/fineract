@@ -1620,4 +1620,110 @@ public class FixedDepositTest extends FeignDepositTestBase {
     private LoanTestData.Journal credit(final Account account, final BigDecimal amount) {
         return LoanTestData.Journal.credit(account.getAccountID().longValue(), amount.doubleValue());
     }
+
+    @Test
+    public void testFixedDepositAccountWithRateChartOverriddenLifecycle() {
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -3);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.YEAR, 10);
+        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -1);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+
+        Long clientId = clientHelper.createClient();
+        Assertions.assertNotNull(clientId);
+
+        Long fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, NONE);
+        Assertions.assertNotNull(fixedDepositProductId);
+
+        // 1. Submit application with isRateChartOverridden = true and custom nominalAnnualInterestRate = 10.0
+        final BigDecimal customInterestRate = new BigDecimal("10.0");
+        PostFixedDepositAccountsRequest request = DepositRequestBuilders
+                .fixedDepositAccount(clientId, fixedDepositProductId, SUBMITTED_ON_DATE, WHOLE_TERM).isRateChartOverridden(true)
+                .nominalAnnualInterestRate(customInterestRate);
+
+        Long fixedDepositAccountId = fixedDepositHelper.submitApplication(request).getSavingsId();
+        Assertions.assertNotNull(fixedDepositAccountId);
+
+        // 2. GET and verify rate chart is overridden with custom rate
+        GetFixedDepositAccountsAccountIdResponse account = fixedDepositHelper.getAccount(fixedDepositAccountId);
+        Assertions.assertTrue(Boolean.TRUE.equals(account.getIsRateChartOverridden()), "isRateChartOverridden should be true");
+        Assertions.assertEquals(0, customInterestRate.compareTo(account.getNominalAnnualInterestRate()));
+
+        // 3. Update application to toggle isRateChartOverridden back to false
+        PostFixedDepositAccountsRequest updateRequest = DepositRequestBuilders
+                .fixedDepositAccount(clientId, fixedDepositProductId, SUBMITTED_ON_DATE, WHOLE_TERM).isRateChartOverridden(false);
+        fixedDepositHelper.updateApplication(fixedDepositAccountId, DepositRequestBuilders.asUpdate(updateRequest));
+
+        // 4. GET and verify rate chart is no longer overridden
+        account = fixedDepositHelper.getAccount(fixedDepositAccountId);
+        Assertions.assertFalse(Boolean.TRUE.equals(account.getIsRateChartOverridden()), "isRateChartOverridden should be false");
+
+        // 5. Approve and activate
+        fixedDepositHelper.approve(fixedDepositAccountId, APPROVED_ON_DATE);
+        DepositTestValidators.verifyFixedDepositIsApproved(statusOf(fixedDepositAccountId));
+
+        fixedDepositHelper.activate(fixedDepositAccountId, ACTIVATION_DATE);
+        DepositTestValidators.verifyFixedDepositIsActive(statusOf(fixedDepositAccountId));
+
+        // 6. Calculate interest: should calculate using product rate chart slabs (7.0% for 14 months tenure)
+        Assertions.assertNotNull(fixedDepositHelper.calculateInterest(fixedDepositAccountId));
+        account = fixedDepositHelper.getAccount(fixedDepositAccountId);
+        Assertions.assertEquals(0, new BigDecimal("7.0").compareTo(account.getNominalAnnualInterestRate()));
+    }
+
+    @Test
+    public void testFixedDepositAccountWithRateChartOverriddenEndToEnd() {
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -3);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.YEAR, 10);
+        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -1);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+
+        Long clientId = clientHelper.createClient();
+        Assertions.assertNotNull(clientId);
+
+        Long fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, NONE);
+        Assertions.assertNotNull(fixedDepositProductId);
+
+        // 1. Submit application with isRateChartOverridden = true and custom nominalAnnualInterestRate = 10.0
+        final BigDecimal customInterestRate = new BigDecimal("10.0");
+        PostFixedDepositAccountsRequest request = DepositRequestBuilders
+                .fixedDepositAccount(clientId, fixedDepositProductId, SUBMITTED_ON_DATE, WHOLE_TERM).isRateChartOverridden(true)
+                .nominalAnnualInterestRate(customInterestRate);
+
+        Long fixedDepositAccountId = fixedDepositHelper.submitApplication(request).getSavingsId();
+        Assertions.assertNotNull(fixedDepositAccountId);
+
+        // 2. GET and verify rate chart is overridden with custom rate
+        GetFixedDepositAccountsAccountIdResponse account = fixedDepositHelper.getAccount(fixedDepositAccountId);
+        Assertions.assertTrue(Boolean.TRUE.equals(account.getIsRateChartOverridden()), "isRateChartOverridden should be true");
+        Assertions.assertEquals(0, customInterestRate.compareTo(account.getNominalAnnualInterestRate()));
+
+        // 3. Approve and activate with override kept ON
+        fixedDepositHelper.approve(fixedDepositAccountId, APPROVED_ON_DATE);
+        DepositTestValidators.verifyFixedDepositIsApproved(statusOf(fixedDepositAccountId));
+
+        fixedDepositHelper.activate(fixedDepositAccountId, ACTIVATION_DATE);
+        DepositTestValidators.verifyFixedDepositIsActive(statusOf(fixedDepositAccountId));
+
+        // 4. Calculate interest: must retain custom rate 10.0% instead of chart's 7.0%
+        Assertions.assertNotNull(fixedDepositHelper.calculateInterest(fixedDepositAccountId));
+        account = fixedDepositHelper.getAccount(fixedDepositAccountId);
+        Assertions.assertTrue(Boolean.TRUE.equals(account.getIsRateChartOverridden()), "isRateChartOverridden should remain true");
+        Assertions.assertEquals(0, customInterestRate.compareTo(account.getNominalAnnualInterestRate()));
+    }
 }
