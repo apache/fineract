@@ -35,6 +35,8 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferTransaction;
@@ -66,6 +68,8 @@ class AccountTransfersWritePlatformServiceImplTest {
     private ExternalIdFactory externalIdFactory;
     @Mock
     private JsonCommand command;
+    @Mock
+    private PlatformSecurityContext context;
 
     @Test
     void givenLoanToSavingsRefund_whenUndo_thenSavingsUndoneLoanAdjustedAndTransferReversed() {
@@ -83,6 +87,7 @@ class AccountTransfersWritePlatformServiceImplTest {
         when(transaction.getAccountTransferDetails()).thenReturn(details);
         when(details.fromLoanAccount()).thenReturn(loan);
         when(details.toSavingsAccount()).thenReturn(toSavingsAccount);
+        givenAccountsInOffice(loan, toSavingsAccount);
         when(transaction.getFromLoanTransaction()).thenReturn(fromLoanTransaction);
         when(fromLoanTransaction.isDisbursement()).thenReturn(false);
         when(fromLoanTransaction.getLoan()).thenReturn(loan);
@@ -114,6 +119,7 @@ class AccountTransfersWritePlatformServiceImplTest {
         when(transaction.getAccountTransferDetails()).thenReturn(details);
         when(details.fromLoanAccount()).thenReturn(loan);
         when(details.toSavingsAccount()).thenReturn(toSavingsAccount);
+        givenAccountsInOffice(loan, toSavingsAccount);
         when(transaction.getFromLoanTransaction()).thenReturn(fromLoanTransaction);
         when(fromLoanTransaction.isDisbursement()).thenReturn(true);
 
@@ -137,5 +143,12 @@ class AccountTransfersWritePlatformServiceImplTest {
         verify(savingsAccountWritePlatformService, never()).undoTransaction(anyLong(), anyLong(), anyBoolean());
         verify(loanAdjustmentService, never()).adjustLoanTransaction(any(), any(), any(), any(), any());
         verify(transaction, never()).reverse();
+    }
+
+    private static void givenAccountsInOffice(final Loan loan, final SavingsAccount savingsAccount) {
+        Office office = mock(Office.class);
+        when(office.getHierarchy()).thenReturn(".");
+        when(loan.getOffice()).thenReturn(office);
+        when(savingsAccount.office()).thenReturn(office);
     }
 }
