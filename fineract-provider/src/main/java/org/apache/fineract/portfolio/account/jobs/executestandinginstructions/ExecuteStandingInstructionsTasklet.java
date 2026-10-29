@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.account.jobs.executestandinginstructions;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -76,23 +78,8 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
             StandingInstructionType instructionType = data.getInstructionTypeEnum();
             LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             if (recurrenceType.isPeriodicRecurrence()) {
-                final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
-                PeriodFrequencyType frequencyType = data.getRecurrenceFrequencyEnum();
-                LocalDate startDate = data.getValidFrom();
-                if (frequencyType.isMonthly()) {
-                    startDate = startDate.withDayOfMonth(data.getRecurrenceOnDay());
-                    if (DateUtils.isBefore(startDate, data.getValidFrom())) {
-                        startDate = startDate.plusMonths(1);
-                    }
-                } else if (frequencyType.isYearly()) {
-                    startDate = startDate.withDayOfMonth(data.getRecurrenceOnDay()).withMonth(data.getRecurrenceOnMonth());
-                    if (DateUtils.isBefore(startDate, data.getValidFrom())) {
-                        startDate = startDate.plusYears(1);
-                    }
-                }
-                isDueForTransfer = scheduledDateGenerator.isDateFallsInSchedule(frequencyType, data.getRecurrenceInterval(), startDate,
-                        transactionDate);
-
+                isDueForTransfer = isDueOnDate(data.getRecurrenceFrequencyEnum(), data.getRecurrenceInterval(), data.getValidFrom(),
+                        data.getRecurrenceOnDay(), data.getRecurrenceOnMonth(), transactionDate);
             }
             BigDecimal transactionAmount = data.getAmount();
             if (PortfolioAccountType.LOAN.equals(data.getToAccountTypeEnum())
@@ -199,6 +186,33 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
         }
         return withdrawable.subtract(account.calculateWithdrawalFee(withdrawable)).setScale(account.getCurrency().getDigitsAfterDecimal(),
                 RoundingMode.DOWN);
+    }
+
+    /**
+     * A recurrence day the month does not have (e.g. the 31st in April) falls on the last day of that month, the same
+     * way savings charges handle their fee day. Yearly recurrence is monthly recurrence every 12 months, starting in
+     * the recurrence month. Daily and weekly recurrence keep using {@link DefaultScheduledDateGenerator}, which loan
+     * schedules share.
+     */
+    static boolean isDueOnDate(final PeriodFrequencyType frequencyType, final int recurrenceInterval, final LocalDate validFrom,
+            final int recurrenceOnDay, final int recurrenceOnMonth, final LocalDate date) {
+        if (!frequencyType.isMonthly() && !frequencyType.isYearly()) {
+            final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
+            return scheduledDateGenerator.isDateFallsInSchedule(frequencyType, recurrenceInterval, validFrom, date);
+        }
+        final int monthsPerPeriod = frequencyType.isYearly() ? 12 : 1;
+        YearMonth firstMonth = frequencyType.isYearly() ? YearMonth.of(validFrom.getYear(), recurrenceOnMonth) : YearMonth.from(validFrom);
+        if (DateUtils.isBefore(dueDateIn(firstMonth, recurrenceOnDay), validFrom)) {
+            firstMonth = firstMonth.plusMonths(monthsPerPeriod);
+        }
+        final YearMonth month = YearMonth.from(date);
+        final long monthsSinceFirst = firstMonth.until(month, ChronoUnit.MONTHS);
+        return monthsSinceFirst >= 0 && monthsSinceFirst % ((long) recurrenceInterval * monthsPerPeriod) == 0
+                && DateUtils.isEqual(dueDateIn(month, recurrenceOnDay), date);
+    }
+
+    private static LocalDate dueDateIn(final YearMonth month, final int recurrenceOnDay) {
+        return month.atDay(Math.min(recurrenceOnDay, month.lengthOfMonth()));
     }
 
     public boolean isDueForTransfer(StandingInstructionDuesData standingInstructionDuesData) {
