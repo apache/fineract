@@ -145,4 +145,23 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
         assertEquals(0, BigDecimal.valueOf(10).compareTo(waiver.getInterestPortion()),
                 "waived interest must be applied exactly once, got " + waiver.getInterestPortion());
     }
+
+    @Test
+    public void inAdvanceRepaymentAppliesPrincipalPortionAndCreatesScheduleMapping() {
+        final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, 1, firstInstallmentToDate,
+                firstInstallmentDueDate, BigDecimal.valueOf(100L), BigDecimal.valueOf(20L), BigDecimal.ZERO, BigDecimal.ZERO, false, null,
+                BigDecimal.ZERO);
+
+        final Money hundred = Money.of(MONETARY_CURRENCY, BigDecimal.valueOf(100));
+        final LoanTransaction repayment = LoanTransaction.repayment(office, hundred, null, transactionDate, ExternalId.empty());
+        repayment.resetDerivedComponents();
+
+        underTest.handleTransactionThatIsPaymentInAdvanceOfInstallment(installment, null, repayment, hundred, transactionMappings, charges);
+
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(repayment.getPrincipalPortion()),
+                "principal portion must be applied, got " + repayment.getPrincipalPortion());
+        assertEquals(1, transactionMappings.size(), "transactionMappings must contain the repayment mapping");
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(transactionMappings.get(0).getPrincipalPortion()),
+                "mapping principal portion must be 100");
+    }
 }
