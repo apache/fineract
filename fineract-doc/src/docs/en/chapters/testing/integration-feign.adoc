@@ -2,11 +2,11 @@
 
 == Overview
 
-Apache Fineract is migrating its integration tests from REST Assured to the generated Feign client (`fineract-client-feign`), so that tests drive the server through the same strongly typed, OpenAPI-derived models that API consumers use. A test written against the generated client stops compiling when the API contract changes, rather than failing at runtime — or, worse, continuing to pass against a payload the server no longer produces.
+Apache Fineract's integration tests call the server through the generated Feign client (`fineract-client-feign`), so that tests drive the server through the same strongly typed, OpenAPI-derived models that API consumers use. A test written against the generated client stops compiling when the API contract changes, rather than failing at runtime — or, worse, continuing to pass against a payload the server no longer produces.
 
-The shared machinery is the `client/feign` package tree — the `FeignLoanTestBase` and `FeignSavingsTestBase` base classes and the helpers under `client/feign/helpers` — together with the `FeignIntegrationTest` root base class one directory above it and the `FineractFeignClientHelper` client factory in `common`. Most migrated tests sit alongside the unmigrated ones in the `org.apache.fineract.integrationtests` package and reach the client by extending one of those base classes.
+The shared machinery is the `client/feign` package tree — the `FeignLoanTestBase` and `FeignSavingsTestBase` base classes and the helpers under `client/feign/helpers` — together with the `FeignIntegrationTest` root base class one directory above it and the `FineractFeignClientHelper` client factory in `common`. Most tests sit in the `org.apache.fineract.integrationtests` package and reach the client by extending one of those base classes.
 
-A Checkstyle rule rejects REST Assured imports in every file except those listed in a baseline of files that still use it. The baseline only shrinks: each migration removes entries from it, so neither a new test nor a migrated one can bring REST Assured back.
+No module depends on REST Assured, and the Retrofit SDK (`fineract-client`) is not on any test classpath, so an import of either does not compile. A Checkstyle rule also rejects REST Assured imports in every module, so adding the dependency back does not get past it.
 
 This chapter covers the guardrail and the conventions that apply to tests written against the Feign client. For prerequisites, database setup, and how to run a suite, see the <<_integration_testing,Integration Testing>> chapter.
 
@@ -14,14 +14,7 @@ This chapter covers the guardrail and the conventions that apply to tests writte
 
 === How It Works
 
-An `IllegalImport` check in `config/checkstyle/checkstyle.xml` rejects any `io.restassured` import, and a `SuppressionFilter` exempts the files listed in `config/checkstyle/restassured-baseline.xml`:
-
-[source,xml]
-----
-<module name="SuppressionFilter">
-    <property name="file" value="${config_loc}/restassured-baseline.xml"/>
-</module>
-----
+An `IllegalImport` check in `config/checkstyle/checkstyle.xml` rejects any `io.restassured` import, in every module and with no exemptions:
 
 [source,xml]
 ----
@@ -30,38 +23,21 @@ An `IllegalImport` check in `config/checkstyle/checkstyle.xml` rejects any `io.r
     <property name="regexp" value="true" />
     <property name="illegalPkgs" value="^io\.restassured" />
     <message key="import.illegal"
-             value="Integration tests must call the server through the generated Feign client, not REST Assured: ''{0}''. Do not add this file to restassured-baseline.xml." />
+             value="Tests must call the server through the generated Feign client, not REST Assured: ''{0}''." />
 </module>
-----
-
-Each baseline entry names one file by its full path and carries the check's `id`, so it exempts that file from this check alone and leaves every other check untouched:
-
-[source,xml]
-----
-<suppress id="FeignNoRestAssured" files="[/\\]integration-tests[/\\]src[/\\]test[/\\]java[/\\]org[/\\]apache[/\\]fineract[/\\]integrationtests[/\\]StaffTest\.java$"/>
 ----
 
 The check runs as part of `checkstyleTest`, which the `build-quality-checks.yml` workflow executes on every pull request. A violation fails the build.
 
-=== The Baseline
+=== History
 
-The baseline lists every file that imported REST Assured when the check was widened to the whole tree. Checkstyle selects files by path, not by supertype, so a plain ban would have failed on those files at once; the baseline lets the ban apply everywhere else from the start.
-
-* A new file that imports REST Assured fails the build.
-* A migrated file that imports REST Assured again fails the build, because it is no longer listed.
-* A listed file builds as before, so work on unmigrated tests is not blocked.
-
-The list only shrinks. A PR that removes the last REST Assured import from a file deletes that file's entry in the same change. Never add an entry: a file that needs REST Assured to pass the check needs migrating instead. Once the list is empty, the baseline, the check and the `io.rest-assured` dependency are removed together, after which a REST Assured import no longer compiles.
-
-The check works per file. New REST Assured code inside a file that is still listed is not caught, so reviewers still watch for it until that file is migrated.
+The check started with a baseline, `config/checkstyle/restassured-baseline.xml`, that exempted every file still importing REST Assured. Each migration removed its entries. The last two, `OAuth2AuthenticationTest` and `TwoFactorAuthenticationTest`, were migrated in the change that removed the `io.rest-assured` dependency, and the baseline was deleted with them. Do not bring it back: a test that seems to need REST Assured needs the generated client fixed instead, as the rules below describe.
 
 === What the Check Does and Does Not Catch
 
-The `Utils.performServerGet`, `performServerPost`, `performServerPut` and `performServerDelete` helpers in `org.apache.fineract.integrationtests.common` are the other common route back to REST Assured. Every one of those overloads takes an `io.restassured.specification.RequestSpecification` as its first parameter, so reaching them normally requires the forbidden import.
+The check reads import statements only, so it is a deterrent rather than a proof. Two routes get past it: a fully qualified reference such as `io.restassured.RestAssured.baseURI`, and a `var` that infers a REST Assured type from another method's return value without ever naming it. Neither appears in the tree today, and neither is something a contributor writes by accident. Both fail to compile, since no module depends on REST Assured.
 
-The check reads import statements only, so it is a deterrent rather than a proof. Two routes get past it: a fully qualified reference such as `io.restassured.RestAssured.baseURI`, and a `var` that infers a REST Assured type from another method's return value without ever naming it. Neither appears in the tree today, and neither is something a contributor writes by accident, but a reviewer should not treat a green build as evidence that no REST Assured call exists.
-
-Utility methods on `Utils` that do not touch the transport — `uniqueRandomStringGenerator`, `getLocalDateOfTenant`, `getDoubleValue`, `dateFormatter` — are unaffected and are used widely by migrated tests.
+`Utils` keeps only helpers that do not touch the transport — `uniqueRandomStringGenerator`, `getLocalDateOfTenant`, `getDoubleValue`, `dateFormatter` — and they are used widely.
 
 === Running Locally
 
@@ -82,7 +58,7 @@ A violation means a call is being made outside the generated client. Resolve it 
 . **The endpoint is in the client, but the generated model is missing a field you need.** Fix the schema at source. See <<feign-fix-model-at-source>>.
 . **The generated client cannot express the call.** Where an endpoint declares no response schema the generator types the result as a bare `String` — `retrieveOneSavingsAccountTransaction` is one example — and some multi-step commands are not modelled at all. Give the endpoint an `@ApiResponse` schema where you can (IT-06); otherwise call it over plain HTTP and add a Javadoc comment stating why the typed client cannot express it.
 
-Suppressing the rule, adding the file to the baseline, dropping the assertion, or substituting a different field are not resolutions. See rules IT-05 and IT-09.
+Suppressing the rule, dropping the assertion, or substituting a different field are not resolutions. See rules IT-05 and IT-09.
 
 == Writing a Feign Integration Test
 
@@ -167,13 +143,11 @@ The following rules are drawn from review feedback on the migration pull request
 [cols="1,3", options="header"]
 |===
 | Rule | Description
-| IT-01 | Call the server through the generated Feign client. REST Assured is not permitted in the `...client.feign` package tree; the Checkstyle rule above enforces this.
+| IT-01 | Call the server through the generated Feign client. No module depends on REST Assured, and the Checkstyle rule above rejects it.
 | IT-02 | Use the `FeignCalls` helpers rather than invoking the generated API interface directly, so failures arrive as `CallFailedRuntimeException`.
 | IT-03 | Use the Feign client, not the legacy Retrofit client's `Calls` or `.legacy` accessors.
 | IT-04 | Plain HTTP is acceptable only where the generated client cannot express the call, and only with a Javadoc comment recording why.
 |===
-
-CAUTION: The Retrofit and Feign SDKs both publish models under `org.apache.fineract.client.models`. In `integration-tests` both are on the test classpath, and the one declared first in `dependencies.gradle` wins. When a model change appears to have no effect at runtime, check which SDK supplied the class.
 
 [#feign-schema-and-sdk]
 === Schema and SDK
@@ -277,8 +251,6 @@ The suite talks to whatever is listening at `BACKEND_PROTOCOL`://`BACKEND_HOST`:
 
 * **Checkstyle**: https://checkstyle.org/[checkstyle] 13.4.2, configured in `config/checkstyle/checkstyle.xml`
 * **IllegalImport**: https://checkstyle.org/checks/imports/illegalimport.html[check reference]
-* **SuppressionFilter**: https://checkstyle.org/filters/suppressionfilter.html[filter reference]
-* **Baseline**: `config/checkstyle/restassured-baseline.xml`
 * **Workflow**: `.github/workflows/build-quality-checks.yml`
 * **Generated client**: `fineract-client-feign`
 * **Migrated tests**: `integration-tests/src/test/java/org/apache/fineract/integrationtests/client/feign`

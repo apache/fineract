@@ -34,10 +34,11 @@ import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeSched
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyRangeScheduleHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
@@ -70,6 +71,8 @@ public class FeignWorkingCapitalLoanRepaymentBeforeFirstCobTest extends FeignInt
     private static final String REPAYMENT_DATE = "20 January 2026";
     private static final LocalDate REPAYMENT_LOCAL_DATE = LocalDate.of(2026, 1, 20);
     private static final String REPAYMENT_DATE_ISO = "2026-01-20";
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     /** Comfortably above the 3% of 3000 the period needs to count as met, so a dropped repayment is unmistakable. */
     private static final BigDecimal REPAYMENT = new BigDecimal("500");
@@ -207,7 +210,7 @@ public class FeignWorkingCapitalLoanRepaymentBeforeFirstCobTest extends FeignInt
     private Long createProductWithDelinquency() {
         final String uniqueName = "WCL PreCobRepay " + Utils.uniqueRandomStringGenerator("", 8);
         final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
-        final PostDelinquencyRangeResponse range = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest()
+        final PostDelinquencyRangeResponse range = delinquencyHelper.createRange(new DelinquencyRangeRequest()
                 .classification(Utils.randomStringGenerator("DLQ_R_", 10)).minimumAgeDays(1).maximumAgeDays(60).locale("en"));
         final PostDelinquencyBucketResponse bucket = WorkingCapitalLoanDelinquencyRangeScheduleHelper
                 .createWorkingCapitalLoanDelinquencyBucket(List.of(range.getResourceId()), DELINQUENCY_FREQUENCY_DAYS, 0,

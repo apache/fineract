@@ -21,10 +21,12 @@ package org.apache.fineract.integrationtests;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import org.apache.fineract.client.models.BusinessStep;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.BusinessStepHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,14 +35,15 @@ import org.junit.jupiter.api.Test;
 
 public class LoanSummaryTest extends FeignLoanTestBase {
 
-    private static BusinessStepHelper.BusinessStepsSnapshot originalConfig;
-    private static final BusinessStepHelper businessStepHelper = new BusinessStepHelper();
+    private static final FeignBusinessStepHelper businessStepHelper = new FeignBusinessStepHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
+    private static List<BusinessStep> originalSteps;
     Long clientId;
     Long loanId;
 
     @BeforeAll
     static void setup() {
-        originalConfig = businessStepHelper.getConfigurationSnapshot("LOAN_CLOSE_OF_BUSINESS");
+        originalSteps = businessStepHelper.getConfiguredBusinessStepsByJobName("LOAN_CLOSE_OF_BUSINESS").getBusinessSteps();
     }
 
     @BeforeEach
@@ -52,7 +55,7 @@ public class LoanSummaryTest extends FeignLoanTestBase {
 
     @AfterAll
     public static void teardown() {
-        originalConfig.restore();
+        businessStepHelper.updateBusinessSteps("LOAN_CLOSE_OF_BUSINESS", originalSteps);
     }
 
     @Test

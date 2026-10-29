@@ -84,7 +84,7 @@ public class FeignClientHelper {
     }
 
     public Long createClient() {
-        return createClient(org.apache.fineract.integrationtests.common.ClientHelper.DEFAULT_DATE);
+        return createClient(ClientTestData.DEFAULT_ACTIVATION_DATE);
     }
 
     public Long createClient(String activationDate) {

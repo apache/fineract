@@ -38,8 +38,8 @@ import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.assertj.core.api.Assertions;
@@ -204,9 +204,10 @@ public class FeignOfficeSpecificLoanProductVisibilityTest extends FeignLoanTestB
     }
 
     private Long createClient(Long officeId) {
-        return clientHelper.createClient(new PostClientsRequest().officeId(officeId).legalFormId(1L)
-                .firstname(Utils.randomFirstNameGenerator()).lastname(Utils.randomLastNameGenerator()).active(true)
-                .activationDate(ClientHelper.DEFAULT_DATE).dateFormat(LoanTestData.DATETIME_PATTERN).locale(LoanTestData.LOCALE))
+        return clientHelper
+                .createClient(new PostClientsRequest().officeId(officeId).legalFormId(1L).firstname(Utils.randomFirstNameGenerator())
+                        .lastname(Utils.randomLastNameGenerator()).active(true).activationDate(ClientTestData.DEFAULT_ACTIVATION_DATE)
+                        .dateFormat(LoanTestData.DATETIME_PATTERN).locale(LoanTestData.LOCALE))
                 .getClientId();
     }
 

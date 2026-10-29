@@ -39,6 +39,7 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
@@ -48,7 +49,6 @@ import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestB
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
@@ -67,7 +67,7 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends FeignLoa
     private static FeignSavingsHelper savingsHelper;
     private static FeignSavingsProductHelper savingsProductHelper;
     private static FeignSavingsTransactionHelper savingsTransactionHelper;
-    private static FinancialActivityAccountHelper financialActivityAccountHelper;
+    private static FeignFinancialActivityAccountHelper financialActivityAccountHelper;
 
     @BeforeAll
     public static void setupSavingsAndFinancialActivityHelpers() {
@@ -75,15 +75,15 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends FeignLoa
         savingsHelper = new FeignSavingsHelper(client);
         savingsProductHelper = new FeignSavingsProductHelper(client);
         savingsTransactionHelper = new FeignSavingsTransactionHelper(client);
-        financialActivityAccountHelper = new FinancialActivityAccountHelper(null);
+        financialActivityAccountHelper = new FeignFinancialActivityAccountHelper(FineractFeignClientHelper.getFineractFeignClient());
     }
 
     @AfterAll
     public static void tearDownFinancialActivityAccounts() {
-        List<GetFinancialActivityAccountsResponse> financialActivities = financialActivityAccountHelper.getAllFinancialActivityAccounts();
+        List<GetFinancialActivityAccountsResponse> financialActivities = financialActivityAccountHelper.getAllMappings();
         for (GetFinancialActivityAccountsResponse financialActivity : financialActivities) {
             DeleteFinancialActivityAccountsResponse deletedFinancialActivityAccount = financialActivityAccountHelper
-                    .deleteFinancialActivityAccount(financialActivity.getId());
+                    .deleteMapping(financialActivity.getId());
             Assertions.assertNotNull(deletedFinancialActivityAccount);
             Assertions.assertEquals(financialActivity.getId(), deletedFinancialActivityAccount.getResourceId());
         }
@@ -173,12 +173,11 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends FeignLoa
     }
 
     private void mapLiabilityTransferFinancialActivity() {
-        financialActivityAccountHelper.getAllFinancialActivityAccounts()
-                .forEach(mapping -> financialActivityAccountHelper.deleteFinancialActivityAccount(mapping.getId()));
+        financialActivityAccountHelper.getAllMappings().forEach(mapping -> financialActivityAccountHelper.deleteMapping(mapping.getId()));
         Long liabilityAccountId = getAccounts().getOverpaymentAccount().getAccountID().longValue();
         PostFinancialActivityAccountsResponse response = financialActivityAccountHelper
-                .createFinancialActivityAccount(new PostFinancialActivityAccountsRequest()
-                        .financialActivityId((long) LIABILITY_TRANSFER.getValue()).glAccountId(liabilityAccountId));
+                .createMapping(new PostFinancialActivityAccountsRequest().financialActivityId((long) LIABILITY_TRANSFER.getValue())
+                        .glAccountId(liabilityAccountId));
         Assertions.assertNotNull(response.getResourceId());
     }
 

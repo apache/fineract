@@ -47,6 +47,7 @@ import org.apache.fineract.infrastructure.event.external.data.ExternalEventRespo
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.AmortizationType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInMonthType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInYearType;
@@ -54,7 +55,6 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.In
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
@@ -81,7 +81,7 @@ public class ExternalBusinessEventTest extends FeignLoanTestBase {
 
     @BeforeAll
     public static void beforeAll() {
-        client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
         loanProductId = createLoanProductPeriodicWithInterest();
         // A single reusable charge for the whole class - the tests only reference it, they never mutate it.
         chargeId = chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateFee(111.0, "USD")).getResourceId();
@@ -829,7 +829,7 @@ public class ExternalBusinessEventTest extends FeignLoanTestBase {
 
     @Test
     public void testProgressiveLoanReverseReplayChargeOffEvents() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final PostClientsResponse client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
 
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> repaymentTransactionIdRef = new AtomicReference<>();

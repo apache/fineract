@@ -46,10 +46,11 @@ import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeSched
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyRangeScheduleHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
@@ -124,6 +125,8 @@ public class FeignWorkingCapitalLoanStatusHelpersTest extends FeignIntegrationTe
 
     private Long sharedProductId;
     private Long discountOverridableProductId;
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @BeforeAll
     void setupHelpers() {
@@ -620,7 +623,7 @@ public class FeignWorkingCapitalLoanStatusHelpersTest extends FeignIntegrationTe
     }
 
     private Long createDelinquencyBucket() {
-        final PostDelinquencyRangeResponse range = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest()
+        final PostDelinquencyRangeResponse range = delinquencyHelper.createRange(new DelinquencyRangeRequest()
                 .classification(Utils.randomStringGenerator("DLQ_R_", 10)).minimumAgeDays(1).maximumAgeDays(30).locale("en"));
         assertNotNull(range, "delinquency range creation must succeed");
         final PostDelinquencyBucketResponse bucket = WorkingCapitalLoanDelinquencyRangeScheduleHelper

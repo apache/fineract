@@ -65,8 +65,8 @@ public class PaymentTypeIntegrationTest extends FeignIntegrationTest {
 
         // 5. Update Payment Type
         String newName = Utils.randomStringGenerator("P_TU", 5);
-        paymentTypeHelper.updatePaymentType(paymentTypeId,
-                new PaymentTypeUpdateRequest().name(newName).description(description).isCashPayment(isCashPayment).position(position));
+        paymentTypeHelper.updatePaymentType(paymentTypeId, new PaymentTypeUpdateRequest().name(newName).description(description)
+                .isCashPayment(isCashPayment).position(position).isSystemDefined(false));
 
         // 6. Verify Update
         var paymentTypeUpdatedResponse = paymentTypeHelper.retrievePaymentType(paymentTypeId);

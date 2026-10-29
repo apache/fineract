@@ -20,13 +20,11 @@ package org.apache.fineract.test.helper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
-import retrofit2.Response;
 
 @NoArgsConstructor
 @Getter
@@ -67,15 +65,6 @@ public class ErrorResponse {
         ErrorDetail error = new ErrorDetail();
         error.setDeveloperMessage(this.developerMessage);
         return error;
-    }
-
-    public static ErrorResponse from(Response retrofitResponse) {
-        try {
-            String errorBody = retrofitResponse.errorBody().string();
-            return OBJECT_MAPPER.readValue(errorBody, ErrorResponse.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Error while parsing the error body", e);
-        }
     }
 
     public static ErrorResponse fromFeignException(feign.FeignException feignException) {

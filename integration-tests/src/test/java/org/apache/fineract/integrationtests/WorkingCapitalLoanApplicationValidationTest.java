@@ -34,9 +34,11 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PostPaymentAllocationRule;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
@@ -49,16 +51,19 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class WorkingCapitalLoanApplicationValidationTest {
 
+    private static final FeignDelinquencyHelper DELINQUENCY_HELPER = new FeignDelinquencyHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
     private static Long delinquencyBucketId;
     private static Long breachId;
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
     private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
 
     @BeforeAll
     static void initSharedFixtures() {
-        delinquencyBucketId = DelinquencyBucketsHelper.createDefaultWorkingCapitalBucket();
+        delinquencyBucketId = DELINQUENCY_HELPER.createDefaultWorkingCapitalBucket();
         final WorkingCapitalBreachHelper helper = new WorkingCapitalBreachHelper();
         breachId = helper.create(
                 helper.createBreachRequest(Utils.randomStringGenerator("Breach", 20), 30, "DAYS", "PERCENTAGE", BigDecimal.valueOf(10)));
@@ -1229,6 +1234,6 @@ public class WorkingCapitalLoanApplicationValidationTest {
     }
 
     private Long createClient() {
-        return ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        return clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
     }
 }

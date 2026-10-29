@@ -32,7 +32,7 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
@@ -55,7 +55,7 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Fe
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ALLOW_CASH_AND_NON_CASH_ACCRUAL,
                     new PutGlobalConfigurationsRequest().enabled(false));
             try {
-                PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+                PostClientsResponse client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
 
                 PostLoanProductsRequest productRequest = createOnePeriod30DaysPeriodicAccrualProduct(INTEREST_RATE_PER_PERIOD)
                         .accountingRule(1) // NONE
@@ -103,7 +103,7 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Fe
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ALLOW_CASH_AND_NON_CASH_ACCRUAL,
                     new PutGlobalConfigurationsRequest().enabled(false));
             try {
-                PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+                PostClientsResponse client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
 
                 PostLoanProductsRequest productRequest = createOnePeriod30DaysPeriodicAccrualProduct(INTEREST_RATE_PER_PERIOD)
                         .accountingRule(2) // CASH_BASED
@@ -133,7 +133,7 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Fe
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ALLOW_CASH_AND_NON_CASH_ACCRUAL,
                     new PutGlobalConfigurationsRequest().enabled(false));
             try {
-                PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+                PostClientsResponse client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
 
                 PostLoanProductsRequest productRequest = createOnePeriod30DaysPeriodicAccrualProduct(INTEREST_RATE_PER_PERIOD)
                         .accountingRule(4); // ACCRUAL_UPFRONT
@@ -163,7 +163,7 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Fe
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ALLOW_CASH_AND_NON_CASH_ACCRUAL,
                     new PutGlobalConfigurationsRequest().enabled(false));
             try {
-                PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+                PostClientsResponse client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
 
                 PostLoanProductsRequest productRequest = createOnePeriod30DaysPeriodicAccrualProduct(INTEREST_RATE_PER_PERIOD);
                 // accountingRule is already 3 (ACCRUAL_PERIODIC) by default in this method
@@ -193,7 +193,7 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Fe
                     new PutGlobalConfigurationsRequest().enabled(true));
 
             // Legacy behavior: flag is enabled (true), accruals are created for NONE accounting type
-            PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            PostClientsResponse client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
 
             PostLoanProductsRequest productRequest = createOnePeriod30DaysPeriodicAccrualProduct(INTEREST_RATE_PER_PERIOD).accountingRule(1) // NONE
                     .fundSourceAccountId(null) //
@@ -240,7 +240,7 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Fe
                     new PutGlobalConfigurationsRequest().enabled(true));
 
             // Legacy behavior: flag is enabled (true), accruals are created for CASH accounting type
-            PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            PostClientsResponse client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
 
             PostLoanProductsRequest productRequest = createOnePeriod30DaysPeriodicAccrualProduct(INTEREST_RATE_PER_PERIOD).accountingRule(2) // CASH_BASED
                     .receivableInterestAccountId(null) //

@@ -43,13 +43,13 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInMonthType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInYearType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.FuturePaymentAllocationRule;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.SupportedInterestRefundTypesItem;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
@@ -64,7 +64,7 @@ public class LoanInterestRefundTest extends FeignLoanTestBase {
 
     @BeforeAll
     public static void setup() {
-        client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
     }
 
     @Test

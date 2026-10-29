@@ -65,6 +65,7 @@ import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
@@ -73,14 +74,13 @@ import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
-import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.junit.jupiter.api.Test;
 
 public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
 
     private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void test() {
@@ -123,8 +123,8 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             String penalty1LoanChargeExternalId = UUID.randomUUID().toString();
-            Integer penalty1LoanChargeId = addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(penalty), penaltyCharge1AddedDate, "10", penalty1LoanChargeExternalId)).intValue();
+            Integer penalty1LoanChargeId = addSpecifiedDueDateCharge(loanId, penalty, penaltyCharge1AddedDate, 10.0,
+                    penalty1LoanChargeExternalId);
 
             // Get loan charges
             List<GetLoansLoanIdChargesChargeIdResponse> loanChargesResult = getLoanCharges((long) loanId);
@@ -493,18 +493,14 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             formattedDate = dateFormatter.format(aMonthBeforePlus3Days);
 
             String penalty3LoanChargeExternalId = UUID.randomUUID().toString();
-            Integer penalty3LoanChargeId = addChargesForLoan(loanWithInterestId, LoanTransactionHelper
-                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), formattedDate, "10", penalty3LoanChargeExternalId))
-                    .intValue();
+            Integer penalty3LoanChargeId = addSpecifiedDueDateCharge(loanWithInterestId, penalty, formattedDate, 10.0,
+                    penalty3LoanChargeExternalId);
 
-            Integer penalty4LoanChargeId = addChargesForLoan(loanWithInterestId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty2), formattedDate, "1000"))
-                    .intValue();
+            Integer penalty4LoanChargeId = addSpecifiedDueDateCharge(loanWithInterestId, penalty2, formattedDate, 1000.0, null);
 
             String penalty5LoanChargeExternalId = UUID.randomUUID().toString();
-            Integer penalty5LoanChargeId = addChargesForLoan(loanWithInterestId, LoanTransactionHelper
-                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty2), formattedDate, "1000", penalty5LoanChargeExternalId))
-                    .intValue();
+            Integer penalty5LoanChargeId = addSpecifiedDueDateCharge(loanWithInterestId, penalty2, formattedDate, 1000.0,
+                    penalty5LoanChargeExternalId);
 
             // Check whether an external id was generated
             final PostLoansLoanIdTransactionsResponse waiveInterestResult = makeWaiveInterest(loanExternalIdStr,
@@ -700,8 +696,8 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             String penalty1LoanChargeExternalId = UUID.randomUUID().toString();
-            Integer penalty1LoanChargeId = addChargesForLoan(loan2Id, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(penalty), penaltyCharge1AddedDate, "10", penalty1LoanChargeExternalId)).intValue();
+            Integer penalty1LoanChargeId = addSpecifiedDueDateCharge(loan2Id, penalty, penaltyCharge1AddedDate, 10.0,
+                    penalty1LoanChargeExternalId);
 
             // NEGATIVE SCENARIOS
 
@@ -814,17 +810,17 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
                     new PutGlobalConfigurationsRequest().enabled(true));
             ArrayList<Long> rangeIds = new ArrayList<>();
             // First Range
-            PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest()
+            PostDelinquencyRangeResponse delinquencyRangeResponse = delinquencyHelper.createRange(new DelinquencyRangeRequest()
                     .minimumAgeDays(1).maximumAgeDays(3).locale("en").classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
-            DelinquencyRangeResponse range = DelinquencyRangesHelper.getRange(delinquencyRangeResponse.getResourceId());
+            DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             // Second Range
-            delinquencyRangeResponse = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest().minimumAgeDays(4)
-                    .maximumAgeDays(60).locale("en").classification(Utils.randomStringGenerator("DLQ_R_", 10)));
+            delinquencyRangeResponse = delinquencyHelper.createRange(new DelinquencyRangeRequest().minimumAgeDays(4).maximumAgeDays(60)
+                    .locale("en").classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper
+            PostDelinquencyBucketResponse delinquencyBucketResponse = delinquencyHelper
                     .createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(rangeIds));
 
             final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
@@ -1044,4 +1040,8 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
         });
     }
 
+    private Integer addSpecifiedDueDateCharge(Integer loanId, Long chargeId, String dueDate, double amount, String externalId) {
+        return addChargesForLoan(loanId.longValue(), new PostLoansLoanIdChargesRequest().chargeId(chargeId).dueDate(dueDate).amount(amount)
+                .externalId(externalId).dateFormat("dd MMMM yyyy").locale("en")).getResourceId().intValue();
+    }
 }
