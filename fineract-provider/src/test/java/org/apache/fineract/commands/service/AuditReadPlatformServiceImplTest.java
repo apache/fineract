@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.commands.service;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -73,5 +74,35 @@ class AuditReadPlatformServiceImplTest {
         auditRequest.setStatus("abc");
 
         assertThrows(PlatformApiDataValidationException.class, () -> auditReadPlatformService.getExtraCriteria(auditRequest));
+    }
+
+    @Test
+    void identifierFiltersMatchReturnedValueForNewRowsAndRequestColumnForOldRows() {
+        final AuditRequest auditRequest = new AuditRequest();
+        auditRequest.setResourceId(5L);
+        auditRequest.setOfficeId(1L);
+
+        final SQLBuilder extraCriteria = auditReadPlatformService.getExtraCriteria(auditRequest);
+
+        assertTrue(extraCriteria.getSQLTemplate().contains("( aud.result_ids_written = ? AND aud.result_resource_id = ? OR "
+                + "aud.result_ids_written = ? AND aud.resource_id = ? )"));
+        assertTrue(extraCriteria.getSQLTemplate().contains(
+                "( aud.result_ids_written = ? AND aud.result_office_id = ? OR " + "aud.result_ids_written = ? AND aud.office_id = ? )"));
+        assertArrayEquals(new Object[] { true, 5L, false, 5L, true, 1L, false, 1L }, extraCriteria.getArguments());
+    }
+
+    @Test
+    void submittedIdentifierFiltersMatchRequestColumnWhereItWasNotOverwritten() {
+        final AuditRequest auditRequest = new AuditRequest();
+        auditRequest.setSubmittedResourceId(5L);
+        auditRequest.setSubmittedLoanExternalId("ext-1");
+
+        final SQLBuilder extraCriteria = auditReadPlatformService.getExtraCriteria(auditRequest);
+
+        assertTrue(extraCriteria.getSQLTemplate().contains(
+                "aud.resource_id = ? AND  ( aud.submitted_ids_kept = ? OR aud.result_ids_written = ? OR aud.status = ? OR aud.status = ? OR aud.status = ? )"));
+        assertTrue(extraCriteria.getSQLTemplate().contains(
+                "aud.loan_external_id = ? AND  ( aud.submitted_ids_kept = ? OR aud.result_ids_written = ? OR aud.status = ? OR aud.status = ? OR aud.status = ? )"));
+        assertArrayEquals(new Object[] { 5L, true, true, 2, 3, 4, "ext-1", true, true, 2, 3, 4 }, extraCriteria.getArguments());
     }
 }

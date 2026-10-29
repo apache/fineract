@@ -42,6 +42,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.data.AuditData;
 import org.apache.fineract.commands.data.AuditSearchData;
 import org.apache.fineract.commands.data.request.MakerCheckerRequest;
+import org.apache.fineract.commands.service.AuditColumns;
 import org.apache.fineract.commands.service.AuditReadPlatformService;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
@@ -129,7 +130,7 @@ public class MakercheckersApiResource {
         if (makerCheckerRequest.getEntityName() != null) {
             extraCriteria.addCriteria("aud.entity_name like ", makerCheckerRequest.getEntityName() + "%");
         }
-        extraCriteria.addNonNullCriteria("aud.resource_id = ", makerCheckerRequest.getResourceId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "resource_id", makerCheckerRequest.getResourceId());
         extraCriteria.addNonNullCriteria("aud.maker_id = ", makerCheckerRequest.getMakerId());
         if (StringUtils.isNotBlank(makerCheckerRequest.getUsername())) {
             extraCriteria.addCriteria("mk.username like ", makerCheckerRequest.getUsername().trim() + "%");
@@ -150,11 +151,30 @@ public class MakercheckersApiResource {
                         SQLBuilder.WhereLogicalOperator.OR);
             });
         }
-        extraCriteria.addNonNullCriteria("aud.office_id = ", makerCheckerRequest.getOfficeId());
-        extraCriteria.addNonNullCriteria("aud.group_id = ", makerCheckerRequest.getGroupId());
-        extraCriteria.addNonNullCriteria("aud.client_id = ", makerCheckerRequest.getClientId());
-        extraCriteria.addNonNullCriteria("aud.loan_id = ", makerCheckerRequest.getLoanId());
-        extraCriteria.addNonNullCriteria("aud.savings_account_id = ", makerCheckerRequest.getSavingsAccountId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "office_id", makerCheckerRequest.getOfficeId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "group_id", makerCheckerRequest.getGroupId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "client_id", makerCheckerRequest.getClientId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "loan_id", makerCheckerRequest.getLoanId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "savings_account_id", makerCheckerRequest.getSavingsAccountId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "product_id", makerCheckerRequest.getProductId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "transaction_id", makerCheckerRequest.getTransactionId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "subresource_id", makerCheckerRequest.getSubresourceId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "resource_external_id", makerCheckerRequest.getResourceExternalId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "subresource_external_id", makerCheckerRequest.getSubresourceExternalId());
+        AuditColumns.addReturnedCriteria(extraCriteria, "loan_external_id", makerCheckerRequest.getLoanExternalId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "office_id", makerCheckerRequest.getSubmittedOfficeId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "group_id", makerCheckerRequest.getSubmittedGroupId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "client_id", makerCheckerRequest.getSubmittedClientId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "loan_id", makerCheckerRequest.getSubmittedLoanId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "savings_account_id", makerCheckerRequest.getSubmittedSavingsAccountId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "product_id", makerCheckerRequest.getSubmittedProductId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "transaction_id", makerCheckerRequest.getSubmittedTransactionId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "resource_id", makerCheckerRequest.getSubmittedResourceId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "resource_external_id", makerCheckerRequest.getSubmittedResourceExternalId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "subresource_id", makerCheckerRequest.getSubmittedSubresourceId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "subresource_external_id",
+                makerCheckerRequest.getSubmittedSubresourceExternalId());
+        AuditColumns.addSubmittedCriteria(extraCriteria, "loan_external_id", makerCheckerRequest.getSubmittedLoanExternalId());
 
         return extraCriteria;
     }

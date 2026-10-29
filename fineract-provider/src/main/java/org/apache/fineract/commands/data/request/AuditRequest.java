@@ -72,6 +72,42 @@ public class AuditRequest implements Serializable {
     private String dateFormat;
     @QueryParam("locale")
     private String locale;
+    @QueryParam("productId")
+    private Long productId;
+    @QueryParam("transactionId")
+    private String transactionId;
+    @QueryParam("subresourceId")
+    private Long subresourceId;
+    @QueryParam("resourceExternalId")
+    private String resourceExternalId;
+    @QueryParam("subresourceExternalId")
+    private String subresourceExternalId;
+    @QueryParam("loanExternalId")
+    private String loanExternalId;
+    @QueryParam("submittedOfficeId")
+    private Long submittedOfficeId;
+    @QueryParam("submittedGroupId")
+    private Long submittedGroupId;
+    @QueryParam("submittedClientId")
+    private Long submittedClientId;
+    @QueryParam("submittedLoanId")
+    private Long submittedLoanId;
+    @QueryParam("submittedSavingsAccountId")
+    private Long submittedSavingsAccountId;
+    @QueryParam("submittedProductId")
+    private Long submittedProductId;
+    @QueryParam("submittedTransactionId")
+    private String submittedTransactionId;
+    @QueryParam("submittedResourceId")
+    private Long submittedResourceId;
+    @QueryParam("submittedResourceExternalId")
+    private String submittedResourceExternalId;
+    @QueryParam("submittedSubresourceId")
+    private Long submittedSubresourceId;
+    @QueryParam("submittedSubresourceExternalId")
+    private String submittedSubresourceExternalId;
+    @QueryParam("submittedLoanExternalId")
+    private String submittedLoanExternalId;
 
     public LocalDateTime getMakerDateTimeFrom() {
         return DateUtils.convertDateTimeStringToLocalDateTime(makerDateTimeFrom, dateFormat, locale, LocalTime.MIN);
