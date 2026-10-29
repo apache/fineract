@@ -474,8 +474,8 @@ public class WorkingCapitalLoanProductDataValidator {
     private BigDecimal validateTermFields(final JsonElement element, final DataValidatorBuilder baseDataValidator, final boolean required) {
         final BigDecimal principal;
         if (required || this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.principalParamName, element)) {
-            principal = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.principalParamName, element,
-                    new HashSet<>());
+            principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(WorkingCapitalLoanProductConstants.principalParamName,
+                    element);
             baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.principalParamName).value(principal).notNull()
                     .positiveAmount();
         } else {
@@ -484,7 +484,7 @@ public class WorkingCapitalLoanProductDataValidator {
 
         if (required || this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, element)) {
             final BigDecimal periodPaymentRateParamName = this.fromApiJsonHelper
-                    .extractBigDecimalNamed(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, element, new HashSet<>());
+                    .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, element);
             baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.periodPaymentRateParamName)
                     .value(periodPaymentRateParamName).ignoreIfNull().zeroOrPositiveAmount();
         }
@@ -513,8 +513,8 @@ public class WorkingCapitalLoanProductDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.discountParamName, element)) {
-            final BigDecimal discount = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.discountParamName,
-                    element, new HashSet<>());
+            final BigDecimal discount = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanProductConstants.discountParamName, element);
             baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.discountParamName).value(discount).ignoreIfNull()
                     .zeroOrPositiveAmount();
         }
@@ -861,7 +861,7 @@ public class WorkingCapitalLoanProductDataValidator {
 
     private BigDecimal extractBigDecimalIfPresent(final JsonElement element, final String paramName) {
         return this.fromApiJsonHelper.parameterExists(paramName, element)
-                ? this.fromApiJsonHelper.extractBigDecimalNamed(paramName, element, new HashSet<>())
+                ? this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(paramName, element)
                 : null;
     }
 
@@ -871,7 +871,7 @@ public class WorkingCapitalLoanProductDataValidator {
      */
     private BigDecimal effectiveBigDecimal(final JsonElement element, final String paramName, final BigDecimal persisted) {
         if (this.fromApiJsonHelper.parameterExists(paramName, element)) {
-            return this.fromApiJsonHelper.extractBigDecimalNamed(paramName, element, new HashSet<>());
+            return this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(paramName, element);
         }
         return persisted;
     }

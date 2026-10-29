@@ -62,8 +62,8 @@ public class WorkingCapitalLoanNearBreachActionWriteServiceImpl implements Worki
                 command.parsedJson());
         final NearBreachActionType actionType = NearBreachActionType.valueOf(actionStr);
 
-        final BigDecimal threshold = fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.nearBreachThresholdParamName,
-                command.parsedJson(), new HashSet<>());
+        final BigDecimal threshold = fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.nearBreachThresholdParamName, command.parsedJson());
         final Integer frequency = fromApiJsonHelper.extractIntegerNamed(WorkingCapitalLoanConstants.nearBreachFrequencyParamName,
                 command.parsedJson(), new HashSet<>());
         final String frequencyTypeStr = fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.nearBreachFrequencyTypeParamName,

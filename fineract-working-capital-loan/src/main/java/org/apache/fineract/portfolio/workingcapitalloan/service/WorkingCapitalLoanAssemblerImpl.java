@@ -110,7 +110,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
         final BigDecimal principal = fromApiJsonHelper
                 .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.principalAmountParamName, element);
         final BigDecimal totalPaymentVolume = fromApiJsonHelper
-                .extractBigDecimalNamed(WorkingCapitalLoanConstants.totalPaymentVolumeParamName, element, new HashSet<>());
+                .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.totalPaymentVolumeParamName, element);
 
         final LocalDate submittedOnDate = fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.submittedOnDateParameterName,
                 element) ? fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.submittedOnDateParameterName, element)
@@ -178,8 +178,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
             detail.setPaymentAmount(null);
         } else {
             detail.setPeriodPaymentRate(fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.periodPaymentRateParamName, element)
-                    ? fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.periodPaymentRateParamName, element,
-                            new HashSet<>())
+                    ? fromApiJsonHelper.extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.periodPaymentRateParamName, element)
                     : productDetail.getPeriodPaymentRate());
             detail.setAnnualEir(null);
             detail.setPaymentAmount(null);
@@ -195,7 +194,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
         detail.setAmortizationType(productDetail.getAmortizationType());
         detail.setNpvDayCount(productDetail.getNpvDayCount());
         detail.setDiscountProposed(fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.discountParamName, element)
-                ? fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.discountParamName, element, new HashSet<>())
+                ? fromApiJsonHelper.extractBigDecimalWithLocaleNamed(WorkingCapitalLoanProductConstants.discountParamName, element)
                 : null);
         if (detail.getDiscountProposed() == null && productDetail.getDiscount() != null
                 && productDetail.getDiscount().compareTo(BigDecimal.ZERO) > 0
@@ -217,12 +216,11 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
         }
         detail.setDelinquencyGraceDays(
                 fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, element)
-                        ? fromApiJsonHelper.extractIntegerNamed(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, element,
-                                new HashSet<>())
+                        ? fromApiJsonHelper.extractIntegerWithLocaleNamed(WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName,
+                                element)
                         : productDetail.getDelinquencyGraceDays());
         detail.setBreachGraceDays(fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, element)
-                ? fromApiJsonHelper.extractIntegerNamed(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, element,
-                        new HashSet<>())
+                ? fromApiJsonHelper.extractIntegerWithLocaleNamed(WorkingCapitalLoanProductConstants.breachGraceDaysParamName, element)
                 : productDetail.getBreachGraceDays());
         // Present (including null) overrides product; omitted inherits — same contract as parents/grace days.
         if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element)) {
@@ -268,7 +266,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
      * resolved it: storing null would leave the loan without the input every later schedule check reads from it.
      */
     private BigDecimal requestedOrProductDefault(final String paramName, final JsonElement element, final BigDecimal productDefault) {
-        final BigDecimal requested = fromApiJsonHelper.extractBigDecimalNamed(paramName, element, new HashSet<>());
+        final BigDecimal requested = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(paramName, element);
         return requested != null ? requested : productDefault;
     }
 
@@ -368,7 +366,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
         if (command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanConstants.totalPaymentVolumeParamName,
                 currenttotalPaymentVolumeVolume)) {
             final BigDecimal totalPaymentVolume = fromApiJsonHelper
-                    .extractBigDecimalNamed(WorkingCapitalLoanConstants.totalPaymentVolumeParamName, element, new HashSet<>());
+                    .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.totalPaymentVolumeParamName, element);
             loan.setTotalPaymentVolume(totalPaymentVolume);
             changes.put(WorkingCapitalLoanConstants.totalPaymentVolumeParamName, totalPaymentVolume);
         }
@@ -402,14 +400,14 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                     && command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanProductConstants.periodPaymentRateParamName,
                             detail.getPeriodPaymentRate())) {
                 final BigDecimal periodPaymentRate = fromApiJsonHelper
-                        .extractBigDecimalNamed(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, element, new HashSet<>());
+                        .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, element);
                 detail.setPeriodPaymentRate(periodPaymentRate);
                 changes.put(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, periodPaymentRate);
             }
             if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.annualEirParamName, element)
                     && command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanConstants.annualEirParamName, detail.getAnnualEir())) {
-                final BigDecimal annualEir = fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.annualEirParamName,
-                        element, new HashSet<>());
+                final BigDecimal annualEir = fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.annualEirParamName, element);
                 detail.setAnnualEir(annualEir);
                 changes.put(WorkingCapitalLoanConstants.annualEirParamName, annualEir);
             }
@@ -417,7 +415,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                     && command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanProductConstants.paymentAmountParamName,
                             detail.getPaymentAmount())) {
                 final BigDecimal paymentAmount = fromApiJsonHelper
-                        .extractBigDecimalNamed(WorkingCapitalLoanProductConstants.paymentAmountParamName, element, new HashSet<>());
+                        .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanProductConstants.paymentAmountParamName, element);
                 detail.setPaymentAmount(paymentAmount);
                 changes.put(WorkingCapitalLoanProductConstants.paymentAmountParamName, paymentAmount);
             }
@@ -438,8 +436,8 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                 changes.put(WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName, type.name());
             }
             if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.discountParamName, element)) {
-                final BigDecimal discount = fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.discountParamName,
-                        element, new HashSet<>());
+                final BigDecimal discount = fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanProductConstants.discountParamName, element);
                 // Compare against the proposed discount: the effective one is only set at disbursement.
                 if (command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanProductConstants.discountParamName,
                         detail.getDiscountProposed())) {
