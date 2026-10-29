@@ -19,12 +19,20 @@
 
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import feign.Headers;
+import feign.Param;
+import feign.RequestLine;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PaymentTypeData;
 import org.apache.fineract.client.models.PaymentTypeUpdateRequest;
+import org.apache.fineract.client.models.PaymentTypeUpdateResponse;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignPaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -79,5 +87,63 @@ public class PaymentTypeIntegrationTest extends FeignIntegrationTest {
         final CallFailedRuntimeException exception = paymentTypeHelper.retrievePaymentTypeExpectingError(paymentTypeId);
 
         assertEquals(404, exception.getStatus());
+    }
+
+    @Test
+    public void testUpdateWithExplicitNullIsSystemDefinedLeavesItUnchanged() {
+        Long paymentTypeId = createPaymentType(true);
+        try {
+            String newName = Utils.randomStringGenerator("P_TN", 5);
+
+            ok(() -> fineractClient().create(ExplicitNullIsSystemDefinedPaymentTypeApi.class).updatePaymentType(paymentTypeId,
+                    new ExplicitNullIsSystemDefinedUpdateRequest(newName, 1L)));
+
+            PaymentTypeData updated = paymentTypeHelper.retrievePaymentType(paymentTypeId);
+            assertEquals(newName, updated.getName());
+            assertTrue(updated.getIsSystemDefined(), "isSystemDefined must not change when the request sends null");
+        } finally {
+            paymentTypeHelper.deletePaymentType(paymentTypeId);
+        }
+    }
+
+    @Test
+    public void testUpdateViolatingNotNullConstraintIsDataIntegrityErrorNotNotFound() {
+        Long paymentTypeId = createPaymentType(false);
+        try {
+            // position is omitted, so the update writes NULL into the NOT NULL order_position column
+            CallFailedRuntimeException exception = fail(() -> fineractClient().paymentType().updatePaymentType(paymentTypeId,
+                    new PaymentTypeUpdateRequest().name(Utils.randomStringGenerator("P_TC", 5)).isSystemDefined(false)));
+
+            assertEquals(403, exception.getStatus());
+            assertEquals("error.msg.paymenttypes.unknown.data.integrity.issue", exception.getUserMessageGlobalisationCode());
+        } finally {
+            paymentTypeHelper.deletePaymentType(paymentTypeId);
+        }
+    }
+
+    private Long createPaymentType(boolean isSystemDefined) {
+        return paymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(Utils.randomStringGenerator("P_T", 5))
+                .description(Utils.randomStringGenerator("PT_Desc", 15)).isCashPayment(true).position(1L).isSystemDefined(isSystemDefined))
+                .getResourceId();
+    }
+
+    /**
+     * The generated {@code PaymentTypeUpdateRequest} cannot send <code>"isSystemDefined": null</code>: the mapper's
+     * global {@code NON_NULL} drops it.
+     */
+    @Headers({ "Accept: application/json", "Content-Type: application/json" })
+    interface ExplicitNullIsSystemDefinedPaymentTypeApi {
+
+        @RequestLine("PUT /v1/paymenttypes/{paymentTypeId}")
+        PaymentTypeUpdateResponse updatePaymentType(@Param("paymentTypeId") Long paymentTypeId,
+                ExplicitNullIsSystemDefinedUpdateRequest request);
+    }
+
+    record ExplicitNullIsSystemDefinedUpdateRequest(String name, Long position,
+            @JsonInclude(JsonInclude.Include.ALWAYS) Boolean isSystemDefined) {
+
+        ExplicitNullIsSystemDefinedUpdateRequest(String name, Long position) {
+            this(name, position, null);
+        }
     }
 }
