@@ -6087,6 +6087,77 @@ class ProgressiveEMICalculatorTest {
                 "Period 6 EMI (single tranche)");
     }
 
+    /**
+     * Several installment snapshots can resolve to the same model period. Principal and interest must be accumulated
+     * independently, and amounts from different periods must remain separate. The model intentionally starts with zero
+     * EMI amounts: the nonzero paid amounts then trigger alignment without introducing disbursement and interest
+     * calculation into this focused regression test. This fixture does not represent a complete loan lifecycle.
+     */
+    @Test
+    public void test_shouldAccumulatePaidAmountsByPeriod() {
+        // Arrange: one calendar period per month.
+        RepaymentScheduleInstallmentData jan = installmentJan(BigDecimal.ZERO, BigDecimal.ZERO);
+        RepaymentScheduleInstallmentData feb = installmentFeb(BigDecimal.ZERO, BigDecimal.ZERO);
+        RepaymentScheduleInstallmentData mar = installmentMar(BigDecimal.ZERO, BigDecimal.ZERO);
+        List<RepaymentScheduleInstallmentData> installments = List.of(jan, feb, mar);
+
+        // January: paid principal = 85.00; paid interest = 8.00.
+        RepaymentScheduleInstallmentData jan1 = installmentJan(new BigDecimal("20.00"), new BigDecimal("2.00"));
+        RepaymentScheduleInstallmentData jan2 = installmentJan(new BigDecimal("50.00"), new BigDecimal("5.00"));
+        RepaymentScheduleInstallmentData jan3 = installmentJan(new BigDecimal("15.00"), new BigDecimal("1.00"));
+
+        // February: paid principal = 70.00; paid interest = 7.00.
+        RepaymentScheduleInstallmentData feb1 = installmentFeb(new BigDecimal("30.00"), new BigDecimal("3.00"));
+        RepaymentScheduleInstallmentData feb2 = installmentFeb(new BigDecimal("25.00"), new BigDecimal("2.50"));
+        RepaymentScheduleInstallmentData feb3 = installmentFeb(new BigDecimal("15.00"), new BigDecimal("1.50"));
+
+        // March: paid principal = 100.00; paid interest = 10.00.
+        RepaymentScheduleInstallmentData mar1 = installmentMar(new BigDecimal("45.00"), new BigDecimal("4.50"));
+        RepaymentScheduleInstallmentData mar2 = installmentMar(new BigDecimal("35.00"), new BigDecimal("3.50"));
+        RepaymentScheduleInstallmentData mar3 = installmentMar(new BigDecimal("20.00"), new BigDecimal("2.00"));
+        List<RepaymentScheduleInstallmentData> payments = List.of(jan1, jan2, jan3, feb1, feb2, feb3, mar1, mar2, mar3);
+
+        // Reuse the calculator, currency, math context and loan product configured by this test class.
+        ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateInstallmentInterestScheduleModel(installments,
+                loanProductRelatedDetail, null, mc);
+        LocalDate tillDate = LocalDate.of(2000, 1, 3);
+
+        // Act
+        emiCalculator.alignPeriodsWithPaidAmounts(scheduleModel, payments, tillDate);
+
+        // Assert
+        List<RepaymentPeriod> repaymentPeriods = List.copyOf(scheduleModel.repaymentPeriods());
+        Assertions.assertEquals(3, repaymentPeriods.size(), "The calendar must contain one period per month");
+
+        // January
+        Assertions.assertEquals(0, new BigDecimal("85.00").compareTo(repaymentPeriods.get(0).getPaidPrincipal().getAmount()),
+                "January paid principal");
+        Assertions.assertEquals(0, new BigDecimal("8.00").compareTo(repaymentPeriods.get(0).getPaidInterest().getAmount()),
+                "January paid interest");
+        // February
+        Assertions.assertEquals(0, new BigDecimal("70.00").compareTo(repaymentPeriods.get(1).getPaidPrincipal().getAmount()),
+                "February paid principal");
+        Assertions.assertEquals(0, new BigDecimal("7.00").compareTo(repaymentPeriods.get(1).getPaidInterest().getAmount()),
+                "February paid interest");
+        // March
+        Assertions.assertEquals(0, new BigDecimal("100.00").compareTo(repaymentPeriods.get(2).getPaidPrincipal().getAmount()),
+                "March paid principal");
+        Assertions.assertEquals(0, new BigDecimal("10.00").compareTo(repaymentPeriods.get(2).getPaidInterest().getAmount()),
+                "March paid interest");
+    }
+
+    private static RepaymentScheduleInstallmentData installmentJan(BigDecimal principal, BigDecimal interest) {
+        return RepaymentScheduleInstallmentData.of(LocalDate.of(2000, 1, 1), LocalDate.of(2000, 2, 1), false, false, principal, interest);
+    }
+
+    private static RepaymentScheduleInstallmentData installmentFeb(BigDecimal principal, BigDecimal interest) {
+        return RepaymentScheduleInstallmentData.of(LocalDate.of(2000, 2, 1), LocalDate.of(2000, 3, 1), false, false, principal, interest);
+    }
+
+    private static RepaymentScheduleInstallmentData installmentMar(BigDecimal principal, BigDecimal interest) {
+        return RepaymentScheduleInstallmentData.of(LocalDate.of(2000, 3, 1), LocalDate.of(2000, 4, 1), false, false, principal, interest);
+    }
+
     @Test
     public void test_disbursementAfterLastPeriodFullyPaid_zeroInterest_keepsPeriodsAbovePaidAmounts() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();

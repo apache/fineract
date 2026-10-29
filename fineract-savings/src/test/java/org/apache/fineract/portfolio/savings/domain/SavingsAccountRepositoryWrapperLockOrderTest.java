@@ -23,6 +23,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
@@ -34,7 +35,7 @@ class SavingsAccountRepositoryWrapperLockOrderTest {
 
     private final SavingsAccountRepository repository = mock(SavingsAccountRepository.class);
     private final SavingsAccountRepositoryWrapper underTest = new SavingsAccountRepositoryWrapper(repository,
-            mock(SavingsAccountTransactionRepository.class));
+            mock(SavingsAccountTransactionRepository.class), mock(PlatformSecurityContext.class));
 
     @Test
     void accountsAreLockedInAscendingIdOrderWhateverTheDirection() {

@@ -159,6 +159,13 @@ distributions {
                 eachFile { details ->
                     details.path = details.path.replace('\\', '/')
                 }
+
+                // Gradle 9 archives store every file as 0644, so keep the wrapper and scripts executable
+                filesMatching(['gradlew', '**/*.sh']) {
+                    permissions {
+                        unix('rwxr-xr-x')
+                    }
+                }
             }
             rename ('LICENSE_SOURCE', 'LICENSE')
             rename ('NOTICE_SOURCE', 'NOTICE')

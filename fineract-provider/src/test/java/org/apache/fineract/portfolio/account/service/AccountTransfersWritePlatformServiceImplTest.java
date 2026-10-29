@@ -114,8 +114,6 @@ class AccountTransfersWritePlatformServiceImplTest {
         LoanTransaction fromLoanTransaction = mock(LoanTransaction.class);
         SavingsAccountTransaction toSavingsTransaction = mock(SavingsAccountTransaction.class);
         ExternalId reversalExternalId = mock(ExternalId.class);
-        Office fromOffice = mock(Office.class);
-        Office toOffice = mock(Office.class);
 
         when(command.entityId()).thenReturn(1L);
         when(accountTransferRepository.findById(1L)).thenReturn(Optional.of(transaction));
@@ -123,10 +121,7 @@ class AccountTransfersWritePlatformServiceImplTest {
         when(transaction.getAccountTransferDetails()).thenReturn(details);
         when(details.fromLoanAccount()).thenReturn(loan);
         when(details.toSavingsAccount()).thenReturn(toSavingsAccount);
-        when(loan.getOffice()).thenReturn(fromOffice);
-        when(toSavingsAccount.office()).thenReturn(toOffice);
-        when(fromOffice.getHierarchy()).thenReturn(".1.");
-        when(toOffice.getHierarchy()).thenReturn(".1.");
+        givenAccountsInOffice(loan, toSavingsAccount);
         when(transaction.getFromLoanTransaction()).thenReturn(fromLoanTransaction);
         when(fromLoanTransaction.isDisbursement()).thenReturn(false);
         when(fromLoanTransaction.getLoan()).thenReturn(loan);
@@ -151,8 +146,6 @@ class AccountTransfersWritePlatformServiceImplTest {
         Loan loan = mock(Loan.class);
         SavingsAccount toSavingsAccount = mock(SavingsAccount.class);
         LoanTransaction fromLoanTransaction = mock(LoanTransaction.class);
-        Office fromOffice = mock(Office.class);
-        Office toOffice = mock(Office.class);
 
         when(command.entityId()).thenReturn(1L);
         when(accountTransferRepository.findById(1L)).thenReturn(Optional.of(transaction));
@@ -160,10 +153,7 @@ class AccountTransfersWritePlatformServiceImplTest {
         when(transaction.getAccountTransferDetails()).thenReturn(details);
         when(details.fromLoanAccount()).thenReturn(loan);
         when(details.toSavingsAccount()).thenReturn(toSavingsAccount);
-        when(loan.getOffice()).thenReturn(fromOffice);
-        when(toSavingsAccount.office()).thenReturn(toOffice);
-        when(fromOffice.getHierarchy()).thenReturn(".1.");
-        when(toOffice.getHierarchy()).thenReturn(".1.");
+        givenAccountsInOffice(loan, toSavingsAccount);
         when(transaction.getFromLoanTransaction()).thenReturn(fromLoanTransaction);
         when(fromLoanTransaction.isDisbursement()).thenReturn(true);
 
@@ -385,5 +375,12 @@ class AccountTransfersWritePlatformServiceImplTest {
         when(toLoanAccount.getCurrency()).thenReturn(usd);
 
         assertThrows(DifferentCurrenciesException.class, () -> underTest.create(command));
+    }
+
+    private static void givenAccountsInOffice(final Loan loan, final SavingsAccount savingsAccount) {
+        Office office = mock(Office.class);
+        when(office.getHierarchy()).thenReturn(".");
+        when(loan.getOffice()).thenReturn(office);
+        when(savingsAccount.office()).thenReturn(office);
     }
 }
