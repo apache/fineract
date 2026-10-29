@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
+import org.apache.fineract.client.feign.services.AuditsApi.RetrieveAuditEntriesQueryParams;
 import org.apache.fineract.client.models.AuditData;
 import org.apache.fineract.client.models.AuditSearchData;
 import org.slf4j.Logger;
@@ -58,57 +59,24 @@ public final class AuditHelper {
     private static final TypeReference<List<AuditData>> AUDIT_DATA_LIST_TYPE = new TypeReference<>() {};
 
     public static List<AuditData> getAuditDetails(final Integer resourceId, final String actionName, final String entityName) {
-        return pageItems(ok(() -> FineractFeignClientHelper.getFineractFeignClient().audits().retrieveAuditEntries(actionName, // actionName
-                entityName, // entityName
-                resourceId == null ? null : resourceId.longValue(), // resourceId
-                null, // makerId
-                null, // makerDateTimeFrom
-                null, // makerDateTimeTo
-                null, // checkerId
-                null, // checkerDateTimeFrom
-                null, // checkerDateTimeTo
-                null, // status
-                null, // clientId
-                null, // loanId
-                null, // officeId
-                null, // groupId
-                null, // savingsAccountId
-                null, // processingResult
-                null, // dateFormat
-                null, // locale
-                null, // offset
-                null, // limit
-                "id", // orderBy
-                "DESC", // sortOrder
-                true // paged
-        )));
+        return getAuditDetails(new RetrieveAuditEntriesQueryParams().actionName(actionName).entityName(entityName)
+                .resourceId(resourceId == null ? null : resourceId.longValue()));
+    }
+
+    public static List<AuditData> getAuditDetailsBySubmittedResourceId(final Long submittedResourceId, final String actionName,
+            final String entityName) {
+        return getAuditDetails(new RetrieveAuditEntriesQueryParams().actionName(actionName).entityName(entityName)
+                .submittedResourceId(submittedResourceId));
+    }
+
+    private static List<AuditData> getAuditDetails(final RetrieveAuditEntriesQueryParams queryParams) {
+        return pageItems(ok(() -> FineractFeignClientHelper.getFineractFeignClient().audits()
+                .retrieveAuditEntries(queryParams.orderBy("id").sortOrder("DESC").paged(true))));
     }
 
     public static List<AuditData> getAuditDetails(final int limit) {
-        return pageItems(ok(() -> FineractFeignClientHelper.getFineractFeignClient().audits().retrieveAuditEntries(null, // actionName
-                null, // entityName
-                null, // resourceId
-                null, // makerId
-                null, // makerDateTimeFrom
-                null, // makerDateTimeTo
-                null, // checkerId
-                null, // checkerDateTimeFrom
-                null, // checkerDateTimeTo
-                null, // status
-                null, // clientId
-                null, // loanId
-                null, // officeId
-                null, // groupId
-                null, // savingsAccountId
-                null, // processingResult
-                null, // dateFormat
-                null, // locale
-                null, // offset
-                limit, // limit
-                null, // orderBy
-                null, // sortOrder
-                true // paged
-        )));
+        return pageItems(ok(() -> FineractFeignClientHelper.getFineractFeignClient().audits()
+                .retrieveAuditEntries(new RetrieveAuditEntriesQueryParams().limit(limit).paged(true))));
     }
 
     private static List<AuditData> pageItems(final String response) {
@@ -160,30 +128,8 @@ public final class AuditHelper {
     }
 
     public static void verifyOrderBysupported(final String orderByValue) {
-        ok(() -> FineractFeignClientHelper.getFineractFeignClient().audits().retrieveAuditEntries(null, // actionName
-                null, // entityName
-                null, // resourceId
-                null, // makerId
-                null, // makerDateTimeFrom
-                null, // makerDateTimeTo
-                null, // checkerId
-                null, // checkerDateTimeFrom
-                null, // checkerDateTimeTo
-                null, // status
-                null, // clientId
-                null, // loanId
-                null, // officeId
-                null, // groupId
-                null, // savingsAccountId
-                null, // processingResult
-                null, // dateFormat
-                null, // locale
-                null, // offset
-                null, // limit
-                orderByValue, // orderBy
-                null, // sortOrder
-                true // paged
-        ));
+        ok(() -> FineractFeignClientHelper.getFineractFeignClient().audits()
+                .retrieveAuditEntries(new RetrieveAuditEntriesQueryParams().orderBy(orderByValue).paged(true)));
     }
 
 }
