@@ -1285,10 +1285,10 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             long completedDays;
 
             if (resetDate == null) {
-                completedDays = DAYS.between(DateUtils.getBusinessLocalDate(), this.activatedOnDate);
+                completedDays = DAYS.between(this.activatedOnDate, DateUtils.getBusinessLocalDate());
 
             } else {
-                completedDays = DAYS.between(DateUtils.getBusinessLocalDate(), resetDate);
+                completedDays = DAYS.between(resetDate, DateUtils.getBusinessLocalDate());
             }
 
             int totalDays = (int) completedDays;
