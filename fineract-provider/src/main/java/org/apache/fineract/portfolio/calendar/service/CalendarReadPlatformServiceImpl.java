@@ -215,16 +215,26 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     public Collection<LocalDate> generateRecurringDates(final CalendarData calendarData, final boolean withHistory,
             final LocalDate tillDate) {
         final LocalDate fromDate = null;
-        Collection<LocalDate> recurringDates = generateRecurringDate(calendarData, fromDate, tillDate, -1);
+        // A non-repeating calendar, or a history row from before it became repeating, has no recurring dates
+        final Collection<LocalDate> recurringDates = new ArrayList<>();
+        addRecurringDates(recurringDates, calendarData, fromDate, tillDate);
 
         if (withHistory) {
             final Collection<CalendarData> calendarHistorys = this.retrieveCalendarsFromHistory(calendarData.getId());
             for (CalendarData calendarHistory : calendarHistorys) {
-                recurringDates.addAll(generateRecurringDate(calendarHistory, fromDate, tillDate, -1));
+                addRecurringDates(recurringDates, calendarHistory, fromDate, tillDate);
             }
         }
 
         return recurringDates;
+    }
+
+    private void addRecurringDates(final Collection<LocalDate> recurringDates, final CalendarData calendarData, final LocalDate fromDate,
+            final LocalDate tillDate) {
+        final Collection<LocalDate> dates = generateRecurringDate(calendarData, fromDate, tillDate, -1);
+        if (dates != null) {
+            recurringDates.addAll(dates);
+        }
     }
 
     @Override
