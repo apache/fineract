@@ -139,6 +139,8 @@ final class LoansApiResourceSwagger {
             private GetLoansLoanIdCollateralData() {}
 
             @Schema(example = "1")
+            public Long id;
+            @Schema(example = "1")
             public Long collateralId;
             @Schema(example = "1")
             public Long clientCollateralId;
@@ -1752,6 +1754,8 @@ final class LoansApiResourceSwagger {
 
             private PutLoansLoanIdCollateral() {}
 
+            @Schema(example = "1")
+            public Long id;
             @Schema(example = "1")
             public Long clientCollateralId;
             @Schema(example = "1")
