@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.BulkMessageItemV1;
@@ -70,6 +71,11 @@ public class EventStore {
     public <R, T extends Event<R>> Optional<EventMessage<R>> findEventById(T type, Long id) {
         List<EventMessage<R>> events = findByType(type);
         return events.stream().filter(em -> type.getIdExtractor().apply(em.getData()).equals(id)).reduce((first, second) -> second);
+    }
+
+    public <R, T extends Event<R>> long countReceivedEventsById(T type, Long id) {
+        return Stream.concat(receivedEvents.stream(), verifiedEvents.stream()).filter(em -> em.getType().equals(type.getEventName()))
+                .map(em -> (EventMessage<R>) em).filter(em -> id.equals(type.getIdExtractor().apply(em.getData()))).count();
     }
 
     public <R, T extends Event<R>> List<EventMessage<R>> findAllEventsById(T type, Long id) {

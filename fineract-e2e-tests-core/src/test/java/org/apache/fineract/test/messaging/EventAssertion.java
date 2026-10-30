@@ -102,6 +102,20 @@ public class EventAssertion {
     }
 
     /**
+     * Like {@link #assertEvent(Class, Long)}, but first waits until {@code expectedCount} events of this type for the
+     * id have been received (already verified ones included), so the latest one is taken only once all of them arrived.
+     */
+    public <R, T extends Event<R>> EventAssertionBuilder<R> assertLatestEvent(final Class<T> eventClazz, final Long id,
+            final long expectedCount) {
+        if (eventProperties.isEventVerificationEnabled()) {
+            final T event = eventFactory.create(eventClazz);
+            awaitRaised(() -> eventStore.countReceivedEventsById(event, id) >= expectedCount,
+                    expectedCount + " " + event.getEventName() + " event(s)");
+        }
+        return assertEvent(eventClazz, id);
+    }
+
+    /**
      * Like {@link #assertEvent(Class, Long)}, but also accepts an event that an earlier step has already verified (and
      * so removed from the store), for steps that inspect the payload of an event raised by a previous action step.
      */

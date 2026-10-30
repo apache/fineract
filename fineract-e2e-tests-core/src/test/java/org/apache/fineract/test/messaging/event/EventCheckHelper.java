@@ -23,6 +23,7 @@ import static org.apache.fineract.test.stepdef.loan.LoanRepaymentStepDef.DATE_FO
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import com.google.gson.JsonParser;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.Duration;
@@ -809,11 +810,32 @@ public class EventCheckHelper {
     }
 
     public void workingCapitalLoanStatusChangedEventCheck(final Long loanId) {
-        workingCapitalLoanAccountDataV1Check(WorkingCapitalLoanStatusChangedEvent.class, loanId);
+        workingCapitalLoanStatusChangedEventMatchesApiCheck(loanId, this::assertWorkingCapitalLoanAccountData);
     }
 
     private GetWorkingCapitalLoansLoanIdResponse fetchWorkingCapitalLoan(final Long loanId) {
         return ok(() -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
+    }
+
+    // A loan raises one status changed event per transition and the events reach the test asynchronously: wait until
+    // every one the server has persisted for the loan is received, so the latest received is the latest raised.
+    private void workingCapitalLoanStatusChangedEventMatchesApiCheck(final Long loanId,
+            final BiConsumer<WorkingCapitalLoanAccountDataV1, GetWorkingCapitalLoansLoanIdResponse> payloadAsserts) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoansLoanIdResponse body = fetchWorkingCapitalLoan(loanId);
+        final long persisted = countPersistedEvents(new WorkingCapitalLoanStatusChangedEvent().getEventName(), loanId);
+        eventAssertion.assertLatestEvent(WorkingCapitalLoanStatusChangedEvent.class, loanId, persisted).extractingData(event -> {
+            payloadAsserts.accept(event, body);
+            return null;
+        });
+    }
+
+    private long countPersistedEvents(final String eventName, final Long aggregateRootId) {
+        if (!eventProperties.isEventVerificationEnabled()) {
+            return 0;
+        }
+        final String rawJson = ok(() -> fineractClient.internalExternalEvents().getExternalEvents(eventName, aggregateRootId));
+        return JsonParser.parseString(rawJson).getAsJsonArray().size();
     }
 
     private void workingCapitalLoanEventMatchesApiCheck(final Class<? extends AbstractWorkingCapitalLoanEvent> eventClazz,
@@ -1078,14 +1100,14 @@ public class EventCheckHelper {
     }
 
     public void workingCapitalLoanStatusChangedEventTimelineCheck(final Long loanId) {
-        workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanStatusChangedEvent.class, loanId, (event, body) -> {
+        workingCapitalLoanStatusChangedEventMatchesApiCheck(loanId, (event, body) -> {
             assertWorkingCapitalLoanAccountData(event, body);
             assertWorkingCapitalLoanTimelineData(event.getTimeline(), body.getTimeline());
         });
     }
 
     public void workingCapitalLoanStatusChangedEventOverpaidOnDateCheck(final Long loanId) {
-        workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanStatusChangedEvent.class, loanId,
+        workingCapitalLoanStatusChangedEventMatchesApiCheck(loanId,
                 (event, body) -> assertEventDateEqualsApiDate("overpaidOnDate", event.getOverpaidOnDate(), body.getOverpaidOnDate()));
     }
 
