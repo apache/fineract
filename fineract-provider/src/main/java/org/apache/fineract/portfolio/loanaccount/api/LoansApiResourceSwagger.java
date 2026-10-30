@@ -1922,6 +1922,8 @@ final class LoansApiResourceSwagger {
         public String actualDisbursementDate;
         @Schema(example = "false", description = "When true, active unpaid down payment fees due on the disbursement date are deactivated and not auto-collected")
         public Boolean skipDownPaymentFee;
+        @Schema(example = "15.00", description = "Absolute amount, in the loan currency, of the down payment fee created for the down payment period of this disbursement; overrides the configured flat or percentage amount")
+        public BigDecimal downPaymentFeeAmount;
         @Schema(example = "31 March 2024")
         public String transactionDate;
         @Schema(example = "3")

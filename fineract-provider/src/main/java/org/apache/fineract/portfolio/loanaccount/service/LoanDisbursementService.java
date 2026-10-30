@@ -50,7 +50,9 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.charge.Loan
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.common.service.Validator;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -353,10 +355,16 @@ public class LoanDisbursementService {
      *
      * @param disbursedTranches
      *            tranches disbursed now; empty for a loan without tranches
+     * @param downPaymentFeeAmount
+     *            amount overriding the configured fee of the disbursed down payment period; null to use the configured
+     *            charge
      * @return true if fees were deactivated (caller should regenerate the schedule)
      */
     public boolean prepareDownPaymentFeesForDisbursement(final Loan loan, final List<LoanDisbursementDetails> disbursedTranches,
-            final LocalDate actualDisbursementDate, final boolean skipDownPaymentFee) {
+            final LocalDate actualDisbursementDate, final boolean skipDownPaymentFee, final BigDecimal downPaymentFeeAmount) {
+        if (downPaymentFeeAmount != null) {
+            validateDownPaymentFeeAmount(loan, disbursedTranches, downPaymentFeeAmount);
+        }
         if (!loan.getLoanRepaymentScheduleDetail().isEnableDownPayment()) {
             return false;
         }
@@ -375,9 +383,40 @@ public class LoanDisbursementService {
             return !unpaidFees.isEmpty();
         }
         for (final LoanCharge fee : unpaidFees) {
-            loanChargeService.updateDownPaymentFee(loan, fee, actualDisbursementDate);
+            if (downPaymentFeeAmount == null) {
+                loanChargeService.updateDownPaymentFee(loan, fee, actualDisbursementDate);
+            } else {
+                loanChargeService.overrideDownPaymentFeeAmount(loan, fee, downPaymentFeeAmount, actualDisbursementDate);
+            }
         }
         return false;
+    }
+
+    /**
+     * The override needs exactly one down payment period created by this disbursement and exactly one down payment
+     * charge to apply to it.
+     */
+    private void validateDownPaymentFeeAmount(final Loan loan, final List<LoanDisbursementDetails> disbursedTranches,
+            final BigDecimal downPaymentFeeAmount) {
+        Validator.validateOrThrow("loan.disbursement", baseDataValidator -> {
+            baseDataValidator.reset().parameter(LoanApiConstants.downPaymentFeeAmountParameterName).value(downPaymentFeeAmount);
+            final LoanDisbursementDetails tranche = disbursedTranches.isEmpty() ? null : disbursedTranches.getFirst();
+            final int downPaymentCharges = downPaymentChargeDefinitionsOn(loan).size();
+            if (!loan.getLoanRepaymentScheduleDetail().isEnableDownPayment()
+                    || loanChargeService.calculateDownPaymentAmountBase(loan, tranche).signum() == 0) {
+                baseDataValidator.failWithCodeAndMessage("not.supported.without.down.payment.period",
+                        "Down payment fee amount cannot be passed because the disbursement does not create a down payment period.");
+            } else if (disbursedTranches.size() > 1) {
+                baseDataValidator.failWithCodeAndMessage("not.supported.with.multiple.down.payment.periods",
+                        "Down payment fee amount cannot be passed because the disbursement creates more than one down payment period.");
+            } else if (downPaymentCharges == 0) {
+                baseDataValidator.failWithCodeAndMessage("not.supported.without.down.payment.fee.charge",
+                        "Down payment fee amount cannot be passed because the loan has no down payment fee charge.");
+            } else if (downPaymentCharges > 1) {
+                baseDataValidator.failWithCodeAndMessage("not.supported.with.multiple.down.payment.fee.charges",
+                        "Down payment fee amount cannot be passed because the loan has more than one down payment fee charge.");
+            }
+        });
     }
 
     /**
@@ -386,23 +425,23 @@ public class LoanDisbursementService {
      * (created with the application); a fee created here raises it on creation. No-op when the fee was skipped.
      */
     public void completeDownPaymentFeesForDisbursement(final Loan loan, final List<LoanDisbursementDetails> disbursedTranches,
-            final LocalDate actualDisbursementDate, final boolean skipDownPaymentFee) {
+            final LocalDate actualDisbursementDate, final boolean skipDownPaymentFee, final BigDecimal downPaymentFeeAmount) {
         if (skipDownPaymentFee || !loan.getLoanRepaymentScheduleDetail().isEnableDownPayment()) {
             return;
         }
         if (disbursedTranches.isEmpty()) {
-            ensureDownPaymentFees(loan, null, actualDisbursementDate, true);
+            ensureDownPaymentFees(loan, null, actualDisbursementDate, true, downPaymentFeeAmount);
         }
         // the application fees (not linked to a tranche) belong to the first tranche of the first disbursement
         final boolean firstDisbursement = loan.isApproved();
         for (int index = 0; index < disbursedTranches.size(); index++) {
             final LoanDisbursementDetails tranche = disbursedTranches.get(index);
-            ensureDownPaymentFees(loan, tranche, actualDisbursementDate, firstDisbursement && index == 0);
+            ensureDownPaymentFees(loan, tranche, actualDisbursementDate, firstDisbursement && index == 0, downPaymentFeeAmount);
         }
     }
 
     private void ensureDownPaymentFees(final Loan loan, final LoanDisbursementDetails tranche, final LocalDate dueDate,
-            final boolean includeApplicationFees) {
+            final boolean includeApplicationFees, final BigDecimal downPaymentFeeAmount) {
         for (final Charge chargeDefinition : downPaymentChargeDefinitionsOn(loan)) {
             final LoanCharge fee = loan.getActiveCharges().stream()
                     .filter(charge -> charge.isDueAtDownPayment() && Objects.equals(charge.getCharge().getId(), chargeDefinition.getId())
@@ -410,7 +449,7 @@ public class LoanDisbursementService {
                                     && DateUtils.isEqual(dueDate, charge.getDueLocalDate()))))
                     .min(BY_ID).orElse(null);
             if (fee == null) {
-                createDownPaymentFee(loan, chargeDefinition, tranche, dueDate);
+                createDownPaymentFee(loan, chargeDefinition, tranche, dueDate, downPaymentFeeAmount);
             } else {
                 notifyLoanAddCharge(fee);
             }
@@ -442,7 +481,7 @@ public class LoanDisbursementService {
             return;
         }
         for (final Charge chargeDefinition : downPaymentChargeDefinitionsOn(loan)) {
-            createDownPaymentFee(loan, chargeDefinition, tranche, tranche.expectedDisbursementDate());
+            createDownPaymentFee(loan, chargeDefinition, tranche, tranche.expectedDisbursementDate(), null);
         }
     }
 
@@ -465,15 +504,17 @@ public class LoanDisbursementService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    /** An overridden fee is a flat fee of {@code downPaymentFeeAmount}, so recalculation keeps the amount. */
     private void createDownPaymentFee(final Loan loan, final Charge chargeDefinition, final LoanDisbursementDetails tranche,
-            final LocalDate dueDate) {
+            final LocalDate dueDate, final BigDecimal downPaymentFeeAmount) {
         ExternalId externalId = ExternalId.empty();
         if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
             externalId = ExternalId.generate();
         }
+        final ChargeCalculationType chargeCalculation = downPaymentFeeAmount == null ? null : ChargeCalculationType.FLAT;
         final LoanCharge loanCharge = loanChargeService.create(loan, chargeDefinition,
-                loanChargeService.calculateDownPaymentAmountBase(loan, tranche), null, null, null, dueDate, null, null, BigDecimal.ZERO,
-                externalId);
+                loanChargeService.calculateDownPaymentAmountBase(loan, tranche), downPaymentFeeAmount, null, chargeCalculation, dueDate,
+                null, null, BigDecimal.ZERO, externalId);
         loanCharge.setDisbursementDetail(tranche);
         loanChargeValidator.validateChargeAdditionForDisbursedLoan(loan, loanCharge);
         loanChargeValidator.validateChargeHasValidSpecifiedDateIfApplicable(loan, loanCharge, loan.getDisbursementDate());

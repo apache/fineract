@@ -1059,6 +1059,19 @@ public class LoanChargeService {
     }
 
     /**
+     * Turns an existing Down Payment fee into a flat fee of {@code amount} (whatever the charge's calculation type), so
+     * recalculation keeps the amount.
+     */
+    public void overrideDownPaymentFeeAmount(final Loan loan, final LoanCharge downPaymentFee, final BigDecimal amount,
+            final LocalDate newDueDate) {
+        downPaymentFee.setChargeCalculation(ChargeCalculationType.FLAT.getValue());
+        downPaymentFee.setPercentage(null);
+        downPaymentFee.setAmountPercentageAppliedTo(null);
+        downPaymentFee.setAmountOrPercentage(amount);
+        updateDownPaymentFee(loan, downPaymentFee, newDueDate);
+    }
+
+    /**
      * Down payment fee amount a new automatic down payment on {@code date} has to collect on top of the down payment
      * principal: the fees of the down payment period this down payment belongs to.
      */

@@ -395,8 +395,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     .filter(tranche -> tranche.actualDisbursementDate() != null).toList();
             final boolean skipDownPaymentFee = command
                     .booleanPrimitiveValueOfParameterNamed(LoanApiConstants.skipDownPaymentFeeParameterName);
+            final BigDecimal downPaymentFeeAmount = command
+                    .bigDecimalValueOfParameterNamed(LoanApiConstants.downPaymentFeeAmountParameterName);
             final boolean downPaymentFeesSkipped = loanDisbursementService.prepareDownPaymentFeesForDisbursement(loan, disbursedTranches,
-                    actualDisbursementDate, skipDownPaymentFee);
+                    actualDisbursementDate, skipDownPaymentFee, downPaymentFeeAmount);
             boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal()) || downPaymentFeesSkipped;
             Money amountToDisburse = disburseAmount.copy();
             final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
@@ -429,7 +431,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             regenerateScheduleOnDisbursement(command, loan, recalculateSchedule, scheduleGeneratorDTO, nextPossibleRepaymentDate,
                     rescheduledRepaymentDate);
             loanDisbursementService.completeDownPaymentFeesForDisbursement(loan, disbursedTranches, actualDisbursementDate,
-                    skipDownPaymentFee);
+                    skipDownPaymentFee, downPaymentFeeAmount);
             boolean downPaymentEnabled = loan.getLoanProductRelatedDetail().isEnableDownPayment();
             if (loan.isInterestBearingAndInterestRecalculationEnabled() || downPaymentEnabled) {
                 createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);

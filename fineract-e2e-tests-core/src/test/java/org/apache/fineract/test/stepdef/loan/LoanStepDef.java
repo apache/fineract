@@ -1845,6 +1845,52 @@ public class LoanStepDef extends AbstractStepDef {
         performLoanDisbursementAndVerifyStatus(loanId, disburseRequest);
     }
 
+    @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount and {string} EUR down payment fee amount")
+    public void disburseLoanWithDownPaymentFeeAmount(final String actualDisbursementDate, final String transactionAmount,
+            final String downPaymentFeeAmount) throws IOException {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.getLoanId();
+
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount));
+
+        performLoanDisbursementAndVerifyStatus(loanId, disburseRequest);
+    }
+
+    @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount and {string} EUR down payment fee amount and got an error {string}")
+    public void disburseLoanWithDownPaymentFeeAmountFailure(final String actualDisbursementDate, final String transactionAmount,
+            final String downPaymentFeeAmount, final String errorMessage) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount));
+
+        validateDisburseLoanWithInvalidDataFailure(loanResponse.getLoanId(), disburseRequest, 400, errorMessage);
+    }
+
+    @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount and {string} EUR down payment fee amount skipping down payment fee and got an error {string}")
+    public void disburseLoanWithDownPaymentFeeAmountSkippingDownPaymentFeeFailure(final String actualDisbursementDate,
+            final String transactionAmount, final String downPaymentFeeAmount, final String errorMessage) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount)).skipDownPaymentFee(true);
+
+        validateDisburseLoanWithInvalidDataFailure(loanResponse.getLoanId(), disburseRequest, 400, errorMessage);
+    }
+
+    @Then("Admin fails to disburse all expected tranches of the loan on {string} with {string} EUR down payment fee amount and got an error {string}")
+    public void disburseAllExpectedTranchesWithDownPaymentFeeAmountFailure(final String actualDisbursementDate,
+            final String downPaymentFeeAmount, final String errorMessage) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(null)
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount));
+
+        validateDisburseLoanWithInvalidDataFailure(loanResponse.getLoanId(), disburseRequest, 400, errorMessage);
+    }
+
     @When("Admin modifies the loan resending its expected disbursement details and charges")
     public void modifyLoanResendingExpectedDisbursementDetailsAndCharges() throws IOException {
         modifyLoanResendingExpectedDisbursementDetails(null);

@@ -126,7 +126,7 @@ public class LoanDisbursementServiceTest {
         final boolean deactivated;
         try (MockedConstruction<LoanRepaymentScheduleProcessingWrapper> wrapper = mockConstruction(
                 LoanRepaymentScheduleProcessingWrapper.class)) {
-            deactivated = underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(disbursed), JAN_2, true);
+            deactivated = underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(disbursed), JAN_2, true, null);
             assertEquals(1, wrapper.constructed().size());
         }
 
@@ -145,7 +145,7 @@ public class LoanDisbursementServiceTest {
         final Loan loan = mockLoan(disbursedTrancheFee, applicationFee, otherTrancheFee);
         when(loan.isApproved()).thenReturn(true);
 
-        final boolean deactivated = underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(disbursed), JAN_2, false);
+        final boolean deactivated = underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(disbursed), JAN_2, false, null);
 
         assertFalse(deactivated);
         verify(loanChargeService).updateDownPaymentFee(eq(loan), eq(disbursedTrancheFee), eq(JAN_2));
@@ -160,8 +160,8 @@ public class LoanDisbursementServiceTest {
         final LoanCharge applicationFee = mockFee(20L, flatFee, null);
         final Loan loan = mockLoan(applicationFee);
 
-        underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche(JAN_2)), JAN_2, false);
-        underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche(JAN_2)), JAN_2, true);
+        underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche(JAN_2)), JAN_2, false, null);
+        underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche(JAN_2)), JAN_2, true, null);
 
         verify(loanChargeService, never()).updateDownPaymentFee(eq(loan), eq(applicationFee), any());
         verify(applicationFee, never()).setActive(false);
@@ -215,8 +215,8 @@ public class LoanDisbursementServiceTest {
         try (MockedStatic<TemporaryConfigurationServiceContainer> configuration = mockStatic(
                 TemporaryConfigurationServiceContainer.class)) {
             configuration.when(TemporaryConfigurationServiceContainer::isExternalIdAutoGenerationEnabled).thenReturn(false);
-            underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche), date, false);
-            underTest.completeDownPaymentFeesForDisbursement(loan, List.of(tranche), date, false);
+            underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche), date, false, null);
+            underTest.completeDownPaymentFeesForDisbursement(loan, List.of(tranche), date, false, null);
         }
     }
 
