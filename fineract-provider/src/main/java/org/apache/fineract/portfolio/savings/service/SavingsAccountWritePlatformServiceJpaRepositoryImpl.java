@@ -203,7 +203,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         this.savingsAccountTransactionDataValidator.validateActivation(command);
 
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFromInUserScope(savingsId, false);
 
         checkClientOrGroupActive(account);
         final Set<Long> existingTransactionIds = new HashSet<>();
@@ -518,7 +518,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
 
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFromInUserScope(savingsId, backdatedTxnsAllowedTill);
         checkClientOrGroupActive(account);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
@@ -1848,7 +1848,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         this.context.authenticatedUser();
 
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFromInUserScope(savingsId, false);
         checkClientOrGroupActive(account);
 
         final Map<String, Object> changes = account.block();
@@ -1875,7 +1875,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult unblockAccount(final Long savingsId) {
         this.context.authenticatedUser();
 
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFromInUserScope(savingsId, false);
         checkClientOrGroupActive(account);
 
         final Map<String, Object> changes = account.unblock();
@@ -1997,7 +1997,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult blockCredits(final Long savingsId, final JsonCommand command) {
         this.context.authenticatedUser();
 
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFromInUserScope(savingsId, false);
         checkClientOrGroupActive(account);
 
         final String reasonForBlock = command.stringValueOfParameterNamed(SavingsApiConstants.reasonForBlockParamName);
@@ -2024,7 +2024,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult unblockCredits(final Long savingsId) {
         this.context.authenticatedUser();
 
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFromInUserScope(savingsId, false);
         checkClientOrGroupActive(account);
         account.updateReason(null);
         final Map<String, Object> changes = account.unblockCredits();
@@ -2047,7 +2047,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult blockDebits(final Long savingsId, final JsonCommand command) {
         this.context.authenticatedUser();
 
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFromInUserScope(savingsId, false);
         checkClientOrGroupActive(account);
 
         final String reasonForBlock = command.stringValueOfParameterNamed(SavingsApiConstants.reasonForBlockParamName);
@@ -2074,7 +2074,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult unblockDebits(final Long savingsId) {
         this.context.authenticatedUser();
 
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFromInUserScope(savingsId, false);
         checkClientOrGroupActive(account);
 
         account.updateReason(null);

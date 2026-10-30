@@ -201,7 +201,20 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, DateUtils.parseLocalDate("2025-05-20"))));
 
-        when(context.getAuthenticatedUserIfPresent()).thenReturn(appUser);
+    }
+
+    @Test
+    public void closeLoan_shouldLoadLoanInUserScope() {
+        Loan loan = mock(Loan.class);
+        JsonCommand command = mock(JsonCommand.class);
+        when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
+        when(command.json()).thenReturn("{}");
+        doThrow(new IllegalStateException("Stop after loading the loan")).when(loan).isChargedOff();
+
+        assertThrows(IllegalStateException.class, () -> loanWritePlatformService.closeLoan(LOAN_ID, command));
+
+        verify(loanAssembler).assembleFromInUserScope(LOAN_ID);
+        verify(loanAssembler, never()).assembleFrom(LOAN_ID);
     }
 
     private void setupMoneyHelper() {

@@ -1599,7 +1599,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult closeLoan(final Long loanId, final JsonCommand command) {
         this.loanTransactionValidator.validateTransactionWithNoAmount(command.json());
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
         LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         if (loan.isChargedOff() && DateUtils.isBefore(transactionDate, loan.getChargedOffOnDate())) {
@@ -1694,7 +1694,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         this.loanTransactionValidator.validateTransactionWithNoAmount(command.json());
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
         if (loan.isChargedOff()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
@@ -1860,7 +1860,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Staff toLoanOfficer = this.loanAssembler.findLoanOfficerByIdIfProvided(toLoanOfficerId);
         final LocalDate dateOfLoanOfficerAssignment = command.localDateValueOfParameterNamed("assignmentDate");
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
         businessEventNotifierService.notifyPreBusinessEvent(new LoanReassignOfficerBusinessEvent(loan));
         if (!loan.hasLoanOfficer(fromLoanOfficer)) {
@@ -1904,7 +1904,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         for (final Long loanId : listLoanIds) {
-            final Loan loan = this.loanAssembler.assembleFrom(loanId);
+            final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
             businessEventNotifierService.notifyPreBusinessEvent(new LoanReassignOfficerBusinessEvent(loan));
             checkClientOrGroupActive(loan);
 
@@ -1932,7 +1932,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LocalDate dateOfLoanOfficerUnassigned = command.localDateValueOfParameterNamed("unassignedDate");
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
 
         if (loan.getLoanOfficer() == null) {
@@ -2288,7 +2288,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     public CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command) {
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
         if (loan.isChargedOff()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
@@ -2381,7 +2381,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult updateDisbursementDateAndAmountForTranche(final Long loanId, final Long disbursementId,
             final JsonCommand command) {
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
         if (loan.isChargedOff()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
