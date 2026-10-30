@@ -21,11 +21,13 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+import java.util.Map;
 import org.apache.fineract.client.models.PostAccountsTypeAccountIdResponse;
+import org.apache.fineract.client.models.PutAccountsTypeAccountIdRequest;
 
 /**
- * Feign interface for the two share-account commands whose body the generated client cannot express. It binds to the
- * generated response model, so the calls stay typed end to end and do not build a JSON body by hand.
+ * Feign interface for the share-account calls whose body the generated client cannot express or read. It binds to the
+ * generated models wherever they fit, so no call builds a JSON body by hand.
  *
  * <p>
  * Every other share command goes through the generated {@code fineractClient.shareAccount()} API.
@@ -43,27 +45,47 @@ public interface ShareAccountCommandsApi {
      * with {@code extractJsonArrayNamed} and treats each entry as a purchased-share transaction id. The generated model
      * declares the array shape, so sending a count through it produces
      * {@code validation.msg.shareaccount.requestedshares.cannot.be.blank}. Retyping the field to a number at source
-     * would break the approve path instead, so this operation gets its own request model.
+     * would break the approve path instead, so this operation and {@link #applyAdditionalShares} get their own request
+     * model.
      */
     @RequestLine("POST /v1/accounts/{type}/{accountId}?command=redeemshares")
     PostAccountsTypeAccountIdResponse redeemShares(@Param("type") String type, @Param("accountId") Long accountId,
             ShareCountRequest request);
 
     /**
-     * Applies for additional shares on an active share account. {@code validateAndApplyAddtionalShares} reads
-     * {@code requestedShares} as a share count, like {@link #redeemShares}, so it takes the same request model.
+     * Applies for additional shares on an active share account. Like {@link #redeemShares}, the command reads
+     * {@code requestedShares} as a share count, so it reuses {@link ShareCountRequest}.
      */
     @RequestLine("POST /v1/accounts/{type}/{accountId}?command=applyadditionalshares")
     PostAccountsTypeAccountIdResponse applyAdditionalShares(@Param("type") String type, @Param("accountId") Long accountId,
             ShareCountRequest request);
 
-    /** Request body for the commands above, with {@code requestedShares} as the share count they read. */
+    /**
+     * Modifies a share application. The generated {@code updateShareAccount} cannot read the response once
+     * {@code requestedShares} changes: {@code ShareAccountDataSerializer.validateAndUpdate} reports that change as the
+     * string {@code "Transaction"}, while the generated {@code PutAccountsChanges} declares an integer. This keeps the
+     * generated request model and reads the response as a plain map.
+     */
+    @RequestLine("PUT /v1/accounts/{type}/{accountId}")
+    Map<String, Object> updateShareAccount(@Param("type") String type, @Param("accountId") Long accountId,
+            PutAccountsTypeAccountIdRequest request);
+
+    /**
+     * Request body for {@link #redeemShares} and {@link #applyAdditionalShares}, with {@code requestedShares} as the
+     * share count the commands read, plus the optional payment detail fields.
+     */
     class ShareCountRequest {
 
         private String requestedDate;
         private String dateFormat;
         private String locale;
         private Long requestedShares;
+        private Long paymentTypeId;
+        private String accountNumber;
+        private String checkNumber;
+        private String routingCode;
+        private String receiptNumber;
+        private String bankNumber;
 
         public String getRequestedDate() {
             return requestedDate;
@@ -98,6 +120,60 @@ public interface ShareAccountCommandsApi {
 
         public ShareCountRequest requestedShares(Long requestedShares) {
             this.requestedShares = requestedShares;
+            return this;
+        }
+
+        public Long getPaymentTypeId() {
+            return paymentTypeId;
+        }
+
+        public ShareCountRequest paymentTypeId(Long paymentTypeId) {
+            this.paymentTypeId = paymentTypeId;
+            return this;
+        }
+
+        public String getAccountNumber() {
+            return accountNumber;
+        }
+
+        public ShareCountRequest accountNumber(String accountNumber) {
+            this.accountNumber = accountNumber;
+            return this;
+        }
+
+        public String getCheckNumber() {
+            return checkNumber;
+        }
+
+        public ShareCountRequest checkNumber(String checkNumber) {
+            this.checkNumber = checkNumber;
+            return this;
+        }
+
+        public String getRoutingCode() {
+            return routingCode;
+        }
+
+        public ShareCountRequest routingCode(String routingCode) {
+            this.routingCode = routingCode;
+            return this;
+        }
+
+        public String getReceiptNumber() {
+            return receiptNumber;
+        }
+
+        public ShareCountRequest receiptNumber(String receiptNumber) {
+            this.receiptNumber = receiptNumber;
+            return this;
+        }
+
+        public String getBankNumber() {
+            return bankNumber;
+        }
+
+        public ShareCountRequest bankNumber(String bankNumber) {
+            this.bankNumber = bankNumber;
             return this;
         }
     }

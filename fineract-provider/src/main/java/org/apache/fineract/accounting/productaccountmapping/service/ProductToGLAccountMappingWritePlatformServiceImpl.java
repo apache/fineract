@@ -383,8 +383,8 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                         CashAccountsForShares.SHARES_SUSPENSE.getValue());
 
                 // advanced accounting mappings
-                this.savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, shareProductId, null);
-                this.savingsProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, shareProductId, null);
+                this.shareProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, shareProductId, null);
+                this.shareProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, shareProductId, null);
             break;
             default:
             break;

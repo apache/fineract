@@ -556,6 +556,18 @@ final class ProductsApiResourceSwagger {
         public Long shareEquityId;
         @Schema(example = "4", description = "Required with accountingRule=2 (cash based)")
         public Long incomeFromFeeAccountId;
+        @Schema(description = "Optional with accountingRule=2 (cash based): routes the share reference entry to a payment type specific GL account")
+        public Set<PostProductsPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
+
+        static final class PostProductsPaymentChannelToFundSourceMappings {
+
+            private PostProductsPaymentChannelToFundSourceMappings() {}
+
+            @Schema(example = "1")
+            public Long paymentTypeId;
+            @Schema(example = "12")
+            public Long fundSourceAccountId;
+        }
     }
 
     @Schema(description = "PostProductsTypeResponse")
@@ -582,6 +594,7 @@ final class ProductsApiResourceSwagger {
         public Integer totalShares;
         @Schema(example = "2000")
         public Integer sharesIssued;
+        public Set<PostProductsTypeRequest.PostProductsPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
     }
 
     @Schema(description = "PutProductsTypeProductIdResponse")

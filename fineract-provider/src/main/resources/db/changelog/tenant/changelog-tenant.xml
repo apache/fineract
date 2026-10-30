@@ -297,4 +297,5 @@
     <include file="parts/0275_add_deposit_product_validity_dates.xml" relativeToChangelogFile="true" />
     <include file="parts/0276_add_unique_constraint_tax_component_and_group_name.xml" relativeToChangelogFile="true" />
     <include file="parts/0277_add_result_columns_to_command_source.xml" relativeToChangelogFile="true" />
+    <include file="parts/0278_add_payment_detail_to_share_account_transactions.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
