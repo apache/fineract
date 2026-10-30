@@ -56,24 +56,15 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
     private final ReloaderService reloaderService;
 
     @Override
-    // Spring Batch 6's ChunkOrientedStep submits item processing to the step's task executor. The
-    // chunk transaction is bound to the step thread and wraps only the write phase, so with a task
-    // executor in play processItem() would run on a pool thread with NO transaction. The business
-    // steps below write to the DB, so processing needs a transaction of its own.
+    // REQUIRED joins the caller's transaction. In the COB worker steps that is the transaction ItemTransactionProcessor
+    // opens for one loan, in which the loan's last closed business date and the release of its lock are written too,
+    // so the business-step writes commit only together with the loan being marked as closed (FINERACT-2684).
     //
-    // The COB worker steps therefore register no task executor at all, and there is no configuration to change
-    // that: processing stays on the step thread and REQUIRED joins the chunk transaction exactly as it did under
-    // Batch 5.
+    // A failing business step marks that transaction rollback-only, so a mid-chain failure never half-commits: the
+    // loan's writes roll back, it stays locked and not closed, and the other loans of the chunk are not affected.
     //
-    // Were an executor ever reintroduced, this would open a NEW transaction per item on the worker thread, which
-    // commits independently of the chunk write - so a chunk-write rollback, a skip in scan mode, or a step restart
-    // would leave those process-time writes committed while the loan is not marked COB'd, and the next pass would
-    // re-run the business steps over it. Do not reintroduce one until FINERACT-2684 establishes that the business
-    // steps are idempotent under a second pass.
-    //
-    // This annotation is load-bearing even without an executor: Batch 6 swallows a skipped process failure instead
-    // of rethrowing (Batch 5's FaultTolerantChunkProcessor rolled back by default), so the participating-transaction
-    // rollback marking it produces is what stops a mid-chain failure from half-committing. Do not remove it.
+    // Without a caller's transaction this opens one of its own, which commits apart from the loan being marked as
+    // closed. Do not call it outside a transaction that also closes the loan.
     @Transactional
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom<Long>> S run(TreeMap<Long, String> executionMap, S item) {
         if (executionMap == null || executionMap.isEmpty()) {

@@ -25,6 +25,7 @@ import org.apache.fineract.cob.conditions.BatchWorkerCondition;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.listener.ChunkProcessingLoanItemListener;
 import org.apache.fineract.cob.listener.CobWorkerStepListener;
+import org.apache.fineract.cob.processor.ItemTransactionProcessor;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.apache.fineract.cob.service.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -33,11 +34,13 @@ import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.infrastructure.springbatch.StepRetryPolicyFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.ChunkOrientedStepBuilder;
+import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.batch.integration.partition.RemotePartitioningWorkerStepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,6 +49,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
@@ -101,20 +105,18 @@ public class LoanCOBWorkerConfiguration {
 
         // No task executor is registered, deliberately and unconditionally.
         //
-        // Batch 6's ChunkOrientedStep keeps the chunk transaction on the step thread and, when a task executor is
-        // present, submits the ITEMS of a chunk to it (ChunkOrientedStep.processChunkConcurrently). Item processing
-        // then runs with no transaction of its own, so COBBusinessStepService.run has to open one - which commits
-        // independently of the chunk write. A chunk-write rollback, a skip in scan mode or a step restart therefore
-        // leaves the business-step writes committed while the loan is not marked COB'd, and the next pass re-runs
-        // them over it.
+        // Each loan is processed and written in a transaction of its own (ItemTransactionProcessor), so its business
+        // step writes, its last closed business date and the release of its lock commit or roll back together, on
+        // whichever thread runs it. The chunk transaction carries none of them.
         //
-        // Leaving the executor unset keeps isConcurrent() false, so processing stays on the step thread and joins the
-        // chunk transaction exactly as it did under Batch 5. This is NOT configurable on purpose: the thread pool size
-        // reads like a throughput dial but decides transactional semantics, so it must not be reachable from
-        // configuration. Concurrency comes from partitioning instead - lower partition-size and add worker instances.
+        // With a task executor, Batch 6's ChunkOrientedStep submits the ITEMS of a chunk to it
+        // (ChunkOrientedStep.processChunkConcurrently). The context the COB business steps read is thread-local and is
+        // set on the step thread only, by cobWorkerStepListener's beforeStep: the COB action context and the COB and
+        // business dates. A pool thread would process the loan without them.
         //
-        // Do not reintroduce a task executor until FINERACT-2621 establishes that every COB business step is
-        // idempotent under a second pass.
+        // Leaving the executor unset keeps isConcurrent() false, so processing stays on the step thread. This is NOT
+        // configurable on purpose. Concurrency comes from partitioning instead - lower partition-size and add worker
+        // instances.
 
         return stepBuilder.build();
     }
@@ -152,13 +154,18 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     @StepScope
-    public LoanItemProcessor cobWorkerItemProcessor() {
-        return new LoanItemProcessor(cobBusinessStepService, progressiveLoanModelProcessingService);
+    public ItemTransactionProcessor<Loan> cobWorkerItemProcessor() {
+        final TransactionTemplate requiresNewTransactionTemplate = new TransactionTemplate(transactionManager);
+        requiresNewTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return new ItemTransactionProcessor<>(new LoanItemProcessor(cobBusinessStepService, progressiveLoanModelProcessingService),
+                new LoanItemWriter(loanLockingService, loanRepository),
+                loanId -> loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId)),
+                requiresNewTransactionTemplate);
     }
 
     @Bean
     @StepScope
-    public LoanItemWriter cobWorkerItemWriter() {
-        return new LoanItemWriter(loanLockingService, loanRepository);
+    public ItemWriter<Loan> cobWorkerItemWriter() {
+        return ItemTransactionProcessor.noOpWriter();
     }
 }
