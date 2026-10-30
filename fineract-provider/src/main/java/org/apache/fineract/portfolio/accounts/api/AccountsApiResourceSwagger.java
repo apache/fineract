@@ -194,6 +194,36 @@ final class AccountsApiResourceSwagger {
             public Double chargeAmount;
             @Schema(example = "5.05")
             public Double amountPaid;
+            public GetAccountsPurchasedSharesPaymentDetailData paymentDetailData;
+        }
+
+        static final class GetAccountsPurchasedSharesPaymentDetailData {
+
+            private GetAccountsPurchasedSharesPaymentDetailData() {}
+
+            static final class GetAccountsPurchasedSharesPaymentType {
+
+                private GetAccountsPurchasedSharesPaymentType() {}
+
+                @Schema(example = "1")
+                public Long id;
+                @Schema(example = "Cash")
+                public String name;
+            }
+
+            @Schema(example = "1")
+            public Long id;
+            public GetAccountsPurchasedSharesPaymentType paymentType;
+            @Schema(example = "acc123")
+            public String accountNumber;
+            @Schema(example = "che123")
+            public String checkNumber;
+            @Schema(example = "rou123")
+            public String routingCode;
+            @Schema(example = "rec123")
+            public String receiptNumber;
+            @Schema(example = "ban123")
+            public String bankNumber;
         }
 
         static final class GetAccountsLockPeriodTypeEnum {
@@ -484,6 +514,18 @@ final class AccountsApiResourceSwagger {
         public String approvedDate;
         @Schema(example = "Share Account Approval Note", description = "command=approve")
         public String note;
+        @Schema(example = "1", description = "command=applyadditionalshares, redeemshares")
+        public Long paymentTypeId;
+        @Schema(example = "acc123", description = "command=applyadditionalshares, redeemshares")
+        public String accountNumber;
+        @Schema(example = "che123", description = "command=applyadditionalshares, redeemshares")
+        public String checkNumber;
+        @Schema(example = "rou123", description = "command=applyadditionalshares, redeemshares")
+        public String routingCode;
+        @Schema(example = "rec123", description = "command=applyadditionalshares, redeemshares")
+        public String receiptNumber;
+        @Schema(example = "ban123", description = "command=applyadditionalshares, redeemshares")
+        public String bankNumber;
     }
 
     @Schema(description = "PostAccountsTypeAccountIdResponse")

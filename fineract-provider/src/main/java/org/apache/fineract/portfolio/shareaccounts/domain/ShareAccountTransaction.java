@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 
 @Entity
 @Table(name = "m_share_account_transactions")
@@ -66,6 +67,10 @@ public class ShareAccountTransaction extends AbstractPersistableCustom<Long> {
 
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
+
+    @ManyToOne
+    @JoinColumn(name = "payment_detail_id", nullable = true)
+    private PaymentDetail paymentDetail;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccountTransaction", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ShareAccountChargePaidBy> shareAccountChargesPaid = new HashSet<>();
@@ -250,5 +255,18 @@ public class ShareAccountTransaction extends AbstractPersistableCustom<Long> {
 
     public BigDecimal shareValue() {
         return this.shareValue;
+    }
+
+    public PaymentDetail getPaymentDetail() {
+        return this.paymentDetail;
+    }
+
+    public void setPaymentDetail(final PaymentDetail paymentDetail) {
+        this.paymentDetail = paymentDetail;
+    }
+
+    public Long getPaymentTypeId() {
+        return this.paymentDetail != null && this.paymentDetail.getPaymentType() != null ? this.paymentDetail.getPaymentType().getId()
+                : null;
     }
 }

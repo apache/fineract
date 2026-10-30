@@ -56,6 +56,8 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
+import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
@@ -108,6 +110,22 @@ public class ShareAccountDataSerializer {
             ShareAccountApiConstants.requesteddate_paramname, ShareAccountApiConstants.requestedshares_paramname,
             ShareAccountApiConstants.purchasedprice_paramname, ShareAccountApiConstants.dateformat_paramname));
 
+    private static final Set<String> paymentDetailStringParameters = new HashSet<>(
+            Arrays.asList(PaymentDetailConstants.accountNumberParamName, PaymentDetailConstants.checkNumberParamName,
+                    PaymentDetailConstants.routingCodeParamName, PaymentDetailConstants.receiptNumberParamName,
+                    PaymentDetailConstants.bankNumberParamName));
+
+    private static final Set<String> createParameters = withPaymentDetailParameters(ShareAccountApiConstants.supportedParameters);
+
+    private static final Set<String> purchaseAndRedeemSharesParameters = withPaymentDetailParameters(addtionalSharesParameters);
+
+    private static Set<String> withPaymentDetailParameters(final Set<String> parameters) {
+        final Set<String> withPaymentDetail = new HashSet<>(parameters);
+        withPaymentDetail.add(PaymentDetailConstants.paymentTypeParamName);
+        withPaymentDetail.addAll(paymentDetailStringParameters);
+        return withPaymentDetail;
+    }
+
     @Autowired
     public ShareAccountDataSerializer(final PlatformSecurityContext platformSecurityContext, final FromJsonHelper fromApiJsonHelper,
             final ChargeRepositoryWrapper chargeRepository, final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
@@ -128,7 +146,7 @@ public class ShareAccountDataSerializer {
             throw new InvalidJsonException();
         }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), ShareAccountApiConstants.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), createParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
@@ -184,6 +202,8 @@ public class ShareAccountDataSerializer {
 
         Integer lockinPeriod = this.fromApiJsonHelper.extractIntegerNamed(ShareAccountApiConstants.lockinperiod_paramname, element, locale);
         PeriodFrequencyType lockPeriodEnum = extractPeriodType(ShareAccountApiConstants.lockperiodfrequencytype_paramname, element);
+
+        validatePaymentDetails(baseDataValidator, element);
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -321,6 +341,7 @@ public class ShareAccountDataSerializer {
         }
 
         LocalDate existingApplicationDate = null;
+        PaymentDetail existingPaymentDetail = null;
         List<ShareAccountTransaction> purchaseTransactionsList = new ArrayList<>();
         Set<ShareAccountCharge> chargesList = new HashSet<>();
 
@@ -334,8 +355,10 @@ public class ShareAccountDataSerializer {
                     transaction.setActive(false);
                     if (!transaction.isChargeTransaction()) {
                         existingApplicationDate = transaction.getPurchasedDate();
+                        existingPaymentDetail = transaction.getPaymentDetail();
                         ShareAccountTransaction newtransaction = new ShareAccountTransaction(transaction.getPurchasedDate(),
                                 transaction.getTotalShares(), transaction.getPurchasePrice());
+                        newtransaction.setPaymentDetail(existingPaymentDetail);
                         purchaseTransactionsList.add(newtransaction);
                     }
                 }
@@ -369,6 +392,7 @@ public class ShareAccountDataSerializer {
             }
             BigDecimal unitPrice = shareProduct.deriveMarketPrice(applicationDate);
             ShareAccountTransaction transaction = new ShareAccountTransaction(applicationDate, requestedShares, unitPrice);
+            transaction.setPaymentDetail(existingPaymentDetail);
             purchaseTransactionsList.add(transaction);
             actualChanges.put(ShareAccountApiConstants.requestedshares_paramname, "Transaction");
 
@@ -690,7 +714,7 @@ public class ShareAccountDataSerializer {
             throw new InvalidJsonException();
         }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), addtionalSharesParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), purchaseAndRedeemSharesParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
         JsonElement element = jsonCommand.parsedJson();
@@ -717,6 +741,7 @@ public class ShareAccountDataSerializer {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.requesteddate_paramname).value(requestedDate)
                     .failWithCodeNoParameterAddedToErrorCode("purchase.transaction.date.cannot.be.before.existing.transactions");
         }
+        validatePaymentDetails(baseDataValidator, element);
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -867,7 +892,7 @@ public class ShareAccountDataSerializer {
             throw new InvalidJsonException();
         }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), addtionalSharesParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), purchaseAndRedeemSharesParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
         JsonElement element = jsonCommand.parsedJson();
@@ -883,6 +908,7 @@ public class ShareAccountDataSerializer {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.requesteddate_paramname).value(requestedDate)
                     .failWithCodeNoParameterAddedToErrorCode("redeem.transaction.date.cannot.be.before.existing.transactions");
         }
+        validatePaymentDetails(baseDataValidator, element);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
@@ -894,6 +920,23 @@ public class ShareAccountDataSerializer {
 
         handleRedeemSharesChargeTransactions(account, transaction);
         return actualChanges;
+    }
+
+    private void validatePaymentDetails(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        final Long paymentTypeId = this.fromApiJsonHelper.extractLongNamed(PaymentDetailConstants.paymentTypeParamName, element);
+        baseDataValidator.reset().parameter(PaymentDetailConstants.paymentTypeParamName).value(paymentTypeId).ignoreIfNull()
+                .longGreaterThanZero();
+        boolean hasPaymentDetailValues = false;
+        for (final String parameterName : paymentDetailStringParameters) {
+            final String value = this.fromApiJsonHelper.extractStringNamed(parameterName, element);
+            baseDataValidator.reset().parameter(parameterName).value(value).ignoreIfNull().notExceedingLengthOf(50);
+            if (StringUtils.isNotBlank(value)) {
+                hasPaymentDetailValues = true;
+            }
+        }
+        if (hasPaymentDetailValues) {
+            baseDataValidator.reset().parameter(PaymentDetailConstants.paymentTypeParamName).value(paymentTypeId).notNull();
+        }
     }
 
     private void validateRedeemRequest(final ShareAccount account, ShareAccountTransaction redeemTransaction,

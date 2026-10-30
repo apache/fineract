@@ -74,7 +74,8 @@ public class ShareProductDataSerializer {
             ShareProductApiConstants.accountingRuleParamName, AccountingConstants.SharesProductAccountingParams.INCOME_FROM_FEES.getValue(),
             AccountingConstants.SharesProductAccountingParams.SHARES_EQUITY.getValue(),
             AccountingConstants.SharesProductAccountingParams.SHARES_REFERENCE.getValue(),
-            AccountingConstants.SharesProductAccountingParams.SHARES_SUSPENSE.getValue()));
+            AccountingConstants.SharesProductAccountingParams.SHARES_SUSPENSE.getValue(),
+            AccountingConstants.SharesProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue()));
     private static final Set<String> supportedParametersForDivident = new HashSet<>(Arrays.asList(ShareProductApiConstants.locale_paramname,
             ShareProductApiConstants.dateFormatParamName, ShareProductApiConstants.dividendPeriodStartDateParamName,
             ShareProductApiConstants.dividendPeriodEndDateParamName, ShareProductApiConstants.dividendAmountParamName));
@@ -189,6 +190,7 @@ public class ShareProductDataSerializer {
         for (ShareProductMarketPrice data : marketPriceSet) {
             data.setShareProduct(product);
         }
+        validatePaymentChannelFundSourceMappings(baseDataValidator, element);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
@@ -448,6 +450,7 @@ public class ShareProductDataSerializer {
             }
         }
 
+        validatePaymentChannelFundSourceMappings(baseDataValidator, element);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
@@ -466,6 +469,28 @@ public class ShareProductDataSerializer {
             }
         }
         return actualChanges;
+    }
+
+    private void validatePaymentChannelFundSourceMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        final String mappingsParamName = AccountingConstants.SharesProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue();
+        if (!this.fromApiJsonHelper.parameterExists(mappingsParamName, element)) {
+            return;
+        }
+        final JsonArray mappings = this.fromApiJsonHelper.extractJsonArrayNamed(mappingsParamName, element);
+        if (mappings == null) {
+            return;
+        }
+        final String paymentTypeParamName = AccountingConstants.SharesProductAccountingParams.PAYMENT_TYPE.getValue();
+        final String fundSourceParamName = AccountingConstants.SharesProductAccountingParams.FUND_SOURCE.getValue();
+        for (int i = 0; i < mappings.size(); i++) {
+            final JsonObject mapping = mappings.get(i).getAsJsonObject();
+            final Long paymentTypeId = this.fromApiJsonHelper.extractLongNamed(paymentTypeParamName, mapping);
+            final Long fundSourceAccountId = this.fromApiJsonHelper.extractLongNamed(fundSourceParamName, mapping);
+            baseDataValidator.reset().parameter(mappingsParamName + "[" + i + "]." + paymentTypeParamName).value(paymentTypeId).notNull()
+                    .longGreaterThanZero();
+            baseDataValidator.reset().parameter(mappingsParamName + "[" + i + "]." + fundSourceParamName).value(fundSourceAccountId)
+                    .notNull().longGreaterThanZero();
+        }
     }
 
     public void validateDividendDetails(JsonCommand jsonCommand) {
