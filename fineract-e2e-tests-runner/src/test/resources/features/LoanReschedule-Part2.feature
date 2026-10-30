@@ -872,8 +872,8 @@ Feature: LoanReschedule - Part2
     When Loan Pay-off is made on "02 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @TestRailId:CTBD
-  Scenario: Verify that chained reschedules on a Progressive loan keep the second due date variation applicable from the first adjusted due date
+  @TestRailId:C119615
+  Scenario: Verify Loan Term Variations start date on chained reschedules for Progressive loan - UC1: second due date variation applicable from the first adjusted due date
     When Admin sets the business date to "21 January 2026"
     When Admin creates a client with random data
     When Admin set "LP1_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -885,6 +885,7 @@ Feature: LoanReschedule - Part2
     Then Loan has 150.0 outstanding amount
     # --- Reschedule 1: 21 Feb -> 22 Mar ---
     When Admin sets the business date to "23 January 2026"
+    And Admin runs inline COB job for Loan
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
       | 21 February 2026   | 23 January 2026 | 22 March 2026   |                  |                 |            |                 |
@@ -893,6 +894,7 @@ Feature: LoanReschedule - Part2
       | 4            | loanTermType.dueDate | dueDate         | 21 February 2026 |               | 22 March 2026 | false                      |              |
     # --- Reschedule 2: 22 Mar -> 13 Jul (business date moved before the second request) ---
     When Admin sets the business date to "15 February 2026"
+    And Admin runs inline COB job for Loan
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate  | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
       | 22 March 2026      | 15 February 2026 | 13 July 2026    |                  |                 |            |                 |
@@ -924,3 +926,6 @@ Feature: LoanReschedule - Part2
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       | 150.0         | 0.0      | 0.0  | 0.0       | 150.0 | 0.0  | 0.0        | 0.0  | 150.0       |
+    # Closing the loan
+    When Loan Pay-off is made on "15 February 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
