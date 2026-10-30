@@ -130,6 +130,12 @@ public final class LoanSchedulePeriodData {
 
     public static LoanSchedulePeriodData downPaymentOnlyPeriod(final Integer periodNumber, final LocalDate periodDate,
             final BigDecimal principalDue, final BigDecimal outstandingLoanBalance) {
+        return downPaymentOnlyPeriod(periodNumber, periodDate, principalDue, outstandingLoanBalance, BigDecimal.ZERO, BigDecimal.ZERO);
+    }
+
+    public static LoanSchedulePeriodData downPaymentOnlyPeriod(final Integer periodNumber, final LocalDate periodDate,
+            final BigDecimal principalDue, final BigDecimal outstandingLoanBalance, final BigDecimal feeDue, final BigDecimal penaltyDue) {
+        final BigDecimal totalDue = MathUtil.add(principalDue, feeDue, penaltyDue);
         return builder().period(periodNumber) //
                 .fromDate(periodDate) //
                 .dueDate(periodDate) //
@@ -137,12 +143,17 @@ public final class LoanSchedulePeriodData {
                 .principalDue(principalDue) //
                 .principalOutstanding(principalDue) //
                 .principalLoanBalanceOutstanding(outstandingLoanBalance) //
-                .totalOriginalDueForPeriod(principalDue) //
-                .totalDueForPeriod(principalDue) //
-                .totalOutstandingForPeriod(principalDue) //
+                .feeChargesDue(feeDue) //
+                .feeChargesOutstanding(feeDue) //
+                .penaltyChargesDue(penaltyDue) //
+                .penaltyChargesOutstanding(penaltyDue) //
+                .totalOriginalDueForPeriod(totalDue) //
+                .totalDueForPeriod(totalDue) //
+                .totalOutstandingForPeriod(totalDue) //
                 .totalInstallmentAmountForPeriod(principalDue) //
+                .totalActualCostOfLoanForPeriod(MathUtil.add(feeDue, penaltyDue)) //
                 .downPaymentPeriod(true) //
-                .totalOverdue(DateUtils.isBeforeBusinessDate(periodDate) ? principalDue : null) //
+                .totalOverdue(DateUtils.isBeforeBusinessDate(periodDate) ? totalDue : null) //
                 .build();
     }
 

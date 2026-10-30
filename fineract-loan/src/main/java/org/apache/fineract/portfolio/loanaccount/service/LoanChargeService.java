@@ -27,12 +27,14 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -41,6 +43,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeWithoutMandatoryFieldException;
+import org.apache.fineract.portfolio.loanaccount.domain.DownPaymentFees;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
@@ -257,7 +260,8 @@ public class LoanChargeService {
         }
 
         return switch (loanCharge.getChargeCalculation()) {
-            case PERCENT_OF_AMOUNT -> getDerivedAmountForCharge(loan, loanCharge);
+            case PERCENT_OF_AMOUNT -> loanCharge.isDueAtDownPayment() ? calculateDownPaymentAmountBase(loan, loanCharge)
+                    : getDerivedAmountForCharge(loan, loanCharge);
             case PERCENT_OF_AMOUNT_AND_INTEREST -> {
                 final BigDecimal totalInterestCharged = loan.isMultiDisburmentLoan()
                         ? loanScheduleGeneratorService.calculateInteresOnlyWithFirtDisbursement(loan)
@@ -288,8 +292,32 @@ public class LoanChargeService {
         };
     }
 
-    public void updateLoanCharges(final Loan loan, final Set<LoanCharge> loanCharges) {
-        List<Long> existingCharges = fetchAllLoanChargeIds(loan);
+    /**
+     * A down payment fee of a modified application is linked to the tranche parsed from the request; the loan's tranche
+     * it stands for is the equal one (same expected date and principal) not yet taken by another resent fee of the same
+     * charge.
+     */
+    private LoanDisbursementDetails trancheOfResentDownPaymentFee(final Loan loan, final LoanCharge fee,
+            final List<LoanCharge> resentFees) {
+        final List<LoanDisbursementDetails> candidates = loan.getDisbursementDetails().stream()
+                .filter(tranche -> tranche.equals(fee.getDisbursementDetail())).toList();
+        return candidates.stream().filter(
+                candidate -> resentFees.stream().noneMatch(resent -> resent.isDownPaymentFeeOf(candidate) && isSameCharge(resent, fee)))
+                .findFirst().orElse(candidates.isEmpty() ? null : candidates.getFirst());
+    }
+
+    private static boolean isSameCharge(final LoanCharge first, final LoanCharge second) {
+        return Objects.equals(first.getCharge().getId(), second.getCharge().getId());
+    }
+
+    /**
+     * @param chargeIdsBeforeUpdate
+     *            ids of the loan's charges before the request changed it: charges it created on the way (fees of a
+     *            tranche it added) are not deleted as charges left out of the request
+     */
+    public void updateLoanCharges(final Loan loan, final Set<LoanCharge> loanCharges, final List<Long> chargeIdsBeforeUpdate) {
+        List<Long> existingCharges = new ArrayList<>(chargeIdsBeforeUpdate);
+        final List<LoanCharge> resentDownPaymentFees = new ArrayList<>();
 
         /* Process new and updated charges **/
         for (final LoanCharge loanCharge : loanCharges) {
@@ -307,6 +335,10 @@ public class LoanChargeService {
                             loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
                         }
                     }
+                }
+                if (loanCharge.getDisbursementDetail() != null) {
+                    loanCharge.setDisbursementDetail(trancheOfResentDownPaymentFee(loan, loanCharge, resentDownPaymentFees));
+                    resentDownPaymentFees.add(loanCharge);
                 }
                 loan.getLoanCharges().add(loanCharge);
             } else {
@@ -334,7 +366,17 @@ public class LoanChargeService {
 
         /* Updated deleted charges **/
         for (Long id : existingCharges) {
-            loan.fetchLoanChargesById(id).setActive(false);
+            final LoanCharge charge = loan.fetchLoanChargesById(id);
+            if (charge == null) {
+                continue;
+            }
+            // Inactive down payment fees are re-created on later disbursements, so a fee removed from the application
+            // must not stay on the loan
+            if (charge.isDueAtDownPayment()) {
+                loan.getLoanCharges().remove(charge);
+            } else {
+                charge.setActive(false);
+            }
         }
         loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(loan.deriveSumTotalOfChargesDueAtDisbursement());
     }
@@ -487,7 +529,9 @@ public class LoanChargeService {
                 case PERCENT_OF_AMOUNT:
                     // If charge type is specified due date and loan is multi disburment loan.
                     // Then we need to get as of this loan charge due date how much amount disbursed.
-                    if (loanCharge.getLoan().isMultiDisburmentLoan() && loanCharge.isSpecifiedDueDate()) {
+                    if (loanCharge.isDueAtDownPayment()) {
+                        amountPercentageAppliedTo = calculateDownPaymentAmountBase(loanCharge.getLoan(), loanCharge);
+                    } else if (loanCharge.getLoan().isMultiDisburmentLoan() && loanCharge.isSpecifiedDueDate()) {
                         for (final LoanDisbursementDetails loanDisbursementDetails : loanCharge.getLoan().getDisbursementDetails()) {
                             if (!DateUtils.isAfter(loanDisbursementDetails.expectedDisbursementDate(), loanCharge.getDueDate())) {
                                 amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.getPrincipal());
@@ -529,7 +573,8 @@ public class LoanChargeService {
         loanCharge.setChargeTime(chargeTime == null ? chargeDefinition.getChargeTimeType() : chargeTime.getValue());
 
         if (loanCharge.getChargeTimeType().equals(ChargeTimeType.SPECIFIED_DUE_DATE)
-                || loanCharge.getChargeTimeType().equals(ChargeTimeType.OVERDUE_INSTALLMENT)) {
+                || loanCharge.getChargeTimeType().equals(ChargeTimeType.OVERDUE_INSTALLMENT)
+                || loanCharge.getChargeTimeType().equals(ChargeTimeType.DOWN_PAYMENT)) {
 
             if (dueDate == null) {
                 final String defaultUserMessage = "Loan charge is missing due date.";
@@ -917,14 +962,6 @@ public class LoanChargeService {
         return Money.zero(loan.getCurrency());
     }
 
-    private List<Long> fetchAllLoanChargeIds(final Loan loan) {
-        List<Long> list = new ArrayList<>();
-        for (LoanCharge loanCharge : loan.getLoanCharges()) {
-            list.add(loanCharge.getId());
-        }
-        return list;
-    }
-
     private Money calculateInstallmentChargeAmount(final Loan loan, final ChargeCalculationType calculationType,
             final BigDecimal percentage, final LoanRepaymentScheduleInstallment installment) {
         Money percentOf = switch (calculationType) {
@@ -958,6 +995,91 @@ public class LoanChargeService {
             }
         }
         return amount;
+    }
+
+    /**
+     * Base amount for a percentage Down payment fee, the only place that decides it: the down payment principal of its
+     * tranche; for the application fee (no tranche) of the first disbursed tranche, or of the loan principal before
+     * disbursement and for a single disbursement loan.
+     */
+    public BigDecimal calculateDownPaymentAmountBase(final Loan loan, final LoanCharge downPaymentFee) {
+        if (downPaymentFee.getDisbursementDetail() != null) {
+            return calculateDownPaymentAmountBase(loan, downPaymentFee.getDisbursementDetail());
+        }
+        final LoanDisbursementDetails firstDisbursedTranche = loan.getDisbursementDetails().stream()
+                .filter(tranche -> tranche.actualDisbursementDate() != null).findFirst().orElse(null);
+        return calculateDownPaymentAmountBase(loan, firstDisbursedTranche);
+    }
+
+    public BigDecimal calculateDownPaymentAmountBase(final Loan loan, final LoanDisbursementDetails tranche) {
+        final BigDecimal disbursementPrincipal = tranche != null ? tranche.getPrincipal() : loan.getPrincipal().getAmount();
+        return calculateDownPaymentAmount(disbursementPrincipal,
+                loan.getLoanRepaymentScheduleDetail().getDisbursedAmountPercentageForDownPayment(),
+                loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf(), loan.getCurrency());
+    }
+
+    /**
+     * Tranche a down payment fee added on {@code dueDate} belongs to: of the tranches on that date, the last one
+     * without an active fee of this charge (for example disbursed with skipDownPaymentFee), otherwise the last one.
+     * Null for a loan without tranches.
+     */
+    public LoanDisbursementDetails trancheForNewDownPaymentFee(final Loan loan, final Charge chargeDefinition, final LocalDate dueDate) {
+        final List<LoanDisbursementDetails> tranchesOnDate = loan.getDisbursementDetails().stream()
+                .filter(tranche -> DateUtils.isEqual(dueDate, tranche.actualOrExpectedDisbursementDate())).toList();
+        return tranchesOnDate.reversed().stream().filter(tranche -> loan.getActiveCharges().stream().noneMatch(
+                charge -> charge.isDownPaymentFeeOf(tranche) && Objects.equals(charge.getCharge().getId(), chargeDefinition.getId())))
+                .findFirst().orElse(tranchesOnDate.isEmpty() ? null : tranchesOnDate.getLast());
+    }
+
+    /**
+     * Calculates the down payment principal for a disbursement amount using the configured percentage and optional
+     * installment multiples rounding.
+     */
+    public BigDecimal calculateDownPaymentAmount(final BigDecimal disbursementPrincipal, final BigDecimal downPaymentPercentage,
+            final Integer installmentAmountInMultiplesOf, final MonetaryCurrency currency) {
+        if (downPaymentPercentage == null || disbursementPrincipal == null) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal downPaymentAmount = MathUtil.percentageOf(disbursementPrincipal, downPaymentPercentage, 19);
+        if (installmentAmountInMultiplesOf != null) {
+            downPaymentAmount = Money.roundToMultiplesOf(Money.of(currency, downPaymentAmount), installmentAmountInMultiplesOf).getAmount();
+        }
+        return downPaymentAmount;
+    }
+
+    // Moves an existing Down Payment fee to a new due date and recalculates its amount
+    public void updateDownPaymentFee(final Loan loan, final LoanCharge downPaymentFee, final LocalDate newDueDate) {
+        update(downPaymentFee, downPaymentFee.amountOrPercentage(), newDueDate, calculateDownPaymentAmountBase(loan, downPaymentFee), null,
+                BigDecimal.ZERO);
+        validateChargeAmountNotZero(downPaymentFee);
+
+        final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
+        wrapper.reprocess(loan.getCurrency(), loan.getDisbursementDate(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
+        loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(loan.deriveSumTotalOfChargesDueAtDisbursement());
+    }
+
+    /**
+     * Turns an existing Down Payment fee into a flat fee of {@code amount} (whatever the charge's calculation type), so
+     * recalculation keeps the amount.
+     */
+    public void overrideDownPaymentFeeAmount(final Loan loan, final LoanCharge downPaymentFee, final BigDecimal amount,
+            final LocalDate newDueDate) {
+        downPaymentFee.setChargeCalculation(ChargeCalculationType.FLAT.getValue());
+        downPaymentFee.setPercentage(null);
+        downPaymentFee.setAmountPercentageAppliedTo(null);
+        downPaymentFee.setAmountOrPercentage(amount);
+        updateDownPaymentFee(loan, downPaymentFee, newDueDate);
+    }
+
+    /**
+     * Down payment fee amount a new automatic down payment on {@code date} has to collect on top of the down payment
+     * principal: the fees of the down payment period this down payment belongs to.
+     */
+    public Money downPaymentFeesForNewAutoDownPayment(final Loan loan, final LocalDate date) {
+        final int downPaymentIndex = (int) loan.getLoanTransactions().stream()
+                .filter(tr -> tr.isNotReversed() && tr.isDownPayment() && DateUtils.isEqual(date, tr.getTransactionDate())).count();
+        return DownPaymentFees.amountToCollect(loan.getActiveCharges(), loan.getCurrency(), date, downPaymentIndex,
+                DownPaymentFees.downPaymentPeriodsOn(loan.getRepaymentScheduleInstallments(), date).size());
     }
 
     public void removeLoanCharge(final Loan loan, final LoanCharge loanCharge) {

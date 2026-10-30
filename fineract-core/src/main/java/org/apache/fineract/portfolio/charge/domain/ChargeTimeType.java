@@ -38,7 +38,8 @@ public enum ChargeTimeType {
     SHAREACCOUNT_ACTIVATION(13, "chargeTimeType.activation"), // only for shares
     SHARE_PURCHASE(14, "chargeTimeType.sharespurchase"), // only for shares
     SHARE_REDEEM(15, "chargeTimeType.sharesredeem"), // only for shares
-    SAVINGS_NOACTIVITY_FEE(16, "chargeTimeType.savingsNoActivityFee"); // only for savings
+    SAVINGS_NOACTIVITY_FEE(16, "chargeTimeType.savingsNoActivityFee"), // only for savings
+    DOWN_PAYMENT(17, "chargeTimeType.downPayment"); // only for loan charges
 
     private final Integer value;
     private final String code;
@@ -59,7 +60,7 @@ public enum ChargeTimeType {
     public static Object[] validLoanValues() {
         return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
                 ChargeTimeType.INSTALMENT_FEE.getValue(), ChargeTimeType.OVERDUE_INSTALLMENT.getValue(),
-                ChargeTimeType.TRANCHE_DISBURSEMENT.getValue() };
+                ChargeTimeType.TRANCHE_DISBURSEMENT.getValue(), ChargeTimeType.DOWN_PAYMENT.getValue() };
     }
 
     public static List<ChargeTimeType> validWorkingCapitalLoanProduct() {
@@ -146,6 +147,9 @@ public enum ChargeTimeType {
                 case 16:
                     chargeTimeType = SAVINGS_NOACTIVITY_FEE;
                 break;
+                case 17:
+                    chargeTimeType = DOWN_PAYMENT;
+                break;
                 default:
                     chargeTimeType = INVALID;
                 break;
@@ -156,6 +160,10 @@ public enum ChargeTimeType {
 
     public boolean isTimeOfDisbursement() {
         return ChargeTimeType.DISBURSEMENT.equals(this);
+    }
+
+    public boolean isTimeOfDownPayment() {
+        return ChargeTimeType.DOWN_PAYMENT.equals(this);
     }
 
     public boolean isOnSpecifiedDueDate() {
@@ -203,7 +211,8 @@ public enum ChargeTimeType {
     }
 
     public boolean isAllowedLoanChargeTime() {
-        return isTimeOfDisbursement() || isOnSpecifiedDueDate() || isInstalmentFee() || isOverdueInstallment() || isTrancheDisbursement();
+        return isTimeOfDisbursement() || isOnSpecifiedDueDate() || isInstalmentFee() || isOverdueInstallment() || isTrancheDisbursement()
+                || isTimeOfDownPayment();
     }
 
     public boolean isAllowedClientChargeTime() {

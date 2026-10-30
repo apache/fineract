@@ -465,6 +465,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
         }
 
         final Set<LoanCharge> existingCharges = loan.getActiveCharges();
+        final List<Long> chargeIdsBeforeUpdate = loan.getLoanCharges().stream().map(LoanCharge::getId).toList();
         Map<Long, LoanChargeData> chargesMap = new HashMap<>();
         for (LoanCharge charge : existingCharges) {
             LoanChargeData chargeData = new LoanChargeData(charge.getId(), charge.getDueLocalDate(), charge.amountOrPercentage());
@@ -504,7 +505,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
                 isChargeModified = true;
             } else {
                 LoanChargeData chargeData = chargesMap.get(loanCharge.getId());
-                if (loanCharge.amountOrPercentage().compareTo(chargeData.getAmountOrPercentage()) != 0
+                if (chargeData == null || loanCharge.amountOrPercentage().compareTo(chargeData.getAmountOrPercentage()) != 0
                         || (loanCharge.isSpecifiedDueDate() && !loanCharge.getDueLocalDate().equals(chargeData.getDueDate()))) {
                     isChargeModified = true;
                 }
@@ -685,8 +686,12 @@ public class LoanAssemblerImpl implements LoanAssembler {
             changes.put(LoanApiConstants.dateFormatParameterName, dateFormatAsInput);
             changes.put(LoanApiConstants.localeParameterName, localeAsInput);
             changes.put(Loan.RECALCULATE_LOAN_SCHEDULE, true);
-            loan.setExpectedDisbursementDate(
-                    command.localDateValueOfParameterNamed(LoanApiConstants.expectedDisbursementDateParameterName));
+            final LocalDate newExpectedDisbursementDate = command
+                    .localDateValueOfParameterNamed(LoanApiConstants.expectedDisbursementDateParameterName);
+            loan.setExpectedDisbursementDate(newExpectedDisbursementDate);
+            if (loan.getDisbursementDetails().isEmpty()) {
+                loanDisbursementService.moveDownPaymentFeesToExpectedDisbursementDate(loan, newExpectedDisbursementDate);
+            }
         }
 
         if (command.isChangeInLocalDateParameterNamed(LoanApiConstants.repaymentsStartingFromDateParameterName,
@@ -752,7 +757,10 @@ public class LoanAssemblerImpl implements LoanAssembler {
         }
 
         if (loanProduct.isMultiDisburseLoan()) {
-            loanDisbursementService.updateDisbursementDetails(loan, command, changes);
+            final boolean resentChargesBringDownPaymentFees = changes.containsKey(LoanApiConstants.chargesParameterName)
+                    && possiblyModifiedLoanCharges.stream()
+                            .anyMatch(charge -> charge.getId() == null && charge.getDisbursementDetail() != null);
+            loanDisbursementService.updateDisbursementDetails(loan, command, changes, !resentChargesBringDownPaymentFees);
             if (command.isChangeInBigDecimalParameterNamed(LoanApiConstants.maxOutstandingBalanceParameterName,
                     loan.getMaxOutstandingLoanBalance())) {
                 loan.setMaxOutstandingLoanBalance(
@@ -855,7 +863,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
 
         final String chargesParamName = "charges";
         if (changes.containsKey(chargesParamName)) {
-            loanChargeService.updateLoanCharges(loan, possiblyModifiedLoanCharges);
+            loanChargeService.updateLoanCharges(loan, possiblyModifiedLoanCharges, chargeIdsBeforeUpdate);
         }
 
         // update installment level delinquency

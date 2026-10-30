@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -126,6 +127,7 @@ import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoansApprovedAmountRequest;
 import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdChargeData;
+import org.apache.fineract.client.models.PutLoansLoanIdDisbursementData;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.test.data.AmortizationType;
@@ -1831,6 +1833,130 @@ public class LoanStepDef extends AbstractStepDef {
         eventCheckHelper.loanDisbursalTransactionEventCheck(loanDisburseResponse);
     }
 
+    @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount skipping down payment fee")
+    public void disburseLoanSkippingDownPaymentFee(String actualDisbursementDate, String transactionAmount) throws IOException {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+
+        PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .skipDownPaymentFee(true);
+
+        performLoanDisbursementAndVerifyStatus(loanId, disburseRequest);
+    }
+
+    @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount and {string} EUR down payment fee amount")
+    public void disburseLoanWithDownPaymentFeeAmount(final String actualDisbursementDate, final String transactionAmount,
+            final String downPaymentFeeAmount) throws IOException {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.getLoanId();
+
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount));
+
+        performLoanDisbursementAndVerifyStatus(loanId, disburseRequest);
+    }
+
+    @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount and {string} EUR down payment fee amount and got an error {string}")
+    public void disburseLoanWithDownPaymentFeeAmountFailure(final String actualDisbursementDate, final String transactionAmount,
+            final String downPaymentFeeAmount, final String errorMessage) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount));
+
+        validateDisburseLoanWithInvalidDataFailure(loanResponse.getLoanId(), disburseRequest, 400, errorMessage);
+    }
+
+    @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount and {string} EUR down payment fee amount skipping down payment fee and got an error {string}")
+    public void disburseLoanWithDownPaymentFeeAmountSkippingDownPaymentFeeFailure(final String actualDisbursementDate,
+            final String transactionAmount, final String downPaymentFeeAmount, final String errorMessage) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount)).skipDownPaymentFee(true);
+
+        validateDisburseLoanWithInvalidDataFailure(loanResponse.getLoanId(), disburseRequest, 400, errorMessage);
+    }
+
+    @Then("Admin fails to disburse all expected tranches of the loan on {string} with {string} EUR down payment fee amount and got an error {string}")
+    public void disburseAllExpectedTranchesWithDownPaymentFeeAmountFailure(final String actualDisbursementDate,
+            final String downPaymentFeeAmount, final String errorMessage) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(null)
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount));
+
+        validateDisburseLoanWithInvalidDataFailure(loanResponse.getLoanId(), disburseRequest, 400, errorMessage);
+    }
+
+    @When("Admin modifies the loan resending its expected disbursement details and charges")
+    public void modifyLoanResendingExpectedDisbursementDetailsAndCharges() throws IOException {
+        modifyLoanResendingExpectedDisbursementDetails(null);
+    }
+
+    @When("Admin modifies the loan resending its charges and moving the expected disbursement date of its last tranche to {string}")
+    public void modifyLoanMovingLastTrancheExpectedDisbursementDate(final String newExpectedDisbursementDate) throws IOException {
+        modifyLoanResendingExpectedDisbursementDetails(newExpectedDisbursementDate);
+    }
+
+    private void modifyLoanResendingExpectedDisbursementDetails(final String lastTrancheNewExpectedDisbursementDate) throws IOException {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assertNotNull(loanResponse);
+        final long loanId = loanResponse.getLoanId();
+        // "all" is needed: disbursementDetails are only returned with the multiDisburseDetails/all association
+        final GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "all", "exclude", "guarantors,futureSchedule")));
+        assertNotNull(loanDetails.getDisbursementDetails());
+
+        // Mirrors the UI "modify loan application" request: every existing expected tranche is resent with its id.
+        final List<GetLoansLoanIdDisbursementDetails> details = loanDetails.getDisbursementDetails().stream()
+                .sorted(Comparator.comparing(GetLoansLoanIdDisbursementDetails::getExpectedDisbursementDate)).toList();
+        final List<PutLoansLoanIdDisbursementData> disbursementData = new ArrayList<>();
+        for (int i = 0; i < details.size(); i++) {
+            final GetLoansLoanIdDisbursementDetails detail = details.get(i);
+            final boolean moveThisTranche = lastTrancheNewExpectedDisbursementDate != null && i == details.size() - 1;
+            disbursementData.add(new PutLoansLoanIdDisbursementData().id(detail.getId()).expectedDisbursementDate(
+                    moveThisTranche ? lastTrancheNewExpectedDisbursementDate : FORMATTER.format(detail.getExpectedDisbursementDate()))
+                    .principal(detail.getPrincipal()));
+        }
+        // The loan GET lists a down payment fee once per tranche; the application carries each charge definition once.
+        final Map<Long, PutLoansLoanIdChargeData> chargesByDefinition = new LinkedHashMap<>();
+        if (loanDetails.getCharges() != null) {
+            loanDetails.getCharges().forEach(charge -> chargesByDefinition.putIfAbsent(charge.getChargeId(),
+                    new PutLoansLoanIdChargeData().chargeId(charge.getChargeId()).amount(charge.getAmountOrPercentage())));
+        }
+        final List<PutLoansLoanIdChargeData> charges = new ArrayList<>(chargesByDefinition.values());
+
+        final PutLoansLoanIdRequest modifyRequest = new PutLoansLoanIdRequest()//
+                .productId(loanDetails.getLoanProductId())//
+                .clientId(loanDetails.getClientId())//
+                .loanType("individual")//
+                .principal(loanDetails.getPrincipal().longValue())//
+                .loanTermFrequency(loanDetails.getTermFrequency())//
+                .loanTermFrequencyType(loanDetails.getTermPeriodFrequencyType().getId().intValue())//
+                .numberOfRepayments(loanDetails.getNumberOfRepayments())//
+                .repaymentEvery(loanDetails.getRepaymentEvery())//
+                .repaymentFrequencyType(loanDetails.getRepaymentFrequencyType().getId().intValue())//
+                .interestRatePerPeriod(loanDetails.getInterestRatePerPeriod())//
+                .amortizationType(loanDetails.getAmortizationType().getId().intValue())//
+                .interestType(loanDetails.getInterestType().getId().intValue())//
+                .interestCalculationPeriodType(loanDetails.getInterestCalculationPeriodType().getId().intValue())//
+                .transactionProcessingStrategyCode(loanDetails.getTransactionProcessingStrategyCode())//
+                .expectedDisbursementDate(FORMATTER.format(loanDetails.getTimeline().getExpectedDisbursementDate()))//
+                .submittedOnDate(FORMATTER.format(loanDetails.getTimeline().getSubmittedOnDate()))//
+                .maxOutstandingLoanBalance(10000L)//
+                .disbursementData(disbursementData)//
+                .charges(charges)//
+                .dateFormat(DATE_FORMAT)//
+                .locale("en");
+
+        final PutLoansLoanIdResponse modifyResponse = ok(
+                () -> fineractClient.loans().updateLoanApplication(loanId, modifyRequest, Map.of()));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, modifyResponse);
+    }
+
     @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount and {string} fixed emi amount")
     public void disburseLoanWithFixedEmiAmount(final String actualDisbursementDate, final String transactionAmount,
             final String fixedEmiAmount) throws IOException {
@@ -2715,6 +2841,24 @@ public class LoanStepDef extends AbstractStepDef {
         }
     }
 
+    @Then("Loan Charges tab has exactly the following data:")
+    public void loanChargesTabCheckExact(DataTable table) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.getLoanId();
+
+        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "charges")));
+        List<GetLoansLoanIdLoanChargeData> charges = loanDetailsResponse.getCharges() == null ? List.of()
+                : loanDetailsResponse.getCharges();
+        int expectedRows = table.asLists().size() - 1;
+        String actualCharges = charges.stream().map(c -> "%s due %s amount %s paid %s outstanding %s".formatted(c.getName(), c.getDueDate(),
+                c.getAmount(), c.getAmountPaid(), c.getAmountOutstanding())).toList().toString();
+        assertThat(charges.size()).as("Loan %s: Charges tab has %s charge(s) but %s expected. Actual: %s".formatted(loanId, charges.size(),
+                expectedRows, actualCharges)).isEqualTo(expectedRows);
+
+        loanChargesTabCheck(table);
+    }
+
     private List<List<String>> getActualValuesList(List<GetLoansLoanIdLoanChargeData> charges, String paymentDueAtExpected,
             String dueAsOfExpected) {
         List<GetLoansLoanIdLoanChargeData> result;
@@ -3140,6 +3284,32 @@ public class LoanStepDef extends AbstractStepDef {
             testContext().set(TestContextKey.LOAN_TRANSACTION_RESPONSE, loanTransaction);
         } else {
             testContext().set(TestContextKey.LOAN_SECOND_TRANSACTION_RESPONSE, loanTransaction);
+        }
+    }
+
+    @Then("The stored {string}th transaction, retrieved by id, has the following data:")
+    public void storedLoanTransactionRetrievedByIdCheck(String nthTrnOrderNumber, DataTable table) {
+        GetLoansLoanIdTransactions storedTransaction = testContext().get(
+                nthTrnOrderNumber.equals("1") ? TestContextKey.LOAN_TRANSACTION_RESPONSE : TestContextKey.LOAN_SECOND_TRANSACTION_RESPONSE);
+        assertNotNull(storedTransaction);
+        // GET /loans/{id}/transactions/{id} also returns rows hidden from the loan transaction list (reversed by
+        // reverse-replay)
+        GetLoansLoanIdTransactionsTransactionIdResponse transaction = getLoanTransactionIdById(storedTransaction.getId());
+        Map<String, Double> actualValues = new LinkedHashMap<>();
+        actualValues.put("Amount", transaction.getAmount());
+        actualValues.put("Principal", transaction.getPrincipalPortion());
+        actualValues.put("Interest", transaction.getInterestPortion());
+        actualValues.put("Fees", transaction.getFeeChargesPortion());
+        String retrieved = "transaction %s (%s on %s) retrieved by id: %s".formatted(transaction.getId(), transaction.getType().getCode(),
+                transaction.getDate(), actualValues);
+
+        List<String> header = table.row(0);
+        List<String> expectedValues = table.row(1);
+        for (int i = 0; i < header.size(); i++) {
+            String column = header.get(i);
+            assertThat(actualValues).as("Unsupported column %s", column).containsKey(column);
+            Double actualValue = actualValues.get(column) == null ? 0.0 : actualValues.get(column);
+            assertThat(actualValue).as("Wrong %s of %s", column, retrieved).isEqualTo(Double.valueOf(expectedValues.get(i)));
         }
     }
 
