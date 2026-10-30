@@ -53,6 +53,10 @@ public class FeignJournalEntryHelper {
         return ok(() -> fineractClient.journalEntries().retrieveAllJournalEntries(Map.of("loanId", loanId)));
     }
 
+    public GetJournalEntriesTransactionIdResponse getJournalEntriesForSavings(Long savingsId) {
+        return ok(() -> fineractClient.journalEntries().retrieveAllJournalEntries(Map.of("savingsId", savingsId)));
+    }
+
     public GetJournalEntriesTransactionIdResponse getJournalEntriesByTransactionId(String transactionId) {
         return ok(() -> fineractClient.journalEntries()
                 .retrieveAllJournalEntries(Map.of("transactionId", transactionId, "orderBy", "id", "sortOrder", "desc")));
