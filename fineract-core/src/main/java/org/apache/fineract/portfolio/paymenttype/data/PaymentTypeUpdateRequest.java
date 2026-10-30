@@ -54,7 +54,6 @@ public class PaymentTypeUpdateRequest implements Serializable {
     private String codeName;
     // @JsonProperty("system_defined") // TODO: fix this, for backwards compatibility only... leave this for Jackson
     // config
-    @Builder.Default
-    @NotNull(message = "{org.apache.fineract.portfolio.is-system-defined.not-null}")
-    private Boolean isSystemDefined = false;
+    // null leaves the stored value unchanged
+    private Boolean isSystemDefined;
 }
