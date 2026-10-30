@@ -60,6 +60,17 @@ public final class CalendarHelper {
                 Long.parseLong(calendarID), buildRescheduleMeetingJson(oldDate, startDate)));
     }
 
+    public static CommandProcessingResult createNonRepeatingCalendarForGroup(final Long groupId, final String startDate) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().calendar().createCalendar("groups", groupId,
+                new CalendarRequest().dateFormat("dd MMMM yyyy").locale("en").repeating("false")
+                        .title(Utils.randomStringGenerator("groups_General", 4)).typeId("4").startDate(startDate)));
+    }
+
+    public static CommandProcessingResult updateCalendarTitleForGroup(final Long groupId, final Long calendarId, final String title) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().calendar().updateCalendar("groups", groupId, calendarId,
+                String.format("{\"title\":\"%s\"}", title)));
+    }
+
     public static void verifyCalendarCreatedOnServer(final Long generatedGroupId, final Long generatedCalendarId) {
         LOG.info("------------------------------CHECK CALENDAR DETAILS------------------------------------\n");
         final Long id = ok(() -> FineractFeignClientHelper.getFineractFeignClient().calendar().retrieveCalendar(generatedCalendarId,
