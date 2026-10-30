@@ -2491,6 +2491,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 unprocessed = loanTransaction.getAmount(transactionCtx.getCurrency()).minus(paidAmount);
                 loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
             }
+            startDate = installment.getDueDate();
         }
 
         if (unprocessed.isGreaterThanZero()) {

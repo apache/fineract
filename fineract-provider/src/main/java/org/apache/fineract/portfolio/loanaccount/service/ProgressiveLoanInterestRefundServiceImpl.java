@@ -66,7 +66,7 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null, null);
         if (LoanTransactionType.CHARGE_PAYMENT.equals(copy.getTypeOf())
                 || LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.equals(copy.getTypeOf())) {
-            copy.getLoanChargesPaid().addAll(copy.getLoanChargesPaid());
+            copy.getLoanChargesPaid().addAll(lt.getLoanChargesPaid());
         }
         if (LoanTransactionType.REAGE.equals(copy.getTypeOf())) {
             copy.setLoanReAgeParameter(lt.getLoanReAgeParameter().getCopy(copy));
