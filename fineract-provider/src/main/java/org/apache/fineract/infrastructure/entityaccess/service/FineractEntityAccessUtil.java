@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractOfficeEntityAccessData;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
@@ -80,13 +80,13 @@ public class FineractEntityAccessUtil {
         // this product or charge against a specific office
         // i.e. this product or charge is specific for this office.
 
-        final GlobalConfigurationProperty property = this.globalConfigurationRepository
+        final GlobalConfigurationPropertyData property = this.globalConfigurationRepository
                 .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED);
         if (property.isEnabled()) {
             // If this property is enabled, then Fineract need to restrict
             // access to this loan product to only the office of the current
             // user
-            final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
+            final GlobalConfigurationPropertyData restrictToUserOfficeProperty = this.globalConfigurationRepository
                     .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.RESTRICT_PRODUCTS_TO_USER_OFFICE);
 
             if (restrictToUserOfficeProperty.isEnabled()) {
@@ -107,7 +107,7 @@ public class FineractEntityAccessUtil {
 
     public <T> List<T> filterVisibleToOffice_ifGlobalConfigEnabled(final FineractEntityAccessType accessType, final Long officeId,
             final Collection<T> entities, final Function<T, Long> idExtractor) {
-        final GlobalConfigurationProperty property = this.globalConfigurationRepository
+        final GlobalConfigurationPropertyData property = this.globalConfigurationRepository
                 .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED);
         if (!property.isEnabled()) {
             return new ArrayList<>(entities);

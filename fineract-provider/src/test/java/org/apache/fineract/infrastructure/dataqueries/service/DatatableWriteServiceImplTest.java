@@ -23,7 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -40,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.codes.service.CodeReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -48,6 +51,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
+import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -107,6 +111,8 @@ class DatatableWriteServiceImplTest {
     private DatatableReadService datatableReadService;
     @Mock
     private DatatableUtil datatableUtil;
+    @Mock
+    private GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
 
     @InjectMocks
     private DatatableWriteServiceImpl underTest;
@@ -141,6 +147,40 @@ class DatatableWriteServiceImplTest {
         // Fourth call: DELETE FROM c_configuration WHERE name = ?
         assertTrue(allSql.get(3).contains("c_configuration"), "Fourth DELETE should target c_configuration");
         assertTrue(allSql.get(3).contains("= ?"), "SQL should use ? placeholder");
+    }
+
+    @Test
+    void testDeregisterDatatableEvictsTheGlobalConfigurationCache() {
+        underTest.deregisterDatatable(DATATABLE_NAME);
+
+        // The c_configuration row of a PPI datatable is deleted with plain JDBC, so the cached snapshot must go too
+        verify(globalConfigurationRepository).removeFromCache();
+    }
+
+    @Test
+    void testRegisterPpiDatatableEvictsTheGlobalConfigurationCache() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), anyString())).thenReturn("true");
+
+        ReflectionTestUtils.invokeMethod(underTest, "registerDataTable", "m_client", DATATABLE_NAME, null,
+                DataTableApiConstant.CATEGORY_PPI);
+
+        verify(namedParameterJdbcTemplate).update(sqlContaining("c_configuration"), anyMap());
+        verify(globalConfigurationRepository).removeFromCache();
+    }
+
+    @Test
+    void testRegisterDefaultDatatableDoesNotTouchTheGlobalConfigurationCache() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), anyString())).thenReturn("true");
+
+        ReflectionTestUtils.invokeMethod(underTest, "registerDataTable", "m_client", DATATABLE_NAME, null,
+                DataTableApiConstant.CATEGORY_DEFAULT);
+
+        verify(namedParameterJdbcTemplate, never()).update(sqlContaining("c_configuration"), anyMap());
+        verify(globalConfigurationRepository, never()).removeFromCache();
+    }
+
+    private static String sqlContaining(final String fragment) {
+        return argThat(sql -> sql != null && sql.contains(fragment));
     }
 
     @Test
