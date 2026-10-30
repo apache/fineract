@@ -40,6 +40,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -136,7 +137,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -1680,11 +1680,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .build();
     }
 
+    // SavingsAccount undoes a recurring fee's payments latest first by id; getTransactions() is ordered by date, and a
+    // payment can be backdated
     private SavingsAccountTransaction getLastChargePayment(final List<SavingsAccountTransaction> chargePayments) {
-        if (!CollectionUtils.isEmpty(chargePayments)) {
-            return chargePayments.get(chargePayments.size() - 1);
-        }
-        return null;
+        return chargePayments.stream().max(Comparator.comparing(SavingsAccountTransaction::getId)).orElse(null);
     }
 
     @Transactional
