@@ -35,6 +35,7 @@ class JsonCommandTest {
     private static final String OTHER_RAW_PASSWORD = "pX268-4Pfv|kF6";
     private static final String LEGACY_RAW_PASSWORD = "password";
     private static final String LEGACY_SHA256_HASH = "{SHA-256}{1}5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a";
+    private static final String LEGACY_HASH_WITHOUT_PREFIX = "5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a";
     private static final PasswordEncoder PASSWORD_ENCODER = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     private static final PlatformPasswordEncoder PLATFORM_PASSWORD_ENCODER = new PlatformPasswordEncoder() {
 
@@ -77,6 +78,13 @@ class JsonCommandTest {
         JsonCommand command = passwordCommand(LEGACY_RAW_PASSWORD);
 
         assertFalse(command.isChangeInPasswordParameterNamed(PASSWORD, LEGACY_SHA256_HASH, PLATFORM_PASSWORD_ENCODER));
+    }
+
+    @Test
+    void isChangeInPasswordParameterNamedReturnsTrueWhenStoredHashHasNoEncoderPrefix() {
+        JsonCommand command = passwordCommand(LEGACY_RAW_PASSWORD);
+
+        assertTrue(command.isChangeInPasswordParameterNamed(PASSWORD, LEGACY_HASH_WITHOUT_PREFIX, PLATFORM_PASSWORD_ENCODER));
     }
 
     private JsonCommand passwordCommand(final String password) {

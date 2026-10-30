@@ -583,7 +583,7 @@ public final class JsonCommand {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
             final String workingValue = stringValueOfParameterNamed(parameterName);
-            isChanged = !platformPasswordEncoder.matches(workingValue, existingValue);
+            isChanged = !(StringUtils.startsWith(existingValue, "{") && platformPasswordEncoder.matches(workingValue, existingValue));
         }
         return isChanged;
     }
