@@ -18,15 +18,18 @@
  */
 package org.apache.fineract.accounting.closure.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.accounting.closure.data.GLClosureCreateRequest;
+import org.apache.fineract.accounting.closure.data.GLClosureCreateResponse;
+import org.apache.fineract.accounting.closure.data.GLClosureDeleteRequest;
+import org.apache.fineract.accounting.closure.data.GLClosureDeleteResponse;
+import org.apache.fineract.accounting.closure.data.GLClosureUpdateRequest;
+import org.apache.fineract.accounting.closure.data.GLClosureUpdateResponse;
 
 public interface GLClosureWritePlatformService {
 
-    CommandProcessingResult createGLClosure(JsonCommand command);
+    GLClosureCreateResponse createGLClosure(GLClosureCreateRequest request);
 
-    CommandProcessingResult updateGLClosure(Long glClosureId, JsonCommand command);
+    GLClosureUpdateResponse updateGLClosure(GLClosureUpdateRequest request);
 
-    CommandProcessingResult deleteGLClosure(Long glClosureId);
-
+    GLClosureDeleteResponse deleteGLClosure(GLClosureDeleteRequest request);
 }

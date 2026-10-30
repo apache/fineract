@@ -18,25 +18,33 @@
  */
 package org.apache.fineract.accounting.closure.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.accounting.closure.data.GLClosureCreateRequest;
+import org.apache.fineract.accounting.closure.data.GLClosureCreateResponse;
 import org.apache.fineract.accounting.closure.service.GLClosureWritePlatformService;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.springframework.stereotype.Service;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GLCLOSURE", action = "DELETE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class DeleteGLClosureCommandHandler implements NewCommandSourceHandler {
+public class GLClosureCreateCommandHandler implements CommandHandler<GLClosureCreateRequest, GLClosureCreateResponse> {
 
-    private final GLClosureWritePlatformService closureWritePlatformService;
+    private final GLClosureWritePlatformService writePlatformService;
 
-    @Transactional
+    @Retry(name = "commandGLClosureCreate", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.closureWritePlatformService.deleteGLClosure(command.entityId());
+    @Transactional
+    public GLClosureCreateResponse handle(Command<GLClosureCreateRequest> command) {
+        return writePlatformService.createGLClosure(command.getPayload());
+    }
+
+    @Override
+    public GLClosureCreateResponse fallback(Command<GLClosureCreateRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }

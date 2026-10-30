@@ -16,15 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.closure.data.request;
+package org.apache.fineract.accounting.closure.data;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record GLClosureRequest(Long id, Long officeId, String closingDate, String comments, String dateFormat,
-        String locale) implements Serializable {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class GLClosureUpdateRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Hidden
+    private Long id;
+
+    @Size(max = 500, message = "{org.apache.fineract.accounting.closure.comments.size}")
+    private String comments;
 }
