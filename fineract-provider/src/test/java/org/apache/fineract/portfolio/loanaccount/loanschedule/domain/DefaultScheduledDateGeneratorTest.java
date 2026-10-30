@@ -28,6 +28,7 @@ import static org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrateg
 import static org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy.LAST_DAY_OF_MONTH;
 import static org.apache.fineract.portfolio.common.domain.PeriodFrequencyType.MONTHS;
 import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.CUMULATIVE;
+import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE;
 import static org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod.EQUAL_PRINCIPAL;
 import static org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
 import static org.apache.fineract.portfolio.loanproduct.domain.InterestMethod.FLAT;
@@ -65,6 +66,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @ExtendWith({ WithSystemTimeZoneExtension.class, WithTenantContextExtension.class, WithSystemPropertyExtension.class })
 public class DefaultScheduledDateGeneratorTest {
@@ -122,6 +124,58 @@ public class DefaultScheduledDateGeneratorTest {
             assertThat(fourthPeriod.periodFromDate()).hasToString("2024-04-01");
             assertThat(fourthPeriod.periodDueDate()).hasToString("2024-05-01");
         });
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 3, 4, 6 })
+    @WithSystemTimeZone(EUROPE_BERLIN_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    public void test_generateRepaymentPeriodsWithMondayToFridayWorkingDays(final int numberOfRepayments) {
+        final List<LocalDate> expectedDueDates = List.of(LocalDate.of(2024, 2, 6), LocalDate.of(2024, 3, 6), LocalDate.of(2024, 4, 8),
+                LocalDate.of(2024, 5, 6), LocalDate.of(2024, 6, 6), LocalDate.of(2024, 7, 8));
+
+        assertThat(progressiveDueDates(numberOfRepayments, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR"))
+                .containsExactlyElementsOf(expectedDueDates.subList(0, numberOfRepayments));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 3, 4, 6 })
+    @WithSystemTimeZone(EUROPE_BERLIN_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    public void test_generateRepaymentPeriodsWithMondayToSundayWorkingDays(final int numberOfRepayments) {
+        final List<LocalDate> expectedDueDates = List.of(LocalDate.of(2024, 2, 6), LocalDate.of(2024, 3, 6), LocalDate.of(2024, 4, 6),
+                LocalDate.of(2024, 5, 6), LocalDate.of(2024, 6, 6), LocalDate.of(2024, 7, 6));
+
+        assertThat(progressiveDueDates(numberOfRepayments, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU"))
+                .containsExactlyElementsOf(expectedDueDates.subList(0, numberOfRepayments));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 3, 4, 6 })
+    @WithSystemTimeZone(EUROPE_BERLIN_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    public void test_generateRepaymentPeriodsWithMondayToSundayWorkingDaysAndJanuaryFirstRepayment(final int numberOfRepayments) {
+        final List<LocalDate> expectedDueDates = List.of(LocalDate.of(2025, 1, 22), LocalDate.of(2025, 2, 22), LocalDate.of(2025, 3, 22),
+                LocalDate.of(2025, 4, 22), LocalDate.of(2025, 5, 22), LocalDate.of(2025, 6, 22));
+
+        assertThat(progressiveDueDates(numberOfRepayments, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU", LocalDate.of(2024, 12, 22),
+                LocalDate.of(2025, 1, 22))).containsExactlyElementsOf(expectedDueDates.subList(0, numberOfRepayments));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 3, 4, 6 })
+    @WithSystemTimeZone(EUROPE_BERLIN_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    public void test_generateRepaymentPeriodsWithMondayToFridayWorkingDaysAndJanuaryFirstRepayment(final int numberOfRepayments) {
+        final List<LocalDate> expectedDueDates = List.of(LocalDate.of(2025, 1, 22), LocalDate.of(2025, 2, 24), LocalDate.of(2025, 3, 24),
+                LocalDate.of(2025, 4, 22), LocalDate.of(2025, 5, 22), LocalDate.of(2025, 6, 23));
+
+        assertThat(progressiveDueDates(numberOfRepayments, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR", LocalDate.of(2024, 12, 22),
+                LocalDate.of(2025, 1, 22))).containsExactlyElementsOf(expectedDueDates.subList(0, numberOfRepayments));
     }
 
     @Test
@@ -230,19 +284,45 @@ public class DefaultScheduledDateGeneratorTest {
             final LocalDate expectedDisbursementDate, final LocalDate submittedOnDate, final LocalDate calculatedFirstRepaymentDate,
             final int numberOfRepayments, final PeriodFrequencyType repaymentFrequency, final Integer fixedLength,
             final MonthEndDueDateStrategy monthEndDueDateStrategy, final HolidayDetailDTO holidayDetailDTO) {
+        return createLoanApplicationTerms(currency, principalAmount, expectedDisbursementDate, submittedOnDate,
+                calculatedFirstRepaymentDate, numberOfRepayments, repaymentFrequency, fixedLength, monthEndDueDateStrategy,
+                holidayDetailDTO, CUMULATIVE);
+    }
+
+    private LoanApplicationTerms createLoanApplicationTerms(final ApplicationCurrency currency, final Money principalAmount,
+            final LocalDate expectedDisbursementDate, final LocalDate submittedOnDate, final LocalDate calculatedFirstRepaymentDate,
+            final int numberOfRepayments, final PeriodFrequencyType repaymentFrequency, final Integer fixedLength,
+            final MonthEndDueDateStrategy monthEndDueDateStrategy, final HolidayDetailDTO holidayDetailDTO,
+            final LoanScheduleType loanScheduleType) {
         return LoanApplicationTerms.assembleFrom(currency.toData(), 1, repaymentFrequency, numberOfRepayments, 1, repaymentFrequency, null,
                 INVALID, EQUAL_PRINCIPAL, FLAT, ZERO, repaymentFrequency, ZERO, SAME_AS_REPAYMENT_PERIOD, false, principalAmount,
                 expectedDisbursementDate, null, calculatedFirstRepaymentDate, null, null, null, null, null,
                 Money.of(fromApplicationCurrency(currency), ZERO), false, null, EMPTY_LIST, BigDecimal.valueOf(36_000L), null,
                 DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null, null, null, ZERO, null, NONE, null, ZERO,
                 EMPTY_LIST, true, 0, false, holidayDetailDTO, false, false, false, null, false, false, null, false, DISBURSEMENT_DATE,
-                submittedOnDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, fixedLength, false, null, null, false, null, false,
-                null, null, null, false, null, null, null, false, false, monthEndDueDateStrategy);
+                submittedOnDate, loanScheduleType, LoanScheduleProcessingType.HORIZONTAL, fixedLength, false, null, null, false, null,
+                false, null, null, null, false, null, null, null, false, false, monthEndDueDateStrategy);
     }
 
     private List<LocalDate> dueDates(final LoanApplicationTerms loanApplicationTerms, final LocalDate scheduleStartDate) {
         return underTest.generateRepaymentPeriods(new MathContext(12, RoundingMode.HALF_EVEN), scheduleStartDate, loanApplicationTerms,
                 createHolidayDTO()).stream().map(LoanScheduleModelPeriod::periodDueDate).toList();
+    }
+
+    private List<LocalDate> progressiveDueDates(final int numberOfRepayments, final String workingDaysRecurrence) {
+        return progressiveDueDates(numberOfRepayments, workingDaysRecurrence, LocalDate.of(2024, 1, 6), LocalDate.of(2024, 2, 6));
+    }
+
+    private List<LocalDate> progressiveDueDates(final int numberOfRepayments, final String workingDaysRecurrence,
+            final LocalDate disbursementDate, final LocalDate firstRepaymentDate) {
+        final ApplicationCurrency currency = new ApplicationCurrency("USD", "US Dollar", 2, 0, "currency.USD", "$");
+        final Money principalAmount = Money.of(fromApplicationCurrency(currency), BigDecimal.valueOf(1000L));
+        final HolidayDetailDTO holidayDetailDTO = createHolidayDTO(workingDaysRecurrence);
+        final LoanApplicationTerms loanApplicationTerms = createLoanApplicationTerms(currency, principalAmount, disbursementDate,
+                disbursementDate, firstRepaymentDate, numberOfRepayments, MONTHS, null, null, holidayDetailDTO, PROGRESSIVE);
+
+        return underTest.generateRepaymentPeriods(new MathContext(12, RoundingMode.HALF_EVEN), disbursementDate, loanApplicationTerms,
+                holidayDetailDTO).stream().map(LoanScheduleModelPeriod::periodDueDate).toList();
     }
 
     @ParameterizedTest(name = "{0}")
@@ -339,8 +419,11 @@ public class DefaultScheduledDateGeneratorTest {
     }
 
     private HolidayDetailDTO createHolidayDTO() {
+        return createHolidayDTO("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU");
+    }
+
+    private HolidayDetailDTO createHolidayDTO(final String workingDaysRecurrence) {
         return new HolidayDetailDTO(false, EMPTY_LIST,
-                new WorkingDays("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU", MOVE_TO_NEXT_WORKING_DAY.getValue(), false, false),
-                false, false);
+                new WorkingDays(workingDaysRecurrence, MOVE_TO_NEXT_WORKING_DAY.getValue(), false, false), false, false);
     }
 }

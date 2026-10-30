@@ -21,6 +21,7 @@ package org.apache.fineract.test.stepdef.common;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.cucumber.java.After;
 import io.cucumber.java.en.When;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +32,8 @@ import org.apache.fineract.client.models.PostGlClosuresRequest;
 import org.apache.fineract.client.models.PostOfficesRequest;
 import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.client.models.PutOfficesOfficeIdRequest;
+import org.apache.fineract.client.models.WorkingDaysUpdateRequest;
+import org.apache.fineract.client.models.WorkingDaysUpdateResponse;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
@@ -77,5 +80,21 @@ public class OfficeStepDef extends AbstractStepDef {
                 .locale("en");//
 
         ok(() -> fineractClient.accountingClosure().createGLClosure(request));
+    }
+
+    @When("Admin sets working days to weekdays")
+    public void adminSetsWorkingDaysToWeekdays() {
+        WorkingDaysUpdateRequest request = new WorkingDaysUpdateRequest().repaymentRescheduleType(2)
+                .recurrence("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR");
+        WorkingDaysUpdateResponse workingDaysUpdateResponse = ok(() -> fineractClient.workingDays().updateWorkingDay(request));
+        assertThat(workingDaysUpdateResponse).as("Working days were not updated").isNotNull();
+    }
+
+    @After("@LoanWorkingDaysFeature")
+    public void resetWorkingDaysAfterAll() {
+        WorkingDaysUpdateRequest request = new WorkingDaysUpdateRequest().extendTermForDailyRepayments(false).repaymentRescheduleType(2)
+                .recurrence("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU");
+        WorkingDaysUpdateResponse workingDaysUpdateResponse = ok(() -> fineractClient.workingDays().updateWorkingDay(request));
+        assertThat(workingDaysUpdateResponse).as("Working days were not updated").isNotNull();
     }
 }
