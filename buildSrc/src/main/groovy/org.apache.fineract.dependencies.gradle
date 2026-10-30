@@ -60,7 +60,10 @@ dependencyManagement {
         dependency 'org.codehaus.janino:janino:3.1.12'
 
         dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:5.0.2'
-        dependency 'com.google.guava:guava:33.6.0-jre'
+        dependency 'com.google.guava:guava:33.7.2-jre'
+        // Transitive via kafka-clients (spring-kafka); pinned for CVE-2026-108106 / CVE-2026-93451 (fixed in 1.1.10.9).
+        // Remove once the Spring Boot BOM brings a kafka-clients that ships snappy-java >= 1.1.10.12.
+        dependency 'org.xerial.snappy:snappy-java:1.1.10.12'
         dependency 'com.google.code.gson:gson:2.14.0'
         dependency 'com.google.googlejavaformat:google-java-format:1.35.0'
         dependency 'org.apache.commons:commons-collections4:4.5.0'
