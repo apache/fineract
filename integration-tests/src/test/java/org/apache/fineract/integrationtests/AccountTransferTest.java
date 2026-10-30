@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -32,6 +33,7 @@ import org.apache.fineract.client.models.GetAccountTransfersPageItems;
 import org.apache.fineract.client.models.GetAccountTransfersPageItemsPaymentDetailData;
 import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
+import org.apache.fineract.client.models.PostAccountTransfersResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -50,6 +52,7 @@ import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestB
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.StandingInstructionsHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.Account.AccountType;
@@ -167,6 +170,41 @@ public class AccountTransferTest extends FeignSavingsTestBase {
         List<GetAccountTransfersPageItems> transfers = accountTransferHelper.retrieveTransfersByAccountDetailId(accountTransferDetailId);
         assertEquals(1, transfers.size());
         assertNull(transfers.get(0).getPaymentDetailData(), "A transfer made without payment details should report none");
+    }
+
+    /**
+     * create() names its resourceId after m_account_transfer_details.id, but undo() (like the read/list APIs) resolves
+     * a transfer by m_account_transfer_transaction.id - a different, independently incrementing sequence. The two
+     * usually coincide, which is why this needs deliberate setup to prove anything: creating (but never executing) a
+     * standing instruction inserts a details row with no transaction, permanently pushing the details-id sequence ahead
+     * - the same divergence every long-lived tenant eventually sees. See FINERACT-3024.
+     */
+    @Test
+    public void testUndoAccountTransferUsesSubResourceIdWhenDetailsAndTransactionIdsDiverge() {
+        createStandingInstructionWithoutExecutingIt();
+
+        SavingsTransferFixture fixture = createSavingsTransferFixture();
+        PostAccountTransfersResponse response = accountTransferHelper.createAccountTransfer(savingsToSavings(fixture.fromClientId,
+                fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId, ACCOUNT_TRANSFER_AMOUNT));
+
+        assertNotEquals(response.getResourceId(), response.getSubResourceId(),
+                "This test only proves anything once the details id and transaction id have diverged");
+
+        assertNotNull(accountTransferHelper.undoTransfer(response.getSubResourceId()).getResourceId(),
+                "undo must succeed using subResourceId, the id undo() actually resolves by");
+
+        assertEquals(404, accountTransferHelper.undoTransferExpectingError(response.getResourceId()).getStatus(),
+                "undoing with resourceId (the details id) must fail cleanly instead of silently reversing an unrelated transfer");
+    }
+
+    private void createStandingInstructionWithoutExecutingIt() {
+        Long clientId = createClientInOffice(createOffice());
+        Long savingsProductId = createCashBasedSavingsProduct();
+        Long fromSavingsId = createActiveSavingsAccount(clientId, savingsProductId);
+        Long toSavingsId = createActiveSavingsAccount(clientId, savingsProductId);
+        new StandingInstructionsHelper().createStandingInstruction(clientId.toString(), fromSavingsId.toString(), toSavingsId.toString(),
+                String.valueOf(PortfolioAccountType.SAVINGS.getValue()), String.valueOf(PortfolioAccountType.SAVINGS.getValue()),
+                ACCOUNT_TRANSFER_DATE, "31 December 2030", "01 January");
     }
 
     @Test

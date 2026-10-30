@@ -126,6 +126,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         Long fromSavingsAccountId = null;
         Long transferDetailId = null;
+        Long transferTransactionId = null;
         boolean isInterestTransfer = false;
         boolean isAccountTransfer = true;
         Long fromLoanAccountId = null;
@@ -163,6 +164,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     fromSavingsAccount, toSavingsAccount, withdrawal, deposit);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferDetailId = accountTransferDetails.getId();
+            transferTransactionId = latestTransactionId(accountTransferDetails);
 
         } else if (isSavingsToLoanAccountTransfer(fromAccountType, toAccountType)) {
             //
@@ -192,6 +194,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     fromSavingsAccount, toLoanAccount, withdrawal, loanRepaymentTransaction);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferDetailId = accountTransferDetails.getId();
+            transferTransactionId = latestTransactionId(accountTransferDetails);
 
         } else if (isLoanToSavingsAccountTransfer(fromAccountType, toAccountType)) {
             // FIXME - kw - ADD overpaid loan to savings account transfer
@@ -214,11 +217,12 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     fromLoanAccount, toSavingsAccount, deposit, loanRefundTransaction);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferDetailId = accountTransferDetails.getId();
+            transferTransactionId = latestTransactionId(accountTransferDetails);
 
         }
 
         final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder() //
-                .withEntityId(transferDetailId);
+                .withEntityId(transferDetailId).withSubEntityId(transferTransactionId);
 
         if (PortfolioAccountType.SAVINGS.equals(fromAccountType)) {
             builder.withSavingsId(fromSavingsAccountId);
@@ -582,6 +586,19 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 .withEntityId(transaction.getId());
 
         return builder.build();
+    }
+
+    /**
+     * create() hands back m_account_transfer_details.id as resourceId (see
+     * FeignAccountTransferHelper#retrieveTransfersByAccountDetailId) but undo() and the read/list APIs resolve a
+     * transfer by m_account_transfer_transaction.id instead - the two are independent id sequences. Rather than have
+     * undo() guess which id space a bare number belongs to (risking a silent reversal of an unrelated transfer once the
+     * sequences drift apart), create() reports the transaction id too, as subResourceId, so callers have the id undo()
+     * actually needs.
+     */
+    private static Long latestTransactionId(final AccountTransferDetails accountTransferDetails) {
+        final List<AccountTransferTransaction> transactions = accountTransferDetails.getAccountTransferTransactions();
+        return transactions.get(transactions.size() - 1).getId();
     }
 
     private void validateAccessRights(final AccountTransferDetails accountTransferDetails) {
