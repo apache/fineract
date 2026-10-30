@@ -413,6 +413,7 @@ public final class LoanProductsApiResourceSwagger {
         }
 
         public List<String> supportedInterestRefundTypes;
+        public List<String> supportedFeeRefundTypes;
         @Schema(example = "REGULAR")
         public String chargeOffBehaviour;
 
@@ -750,6 +751,7 @@ public final class LoanProductsApiResourceSwagger {
         public Integer principalThresholdForLastInstalment;
         public GetLoanProductsResponse.GetLoanProductsRepaymentStartDateType repaymentStartDateType;
         public List<StringEnumOptionData> supportedInterestRefundTypes;
+        public List<StringEnumOptionData> supportedFeeRefundTypes;
         public StringEnumOptionData chargeOffBehaviour;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
@@ -1215,7 +1217,9 @@ public final class LoanProductsApiResourceSwagger {
         public List<EnumOptionData> creditAllocationTransactionTypes;
 
         public List<StringEnumOptionData> supportedInterestRefundTypes;
+        public List<StringEnumOptionData> supportedFeeRefundTypes;
         public List<StringEnumOptionData> supportedInterestRefundTypesOptions;
+        public List<StringEnumOptionData> supportedFeeRefundTypesOptions;
         public List<GetLoanProductsChargeOffReasonOptions> chargeOffReasonOptions;
         public List<GetLoanProductsWriteOffReasonOptions> writeOffReasonOptions;
         public StringEnumOptionData chargeOffBehaviour;
@@ -1586,6 +1590,7 @@ public final class LoanProductsApiResourceSwagger {
         @Schema(example = "false")
         public Boolean enableAccrualActivityPosting;
         public List<StringEnumOptionData> supportedInterestRefundTypes;
+        public List<StringEnumOptionData> supportedFeeRefundTypes;
         public List<GetLoanProductsChargeOffReasonOptions> chargeOffReasonOptions;
         public List<GetLoanProductsWriteOffReasonOptions> writeOffReasonOptions;
         public StringEnumOptionData chargeOffBehaviour;
@@ -1894,6 +1899,7 @@ public final class LoanProductsApiResourceSwagger {
         public List<PostLoanProductsRequest.RateData> rates;
 
         public List<String> supportedInterestRefundTypes;
+        public List<String> supportedFeeRefundTypes;
         @Schema(example = "REGULAR")
         public String chargeOffBehaviour;
         @Schema(example = "false")

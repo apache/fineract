@@ -307,6 +307,15 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
                 LoanAdjustTransactionBusinessEvent.Data eventData = new LoanAdjustTransactionBusinessEvent.Data(loanTransaction);
                 businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(eventData));
             });
+            loanTransactionRelationRepository.findNonReversedFeeRefundsRelatedTo(transactionForAdjustment).forEach(loanTransaction -> {
+                loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(loanTransaction.getLoan(), loanTransaction,
+                        "reversed");
+                loanTransaction.reverse();
+                loanTransaction.manuallyAdjustedOrReversed();
+                journalEntryPoster.postJournalEntriesForLoanTransaction(loanTransaction, false, false);
+                LoanAdjustTransactionBusinessEvent.Data eventData = new LoanAdjustTransactionBusinessEvent.Data(loanTransaction);
+                businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(eventData));
+            });
         }
 
         if (loan.isClosedWrittenOff()) {

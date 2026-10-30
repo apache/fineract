@@ -22,7 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -31,6 +33,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -48,6 +52,7 @@ public class DownPaymentFeesTest {
     private static final MockedStatic<MoneyHelper> MONEY_HELPER = mockStatic(MoneyHelper.class);
     private static final LocalDate JAN_1 = LocalDate.of(2026, 1, 1);
     private static final LocalDate JAN_2 = LocalDate.of(2026, 1, 2);
+    private static final LocalDate JAN_3 = LocalDate.of(2026, 1, 3);
 
     private final MonetaryCurrency currency = MonetaryCurrency.fromCurrencyData(new CurrencyData("EUR"));
     private final Charge flatFee = mockDefinition(1L);
@@ -255,6 +260,159 @@ public class DownPaymentFeesTest {
         final Loan loan = mock(Loan.class);
         when(loan.getDisbursementDetails()).thenReturn(List.of(tranches));
         return loan;
+    }
+
+    @Test
+    public void testRefundAmountIsRatioOfTheOriginalFeeAmounts() {
+        final Loan loan = mockRefundLoan(List.of(disbursement(JAN_1, 1000), disbursement(JAN_1, 500)),
+                List.of(chargedFee(JAN_1, 25), chargedFee(JAN_1, "12.50")));
+
+        assertEqualsAmount("18.75", DownPaymentFees.refundAmount(loan, BigDecimal.valueOf(750), JAN_2, BigDecimal.ZERO));
+    }
+
+    @Test
+    public void testRefundAmountIsRoundedByTheLoanCurrency() {
+        final Loan loan = mockRefundLoan(List.of(disbursement(JAN_1, 1500)), List.of(chargedFee(JAN_1, 50)));
+
+        assertEqualsAmount("16.67", DownPaymentFees.refundAmount(loan, BigDecimal.valueOf(500), JAN_2, BigDecimal.ZERO));
+    }
+
+    @Test
+    public void testRefundAmountIsCappedByWhatIsLeftToRefund() {
+        final Loan loan = mockRefundLoan(List.of(disbursement(JAN_1, 1000)), List.of(chargedFee(JAN_1, 25)));
+
+        assertEqualsAmount("10", DownPaymentFees.refundAmount(loan, BigDecimal.valueOf(600), JAN_2, BigDecimal.valueOf(15)));
+        assertEqualsAmount("0", DownPaymentFees.refundAmount(loan, BigDecimal.valueOf(600), JAN_2, BigDecimal.valueOf(25)));
+    }
+
+    @Test
+    public void testRefundAmountCountsOnlyWhatExistsOnTheRefundDate() {
+        final Loan loan = mockRefundLoan(List.of(disbursement(JAN_1, 1000), disbursement(JAN_3, 500)),
+                List.of(chargedFee(JAN_1, 25), chargedFee(JAN_3, 25)));
+
+        assertEqualsAmount("12.50", DownPaymentFees.refundAmount(loan, BigDecimal.valueOf(500), JAN_2, BigDecimal.ZERO));
+        assertEqualsAmount("16.67", DownPaymentFees.refundAmount(loan, BigDecimal.valueOf(500), JAN_3, BigDecimal.ZERO));
+    }
+
+    @Test
+    public void testRefundAmountSkipsTheFeeOfATrancheNotDisbursedYet() {
+        final LoanCharge awaitingFee = chargedFee(JAN_1, 10);
+        when(awaitingFee.isDownPaymentFeeAwaitingDisbursement()).thenReturn(true);
+        final Loan loan = mockRefundLoan(List.of(disbursement(JAN_1, 600)), List.of(chargedFee(JAN_1, 15), awaitingFee));
+
+        assertEqualsAmount("7.50", DownPaymentFees.refundAmount(loan, BigDecimal.valueOf(300), JAN_2, BigDecimal.ZERO));
+    }
+
+    @Test
+    public void testRefundAmountSkipsReversedDisbursementsAndInactiveFees() {
+        final LoanTransaction reversed = disbursement(JAN_1, 1000);
+        when(reversed.isNotReversed()).thenReturn(false);
+        final LoanCharge inactive = chargedFee(JAN_1, 25);
+        when(inactive.isActive()).thenReturn(false);
+        final LoanCharge notDownPayment = chargedFee(JAN_1, 25);
+        when(notDownPayment.isDueAtDownPayment()).thenReturn(false);
+        final Loan loan = mockRefundLoan(List.of(reversed, disbursement(JAN_1, 500)),
+                List.of(chargedFee(JAN_1, 10), inactive, notDownPayment));
+
+        assertEqualsAmount("5", DownPaymentFees.refundAmount(loan, BigDecimal.valueOf(250), JAN_2, BigDecimal.ZERO));
+    }
+
+    @Test
+    public void testRefundAmountIsZeroWithoutDisbursementOrFee() {
+        assertEqualsAmount("0", DownPaymentFees.refundAmount(mockRefundLoan(List.of(), List.of(chargedFee(JAN_1, 25))),
+                BigDecimal.valueOf(100), JAN_2, BigDecimal.ZERO));
+        assertEqualsAmount("0", DownPaymentFees.refundAmount(mockRefundLoan(List.of(disbursement(JAN_1, 1000)), List.of()),
+                BigDecimal.valueOf(100), JAN_2, BigDecimal.ZERO));
+    }
+
+    @Test
+    public void testBackdatedRefundIsCalculatedBeforeTheLaterRefund() {
+        // UC27: MIR 1000 on Jan 3 refunded the whole fee, then MIR 400 is backdated to Jan 2
+        final LoanTransaction laterRefund = refund(5L, JAN_3, 1000);
+        final LoanTransaction backdatedRefund = refund(null, JAN_2, 400);
+        final List<LoanTransaction> transactions = new ArrayList<>(List.of(disbursement(JAN_1, 1000), feeRefundOf(laterRefund)));
+        final Loan loan = mockRefundLoan(transactions, List.of(chargedFee(JAN_1, 25)));
+
+        assertEqualsAmount("10", DownPaymentFees.refundAmount(loan, backdatedRefund));
+        transactions.add(feeRefundOf(backdatedRefund));
+        assertEqualsAmount("15", DownPaymentFees.refundAmount(loan, laterRefund));
+    }
+
+    @Test
+    public void testRefundsOnTheSameDateUseUpTheCapInReplayOrder() {
+        final LoanTransaction first = refund(5L, JAN_2, 600);
+        final LoanTransaction second = refund(6L, JAN_2, 600);
+        final Loan loan = mockRefundLoan(List.of(disbursement(JAN_1, 1000), feeRefundOf(second), feeRefundOf(first)),
+                List.of(chargedFee(JAN_1, 25)));
+
+        assertEqualsAmount("15", DownPaymentFees.refundAmount(loan, first));
+        assertEqualsAmount("10", DownPaymentFees.refundAmount(loan, second));
+    }
+
+    @Test
+    public void testRefundWithoutFeeRefundDoesNotUseUpTheCap() {
+        final LoanTransaction reversedFeeRefund = feeRefundOf(refund(5L, JAN_2, 1000));
+        when(reversedFeeRefund.isNotReversed()).thenReturn(false);
+        final LoanTransaction reversedRefund = refund(6L, JAN_2, 1000);
+        when(reversedRefund.isNotReversed()).thenReturn(false);
+        final Loan loan = mockRefundLoan(List.of(disbursement(JAN_1, 1000), reversedFeeRefund, feeRefundOf(reversedRefund)),
+                List.of(chargedFee(JAN_1, 25)));
+
+        assertEqualsAmount("15", DownPaymentFees.refundAmount(loan, refund(7L, JAN_3, 600)));
+    }
+
+    private static void assertEqualsAmount(final String expected, final BigDecimal actual) {
+        assertEquals(0, new BigDecimal(expected).compareTo(actual), () -> "expected " + expected + " but was " + actual);
+    }
+
+    private static Loan mockRefundLoan(final List<LoanTransaction> transactions, final List<LoanCharge> charges) {
+        final Loan loan = mock(Loan.class);
+        lenient().when(loan.getCurrency()).thenReturn(new MonetaryCurrency("EUR", 2, null));
+        when(loan.getLoanTransactions()).thenReturn(transactions);
+        when(loan.getLoanCharges()).thenReturn(new LinkedHashSet<>(charges));
+        return loan;
+    }
+
+    private static LoanTransaction disbursement(final LocalDate date, final long amount) {
+        final LoanTransaction transaction = mock(LoanTransaction.class);
+        lenient().when(transaction.isNotReversed()).thenReturn(true);
+        lenient().when(transaction.isDisbursement()).thenReturn(true);
+        lenient().when(transaction.getTransactionDate()).thenReturn(date);
+        lenient().when(transaction.getAmount()).thenReturn(BigDecimal.valueOf(amount));
+        return transaction;
+    }
+
+    private static LoanTransaction refund(final Long id, final LocalDate date, final long amount) {
+        final LoanTransaction refund = mock(LoanTransaction.class);
+        lenient().when(refund.getId()).thenReturn(id);
+        lenient().when(refund.isNotReversed()).thenReturn(true);
+        lenient().when(refund.getTransactionDate()).thenReturn(date);
+        lenient().when(refund.getAmount()).thenReturn(BigDecimal.valueOf(amount));
+        return refund;
+    }
+
+    private static LoanTransaction feeRefundOf(final LoanTransaction refund) {
+        final LoanTransactionRelation relation = mock(LoanTransactionRelation.class);
+        lenient().when(relation.getRelationType()).thenReturn(LoanTransactionRelationTypeEnum.RELATED);
+        lenient().when(relation.getToTransaction()).thenReturn(refund);
+        final LoanTransaction feeRefund = mock(LoanTransaction.class);
+        lenient().when(feeRefund.isNotReversed()).thenReturn(true);
+        lenient().when(feeRefund.isFeeRefund()).thenReturn(true);
+        lenient().when(feeRefund.getLoanTransactionRelations(any())).thenReturn(List.of(relation));
+        return feeRefund;
+    }
+
+    private static LoanCharge chargedFee(final LocalDate dueDate, final long amount) {
+        return chargedFee(dueDate, String.valueOf(amount));
+    }
+
+    private static LoanCharge chargedFee(final LocalDate dueDate, final String amount) {
+        final LoanCharge fee = mock(LoanCharge.class);
+        lenient().when(fee.isActive()).thenReturn(true);
+        lenient().when(fee.isDueAtDownPayment()).thenReturn(true);
+        lenient().when(fee.getDueLocalDate()).thenReturn(dueDate);
+        lenient().when(fee.amount()).thenReturn(new BigDecimal(amount));
+        return fee;
     }
 
     private static LoanCharge mockFee(final Long id, final Charge definition, final LocalDate dueDate, final Loan loan,

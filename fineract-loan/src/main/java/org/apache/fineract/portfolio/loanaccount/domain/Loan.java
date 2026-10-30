@@ -78,6 +78,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedFeeRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 import org.apache.fineract.portfolio.rate.domain.Rate;
@@ -1811,6 +1812,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public List<LoanTransactionType> getSupportedInterestRefundTransactionTypes() {
         return getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
                 .map(LoanSupportedInterestRefundTypes::getTransactionType).toList();
+    }
+
+    public List<LoanTransactionType> getSupportedFeeRefundTransactionTypes() {
+        return getLoanProductRelatedDetail().getSupportedFeeRefundTypes().stream().map(LoanSupportedFeeRefundTypes::getTransactionType)
+                .toList();
     }
 
     public LoanTransaction getLastUserTransaction() {

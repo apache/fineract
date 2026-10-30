@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.data;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.ToString;
@@ -50,12 +51,14 @@ public class CommandProcessingResult implements Serializable {
     private final ExternalId resourceExternalId;
     private final ExternalId subResourceExternalId;
     private final ExternalId loanExternalId;
+    private final List<CommandProcessingSubResourceResult> subResources;
 
     private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
             final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
             final Map<String, Object> changes, final Long productId, final Long gsimId, final Long glimId,
             final Map<String, Object> creditBureauReportData, Boolean rollbackTransaction, final Long subResourceId,
-            final ExternalId resourceExternalId, final ExternalId subResourceExternalId, final ExternalId loanExternalId) {
+            final ExternalId resourceExternalId, final ExternalId subResourceExternalId, final ExternalId loanExternalId,
+            final List<CommandProcessingSubResourceResult> subResources) {
         this.commandId = commandId;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -71,16 +74,20 @@ public class CommandProcessingResult implements Serializable {
         this.glimId = glimId;
         this.creditBureauReportData = creditBureauReportData;
         this.rollbackTransaction = rollbackTransaction;
-        this.subResourceId = subResourceId;
         this.resourceExternalId = setExternalIdOrNull(resourceExternalId);
-        this.subResourceExternalId = setExternalIdOrNull(subResourceExternalId);
         this.loanExternalId = setExternalIdOrNull(loanExternalId);
+        this.subResources = subResources == null || subResources.isEmpty() ? null : List.copyOf(subResources);
+        // The first sub resource stays available for clients that only read subResourceId / subResourceExternalId
+        final CommandProcessingSubResourceResult firstSubResource = this.subResources == null ? null : this.subResources.getFirst();
+        this.subResourceId = firstSubResource == null ? subResourceId : firstSubResource.resourceId();
+        this.subResourceExternalId = setExternalIdOrNull(
+                firstSubResource == null ? subResourceExternalId : firstSubResource.resourceExternalId());
     }
 
     protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changes,
             Long clientId) {
         this(commandId, officeId, null, clientId, null, null, resourceId == null ? null : resourceId.toString(), resourceId, null, changes,
-                null, null, null, null, null, null, ExternalId.empty(), ExternalId.empty(), ExternalId.empty());
+                null, null, null, null, null, null, ExternalId.empty(), ExternalId.empty(), ExternalId.empty(), null);
     }
 
     protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changes) {
@@ -96,7 +103,8 @@ public class CommandProcessingResult implements Serializable {
                 commandResult.loanId, commandResult.savingsId, commandResult.resourceIdentifier, resourceId, commandResult.transactionId,
                 commandResult.changes, commandResult.productId, commandResult.gsimId, commandResult.glimId,
                 commandResult.creditBureauReportData, commandResult.rollbackTransaction, commandResult.subResourceId,
-                commandResult.resourceExternalId, commandResult.subResourceExternalId, commandResult.loanExternalId);
+                commandResult.resourceExternalId, commandResult.subResourceExternalId, commandResult.loanExternalId,
+                commandResult.subResources);
     }
 
     public static CommandProcessingResult fromCommandProcessingResult(CommandProcessingResult commandResult) {
@@ -107,10 +115,11 @@ public class CommandProcessingResult implements Serializable {
             final Long loanId, final Long savingsId, final String resourceIdentifier, final Long entityId, final Long gsimId,
             final Long glimId, final Map<String, Object> creditBureauReportData, final String transactionId,
             final Map<String, Object> changes, final Long productId, final Boolean rollbackTransaction, final Long subResourceId,
-            final ExternalId resourceExternalId, final ExternalId subResourceExternalId, final ExternalId loanExternalId) {
+            final ExternalId resourceExternalId, final ExternalId subResourceExternalId, final ExternalId loanExternalId,
+            final List<CommandProcessingSubResourceResult> subResources) {
         return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
                 transactionId, changes, productId, gsimId, glimId, creditBureauReportData, rollbackTransaction, subResourceId,
-                resourceExternalId, subResourceExternalId, loanExternalId);
+                resourceExternalId, subResourceExternalId, loanExternalId, subResources);
     }
 
     public static CommandProcessingResult commandOnlyResult(final Long commandId) {
