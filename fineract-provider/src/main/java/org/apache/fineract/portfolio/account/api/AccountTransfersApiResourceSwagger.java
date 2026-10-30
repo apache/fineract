@@ -197,6 +197,8 @@ final class AccountTransfersApiResourceSwagger {
         public Long savingsId;
         @Schema(example = "1")
         public Long resourceId;
+        @Schema(example = "1", description = "The id of the m_account_transfer_transaction row created, i.e. the id to use for undoing this transfer")
+        public Long subResourceId;
     }
 
     @Schema(description = "GetAccountTransfersResponse")

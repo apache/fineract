@@ -78,4 +78,8 @@ public class FeignAccountTransferHelper {
     public CommandProcessingResult undoTransfer(Long accountTransferId) {
         return ok(() -> fineractClient.accountTransfers().accountTransferOperation(accountTransferId, "undo"));
     }
+
+    public CallFailedRuntimeException undoTransferExpectingError(Long accountTransferId) {
+        return fail(() -> fineractClient.accountTransfers().accountTransferOperation(accountTransferId, "undo"));
+    }
 }

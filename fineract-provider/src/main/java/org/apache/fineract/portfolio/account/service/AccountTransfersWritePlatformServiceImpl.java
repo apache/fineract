@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -127,6 +126,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         Long fromSavingsAccountId = null;
         Long transferDetailId = null;
+        Long transferTransactionId = null;
         boolean isInterestTransfer = false;
         boolean isAccountTransfer = true;
         Long fromLoanAccountId = null;
@@ -164,6 +164,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     fromSavingsAccount, toSavingsAccount, withdrawal, deposit);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferDetailId = accountTransferDetails.getId();
+            transferTransactionId = latestTransactionId(accountTransferDetails);
 
         } else if (isSavingsToLoanAccountTransfer(fromAccountType, toAccountType)) {
             //
@@ -193,6 +194,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     fromSavingsAccount, toLoanAccount, withdrawal, loanRepaymentTransaction);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferDetailId = accountTransferDetails.getId();
+            transferTransactionId = latestTransactionId(accountTransferDetails);
 
         } else if (isLoanToSavingsAccountTransfer(fromAccountType, toAccountType)) {
             // FIXME - kw - ADD overpaid loan to savings account transfer
@@ -215,11 +217,12 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     fromLoanAccount, toSavingsAccount, deposit, loanRefundTransaction);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferDetailId = accountTransferDetails.getId();
+            transferTransactionId = latestTransactionId(accountTransferDetails);
 
         }
 
         final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder() //
-                .withEntityId(transferDetailId);
+                .withEntityId(transferDetailId).withSubEntityId(transferTransactionId);
 
         if (PortfolioAccountType.SAVINGS.equals(fromAccountType)) {
             builder.withSavingsId(fromSavingsAccountId);
@@ -528,7 +531,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         // what a caller can actually see, and reversal is scoped to this single transaction only - not every
         // transaction sharing the same details record (e.g. a recurring standing instruction).
         final AccountTransferTransaction transaction = accountTransferRepository.findById(accountTransferId)
-                .or(() -> resolveByAccountTransferDetailsId(accountTransferId))
                 .orElseThrow(() -> new AccountTransferNotFoundException(accountTransferId));
 
         if (transaction.isReversed()) {
@@ -587,16 +589,16 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     }
 
     /**
-     * create() hands back m_account_transfer_details.id as a transfer's resourceId (see
-     * FeignAccountTransferHelper#retrieveTransfersByAccountDetailId), a different id space from the transaction id the
-     * read/list APIs expose. A caller that undoes a transfer using the id create() gave them would otherwise get a 404.
-     * Falling back to the details id - and only when it maps to exactly one transaction, so a recurring standing
-     * instruction's shared details record is never guessed at - resolves that id too.
+     * create() hands back m_account_transfer_details.id as resourceId (see
+     * FeignAccountTransferHelper#retrieveTransfersByAccountDetailId) but undo() and the read/list APIs resolve a
+     * transfer by m_account_transfer_transaction.id instead - the two are independent id sequences. Rather than have
+     * undo() guess which id space a bare number belongs to (risking a silent reversal of an unrelated transfer once the
+     * sequences drift apart), create() reports the transaction id too, as subResourceId, so callers have the id undo()
+     * actually needs.
      */
-    private Optional<AccountTransferTransaction> resolveByAccountTransferDetailsId(final Long accountTransferDetailsId) {
-        return accountTransferDetailRepository.findById(accountTransferDetailsId)
-                .map(AccountTransferDetails::getAccountTransferTransactions).filter(transactions -> transactions.size() == 1)
-                .map(transactions -> transactions.get(0));
+    private static Long latestTransactionId(final AccountTransferDetails accountTransferDetails) {
+        final List<AccountTransferTransaction> transactions = accountTransferDetails.getAccountTransferTransactions();
+        return transactions.get(transactions.size() - 1).getId();
     }
 
     private void validateAccessRights(final AccountTransferDetails accountTransferDetails) {
