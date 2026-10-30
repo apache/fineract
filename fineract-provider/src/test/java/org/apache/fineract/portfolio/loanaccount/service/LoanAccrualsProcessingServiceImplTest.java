@@ -48,6 +48,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ChargeAccrualDate
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
@@ -57,6 +58,9 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.portfolio.loanaccount.data.AccrualChargeData;
+import org.apache.fineract.portfolio.loanaccount.data.AccrualPeriodData;
+import org.apache.fineract.portfolio.loanaccount.data.AccrualPeriodsData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
@@ -826,6 +830,165 @@ public class LoanAccrualsProcessingServiceImplTest {
                         ChargeAccrualDateConfig.DUE_DATE, beforeDueDate, "10"),
                 Arguments.of("eod submitted-date, submitted before disbursement, after due date -> not accrued", beforeDisbursement, false,
                         ChargeAccrualDateConfig.SUBMITTED_DATE, afterDueDate, "0"));
+    }
+
+    /**
+     * While a loan is NPA, only interest the installment has been paid is recognised; what was accrued before NPA
+     * stays, unpaid interest stays unaccrued, and fees/penalties are not accrued.
+     */
+    @Test
+    void limitAccrualsToReceivedInterest_ShouldRecogniseOnlyPaidInterest_WhileNpa() {
+        // Given: 8.22 interest per installment
+        MonetaryCurrency currency = new MonetaryCurrency("USD", 2, 1);
+        Money interest = Money.of(currency, new BigDecimal("8.22"));
+        Money zero = Money.zero(currency);
+        AccrualPeriodsData accrualPeriods = new AccrualPeriodsData(currency);
+        // 1: accrued before NPA, now paid
+        AccrualPeriodData accruedAndPaid = npaPeriod(accrualPeriods, 1, interest, interest, interest);
+        // 2: never accrued (NPA), now paid
+        AccrualPeriodData unaccruedAndPaid = npaPeriod(accrualPeriods, 2, interest, zero, interest);
+        // 3: never accrued (NPA), still unpaid
+        AccrualPeriodData unaccruedAndUnpaid = npaPeriod(accrualPeriods, 3, interest, zero, zero);
+        // 4: never accrued (NPA), partly paid
+        AccrualPeriodData unaccruedAndPartlyPaid = npaPeriod(accrualPeriods, 4, interest, zero, Money.of(currency, new BigDecimal("3.00")));
+        AccrualChargeData fee = new AccrualChargeData(1L, null, false).setChargeAmount(Money.of(currency, BigDecimal.TEN))
+                .setChargeAccruable(Money.of(currency, BigDecimal.TEN)).setChargeAccrued(zero);
+        unaccruedAndPaid.addCharge(fee);
+
+        // When
+        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "limitAccrualsToReceivedInterest", loan, accrualPeriods);
+
+        // Then
+        assertThat(accruedAndPaid.getInterestAccruable().getAmount()).isEqualByComparingTo("8.22");
+        assertThat(unaccruedAndPaid.getInterestAccruable().getAmount()).isEqualByComparingTo("8.22");
+        assertThat(unaccruedAndUnpaid.getInterestAccruable().getAmount()).isEqualByComparingTo("0");
+        assertThat(unaccruedAndPartlyPaid.getInterestAccruable().getAmount()).isEqualByComparingTo("3.00");
+        assertThat(fee.getChargeAccruable().getAmount()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void processAccrualsOnNpaLoanRepayment_ShouldNotProceed_WhenLoanIsNotNpa() {
+        // Given
+        when(loan.isOpen()).thenReturn(true);
+        when(loan.isNpa()).thenReturn(false);
+
+        // When
+        accrualsProcessingService.processAccrualsOnNpaLoanRepayment(loan);
+
+        // Then
+        verify(loan, never()).isPeriodicAccrualAccountingEnabledOnLoanProduct();
+        verify(loan, never()).addLoanTransaction(any());
+    }
+
+    @Test
+    void processAccrualsOnNpaLoanRepayment_ShouldNotProceed_WhenLoanIsNotOpen() {
+        // Given
+        when(loan.isOpen()).thenReturn(false);
+        when(loan.isNpa()).thenReturn(true);
+
+        // When
+        accrualsProcessingService.processAccrualsOnNpaLoanRepayment(loan);
+
+        // Then
+        verify(loan, never()).isPeriodicAccrualAccountingEnabledOnLoanProduct();
+        verify(loan, never()).addLoanTransaction(any());
+    }
+
+    private AccrualPeriodData npaPeriod(AccrualPeriodsData accrualPeriods, int installmentNumber, Money accruable, Money accrued,
+            Money paid) {
+        LoanRepaymentScheduleInstallment installment = mock(LoanRepaymentScheduleInstallment.class);
+        when(installment.getInterestPaid(any())).thenReturn(paid);
+        when(loan.fetchRepaymentScheduleInstallment(installmentNumber)).thenReturn(installment);
+        AccrualPeriodData period = new AccrualPeriodData(installmentNumber, installmentNumber == 1, null, null)
+                .setInterestAccruable(accruable).setInterestAccrued(accrued);
+        accrualPeriods.addPeriod(period);
+        return period;
+    }
+
+    /**
+     * One catch-up accrual dated today covers installments that fell due earlier. Reprocessing must attribute it to
+     * them in order and must NOT reverse it, although its date lies in today's installment.
+     */
+    @Test
+    void reallocateCumulativeAccruals_ShouldFillEarlierInstallmentsFromACatchUpWithoutReversingIt() {
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+        final LoanRepaymentScheduleInstallment first = dailyInstallment(1, today.minusDays(2));
+        final LoanRepaymentScheduleInstallment second = dailyInstallment(2, today.minusDays(1));
+        final LoanRepaymentScheduleInstallment third = dailyInstallment(3, today);
+        when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(first, second, third));
+        when(loan.isClosed()).thenReturn(false);
+        when(loan.isInterestBearing()).thenReturn(true);
+        // One catch-up dated today for all three installments' interest.
+        final LoanTransaction catchUp = accrual(today, "24.66", false);
+
+        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateCumulativeAccruals", loan, List.of(catchUp), today, true);
+
+        verify(catchUp, never()).reverse();
+        verify(first).setInterestAccrued(new BigDecimal("8.22"));
+        verify(second).setInterestAccrued(new BigDecimal("8.22"));
+        verify(third).setInterestAccrued(new BigDecimal("8.22"));
+    }
+
+    @Test
+    void reallocateCumulativeAccruals_ShouldReverseTheLatestAccrualWhenOverAccrued() {
+        // After a reschedule only 8.22 is accruable by today, but 16.44 was accrued: the latest accrual goes.
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+        final LoanRepaymentScheduleInstallment first = dailyInstallment(1, today);
+        final LoanRepaymentScheduleInstallment later = dailyInstallment(2, today.plusDays(30));
+        when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(first, later));
+        when(loan.isClosed()).thenReturn(false);
+        when(loan.isInterestBearing()).thenReturn(false);
+        final LoanTransaction older = accrual(today.minusDays(1), "8.22", false);
+        final LoanTransaction latest = accrual(today, "8.22", false);
+
+        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateCumulativeAccruals", loan, List.of(older, latest),
+                today.plusDays(30), false);
+
+        verify(latest).reverse();
+        verify(older, never()).reverse();
+        verify(first).setInterestAccrued(new BigDecimal("8.22"));
+        verify(later).setInterestAccrued(new BigDecimal("0.00"));
+    }
+
+    @Test
+    void reallocateCumulativeAccruals_ShouldNetAccrualAdjustments() {
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+        final LoanRepaymentScheduleInstallment first = dailyInstallment(1, today.minusDays(1));
+        final LoanRepaymentScheduleInstallment second = dailyInstallment(2, today);
+        when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(first, second));
+        when(loan.isClosed()).thenReturn(false);
+        final LoanTransaction accrual = accrual(today.minusDays(1), "16.44", false);
+        final LoanTransaction adjustment = accrual(today, "8.22", true);
+
+        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateCumulativeAccruals", loan, List.of(accrual, adjustment),
+                today, true);
+
+        verify(accrual, never()).reverse();
+        verify(first).setInterestAccrued(new BigDecimal("8.22"));
+        verify(second).setInterestAccrued(new BigDecimal("0.00"));
+    }
+
+    private static LoanRepaymentScheduleInstallment dailyInstallment(final int number, final LocalDate dueDate) {
+        final LoanRepaymentScheduleInstallment installment = mock(LoanRepaymentScheduleInstallment.class);
+        when(installment.getInstallmentNumber()).thenReturn(number);
+        when(installment.getFromDate()).thenReturn(dueDate.minusDays(1));
+        when(installment.getDueDate()).thenReturn(dueDate);
+        when(installment.getInterestCharged()).thenReturn(new BigDecimal("8.22"));
+        when(installment.getInterestWaived()).thenReturn(BigDecimal.ZERO);
+        when(installment.getFeeChargesCharged()).thenReturn(BigDecimal.ZERO);
+        when(installment.getPenaltyCharges()).thenReturn(BigDecimal.ZERO);
+        return installment;
+    }
+
+    private static LoanTransaction accrual(final LocalDate date, final String interest, final boolean adjustment) {
+        final LoanTransaction transaction = mock(LoanTransaction.class);
+        when(transaction.getTransactionDate()).thenReturn(date);
+        when(transaction.getInterestPortion()).thenReturn(new BigDecimal(interest));
+        when(transaction.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(transaction.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(transaction.isAccrual()).thenReturn(!adjustment);
+        when(transaction.isAccrualAdjustment()).thenReturn(adjustment);
+        return transaction;
     }
 
     private static Stream<Arguments> loanStatusTestCases() {
