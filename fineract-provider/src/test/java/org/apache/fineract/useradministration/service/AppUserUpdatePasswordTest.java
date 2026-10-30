@@ -134,6 +134,7 @@ class AppUserUpdatePasswordTest {
 
         assertTrue(result.getChanges().containsKey("password"));
         assertTrue(user.isPasswordResetRequired());
+        assertTrue(platformPasswordEncoder.matches(OTHER_RAW_PASSWORD, user.getPassword()));
         verify(appUserRepository).saveAndFlush(user);
     }
 
