@@ -74,7 +74,7 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult unassignFieldOfficer(Long savingsAccountId, JsonCommand command);
 
-    void applyChargeDue(Long savingsAccountChargeId, Long accountId);
+    LocalDate applyChargeDue(Long savingsAccountChargeId, Long accountId);
 
     void processPostActiveActions(SavingsAccount account, DateTimeFormatter fmt, Set<Long> existingTransactionIds,
             Set<Long> existingReversedTransactionIds);

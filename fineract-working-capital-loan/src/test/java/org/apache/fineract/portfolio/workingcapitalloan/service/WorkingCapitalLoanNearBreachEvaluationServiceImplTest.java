@@ -45,6 +45,7 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPausePeriod;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
@@ -64,7 +65,7 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
 
     private static final Long LOAN_ID = 1L;
     private static final NearBreachParameters PARAMETERS = new NearBreachParameters(BigDecimal.valueOf(33), 3,
-            WorkingCapitalLoanPeriodFrequencyType.DAYS, 0);
+            WorkingCapitalLoanPeriodFrequencyType.DAYS, 0, List.of(), List.of());
 
     @Mock
     private WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
@@ -86,7 +87,7 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 1, 1))));
         MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
         underTest = new WorkingCapitalLoanNearBreachEvaluationServiceImpl(breachScheduleRepository, breachActionRepository,
-                nearBreachActionRepository);
+                nearBreachActionRepository, new WorkingCapitalLoanActiveBreachResetResolver(breachActionRepository));
         lenient().when(breachActionRepository.isBreachDisabled(anyLong())).thenReturn(false);
         lenient().when(nearBreachActionRepository.findTopByWorkingCapitalLoanIdAndActionOrderByIdDesc(anyLong(), any()))
                 .thenReturn(Optional.empty());
@@ -140,6 +141,7 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
 
         assertFalse(underTest.evaluateNearBreachOnCob(loan, LocalDate.of(2026, 1, 6)));
         verify(breachScheduleRepository, never()).saveAll(any());
+        verify(breachActionRepository, never()).findByWorkingCapitalLoanIdAndActionInOrderById(anyLong(), any());
     }
 
     @Test
@@ -152,6 +154,22 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
         assertEquals(Optional.of(false), resolve(period, LocalDate.of(2026, 1, 3)));
         assertEquals(Optional.of(true), resolve(period, LocalDate.of(2026, 1, 6)));
         assertEquals(Optional.of(true), resolve(period, LocalDate.of(2026, 1, 9)));
+    }
+
+    @Test
+    public void shiftsEvaluationDatesAndCumulativeRequirementByBreachPause() {
+        final WorkingCapitalLoan loan = loanWithNearBreach(0);
+        final WorkingCapitalLoanBreachSchedule period = period(loan, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 12));
+        period.setPaidAmount(BigDecimal.valueOf(140));
+        final NearBreachParameters parameters = new NearBreachParameters(BigDecimal.valueOf(33), 3,
+                WorkingCapitalLoanPeriodFrequencyType.DAYS, 0,
+                List.of(new WorkingCapitalLoanPausePeriod(LocalDate.of(2026, 1, 2), LocalDate.of(2026, 1, 4))), List.of());
+
+        assertEquals(Optional.empty(), underTest.resolveNearBreachValue(period, parameters, LocalDate.of(2026, 1, 3)));
+        assertEquals(Optional.empty(), underTest.resolveNearBreachValue(period, parameters, LocalDate.of(2026, 1, 5)));
+        assertEquals(Optional.of(false), underTest.resolveNearBreachValue(period, parameters, LocalDate.of(2026, 1, 6)));
+        assertEquals(Optional.of(false), underTest.resolveNearBreachValue(period, parameters, LocalDate.of(2026, 1, 8)));
+        assertEquals(Optional.of(true), underTest.resolveNearBreachValue(period, parameters, LocalDate.of(2026, 1, 9)));
     }
 
     @Test
@@ -225,7 +243,8 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
     public void resolvesTheProductParametersOfAnActiveLoan() {
         final WorkingCapitalLoan loan = loanWithNearBreach(2);
 
-        assertEquals(Optional.of(new NearBreachParameters(BigDecimal.valueOf(33), 3, WorkingCapitalLoanPeriodFrequencyType.DAYS, 2)),
+        assertEquals(Optional.of(
+                new NearBreachParameters(BigDecimal.valueOf(33), 3, WorkingCapitalLoanPeriodFrequencyType.DAYS, 2, List.of(), List.of())),
                 underTest.resolveParameters(loan));
         verify(breachActionRepository, never()).isBreachDisabled(anyLong());
     }
@@ -246,6 +265,7 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
 
         assertFalse(underTest.evaluateNearBreachOnCob(loan, LocalDate.of(2026, 1, 3)));
         verify(breachScheduleRepository, never()).findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(anyLong(), any(), any());
+        verify(breachActionRepository, never()).findByWorkingCapitalLoanIdAndActionInOrderById(anyLong(), any());
     }
 
     @Test

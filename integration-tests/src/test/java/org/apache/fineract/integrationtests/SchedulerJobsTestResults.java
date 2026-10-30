@@ -52,6 +52,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetStandingInstructionHistoryPageItemsResponse;
 import org.apache.fineract.client.models.GetStandingInstructionsStandingInstructionIdResponse;
+import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostFixedDepositAccountsRequest;
 import org.apache.fineract.client.models.PostFixedDepositProductsRequest;
@@ -460,43 +461,74 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
     }
 
     @Test
-    public void testApplyDueFeeChargesForSavingsJobOutcome() throws InterruptedException {
-        final Long clientID = clientHelper.createClient();
-        Assertions.assertNotNull(clientID);
+    public void testApplyDueFeeChargesForSavingsJobOutcome() {
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2013, 3, 25));
+            final Long clientID = clientHelper.createClient();
+            final Long partiallyFundedProductID = createSavingsProduct("250");
+            final Long fundedProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
+            final Long partiallyFundedSavingsId = savingsHelper
+                    .submitApplication(clientID, partiallyFundedProductID, SAVINGS_SUBMITTED_DATE).getSavingsId();
+            final Long fundedSavingsId = savingsHelper.submitApplication(clientID, fundedProductID, SAVINGS_SUBMITTED_DATE).getSavingsId();
 
-        final Long savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
-        Assertions.assertNotNull(savingsProductID);
+            final Long weeklyChargeDefinitionId = chargesHelper.createCharge(SavingsRequestBuilders.savingsWeeklyFeeCharge())
+                    .getResourceId();
+            final Long specifiedDueDateChargeDefinitionId = chargesHelper
+                    .createCharge(SavingsRequestBuilders.savingsSpecifiedDueDateCharge()).getResourceId();
+            final Long recurringChargeId = savingsChargeHelper
+                    .addChargeToSavings(partiallyFundedSavingsId, savingsChargeWithDueDate(weeklyChargeDefinitionId)).getResourceId();
+            final Long fundedChargeId = savingsChargeHelper
+                    .addChargeToSavings(fundedSavingsId, savingsChargeWithDueDate(specifiedDueDateChargeDefinitionId)).getResourceId();
 
-        final Long savingsId = savingsHelper.submitApplication(clientID, savingsProductID, SAVINGS_SUBMITTED_DATE).getSavingsId();
-        Assertions.assertNotNull(savingsProductID);
+            savingsHelper.approveSavings(partiallyFundedSavingsId, SAVINGS_APPROVED_DATE);
+            savingsHelper.approveSavings(fundedSavingsId, SAVINGS_APPROVED_DATE);
+            savingsHelper.activateSavings(partiallyFundedSavingsId, SAVINGS_ACTIVATED_DATE);
+            savingsHelper.activateSavings(fundedSavingsId, SAVINGS_ACTIVATED_DATE);
 
-        SavingsTestValidators.verifySavingsIsPending(savingsHelper.getSavingsStatus(savingsId));
+            LocalDate expectedRecurringDueDate = savingsHelper.getSavingsAccountCharges(partiallyFundedSavingsId).stream()
+                    .filter(charge -> recurringChargeId.equals(charge.getId())).findFirst().orElseThrow().getDueDate().plusWeeks(2);
+            int partialTransactionsBefore = savingsHelper.getSavingsDetails(partiallyFundedSavingsId, "transactions").getTransactions()
+                    .size();
+            int fundedTransactionsBefore = savingsHelper.getSavingsDetails(fundedSavingsId, "transactions").getTransactions().size();
 
-        final Long specifiedDueDateChargeId = chargesHelper.createCharge(SavingsRequestBuilders.savingsSpecifiedDueDateCharge())
-                .getResourceId();
-        Assertions.assertNotNull(specifiedDueDateChargeId);
+            String jobName = "Pay Due Savings Charges";
+            JobDetailHistoryDataSwagger firstRun = SchedulerJobHelper.executeAndAwaitJobWithResult(jobName);
 
-        savingsChargeHelper.addChargeToSavings(savingsId, savingsChargeWithDueDate(specifiedDueDateChargeId));
-        Assertions.assertEquals(1, savingsHelper.getSavingsCharges(savingsId).size());
+            Assertions.assertEquals("success", firstRun.getStatus());
 
-        savingsHelper.approveSavings(savingsId, SAVINGS_APPROVED_DATE);
-        SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsId));
+            var recurringChargeAfter = savingsHelper.getSavingsAccountCharges(partiallyFundedSavingsId).stream()
+                    .filter(charge -> recurringChargeId.equals(charge.getId())).findFirst().orElseThrow();
+            var fundedChargeAfter = savingsHelper.getSavingsAccountCharges(fundedSavingsId).stream()
+                    .filter(charge -> fundedChargeId.equals(charge.getId())).findFirst().orElseThrow();
+            int partialTransactionsAfter = savingsHelper.getSavingsDetails(partiallyFundedSavingsId, "transactions").getTransactions()
+                    .size();
+            int fundedTransactionsAfter = savingsHelper.getSavingsDetails(fundedSavingsId, "transactions").getTransactions().size();
 
-        savingsHelper.activateSavings(savingsId, SAVINGS_ACTIVATED_DATE);
-        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
+            assertThat(savingsHelper.getSavingsSummary(partiallyFundedSavingsId).getAccountBalance()).isEqualByComparingTo("50");
+            assertThat(recurringChargeAfter.getAmountPaid()).isEqualByComparingTo("200");
+            assertThat(recurringChargeAfter.getAmountOutstanding()).isEqualByComparingTo("100");
+            Assertions.assertEquals(expectedRecurringDueDate, recurringChargeAfter.getDueDate());
+            Assertions.assertEquals(partialTransactionsBefore + 2, partialTransactionsAfter);
 
-        BigDecimal balanceBefore = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
+            assertThat(savingsHelper.getSavingsSummary(fundedSavingsId).getAccountBalance()).isEqualByComparingTo("900");
+            assertThat(fundedChargeAfter.getAmountPaid()).isEqualByComparingTo("100");
+            assertThat(fundedChargeAfter.getAmountOutstanding()).isEqualByComparingTo("0");
+            Assertions.assertEquals(fundedTransactionsBefore + 1, fundedTransactionsAfter);
 
-        String JobName = "Pay Due Savings Charges";
+            JobDetailHistoryDataSwagger secondRun = SchedulerJobHelper.executeAndAwaitJobWithResult(jobName);
 
-        SchedulerJobHelper.executeAndAwaitJob(JobName);
-        BigDecimal balanceAfter = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
-
-        final BigDecimal chargeAmount = BigDecimal.valueOf(chargesHelper.getCharge(specifiedDueDateChargeId).getAmount());
-
-        final BigDecimal balance = balanceBefore.subtract(chargeAmount);
-
-        assertAmount(balance, balanceAfter, "Verifying the Balance after running Pay due Savings Charges");
+            Assertions.assertEquals("success", secondRun.getStatus());
+            assertThat(savingsHelper.getSavingsSummary(partiallyFundedSavingsId).getAccountBalance()).isEqualByComparingTo("50");
+            Assertions.assertEquals(partialTransactionsAfter,
+                    savingsHelper.getSavingsDetails(partiallyFundedSavingsId, "transactions").getTransactions().size());
+            Assertions.assertEquals(fundedTransactionsAfter,
+                    savingsHelper.getSavingsDetails(fundedSavingsId, "transactions").getTransactions().size());
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
     }
 
     @Test
@@ -626,6 +658,112 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
 
         Assertions.assertEquals(standingInstructionData.getAmount(), loggedTransaction.getAmount(),
                 "Verifying transferred amount and logged transaction amounts");
+    }
+
+    @Test
+    public void testExecuteStandingInstructionsJobTransfersAvailableBalanceWhenPartialTransferIsAllowed() throws InterruptedException {
+        StandingInstructionsHelper standingInstructionsHelper = new StandingInstructionsHelper();
+
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+        final DateTimeFormatter monthDayFormat = DateTimeFormatter.ofPattern("dd MMMM", Locale.US);
+
+        final LocalDate localDate = LocalDate.now(this.systemTimeZone.toZoneId());
+        ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.systemTimeZone.toZoneId());
+        final String MONTH_DAY = monthDayFormat.format(currentDate.toLocalDate());
+        currentDate = currentDate.minus(Duration.ofDays(7));
+        final String VALID_FROM = dateFormat.format(currentDate);
+        currentDate = currentDate.plus(1, ChronoUnit.YEARS);
+        final String VALID_TO = dateFormat.format(currentDate);
+
+        final Long clientID = clientHelper.createClient();
+        Assertions.assertNotNull(clientID);
+
+        final Long savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Long fromSavingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
+        final Long toSavingsId = applyApproveAndActivateSavings(clientID, savingsProductID);
+
+        BigDecimal fromSavingsBalanceBefore = savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance();
+        BigDecimal toSavingsBalanceBefore = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
+
+        // ask for more than the account holds, so the transfer can only be covered in part
+        final String amountBeyondTheBalance = fromSavingsBalanceBefore.multiply(BigDecimal.valueOf(2)).toPlainString();
+        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
+                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY,
+                amountBeyondTheBalance, true);
+        Assertions.assertNotNull(standingInstructionId);
+
+        SchedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");
+
+        BigDecimal fromSavingsBalanceAfter = savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance();
+        BigDecimal toSavingsBalanceAfter = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
+
+        assertAmount(BigDecimal.ZERO, fromSavingsBalanceAfter, "Verifying the whole available balance was transferred");
+        assertAmount(toSavingsBalanceBefore.add(fromSavingsBalanceBefore), toSavingsBalanceAfter,
+                "Verifying the receiving account was credited with the available balance");
+
+        Set<GetStandingInstructionHistoryPageItemsResponse> standingInstructionHistoryData = standingInstructionsHelper
+                .getStandingInstructionHistory(fromSavingsId.intValue(), PortfolioAccountType.SAVINGS.getValue(), clientID.intValue(),
+                        AccountTransferType.ACCOUNT_TRANSFER.getValue());
+        Assertions.assertEquals(1, standingInstructionHistoryData.size(),
+                "Verifying the no of standing instruction transactions logged for the client");
+        GetStandingInstructionHistoryPageItemsResponse loggedTransaction = standingInstructionHistoryData.iterator().next();
+        Assertions.assertEquals("partial", loggedTransaction.getStatus(),
+                "Verifying a partly covered transfer is distinguishable from a fully covered one");
+        assertAmount(fromSavingsBalanceBefore, new BigDecimal(String.valueOf(loggedTransaction.getAmount())),
+                "Verifying the logged amount is what was actually transferred, not what was due");
+    }
+
+    @Test
+    public void testExecuteStandingInstructionsJobUsesTheOverdraftLimitWhenPartialTransferIsAllowed() throws InterruptedException {
+        StandingInstructionsHelper standingInstructionsHelper = new StandingInstructionsHelper();
+
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+        final DateTimeFormatter monthDayFormat = DateTimeFormatter.ofPattern("dd MMMM", Locale.US);
+
+        final LocalDate localDate = LocalDate.now(this.systemTimeZone.toZoneId());
+        ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.systemTimeZone.toZoneId());
+        final String MONTH_DAY = monthDayFormat.format(currentDate.toLocalDate());
+        currentDate = currentDate.minus(Duration.ofDays(7));
+        final String VALID_FROM = dateFormat.format(currentDate);
+        currentDate = currentDate.plus(1, ChronoUnit.YEARS);
+        final String VALID_TO = dateFormat.format(currentDate);
+
+        final Long clientID = clientHelper.createClient();
+        Assertions.assertNotNull(clientID);
+
+        final Long overdraftProductID = savingsProductHelper
+                .createSavingsProduct(savingsProduct(SavingsTestData.InterestPostingPeriodType.MONTHLY, MINIMUM_OPENING_BALANCE)
+                        .allowOverdraft(true).overdraftLimit(new BigDecimal("1000")))
+                .getResourceId();
+        final Long fromSavingsId = applyApproveAndActivateSavings(clientID, overdraftProductID);
+        final Long toSavingsId = applyApproveAndActivateSavings(clientID, createSavingsProduct(MINIMUM_OPENING_BALANCE));
+
+        BigDecimal fromSavingsBalanceBefore = savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance();
+        BigDecimal toSavingsBalanceBefore = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
+
+        // more than the balance but within the overdraft limit, so the whole amount is covered
+        final BigDecimal amount = fromSavingsBalanceBefore.add(new BigDecimal("500"));
+        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
+                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY,
+                amount.toPlainString(), true);
+        Assertions.assertNotNull(standingInstructionId);
+
+        SchedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");
+
+        assertAmount(fromSavingsBalanceBefore.subtract(amount), savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance(),
+                "Verifying the overdraft account was debited with the whole amount");
+        assertAmount(toSavingsBalanceBefore.add(amount), savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance(),
+                "Verifying the receiving account was credited with the whole amount");
+
+        Set<GetStandingInstructionHistoryPageItemsResponse> standingInstructionHistoryData = standingInstructionsHelper
+                .getStandingInstructionHistory(fromSavingsId.intValue(), PortfolioAccountType.SAVINGS.getValue(), clientID.intValue(),
+                        AccountTransferType.ACCOUNT_TRANSFER.getValue());
+        Assertions.assertEquals(1, standingInstructionHistoryData.size(),
+                "Verifying the no of standing instruction transactions logged for the client");
+        Assertions.assertEquals("success", standingInstructionHistoryData.iterator().next().getStatus(),
+                "Verifying a run the overdraft limit covers is not recorded as partial");
     }
 
     @Test
@@ -1053,6 +1191,9 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
 
         final Boolean isNPABefore = loanHelper.getLoanDetails(loanID).getIsNPA();
         Assertions.assertFalse(isNPABefore);
+        // "Update Non Performing Assets" requires "Update Loan Arrears Ageing" to have run successfully first -
+        // run it explicitly rather than relying on test execution order.
+        SchedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
         String JobName = "Update Non Performing Assets";
         SchedulerJobHelper.executeAndAwaitJob(JobName);
         final Boolean isNPAAfter = loanHelper.getLoanDetails(loanID).getIsNPA();

@@ -20,7 +20,21 @@ package org.apache.fineract.portfolio.tax.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 public interface TaxComponentRepository extends JpaRepository<TaxComponent, Long>, JpaSpecificationExecutor<TaxComponent> {
+
+    @Query(value = "select case when exists (select 1 from m_tax_group_mappings tgm where tgm.tax_component_id = ?1"
+            + " and (exists (select 1 from m_charge c where c.tax_group_id = tgm.tax_group_id)"
+            + " or exists (select 1 from m_savings_product sp where sp.tax_group_id = tgm.tax_group_id)"
+            + " or exists (select 1 from m_savings_account sa where sa.tax_group_id = tgm.tax_group_id)))"
+            + " or exists (select 1 from m_loan_charge_tax_details lctd where lctd.tax_component_id = ?1)"
+            + " or exists (select 1 from m_savings_account_transaction_tax_details sattd where sattd.tax_component_id = ?1)"
+            + " then 1 else 0 end", nativeQuery = true)
+    int linkExists(Long taxComponentId);
+
+    default boolean isLinked(final Long taxComponentId) {
+        return linkExists(taxComponentId) > 0;
+    }
 
 }

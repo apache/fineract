@@ -13,8 +13,6 @@ signing.password=*****
 signing.secretKeyRingFile=~/.gnupg/secring.gpg
 ----
 
-This is quite similiar to the Fineract release plugin properties for GPG. In one of the next release we'll merge these two setups to avoid this duplicated configuration.
-
 == Maven Repository
 
 We are using the ASF's official https://repository.apache.org[Nexus Maven repository] to publish our snapshot and release artifacts.

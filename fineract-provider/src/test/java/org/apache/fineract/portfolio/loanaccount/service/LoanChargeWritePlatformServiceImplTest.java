@@ -202,7 +202,7 @@ class LoanChargeWritePlatformServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
+        when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
         when(chargeRepository.findOneWithNotFoundDetection(anyLong())).thenReturn(chargeDefinition);
         when(chargeDefinition.getChargeTimeType()).thenReturn(SPECIFIED_DUE_DATE);
         when(chargeDefinition.getCurrencyCode()).thenReturn(CURRENCY_CODE);
@@ -320,6 +320,8 @@ class LoanChargeWritePlatformServiceImplTest {
     @Test
     @DisplayName("Applying an overdue penalty hands the applied penalty to real-time accrual after the loan is reprocessed")
     void shouldHandAppliedOverduePenaltiesToRealTimeAccrualAfterReprocessing() {
+        // the overdue charge job loads the loan without the user's office scope
+        when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
         LocalDate overdueDueDate = LocalDate.of(2024, 1, 15);
         LoanProduct loanProduct = mock(LoanProduct.class);
         when(loan.getLoanProduct()).thenReturn(loanProduct);

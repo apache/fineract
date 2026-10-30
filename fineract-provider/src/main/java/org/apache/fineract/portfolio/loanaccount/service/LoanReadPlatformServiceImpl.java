@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -83,6 +84,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
@@ -863,6 +865,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " l.is_floating_interest_rate as isFloatingInterestRate, "
                     + " l.interest_rate_differential as interestRateDifferential, "
                     + " l.days_in_year_custom_strategy as daysInYearCustomStrategy, "
+                    + " l.month_end_due_date_strategy as monthEndDueDateStrategy, "
                     + " l.enable_income_capitalization as enableIncomeCapitalization, "
                     + " l.capitalized_income_calculation_type as capitalizedIncomeCalculationType, "
                     + " l.capitalized_income_strategy as capitalizedIncomeStrategy, "
@@ -1269,6 +1272,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final StringEnumOptionData buyDownFeeIncomeType = ApiFacingEnum.getStringEnumOptionData(LoanBuyDownFeeIncomeType.class,
                     rs.getString("buyDownFeeIncomeType"));
             final boolean merchantBuyDownFee = rs.getBoolean("merchantBuyDownFee");
+            final StringEnumOptionData monthEndDueDateStrategy = ApiFacingEnum.getStringEnumOptionData(MonthEndDueDateStrategy.class,
+                    rs.getString("monthEndDueDateStrategy"));
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo, clientName,
                     clientOfficeId, clientExternalId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
@@ -1291,7 +1296,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     chargeOffBehaviour.getValueAsStringEnumOptionData(), interestRecognitionOnDisbursementDate, allowFullTermForTranche,
                     daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
                     capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                    merchantBuyDownFee);
+                    merchantBuyDownFee).setMonthEndDueDateStrategy(monthEndDueDateStrategy);
         }
     }
 
@@ -1470,7 +1475,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     }
 
     @Override
-    public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId, final Long clientId, final Long groupId) {
+    public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId, final Long clientId, final Long groupId,
+            final Long officeId) {
 
         this.context.authenticatedUser();
 
@@ -1504,10 +1510,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         Collection<ChargeData> chargeOptions = null;
         if (loanProduct.getMultiDisburseLoan()) {
             chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
-                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
+                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT }, officeId);
         } else {
             chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
-                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT });
+                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT }, officeId);
         }
 
         Integer loanCycleCounter = null;
@@ -1526,7 +1532,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             activeLoanOptions = this.accountDetailsReadPlatformService.retrieveGroupActiveLoanAccountSummary(groupId);
         }
 
-        return new LoanAccountData().withProductData(loanProduct, loanCycleCounter) //
+        LoanAccountData loanAccountData = new LoanAccountData().withProductData(loanProduct, loanCycleCounter) //
                 .setTermFrequencyTypeOptions(loanTermFrequencyTypeOptions) //
                 .setRepaymentFrequencyTypeOptions(repaymentFrequencyTypeOptions) //
                 .setRepaymentFrequencyNthDayTypeOptions(repaymentFrequencyNthDayTypeOptions) //
@@ -1543,6 +1549,21 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 .setClientActiveLoanOptions(activeLoanOptions) //
                 .setLoanScheduleTypeOptions(LoanScheduleType.getValuesAsEnumOptionDataList()) //
                 .setLoanScheduleProcessingTypeOptions(LoanScheduleProcessingType.getValuesAsEnumOptionDataList()); //
+
+        if (officeId != null) {
+            final Set<Long> visibleChargeIds = this.chargeReadPlatformService.retrieveLoanProductCharges(productId, officeId).stream()
+                    .map(ChargeData::getId).collect(Collectors.toSet());
+            if (loanAccountData.getCharges() != null) {
+                loanAccountData.setCharges(
+                        loanAccountData.getCharges().stream().filter(charge -> visibleChargeIds.contains(charge.getChargeId())).toList());
+            }
+            if (loanAccountData.getOverdueCharges() != null) {
+                loanAccountData.setOverdueCharges(
+                        loanAccountData.getOverdueCharges().stream().filter(charge -> visibleChargeIds.contains(charge.getId())).toList());
+            }
+        }
+
+        return loanAccountData;
     }
 
     @Override
@@ -1646,14 +1667,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     @SuppressWarnings("deprecation")
     @Override
     public Integer retriveLoanCounter(final Long groupId, final Integer loanType, Long productId) {
-        final String sql = "Select MAX(l.loan_product_counter) from m_loan l where l.group_id = ?  and l.loan_type_enum = ? and l.product_id=?";
+        final String sql = "Select COALESCE(MAX(l.loan_product_counter), 0) from m_loan l where l.group_id = ?  and l.loan_type_enum = ? and l.product_id=?";
         return this.jdbcTemplate.queryForObject(sql, new Object[] { groupId, loanType, productId }, Integer.class);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public Integer retriveLoanCounter(final Long clientId, Long productId) {
-        final String sql = "Select MAX(l.loan_product_counter) from m_loan l where l.client_id = ? and l.product_id=?";
+        final String sql = "Select COALESCE(MAX(l.loan_product_counter), 0) from m_loan l where l.client_id = ? and l.product_id=?";
         return this.jdbcTemplate.queryForObject(sql, new Object[] { clientId, productId }, Integer.class);
     }
 
@@ -1858,7 +1879,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 LEFT JOIN m_loan_reschedule_request lrr ON lrr.loan_id = l.id
                 -- this is to identify the applicable rates when base rate is changed
                 LEFT JOIN m_floating_rates bfr ON bfr.is_base_lending_rate = TRUE
-                LEFT JOIN m_floating_rates_periods bfrp ON bfr.id = bfrp.floating_rates_id AND bfrp.created_date >= ?
+                LEFT JOIN m_floating_rates_periods bfrp ON bfr.id = bfrp.floating_rates_id AND bfrp.created_on_utc >= ?
                 WHERE l.loan_status_id = ?
                   AND l.is_npa = FALSE
                   AND l.is_charged_off = FALSE
@@ -1872,7 +1893,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                         -- float rate changes
                         (fr.is_active = TRUE
                             AND frp.is_active = TRUE
-                            AND (frp.created_date >= ?
+                            AND (frp.created_on_utc >= ?
                                  OR (bfrp.id IS NOT NULL
                                      AND frp.is_differential_to_base_lending_rate = TRUE
                                      AND frp.from_date >= bfrp.from_date))
@@ -1882,8 +1903,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 """;
         try {
             LocalDate currentdate = DateUtils.getBusinessLocalDate();
-            // will look only for yesterday modified rates
-            LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
+            // will look only for yesterday modified rates; compared against created_on_utc (a UTC timestamp), so
+            // bind the tenant's actual start-of-day boundary rather than a bare date, which the DB would otherwise
+            // interpret in its own session time zone instead of the tenant's.
+            OffsetDateTime yesterday = DateUtils.getOffsetDateTimeOfTenantFromLocalDate(DateUtils.getBusinessLocalDate().minusDays(1));
             return this.jdbcTemplate.queryForList(sql, Long.class, yesterday, LoanStatus.ACTIVE.getValue(), currentdate, currentdate,
                     currentdate, yesterday);
         } catch (final EmptyResultDataAccessException e) {
@@ -1894,8 +1917,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     @Override
     public List<Long> fetchLoansForInterestRecalculation(Integer pageSize, Long maxLoanIdInList, String officeHierarchy) {
         LocalDate currentdate = DateUtils.getBusinessLocalDate();
-        // will look only for yesterday modified rates
-        LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
+        // will look only for yesterday modified rates; compared against created_on_utc (a UTC timestamp), so bind
+        // the tenant's actual start-of-day boundary rather than a bare date, which the DB would otherwise interpret
+        // in its own session time zone instead of the tenant's.
+        OffsetDateTime yesterday = DateUtils.getOffsetDateTimeOfTenantFromLocalDate(DateUtils.getBusinessLocalDate().minusDays(1));
         final String sql = """
                 SELECT l.id
                 FROM m_loan l
@@ -1914,7 +1939,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 LEFT JOIN m_loan_reschedule_request lrr ON lrr.loan_id = l.id
                 -- this is to identify the applicable rates when base rate is changed
                 LEFT JOIN m_floating_rates bfr ON bfr.is_base_lending_rate = TRUE
-                LEFT JOIN m_floating_rates_periods bfrp ON bfr.id = bfrp.floating_rates_id AND bfrp.created_date >= ?
+                LEFT JOIN m_floating_rates_periods bfrp ON bfr.id = bfrp.floating_rates_id AND bfrp.created_on_utc >= ?
                 WHERE l.loan_status_id = ?
                     AND l.is_npa = FALSE
                     AND l.is_charged_off = FALSE
@@ -1926,7 +1951,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                         OR
                          (fr.is_active = TRUE
                              AND frp.is_active = TRUE
-                             AND (frp.created_date >= ?
+                             AND (frp.created_on_utc >= ?
                                   OR (bfrp.id IS NOT NULL
                                       AND frp.is_differential_to_base_lending_rate = TRUE
                                       AND frp.from_date >= bfrp.from_date))

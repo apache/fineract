@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain.interest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -492,7 +493,7 @@ public final class PostingPeriod {
                 periodEndDate = periodStartDate.withMonth(previousMonth);
                 periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
                 if (DateUtils.isBefore(periodEndDate, periodStartDate)) {
-                    periodEndDate = periodEndDate.plusYears(1);
+                    periodEndDate = periodEndDate.plusYears(1).with(TemporalAdjusters.lastDayOfMonth());
                 }
             break;
 
@@ -527,14 +528,13 @@ public final class PostingPeriod {
 
         for (Integer month : monthSet) {
             if (monthofYear <= month.intValue()) {
-                periodEndDate = LocalDate.of(year, month, DateUtils.getBusinessLocalDate().withMonth(month).lengthOfMonth());
+                periodEndDate = LocalDate.of(year, month, YearMonth.of(year, month).lengthOfMonth());
                 notInRange = false;
                 break;
             }
         }
         if (notInRange) {
-            periodEndDate = LocalDate.of(year + 1, monthSet.first(),
-                    DateUtils.getBusinessLocalDate().withMonth(monthSet.first()).lengthOfMonth());
+            periodEndDate = LocalDate.of(year + 1, monthSet.first(), YearMonth.of(year + 1, monthSet.first()).lengthOfMonth());
         }
         return periodEndDate;
     }

@@ -849,33 +849,26 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
             final Long savingsProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
             final LocalDate transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
             final List<ChargePaymentDTO> chargePaymentDTOs) {
-        // TODO Vishwas: Remove this validation, as and when appropriate Junit
-        // tests are written for accounting
-        /**
-         * Accounting module currently supports a single charge per transaction, throw an error if this is not the case
-         * here so any developers changing the expected portfolio behavior would also take care of modifying the
-         * accounting code appropriately
-         **/
-        if (chargePaymentDTOs.size() != 1) {
-            throw new PlatformDataIntegrityException("Recent Portfolio changes w.r.t Charges for Savings have Broken the accounting code",
-                    "Recent Portfolio changes w.r.t Charges for Savings have Broken the accounting code");
-        }
-        ChargePaymentDTO chargePaymentDTO = chargePaymentDTOs.get(0);
-        GLAccount chargeSpecificAccount = getLinkedGLAccountForSavingsCharges(savingsProductId, accountTypeToBeCredited.getValue(),
-                chargePaymentDTO.getChargeId());
+        createCashBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode, accountTypeToBeDebited, accountTypeToBeCredited,
+                savingsProductId, paymentTypeId, loanId, transactionId, transactionDate, totalAmount, isReversal, chargePaymentDTOs,
+                List.of());
+    }
 
-        final GLAccount savingsControlAccount = getLinkedGLAccountForSavingsProduct(savingsProductId, accountTypeToBeDebited.getValue(),
-                paymentTypeId);
-        if (isReversal) {
-            createDebitJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
-            createCreditJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
-        } else {
-            createDebitJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
-            createCreditJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
+    @Override
+    public void createCashBasedJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
+            final CashAccountsForSavings accountTypeToBeDebited, final CashAccountsForSavings accountTypeToBeCredited,
+            final Long savingsProductId, final Long paymentTypeId, final Long savingsId, final String transactionId,
+            final LocalDate transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
+            final List<ChargePaymentDTO> chargePaymentDTOs, final List<TaxPaymentDTO> taxPayments) {
+        final List<TaxPaymentDTO> chargeTaxPayments = chargeTaxPayments(taxPayments);
+        createJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
+                getLinkedGLAccountForSavingsProduct(savingsProductId, accountTypeToBeDebited.getValue(), paymentTypeId),
+                getLinkedGLAccountForSavingsCharges(savingsProductId, accountTypeToBeCredited.getValue(),
+                        singleChargePayment(chargePaymentDTOs).getChargeId()),
+                savingsId, transactionId, transactionDate, totalAmount, isReversal, chargeTaxPayments);
+        for (TaxPaymentDTO taxPayment : chargeTaxPayments) {
+            createCashBasedCreditJournalEntriesAndReversalsForSavings(office, currencyCode, taxPayment.getCreditAccountId(), savingsId,
+                    transactionId, transactionDate, taxPayment.getAmount(), isReversal);
         }
     }
 
@@ -885,8 +878,50 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
             final AccountingConstants.AccrualAccountsForSavings accountTypeToBeCredited, final Long savingsProductId,
             final Long paymentTypeId, final Long loanId, final String transactionId, final LocalDate transactionDate,
             final BigDecimal totalAmount, final Boolean isReversal, final List<ChargePaymentDTO> chargePaymentDTOs) {
-        // TODO Vishwas: Remove this validation, as and when appropriate Junit
-        // tests are written for accounting
+        createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode, accountTypeToBeDebited, accountTypeToBeCredited,
+                savingsProductId, paymentTypeId, loanId, transactionId, transactionDate, totalAmount, isReversal, chargePaymentDTOs,
+                List.of());
+    }
+
+    @Override
+    public void createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
+            final AccountingConstants.AccrualAccountsForSavings accountTypeToBeDebited,
+            final AccountingConstants.AccrualAccountsForSavings accountTypeToBeCredited, final Long savingsProductId,
+            final Long paymentTypeId, final Long savingsId, final String transactionId, final LocalDate transactionDate,
+            final BigDecimal totalAmount, final Boolean isReversal, final List<ChargePaymentDTO> chargePaymentDTOs,
+            final List<TaxPaymentDTO> taxPayments) {
+        final List<TaxPaymentDTO> chargeTaxPayments = chargeTaxPayments(taxPayments);
+        createJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
+                getLinkedGLAccountForSavingsProduct(savingsProductId, accountTypeToBeDebited.getValue(), paymentTypeId),
+                getLinkedGLAccountForSavingsCharges(savingsProductId, accountTypeToBeCredited.getValue(),
+                        singleChargePayment(chargePaymentDTOs).getChargeId()),
+                savingsId, transactionId, transactionDate, totalAmount, isReversal, chargeTaxPayments);
+        for (TaxPaymentDTO taxPayment : chargeTaxPayments) {
+            createAccrualBasedBasedCreditJournalEntriesAndReversalsForSavings(office, currencyCode, taxPayment.getCreditAccountId(),
+                    savingsId, transactionId, transactionDate, taxPayment.getAmount(), isReversal);
+        }
+    }
+
+    private void createJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
+            final GLAccount savingsControlAccount, final GLAccount chargeSpecificAccount, final Long savingsId, final String transactionId,
+            final LocalDate transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
+            final List<TaxPaymentDTO> chargeTaxPayments) {
+        final BigDecimal netAmount = totalAmount
+                .subtract(chargeTaxPayments.stream().map(TaxPaymentDTO::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add));
+        if (isReversal) {
+            createDebitJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, savingsId, transactionId, transactionDate,
+                    netAmount);
+            createCreditJournalEntryForSavings(office, currencyCode, savingsControlAccount, savingsId, transactionId, transactionDate,
+                    totalAmount);
+        } else {
+            createDebitJournalEntryForSavings(office, currencyCode, savingsControlAccount, savingsId, transactionId, transactionDate,
+                    totalAmount);
+            createCreditJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, savingsId, transactionId, transactionDate,
+                    netAmount);
+        }
+    }
+
+    private static ChargePaymentDTO singleChargePayment(final List<ChargePaymentDTO> chargePaymentDTOs) {
         /**
          * Accounting module currently supports a single charge per transaction, throw an error if this is not the case
          * here so any developers changing the expected portfolio behavior would also take care of modifying the
@@ -896,23 +931,12 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
             throw new PlatformDataIntegrityException("Recent Portfolio changes w.r.t Charges for Savings have Broken the accounting code",
                     "Recent Portfolio changes w.r.t Charges for Savings have Broken the accounting code");
         }
-        ChargePaymentDTO chargePaymentDTO = chargePaymentDTOs.get(0);
-        GLAccount chargeSpecificAccount = getLinkedGLAccountForSavingsCharges(savingsProductId, accountTypeToBeCredited.getValue(),
-                chargePaymentDTO.getChargeId());
+        return chargePaymentDTOs.get(0);
+    }
 
-        final GLAccount savingsControlAccount = getLinkedGLAccountForSavingsProduct(savingsProductId, accountTypeToBeDebited.getValue(),
-                paymentTypeId);
-        if (isReversal) {
-            createDebitJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
-            createCreditJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
-        } else {
-            createDebitJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
-            createCreditJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
-        }
+    private static List<TaxPaymentDTO> chargeTaxPayments(final List<TaxPaymentDTO> taxPayments) {
+        return taxPayments.stream().filter(taxPayment -> taxPayment.getCreditAccountId() != null && taxPayment.getAmount() != null
+                && taxPayment.getAmount().signum() > 0).toList();
     }
 
     @Override

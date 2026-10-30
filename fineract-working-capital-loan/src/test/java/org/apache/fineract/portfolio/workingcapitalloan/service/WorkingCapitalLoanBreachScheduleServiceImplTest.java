@@ -84,7 +84,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
 
     private static final Long LOAN_ID = 1L;
     private static final NearBreachParameters NEAR_BREACH_PARAMETERS = new NearBreachParameters(BigDecimal.valueOf(33), 3,
-            WorkingCapitalLoanPeriodFrequencyType.DAYS, 0);
+            WorkingCapitalLoanPeriodFrequencyType.DAYS, 0, List.of(), List.of());
 
     @Mock
     private WorkingCapitalLoanBreachScheduleRepository repository;
@@ -527,7 +527,8 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
     @Test
     void applyRepayment_resolvesTheBreachDisabledFlagAndTheNearBreachParametersOnce() {
         final WorkingCapitalLoanNearBreachEvaluationService evaluationService = new WorkingCapitalLoanNearBreachEvaluationServiceImpl(
-                repository, breachActionRepository, nearBreachActionRepository);
+                repository, breachActionRepository, nearBreachActionRepository,
+                new WorkingCapitalLoanActiveBreachResetResolver(breachActionRepository));
         final WorkingCapitalLoanBreachScheduleServiceImpl service = new WorkingCapitalLoanBreachScheduleServiceImpl(repository, mapper,
                 loanRepository, breachActionRepository, nearBreachActionRepository, transactionRepository, balanceRepository,
                 businessEventNotifierService, new WorkingCapitalLoanActiveBreachResetResolver(breachActionRepository),

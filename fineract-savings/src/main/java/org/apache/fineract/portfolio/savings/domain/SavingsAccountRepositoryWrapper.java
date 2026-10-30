@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
@@ -48,6 +49,7 @@ public class SavingsAccountRepositoryWrapper {
 
     private final SavingsAccountRepository repository;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
+    private final PlatformSecurityContext context;
 
     @Transactional(readOnly = true)
     public SavingsAccount findOneWithNotFoundDetection(final Long savingsId) {
@@ -55,6 +57,20 @@ public class SavingsAccountRepositoryWrapper {
                 .orElseThrow(() -> new SavingsAccountNotFoundException(savingsId));
         account.loadLazyCollections();
         return account;
+    }
+
+    /**
+     * Locks the given accounts (SELECT ... FOR UPDATE) in ascending id order. Two transactions that touch the same two
+     * accounts in opposite directions (A to B and B to A) would otherwise each lock one account and wait for the other:
+     * a deadlock, which the database resolves by aborting one of them. With a single global lock order they queue up
+     * instead.
+     */
+    @Transactional
+    public void lockInIdOrder(final Long... savingsIds) {
+        final List<Long> ids = java.util.Arrays.stream(savingsIds).filter(java.util.Objects::nonNull).distinct().sorted().toList();
+        if (!ids.isEmpty()) {
+            this.repository.findAllLockedOrderedById(ids);
+        }
     }
 
     @Transactional
@@ -69,6 +85,13 @@ public class SavingsAccountRepositoryWrapper {
             }
         }
 
+        return account;
+    }
+
+    @Transactional
+    public SavingsAccount findOneInUserScope(final Long savingsId, final boolean backdatedTxnsAllowedTill) {
+        final SavingsAccount account = findSavingsWithNotFoundDetection(savingsId, backdatedTxnsAllowedTill);
+        this.context.validateAccessRights(account.office().getHierarchy());
         return account;
     }
 

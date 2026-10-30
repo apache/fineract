@@ -27,19 +27,21 @@ public interface LoanTransactionRelationRepository
         extends JpaRepository<LoanTransactionRelation, Long>, JpaSpecificationExecutor<LoanTransactionRelation> {
 
     @Query("""
-            SELECT CASE WHEN COUNT(ltr) > 0 THEN true ELSE false END
-            FROM LoanTransactionRelation ltr
-            WHERE ltr.toTransaction = :toTransaction AND ltr.relationType = :relationType
-              AND ltr.fromTransaction.reversed = false
-            """)
-    boolean hasLoanTransactionRelationsWithType(LoanTransaction toTransaction, LoanTransactionRelationTypeEnum relationType);
-
-    @Query("""
             SELECT ltr
             FROM LoanTransactionRelation ltr
             WHERE ltr.toTransaction = :toTransaction AND ltr.relationType = :relationType
             """)
     List<LoanTransactionRelation> findByToTransactionAndRelationType(LoanTransaction toTransaction,
             LoanTransactionRelationTypeEnum relationType);
+
+    @Query("""
+            SELECT ltr.fromTransaction
+            FROM LoanTransactionRelation ltr
+            WHERE ltr.toTransaction = :toTransaction
+              AND ltr.relationType = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum.RELATED
+              AND ltr.fromTransaction.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.INTEREST_REFUND
+              AND ltr.fromTransaction.reversed = false
+            """)
+    List<LoanTransaction> findNonReversedInterestRefundsRelatedTo(LoanTransaction toTransaction);
 
 }

@@ -96,4 +96,24 @@ public class DatabaseSpecificSQLGeneratorTest {
         String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
         Assertions.assertEquals("SELECT COUNT(*) FROM (SELECT 1 FROM test_table WHERE asd=2) AS temp", countQuery);
     }
+
+    @Test
+    public void testCastCharOnPostgresDoesNotTruncateToOneCharacter() {
+        Mockito.when(databaseTypeResolver.isPostgreSQL()).thenReturn(true);
+
+        // ::CHAR would be CHAR(1) on PostgreSQL, so code value id 12 would compare as '1'
+        Assertions.assertEquals("code.id::VARCHAR", databaseSpecificSQLGenerator.castChar("code.id"));
+    }
+
+    @Test
+    public void testCastCharOnMySql() {
+        Mockito.when(databaseTypeResolver.isMySQL()).thenReturn(true);
+
+        Assertions.assertEquals("CAST(code.id AS CHAR) COLLATE utf8mb4_unicode_ci", databaseSpecificSQLGenerator.castChar("code.id"));
+    }
+
+    @Test
+    public void testCastCharOnUnsupportedDatabaseThrows() {
+        Assertions.assertThrows(IllegalStateException.class, () -> databaseSpecificSQLGenerator.castChar("code.id"));
+    }
 }

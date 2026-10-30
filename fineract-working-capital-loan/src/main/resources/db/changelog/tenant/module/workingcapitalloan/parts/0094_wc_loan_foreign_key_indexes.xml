@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Per-loan reads and deletes on these columns scanned the whole table. m_wc_loan_charge.loan_id has no foreign key
+         and no index on any database. The others carry only a foreign key, which MySQL and MariaDB back with an index
+         of their own but PostgreSQL does not; on MySQL/MariaDB the explicit index takes over that role.
+         CONCURRENTLY on PostgreSQL so the build does not lock the table. -->
+    <changeSet author="fineract" id="wcl-0094-1-pg" runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM pg_indexes WHERE tablename = 'm_wc_loan_charge' AND indexname = 'idx_wc_loan_charge_loan_id';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX CONCURRENTLY idx_wc_loan_charge_loan_id ON m_wc_loan_charge(loan_id);
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0094-1-mysql" runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.statistics
+                WHERE table_schema = DATABASE() AND table_name = 'm_wc_loan_charge' AND index_name = 'idx_wc_loan_charge_loan_id';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX idx_wc_loan_charge_loan_id ON m_wc_loan_charge(loan_id);
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0094-2-pg" runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM pg_indexes WHERE tablename = 'm_wc_loan_disbursement_detail' AND indexname = 'idx_wc_loan_disbursement_detail_loan_id';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX CONCURRENTLY idx_wc_loan_disbursement_detail_loan_id ON m_wc_loan_disbursement_detail(wc_loan_id);
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0094-2-mysql" runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.statistics
+                WHERE table_schema = DATABASE() AND table_name = 'm_wc_loan_disbursement_detail' AND index_name = 'idx_wc_loan_disbursement_detail_loan_id';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX idx_wc_loan_disbursement_detail_loan_id ON m_wc_loan_disbursement_detail(wc_loan_id);
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0094-3-pg" runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM pg_indexes WHERE tablename = 'm_wc_loan_transaction_relation' AND indexname = 'idx_wc_loan_txn_relation_from_txn';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX CONCURRENTLY idx_wc_loan_txn_relation_from_txn ON m_wc_loan_transaction_relation(from_loan_transaction_id);
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0094-3-mysql" runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.statistics
+                WHERE table_schema = DATABASE() AND table_name = 'm_wc_loan_transaction_relation' AND index_name = 'idx_wc_loan_txn_relation_from_txn';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX idx_wc_loan_txn_relation_from_txn ON m_wc_loan_transaction_relation(from_loan_transaction_id);
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0094-4-pg" runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM pg_indexes WHERE tablename = 'm_wc_loan_transaction_relation' AND indexname = 'idx_wc_loan_txn_relation_to_txn';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX CONCURRENTLY idx_wc_loan_txn_relation_to_txn ON m_wc_loan_transaction_relation(to_loan_transaction_id);
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0094-4-mysql" runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.statistics
+                WHERE table_schema = DATABASE() AND table_name = 'm_wc_loan_transaction_relation' AND index_name = 'idx_wc_loan_txn_relation_to_txn';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX idx_wc_loan_txn_relation_to_txn ON m_wc_loan_transaction_relation(to_loan_transaction_id);
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0094-5-pg" runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM pg_indexes WHERE tablename = 'm_wc_loan_transaction_relation' AND indexname = 'idx_wc_loan_txn_relation_to_charge';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX CONCURRENTLY idx_wc_loan_txn_relation_to_charge ON m_wc_loan_transaction_relation(to_loan_charge_id);
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0094-5-mysql" runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.statistics
+                WHERE table_schema = DATABASE() AND table_name = 'm_wc_loan_transaction_relation' AND index_name = 'idx_wc_loan_txn_relation_to_charge';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE INDEX idx_wc_loan_txn_relation_to_charge ON m_wc_loan_transaction_relation(to_loan_charge_id);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

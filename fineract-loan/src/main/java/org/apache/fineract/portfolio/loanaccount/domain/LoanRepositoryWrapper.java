@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -53,6 +54,7 @@ public class LoanRepositoryWrapper {
 
     private final LoanRepository repository;
     private final FineractProperties fineractProperties;
+    private final PlatformSecurityContext context;
 
     @Transactional(readOnly = true)
     public Loan findOneWithNotFoundDetection(final Long id) {
@@ -79,6 +81,13 @@ public class LoanRepositoryWrapper {
         if (loadLazyCollections) {
             loan.initializeLazyCollections();
         }
+        return loan;
+    }
+
+    @Transactional(readOnly = true)
+    public Loan findOneInUserScope(final Long id, final boolean loadLazyCollections) {
+        final Loan loan = this.findOneWithNotFoundDetection(id, loadLazyCollections);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         return loan;
     }
 
@@ -216,11 +225,6 @@ public class LoanRepositoryWrapper {
         return loans;
     }
 
-    // This method is not used
-    public List<Long> getLoansDisbursedAfter(@Param("disbursalDate") LocalDate disbursalDate) {
-        return this.repository.getLoansDisbursedAfter(disbursalDate);
-    }
-
     // Repayments Schedule
     public List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses) {
@@ -265,16 +269,8 @@ public class LoanRepositoryWrapper {
         return this.repository.findLoanByAccountNumberAndStatuses(accountNumber, NON_CLOSED_LOAN_STATUSES);
     }
 
-    public boolean existsNonClosedLoanByExternalLoanId(final ExternalId externalId) {
-        return this.repository.existsLoanByExternalLoanIdAndStatuses(externalId, NON_CLOSED_LOAN_STATUSES);
-    }
-
     public boolean existLoanByExternalId(final ExternalId externalId) {
         return this.repository.existsByExternalId(externalId);
-    }
-
-    public List<Long> findAllNonClosedLoanIds() {
-        return this.repository.findAllLoanIdsByStatuses(NON_CLOSED_LOAN_STATUSES);
     }
 
     // Looks like we need complete entity

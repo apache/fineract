@@ -24,6 +24,7 @@ import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsCons
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE_DB_FIELD;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -51,13 +52,14 @@ public class GenerateRdScheduleTasklet implements Tasklet {
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;
     private final PlatformSecurityContext securityContext;
 
+    static final String INSERT_SQL = "INSERT INTO m_mandatory_savings_schedule (savings_account_id, duedate, installment, deposit_amount, completed_derived, "
+            + CREATED_DATE_DB_FIELD + ", " + CREATED_BY_DB_FIELD + ", " + LAST_MODIFIED_DATE_DB_FIELD + ", " + LAST_MODIFIED_BY_DB_FIELD
+            + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
         final Collection<Map<String, Object>> scheduleDetails = depositAccountReadPlatformService.retriveDataForRDScheduleCreation();
-        String insertSql = "INSERT INTO m_mandatory_savings_schedule (savings_account_id, duedate, installment, deposit_amount, completed_derived, "
-                + CREATED_DATE_DB_FIELD + ", " + CREATED_BY_DB_FIELD + ", " + LAST_MODIFIED_DATE_DB_FIELD + ", " + LAST_MODIFIED_BY_DB_FIELD
-                + ") " + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         List<Object[]> params = new ArrayList<>();
         Long userId = securityContext.authenticatedUser().getId();
         int iterations = 0;
@@ -69,8 +71,8 @@ public class GenerateRdScheduleTasklet implements Tasklet {
             final Long savingsId = (Long) details.get("savingsId");
             final BigDecimal amount = (BigDecimal) details.get("amount");
             final String recurrence = (String) details.get("recurrence");
-            LocalDate lastDepositDate = (LocalDate) details.get("dueDate");
-            Integer installmentNumber = (Integer) details.get("installment");
+            LocalDate lastDepositDate = ((Date) details.get("dueDate")).toLocalDate();
+            Integer installmentNumber = ((Number) details.get("installment")).intValue();
             while (count < DepositAccountUtils.GENERATE_MINIMUM_NUMBER_OF_FUTURE_INSTALMENTS) {
                 count++;
                 installmentNumber++;
@@ -81,14 +83,14 @@ public class GenerateRdScheduleTasklet implements Tasklet {
                 iterations++;
             }
             if (iterations > 200) {
-                jdbcTemplate.batchUpdate(insertSql, params);
+                jdbcTemplate.batchUpdate(INSERT_SQL, params);
                 params.clear();
                 iterations = 0;
             }
         }
 
         if (!params.isEmpty()) {
-            jdbcTemplate.batchUpdate(insertSql, params);
+            jdbcTemplate.batchUpdate(INSERT_SQL, params);
         }
         return RepeatStatus.FINISHED;
     }

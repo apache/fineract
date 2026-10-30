@@ -174,6 +174,7 @@ public class LoanAccountData {
     private List<EnumOptionData> loanScheduleTypeOptions;
     private List<EnumOptionData> loanScheduleProcessingTypeOptions;
     private List<StringEnumOptionData> daysInYearCustomStrategyOptions;
+    private List<StringEnumOptionData> monthEndDueDateStrategyOptions;
     private List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions;
     private List<StringEnumOptionData> capitalizedIncomeStrategyOptions;
     private List<StringEnumOptionData> capitalizedIncomeTypeOptions;
@@ -226,6 +227,7 @@ public class LoanAccountData {
     private EnumOptionData daysInMonthType;
     private EnumOptionData daysInYearType;
     private StringEnumOptionData daysInYearCustomStrategy;
+    private StringEnumOptionData monthEndDueDateStrategy;
     // TODO: avoid prefix "is"
     private boolean isInterestRecalculationEnabled;
 
@@ -448,7 +450,9 @@ public class LoanAccountData {
                 .setRepaymentStartDateType(product.getRepaymentStartDateType())
                 .setInterestRecognitionOnDisbursementDate(product.isInterestRecognitionOnDisbursementDate())
                 .setDaysInYearCustomStrategyOptions(product.getDaysInYearCustomStrategyOptions())
-                .setDaysInYearCustomStrategy(product.getDaysInYearCustomStrategy());
+                .setDaysInYearCustomStrategy(product.getDaysInYearCustomStrategy())
+                .setMonthEndDueDateStrategyOptions(product.getMonthEndDueDateStrategyOptions())
+                .setMonthEndDueDateStrategy(product.getMonthEndDueDateStrategy());
     }
 
     /*

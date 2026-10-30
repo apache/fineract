@@ -1315,6 +1315,8 @@ final class LoansApiResourceSwagger {
         @Schema(description = "List of GetLoansLoanIdLoanTermVariations")
         public List<GetLoansLoanIdLoanTermVariations> loanTermVariations;
         public StringEnumOptionData chargeOffBehaviour;
+        @Schema(description = "The loan's month end due date strategy. It has no effect on a loan whose repayments follow a meeting calendar.")
+        public StringEnumOptionData monthEndDueDateStrategy;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
         @Schema(example = "false")
@@ -1464,6 +1466,10 @@ final class LoansApiResourceSwagger {
         public BigDecimal fixedEmiAmount;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        @Schema(example = "FIRST_DAY_OF_NEXT_MONTH", allowableValues = { "LAST_DAY_OF_MONTH",
+                "FIRST_DAY_OF_NEXT_MONTH" }, description = "Overrides the loan product's month end due date strategy for this loan. "
+                        + "It has no effect on a loan whose repayments follow a meeting calendar.")
+        public String monthEndDueDateStrategy;
         @Schema(example = "false")
         public Boolean enableIncomeCapitalization;
         @Schema(example = "FLAT", allowableValues = "FLAT")
@@ -1713,6 +1719,10 @@ final class LoansApiResourceSwagger {
         public Boolean enableAutoRepaymentForDownPayment;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        @Schema(example = "FIRST_DAY_OF_NEXT_MONTH", allowableValues = { "LAST_DAY_OF_MONTH",
+                "FIRST_DAY_OF_NEXT_MONTH" }, description = "Overrides the loan product's month end due date strategy for this loan. "
+                        + "It has no effect on a loan whose repayments follow a meeting calendar.")
+        public String monthEndDueDateStrategy;
 
         static final class PutLoansLoanIdChargeData {
 

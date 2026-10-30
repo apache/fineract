@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.DeleteDataTablesDatatableAppTableIdDatatableIdResponse;
 import org.apache.fineract.client.models.DeleteDataTablesDatatableAppTableIdResponse;
 import org.apache.fineract.client.models.DeleteDataTablesResponse;
 import org.apache.fineract.client.models.GetDataTablesResponse;
@@ -104,6 +107,21 @@ public class FeignDatatableHelper {
     public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(String datatableName, Long apptableId, Long datatableId,
             Map<String, Object> entry) {
         return ok(() -> fineractClient.dataTables().updateDatatableEntryOneToMany(datatableName, apptableId, datatableId, asJson(entry)));
+    }
+
+    public CallFailedRuntimeException updateDatatableEntryExpectingError(String datatableName, Long apptableId, Long datatableId,
+            Map<String, Object> entry) {
+        return fail(() -> fineractClient.dataTables().updateDatatableEntryOneToMany(datatableName, apptableId, datatableId, asJson(entry)));
+    }
+
+    /** Deletes one entry of a one-to-many datatable, by its id. */
+    public DeleteDataTablesDatatableAppTableIdDatatableIdResponse deleteDatatableEntry(String datatableName, Long apptableId,
+            Long datatableId) {
+        return ok(() -> fineractClient.dataTables().deleteDatatableEntry(datatableName, apptableId, datatableId));
+    }
+
+    public CallFailedRuntimeException deleteDatatableEntryExpectingError(String datatableName, Long apptableId, Long datatableId) {
+        return fail(() -> fineractClient.dataTables().deleteDatatableEntry(datatableName, apptableId, datatableId));
     }
 
     /** Deletes every entry the given datatable holds for the given application-table row. */

@@ -180,9 +180,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     List<Loan> findByIdsAndLoanStatusAndLoanType(@Param("ids") Collection<Long> ids,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses, @Param("loanTypes") Collection<AccountType> loanTypes);
 
-    @Query("select loan.id from Loan loan where loan.actualDisbursementDate > :disbursalDate order by loan.actualDisbursementDate")
-    List<Long> getLoansDisbursedAfter(@Param("disbursalDate") LocalDate disbursalDate);
-
     @Query("select loan from Loan loan where loan.client.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
     List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
@@ -290,12 +287,12 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     List<COBIdAndLastClosedBusinessDate> findAllLoansBehindOnDisbursementDate(@Param("cobBusinessDate") LocalDate cobBusinessDate,
             @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
-    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN TRUE ELSE FALSE END FROM Loan l WHERE l.id = :loanId and l.loanRepaymentScheduleDetail.loanScheduleType = org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE")
-    Boolean isProgressiveLoan(@Param("loanId") Long loanId);
-
     @Query("SELECT CASE WHEN COUNT(l) > 0 THEN TRUE ELSE FALSE END FROM Loan l WHERE l.id = :loanId and l.loanStatus in :allowedLoanStatuses")
     Boolean isLoanInAllowedStatus(@Param("loanId") Long loanId, @Param("allowedLoanStatuses") List<LoanStatus> allowedLoanStatuses);
 
     @Query("SELECT MAX(lt.dateOf) FROM LoanTransaction lt, Loan l WHERE lt.loan=l AND l.loanStatus = org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.ACTIVE")
     LocalDate findMaxTransactionDateOfActiveLoans();
+
+    @Query("select coalesce(co.id, go.id) from Loan loan left join loan.client c left join c.office co left join loan.group g left join g.office go where loan.id = :loanId")
+    Long findOfficeIdByLoanId(@Param("loanId") Long loanId);
 }

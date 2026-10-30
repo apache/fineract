@@ -31,6 +31,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.deposit
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.expectedFirstDepositOnDateParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isCalendarInheritedParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isRateChartOverriddenParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.mandatoryRecommendedDepositAmountParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.maturityInstructionIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
@@ -70,6 +71,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -96,6 +98,7 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
+import org.apache.fineract.portfolio.savings.exception.DepositAccountApplicationDateException;
 import org.apache.fineract.portfolio.savings.exception.FixedDepositProductNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
@@ -223,6 +226,7 @@ public class DepositAccountAssembler {
         }
 
         final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(submittedOnDateParamName, element);
+        validateProductApplicationDate(submittedOnDate, product);
 
         BigDecimal interestRate = null;
         if (command.parameterExists(nominalAnnualInterestRateParamName)) {
@@ -367,9 +371,43 @@ public class DepositAccountAssembler {
         return account;
     }
 
+    public void validateProductApplicationDate(final LocalDate submittedOnDate, final SavingsProduct savingsProduct) {
+        if (!(savingsProduct instanceof FixedDepositProduct product)) {
+            return;
+        }
+        final LocalDate startDate = product.getStartDate();
+        final LocalDate closeDate = product.getCloseDate();
+
+        if (startDate != null && DateUtils.isBefore(submittedOnDate, startDate)) {
+            throw new DepositAccountApplicationDateException("submitted.on.date.cannot.be.before.the.deposit.product.start.date",
+                    "submittedOnDate cannot be before the deposit product startDate.", submittedOnDate.toString(), startDate.toString());
+        }
+
+        if (closeDate != null && DateUtils.isAfter(submittedOnDate, closeDate)) {
+            throw new DepositAccountApplicationDateException("submitted.on.date.cannot.be.after.the.deposit.product.close.date",
+                    "submittedOnDate cannot be after the deposit product closeDate.", submittedOnDate.toString(), closeDate.toString());
+        }
+    }
+
+    public boolean isProductOpenForApplication(final LocalDate applicationDate, final SavingsProduct savingsProduct) {
+        if (!(savingsProduct instanceof FixedDepositProduct product)) {
+            return true;
+        }
+        final LocalDate startDate = product.getStartDate();
+        final LocalDate closeDate = product.getCloseDate();
+        return (startDate == null || !DateUtils.isBefore(applicationDate, startDate))
+                && (closeDate == null || !DateUtils.isAfter(applicationDate, closeDate));
+    }
+
     public SavingsAccount assembleFrom(final Long savingsId, DepositAccountType depositAccountType) {
         final SavingsAccount account = this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId, depositAccountType);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper, this.configurationDomainService);
+        return account;
+    }
+
+    public SavingsAccount assembleFromInUserScope(final Long savingsId, DepositAccountType depositAccountType) {
+        final SavingsAccount account = assembleFrom(savingsId, depositAccountType);
+        this.context.validateAccessRights(account.office().getHierarchy());
         return account;
     }
 
@@ -404,9 +442,10 @@ public class DepositAccountAssembler {
                 ? DepositAccountOnClosureType.fromInt(accountOnClosureTypeId)
                 : null;
         final Long transferToSavingsId = command.longValueOfParameterNamed(transferToSavingsIdParamName);
+        final boolean isRateChartOverridden = command.booleanPrimitiveValueOfParameterNamed(isRateChartOverriddenParamName);
         return DepositAccountTermAndPreClosure.createNew(updatedProductPreClosure, updatedProductTerm, account, depositAmount,
                 maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType,
-                trasferInterest, transferToSavingsId);
+                trasferInterest, transferToSavingsId, isRateChartOverridden);
     }
 
     public DepositAccountRecurringDetail assembleAccountRecurringDetail(final JsonCommand command,

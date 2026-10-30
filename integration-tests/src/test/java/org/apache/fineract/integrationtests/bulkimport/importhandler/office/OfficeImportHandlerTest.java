@@ -18,55 +18,33 @@
  */
 package org.apache.fineract.integrationtests.bulkimport.importhandler.office;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.bulkimport.importhandler.BulkImportOutputTemplateHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBulkImportHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class OfficeImportHandlerTest {
 
-    private static final String OFFICE_URL = "/fineract-provider/api/v1/offices";
-
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
+    private final FeignBulkImportHelper bulkImportHelper = new FeignBulkImportHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
-    public void testOfficeImport() throws IOException, InterruptedException, NoSuchFieldException, ParseException {
-        Workbook workbook = getOfficeWorkBook("dd MMMM yyyy");
+    public void testOfficeImport() throws IOException, InterruptedException, ParseException {
+        Workbook workbook = bulkImportHelper.downloadTemplate("offices", Map.of("dateFormat", "dd MMMM yyyy"));
 
         // insert dummy data into excel
         Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
@@ -80,26 +58,16 @@ public class OfficeImportHandlerTest {
         Date date = simpleDateFormat.parse("14 May 2001");
         firstOfficeRow.createCell(OfficeConstants.OPENED_ON_COL).setCellValue(date);
 
-        Path directory = Path.of("").toAbsolutePath().resolve("src").resolve("integrationTest").resolve("resources").resolve("bulkimport")
-                .resolve("importhandler").resolve("office");
-        if (!directory.toFile().exists()) {
-            directory.toFile().mkdirs();
-        }
-        File file = directory.resolve("Office.xls").toFile();
-        try (OutputStream outputStream = Files.newOutputStream(file.toPath())) {
-            workbook.write(outputStream);
-        }
-
-        String importDocumentId = importOfficeTemplate(file);
-        file.delete();
+        Long importDocumentId = bulkImportHelper.uploadTemplate("offices", Map.of(), workbook, "Office.xls", "en", "dd MMMM yyyy");
         Assertions.assertNotNull(importDocumentId);
 
         // Wait for the creation of output excel
         Thread.sleep(1000);
 
         // check status column of output excel
-        try (Workbook outputWorkbook = BulkImportOutputTemplateHelper.waitForWorkbook(() -> downloadOutputTemplate(importDocumentId),
-                TemplatePopulateImportConstants.OFFICE_SHEET_NAME, 1, OfficeConstants.STATUS_COL)) {
+        try (Workbook outputWorkbook = BulkImportOutputTemplateHelper.waitForWorkbook(
+                () -> bulkImportHelper.downloadOutputTemplate(importDocumentId), TemplatePopulateImportConstants.OFFICE_SHEET_NAME, 1,
+                OfficeConstants.STATUS_COL)) {
             Sheet officeSheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
             Row row = officeSheet.getRow(1);
 
@@ -107,25 +75,5 @@ public class OfficeImportHandlerTest {
 
             Assertions.assertEquals("Imported", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
         }
-    }
-
-    private Workbook getOfficeWorkBook(final String dateFormat) throws IOException {
-        requestSpec.header(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
-        byte[] byteArray = Utils.performGetBinaryResponse(requestSpec, responseSpec,
-                OFFICE_URL + "/downloadtemplate" + "?" + Utils.TENANT_IDENTIFIER + "&dateFormat=" + dateFormat);
-        InputStream inputStream = new ByteArrayInputStream(byteArray);
-        return new HSSFWorkbook(inputStream);
-    }
-
-    private String importOfficeTemplate(File file) {
-        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
-        return Utils.performServerTemplatePost(requestSpec, responseSpec, OFFICE_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER,
-                null, file, "en", "dd MMMM yyyy");
-    }
-
-    private byte[] downloadOutputTemplate(final String importDocumentId) {
-        requestSpec.header(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
-        return Utils.performServerOutputTemplateDownloadGet(requestSpec, responseSpec,
-                "/fineract-provider/api/v1/imports/downloadOutputTemplate" + "?" + Utils.TENANT_IDENTIFIER, importDocumentId);
     }
 }

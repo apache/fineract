@@ -123,7 +123,7 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
     private void batchApiCreateWCLoanInternal(DataTable table, String externalId) throws IOException {
         final List<String> loanData = table.asLists().get(1);
         final Long clientId = extractClientId();
-        final Long productId = workingCapitalLoanProductResolver.resolve(DefaultWorkingCapitalLoanProduct.valueOf(loanData.get(0)));
+        final Long productId = workingCapitalLoanAccountStepDef.resolveLoanProductId(loanData.get(0));
 
         final PostWorkingCapitalLoansRequest request = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansRequest(clientId)
                 .productId(productId).submittedOnDate(loanData.get(1)).expectedDisbursementDate(loanData.get(2))
@@ -989,6 +989,15 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
 
         GetWorkingCapitalLoansLoanIdResponse response = parseBatchResponse(ok, new TypeReference<>() {});
         workingCapitalLoanAccountStepDef.validateWorkingCapitalLoanDetailFieldValuesResponse(table, response);
+    }
+
+    @Then("Working capital loan details has the client office of the last created office via batch api")
+    public void verifyClientOfficeOfLastCreatedOffice() {
+        Long loanId = workingCapitalDelinquencyStepDef.extractLoanId();
+        List<BatchResponse> ok = handleBatchRequestByUrlForGetApi(WCL_BASE_URL + "/" + loanId);
+
+        GetWorkingCapitalLoansLoanIdResponse response = parseBatchResponse(ok, new TypeReference<>() {});
+        workingCapitalLoanAccountStepDef.verifyClientOfficeOfLastCreatedOffice(response);
     }
 
     private <T> T parseBatchResponse(List<BatchResponse> ok, TypeReference<T> typeReference) {

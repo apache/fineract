@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.PasswordPreferencesHelper;
-import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +37,6 @@ public class PasswordPreferencesIntegrationTest {
 
     @BeforeEach
     public void setUp() {
-        Utils.initializeRESTAssured();
         originalPasswordPolicyId = PasswordPreferencesHelper.getActivePasswordPreference().getId().intValue();
     }
 

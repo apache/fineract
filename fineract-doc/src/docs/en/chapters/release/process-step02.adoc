@@ -22,13 +22,3 @@ project = FINERACT and fixVersion = {revnumber}
 ----
 
 Finally, check out the output of the JIRA release note tool to see which tickets are included in the release, in order to do a sanity check.
-
-== Gradle Task
-
-.Command
-[source,bash,subs="attributes+,+macros"]
-----
-./gradlew fineractReleaseStep2 -Pfineract.release.version={revnumber}
-----
-
-CAUTION: This task is not yet automated!

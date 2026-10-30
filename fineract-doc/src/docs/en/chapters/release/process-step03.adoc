@@ -40,17 +40,23 @@ git push origin release/{revnumber}
 
 6. Send email announcing the new release branch on the earlier email thread
 +
-[source,text]
+[source,text,subs="attributes+"]
 ----
-include::{rootdir}/buildSrc/src/main/resources/email/release.step03.branch.subject.ftl[lines=21..]
+Subject: [FINERACT] [ANNOUNCE] 🔀 {revnumber} release branch
 
-include::{rootdir}/buildSrc/src/main/resources/email/release.step03.branch.message.ftl[lines=21..]
-----
+Hello everyone,
 
-== Gradle Task
+... as previously announced, I've created the branch for our upcoming {revnumber} release. The branch name is release/{revnumber}.
 
-.Command
-[source,bash,subs="attributes+,+macros"]
-----
-./gradlew fineractReleaseStep3 -Pfineract.release.date="Monday, May 10, 2022" -Pfineract.release.version={revnumber}
+You can continue working and merging PRs into the develop branch for future releases, as always.
+
+I started the DRAFT release notes at https://cwiki.apache.org/confluence/display/FINERACT/{revnumber}+-+Apache+Fineract . Please help me by filling in "Summary of changes". Does anyone see anything else missing?
+
+Does anyone have any last minute changes for the release branch, or are we good to go and actually cut the release based on this branch as it is?
+
+I'll initiate the final stage of actually creating the release on <planned release date, e. g. "Monday, May 10, 2022"> if nobody objects.
+
+Cheers,
+
+<your name>
 ----

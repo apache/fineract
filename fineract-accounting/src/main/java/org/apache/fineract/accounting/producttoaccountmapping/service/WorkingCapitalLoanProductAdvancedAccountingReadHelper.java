@@ -20,8 +20,14 @@ package org.apache.fineract.accounting.producttoaccountmapping.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.producttoaccountmapping.data.AdvancedMappingToExpenseAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
@@ -31,15 +37,18 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.mapper.CodeValueMapper;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.data.ChargeSummaryData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class WorkingCapitalLoanProductAdvancedAccountingReadHelper {
 
     private final ProductToGLAccountMappingRepository productToGLAccountMappingRepository;
     private final CodeValueMapper codeValueMapper;
+    private final AccountingChargeReadService accountingChargeReadService;
 
     public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappings(final Long wcLoanProductId) {
         final List<ProductToGLAccountMapping> mappings = productToGLAccountMappingRepository.findAllPaymentTypeMappings(wcLoanProductId,
@@ -74,17 +83,30 @@ public class WorkingCapitalLoanProductAdvancedAccountingReadHelper {
     }
 
     private List<ChargeToGLAccountMapper> fetchChargeToIncomeMappings(final Long wcLoanProductId, final boolean penalty) {
+        final int productType = PortfolioProductType.WORKING_CAPITAL_LOAN.getValue();
         final List<ProductToGLAccountMapping> mappings = penalty
-                ? productToGLAccountMappingRepository.findAllPenaltyMappings(wcLoanProductId,
-                        PortfolioProductType.WORKING_CAPITAL_LOAN.getValue())
-                : productToGLAccountMappingRepository.findAllFeeMappings(wcLoanProductId,
-                        PortfolioProductType.WORKING_CAPITAL_LOAN.getValue());
+                ? productToGLAccountMappingRepository.findAllPenaltyToIncomeAccountMappings(wcLoanProductId, productType)
+                : productToGLAccountMappingRepository.findAllFeeToIncomeAccountMappings(wcLoanProductId, productType);
+        if (mappings.isEmpty()) {
+            return null;
+        }
+
+        final Set<Long> chargeIds = mappings.stream().map(ProductToGLAccountMapping::getChargeId).collect(Collectors.toSet());
+        final Map<Long, ChargeSummaryData> chargesById = accountingChargeReadService.findChargesByIds(chargeIds).stream()
+                .collect(Collectors.toMap(ChargeSummaryData::id, Function.identity()));
+
         final List<ChargeToGLAccountMapper> result = new ArrayList<>();
         for (final ProductToGLAccountMapping mapping : mappings) {
-            final GLAccountData gLAccountData = new GLAccountData().setId(mapping.getGlAccount().getId())
-                    .setName(mapping.getGlAccount().getName()).setGlCode(mapping.getGlAccount().getGlCode());
-            final ChargeData chargeData = ChargeData.builder().id(mapping.getCharge().getId()).name(mapping.getCharge().getName())
-                    .penalty(mapping.getCharge().isPenalty()).build();
+            final ChargeSummaryData charge = chargesById.get(mapping.getChargeId());
+            if (charge == null) {
+                log.warn("Charge {} referenced by product to GL account mapping {} no longer exists; mapping is skipped",
+                        mapping.getChargeId(), mapping.getId());
+                continue;
+            }
+            final GLAccount glAccount = mapping.getGlAccount();
+            final GLAccountData gLAccountData = new GLAccountData().setId(glAccount.getId()).setName(glAccount.getName())
+                    .setGlCode(glAccount.getGlCode());
+            final ChargeData chargeData = ChargeData.builder().id(charge.id()).name(charge.name()).penalty(charge.penalty()).build();
             result.add(new ChargeToGLAccountMapper().setCharge(chargeData).setIncomeAccount(gLAccountData));
         }
         return result.isEmpty() ? null : result;

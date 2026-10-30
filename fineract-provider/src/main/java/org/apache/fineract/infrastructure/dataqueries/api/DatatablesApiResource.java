@@ -389,7 +389,9 @@ public class DatatablesApiResource {
     @Path("{datatable}/{apptableId}/{datatableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update Entry in Data Table (One to Many)", description = "Updates the row (if it exists) of the data table.")
+    @Operation(summary = "Update Entry in Data Table (One to Many)", description = """
+            Updates the row (if it exists) of the data table. A data table that is one-to-one with the application table \
+            refuses an entry id.""")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = String.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdDatatableIdResponse.class)))
     public String updateDatatableEntryOneToMany(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
@@ -430,7 +432,8 @@ public class DatatablesApiResource {
     @Path("{datatable}/{apptableId}/{datatableId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete Entry in Datatable (One to Many)", description = """
-            Deletes the entry (if it exists) for data tables that are one to many with the application table.""")
+            Deletes the entry for data tables that are one to many with the application table. An entry that does not belong to \
+            apptableId is not found. A data table that is one-to-one with the application table refuses an entry id.""")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.DeleteDataTablesDatatableAppTableIdDatatableIdResponse.class)))
     public String deleteDatatableEntry(@PathParam("datatable") @Parameter(description = "datatable", example = "{}") final String datatable,
             @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId,

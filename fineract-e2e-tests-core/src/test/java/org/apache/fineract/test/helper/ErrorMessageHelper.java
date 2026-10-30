@@ -125,8 +125,8 @@ public final class ErrorMessageHelper {
         return "Loan can't be disbursed, disburse amount is exceeding approved principal.";
     }
 
-    public static String loanSubmitDateInFutureFailureMsg() {
-        return "The date on which a loan is submitted cannot be in the future.";
+    public static String disburseWithChargeOutOfRangeFailure() {
+        return "This charge with specified due date cannot be added as the it is not in schedule range.";
     }
 
     public static String loanApproveDateInFutureFailureMsg() {
@@ -200,7 +200,7 @@ public final class ErrorMessageHelper {
     }
 
     public static String addCapitalizedIncomeUndoFailureTransactionTypeNonReversal() {
-        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee, buy down fee adjustment or chargeback can be adjusted.";
+        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee, buy down fee adjustment, chargeback, goodwill credit, payout refund, merchant issued refund, charge adjustment or refund can be adjusted.";
     }
 
     public static String addCapitalizedIncomeUndoFailureAdjustmentExists() {

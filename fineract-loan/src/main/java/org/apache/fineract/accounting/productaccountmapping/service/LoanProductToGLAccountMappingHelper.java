@@ -33,12 +33,12 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingInvalidException;
+import org.apache.fineract.accounting.producttoaccountmapping.service.AccountingChargeReadService;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingHelper;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.PortfolioProductType;
-import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
 import org.springframework.stereotype.Component;
 
@@ -47,9 +47,9 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
 
     public LoanProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
-            final ChargeRepositoryWrapper chargeRepositoryWrapper, final GLAccountRepositoryWrapper accountRepositoryWrapper,
+            final AccountingChargeReadService accountingChargeReadService, final GLAccountRepositoryWrapper accountRepositoryWrapper,
             final PaymentTypeRepository paymentTypeRepository, final CodeValueRepository codeValueRepository) {
-        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, chargeRepositoryWrapper, accountRepositoryWrapper,
+        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, accountingChargeReadService, accountRepositoryWrapper,
                 paymentTypeRepository, codeValueRepository);
     }
 

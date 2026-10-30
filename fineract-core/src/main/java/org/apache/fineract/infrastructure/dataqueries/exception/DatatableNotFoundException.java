@@ -30,6 +30,11 @@ public class DatatableNotFoundException extends AbstractPlatformResourceNotFound
         super("error.msg.datatable.data.not.found", "Data not found for datatable: ", datatable + "  Id:" + id);
     }
 
+    public DatatableNotFoundException(final String datatable, final Long appTableId, final Long datatableId) {
+        super("error.msg.datatable.data.not.found", "Data not found for datatable: ",
+                datatable + "  Id:" + appTableId + "  Entry id:" + datatableId);
+    }
+
     public DatatableNotFoundException(final String datatable) {
         super("error.msg.datatable.not.found", "Datatable not found.", datatable);
     }

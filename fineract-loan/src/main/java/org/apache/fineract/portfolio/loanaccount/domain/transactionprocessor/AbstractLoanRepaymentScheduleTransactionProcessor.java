@@ -76,6 +76,8 @@ import org.springframework.util.CollectionUtils;
 @RequiredArgsConstructor
 public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implements LoanRepaymentScheduleTransactionProcessor {
 
+    private static final Comparator<Long> CHARGE_ID_ORDER = Comparator.nullsLast(Comparator.naturalOrder());
+
     protected final SingleLoanChargeRepaymentScheduleProcessingWrapper loanChargeProcessor = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
     protected final ExternalIdFactory externalIdFactory;
     protected final LoanChargeValidator loanChargeValidator;
@@ -746,8 +748,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         installemntCharge = loanCharge;
                         chargePerInstallment = unpaidLoanChargePerInstallment;
                     }
-                } else if (earliestUnpaidCharge == null
-                        || DateUtils.isBefore(loanCharge.getDueLocalDate(), earliestUnpaidCharge.getDueLocalDate())) {
+                } else if (earliestUnpaidCharge == null || isPaidBefore(loanCharge, earliestUnpaidCharge)) {
                     earliestUnpaidCharge = loanCharge;
                 }
             }
@@ -881,8 +882,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         installemntCharge = loanCharge;
                         chargePerInstallment = paidLoanChargePerInstallment;
                     }
-                } else if (latestPaidCharge == null || (loanCharge.isPaidOrPartiallyPaid(currency)
-                        && DateUtils.isAfter(loanCharge.getDueLocalDate(), latestPaidCharge.getDueLocalDate()))) {
+                } else if (latestPaidCharge == null || isPaidBefore(latestPaidCharge, loanCharge)) {
                     latestPaidCharge = loanCharge;
                 }
             }
@@ -893,6 +893,18 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
 
         return latestPaidCharge;
+    }
+
+    /**
+     * The order in which charges of the same kind are paid: by due date, then by id, so that charges due on the same
+     * date are paid in the order they were created. A charge not saved yet comes after the saved ones. Undoing a
+     * payment goes in the reverse order.
+     */
+    private static boolean isPaidBefore(final LoanCharge charge, final LoanCharge other) {
+        if (!DateUtils.isEqual(charge.getDueLocalDate(), other.getDueLocalDate())) {
+            return DateUtils.isBefore(charge.getDueLocalDate(), other.getDueLocalDate());
+        }
+        return CHARGE_ID_ORDER.compare(charge.getId(), other.getId()) < 0;
     }
 
     protected void addChargeOnlyRepaymentInstallmentIfRequired(Set<LoanCharge> charges,

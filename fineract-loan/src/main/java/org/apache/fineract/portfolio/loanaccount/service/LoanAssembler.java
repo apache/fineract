@@ -33,6 +33,8 @@ public interface LoanAssembler {
 
     Loan assembleFrom(Long accountId, boolean loadLazyCollections);
 
+    Loan assembleFromInUserScope(Long accountId);
+
     Loan assembleFrom(ExternalId externalId);
 
     Loan assembleFrom(ExternalId externalId, boolean loadLazyCollections);

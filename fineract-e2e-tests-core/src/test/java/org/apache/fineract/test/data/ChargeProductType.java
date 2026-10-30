@@ -41,6 +41,8 @@ public enum ChargeProductType {
     LOAN_INSTALLMENT_FEE_PERCENTAGE_AMOUNT("Installment percentage amount fee"), //
     LOAN_INSTALLMENT_FEE_PERCENTAGE_INTEREST("Installment percentage interest fee"), //
     LOAN_DISBURSEMENT_PERCENTAGE_AMOUNT_PLUS_INTEREST_FEE("Disbursement percentage amount + interest fee"), //
+    LOAN_PERCENTAGE_AMOUNT_DUE_DATE_FEE("% Amount due date fee"), //
+    LOAN_PERCENTAGE_INTEREST_DUE_DATE_FEE("% Interest due date fee"), //
     WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE("Working Capital Loan Fee"), //
     WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY("Working Capital Loan Penalty"); //
 

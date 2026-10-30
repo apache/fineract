@@ -57,11 +57,8 @@ import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepository;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMappingRepository;
 import org.apache.fineract.infrastructure.entityaccess.exception.NotOfficeSpecificProductException;
+import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessReadService;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
 import org.apache.fineract.organisation.holiday.domain.HolidayStatusType;
@@ -176,7 +173,8 @@ public final class LoanApplicationValidator {
             LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.ENABLE_DOWN_PAYMENT,
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
             LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, LoanApiConstants.daysInYearCustomStrategyParameterName,
-            LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, LoanApiConstants.ORIGINATORS_PARAM, LoanApiConstants.REPAYMENT_START_DATE_TYPE));
+            LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, LoanApiConstants.ORIGINATORS_PARAM, LoanApiConstants.REPAYMENT_START_DATE_TYPE,
+            LoanApiConstants.monthEndDueDateStrategyParameterName));
     public static final String LOANAPPLICATION_UNDO = "loanapplication.undo";
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -192,8 +190,7 @@ public final class LoanApplicationValidator {
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanProductDataValidator loanProductDataValidator;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
-    private final FineractEntityToEntityMappingRepository entityMappingRepository;
-    private final FineractEntityRelationRepository fineractEntityRelationRepository;
+    private final FineractEntityAccessReadService fineractEntityAccessReadService;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final LoanCollateralAssembler collateralAssembler;
@@ -790,6 +787,8 @@ public final class LoanApplicationValidator {
 
                 }
             }
+
+            loanProductDataValidator.validateMonthEndDueDateStrategy(element, baseDataValidator);
 
             if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.REPAYMENT_START_DATE_TYPE, element)) {
                 final Integer repaymentStartDateType = this.fromApiJsonHelper
@@ -1515,6 +1514,8 @@ public final class LoanApplicationValidator {
                 }
             }
 
+            loanProductDataValidator.validateMonthEndDueDateStrategy(element, baseDataValidator);
+
             Integer repaymentStartDateType = loan.getRepaymentStartDateType().getValue();
             if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.REPAYMENT_START_DATE_TYPE, element)) {
                 repaymentStartDateType = this.fromApiJsonHelper.extractIntegerNamed(LoanApiConstants.REPAYMENT_START_DATE_TYPE, element,
@@ -1854,11 +1855,9 @@ public final class LoanApplicationValidator {
         final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
                 .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED);
         if (restrictToUserOfficeProperty.isEnabled()) {
-            FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
-                    .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.getStr());
-            FineractEntityToEntityMapping officeToLoanProductMappingList = this.entityMappingRepository
-                    .findListByProductId(fineractEntityRelation, productId, officeId);
-            if (officeToLoanProductMappingList == null) {
+            if (!fineractEntityAccessReadService
+                    .retrieveOfficeEntityAccess(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, officeId, false)
+                    .isVisible(productId)) {
                 throw new NotOfficeSpecificProductException(productId, officeId);
             }
 

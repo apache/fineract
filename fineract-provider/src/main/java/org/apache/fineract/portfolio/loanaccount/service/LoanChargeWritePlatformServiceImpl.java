@@ -114,7 +114,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.InstallmentNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeAdjustmentException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeDeactivationException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeRefundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
@@ -181,7 +180,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     public CommandProcessingResult addLoanCharge(final Long loanId, final JsonCommand command) {
         this.loanChargeApiJsonValidator.validateAddLoanCharge(command.json());
 
-        Loan loan = this.loanAssembler.assembleFrom(loanId);
+        Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
         if (loan.isChargedOff()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
@@ -384,7 +383,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         }
 
         final Long loanId = loanTransaction.getLoan().getId();
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
         // Charges may be waived only when the loan associated with them are
         // active
@@ -433,7 +432,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         this.loanChargeApiJsonValidator.validateUpdateOfLoanCharge(command.json());
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
@@ -483,7 +482,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     @Override
     public CommandProcessingResult waiveLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
         this.loanChargeApiJsonValidator.validateInstallmentChargeTransaction(command.json());
         final ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
@@ -581,7 +580,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     @Override
     public CommandProcessingResult deleteLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
@@ -619,7 +618,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         if (isChargeIdIncludedInJson) {
             loanChargeId = command.longValueOfParameterNamed("chargeId");
         }
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
         final ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
@@ -724,7 +723,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         changes.put("locale", locale);
 
         loanChargeAdjustmentEntranceValidation(loanCharge, transactionAmount);
-        final Loan loan = loanAssembler.assembleFrom(loanId);
+        final Loan loan = loanAssembler.assembleFromInUserScope(loanId);
 
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
         PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createPaymentDetail(command, changes);
@@ -765,7 +764,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         List<LoanCharge> loanCharges = loanChargeRepository.findByLoanIdAndFromDueDate(loanId, fromDueDate);
         loanCharges.forEach(this::inactivateOverdueLoanCharge);
 
-        Loan loan = loanAssembler.assembleFrom(loanId);
+        Loan loan = loanAssembler.assembleFromInUserScope(loanId);
         List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan
                 .getRepaymentScheduleInstallments(si -> DateUtils.isDateInRangeInclusive(fromDueDate, si.getFromDate(), si.getDueDate())
                         || DateUtils.isAfter(si.getFromDate(), fromDueDate));
@@ -1326,40 +1325,10 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
     private void loanChargeAdjustmentEntranceValidation(final LoanCharge loanCharge, final BigDecimal transactionAmount) {
         final Loan loan = loanCharge.getLoan();
-        if (!(loan.isOpen() || loan.getStatus().isClosedObligationsMet() || loan.getStatus().isOverpaid())) {
-            final String errorCode = "loan.charge.adjustment.invalid.status";
-            throw new LoanChargeAdjustmentException(errorCode,
-                    "Adjustment is not supported for the status of " + loan.getStatus().toString());
-        }
-
-        if (transactionAmount.compareTo(loanCharge.amount()) > 0) {
-            final String errorCode = "loan.charge.adjustment.invalid.amount";
-            throw new LoanChargeAdjustmentException(errorCode,
-                    "Transaction amount cannot be higher than the charge amount: " + loanCharge.amount());
-        }
-
-        BigDecimal availableAmountForAdjustment = calculateAvailableAmountForChargeAdjustment(loanCharge);
-        if (transactionAmount.compareTo(availableAmountForAdjustment) > 0) {
-            final String errorCode = "loan.charge.adjustment.invalid.amount";
-            throw new LoanChargeAdjustmentException(errorCode,
-                    "Transaction amount cannot be higher than the available charge amount for adjustment: " + availableAmountForAdjustment);
-        }
+        loanChargeValidator.validateLoanStatusForChargeAdjustment(loan);
+        loanChargeValidator.validateChargeAdjustmentAmount(loanCharge, transactionAmount, null);
         checkClientOrGroupActive(loan);
         loanDownPaymentTransactionValidator.validateAccountStatus(loan, LoanEvent.LOAN_CHARGE_ADJUSTMENT);
-    }
-
-    private BigDecimal calculateAvailableAmountForChargeAdjustment(final LoanCharge loanCharge) {
-        BigDecimal availableAmountForAdjustment = loanCharge.amount();
-        for (LoanTransaction loanTransaction : loanCharge.getLoan().getLoanTransactions()) {
-            if (loanTransaction.isNotReversed() && loanTransaction.getTypeOf().isChargeAdjustment()) {
-                LoanTransactionRelation loanTransactionRelation = loanTransaction.getLoanTransactionRelations().stream()
-                        .filter(e -> e.getToCharge() != null).findFirst().orElseThrow();
-                if (loanCharge.equals(loanTransactionRelation.getToCharge())) {
-                    availableAmountForAdjustment = availableAmountForAdjustment.subtract(loanTransaction.getAmount());
-                }
-            }
-        }
-        return availableAmountForAdjustment;
     }
 
     private void throwLoanChargeRefundException(String errorMessage, Integer installmentNumber, LocalDate dueDate) {

@@ -43,6 +43,11 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
     @Query("select sa from SavingsAccount sa where sa.id = :savingsId")
     SavingsAccount findOneLocked(@Param("savingsId") Long id);
 
+    // the rows are locked in ascending id order, see SavingsAccountRepositoryWrapper#lockInIdOrder
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select sa from SavingsAccount sa where sa.id in :ids order by sa.id")
+    List<SavingsAccount> findAllLockedOrderedById(@Param("ids") Collection<Long> ids);
+
     @Query("select s_acc from SavingsAccount s_acc where s_acc.gsim.id = :gsimId")
     List<SavingsAccount> findSavingAccountByGsimId(@Param("gsimId") Long gsimId);
 
@@ -147,4 +152,7 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
             ORDER BY sa.lastClosedBusinessDate ASC
             """)
     List<COBIdAndLastClosedBusinessDate> findAllSavingsIdsOldestCobProcessed();
+
+    @Query("select coalesce(co.id, go.id) from SavingsAccount sa left join sa.client c left join c.office co left join sa.group g left join g.office go where sa.id = :savingsAccountId")
+    Long findOfficeIdBySavingsAccountId(@Param("savingsAccountId") Long savingsAccountId);
 }

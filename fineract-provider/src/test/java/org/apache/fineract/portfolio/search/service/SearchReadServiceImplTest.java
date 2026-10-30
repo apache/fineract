@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.search.service;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -76,6 +77,21 @@ class SearchReadServiceImplTest {
         final ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
         verify(namedParameterJdbcTemplate).query(sqlCaptor.capture(), any(MapSqlParameterSource.class), any(RowMapper.class));
         assertTrue(sqlCaptor.getValue().contains(" a.percentOut <= :outStandingAmountPercentage "));
+    }
+
+    @Test
+    void retrieveAdHocQueryMatchingDataDoesNotQuoteColumnAliases() {
+        final AdHocQuerySearchRequest request = AdHocQuerySearchRequest.builder().build();
+        doReturn(List.<AdHocSearchQueryData>of()).when(namedParameterJdbcTemplate).query(anyString(), any(MapSqlParameterSource.class),
+                any(RowMapper.class));
+
+        service.retrieveAdHocQueryMatchingData(request);
+
+        final ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(namedParameterJdbcTemplate).query(sqlCaptor.capture(), any(MapSqlParameterSource.class), any(RowMapper.class));
+        // PostgreSQL rejects a single-quoted alias such as as 'count'
+        assertTrue(sqlCaptor.getValue().contains(" a.cnt as count, "));
+        assertFalse(sqlCaptor.getValue().contains("'"));
     }
 
     @Test

@@ -32,6 +32,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.MonthDay;
+import java.time.OffsetTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -365,13 +366,14 @@ public class JsonParserHelper {
                 final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                 final String valueAsString = primitive.getAsString();
                 if (StringUtils.isNotBlank(valueAsString)) {
+                    validateMonthDayFormatAndLocale(parameterName, dateFormat, clientApplicationLocale);
                     try {
                         final DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
                                 .appendPattern(dateFormat).toFormatter(clientApplicationLocale).withResolverStyle(ResolverStyle.STRICT);
                         value = MonthDay.parse(valueAsString, formatter);
                     } catch (final IllegalArgumentException | DateTimeException e) {
                         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-                        final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.month.day",
+                        final ApiParameterError error = ApiParameterError.parameterErrorWithValue("validation.msg.invalid.month.day",
                                 "The parameter `" + parameterName + "` is invalid based on the monthDayFormat: `" + dateFormat
                                         + "` and locale: `" + clientApplicationLocale + "` provided:",
                                 parameterName, valueAsString, dateFormat);
@@ -422,6 +424,36 @@ public class JsonParserHelper {
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
             value = extractLocalDateTimeNamed(parameterName, element, extractDateFormatParameter(object), parametersPassedInCommand);
+        }
+        return value;
+    }
+
+    public OffsetTime extractOffsetTimeNamed(final String parameterName, final JsonElement element,
+            final Set<String> parametersPassedInCommand) {
+        OffsetTime value = null;
+        String timeValueAsString = null;
+        if (element.isJsonObject()) {
+            final JsonObject object = element.getAsJsonObject();
+            if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
+                parametersPassedInCommand.add(parameterName);
+
+                try {
+                    final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+                    timeValueAsString = primitive.getAsString();
+                    if (StringUtils.isNotBlank(timeValueAsString)) {
+                        value = OffsetTime.parse(timeValueAsString, DateTimeFormatter.ISO_OFFSET_TIME);
+                    }
+                } catch (IllegalArgumentException | DateTimeParseException e) {
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                    final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.time.format",
+                            "The parameter `" + parameterName
+                                    + "` is invalid. Expected ISO offset time format, for example: HH:mm:ss+05:30",
+                            parameterName, (Object) timeValueAsString);
+                    dataValidationErrors.add(error);
+                    throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                            dataValidationErrors, e);
+                }
+            }
         }
         return value;
     }
@@ -584,6 +616,23 @@ public class JsonParserHelper {
         }
 
         return eventLocalDateTime;
+    }
+
+    private static void validateMonthDayFormatAndLocale(final String parameterName, final String monthDayFormat,
+            final Locale clientApplicationLocale) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        if (StringUtils.isBlank(monthDayFormat)) {
+            dataValidationErrors.add(ApiParameterError.parameterError("validation.msg.missing.monthDayFormat.parameter",
+                    "The parameter `" + parameterName + "` requires a `monthDayFormat` parameter to be passed with it.", parameterName));
+        }
+        if (clientApplicationLocale == null) {
+            dataValidationErrors.add(ApiParameterError.parameterError("validation.msg.missing.locale.parameter",
+                    "The parameter `" + parameterName + "` requires a `locale` parameter to be passed with it.", parameterName));
+        }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
     private static void validateDateFormatAndLocale(final String parameterName, final String dateFormat,

@@ -179,7 +179,15 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                 for (final ScheduledJobDetail jobDetail : scheduledJobDetails) {
                     if (jobDetail.isTriggerMisfired()) {
                         if (jobDetail.isActiveSchedular()) {
-                            executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON, Collections.emptySet());
+                            // Fire the misfire replay as a "misfire" trigger, not "cron":
+                            // processJobDetailForExecution()
+                            // vetoes a "cron" fire whose nextRunTime is in the future, and nextRunTime is advanced to
+                            // the future by this very method right below, racing the async veto check on another
+                            // thread. Any non-cron trigger type bypasses that specific veto condition without
+                            // weakening it for genuinely-not-due cron fires; "misfire" (rather than reusing
+                            // "application", the manual /jobs/{id}?command=executeJob API's type) keeps the two
+                            // distinguishable in job run history.
+                            executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_MISFIRE, Collections.emptySet());
                             jobDetail.setMismatchedJob(false);
                         }
                         final String schedulerName = getSchedulerName(jobDetail);

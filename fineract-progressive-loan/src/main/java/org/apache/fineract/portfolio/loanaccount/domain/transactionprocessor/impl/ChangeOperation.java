@@ -121,6 +121,11 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
         }
     }
 
+    public boolean isDueDatePercentageCharge() {
+        return this.isCharge() && this.getLoanCharge().isPresent() && this.getLoanCharge().get().isDueDateCharge()
+                && this.getLoanCharge().get().getPercentage() != null;
+    }
+
     @Override
     @SuppressFBWarnings(value = "EQ_COMPARETO_USE_OBJECT_EQUALS", justification = "TODO: fix this! See: https://stackoverflow.com/questions/2609037/findbugs-how-to-solve-eq-compareto-use-object-equals")
     public int compareTo(@NonNull ChangeOperation o) {

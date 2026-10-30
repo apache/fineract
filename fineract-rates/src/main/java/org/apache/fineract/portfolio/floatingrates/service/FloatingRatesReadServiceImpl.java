@@ -48,13 +48,6 @@ public class FloatingRatesReadServiceImpl implements FloatingRatesReadService {
     }
 
     @Override
-    public List<FloatingRateData> retrieveAllActive() {
-        FloatingRateRowMapper rateMapper = new FloatingRateRowMapper(false);
-        final String sql = "select " + rateMapper.schema() + " where rate.is_active = true ";
-        return this.jdbcTemplate.query(sql, rateMapper);// NOSONAR
-    }
-
-    @Override
     public List<FloatingRateData> retrieveLookupActive() {
         FloatingRateLookupMapper rateMapper = new FloatingRateLookupMapper();
         final String sql = "select " + rateMapper.schema() + " where rate.is_active = true ";

@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -161,7 +160,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // Principal amount (optional, defaults to proposed)
         if (command.parameterExists(WorkingCapitalLoanConstants.approvedLoanAmountParamName)) {
             final BigDecimal approvedAmount = this.fromApiJsonHelper
-                    .extractBigDecimalNamed(WorkingCapitalLoanConstants.approvedLoanAmountParamName, command.parsedJson(), new HashSet<>());
+                    .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.approvedLoanAmountParamName, command.parsedJson());
             if (approvedAmount != null) {
                 loan.setApprovedPrincipal(approvedAmount);
             }
@@ -179,8 +178,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         // Discount amount (optional, can only be reduced per requirement)
         if (command.parameterExists(WorkingCapitalLoanConstants.discountAmountParamName)) {
-            final BigDecimal discount = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.discountAmountParamName,
-                    command.parsedJson(), new HashSet<>());
+            final BigDecimal discount = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.discountAmountParamName, command.parsedJson());
             loan.getLoanProductRelatedDetails().setDiscountApproved(discount);
         } else if (!loan.getLoanProduct().getConfigurableAttributes().isDiscountDefaultOverridable()) {
             loan.getLoanProductRelatedDetails().setDiscountApproved(loan.getLoanProductRelatedDetails().getDiscountProposed());
@@ -339,7 +338,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final LocalDate actualDisbursementDate = command
                 .localDateValueOfParameterNamed(WorkingCapitalLoanConstants.actualDisbursementDateParamName);
         final BigDecimal transactionAmount = this.fromApiJsonHelper
-                .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, command.parsedJson(), new HashSet<>());
+                .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.transactionAmountParamName, command.parsedJson());
         final Long classificationId = this.fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanConstants.classificationIdParamName,
                 command.parsedJson());
         final CodeValue classification = classificationId != null
@@ -373,8 +372,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 discount = loan.getLoanProductRelatedDetails().getDiscountApproved();
             }
         } else if (command.parameterExists(WorkingCapitalLoanConstants.discountAmountParamName)) {
-            discount = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.discountAmountParamName,
-                    command.parsedJson(), new HashSet<>());
+            discount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.discountAmountParamName,
+                    command.parsedJson());
             if (discount != null) {
                 loan.getLoanProductRelatedDetails().setDiscount(discount);
                 changes.put(WorkingCapitalLoanConstants.discountAmountParamName, discount);
@@ -559,8 +558,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             final JsonCommand command) {
         final Long loanId = loan.getId();
 
-        BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
-                command.parsedJson(), new HashSet<>());
+        BigDecimal amount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
+                command.parsedJson());
         if (amount == null) {
             amount = loan.getLoanProductRelatedDetails().getDiscount();
         }
@@ -701,8 +700,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.discount.transaction.invalid",
                     "Related transaction must be an active discount fee transaction", reference.paramName());
         }
-        final BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
-                command.parsedJson(), new HashSet<>());
+        final BigDecimal amount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
+                command.parsedJson());
         final BigDecimal totalAdjusted = relationRepository
                 .findAllByToTransactionAndFromTransactionReversedAndFromTransactionTransactionType(relatedDiscountTransaction, false,
                         LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT)
@@ -839,8 +838,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             final WorkingCapitalLoanTransaction transactionToAdjust, final JsonCommand command) {
         this.validator.validateAdjustByDelta(command, loan, transactionToAdjust);
 
-        final BigDecimal deltaAmount = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName,
-                command.parsedJson(), new HashSet<>());
+        final BigDecimal deltaAmount = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.transactionAmountParamName, command.parsedJson());
         final BigDecimal newTransactionAmount = transactionToAdjust.getTransactionAmount().add(deltaAmount);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -1165,7 +1164,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final LoanStatus oldStatus = loan.getLoanStatus();
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(WorkingCapitalLoanConstants.transactionDateParamName);
         final BigDecimal transactionAmount = this.fromApiJsonHelper
-                .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, command.parsedJson(), new HashSet<>());
+                .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.transactionAmountParamName, command.parsedJson());
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(WorkingCapitalLoanConstants.transactionDateParamName, transactionDate);
         changes.put(WorkingCapitalLoanConstants.transactionAmountParamName, transactionAmount);
@@ -1276,7 +1275,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(WorkingCapitalLoanConstants.transactionDateParamName);
         final BigDecimal transactionAmount = this.fromApiJsonHelper
-                .extractBigDecimalNamed(WorkingCapitalLoanConstants.transactionAmountParamName, command.parsedJson(), new HashSet<>());
+                .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.transactionAmountParamName, command.parsedJson());
         if (transactionAmount.compareTo(availableOverpayment) > 0) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.credit.balance.refund.amount.invalid",
                     "Credit balance refund amount cannot exceed overpayment amount",
@@ -1361,8 +1360,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
         this.validator.validateUpdatePeriodPaymentRate(command.json(), loan);
 
-        final BigDecimal newRate = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.periodPaymentRateParamName,
-                command.parsedJson(), new HashSet<>());
+        final BigDecimal newRate = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.periodPaymentRateParamName, command.parsedJson());
 
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         // Mandatory, so the validator has already rejected a request without it.

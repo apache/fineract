@@ -111,11 +111,14 @@ class JobRegisterServiceImplTest {
 
             fixture.asRequest(fixture.jobRegisterService::startScheduler);
 
-            // The legacy replay is asynchronous and moves next_run_time before the replayed fire is vetoed or not
-            // (FINERACT-2918), so only its synchronous effects are asserted.
             assertThat(fixture.schedulerDetail.isSuspended()).isFalse();
             assertThat(job.isTriggerMisfired()).isFalse();
             assertThat(job.getNextRunTime()).as("legacy resume takes the trigger's next fire time").isAfter(new Date());
+            // The legacy replay is fired asynchronously, then next_run_time is moved to the future on the same,
+            // synchronous call above - a "cron" fire would be vetoed by that future next_run_time on whichever
+            // thread processes it (FINERACT-2918). Firing it as "misfire" bypasses that veto, so the replay runs
+            // reliably instead of racing the veto check.
+            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(fixture.executionCount(JobName.UPDATE_LOAN_ARREARS_AGEING)).isOne());
         }
     }
 }

@@ -411,22 +411,22 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
     Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
     Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
     Then Working Capital loan status will be "ACTIVE"
-    When Admin sets the business date to "15 May 2026"
+    When Admin sets the business date to "03 May 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Admin creates WC breach reschedule action with the following parameters:
       | frequency | frequencyType |
-      | 30        | DAYS          |
-    When Admin sets the business date to "15 August 2026"
+      | 6         | DAYS          |
+    And Admin creates a near breach reschedule action with threshold "72.15" frequency 3 frequencyType "DAYS"
+    When Admin sets the business date to "13 May 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-28 | 59           | 123.0            | 123.0             | null       | true   |
       | 2            | 2026-03-01 | 2026-04-30 | 61           | 123.0            | 123.0             | null       | true   |
-      | 3            | 2026-05-01 | 2026-05-30 | 30           | 123.0            | 123.0             | null       | true   |
-      | 4            | 2026-05-31 | 2026-06-29 | 30           | 123.0            | 123.0             | false      | true   |
-      | 5            | 2026-06-30 | 2026-07-29 | 30           | 123.0            | 123.0             | false      | true   |
-      | 6            | 2026-07-30 | 2026-08-28 | 30           | 123.0            | 123.0             | null       | null   |
-    Then Admin closes the Working Capital loan with a full repayment on "15 August 2026"
+      | 3            | 2026-05-01 | 2026-05-06 | 6            | 123.0            | 123.0             | true       | true   |
+      | 4            | 2026-05-07 | 2026-05-12 | 6            | 123.0            | 123.0             | true       | true   |
+      | 5            | 2026-05-13 | 2026-05-18 | 6            | 123.0            | 123.0             | null       | null   |
+    Then Admin closes the Working Capital loan with a full repayment on "13 May 2026"
 
   @TestRailId:C106678
   Scenario: Verify working capital loan delinquency range schedule on disbursement date with Annual EIR payment strategy - UC11
@@ -451,7 +451,7 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
       | 2            | 2026-01-31 | 2026-03-01 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
     Then Admin closes the Working Capital loan with a full repayment on "02 February 2026"
 
-  @TestRailId:C106678
+  @TestRailId:C106679
   Scenario: Verify WC new delinquency pause is allowed after resumed pause when outside effective pause window with Annual EIR payment strategy - UC12
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -611,9 +611,9 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
       | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee    | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
       | 12 January 2026 | Goodwill Credit | 270.0             | 230.0            | 15.0              | 25.0                  | false    |
-    When Admin sets the business date to "15 March 2026"
+    When Admin sets the business date to "13 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "15 March 2026"
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "13 January 2026"
 
   @TestRailId:C106682
   Scenario: Verify Working Capital fee charge adjustment accounting entries has correct journal entries with Annual EIR payment strategy - UC15
@@ -865,7 +865,7 @@ Feature: Working Capital Payment Amount Calculation Strategy - Annual EIR
     Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
     Then Working capital loan details has the originator attached
 
-  @TestRailId:С106720
+  @TestRailId:C106720
   Scenario: Verify Working Capital Write-off with undo reopens the loan and restores the balance with Annual EIR payment strategy - UC21
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

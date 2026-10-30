@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.portfolio.account.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetTime;
 import java.util.Collection;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -40,6 +42,8 @@ public final class AccountTransferData implements Serializable {
     private final CurrencyData currency;
     private final BigDecimal transferAmount;
     private final LocalDate transferDate;
+    @Schema(type = "string", example = "09:00:00Z")
+    private final OffsetTime transferTime;
     private final String transferDescription;
     private final OfficeData fromOffice;
     private final ClientData fromClient;
@@ -80,18 +84,27 @@ public final class AccountTransferData implements Serializable {
         final String transferDescription = null;
         final Boolean reversed = null;
         return new AccountTransferData(id, reversed, fromOffice, fromClient, fromAccountType, fromAccount, currency, transferAmount,
-                transferDate, transferDescription, toOffice, toClient, toAccountType, toAccount, null, fromOfficeOptions, fromClientOptions,
-                fromAccountTypeOptions, fromAccountOptions, toOfficeOptions, toClientOptions, toAccountTypeOptions, toAccountOptions);
+                transferDate, null, transferDescription, toOffice, toClient, toAccountType, toAccount, null, fromOfficeOptions,
+                fromClientOptions, fromAccountTypeOptions, fromAccountOptions, toOfficeOptions, toClientOptions, toAccountTypeOptions,
+                toAccountOptions);
     }
 
     public static AccountTransferData instance(final Long id, final Boolean reversed, final LocalDate transferDate,
             final CurrencyData currency, final BigDecimal transferAmount, final String transferDescription, final OfficeData fromOffice,
             final OfficeData toOffice, final ClientData fromClient, final ClientData toClient, final EnumOptionData fromAccountType,
             final PortfolioAccountData fromAccount, final EnumOptionData toAccountType, final PortfolioAccountData toAccount) {
+        return instance(id, reversed, transferDate, null, currency, transferAmount, transferDescription, fromOffice, toOffice, fromClient,
+                toClient, fromAccountType, fromAccount, toAccountType, toAccount);
+    }
 
-        return new AccountTransferData(id, reversed, fromOffice, fromClient, fromAccountType, fromAccount, currency, transferAmount,
-                transferDate, transferDescription, toOffice, toClient, toAccountType, toAccount, null, null, null, null, null, null, null,
-                null, null);
+    public static AccountTransferData instance(final Long id, final Boolean reversed, final LocalDate transferDate,
+            final OffsetTime transferTime, final CurrencyData currency, final BigDecimal transferAmount, final String transferDescription,
+            final OfficeData fromOffice, final OfficeData toOffice, final ClientData fromClient, final ClientData toClient,
+            final EnumOptionData fromAccountType, final PortfolioAccountData fromAccount, final EnumOptionData toAccountType,
+            final PortfolioAccountData toAccount) {
+
+        return instance(id, reversed, transferDate, transferTime, currency, transferAmount, transferDescription, fromOffice, toOffice,
+                fromClient, toClient, fromAccountType, fromAccount, toAccountType, toAccount, null);
     }
 
     public static AccountTransferData instance(final Long id, final Boolean reversed, final LocalDate transferDate,
@@ -99,26 +112,40 @@ public final class AccountTransferData implements Serializable {
             final OfficeData toOffice, final ClientData fromClient, final ClientData toClient, final EnumOptionData fromAccountType,
             final PortfolioAccountData fromAccount, final EnumOptionData toAccountType, final PortfolioAccountData toAccount,
             final PaymentDetailData paymentDetailData) {
+        return instance(id, reversed, transferDate, null, currency, transferAmount, transferDescription, fromOffice, toOffice, fromClient,
+                toClient, fromAccountType, fromAccount, toAccountType, toAccount, paymentDetailData);
+    }
+
+    public static AccountTransferData instance(final Long id, final Boolean reversed, final LocalDate transferDate,
+            final OffsetTime transferTime, final CurrencyData currency, final BigDecimal transferAmount, final String transferDescription,
+            final OfficeData fromOffice, final OfficeData toOffice, final ClientData fromClient, final ClientData toClient,
+            final EnumOptionData fromAccountType, final PortfolioAccountData fromAccount, final EnumOptionData toAccountType,
+            final PortfolioAccountData toAccount, final PaymentDetailData paymentDetailData) {
 
         return new AccountTransferData(id, reversed, fromOffice, fromClient, fromAccountType, fromAccount, currency, transferAmount,
-                transferDate, transferDescription, toOffice, toClient, toAccountType, toAccount, paymentDetailData, null, null, null, null,
-                null, null, null, null);
+                transferDate, transferTime, transferDescription, toOffice, toClient, toAccountType, toAccount, paymentDetailData, null,
+                null, null, null, null, null, null, null);
     }
 
     public static AccountTransferData transferBasicDetails(final Long id, final CurrencyData currency, final BigDecimal transferAmount,
             final LocalDate transferDate, final String description, final Boolean reversed) {
+        return transferBasicDetails(id, currency, transferAmount, transferDate, null, description, reversed);
+    }
+
+    public static AccountTransferData transferBasicDetails(final Long id, final CurrencyData currency, final BigDecimal transferAmount,
+            final LocalDate transferDate, final OffsetTime transferTime, final String description, final Boolean reversed) {
 
         final EnumOptionData fromAccountType = null;
         final EnumOptionData toAccountType = null;
 
-        return new AccountTransferData(id, reversed, null, null, fromAccountType, null, currency, transferAmount, transferDate, description,
-                null, null, toAccountType, null, null, null, null, null, null, null, null, null, null);
+        return new AccountTransferData(id, reversed, null, null, fromAccountType, null, currency, transferAmount, transferDate,
+                transferTime, description, null, null, toAccountType, null, null, null, null, null, null, null, null, null, null);
     }
 
     private AccountTransferData(final Long id, final Boolean reversed, final OfficeData fromOffice, final ClientData fromClient,
             final EnumOptionData fromAccountType, final PortfolioAccountData fromAccount, final CurrencyData currency,
-            final BigDecimal transferAmount, final LocalDate transferDate, final String transferDescription, final OfficeData toOffice,
-            final ClientData toClient, final EnumOptionData toAccountType, final PortfolioAccountData toAccount,
+            final BigDecimal transferAmount, final LocalDate transferDate, final OffsetTime transferTime, final String transferDescription,
+            final OfficeData toOffice, final ClientData toClient, final EnumOptionData toAccountType, final PortfolioAccountData toAccount,
             final PaymentDetailData paymentDetailData, final Collection<OfficeData> fromOfficeOptions,
             final Collection<ClientData> fromClientOptions, final Collection<EnumOptionData> fromAccountTypeOptions,
             final Collection<PortfolioAccountData> fromAccountOptions, final Collection<OfficeData> toOfficeOptions,
@@ -138,6 +165,7 @@ public final class AccountTransferData implements Serializable {
         this.currency = currency;
         this.transferAmount = transferAmount;
         this.transferDate = transferDate;
+        this.transferTime = transferTime;
         this.transferDescription = transferDescription;
         this.paymentDetailData = paymentDetailData;
 

@@ -153,11 +153,18 @@ distributions {
                         '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', 
                         '**/.externalToolbuilders', '.theia', 'LICENSE_RELEASE', 
                         'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', 
-                        '**/.gitkeep', '*.swp', '.atr-rat-excludes-bin.txt'
+                        '**/.gitkeep', '*.swp', '.atr-rat-excludes-bin.txt', '.claude'
                 
                 // Ensure consistent file paths for caching
                 eachFile { details ->
                     details.path = details.path.replace('\\', '/')
+                }
+
+                // Gradle 9 archives store every file as 0644, so keep the wrapper and scripts executable
+                filesMatching(['gradlew', '**/*.sh']) {
+                    permissions {
+                        unix('rwxr-xr-x')
+                    }
                 }
             }
             rename ('LICENSE_SOURCE', 'LICENSE')

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPausePeriod;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 
 public interface WorkingCapitalLoanNearBreachEvaluationService {
@@ -48,6 +49,6 @@ public interface WorkingCapitalLoanNearBreachEvaluationService {
     boolean rederiveNearBreach(List<WorkingCapitalLoanBreachSchedule> periods, NearBreachParameters parameters, LocalDate effectiveDate);
 
     record NearBreachParameters(BigDecimal threshold, Integer frequency, WorkingCapitalLoanPeriodFrequencyType frequencyType,
-            Integer breachGraceDays) {
+            Integer breachGraceDays, List<WorkingCapitalLoanPausePeriod> breachPauses, List<LocalDate> restartResetDates) {
     }
 }

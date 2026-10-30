@@ -79,8 +79,11 @@ public class ScheduledJobRunnerConfig {
      * nested values COB stores fail outright. Keeping Batch 5's settings makes the two byte-identical.
      */
     static JsonMapper executionContextMapper() {
-        return JsonMapper.builder()
-                .activateDefaultTyping(executionContextTypeValidator(), DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY).build();
+        PolymorphicTypeValidator typeValidator = executionContextTypeValidator();
+        // the mapper-wide validator governs types declared via @JsonTypeInfo, e.g. on COBParameter, rather than
+        // default typing, so it is restricted the same way
+        return JsonMapper.builder().polymorphicTypeValidator(typeValidator)
+                .activateDefaultTyping(typeValidator, DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY).build();
     }
 
     private static PolymorphicTypeValidator executionContextTypeValidator() {

@@ -599,6 +599,23 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
         return deleteDatatableEntries(dataTableName, appTableId, datatableId, command);
     }
 
+    @Transactional
+    @Override
+    public void deleteDatatableEntriesOfEntity(final EntityTables entityTable, final Long appTableId) {
+        final List<String> dataTableNames = jdbcTemplate.queryForList(
+                "SELECT registered_table_name FROM x_registered_table WHERE application_table_name = ?", String.class,
+                entityTable.getName());
+        final String fkColumn = datatableUtil.getFKField(entityTable);
+        for (final String dataTableName : dataTableNames) {
+            datatableUtil.validateDatatableName(dataTableName);
+            final String sql = "DELETE FROM " + sqlGenerator.escape(dataTableName) + " WHERE " + sqlGenerator.escape(fkColumn) + " = ?";
+            if (jdbcTemplate.update(sql, appTableId) > 0) { // NOSONAR
+                businessEventNotifierService.notifyPostBusinessEvent(new DatatableEntryDeletedBusinessEvent(
+                        new DatatableEntryDetails(dataTableName, entityTable, null, appTableId, null)));
+            }
+        }
+    }
+
     private void registerDataTable(final String entityName, final String dataTableName, final String entitySubType,
             final Integer category) {
         datatableUtil.resolveEntity(entityName);
@@ -1204,7 +1221,8 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
         final GenericResultsetData existingRows = datatableUtil.retrieveDataTableGenericResultSet(entityTable, dataTableName, appTableId,
                 null, datatableId);
         if (existingRows.hasNoEntries()) {
-            throw new DatatableNotFoundException(dataTableName, appTableId);
+            throw datatableId == null ? new DatatableNotFoundException(dataTableName, appTableId)
+                    : new DatatableNotFoundException(dataTableName, appTableId, datatableId);
         }
         if (existingRows.hasMoreThanOneEntry()) {
             throw new PlatformDataIntegrityException("error.msg.attempting.multiple.update",
@@ -1212,9 +1230,13 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
         }
 
         List<ResultsetColumnHeaderData> columnHeaders = existingRows.getColumnHeaders();
-        if (datatableUtil.isMultirowDatatable(columnHeaders) && datatableId == null) {
+        final boolean multiRow = datatableUtil.isMultirowDatatable(columnHeaders);
+        if (multiRow && datatableId == null) {
             throw new PlatformDataIntegrityException("error.msg.attempting.multiple.update",
                     "Application table: " + dataTableName + " Foreign key id: " + appTableId);
+        }
+        if (!multiRow && datatableId != null) {
+            throw entryIdNotAllowedOnOneToOne(dataTableName);
         }
         Map<String, ResultsetColumnHeaderData> headersByName = searchUtil.mapHeadersToName(columnHeaders);
         final List<Object> existingValues = existingRows.getData().get(0).getRow();
@@ -1261,7 +1283,13 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
         if (!updateColumns.isEmpty()) {
             ResultsetColumnHeaderData pkColumn = searchUtil.getFiltered(columnHeaders, ResultsetColumnHeaderData::getIsColumnPrimaryKey);
             if (pkColumn != null) {
-                params.add(primaryKey);
+                // key on the row read for appTableId: datatableId is not the key when a column named id is not the
+                // primary key
+                final Object readPrimaryKey = valuesByHeader.get(pkColumn);
+                if (readPrimaryKey instanceof Number number) {
+                    primaryKey = number.longValue();
+                }
+                params.add(readPrimaryKey);
                 final String sql = sqlGenerator.buildUpdate(dataTableName, updateColumns, headersByName) + " WHERE "
                         + pkColumn.getColumnName() + " = ?";
                 int updated = jdbcTemplate.update(sql, params.toArray(Object[]::new)); // NOSONAR
@@ -1290,6 +1318,11 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                 .build();
     }
 
+    private static PlatformDataIntegrityException entryIdNotAllowedOnOneToOne(final String dataTableName) {
+        return new PlatformDataIntegrityException("error.msg.datatable.entry.id.not.allowed.for.one.to.one",
+                "Datatable " + dataTableName + " is one-to-one with its application table, so an entry id cannot be given");
+    }
+
     private static boolean isUserUpdatable(@NonNull EntityTables entityTable, @NonNull ResultsetColumnHeaderData columnHeader) {
         return isUserInsertable(entityTable, columnHeader);
     }
@@ -1303,18 +1336,20 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
         final EntityTables entityTable = datatableUtil.queryForApplicationEntity(dataTableName);
         final CommandProcessingResult commandProcessingResult = datatableUtil.checkMainResourceExistsWithinScope(entityTable, appTableId);
 
-        String whereColumn;
-        Long whereValue;
-        if (datatableId == null) {
-            whereColumn = datatableUtil.getFKField(entityTable);
-            whereValue = appTableId;
-        } else {
-            whereColumn = TABLE_FIELD_ID;
-            whereValue = datatableId;
+        if (datatableId != null && !datatableUtil.isMultirowDatatable(genericDataService.fillResultsetColumnHeaders(dataTableName))) {
+            throw entryIdNotAllowedOnOneToOne(dataTableName);
         }
-        String sql = "DELETE FROM " + sqlGenerator.escape(dataTableName) + " WHERE " + sqlGenerator.escape(whereColumn) + " = ?";
-
-        this.jdbcTemplate.update(sql, whereValue); // NOSONAR
+        String sql = "DELETE FROM " + sqlGenerator.escape(dataTableName) + " WHERE "
+                + sqlGenerator.escape(datatableUtil.getFKField(entityTable)) + " = ?";
+        final List<Object> params = new ArrayList<>(List.of(appTableId));
+        if (datatableId != null) {
+            sql += " AND " + sqlGenerator.escape(TABLE_FIELD_ID) + " = ?";
+            params.add(datatableId);
+        }
+        final int deleted = this.jdbcTemplate.update(sql, params.toArray()); // NOSONAR
+        if (datatableId != null && deleted == 0) {
+            throw new DatatableNotFoundException(dataTableName, appTableId, datatableId);
+        }
         final Map<String, Object> dataParams = null;
         final DatatableEntryDetails datatableEntryDetails = new DatatableEntryDetails(dataTableName, entityTable, datatableId, appTableId,
                 dataParams);
@@ -1322,7 +1357,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(whereValue) //
+                .withEntityId(datatableId == null ? appTableId : datatableId) //
                 .withOfficeId(commandProcessingResult.getOfficeId()) //
                 .withGroupId(commandProcessingResult.getGroupId()) //
                 .withClientId(commandProcessingResult.getClientId()) //

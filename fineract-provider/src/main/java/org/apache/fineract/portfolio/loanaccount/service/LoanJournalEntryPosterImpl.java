@@ -19,10 +19,17 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.data.AccountingBridgeDataDTO;
 import org.apache.fineract.accounting.journalentry.data.AccountingBridgeLoanTransactionDTO;
@@ -33,6 +40,7 @@ import org.apache.fineract.accounting.journalentry.data.LoanChargePaidByDTO;
 import org.apache.fineract.accounting.journalentry.service.ExternalOwnerJournalEntryWriteService;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.investor.domain.ExternalAssetOwner;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -48,12 +56,24 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class LoanJournalEntryPosterImpl implements LoanJournalEntryPoster {
+
+    /**
+     * Transaction types whose charge tax can be posted, in two streams that are rounded separately: the types the
+     * accounting processors dispatch as repayments, and accruals. No other type posts charge tax.
+     */
+    static final Set<LoanTransactionType> PAYMENT_TAX_STREAM = EnumSet.of(LoanTransactionType.REPAYMENT,
+            LoanTransactionType.MERCHANT_ISSUED_REFUND, LoanTransactionType.PAYOUT_REFUND, LoanTransactionType.GOODWILL_CREDIT,
+            LoanTransactionType.CHARGE_REFUND, LoanTransactionType.DOWN_PAYMENT, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT,
+            LoanTransactionType.CHARGE_PAYMENT);
+    static final Set<LoanTransactionType> ACCRUAL_TAX_STREAM = EnumSet.of(LoanTransactionType.ACCRUAL,
+            LoanTransactionType.ACCRUAL_ADJUSTMENT);
 
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final ExternalOwnerJournalEntryWriteService externalOwnerJournalEntryWriteService;
@@ -182,7 +202,7 @@ public class LoanJournalEntryPosterImpl implements LoanJournalEntryPoster {
         // Populate loanChargesPaid from the transaction
         if (!loanTransaction.getLoanChargesPaid().isEmpty()) {
             List<LoanChargePaidByDTO> loanChargesPaidData = new ArrayList<>();
-            final MathContext mc = MoneyHelper.getMathContext();
+            final Map<LoanChargePaidBy, List<ChargeTaxDetailDTO>> chargeTaxes = prorateChargeTaxes(loanTransaction);
             for (final LoanChargePaidBy chargePaidBy : loanTransaction.getLoanChargesPaid()) {
                 final LoanCharge lc = chargePaidBy.getLoanCharge();
                 final LoanChargePaidByDTO loanChargePaidData = new LoanChargePaidByDTO();
@@ -192,17 +212,8 @@ public class LoanJournalEntryPosterImpl implements LoanJournalEntryPoster {
                 loanChargePaidData.setAmount(chargePaidBy.getAmount());
                 loanChargePaidData.setInstallmentNumber(chargePaidBy.getInstallmentNumber());
 
-                // Pro-rate each TaxComponent's tax proportionally to the paid amount
-                final BigDecimal chargeAmount = lc.getAmount();
-                final BigDecimal paidAmount = chargePaidBy.getAmount();
-                if (chargeAmount != null && chargeAmount.compareTo(BigDecimal.ZERO) > 0 && !lc.getTaxDetails().isEmpty()) {
-                    final List<ChargeTaxDetailDTO> taxDetails = new ArrayList<>();
-                    for (LoanChargeTaxDetails taxDetail : lc.getTaxDetails()) {
-                        if (taxDetail.getTaxComponent().getCreditAccount() != null) {
-                            final BigDecimal proRatedTax = taxDetail.getAmount().multiply(paidAmount, mc).divide(chargeAmount, mc);
-                            taxDetails.add(new ChargeTaxDetailDTO(taxDetail.getTaxComponent().getCreditAccount().getId(), proRatedTax));
-                        }
-                    }
+                final List<ChargeTaxDetailDTO> taxDetails = chargeTaxes.get(chargePaidBy);
+                if (taxDetails != null) {
                     loanChargePaidData.setTaxDetails(taxDetails);
                 }
 
@@ -245,5 +256,94 @@ public class LoanJournalEntryPosterImpl implements LoanJournalEntryPoster {
         transactionDTO.setLoanToLoanTransfer(false);
 
         return transactionDTO;
+    }
+
+    /**
+     * Pro-rates each tax component of the taxed charges this transaction pays, rounded to the currency's scale with the
+     * configured rounding mode. The tax is rounded cumulatively over the charge's earlier transactions of the same
+     * stream, and this transaction posts the difference, so that the lines of each tax component sum to that
+     * component's tax rounded as a whole.
+     * <p>
+     * "Earlier" means a lower id, read by a query: the transaction must be saved, and the earlier ones flushed, before
+     * its journal entries are posted.
+     */
+    private Map<LoanChargePaidBy, List<ChargeTaxDetailDTO>> prorateChargeTaxes(final LoanTransaction loanTransaction) {
+        final Map<LoanChargePaidBy, List<ChargeTaxDetailDTO>> taxesByChargePaidBy = new HashMap<>();
+        final Set<LoanTransactionType> stream = taxStreamOf(loanTransaction);
+        if (stream.isEmpty()) {
+            // no processor posts this transaction's tax, or it is reversed and its entries are mirrored
+            return taxesByChargePaidBy;
+        }
+        final Map<LoanCharge, List<LoanChargePaidBy>> taxedRowsByCharge = new LinkedHashMap<>();
+        for (final LoanChargePaidBy chargePaidBy : loanTransaction.getLoanChargesPaid()) {
+            final LoanCharge loanCharge = chargePaidBy.getLoanCharge();
+            if (MathUtil.isGreaterThanZero(loanCharge.getAmount()) && !loanCharge.getTaxDetails().isEmpty()) {
+                taxedRowsByCharge.computeIfAbsent(loanCharge, k -> new ArrayList<>()).add(chargePaidBy);
+            }
+        }
+        if (taxedRowsByCharge.isEmpty()) {
+            return taxesByChargePaidBy;
+        }
+        Objects.requireNonNull(loanTransaction.getId(), "the transaction must be saved before its charge tax is prorated");
+        final int scale = loanTransaction.getLoan().getCurrency().getDigitsAfterDecimal();
+        final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
+        final boolean accrualAdjustment = loanTransaction.getTypeOf().isAccrualAdjustment();
+        for (final Map.Entry<LoanCharge, List<LoanChargePaidBy>> entry : taxedRowsByCharge.entrySet()) {
+            final LoanCharge loanCharge = entry.getKey();
+            BigDecimal paidBefore = loanTransactionRepository.findChargeAmountPaidByEarlierTransactions(loanCharge, loanTransaction.getId(),
+                    stream);
+            final List<LoanChargePaidBy> rows = new ArrayList<>(entry.getValue());
+            rows.sort(Comparator.comparing(LoanChargePaidBy::getInstallmentNumber, Comparator.nullsFirst(Comparator.naturalOrder()))
+                    .thenComparing(LoanChargePaidBy::getId, Comparator.nullsLast(Comparator.naturalOrder())));
+            for (final LoanChargePaidBy chargePaidBy : rows) {
+                final BigDecimal paid = chargePaidBy.getAmount();
+                if (!MathUtil.isGreaterThanZero(paid)) {
+                    taxesByChargePaidBy.put(chargePaidBy, new ArrayList<>());
+                    continue;
+                }
+                // an accrual adjustment takes accrued charge back, so it moves the running total down; either way the
+                // line is the tax between the two totals
+                final BigDecimal paidAfter = accrualAdjustment ? paidBefore.subtract(paid) : paidBefore.add(paid);
+                taxesByChargePaidBy.put(chargePaidBy,
+                        taxLines(loanCharge, paidBefore.min(paidAfter), paidBefore.max(paidAfter), scale, roundingMode));
+                paidBefore = paidAfter;
+            }
+        }
+        return taxesByChargePaidBy;
+    }
+
+    /**
+     * The tax lines for the part of the charge between {@code paidFrom} and {@code paidTo}: per component, its tax on
+     * {@code paidTo} less its tax on {@code paidFrom}, each rounded. A component whose difference is zero gets no line.
+     */
+    private static List<ChargeTaxDetailDTO> taxLines(final LoanCharge loanCharge, final BigDecimal paidFrom, final BigDecimal paidTo,
+            final int scale, final RoundingMode roundingMode) {
+        final List<ChargeTaxDetailDTO> taxLines = new ArrayList<>();
+        final BigDecimal chargeAmount = loanCharge.getAmount();
+        for (final LoanChargeTaxDetails taxDetail : loanCharge.getTaxDetails()) {
+            if (taxDetail.getTaxComponent().getCreditAccount() == null) {
+                continue;
+            }
+            final BigDecimal tax = taxDetail.getAmount();
+            final BigDecimal line = tax.multiply(paidTo).divide(chargeAmount, scale, roundingMode)
+                    .subtract(tax.multiply(paidFrom).divide(chargeAmount, scale, roundingMode));
+            if (line.signum() != 0) {
+                taxLines.add(new ChargeTaxDetailDTO(taxDetail.getTaxComponent().getCreditAccount().getId(), line));
+            }
+        }
+        return taxLines;
+    }
+
+    private static Set<LoanTransactionType> taxStreamOf(final LoanTransaction loanTransaction) {
+        if (loanTransaction.isReversed()) {
+            return Set.of();
+        }
+        if (PAYMENT_TAX_STREAM.contains(loanTransaction.getTypeOf())) {
+            return PAYMENT_TAX_STREAM;
+        }
+        if (ACCRUAL_TAX_STREAM.contains(loanTransaction.getTypeOf())) {
+            return ACCRUAL_TAX_STREAM;
+        }
+        return Set.of();
     }
 }

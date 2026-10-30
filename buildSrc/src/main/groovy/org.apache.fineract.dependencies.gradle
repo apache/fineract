@@ -45,6 +45,7 @@ dependencyManagement {
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.4.0'
         mavenBom 'org.testcontainers:testcontainers-bom:1.21.4'
         mavenBom 'org.glassfish.jersey:jersey-bom:4.0.2'
+        mavenBom 'org.springframework.modulith:spring-modulith-bom:2.1.1'
     }
 
     dependencies {
@@ -85,62 +86,39 @@ dependencyManagement {
         dependency ('org.apache.tika:tika-core:3.3.0') {
             exclude 'commons-logging:commons-logging'
         }
-        dependency ('org.apache.tika:tika-parser-miscoffice-module:3.3.0') {
-            exclude 'org.bouncycastle:bcprov-jdk15on'
-            exclude 'org.bouncycastle:bcjmail-jdk15on'
-            exclude 'org.bouncycastle:bcprov-jdk18on'
-            exclude 'org.bouncycastle:bcjmail-jdk18on'
-            exclude 'commons-logging:commons-logging'
-            exclude 'org.apache.logging.log4j:log4j-api'
-            exclude 'org.slf4j:slf4j-api'
-            exclude 'commons-io:commons-io'
-            exclude 'commons-codec:commons-codec'
-            exclude 'org.apache.commons:commons-lang3'
-            exclude 'org.apache.poi:poi'
-            exclude 'org.apache.poi:poi-scratchpad'
-            exclude 'org.glassfish.jaxb:jaxb-runtime'
-            exclude 'org.apache.commons:commons-compress'
-            exclude 'xml-apis:xml-apis'
-        }
-        dependency ('org.apache.tika:tika-parser-microsoft-module:3.3.0') {
-            exclude 'org.bouncycastle:bcprov-jdk15on'
-            exclude 'org.bouncycastle:bcjmail-jdk15on'
-            exclude 'org.bouncycastle:bcprov-jdk18on'
-            exclude 'org.bouncycastle:bcjmail-jdk18on'
-            exclude 'commons-logging:commons-logging'
-            exclude 'org.apache.logging.log4j:log4j-api'
-            exclude 'org.slf4j:slf4j-api'
-            exclude 'commons-io:commons-io'
-            exclude 'commons-codec:commons-codec'
-            exclude 'org.apache.commons:commons-lang3'
-            exclude 'org.apache.poi:poi'
-            exclude 'org.apache.poi:poi-scratchpad'
-            exclude 'org.glassfish.jaxb:jaxb-runtime'
-            exclude 'org.apache.commons:commons-compress'
-            exclude 'xml-apis:xml-apis'
-        }
-        dependency ('org.apache.tika:tika-parser-image-module:3.3.0') {
-            exclude 'org.bouncycastle:bcprov-jdk15on'
-            exclude 'org.bouncycastle:bcjmail-jdk15on'
-            exclude 'org.bouncycastle:bcprov-jdk18on'
-            exclude 'org.bouncycastle:bcjmail-jdk18on'
-            exclude 'commons-logging:commons-logging'
-            exclude 'org.apache.logging.log4j:log4j-api'
-            exclude 'org.slf4j:slf4j-api'
-            exclude 'commons-io:commons-io'
-            exclude 'commons-codec:commons-codec'
-            exclude 'org.apache.commons:commons-lang3'
-            exclude 'org.apache.poi:poi'
-            exclude 'org.apache.poi:poi-scratchpad'
-            exclude 'org.glassfish.jaxb:jaxb-runtime'
-            exclude 'org.apache.commons:commons-compress'
-            exclude 'xml-apis:xml-apis'
+        def tikaParserExcludes = [
+            'org.bouncycastle:bcprov-jdk15on',
+            'org.bouncycastle:bcjmail-jdk15on',
+            'org.bouncycastle:bcprov-jdk18on',
+            'org.bouncycastle:bcjmail-jdk18on',
+            'commons-logging:commons-logging',
+            'org.apache.logging.log4j:log4j-api',
+            'org.slf4j:slf4j-api',
+            'commons-io:commons-io',
+            'commons-codec:commons-codec',
+            'org.apache.commons:commons-lang3',
+            'org.apache.poi:poi',
+            'org.apache.poi:poi-scratchpad',
+            'org.glassfish.jaxb:jaxb-runtime',
+            'org.apache.commons:commons-compress',
+            'xml-apis:xml-apis',
+        ]
+        [
+            'tika-parser-miscoffice-module',
+            'tika-parser-microsoft-module',
+            'tika-parser-image-module'
+        ].each { module ->
+            dependency("org.apache.tika:$module:3.3.0") {
+                tikaParserExcludes.each { exclude it }
+            }
         }
         dependency ('org.apache.httpcomponents:httpclient:4.5.14') {
             exclude 'commons-logging:commons-logging:'
         }
-        dependency 'org.apache.httpcomponents.core5:httpcore5:5.4.4'
-        dependency 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.4'
+        dependencySet(group: 'org.apache.httpcomponents.core5', version: '5.4.4') {
+            entry 'httpcore5'
+            entry 'httpcore5-h2'
+        }
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:3.1.0'
         dependency 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
@@ -155,37 +133,34 @@ dependencyManagement {
         dependency 'com.icegreen:greenmail-junit5:2.0.1'
 
         // fineract client dependencies
-        dependency "com.squareup.retrofit2:retrofit:2.12.0"
-        dependency "com.squareup.retrofit2:retrofit-mock:2.12.0"
-        dependency "com.squareup.retrofit2:adapter-rxjava2:2.12.0"
-        dependency "com.squareup.retrofit2:adapter-rxjava3:2.12.0"
-        dependency "com.squareup.retrofit2:adapter-guava:2.12.0"
-        dependency "com.squareup.retrofit2:converter-wire:2.12.0"
-        dependency "com.squareup.retrofit2:converter-jackson:2.12.0"
-        dependency "com.squareup.retrofit2:converter-simplexml:2.12.0"
-        dependency "com.squareup.retrofit2:converter-jaxb:2.12.0"
-        dependency "com.squareup.retrofit2:converter-scalars:2.12.0"
-        dependency "com.squareup.retrofit2:converter-gson:2.12.0"
-        dependency "com.squareup.retrofit2:converter-protobuf:2.12.0"
+        dependencySet(group: 'com.squareup.retrofit2', version: '2.12.0') {
+            entry 'retrofit'
+            entry 'retrofit-mock'
+            entry 'adapter-rxjava2'
+            entry 'adapter-rxjava3'
+            entry 'adapter-guava'
+            entry 'converter-wire'
+            entry 'converter-jackson'
+            entry 'converter-simplexml'
+            entry 'converter-jaxb'
+            entry 'converter-scalars'
+            entry 'converter-gson'
+            entry 'converter-protobuf'
+        }
         dependency 'io.reactivex.rxjava2:rxjava:2.2.21'
         dependency "io.gsonfire:gson-fire:1.9.0"
         dependency "com.google.code.findbugs:jsr305:3.0.2"
         dependency "commons-codec:commons-codec:1.22.0"
         dependency "org.projectlombok:lombok:1.18.46"
 
-        dependency 'org.bouncycastle:bcpkix-jdk18on:1.84'
-        dependency 'org.bouncycastle:bcprov-jdk18on:1.84'
-        dependency 'org.bouncycastle:bcutil-jdk18on:1.84'
-        dependency 'org.bouncycastle:bcpg-jdk18on:1.84'
+        dependencySet(group: 'org.bouncycastle', version: '1.84') {
+            entry 'bcpkix-jdk18on'
+            entry 'bcprov-jdk18on'
+            entry 'bcutil-jdk18on'
+        }
 
         dependency 'org.eclipse.jgit:org.eclipse.jgit:7.6.0.202603022253-r'
-        dependency 'org.eclipse.jgit:org.eclipse.jgit.gpg.bc:7.6.0.202603022253-r'
-        dependency 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:7.6.0.202603022253-r'
         dependency 'org.apache.maven:maven-artifact:3.9.16'
-
-        dependency ('com.tmatesoft.svnkit:svnkit:1.10.13')
-        dependency 'com.vdurmont:semver4j:3.1.0'
-        dependency 'org.beryx:text-io:3.4.1'
 
         dependency ('org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3') {
             exclude 'io.swagger.core.v3:swagger-core'
@@ -241,8 +216,10 @@ dependencyManagement {
             entry 'xml-path'
         }
 
-        dependency 'org.mapstruct:mapstruct:1.6.3'
-        dependency 'org.mapstruct:mapstruct-processor:1.6.3'
+        dependencySet(group: 'org.mapstruct', version: '1.6.3') {
+            entry 'mapstruct'
+            entry 'mapstruct-processor'
+        }
 
         dependency "org.apache.avro:avro:1.12.1"
 
@@ -255,23 +232,30 @@ dependencyManagement {
         dependency 'com.mysql:mysql-connector-j:9.7.0'
 
         dependency 'org.assertj:assertj-core:3.27.7'
+        dependency 'com.tngtech.archunit:archunit:1.4.2'
 
         dependency 'org.apache.commons:commons-math3:3.6.1'
         dependency 'commons-beanutils:commons-beanutils:1.11.0'
 
         dependency 'org.wiremock:wiremock-standalone:3.13.2'
-        dependency 'org.apache.sshd:sshd-common:2.17.1'
-        dependency 'org.apache.sshd:sshd-core:2.17.1'
+        dependencySet(group: 'org.apache.sshd', version: '2.17.1') {
+            entry 'sshd-common'
+            entry 'sshd-core'
+        }
 
-        dependency 'io.cucumber:cucumber-java:7.34.3'
-        dependency 'io.cucumber:cucumber-java8:7.34.3'
-        dependency 'io.cucumber:cucumber-junit-platform-engine:7.34.3'
-        dependency 'io.cucumber:cucumber-spring:7.34.3'
+        dependencySet(group: 'io.cucumber', version: '7.34.3') {
+            entry 'cucumber-java'
+            entry 'cucumber-java8'
+            entry 'cucumber-junit-platform-engine'
+            entry 'cucumber-spring'
+        }
 
         dependency 'org.reflections:reflections:0.10.2'
 
-        dependency 'org.openjdk.jmh:jmh-core:1.37'
-        dependency 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+        dependencySet(group: 'org.openjdk.jmh', version: '1.37') {
+            entry 'jmh-core'
+            entry 'jmh-generator-annprocess'
+        }
 
         // spring-restdocs (4.0.x) now managed by the Spring Boot 4 BOM
 
@@ -283,7 +267,7 @@ dependencyManagement {
             exclude 'org.mockito:mockito-core'
         }
 
-        dependency 'com.ibm.icu:icu4j:78.3'
+        dependency 'com.ibm.icu:icu4j:79.1'
         dependency 'org.yakworks:spring-icu4j:0.5.2'
         dependency 'org.apache.commons:commons-lang3:3.20.0'
         dependency 'com.nimbusds:nimbus-jose-jwt:10.9'
@@ -291,22 +275,24 @@ dependencyManagement {
         // resilience4j-bom does not manage the spring-boot4 starter variant — pin it explicitly:
         dependency 'io.github.resilience4j:resilience4j-spring-boot4:2.4.0'
         // Keep Netty on the 4.1 line for MockServer compatibility.
-        dependency 'io.netty:netty-buffer:4.1.138.Final'
-        dependency 'io.netty:netty-common:4.1.138.Final'
-        dependency 'io.netty:netty-codec:4.1.138.Final'
-        dependency 'io.netty:netty-codec-base:4.1.138.Final'
-        dependency 'io.netty:netty-codec-compression:4.1.138.Final'
-        dependency 'io.netty:netty-codec-http:4.1.138.Final'
-        dependency 'io.netty:netty-codec-http2:4.1.138.Final'
-        dependency 'io.netty:netty-codec-marshalling:4.1.138.Final'
-        dependency 'io.netty:netty-codec-protobuf:4.1.138.Final'
-        dependency 'io.netty:netty-codec-socks:4.1.138.Final'
-        dependency 'io.netty:netty-handler:4.1.138.Final'
-        dependency 'io.netty:netty-handler-proxy:4.1.138.Final'
-        dependency 'io.netty:netty-resolver:4.1.138.Final'
-        dependency 'io.netty:netty-transport:4.1.138.Final'
-        dependency 'io.netty:netty-transport-classes-epoll:4.1.138.Final'
-        dependency 'io.netty:netty-transport-native-unix-common:4.1.138.Final'
+        dependencySet(group: 'io.netty', version: '4.1.138.Final') {
+            entry 'netty-buffer'
+            entry 'netty-common'
+            entry 'netty-codec'
+            entry 'netty-codec-base'
+            entry 'netty-codec-compression'
+            entry 'netty-codec-http'
+            entry 'netty-codec-http2'
+            entry 'netty-codec-marshalling'
+            entry 'netty-codec-protobuf'
+            entry 'netty-codec-socks'
+            entry 'netty-handler'
+            entry 'netty-handler-proxy'
+            entry 'netty-resolver'
+            entry 'netty-transport'
+            entry 'netty-transport-classes-epoll'
+            entry 'netty-transport-native-unix-common'
+        }
         dependency 'at.yawk.lz4:lz4-java:1.11.4'
         dependency 'org.springframework.retry:spring-retry:2.0.13'
         dependency 'org.jsoup:jsoup:1.23.2'

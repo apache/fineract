@@ -34,7 +34,7 @@ noOpMethod.invoke(loggerFactory, "io.spring.gradle.dependencymanagement.internal
 
 apply from: "${projectDir}/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
-description = 'Fineract Gradle Plugin'
+description = 'Fineract build logic'
 
 repositories {
     gradlePluginPortal()
@@ -50,25 +50,6 @@ configurations.all {
 }
 
 dependencies {
-    implementation 'com.sun.activation:jakarta.activation'
-    implementation 'com.sun.mail:jakarta.mail'
-    implementation 'org.freemarker:freemarker'
-    implementation ('com.tmatesoft.svnkit:svnkit') {
-        exclude group: 'net.i2p.crypto', module: 'eddsa'
-    }
-    implementation 'org.bouncycastle:bcprov-jdk18on'
-    implementation 'org.bouncycastle:bcutil-jdk18on'
-    implementation 'org.bouncycastle:bcpg-jdk18on'
     implementation 'org.eclipse.jgit:org.eclipse.jgit'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit.gpg.bc'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache'
     implementation 'org.apache.maven:maven-artifact'
-    implementation 'com.vdurmont:semver4j'
-    implementation 'org.beryx:text-io'
-    implementation 'commons-io:commons-io'
-    implementation 'com.squareup.okhttp3:okhttp'
-    implementation 'com.squareup.okhttp3:logging-interceptor'
-    implementation 'com.squareup.retrofit2:retrofit'
-    implementation 'com.squareup.retrofit2:converter-jackson'
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
 }

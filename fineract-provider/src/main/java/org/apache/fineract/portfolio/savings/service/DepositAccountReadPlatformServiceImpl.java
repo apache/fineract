@@ -24,6 +24,9 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -343,13 +346,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     .retrievewithdrawalFeeTypeOptions();
 
             final Collection<SavingsAccountTransactionData> transactions = null;
-            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId);
+            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId, officeId);
             // update charges from Product charges
             final Collection<SavingsAccountChargeData> charges = fromChargesToSavingsCharges(productCharges);
 
             final boolean feeChargesOnly = false;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsProductApplicableCharges(feeChargesOnly);
+                    .retrieveSavingsProductApplicableCharges(feeChargesOnly, officeId);
 
             final Collection<EnumOptionData> maturityInstructionOptions = this.depositsDropdownReadPlatformService
                     .maturityInstructionOptions();
@@ -430,7 +433,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             final boolean feeChargesOnly = true;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsProductApplicableCharges(feeChargesOnly);
+                    .retrieveSavingsProductApplicableCharges(feeChargesOnly, officeId);
 
             if (depositAccountType == DepositAccountType.FIXED_DEPOSIT) {
 
@@ -844,6 +847,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         public static final String ON_ACCOUNT_CLOSURE_ID = "onAccountClosureId";
         public static final String TRANSFER_INTEREST_TO_SAVINGS = "transferInterestToSavings";
         public static final String TRANSFER_TO_SAVINGS_ID = "transferToSavingsId";
+        public static final String IS_RATE_CHART_OVERRIDDEN = "isRateChartOverridden";
         private final String schemaSql;
 
         FixedDepositAccountMapper() {
@@ -866,7 +870,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("datp.deposit_period_frequency_enum as depositPeriodFrequencyTypeId, ");
             sqlBuilder.append("datp.on_account_closure_enum as onAccountClosureId, ");
             sqlBuilder.append("datp.transfer_interest_to_linked_account as transferInterestToSavings, ");
-            sqlBuilder.append("datp.transfer_to_savings_account_id as transferToSavingsId ");
+            sqlBuilder.append("datp.transfer_to_savings_account_id as transferToSavingsId, ");
+            sqlBuilder.append("datp.is_rate_chart_overridden as isRateChartOverridden ");
 
             sqlBuilder.append(super.selectTablesSql());
 
@@ -916,10 +921,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             final Long transferToSavingsId = JdbcSupport.getLong(rs, TRANSFER_TO_SAVINGS_ID);
 
+            final boolean isRateChartOverridden = rs.getBoolean(IS_RATE_CHART_OVERRIDDEN);
+
             return FixedDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, transferToSavingsId);
+                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, transferToSavingsId,
+                    isRateChartOverridden);
         }
     }
 
@@ -948,6 +956,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         public static final String IS_CALENDAR_INHERITED = "isCalendarInherited";
         public static final String ON_ACCOUNT_CLOSURE_ID = "onAccountClosureId";
         public static final String EXPECTED_FIRST_DEPOSIT_ON_DATE = "expectedFirstDepositOnDate";
+        public static final String IS_RATE_CHART_OVERRIDDEN = "isRateChartOverridden";
         private final String schemaSql;
 
         RecurringDepositAccountMapper() {
@@ -976,7 +985,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("datp.maturity_date as maturityDate, ");
             sqlBuilder.append("datp.deposit_period as depositPeriod, ");
             sqlBuilder.append("datp.deposit_period_frequency_enum as depositPeriodFrequencyTypeId, ");
-            sqlBuilder.append("datp.on_account_closure_enum as onAccountClosureId ");
+            sqlBuilder.append("datp.on_account_closure_enum as onAccountClosureId, ");
+            sqlBuilder.append("datp.is_rate_chart_overridden as isRateChartOverridden ");
 
             sqlBuilder.append(this.selectTablesSql());
             sqlBuilder.append("left join m_deposit_account_recurring_detail dard on sa.id = dard.savings_account_id ");
@@ -1033,12 +1043,14 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     : SavingsEnumerations.depositAccountOnClosureType(onAccountClosureId);
             final LocalDate expectedFirstDepositOnDate = JdbcSupport.getLocalDate(rs, EXPECTED_FIRST_DEPOSIT_ON_DATE);
 
+            final boolean isRateChartOverridden = rs.getBoolean(IS_RATE_CHART_OVERRIDDEN);
+
             return RecurringDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
                     depositPeriodFrequencyType, mandatoryRecommendedDepositAmount, onAccountClosureType, expectedFirstDepositOnDate,
                     totalOverdueAmount, noOfOverdueInstallments, isMandatoryDeposit, allowWithdrawal, adjustAdvanceTowardsFuturePayments,
-                    isCalendarInherited);
+                    isCalendarInherited, isRateChartOverridden);
 
         }
     }
@@ -1070,6 +1082,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         public static final String TRANSACTION_ID = "transactionId";
         public static final String TRANSACTION_TYPE = "transactionType";
         public static final String TRANSACTION_DATE = "transactionDate";
+        public static final String TRANSACTION_TIME = "transactionTime";
+        public static final String TRANSACTION_TIME_OFFSET = "transactionTimeOffset";
         public static final String TRANSACTION_AMOUNT = "transactionAmount";
         public static final String RUNNING_BALANCE = "runningBalance";
         public static final String REVERSED = "reversed";
@@ -1091,10 +1105,14 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         public static final String FROM_TRANSFER_ID = "fromTransferId";
         public static final String TO_TRANSFER_ID = "toTransferId";
         public static final String FROM_TRANSFER_DATE = "fromTransferDate";
+        public static final String FROM_TRANSFER_TIME = "fromTransferTime";
+        public static final String FROM_TRANSFER_TIME_OFFSET = "fromTransferTimeOffset";
         public static final String FROM_TRANSFER_AMOUNT = "fromTransferAmount";
         public static final String FROM_TRANSFER_REVERSED = "fromTransferReversed";
         public static final String FROM_TRANSFER_DESCRIPTION = "fromTransferDescription";
         public static final String TO_TRANSFER_DATE = "toTransferDate";
+        public static final String TO_TRANSFER_TIME = "toTransferTime";
+        public static final String TO_TRANSFER_TIME_OFFSET = "toTransferTimeOffset";
         public static final String TO_TRANSFER_AMOUNT = "toTransferAmount";
         public static final String TO_TRANSFER_REVERSED = "toTransferReversed";
         public static final String TO_TRANSFER_DESCRIPTION = "toTransferDescription";
@@ -1106,14 +1124,20 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
-            sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
+            sqlBuilder.append(
+                    "tr.transaction_date as transactionDate, tr.transaction_time as transactionTime, tr.transaction_time_offset as transactionTimeOffset, ");
+            sqlBuilder.append("tr.amount as transactionAmount,");
             sqlBuilder.append("tr.running_balance_derived as runningBalance, tr.is_reversed as reversed,");
             sqlBuilder.append("tr.submitted_on_date as submittedOnDate,");
             sqlBuilder.append("fromtran.id as fromTransferId, fromtran.is_reversed as fromTransferReversed,");
-            sqlBuilder.append("fromtran.transaction_date as fromTransferDate, fromtran.amount as fromTransferAmount,");
+            sqlBuilder.append(
+                    "fromtran.transaction_date as fromTransferDate, fromtran.transaction_time as fromTransferTime, fromtran.transaction_time_offset as fromTransferTimeOffset, ");
+            sqlBuilder.append("fromtran.amount as fromTransferAmount,");
             sqlBuilder.append("fromtran.description as fromTransferDescription,");
             sqlBuilder.append("totran.id as toTransferId, totran.is_reversed as toTransferReversed,");
-            sqlBuilder.append("totran.transaction_date as toTransferDate, totran.amount as toTransferAmount,");
+            sqlBuilder.append(
+                    "totran.transaction_date as toTransferDate, totran.transaction_time as toTransferTime, totran.transaction_time_offset as toTransferTimeOffset, ");
+            sqlBuilder.append("totran.amount as toTransferAmount,");
             sqlBuilder.append("totran.description as toTransferDescription,");
             sqlBuilder.append("sa.id as savingsId, sa.account_no as accountNo,");
             sqlBuilder.append(" au.username as submittedByUsername, ");
@@ -1146,6 +1170,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations.transactionType(transactionTypeInt);
 
             final LocalDate date = JdbcSupport.getLocalDate(rs, TRANSACTION_DATE);
+            final OffsetTime transactionTime = getOffsetTime(rs, TRANSACTION_TIME, TRANSACTION_TIME_OFFSET);
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, SUBMITTED_ON_DATE);
             final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, TRANSACTION_AMOUNT);
             final BigDecimal outstandingChargeAmount = null;
@@ -1185,27 +1210,37 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final Long toTransferId = JdbcSupport.getLong(rs, TO_TRANSFER_ID);
             if (fromTransferId != null) {
                 final LocalDate fromTransferDate = JdbcSupport.getLocalDate(rs, FROM_TRANSFER_DATE);
+                final OffsetTime fromTransferTime = getOffsetTime(rs, FROM_TRANSFER_TIME, FROM_TRANSFER_TIME_OFFSET);
                 final BigDecimal fromTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, FROM_TRANSFER_AMOUNT);
                 final boolean fromTransferReversed = rs.getBoolean(FROM_TRANSFER_REVERSED);
                 final String fromTransferDescription = rs.getString(FROM_TRANSFER_DESCRIPTION);
 
                 transfer = AccountTransferData.transferBasicDetails(fromTransferId, currency, fromTransferAmount, fromTransferDate,
-                        fromTransferDescription, fromTransferReversed);
+                        fromTransferTime, fromTransferDescription, fromTransferReversed);
             } else if (toTransferId != null) {
                 final LocalDate toTransferDate = JdbcSupport.getLocalDate(rs, TO_TRANSFER_DATE);
+                final OffsetTime toTransferTime = getOffsetTime(rs, TO_TRANSFER_TIME, TO_TRANSFER_TIME_OFFSET);
                 final BigDecimal toTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, TO_TRANSFER_AMOUNT);
                 final boolean toTransferReversed = rs.getBoolean(TO_TRANSFER_REVERSED);
                 final String toTransferDescription = rs.getString(TO_TRANSFER_DESCRIPTION);
 
                 transfer = AccountTransferData.transferBasicDetails(toTransferId, currency, toTransferAmount, toTransferDate,
-                        toTransferDescription, toTransferReversed);
+                        toTransferTime, toTransferDescription, toTransferReversed);
             }
             final boolean postInterestAsOn = false;
             final String submittedByUsername = rs.getString(SUBMITTED_BY_USERNAME);
             final String note = null;
-            return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency,
-                    amount, outstandingChargeAmount, runningBalance, reversed, transfer, postInterestAsOn, submittedByUsername, note,
-                    submittedOnDate);
+            return SavingsAccountTransactionData
+                    .create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency, amount, outstandingChargeAmount,
+                            runningBalance, reversed, transfer, postInterestAsOn, submittedByUsername, note, submittedOnDate)
+                    .withTransactionTime(transactionTime);
+        }
+
+        private static OffsetTime getOffsetTime(final ResultSet rs, final String timeColumn, final String offsetColumn)
+                throws SQLException {
+            final LocalTime time = JdbcSupport.getLocalTime(rs, timeColumn);
+            final Integer offset = JdbcSupport.getInteger(rs, offsetColumn);
+            return time == null ? null : OffsetTime.of(time, ZoneOffset.ofTotalSeconds(offset));
         }
     }
 
@@ -1433,11 +1468,12 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final EnumOptionData depositPeriodFrequencyType = null;
             final EnumOptionData onAccountClosureType = null;
             final Boolean transferInterestToSavings = false;
+            final boolean isRateChartOverridden = false;
 
             return FixedDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, null);
+                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, null, isRateChartOverridden);
         }
     }
 
@@ -1513,6 +1549,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final boolean allowWithdrawal = rs.getBoolean(ALLOW_WITHDRAWAL);
             final boolean adjustAdvanceTowardsFuturePayments = rs.getBoolean(ADJUST_ADVANCE_TOWARDS_FUTURE_PAYMENTS);
             final boolean isCalendarInherited = false;
+            final boolean isRateChartOverridden = false;
 
             final BigDecimal depositAmount = null;
             final BigDecimal maturityAmount = null;
@@ -1530,7 +1567,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
                     depositPeriodFrequencyType, mandatoryRecommendedDepositAmount, onAccountClosureType, expectedFirstDepositOnDate,
                     totalOverdueAmount, noOfOverdueInstallments, isMandatoryDeposit, allowWithdrawal, adjustAdvanceTowardsFuturePayments,
-                    isCalendarInherited);
+                    isCalendarInherited, isRateChartOverridden);
         }
     }
 

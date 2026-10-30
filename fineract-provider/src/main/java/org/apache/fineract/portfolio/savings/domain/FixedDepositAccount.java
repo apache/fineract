@@ -161,6 +161,17 @@ public class FixedDepositAccount extends SavingsAccount {
         // default it to nominalAnnualInterst rate. interest chart overrrides
         // this value.
         BigDecimal applicableInterestRate = this.nominalAnnualInterestRate;
+        if (this.accountTermAndPreClosure.isRateChartOverridden()) {
+            if (isPreMatureClosure && this.accountTermAndPreClosure.isPreClosurePenalApplicable()) {
+                final BigDecimal penalInterest = this.accountTermAndPreClosure.depositPreClosureDetail().preClosurePenalInterest();
+                applicableInterestRate = applicableInterestRate.subtract(penalInterest);
+                if (applicableInterestRate.compareTo(BigDecimal.ZERO) < 0) {
+                    applicableInterestRate = BigDecimal.ZERO;
+                }
+            }
+            return applicableInterestRate.divide(BigDecimal.valueOf(100L), mc);
+        }
+
         if (this.chart != null) {
             boolean applyPreMaturePenalty = false;
             BigDecimal penalInterest = BigDecimal.ZERO;
@@ -186,8 +197,8 @@ public class FixedDepositAccount extends SavingsAccount {
                 applicableInterestRate = applicableInterestRate.subtract(penalInterest);
                 applicableInterestRate = applicableInterestRate.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : applicableInterestRate;
             }
+            this.nominalAnnualInterestRate = applicableInterestRate;
         }
-        this.nominalAnnualInterestRate = applicableInterestRate;
 
         return applicableInterestRate.divide(BigDecimal.valueOf(100L), mc);
     }
@@ -747,7 +758,7 @@ public class FixedDepositAccount extends SavingsAccount {
             }
         }
 
-        if (this.chart != null) {
+        if (this.chart != null && !this.accountTermAndPreClosure.isRateChartOverridden()) {
             final LocalDate chartFromDate = this.chart.getFromDate();
             LocalDate chartEndDate = this.chart.getEndDate();
             chartEndDate = chartEndDate == null ? DateUtils.getBusinessLocalDate() : chartEndDate;
@@ -804,7 +815,8 @@ public class FixedDepositAccount extends SavingsAccount {
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
                 .fromInt(this.interestCalculationDaysInYearType);
         final BigDecimal minRequiredOpeningBalance = null;
-        final BigDecimal interestRate = BigDecimal.ZERO;
+        final BigDecimal interestRate = this.accountTermAndPreClosure.isRateChartOverridden() ? this.nominalAnnualInterestRate
+                : BigDecimal.ZERO;
         final Set<SavingsAccountCharge> savingsAccountCharges = null;
         final SavingsPeriodFrequencyType lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType);
         final Integer lockinPeriodFrequency = this.lockinPeriodFrequency;

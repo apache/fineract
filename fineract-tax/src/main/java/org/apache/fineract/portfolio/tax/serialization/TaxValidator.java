@@ -29,11 +29,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -65,8 +67,7 @@ public class TaxValidator {
             Arrays.asList(DATE_FORMAT, LOCALE, TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName,
                     TaxApiConstants.startDateParamName, TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAccountIdParamName,
                     TaxApiConstants.creditAccountTypeParamName, TaxApiConstants.creditAccountIdParamName));
-    private static final Set<String> SUPPORTED_TAX_COMPONENT_UPDATE_PARAMETERS = new HashSet<>(Arrays.asList(DATE_FORMAT, LOCALE,
-            TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName, TaxApiConstants.startDateParamName));
+    private static final Set<String> SUPPORTED_TAX_COMPONENT_UPDATE_PARAMETERS = SUPPORTED_TAX_COMPONENT_CREATE_PARAMETERS;
     private static final Set<String> SUPPORTED_TAX_GROUP_PARAMETERS = new HashSet<>(
             Arrays.asList(DATE_FORMAT, LOCALE, TaxApiConstants.nameParamName, TaxApiConstants.taxComponentsParamName));
     private static final Set<String> SUPPORTED_TAX_GROUP_TAX_COMPONENTS_CREATE_PARAMETERS = new HashSet<>(
@@ -105,32 +106,24 @@ public class TaxValidator {
         baseDataValidator.reset().parameter(TaxApiConstants.percentageParamName).value(percentage).notBlank().positiveAmount()
                 .notGreaterThanMax(BigDecimal.valueOf(100));
 
-        final Integer debitAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(TaxApiConstants.debitAccountTypeParamName,
-                element);
-        baseDataValidator.reset().parameter(TaxApiConstants.debitAccountTypeParamName).value(debitAccountType).ignoreIfNull()
-                .isOneOfTheseValues(GLAccountType.ASSET.getValue(), GLAccountType.LIABILITY.getValue(), GLAccountType.EQUITY.getValue(),
-                        GLAccountType.INCOME.getValue(), GLAccountType.EXPENSE.getValue());
-
-        final Long debitAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.debitAccountIdParamName, element);
-        baseDataValidator.reset().parameter(TaxApiConstants.debitAccountIdParamName).value(debitAccountId).longGreaterThanZero();
-        if (debitAccountType != null || debitAccountId != null) {
-            baseDataValidator.reset().parameter(TaxApiConstants.debitAccountTypeParamName).value(debitAccountType).notBlank();
-            baseDataValidator.reset().parameter(TaxApiConstants.debitAccountIdParamName).value(debitAccountId).notBlank();
-        }
-
-        final Integer creditAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(TaxApiConstants.creditAccountTypeParamName,
-                element);
-        baseDataValidator.reset().parameter(TaxApiConstants.creditAccountTypeParamName).value(creditAccountType).ignoreIfNull()
-                .isOneOfTheseValues(GLAccountType.ASSET.getValue(), GLAccountType.LIABILITY.getValue(), GLAccountType.EQUITY.getValue(),
-                        GLAccountType.INCOME.getValue(), GLAccountType.EXPENSE.getValue());
-
-        final Long creditAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.creditAccountIdParamName, element);
-        baseDataValidator.reset().parameter(TaxApiConstants.creditAccountIdParamName).value(creditAccountId).longGreaterThanZero();
-        if (creditAccountType != null || creditAccountId != null) {
-            baseDataValidator.reset().parameter(TaxApiConstants.creditAccountIdParamName).value(creditAccountId).notBlank();
-            baseDataValidator.reset().parameter(TaxApiConstants.creditAccountTypeParamName).value(creditAccountType).notBlank();
-        }
+        validateGlAccount(element, TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAccountIdParamName, baseDataValidator);
+        validateGlAccount(element, TaxApiConstants.creditAccountTypeParamName, TaxApiConstants.creditAccountIdParamName, baseDataValidator);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateGlAccount(final JsonElement element, final String accountTypeParamName, final String accountIdParamName,
+            final DataValidatorBuilder baseDataValidator) {
+        final Integer accountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(accountTypeParamName, element);
+        baseDataValidator.reset().parameter(accountTypeParamName).value(accountType).ignoreIfNull().isOneOfTheseValues(
+                GLAccountType.ASSET.getValue(), GLAccountType.LIABILITY.getValue(), GLAccountType.EQUITY.getValue(),
+                GLAccountType.INCOME.getValue(), GLAccountType.EXPENSE.getValue());
+
+        final Long accountId = this.fromApiJsonHelper.extractLongNamed(accountIdParamName, element);
+        baseDataValidator.reset().parameter(accountIdParamName).value(accountId).longGreaterThanZero();
+        if (accountType != null || accountId != null) {
+            baseDataValidator.reset().parameter(accountTypeParamName).value(accountType).notBlank();
+            baseDataValidator.reset().parameter(accountIdParamName).value(accountId).notBlank();
+        }
     }
 
     public void validateForTaxComponentUpdate(final String json) {
@@ -160,10 +153,15 @@ public class TaxValidator {
                     .notGreaterThanMax(BigDecimal.valueOf(100));
         }
 
-        if (this.fromApiJsonHelper.parameterExists(TaxApiConstants.startDateParamName, element)) {
-            final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.startDateParamName, element);
-            baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate)
-                    .validateDateAfter(DateUtils.getBusinessLocalDate());
+        if (this.fromApiJsonHelper.parameterExists(TaxApiConstants.debitAccountTypeParamName, element)
+                || this.fromApiJsonHelper.parameterExists(TaxApiConstants.debitAccountIdParamName, element)) {
+            validateGlAccount(element, TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAccountIdParamName,
+                    baseDataValidator);
+        }
+        if (this.fromApiJsonHelper.parameterExists(TaxApiConstants.creditAccountTypeParamName, element)
+                || this.fromApiJsonHelper.parameterExists(TaxApiConstants.creditAccountIdParamName, element)) {
+            validateGlAccount(element, TaxApiConstants.creditAccountTypeParamName, TaxApiConstants.creditAccountIdParamName,
+                    baseDataValidator);
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -340,16 +338,61 @@ public class TaxValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateStartDate(final LocalDate existingStartDate, final JsonCommand command) {
+    public void validateTaxComponentChanges(final TaxComponent taxComponent, final JsonCommand command, final boolean linked) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_COMPONENT);
-        validateStartDate(existingStartDate, command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName), baseDataValidator);
+        if (linked) {
+            for (String parameterName : lockedParametersChangedBy(taxComponent, command)) {
+                baseDataValidator.reset().parameter(parameterName).failWithCode("cannot.be.modified.for.linked.tax.component");
+            }
+        } else if (command.isChangeInBigDecimalParameterNamed(TaxApiConstants.percentageParamName, taxComponent.getPercentage())) {
+            final LocalDate startDate = command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName);
+            baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate)
+                    .validateDateAfter(DateUtils.getBusinessLocalDate());
+            baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate)
+                    .validateDateAfter(taxComponent.startDate());
+        } else if (command.isChangeInLocalDateParameterNamed(TaxApiConstants.startDateParamName, taxComponent.startDate())) {
+            validateStartDateMove(taxComponent, command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName),
+                    baseDataValidator);
+        }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    private void validateStartDate(final LocalDate existingStartDate, final LocalDate startDate,
+    private void validateStartDateMove(final TaxComponent taxComponent, final LocalDate startDate,
             final DataValidatorBuilder baseDataValidator) {
-        baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate).validateDateAfter(existingStartDate);
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+        if (!DateUtils.isAfter(taxComponent.startDate(), today)) {
+            baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).failWithCode("cannot.be.modified.after.activation");
+            return;
+        }
+        baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate).notNull().validateDateAfter(today);
+        taxComponent.findPreviousRate().ifPresent(previousRate -> {
+            if (startDate != null && !DateUtils.isAfter(startDate, previousRate.startDate())) {
+                baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate)
+                        .failWithCode("must.be.after.previous.rate.start.date", previousRate.startDate());
+            }
+        });
+    }
+
+    private static List<String> lockedParametersChangedBy(final TaxComponent taxComponent, final JsonCommand command) {
+        final Map<String, Boolean> changes = new LinkedHashMap<>();
+        changes.put(TaxApiConstants.percentageParamName,
+                command.isChangeInBigDecimalParameterNamed(TaxApiConstants.percentageParamName, taxComponent.getPercentage()));
+        changes.put(TaxApiConstants.startDateParamName,
+                command.isChangeInLocalDateParameterNamed(TaxApiConstants.startDateParamName, taxComponent.startDate()));
+        changes.put(TaxApiConstants.debitAccountTypeParamName, command
+                .isChangeInIntegerSansLocaleParameterNamed(TaxApiConstants.debitAccountTypeParamName, taxComponent.getDebitAccountType()));
+        changes.put(TaxApiConstants.debitAccountIdParamName,
+                command.isChangeInLongParameterNamed(TaxApiConstants.debitAccountIdParamName, accountId(taxComponent.getDebitAccount())));
+        changes.put(TaxApiConstants.creditAccountTypeParamName, command.isChangeInIntegerSansLocaleParameterNamed(
+                TaxApiConstants.creditAccountTypeParamName, taxComponent.getCreditAccountType()));
+        changes.put(TaxApiConstants.creditAccountIdParamName,
+                command.isChangeInLongParameterNamed(TaxApiConstants.creditAccountIdParamName, accountId(taxComponent.getCreditAccount())));
+        return changes.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).toList();
+    }
+
+    private static Long accountId(final GLAccount account) {
+        return account == null ? null : account.getId();
     }
 
     private void validateOverlappingComponents(final Set<TaxGroupMappings> taxMappings, final DataValidatorBuilder baseDataValidator) {

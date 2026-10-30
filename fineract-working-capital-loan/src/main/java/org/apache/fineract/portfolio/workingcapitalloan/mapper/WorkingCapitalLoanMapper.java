@@ -54,6 +54,7 @@ public interface WorkingCapitalLoanMapper {
     @Mapping(target = "clientName", source = "client.displayName")
     @Mapping(target = "clientExternalId", source = "client.externalId")
     @Mapping(target = "clientOfficeId", source = "client.office.id")
+    @Mapping(target = "clientOfficeName", source = "client.office.name")
     @Mapping(target = "fundId", source = "fund.id")
     @Mapping(target = "fundName", source = "fund.name")
     @Mapping(target = "product", ignore = true)

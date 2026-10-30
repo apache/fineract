@@ -25,6 +25,9 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -347,6 +350,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append(
                     "apm2.gl_account_id as glAccountIdForInterestReceivable,apm3.gl_account_id as glAccountIdForOverdraftPorfolio, ");
             sqlBuilder.append("apm4.gl_account_id as glAccountIdForInterestPayable, ");
+            sqlBuilder.append("apm5.gl_account_id as glAccountIdForIncomeFromInterest, ");
             sqlBuilder.append(
                     "mtc.id as taxComponentId, mtc.debit_account_id as debitAccountId, mtc.credit_account_id as creditAccountId, mtc.percentage as taxPercentage ");
             sqlBuilder.append("from m_savings_account sa ");
@@ -366,9 +370,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     "left join acc_product_mapping apm on apm.product_type = 2 and apm.product_id = sp.id and apm.financial_account_type=3 ");
             sqlBuilder.append(
                     "left join acc_product_mapping apm1 on apm1.product_type = 2 and apm1.product_id = sp.id and apm1.financial_account_type=2 ");
-            sqlBuilder.append("left join acc_product_mapping apm2 on apm2.product_id = sp.id and apm2.financial_account_type=18 ");
-            sqlBuilder.append("left join acc_product_mapping apm3 on apm3.product_id = sp.id and apm3.financial_account_type = 11 ");
-            sqlBuilder.append("left join acc_product_mapping apm4 on apm4.product_id = sp.id and apm4.financial_account_type = 17 ");
+            sqlBuilder.append(
+                    "left join acc_product_mapping apm2 on apm2.product_type = 2 and apm2.product_id = sp.id and apm2.financial_account_type=18 ");
+            sqlBuilder.append(
+                    "left join acc_product_mapping apm3 on apm3.product_type = 2 and apm3.product_id = sp.id and apm3.financial_account_type=11 ");
+            sqlBuilder.append(
+                    "left join acc_product_mapping apm4 on apm4.product_type = 2 and apm4.product_id = sp.id and apm4.financial_account_type=17 ");
+            sqlBuilder.append(
+                    "left join acc_product_mapping apm5 on apm5.product_type = 2 and apm5.product_id = sp.id and apm5.financial_account_type=12 ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -426,6 +435,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final Long glAccountIdForInterestReceivable = rs.getLong("glAccountIdForInterestReceivable");
 
                     final Long glAccountIdForInterestPayable = rs.getLong("glAccountIdForInterestPayable");
+
+                    final Long glAccountIdForIncomeFromInterest = rs.getLong("glAccountIdForIncomeFromInterest");
 
                     final Long productId = rs.getLong("productId");
                     final Integer accountType = rs.getInt("accountingType");
@@ -591,6 +602,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
                     savingsAccountData.setGlAccountIdForInterestOnSavings(glAccountIdForInterestOnSavings);
                     savingsAccountData.setGlAccountIdForSavingsControl(glAccountIdForSavingsControl);
+                    savingsAccountData.setGlAccountIdForIncomeFromInterest(glAccountIdForIncomeFromInterest);
                     final Integer version = JdbcSupport.getInteger(rs, "version");
                     savingsAccountData.setVersion(version);
                 }
@@ -1111,16 +1123,16 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         protected static String buildSelect() {
             return "tr.id as transactionId, tr.transaction_type_enum as transactionType, "
-                    + "tr.transaction_date as transactionDate, tr.external_id as externalId, tr.amount as transactionAmount, "
+                    + "tr.transaction_date as transactionDate, tr.transaction_time as transactionTime, tr.transaction_time_offset as transactionTimeOffset, tr.external_id as externalId, tr.amount as transactionAmount, "
                     + "tr.release_id_of_hold_amount as releaseTransactionId, tr.reason_for_block as reasonForBlock, "
                     + "tr.submitted_on_date as submittedOnDate, au.username as submittedByUsername, nt.note as transactionNote, "
                     + "tr.running_balance_derived as runningBalance, tr.is_reversed as reversed, "
                     + "tr.is_reversal as isReversal, tr.original_transaction_id as originalTransactionId, tr.is_lien_transaction as lienTransaction, "
                     + "fromtran.id as fromTransferId, fromtran.is_reversed as fromTransferReversed, "
-                    + "fromtran.transaction_date as fromTransferDate, fromtran.amount as fromTransferAmount, "
+                    + "fromtran.transaction_date as fromTransferDate, fromtran.transaction_time as fromTransferTime, fromtran.transaction_time_offset as fromTransferTimeOffset, fromtran.amount as fromTransferAmount, "
                     + "fromtran.description as fromTransferDescription, "
                     + "totran.id as toTransferId, totran.is_reversed as toTransferReversed, "
-                    + "totran.transaction_date as toTransferDate, totran.amount as toTransferAmount, "
+                    + "totran.transaction_date as toTransferDate, totran.transaction_time as toTransferTime, totran.transaction_time_offset as toTransferTimeOffset, totran.amount as toTransferAmount, "
                     + "totran.description as toTransferDescription, sa.id as savingsId, sa.account_no as accountNo, "
                     + "pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, "
                     + "pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, "
@@ -1158,6 +1170,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations.transactionType(transactionTypeInt);
 
             final LocalDate date = JdbcSupport.getLocalDate(rs, "transactionDate");
+            final OffsetTime transactionTime = getOffsetTime(rs, "transactionTime", "transactionTimeOffset");
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final ExternalId externalId = ExternalIdFactory.produce(rs.getString("externalId"));
             final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "transactionAmount");
@@ -1204,26 +1217,36 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final Long toTransferId = JdbcSupport.getLong(rs, "toTransferId");
             if (fromTransferId != null) {
                 final LocalDate fromTransferDate = JdbcSupport.getLocalDate(rs, "fromTransferDate");
+                final OffsetTime fromTransferTime = getOffsetTime(rs, "fromTransferTime", "fromTransferTimeOffset");
                 final BigDecimal fromTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "fromTransferAmount");
                 final boolean fromTransferReversed = rs.getBoolean("fromTransferReversed");
                 final String fromTransferDescription = rs.getString("fromTransferDescription");
 
                 transfer = AccountTransferData.transferBasicDetails(fromTransferId, currency, fromTransferAmount, fromTransferDate,
-                        fromTransferDescription, fromTransferReversed);
+                        fromTransferTime, fromTransferDescription, fromTransferReversed);
             } else if (toTransferId != null) {
                 final LocalDate toTransferDate = JdbcSupport.getLocalDate(rs, "toTransferDate");
+                final OffsetTime toTransferTime = getOffsetTime(rs, "toTransferTime", "toTransferTimeOffset");
                 final BigDecimal toTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "toTransferAmount");
                 final boolean toTransferReversed = rs.getBoolean("toTransferReversed");
                 final String toTransferDescription = rs.getString("toTransferDescription");
 
                 transfer = AccountTransferData.transferBasicDetails(toTransferId, currency, toTransferAmount, toTransferDate,
-                        toTransferDescription, toTransferReversed);
+                        toTransferTime, toTransferDescription, toTransferReversed);
             }
             final String submittedByUsername = rs.getString("submittedByUsername");
             final String note = rs.getString("transactionNote");
             return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, externalId, date,
                     currency, amount, outstandingChargeAmount, runningBalance, reversed, transfer, submittedOnDate, postInterestAsOn,
-                    submittedByUsername, note, isReversal, originalTransactionId, lienTransaction, releaseTransactionId, reasonForBlock);
+                    submittedByUsername, note, isReversal, originalTransactionId, lienTransaction, releaseTransactionId, reasonForBlock)
+                    .withTransactionTime(transactionTime);
+        }
+
+        private static OffsetTime getOffsetTime(final ResultSet rs, final String timeColumn, final String offsetColumn)
+                throws SQLException {
+            final LocalTime time = JdbcSupport.getLocalTime(rs, timeColumn);
+            final Integer offset = JdbcSupport.getInteger(rs, offsetColumn);
+            return time == null ? null : OffsetTime.of(time, ZoneOffset.ofTotalSeconds(offset));
         }
     }
 
