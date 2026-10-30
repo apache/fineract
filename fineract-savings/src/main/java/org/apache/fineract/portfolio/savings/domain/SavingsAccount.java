@@ -1179,6 +1179,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                 "savingsaccount");
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_WITHDRAWAL, transactionDTO.getTransactionDate());
 
+        final boolean wasNotOverdrawn = this.getAccountBalance().compareTo(BigDecimal.ZERO) >= 0;
+
         if (applyWithdrawFee) {
             // auto pay withdrawal fee
             payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate(), transactionDTO.getPaymentDetail(),
@@ -1204,6 +1206,12 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (backdatedTxnsAllowedTill) {
             this.summary.updateSummaryWithPivotConfig(this.currency, this.savingsAccountTransactionSummaryWrapper, transaction,
                     this.savingsAccountTransactions);
+        } else {
+            this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+        }
+
+        if (wasNotOverdrawn && this.getAccountBalance().compareTo(BigDecimal.ZERO) < 0) {
+            payOverdraftFee(transactionDTO.getTransactionDate(), backdatedTxnsAllowedTill, refNo);
         }
         return transaction;
     }
@@ -1252,6 +1260,15 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                     this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, backdatedTxnsAllowedTill,
                             refNo);
                 }
+            }
+        }
+    }
+
+    private void payOverdraftFee(final LocalDate transactionDate, final boolean backdatedTxnsAllowedTill, final String refNo) {
+        for (SavingsAccountCharge charge : this.charges()) {
+            if (charge.isOverdraftFee() && charge.isActive() && charge.getAmount(this.getCurrency()).isGreaterThanZero()) {
+                charge.prepareForNextOverdraftFee();
+                this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, backdatedTxnsAllowedTill, refNo);
             }
         }
     }
@@ -3114,6 +3131,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             chargeTransaction = SavingsAccountTransaction.withdrawalFee(this, office(), transactionDate, transactionAmount, refNo);
         } else if (savingsAccountCharge.isAnnualFee()) {
             chargeTransaction = SavingsAccountTransaction.annualFee(this, office(), transactionDate, transactionAmount);
+        } else if (savingsAccountCharge.isOverdraftFee()) {
+            chargeTransaction = SavingsAccountTransaction.charge(this, office(), transactionDate, transactionAmount, refNo);
         } else {
             chargeTransaction = SavingsAccountTransaction.charge(this, office(), transactionDate, transactionAmount);
         }

@@ -251,6 +251,14 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
         }
     }
 
+    public void prepareForNextOverdraftFee() {
+        if (isOverdraftFee() && this.amountOutstanding.compareTo(BigDecimal.ZERO) == 0) {
+            this.amountOutstanding = this.amount;
+            this.paid = false;
+            this.waived = false;
+        }
+    }
+
     private void populateDerivedFields(final BigDecimal transactionAmount, final BigDecimal chargeAmount) {
 
         switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
