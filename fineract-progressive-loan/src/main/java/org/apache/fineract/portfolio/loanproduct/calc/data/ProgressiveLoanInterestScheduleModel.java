@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestSc
 import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.INTEREST_RECALCULATION_ENABLED;
 import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.PRINCIPAL_GRACE_LIFTED;
 
+import com.google.common.base.Equivalence;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -32,6 +33,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.serialization.gson.JsonExclude;
@@ -72,6 +75,9 @@ public class ProgressiveLoanInterestScheduleModel {
     @Setter
     private LocalDate lastOverdueBalanceChange;
     private List<OverdueBalanceCorrection> overdueCorrections = new ArrayList<>();
+    @JsonExclude
+    @EqualsAndHashCode.Exclude
+    private final Map<OverdueBalanceCorrection, LocalDate> overdueCorrectionPeriods = new IdentityHashMap<>();
 
     public ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods,
             final ILoanConfigurationDetails loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
@@ -122,17 +128,45 @@ public class ProgressiveLoanInterestScheduleModel {
      * corresponding InterestPeriod's balanceCorrectionAmount.
      */
     public void reverseOverdueCorrections() {
-        for (final OverdueBalanceCorrection oc : overdueCorrections) {
-            changeOutstandingBalanceAndUpdateInterestPeriods(oc.correctionDate(), zero(), oc.amount().negated(), zero());
-        }
+        overdueCorrections.forEach(correction -> findInterestPeriodForOverdueCorrection(correction)
+                .ifPresent(interestPeriod -> interestPeriod.addBalanceCorrectionAmount(correction.amount().negated())));
         overdueCorrections.clear();
+        overdueCorrectionPeriods.clear();
         this.lastOverdueBalanceChange = null;
+    }
+
+    public void updateInterestPeriodDueDate(final InterestPeriod interestPeriod, final LocalDate dueDate) {
+        overdueCorrections.replaceAll(correction -> {
+            if (findInterestPeriodForOverdueCorrection(correction).filter(Equivalence.identity().equivalentTo(interestPeriod)).isEmpty()) {
+                return correction;
+            }
+            final OverdueBalanceCorrection updatedCorrection = new OverdueBalanceCorrection(dueDate, correction.amount(),
+                    correction.affectedRpDueDate());
+            overdueCorrectionPeriods.remove(correction);
+            overdueCorrectionPeriods.put(updatedCorrection, interestPeriod.getRepaymentPeriod().getDueDate());
+            return updatedCorrection;
+        });
+        interestPeriod.setDueDate(dueDate);
+    }
+
+    private Optional<InterestPeriod> findInterestPeriodForOverdueCorrection(final OverdueBalanceCorrection correction) {
+        final Optional<RepaymentPeriod> repaymentPeriod = Optional.ofNullable(overdueCorrectionPeriods.get(correction))
+                .map(dueDate -> repaymentPeriods.stream().filter(period -> period.getDueDate().isEqual(dueDate)).findFirst())
+                .orElseGet(() -> findRepaymentPeriodForBalanceChange(correction.correctionDate()));
+        return repaymentPeriod.flatMap(period -> {
+            final boolean isChangeOnMaturityDate = isLastRepaymentPeriod(period)
+                    && correction.correctionDate().isEqual(period.getDueDate());
+            return period.getInterestPeriods().stream()
+                    .filter(interestPeriod -> interestPeriod.getDueDate().isEqual(correction.correctionDate()))
+                    .reduce((first, second) -> isChangeOnMaturityDate ? second : first);
+        });
     }
 
     public ProgressiveLoanInterestScheduleModel deepCopy(final MathContext mc) {
         final ProgressiveLoanInterestScheduleModel copy = new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates,
                 loanProductRelatedDetail, installmentAmountInMultiplesOf, mc, false);
         copy.overdueCorrections = new ArrayList<>(this.overdueCorrections);
+        copy.overdueCorrectionPeriods.putAll(this.overdueCorrectionPeriods);
         copy.copyPrincipalGraceLiftFrom(this);
         return copy;
     }
