@@ -20,10 +20,12 @@ package org.apache.fineract.portfolio.calendar.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
 
 public interface CalendarWritePlatformService {
 
-    CommandProcessingResult createCalendar(JsonCommand command);
+    CalendarCreateResponse createCalendar(CalendarCreateRequest request);
 
     CommandProcessingResult updateCalendar(JsonCommand command);
 
