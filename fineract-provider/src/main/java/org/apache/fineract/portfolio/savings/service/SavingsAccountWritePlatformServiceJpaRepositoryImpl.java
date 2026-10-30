@@ -928,6 +928,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         // for undo withdrawal fee
         undoWithdrawalFee(account, savingsAccountTransaction);
+        account.updateSavingsAccountSummary(
+                SavingsAccountTransactionSummaryWrapper.calculateSummaryTotals(account.getCurrency(), account.getTransactions()));
 
         SavingsAccountTransaction transaction = null;
         boolean isInterestTransfer = false;
@@ -988,7 +990,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             return;
         }
         for (final SavingsAccountTransaction transaction : this.savingsAccountTransactionRepository.findByRefNo(withdrawal.getRefNo())) {
-            if (account.getId().equals(transaction.getSavingsAccount().getId()) && transaction.isWithdrawalFeeAndNotReversed()) {
+            if (account.getId().equals(transaction.getSavingsAccount().getId())
+                    && (transaction.isWithdrawalFeeAndNotReversed() || transaction.isOverdraftFeeChargeAndNotReversed())) {
                 account.undoTransaction(transaction.getId());
             }
         }

@@ -117,6 +117,53 @@ class SavingsAccountTransactionSummaryWrapperTest {
         assertThat(totals.interestPostedTillDate()).isEqualTo(SECOND_POSTING_DATE);
     }
 
+    @Test
+    void pivotBalanceDeductsChargesPaidAfterThePivotDate() {
+        final List<SavingsAccountTransaction> transactions = List.of(deposit("100"), withdrawal("50"), withdrawalFee("5"), annualFee("7"),
+                feeCharge("40"), penaltyCharge("3"));
+
+        final SavingsAccountPivotSummaryTotals totals = SavingsAccountTransactionSummaryWrapper.calculatePivotSummaryTotals(CURRENCY,
+                transactions, new BigDecimal("500"));
+
+        // 500 + 100 - 50 - 5 - 7 - 40 - 3
+        assertThat(totals.accountBalance()).isEqualByComparingTo("495");
+    }
+
+    @Test
+    void pivotBalanceIgnoresReversedCharges() {
+        final SavingsAccountTransaction reversedFee = feeCharge("40");
+        when(reversedFee.isFeeChargeAndNotReversed()).thenReturn(false);
+
+        final SavingsAccountPivotSummaryTotals totals = SavingsAccountTransactionSummaryWrapper.calculatePivotSummaryTotals(CURRENCY,
+                List.of(withdrawal("100"), reversedFee), BigDecimal.ZERO);
+
+        assertThat(totals.accountBalance()).isEqualByComparingTo("-100");
+    }
+
+    private static SavingsAccountTransaction withdrawalFee(final String amount) {
+        final SavingsAccountTransaction transaction = transaction(amount, LocalDate.of(2025, 1, 15));
+        when(transaction.isWithdrawalFeeAndNotReversed()).thenReturn(true);
+        return transaction;
+    }
+
+    private static SavingsAccountTransaction annualFee(final String amount) {
+        final SavingsAccountTransaction transaction = transaction(amount, LocalDate.of(2025, 1, 15));
+        when(transaction.isAnnualFeeAndNotReversed()).thenReturn(true);
+        return transaction;
+    }
+
+    private static SavingsAccountTransaction feeCharge(final String amount) {
+        final SavingsAccountTransaction transaction = transaction(amount, LocalDate.of(2025, 1, 15));
+        when(transaction.isFeeChargeAndNotReversed()).thenReturn(true);
+        return transaction;
+    }
+
+    private static SavingsAccountTransaction penaltyCharge(final String amount) {
+        final SavingsAccountTransaction transaction = transaction(amount, LocalDate.of(2025, 1, 15));
+        when(transaction.isPenaltyChargeAndNotReversed()).thenReturn(true);
+        return transaction;
+    }
+
     private static SavingsAccountTransaction deposit(final String amount) {
         final SavingsAccountTransaction transaction = transaction(amount, LocalDate.of(2025, 1, 1));
         when(transaction.isDepositAndNotReversed()).thenReturn(true);

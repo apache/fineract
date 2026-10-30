@@ -180,9 +180,16 @@ public class SavingsAccountSummaryData implements Serializable {
             this.totalInterestPosted = interestTotal.getAmountDefaultedToNullIfZero();
             this.totalWithholdTax = withHoldTaxTotal.getAmountDefaultedToNullIfZero();
             this.totalOverdraftInterestDerived = overdraftInterestTotal.getAmountDefaultedToNullIfZero();
+            // Charges paid after the pivot date reduce the balance like withdrawals do.
+            // On transaction data every charge deduction (withdrawal fee, annual fee and
+            // pay charge, fee or penalty) counts as a withdrawal fee, so that one total
+            // covers them all. Only the balance is derived from it: the fee totals are
+            // kept up to date when each charge is paid.
+            final BigDecimal chargesPaid = wrapper.calculateTotalWithdrawalFees(currency, savingsAccountTransactions);
             this.accountBalance = getRunningBalanceOnPivotDate();
             this.accountBalance = Money.of(currency, this.accountBalance).plus(Money.of(currency, this.totalDeposits)).plus(deltaInterest)
-                    .minus(this.totalWithdrawals).minus(deltaWithholdTax).minus(deltaOverdraftInterestDerived).getAmount();
+                    .minus(this.totalWithdrawals).minus(chargesPaid).minus(deltaWithholdTax).minus(deltaOverdraftInterestDerived)
+                    .getAmount();
         }
     }
 
