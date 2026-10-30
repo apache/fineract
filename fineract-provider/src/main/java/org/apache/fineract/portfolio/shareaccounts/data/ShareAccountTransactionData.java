@@ -25,6 +25,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
+import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 
 @Getter
 @RequiredArgsConstructor
@@ -50,5 +51,7 @@ public class ShareAccountTransactionData implements Serializable {
     private final BigDecimal chargeAmount;
 
     private final BigDecimal amountPaid;
+
+    private final PaymentDetailData paymentDetailData;
 
 }

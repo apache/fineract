@@ -20,11 +20,15 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.AccountRequest;
 import org.apache.fineract.client.models.GetAccountsTypeAccountIdResponse;
+import org.apache.fineract.client.models.PostAccountsRequestedShares;
 import org.apache.fineract.client.models.PostAccountsTypeAccountIdRequest;
 import org.apache.fineract.client.models.PostProductsTypeRequest;
+import org.apache.fineract.client.models.PutAccountsTypeAccountIdRequest;
 
 public class FeignShareAccountHelper {
 
@@ -55,6 +59,14 @@ public class FeignShareAccountHelper {
                 "approve");
     }
 
+    public void reject(Long shareAccountId) {
+        command(shareAccountId, new PostAccountsTypeAccountIdRequest(), "reject");
+    }
+
+    public void update(Long shareAccountId, PutAccountsTypeAccountIdRequest request) {
+        ok(() -> fineractClient.create(ShareAccountCommandsApi.class).updateShareAccount(SHARE, shareAccountId, request));
+    }
+
     public void activate(Long shareAccountId, String activatedDate, String dateFormat, String locale) {
         command(shareAccountId, new PostAccountsTypeAccountIdRequest().activatedDate(activatedDate).dateFormat(dateFormat).locale(locale),
                 "activate");
@@ -71,7 +83,35 @@ public class FeignShareAccountHelper {
                 .dateFormat(dateFormat)//
                 .locale(locale)//
                 .requestedShares(shares);
+        redeemShares(shareAccountId, request);
+    }
+
+    public void redeemShares(Long shareAccountId, ShareAccountCommandsApi.RedeemSharesRequest request) {
         ok(() -> fineractClient.create(ShareAccountCommandsApi.class).redeemShares(SHARE, shareAccountId, request));
+    }
+
+    /** See {@link ShareAccountCommandsApi#applyAdditionalShares} for why this command needs its own request model. */
+    public void applyAdditionalShares(Long shareAccountId, ShareAccountCommandsApi.RedeemSharesRequest request) {
+        ok(() -> fineractClient.create(ShareAccountCommandsApi.class).applyAdditionalShares(SHARE, shareAccountId, request));
+    }
+
+    public void approveAdditionalShares(Long shareAccountId, Set<Long> purchasedShareIds) {
+        approveAdditionalShares(shareAccountId, additionalSharesRequest(purchasedShareIds));
+    }
+
+    public void approveAdditionalShares(Long shareAccountId, PostAccountsTypeAccountIdRequest request) {
+        command(shareAccountId, request, "approveadditionalshares");
+    }
+
+    public void rejectAdditionalShares(Long shareAccountId, PostAccountsTypeAccountIdRequest request) {
+        command(shareAccountId, request, "rejectadditionalshares");
+    }
+
+    /** Approve and reject of additional shares take the purchased-share transaction ids to act on. */
+    public static PostAccountsTypeAccountIdRequest additionalSharesRequest(Set<Long> purchasedShareIds) {
+        Set<PostAccountsRequestedShares> requestedShares = purchasedShareIds.stream().map(id -> new PostAccountsRequestedShares().id(id))
+                .collect(Collectors.toSet());
+        return new PostAccountsTypeAccountIdRequest().requestedShares(requestedShares);
     }
 
     public GetAccountsTypeAccountIdResponse getShareAccount(Long shareAccountId) {

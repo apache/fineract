@@ -24310,7 +24310,7 @@ Request Body:
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
                 <tr class=alt><td>sharesIssued, minimumShares, maximumShares, minimumActivePeriodForDividends, minimumactiveperiodFrequencyType,
-				lockinPeriodFrequency, lockinPeriodFrequencyType, marketPricePeriods, chargesSelected</tr>
+				lockinPeriodFrequency, lockinPeriodFrequencyType, marketPricePeriods, chargesSelected, paymentChannelToFundSourceMappings</tr>
             </table>
         </div>
         <div class="method-example">
@@ -26373,7 +26373,7 @@ Content-Type: application/json
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
-	            <tr class=alt><td>accountNo, externalId</td></tr>
+	            <tr class=alt><td>accountNo, externalId, paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
@@ -26658,6 +26658,15 @@ Request Body:
                 </tr>
             </table>
             <br />
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG">
+                    <td><div class="fineractHeading2">Optional Fields</div></td>
+                </tr>
+                <tr class=alt>
+                    <td>paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber</td>
+                </tr>
+            </table>
+            <br />
 
 	    </div>
 	    <div class="method-example">
@@ -26770,6 +26779,15 @@ Request Body:
                 </tr>
                 <tr class=alt>
                     <td>dateFormat,locale,requestedDate,requestedShares</td>
+                </tr>
+            </table>
+            <br />
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG">
+                    <td><div class="fineractHeading2">Optional Fields</div></td>
+                </tr>
+                <tr class=alt>
+                    <td>paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber</td>
                 </tr>
             </table>
             <br />

@@ -46,6 +46,9 @@ import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
+import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountChargePaidBy;
@@ -76,10 +79,15 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
 
     private final BusinessEventNotifierService businessEventNotifierService;
 
+    private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
+
     @Override
     public CommandProcessingResult createShareAccount(JsonCommand jsonCommand) {
         try {
             ShareAccount account = this.accountDataSerializer.validateAndCreate(jsonCommand);
+            for (ShareAccountTransaction txn : account.getPendingForApprovalSharePurchaseTransactions()) {
+                attachPaymentDetail(jsonCommand, txn);
+            }
             this.shareAccountRepository.saveAndFlush(account);
             generateAccountNumber(account);
             journalEntryWritePlatformService.createJournalEntriesForShares(
@@ -143,8 +151,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             }
 
             transactionDto.put("chargeAmount", transaction.chargeAmount());
-            transactionDto.put("paymentTypeId", null); // FIXME::make it cash
-                                                       // payment
+            transactionDto.put("paymentTypeId", transaction.getPaymentTypeId());
             if (transaction.getChargesPaidBy() != null && !transaction.getChargesPaidBy().isEmpty()) {
                 final List<Map<String, Object>> chargesPaidData = new ArrayList<>();
                 transactionDto.put("chargesPaid", chargesPaidData);
@@ -203,12 +210,15 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             Map<String, Object> changes = this.accountDataSerializer.validateAndApplyAddtionalShares(jsonCommand, account);
             ShareAccountTransaction transaction = null;
             if (!changes.isEmpty()) {
+                final Map<String, Object> paymentDetailChanges = attachPaymentDetail(jsonCommand,
+                        (ShareAccountTransaction) changes.get(ShareAccountApiConstants.additionalshares_paramname));
                 this.shareAccountRepository.saveAndFlush(account);
                 transaction = (ShareAccountTransaction) changes.get(ShareAccountApiConstants.additionalshares_paramname);
                 transaction = account.getShareAccountTransaction(transaction);
                 if (transaction != null) {
                     changes.clear();
                     changes.put(ShareAccountApiConstants.additionalshares_paramname, transaction.getId());
+                    changes.putAll(paymentDetailChanges);
                     Set<ShareAccountTransaction> transactions = new HashSet<>();
                     transactions.add(transaction);
                     this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, transactions));
@@ -435,6 +445,8 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndRedeemShares(jsonCommand, account);
             if (!changes.isEmpty()) {
+                final Map<String, Object> paymentDetailChanges = attachPaymentDetail(jsonCommand,
+                        (ShareAccountTransaction) changes.get(ShareAccountApiConstants.requestedshares_paramname));
                 this.shareAccountRepository.saveAndFlush(account);
                 ShareAccountTransaction transaction = (ShareAccountTransaction) changes
                         .get(ShareAccountApiConstants.requestedshares_paramname);
@@ -452,6 +464,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, transactions));
                 changes.clear();
                 changes.put(ShareAccountApiConstants.requestedshares_paramname, transaction.getId());
+                changes.putAll(paymentDetailChanges);
 
             }
             return new CommandProcessingResultBuilder() //
@@ -497,6 +510,17 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
+    }
+
+    private Map<String, Object> attachPaymentDetail(final JsonCommand jsonCommand, final ShareAccountTransaction transaction) {
+        final Map<String, Object> paymentDetailChanges = new HashMap<>();
+        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(jsonCommand,
+                paymentDetailChanges);
+        if (paymentDetail != null && transaction != null) {
+            transaction.setPaymentDetail(paymentDetail);
+            paymentDetailChanges.put(PaymentDetailConstants.paymentTypeParamName, paymentDetail.getPaymentType().getId());
+        }
+        return paymentDetailChanges;
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {

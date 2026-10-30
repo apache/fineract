@@ -26,6 +26,8 @@ import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -50,7 +52,13 @@ public class PurchasedSharesReadPlatformServiceImpl implements PurchasedSharesRe
             StringBuilder buff = new StringBuilder()
                     .append("saps.id, saps.account_id, saps.transaction_date, saps.total_shares, saps.unit_price, ")
                     .append("saps.status_enum, saps.type_enum, saps.amount, saps.charge_amount as chargeamount, ")
-                    .append("saps.amount_paid as amountPaid").append(" from m_share_account_transactions saps ");
+                    .append("saps.amount_paid as amountPaid, ")
+                    .append("pd.id as paymentDetailId, pd.payment_type_id as paymentTypeId, pt.value as paymentTypeName, ")
+                    .append("pd.account_number as accountNumber, pd.check_number as checkNumber, pd.routing_code as routingCode, ")
+                    .append("pd.receipt_number as receiptNumber, pd.bank_number as bankNumber")
+                    .append(" from m_share_account_transactions saps ")
+                    .append(" left join m_payment_detail pd on pd.id = saps.payment_detail_id ")
+                    .append(" left join m_payment_type pt on pt.id = pd.payment_type_id ");
             schema = buff.toString();
         }
 
@@ -69,8 +77,18 @@ public class PurchasedSharesReadPlatformServiceImpl implements PurchasedSharesRe
             final BigDecimal chargeAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "chargeamount");
             final BigDecimal amountPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPaid");
 
+            PaymentDetailData paymentDetailData = null;
+            final Long paymentDetailId = JdbcSupport.getLong(rs, "paymentDetailId");
+            if (paymentDetailId != null) {
+                final PaymentTypeData paymentType = PaymentTypeData.builder().id(JdbcSupport.getLong(rs, "paymentTypeId"))
+                        .name(rs.getString("paymentTypeName")).build();
+                paymentDetailData = new PaymentDetailData(paymentDetailId, paymentType, rs.getString("accountNumber"),
+                        rs.getString("checkNumber"), rs.getString("routingCode"), rs.getString("receiptNumber"),
+                        rs.getString("bankNumber"));
+            }
+
             return new ShareAccountTransactionData(id, accountId, purchasedDate, numberOfShares, purchasedPrice, statusEnum, typeEnum,
-                    amount, chargeAmount, amountPaid);
+                    amount, chargeAmount, amountPaid, paymentDetailData);
         }
 
         public String schema() {
