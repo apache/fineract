@@ -21,8 +21,20 @@ package org.apache.fineract.infrastructure.documentmanagement.command;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.HookableCommand;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentDeleteRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DocumentDeleteCommand extends Command<DocumentDeleteRequest> {}
+public class DocumentDeleteCommand extends Command<DocumentDeleteRequest> implements HookableCommand {
+
+    @Override
+    public String hookEntityName() {
+        return "DOCUMENT";
+    }
+
+    @Override
+    public String hookActionName() {
+        return "DELETE";
+    }
+}
