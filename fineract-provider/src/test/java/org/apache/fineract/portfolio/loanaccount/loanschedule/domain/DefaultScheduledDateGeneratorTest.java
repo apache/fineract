@@ -339,8 +339,8 @@ public class DefaultScheduledDateGeneratorTest {
                 false, null, EMPTY_LIST, BigDecimal.valueOf(36_000L), null, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null,
                 null, null, null, null, ZERO, null, NONE, null, ZERO, EMPTY_LIST, false, 0, false, holidayDetailDTO, false, false, false,
                 null, false, false, null, false, DISBURSEMENT_DATE, expectedDisbursementDate, CUMULATIVE,
-                LoanScheduleProcessingType.HORIZONTAL, null, false, null, null, false, null, false, null, null, null, false, null, null,
-                null, false, false, null);
+                LoanScheduleProcessingType.HORIZONTAL, null, false, null, null, null, false, null, false, null, null, null, false, null,
+                null, null, false, false, null);
     }
 
     private LoanApplicationTerms createLoanApplicationTerms(LocalDate dueRepaymentPeriodDate, HolidayDetailDTO holidayDetailDTO) {
@@ -382,7 +382,7 @@ public class DefaultScheduledDateGeneratorTest {
                 Money.of(fromApplicationCurrency(currency), ZERO), false, null, EMPTY_LIST, BigDecimal.valueOf(36_000L), null,
                 DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null, null, null, ZERO, null, NONE, null, ZERO,
                 EMPTY_LIST, true, 0, false, holidayDetailDTO, false, false, false, null, false, false, null, false, DISBURSEMENT_DATE,
-                submittedOnDate, loanScheduleType, LoanScheduleProcessingType.HORIZONTAL, fixedLength, false, null, null, false, null,
+                submittedOnDate, loanScheduleType, LoanScheduleProcessingType.HORIZONTAL, fixedLength, false, null, null, null, false, null,
                 false, null, null, null, false, null, null, null, false, false, monthEndDueDateStrategy);
     }
 
