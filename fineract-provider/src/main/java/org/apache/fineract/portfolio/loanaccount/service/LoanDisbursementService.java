@@ -30,10 +30,12 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,8 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.event.business.domain.loan.charge.LoanAddChargeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -52,6 +56,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTrancheCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTrancheDisbursementCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -72,8 +77,21 @@ public class LoanDisbursementService {
     private final LoanJournalEntryPoster loanJournalEntryPoster;
     private final LoanTransactionRepository loanTransactionRepository;
     private final ConfigurationDomainService configurationDomainService;
+    private final BusinessEventNotifierService businessEventNotifierService;
+
+    private static final Comparator<LoanCharge> BY_ID = Comparator.comparing(LoanCharge::getId, Comparator.nullsLast(Long::compareTo));
 
     public void updateDisbursementDetails(final Loan loan, final JsonCommand jsonCommand, final Map<String, Object> actualChanges) {
+        updateDisbursementDetails(loan, jsonCommand, actualChanges, true);
+    }
+
+    /**
+     * @param createDownPaymentFees
+     *            false when the request's charges bring the down payment fee of every tranche themselves (modified
+     *            application, see {@link LoanChargeAssembler}), so a tranche added here gets none of its own
+     */
+    public void updateDisbursementDetails(final Loan loan, final JsonCommand jsonCommand, final Map<String, Object> actualChanges,
+            final boolean createDownPaymentFees) {
         final List<Long> disbursementList = loan.fetchDisbursementIds();
         final List<Long> loanChargeIds = loan.fetchLoanTrancheChargeIds();
         final int chargeIdLength = loanChargeIds.size();
@@ -114,7 +132,7 @@ public class LoanDisbursementService {
                         }
                     }
                     createOrUpdateDisbursementDetails(loan, disbursementID, actualChanges, expectedDisbursementDate, principal,
-                            disbursementList);
+                            disbursementList, createDownPaymentFees);
                 }
                 removeDisbursementAndAssociatedCharges(loan, actualChanges, disbursementList, loanChargeIds, chargeIdLength,
                         removeAllCharges);
@@ -284,7 +302,8 @@ public class LoanDisbursementService {
     }
 
     private void createOrUpdateDisbursementDetails(final Loan loan, final Long disbursementID, final Map<String, Object> actualChanges,
-            final LocalDate expectedDisbursementDate, final BigDecimal principal, final List<Long> existingDisbursementList) {
+            final LocalDate expectedDisbursementDate, final BigDecimal principal, final List<Long> existingDisbursementList,
+            final boolean createDownPaymentFees) {
         if (disbursementID != null) {
             LoanDisbursementDetails loanDisbursementDetail = loan.fetchLoanDisbursementsById(disbursementID);
             existingDisbursementList.remove(disbursementID);
@@ -295,6 +314,7 @@ public class LoanDisbursementService {
                 disbursementDetails.updateLoan(loan);
                 if (!loanDisbursementDetail.equals(disbursementDetails)) {
                     loanDisbursementDetail.copy(disbursementDetails);
+                    updateDownPaymentFeesOfTranche(loan, loanDisbursementDetail);
                     actualChanges.put("disbursementDetailId", disbursementID);
                     actualChanges.put(RECALCULATE_LOAN_SCHEDULE, true);
                 }
@@ -317,9 +337,154 @@ public class LoanDisbursementService {
                 loanChargeValidator.validateChargeHasValidSpecifiedDateIfApplicable(loan, loanCharge, loan.getDisbursementDate());
                 loanChargeService.addLoanCharge(loan, loanCharge);
             }
+            if (createDownPaymentFees) {
+                addDownPaymentFeesForTranche(loan, disbursementDetails);
+            }
             actualChanges.put(LoanApiConstants.disbursementDataParameterName, expectedDisbursementDate + "-" + principal);
             actualChanges.put(RECALCULATE_LOAN_SCHEDULE, true);
         }
+    }
+
+    /**
+     * Before schedule regeneration on actual disbursement: with skipDownPaymentFee the unpaid fees of the disbursed
+     * tranches are deactivated, so they can be added manually later; otherwise they move onto the actual disbursement
+     * date. Like a disbursement fee, a fee created with the application of a loan without expected tranches is not
+     * linked to a tranche and belongs to the first disbursement.
+     *
+     * @param disbursedTranches
+     *            tranches disbursed now; empty for a loan without tranches
+     * @return true if fees were deactivated (caller should regenerate the schedule)
+     */
+    public boolean prepareDownPaymentFeesForDisbursement(final Loan loan, final List<LoanDisbursementDetails> disbursedTranches,
+            final LocalDate actualDisbursementDate, final boolean skipDownPaymentFee) {
+        if (!loan.getLoanRepaymentScheduleDetail().isEnableDownPayment()) {
+            return false;
+        }
+        final boolean firstDisbursement = loan.isApproved();
+        final List<LoanCharge> unpaidFees = loan.getActiveCharges().stream().filter(fee -> fee.isDueAtDownPayment() && !fee.isPaid()
+                && (fee.getDisbursementDetail() == null ? firstDisbursement : disbursedTranches.stream().anyMatch(fee::isDownPaymentFeeOf)))
+                .toList();
+        if (skipDownPaymentFee) {
+            unpaidFees.forEach(fee -> fee.setActive(false));
+            if (!unpaidFees.isEmpty()) {
+                final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
+                wrapper.reprocess(loan.getCurrency(), loan.getDisbursementDate(), loan.getRepaymentScheduleInstallments(),
+                        loan.getActiveCharges());
+                loanBalanceService.updateLoanSummaryDerivedFields(loan);
+            }
+            return !unpaidFees.isEmpty();
+        }
+        for (final LoanCharge fee : unpaidFees) {
+            loanChargeService.updateDownPaymentFee(loan, fee, actualDisbursementDate);
+        }
+        return false;
+    }
+
+    /**
+     * After schedule regeneration on actual disbursement: each disbursed tranche (or the loan without tranches) has one
+     * fee per down payment charge of the loan. Raises {@link LoanAddChargeBusinessEvent} for a fee already on the loan
+     * (created with the application); a fee created here raises it on creation. No-op when the fee was skipped.
+     */
+    public void completeDownPaymentFeesForDisbursement(final Loan loan, final List<LoanDisbursementDetails> disbursedTranches,
+            final LocalDate actualDisbursementDate, final boolean skipDownPaymentFee) {
+        if (skipDownPaymentFee || !loan.getLoanRepaymentScheduleDetail().isEnableDownPayment()) {
+            return;
+        }
+        if (disbursedTranches.isEmpty()) {
+            ensureDownPaymentFees(loan, null, actualDisbursementDate, true);
+        }
+        // the application fees (not linked to a tranche) belong to the first tranche of the first disbursement
+        final boolean firstDisbursement = loan.isApproved();
+        for (int index = 0; index < disbursedTranches.size(); index++) {
+            final LoanDisbursementDetails tranche = disbursedTranches.get(index);
+            ensureDownPaymentFees(loan, tranche, actualDisbursementDate, firstDisbursement && index == 0);
+        }
+    }
+
+    private void ensureDownPaymentFees(final Loan loan, final LoanDisbursementDetails tranche, final LocalDate dueDate,
+            final boolean includeApplicationFees) {
+        for (final Charge chargeDefinition : downPaymentChargeDefinitionsOn(loan)) {
+            final LoanCharge fee = loan.getActiveCharges().stream()
+                    .filter(charge -> charge.isDueAtDownPayment() && Objects.equals(charge.getCharge().getId(), chargeDefinition.getId())
+                            && (charge.isDownPaymentFeeOf(tranche) || (includeApplicationFees && charge.getDisbursementDetail() == null
+                                    && DateUtils.isEqual(dueDate, charge.getDueLocalDate()))))
+                    .min(BY_ID).orElse(null);
+            if (fee == null) {
+                createDownPaymentFee(loan, chargeDefinition, tranche, dueDate);
+            } else {
+                notifyLoanAddCharge(fee);
+            }
+        }
+    }
+
+    /** Moves the unpaid down payment fees not linked to a tranche to the loan's new expected disbursement date. */
+    public void moveDownPaymentFeesToExpectedDisbursementDate(final Loan loan, final LocalDate expectedDisbursementDate) {
+        if (!loan.getLoanRepaymentScheduleDetail().isEnableDownPayment() || expectedDisbursementDate == null) {
+            return;
+        }
+        for (final LoanCharge fee : List.copyOf(loan.getActiveCharges())) {
+            if (fee.isDueAtDownPayment() && !fee.isPaid() && fee.getDisbursementDetail() == null) {
+                loanChargeService.updateDownPaymentFee(loan, fee, expectedDisbursementDate);
+            }
+        }
+    }
+
+    public void updateDownPaymentFeesOfTranche(final Loan loan, final LoanDisbursementDetails tranche) {
+        for (final LoanCharge fee : List.copyOf(loan.getActiveCharges())) {
+            if (fee.isDownPaymentFeeOf(tranche) && !fee.isPaid()) {
+                loanChargeService.updateDownPaymentFee(loan, fee, tranche.actualOrExpectedDisbursementDate());
+            }
+        }
+    }
+
+    private void addDownPaymentFeesForTranche(final Loan loan, final LoanDisbursementDetails tranche) {
+        if (!loan.getLoanRepaymentScheduleDetail().isEnableDownPayment()) {
+            return;
+        }
+        for (final Charge chargeDefinition : downPaymentChargeDefinitionsOn(loan)) {
+            createDownPaymentFee(loan, chargeDefinition, tranche, tranche.expectedDisbursementDate());
+        }
+    }
+
+    /**
+     * Undo of the last disbursement (or full undo of a loan whose tranches are created on disbursement) reverses the
+     * tranche, so the tranche's down payment fees are left without a down payment period. Like tranche disbursement
+     * charges, they are reset and deactivated; the next disbursement creates its own fees.
+     */
+    public void deactivateDownPaymentFeesOfTranche(final Loan loan, final LoanDisbursementDetails tranche) {
+        for (final LoanCharge fee : List.copyOf(loan.getActiveCharges())) {
+            if (fee.isDownPaymentFeeOf(tranche)) {
+                fee.resetPaidAmount(loan.getCurrency());
+                fee.setActive(false);
+            }
+        }
+    }
+
+    private Set<Charge> downPaymentChargeDefinitionsOn(final Loan loan) {
+        return loan.getCharges().stream().filter(LoanCharge::isDueAtDownPayment).map(LoanCharge::getCharge)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private void createDownPaymentFee(final Loan loan, final Charge chargeDefinition, final LoanDisbursementDetails tranche,
+            final LocalDate dueDate) {
+        ExternalId externalId = ExternalId.empty();
+        if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+            externalId = ExternalId.generate();
+        }
+        final LoanCharge loanCharge = loanChargeService.create(loan, chargeDefinition,
+                loanChargeService.calculateDownPaymentAmountBase(loan, tranche), null, null, null, dueDate, null, null, BigDecimal.ZERO,
+                externalId);
+        loanCharge.setDisbursementDetail(tranche);
+        loanChargeValidator.validateChargeAdditionForDisbursedLoan(loan, loanCharge);
+        loanChargeValidator.validateChargeHasValidSpecifiedDateIfApplicable(loan, loanCharge, loan.getDisbursementDate());
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanAddChargeBusinessEvent(loanCharge));
+        loanChargeService.addLoanCharge(loan, loanCharge);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanAddChargeBusinessEvent(loanCharge));
+    }
+
+    private void notifyLoanAddCharge(final LoanCharge loanCharge) {
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanAddChargeBusinessEvent(loanCharge));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanAddChargeBusinessEvent(loanCharge));
     }
 
     private void removeDisbursementAndAssociatedCharges(final Loan loan, final Map<String, Object> actualChanges,
@@ -353,17 +518,19 @@ public class LoanDisbursementService {
     }
 
     private void removeChargesByDisbursementID(final Loan loan, final Long id) {
+        final LoanDisbursementDetails detail = loan.fetchLoanDisbursementsById(id);
         loan.getCharges().stream() //
                 .filter(charge -> { //
                     final LoanTrancheDisbursementCharge transCharge = charge.getTrancheDisbursementCharge(); //
-                    if (transCharge == null || !Objects.equals(id, transCharge.getloanDisbursementDetails().getId())) {
+                    if ((transCharge == null || !Objects.equals(id, transCharge.getloanDisbursementDetails().getId()))
+                            && !charge.isDownPaymentFeeOf(detail)) {
                         return false;
                     }
                     loanChargeValidator.validateLoanIsNotClosed(loan, charge); //
                     loanChargeValidator.validateLoanChargeIsNotWaived(loan, charge); //
                     return true; //
                 }) //
-                .forEach(loanCharge -> loanChargeService.removeLoanCharge(loan, loanCharge));
+                .toList().forEach(loanCharge -> loanChargeService.removeLoanCharge(loan, loanCharge));
     }
 
     // This method returns date format and locale if present in the JsonCommand

@@ -63,6 +63,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductGuaranteeDeta
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductInterestRecalculationDetails;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductParamType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedFeeRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 import org.apache.fineract.portfolio.rate.domain.Rate;
@@ -309,6 +310,15 @@ public class LoanProductAssembler {
             });
         }
 
+        final List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes = new ArrayList<>();
+        if (command.parameterExists(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES)) {
+            final JsonArray supportedTransactionsForFeeRefund = command
+                    .arrayOfParameterNamed(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES);
+            supportedTransactionsForFeeRefund.iterator().forEachRemaining(value -> {
+                supportedFeeRefundTypes.add(LoanSupportedFeeRefundTypes.valueOf(value.getAsString()));
+            });
+        }
+
         final LoanChargeOffBehaviour chargeOffBehaviour;
         if (command.parameterExists(LoanProductConstants.CHARGE_OFF_BEHAVIOUR)) {
             chargeOffBehaviour = LoanChargeOffBehaviour
@@ -356,10 +366,11 @@ public class LoanProductAssembler {
                 allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
                 repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
-                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate,
-                daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
-                capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                merchantBuyDownFee, allowFullTermForTranche, monthEndDueDateStrategy);
+                enableAccrualActivityPosting, supportedInterestRefundTypes, supportedFeeRefundTypes, chargeOffBehaviour,
+                interestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee, allowFullTermForTranche,
+                monthEndDueDateStrategy);
 
     }
 

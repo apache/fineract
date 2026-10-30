@@ -72,7 +72,7 @@ public final class LoanDownPaymentTransactionValidator {
         if (repaymentTransaction.isGoodwillCredit() || repaymentTransaction.isInterestPaymentWaiver()
                 || repaymentTransaction.isMerchantIssuedRefund() || repaymentTransaction.isPayoutRefund()
                 || repaymentTransaction.isChargeRefund() || repaymentTransaction.isRepayment() || repaymentTransaction.isDownPayment()
-                || repaymentTransaction.isInterestRefund()) {
+                || repaymentTransaction.isInterestRefund() || repaymentTransaction.isFeeRefund()) {
             validateLoanStatusIsActiveOrFullyPaidOrOverpaid(loan);
         } else {
             validateAccountStatus(loan, event);

@@ -50,7 +50,6 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.exceptions.AccountLockCannotBeOverruledException;
 import org.apache.fineract.cob.service.AccountLockService;
@@ -62,6 +61,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingSubResourceResult;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
@@ -180,6 +180,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationR
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.RefundTransactionResult;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.exception.DateMismatchException;
@@ -291,6 +292,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanBalanceService loanBalanceService;
     private final LoanTransactionService loanTransactionService;
     private final LoanOriginatorLinkingService loanOriginatorLinkingService;
+    private final LoanChargeService loanChargeService;
 
     @Transactional
     @Override
@@ -387,9 +389,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (netDisbursalAmount != null) {
                 loan.setNetDisbursalAmount(netDisbursalAmount);
             }
+            final List<LoanDisbursementDetails> undisbursedTranches = loan.getDisbursementDetails().stream()
+                    .filter(tranche -> tranche.actualDisbursementDate() == null).toList();
             Money disburseAmount = loanDisbursementService.adjustDisburseAmount(loan, command, actualDisbursementDate);
+            final List<LoanDisbursementDetails> disbursedTranches = undisbursedTranches.stream()
+                    .filter(tranche -> tranche.actualDisbursementDate() != null).toList();
+            final boolean skipDownPaymentFee = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanApiConstants.skipDownPaymentFeeParameterName);
+            final boolean downPaymentFeesSkipped = loanDisbursementService.prepareDownPaymentFeesForDisbursement(loan, disbursedTranches,
+                    actualDisbursementDate, skipDownPaymentFee);
+            boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal()) || downPaymentFeesSkipped;
             Money amountToDisburse = disburseAmount.copy();
-            boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal());
             final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
             if (loan.isTopup() && loan.getClientId() != null) {
@@ -419,6 +429,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             regenerateScheduleOnDisbursement(command, loan, recalculateSchedule, scheduleGeneratorDTO, nextPossibleRepaymentDate,
                     rescheduledRepaymentDate);
+            loanDisbursementService.completeDownPaymentFeesForDisbursement(loan, disbursedTranches, actualDisbursementDate,
+                    skipDownPaymentFee);
             boolean downPaymentEnabled = loan.getLoanProductRelatedDetail().isEnableDownPayment();
             if (loan.isInterestBearingAndInterestRecalculationEnabled() || downPaymentEnabled) {
                 createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
@@ -450,12 +462,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
                     BigDecimal disbursedAmountPercentageForDownPayment = loan.getLoanRepaymentScheduleDetail()
                             .getDisbursedAmountPercentageForDownPayment();
-                    Money downPaymentMoney = Money.of(loan.getCurrency(),
-                            MathUtil.percentageOf(amountToDisburse.getAmount(), disbursedAmountPercentageForDownPayment, 19));
-                    if (loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf() != null) {
-                        downPaymentMoney = Money.roundToMultiplesOf(downPaymentMoney,
-                                loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf());
-                    }
+                    final Money downPaymentMoney = Money
+                            .of(loan.getCurrency(),
+                                    loanChargeService.calculateDownPaymentAmount(amountToDisburse.getAmount(),
+                                            disbursedAmountPercentageForDownPayment,
+                                            loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf(), loan.getCurrency()))
+                            .plus(loanChargeService.downPaymentFeesForNewAutoDownPayment(loan, actualDisbursementDate));
                     final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(actualDisbursementDate,
                             downPaymentMoney.getAmount(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
                             linkedSavingsAccountData.getId(), loan.getId(),
@@ -1265,6 +1277,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     "Interest refund transaction: " + transactionId + " cannot be reversed or adjusted directly", transactionId);
         }
 
+        if (transactionToAdjust.isFeeRefund()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.update.not.allowed",
+                    "Fee refund transaction: " + transactionId + " cannot be reversed or adjusted directly", transactionId);
+        }
+
         Long commandId = command.commandId();
         final String noteText = command.stringValueOfParameterNamed("note");
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
@@ -1290,6 +1307,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (!loanTransactionRelationRepository.findNonReversedInterestRefundsRelatedTo(transactionToAdjust).isEmpty()) {
                 throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.adjust.not.allowed.when.interest.refund.exists",
                         "Loan transaction: " + transactionId + " cannot be adjusted as it has a linked interest refund transaction",
+                        transactionId);
+            }
+            if (loan.getSupportedFeeRefundTransactionTypes().contains(transactionToAdjust.getTypeOf())) {
+                throw new GeneralPlatformDomainRuleException(
+                        "error.msg.loan.transaction.adjust.not.allowed.when.fee.refund.enabled", "Loan transaction: " + transactionId
+                                + " cannot be adjusted as fee refund is enabled for " + transactionToAdjust.getTypeOf().getCode(),
+                        transactionId);
+            }
+            if (!loanTransactionRelationRepository.findNonReversedFeeRefundsRelatedTo(transactionToAdjust).isEmpty()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.adjust.not.allowed.when.fee.refund.exists",
+                        "Loan transaction: " + transactionId + " cannot be adjusted as it has a linked fee refund transaction",
                         transactionId);
             }
         }
@@ -2943,10 +2971,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         createNote(loan, command, changes);
         // Create refund transaction(s)
         final Boolean interestRefundCalculation = command.booleanObjectValueOfParameterNamed("interestRefundCalculation");
-        Pair<LoanTransaction, LoanTransaction> refundTransactions = loanAccountDomainService.makeRefund(loan, scheduleGeneratorDTO,
+        final RefundTransactionResult refundTransactions = loanAccountDomainService.makeRefund(loan, scheduleGeneratorDTO,
                 loanTransactionType, transactionDate, transactionAmount, paymentDetail, txnExternalId, interestRefundCalculation);
-        LoanTransaction refundTransaction = refundTransactions.getLeft();
-        LoanTransaction interestRefundTransaction = refundTransactions.getRight();
+        final LoanTransaction refundTransaction = refundTransactions.refund();
+        final List<LoanTransaction> derivedTransactions = refundTransactions.derivedTransactions();
         // Accrual reprocessing
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
@@ -2961,35 +2989,32 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanAccountDomainService.disableStandingInstructionsLinkedToClosedLoan(loan);
         //// Mark Post Dated Check as paid., Do we need this for refund?
         loanAccountDomainService.updateAndSavePostDatedChecksForIndividualAccount(loan, refundTransaction);
-        if (interestRefundTransaction != null) {
-            loanAccountDomainService.updateAndSavePostDatedChecksForIndividualAccount(loan, interestRefundTransaction);
+        for (final LoanTransaction derivedTransaction : derivedTransactions) {
+            loanAccountDomainService.updateAndSavePostDatedChecksForIndividualAccount(loan, derivedTransaction);
         }
         // Collateral management
         loanAccountDomainService.updateAndSaveLoanCollateralTransactionsForIndividualAccounts(loan, refundTransaction);
-        if (interestRefundTransaction != null) {
-            loanAccountDomainService.updateAndSaveLoanCollateralTransactionsForIndividualAccounts(loan, interestRefundTransaction);
+        for (final LoanTransaction derivedTransaction : derivedTransactions) {
+            loanAccountDomainService.updateAndSaveLoanCollateralTransactionsForIndividualAccounts(loan, derivedTransaction);
         }
         // Raise business events
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
                 true);
 
         journalEntryPoster.postJournalEntriesForLoanTransaction(refundTransaction, false, false);
-        if (interestRefundTransaction != null) {
-            journalEntryPoster.postJournalEntriesForLoanTransaction(interestRefundTransaction, false, false);
-        }
+        derivedTransactions.forEach(txn -> journalEntryPoster.postJournalEntriesForLoanTransaction(txn, false, false));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
 
         Long entityId = refundTransaction.getId();
         ExternalId entityExternalId = refundTransaction.getExternalId();
-        Long subEntityId = interestRefundTransaction != null ? interestRefundTransaction.getId() : null;
-        ExternalId subEntityExternalId = interestRefundTransaction != null ? interestRefundTransaction.getExternalId() : null;
+        final List<CommandProcessingSubResourceResult> subResources = derivedTransactions.stream()
+                .map(txn -> new CommandProcessingSubResourceResult(txn.getId(), txn.getExternalId())).toList();
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withLoanId(loan.getId()) //
                 .withEntityId(entityId) //
                 .withEntityExternalId(entityExternalId) //
-                .withSubEntityId(subEntityId) //
-                .withSubEntityExternalId(subEntityExternalId) //
+                .withSubResources(subResources) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -3190,6 +3215,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // Remove All the Disbursement Details If the Loan Product is disabled and exists one
             if (loan.loanProduct().isDisallowExpectedDisbursements() && !loan.getDisbursementDetails().isEmpty()) {
                 for (LoanDisbursementDetails disbursementDetail : loan.getAllDisbursementDetails()) {
+                    loanDisbursementService.deactivateDownPaymentFeesOfTranche(loan, disbursementDetail);
                     disbursementDetail.reverse();
                 }
             } else {
@@ -3199,6 +3225,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
             final boolean isEmiAmountChanged = !loan.getLoanTermVariations().isEmpty();
             updateLoanToPreDisbursalState(loan);
+            loanDisbursementService.moveDownPaymentFeesToExpectedDisbursementDate(loan, loan.getExpectedDisbursedOnLocalDate());
+            loan.getDisbursementDetails().forEach(tranche -> loanDisbursementService.updateDownPaymentFeesOfTranche(loan, tranche));
             if (isScheduleRegenerateRequired || isDisbursedAmountChanged || isEmiAmountChanged
                     || loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 // clear off actual disbusrement date so schedule regeneration
@@ -3488,6 +3516,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                                 && DateUtils.isEqual(loanTermVariations.getTermApplicableFrom(), lastTransactionDate))
                         || DateUtils.isAfter(loanTermVariations.getTermApplicableFrom(), lastTransactionDate));
         reverseExistingTransactionsTillLastDisbursal(loan, lastDisbursalTransaction);
+        loanDisbursementService.deactivateDownPaymentFeesOfTranche(loan, disbursementDetail);
         loanScheduleService.regenerateScheduleWithReprocessingTransactions(loan, scheduleGeneratorDTO);
         actualChanges.put("undolastdisbursal", "true");
         actualChanges.put("disbursedAmount", loan.getDisbursedAmount());
@@ -3555,27 +3584,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
-
-        if (loan.isAutoRepaymentForDownPaymentEnabled()) {
-            // identify down-payment amount for the transaction
-            BigDecimal disbursedAmountPercentageForDownPayment = loan.getLoanRepaymentScheduleDetail()
-                    .getDisbursedAmountPercentageForDownPayment();
-            Money downPaymentMoney = Money.of(loan.getCurrency(),
-                    MathUtil.percentageOf(lastDisbursalTransaction.getAmount(), disbursedAmountPercentageForDownPayment, 19));
-
-            // find the latest matching down-payment transaction based on date, amount and transaction type
-            Optional<LoanTransaction> downPaymentTransaction = loan.getLoanTransactions().stream()
-                    .filter(tr -> tr.getTransactionDate().equals(lastDisbursalTransaction.getTransactionDate())
-                            && tr.getTypeOf().isDownPayment() && tr.getAmount().compareTo(downPaymentMoney.getAmount()) == 0)
-                    .max(Comparator.comparing(LoanTransaction::getId));
-
-            // reverse the down-payment transaction
-            downPaymentTransaction.ifPresent(transaction -> {
-                loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(transaction.getLoan(), transaction, "reversed");
-                transaction.reverse();
-                journalEntryPoster.postJournalEntriesForLoanTransaction(transaction, false, false);
-            });
-        }
     }
 
     public void closeAsMarkedForReschedule(final Loan loan, final JsonCommand command, final Map<String, Object> changes) {

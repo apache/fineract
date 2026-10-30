@@ -44,6 +44,7 @@ public interface LoanApiConstants {
     String chargesParameterName = "charges";
     String loanIdTobeApproved = "loanId";
     String postDatedChecks = "postDatedChecks";
+    String skipDownPaymentFeeParameterName = "skipDownPaymentFee";
 
     String approvedLoanAmountParameterName = "approvedLoanAmount";
     String approvedOnDateParameterName = "approvedOnDate";
@@ -209,6 +210,7 @@ public interface LoanApiConstants {
             LoanTransactionType.GOODWILL_CREDIT, //
             LoanTransactionType.INTEREST_PAYMENT_WAIVER, //
             LoanTransactionType.INTEREST_REFUND, //
+            LoanTransactionType.FEE_REFUND, //
             LoanTransactionType.MERCHANT_ISSUED_REFUND, //
             LoanTransactionType.PAYOUT_REFUND, //
             LoanTransactionType.REPAYMENT //

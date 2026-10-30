@@ -973,13 +973,14 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
         if (isAccountTransfer) {
             disbursementParameters = new HashSet<>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale", "dateFormat",
                     LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.fixedEmiAmountParameterName,
-                    LoanApiConstants.disbursementNetDisbursalAmountParameterName, LoanApiConstants.ORIGINATORS_PARAM));
+                    LoanApiConstants.disbursementNetDisbursalAmountParameterName, LoanApiConstants.ORIGINATORS_PARAM,
+                    LoanApiConstants.skipDownPaymentFeeParameterName));
         } else {
             disbursementParameters = new HashSet<>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale", "dateFormat",
                     "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber", "adjustRepaymentDate",
                     LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.fixedEmiAmountParameterName,
                     LoanApiConstants.postDatedChecks, LoanApiConstants.disbursementNetDisbursalAmountParameterName,
-                    LoanApiConstants.ORIGINATORS_PARAM));
+                    LoanApiConstants.ORIGINATORS_PARAM, LoanApiConstants.skipDownPaymentFeeParameterName));
         }
         return disbursementParameters;
     }

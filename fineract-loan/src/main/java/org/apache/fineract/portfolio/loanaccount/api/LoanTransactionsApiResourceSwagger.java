@@ -428,6 +428,19 @@ public final class LoanTransactionsApiResourceSwagger {
         public Long subResourceId;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String subResourceExternalId;
+
+        static final class PostLoansLoanIdTransactionsSubResource {
+
+            private PostLoansLoanIdTransactionsSubResource() {}
+
+            @Schema(example = "22")
+            public Long resourceId;
+            @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+            public String resourceExternalId;
+        }
+
+        @Schema(description = "Derived transactions created with the refund (interest and/or fee refund)")
+        public List<PostLoansLoanIdTransactionsSubResource> subResources;
         public PostLoansLoanIdTransactionsResponse.PostLoansLoanIdTransactionsResponseChanges changes;
 
         static final class PostLoansLoanIdTransactionsResponseChanges {

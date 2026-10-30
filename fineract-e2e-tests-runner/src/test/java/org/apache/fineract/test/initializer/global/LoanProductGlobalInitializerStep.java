@@ -101,6 +101,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         List<String> supportedInterestRefundTypes = Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND");
         List<LoanProductChargeData> chargesDisbursement = new ArrayList<>();
         chargesDisbursement.add(new LoanProductChargeData().id(chargeProductResolver.resolve(ChargeProductType.LOAN_DISBURSEMENT_CHARGE)));
+        final List<LoanProductChargeData> chargesDownPaymentFee = new ArrayList<>();
+        chargesDownPaymentFee.add(new LoanProductChargeData().id(chargeProductResolver.resolve(ChargeProductType.LOAN_DOWN_PAYMENT_FEE)));
         final List<LoanProductChargeData> chargesInstallmentFeePercentInterest = new ArrayList<>();
         chargesInstallmentFeePercentInterest.add(
                 new LoanProductChargeData().id(chargeProductResolver.resolve(ChargeProductType.LOAN_INSTALLMENT_FEE_PERCENTAGE_INTEREST)));
@@ -401,6 +403,54 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         });
 
         tasks.add(() -> {
+            // LP2 with Down-payment+autopayment + advanced payment allocation + expected tranches (disbursementData)
+            // (LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_EXPECTED_TRANCHES)
+            String nameDownPaymentAutoExpectedTranches = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_EXPECTED_TRANCHES.getName();
+            PostLoanProductsRequest loanProductsRequestDownPaymentAutoExpectedTranches = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2()//
+                    .name(nameDownPaymentAutoExpectedTranches)//
+                    .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                    .loanScheduleType("PROGRESSIVE") //
+                    .multiDisburseLoan(true)//
+                    .disallowExpectedDisbursements(false)//
+                    .maxTrancheCount(10)//
+                    .outstandingLoanBalance(10000.0)//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoExpectedTranches = createLoanProductIdempotent(
+                    loanProductsRequestDownPaymentAutoExpectedTranches);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_EXPECTED_TRANCHES,
+                    responseLoanProductsRequestDownPaymentAutoExpectedTranches);
+        });
+
+        tasks.add(() -> {
+            // LP2 with Down-payment+autopayment + advanced payment allocation + "Down Payment Fee" charge attached at
+            // product level
+            // (LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_DP_FEE_ON_PRODUCT)
+            String nameDownPaymentAutoFeeOnProduct = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_DP_FEE_ON_PRODUCT.getName();
+            PostLoanProductsRequest loanProductsRequestDownPaymentAutoFeeOnProduct = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2()//
+                    .name(nameDownPaymentAutoFeeOnProduct)//
+                    .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                    .loanScheduleType("PROGRESSIVE") //
+                    .charges(chargesDownPaymentFee)//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoFeeOnProduct = createLoanProductIdempotent(
+                    loanProductsRequestDownPaymentAutoFeeOnProduct);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_DP_FEE_ON_PRODUCT,
+                    responseLoanProductsRequestDownPaymentAutoFeeOnProduct);
+        });
+
+        tasks.add(() -> {
             // LP2 with Down-payment+autopayment + advanced payment allocation, no installmentAmountInMultiplesOf
             // (LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_NO_MULTIPLES_OF)
             final String nameDownPaymentAutoAdvPmtAllocNoMultiplesOf = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_NO_MULTIPLES_OF
@@ -441,6 +491,166 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                     loanProductsRequestDownPaymentAdvPaymentAllocation);
             TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION,
                     responseLoanProductsRequestDownPaymentAdvPaymentAllocation);
+        });
+
+        tasks.add(() -> {
+            // LP2 with Down-payment+autopayment + advanced payment allocation + Fee Refund on MIR/Payout Refund
+            // (LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND)
+            final String nameDownPaymentAutoAdvPaymentAllocationFeeRefund = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND
+                    .getName();
+            final PostLoanProductsRequest loanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefund = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2()//
+                    .name(nameDownPaymentAutoAdvPaymentAllocationFeeRefund)//
+                    .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                    .loanScheduleType("PROGRESSIVE") //
+                    .supportedFeeRefundTypes(Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefund = createLoanProductIdempotent(
+                    loanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefund);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND,
+                    responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefund);
+        });
+
+        tasks.add(() -> {
+            // LP2 with Down-payment (no auto down payment) + advanced payment allocation + Fee Refund on MIR/Payout
+            // Refund
+            // (LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND)
+            final String nameDownPaymentAdvPaymentAllocationFeeRefund = DefaultLoanProduct.LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND
+                    .getName();
+            final PostLoanProductsRequest loanProductsRequestDownPaymentAdvPaymentAllocationFeeRefund = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2()//
+                    .name(nameDownPaymentAdvPaymentAllocationFeeRefund)//
+                    .enableAutoRepaymentForDownPayment(false)//
+                    .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                    .loanScheduleType("PROGRESSIVE") //
+                    .supportedFeeRefundTypes(Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse responseLoanProductsRequestDownPaymentAdvPaymentAllocationFeeRefund = createLoanProductIdempotent(
+                    loanProductsRequestDownPaymentAdvPaymentAllocationFeeRefund);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND,
+                    responseLoanProductsRequestDownPaymentAdvPaymentAllocationFeeRefund);
+        });
+
+        tasks.add(() -> {
+            // LP2 with Down-payment+autopayment + advanced payment allocation + Fee Refund on MIR only
+            // (LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND_MIR)
+            final String nameDownPaymentAutoAdvPaymentAllocationFeeRefundMir = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND_MIR
+                    .getName();
+            final PostLoanProductsRequest loanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefundMir = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2()//
+                    .name(nameDownPaymentAutoAdvPaymentAllocationFeeRefundMir)//
+                    .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                    .loanScheduleType("PROGRESSIVE") //
+                    .supportedFeeRefundTypes(List.of("MERCHANT_ISSUED_REFUND"))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefundMir = createLoanProductIdempotent(
+                    loanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefundMir);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND_MIR,
+                    responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefundMir);
+        });
+
+        tasks.add(() -> {
+            // LP2 with Down-payment+autopayment + advanced payment allocation + Fee Refund on Payout Refund only
+            // (LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND_PAYOUT)
+            final String nameDownPaymentAutoAdvPaymentAllocationFeeRefundPayout = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND_PAYOUT
+                    .getName();
+            final PostLoanProductsRequest loanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefundPayout = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2()//
+                    .name(nameDownPaymentAutoAdvPaymentAllocationFeeRefundPayout)//
+                    .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                    .loanScheduleType("PROGRESSIVE") //
+                    .supportedFeeRefundTypes(List.of("PAYOUT_REFUND"))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefundPayout = createLoanProductIdempotent(
+                    loanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefundPayout);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND_PAYOUT,
+                    responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefundPayout);
+        });
+
+        tasks.add(() -> {
+            // LP2 with progressive loan schedule + interest EMI + interest recalculation + Down-payment+autopayment +
+            // Interest Refund and Fee Refund on MIR/Payout Refund
+            // (LP2_DOWNPAYMENT_AUTO_ADV_PYMNT_INTEREST_RECALCULATION_INTEREST_REFUND_FEE_REFUND)
+            final String nameDownPaymentAutoInterestRefundFeeRefund = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADV_PYMNT_INTEREST_RECALCULATION_INTEREST_REFUND_FEE_REFUND
+                    .getName();
+            final PostLoanProductsRequest loanProductsRequestDownPaymentAutoInterestRefundFeeRefund = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2Emi()//
+                    .name(nameDownPaymentAutoInterestRefundFeeRefund)//
+                    .enableDownPayment(true)//
+                    .disbursedAmountPercentageForDownPayment(new BigDecimal(25))//
+                    .enableAutoRepaymentForDownPayment(true)//
+                    .isInterestRecalculationEnabled(true)//
+                    .preClosureInterestCalculationStrategy(1)//
+                    .rescheduleStrategyMethod(4)//
+                    .interestRecalculationCompoundingMethod(0)//
+                    .recalculationRestFrequencyType(2)//
+                    .recalculationRestFrequencyInterval(1)//
+                    .supportedInterestRefundTypes(Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))//
+                    .supportedFeeRefundTypes(Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("INTEREST_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoInterestRefundFeeRefund = createLoanProductIdempotent(
+                    loanProductsRequestDownPaymentAutoInterestRefundFeeRefund);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PYMNT_INTEREST_RECALCULATION_INTEREST_REFUND_FEE_REFUND,
+                    responseLoanProductsRequestDownPaymentAutoInterestRefundFeeRefund);
+        });
+
+        tasks.add(() -> {
+            // LP2 with progressive loan schedule + interest EMI + interest recalculation + Down-payment+autopayment +
+            // Interest Refund and Fee Refund on MIR/Payout Refund + cash based accounting
+            // (LP2_DOWNPAYMENT_AUTO_ADV_PYMNT_INTEREST_RECALCULATION_INTEREST_REFUND_FEE_REFUND_CASH_ACCOUNTING)
+            final String nameDownPaymentAutoInterestRefundFeeRefundCash = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADV_PYMNT_INTEREST_RECALCULATION_INTEREST_REFUND_FEE_REFUND_CASH_ACCOUNTING
+                    .getName();
+            final PostLoanProductsRequest loanProductsRequestDownPaymentAutoInterestRefundFeeRefundCash = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2EmiCashAccounting()//
+                    .name(nameDownPaymentAutoInterestRefundFeeRefundCash)//
+                    .enableDownPayment(true)//
+                    .disbursedAmountPercentageForDownPayment(new BigDecimal(25))//
+                    .enableAutoRepaymentForDownPayment(true)//
+                    .isInterestRecalculationEnabled(true)//
+                    .preClosureInterestCalculationStrategy(1)//
+                    .rescheduleStrategyMethod(4)//
+                    .interestRecalculationCompoundingMethod(0)//
+                    .recalculationRestFrequencyType(2)//
+                    .recalculationRestFrequencyInterval(1)//
+                    .supportedInterestRefundTypes(Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))//
+                    .supportedFeeRefundTypes(Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("INTEREST_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoInterestRefundFeeRefundCash = createLoanProductIdempotent(
+                    loanProductsRequestDownPaymentAutoInterestRefundFeeRefundCash);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PYMNT_INTEREST_RECALCULATION_INTEREST_REFUND_FEE_REFUND_CASH_ACCOUNTING,
+                    responseLoanProductsRequestDownPaymentAutoInterestRefundFeeRefundCash);
         });
 
         tasks.add(() -> {

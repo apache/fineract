@@ -283,9 +283,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             final boolean enableInstallmentLevelDelinquency, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean isInterestRecognitionOnDisbursementDate,
-            final DaysInYearCustomStrategyType daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
-            final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
+            final List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes, final LoanChargeOffBehaviour chargeOffBehaviour,
+            final boolean isInterestRecognitionOnDisbursementDate, final DaysInYearCustomStrategyType daysInYearCustomStrategy,
+            final boolean enableIncomeCapitalization, final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
             final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType,
             final boolean enableBuyDownFee, final LoanBuyDownFeeCalculationType buyDownFeeCalculationType,
             final LoanBuyDownFeeStrategy buyDownFeeStrategy, final LoanBuyDownFeeIncomeType buyDownFeeIncomeType,
@@ -340,10 +340,10 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(), daysInYearType.getValue(),
                 isInterestRecalculationEnabled, isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment,
                 enableAutoRepaymentForDownPayment, loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting,
-                supportedInterestRefundTypes, chargeOffBehaviour, isInterestRecognitionOnDisbursementDate, daysInYearCustomStrategy,
-                enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType,
-                installmentAmountInMultiplesOf, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                merchantBuyDownFee, monthEndDueDateStrategy);
+                supportedInterestRefundTypes, supportedFeeRefundTypes, chargeOffBehaviour, isInterestRecognitionOnDisbursementDate,
+                daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
+                capitalizedIncomeType, installmentAmountInMultiplesOf, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy,
+                buyDownFeeIncomeType, merchantBuyDownFee, monthEndDueDateStrategy);
 
         this.loanProductMinMaxConstraints = new LoanProductMinMaxConstraints(defaultMinPrincipal, defaultMaxPrincipal,
                 defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, defaultMinNumberOfInstallments,

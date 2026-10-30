@@ -53,6 +53,11 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
             accruals = loanCharge.getLoanChargePaidBySet().stream().filter(e -> !e.getLoanTransaction().isReversed()
                     && (e.getLoanTransaction().isAccrual() || e.getLoanTransaction().isAccrualAdjustment())).toList();
         }
+        if (loanCharge.isDueAtDownPayment()) {
+            applyDownPaymentFee(currency, installments, loanCharge);
+            return;
+        }
+
         LocalDate startDate = disbursementDate;
         int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(installments);
         for (final LoanRepaymentScheduleInstallment installment : installments) {
@@ -62,7 +67,7 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
             boolean installmentChargeApplicable = !installment.isRecalculatedInterestComponent();
             Integer installmentNumber = installment.getInstallmentNumber();
             boolean isFirstPeriod = installmentNumber.equals(firstNormalInstallmentNumber);
-            Predicate<LoanCharge> feePredicate = e -> e.isFeeCharge() && !e.isDueAtDisbursement();
+            Predicate<LoanCharge> feePredicate = e -> e.isFeeCharge() && !e.isDueAtDisbursementOrDownPayment();
             LocalDate dueDate = installment.getDueDate();
             final Money feeChargesDue = calcChargeDue(startDate, dueDate, loanCharge, currency, installment, totalPrincipal, totalInterest,
                     installmentChargeApplicable, isFirstPeriod, feePredicate);
@@ -100,6 +105,22 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
         }
     }
 
+    private void applyDownPaymentFee(final MonetaryCurrency currency, final List<LoanRepaymentScheduleInstallment> installments,
+            final LoanCharge loanCharge) {
+        if (!loanCharge.isFeeCharge()) {
+            return;
+        }
+        final List<LoanRepaymentScheduleInstallment> periodsOnDate = DownPaymentFees.downPaymentPeriodsOn(installments,
+                loanCharge.getDueLocalDate());
+        if (periodsOnDate.isEmpty()) {
+            return;
+        }
+        final int periodIndex = DownPaymentFees.periodIndexOf(loanCharge, periodsOnDate.size());
+        final Money zero = Money.zero(currency);
+        periodsOnDate.get(periodIndex).addToChargePortion(loanCharge.getAmount(currency), loanCharge.getAmountWaived(currency),
+                loanCharge.getAmountWrittenOff(currency), zero, zero, zero);
+    }
+
     @NotNull
     private Money calcChargeDue(final LocalDate periodStart, final LocalDate periodEnd, final LoanCharge loanCharge,
             final MonetaryCurrency currency, LoanRepaymentScheduleInstallment period, final Money totalPrincipal, final Money totalInterest,
@@ -108,7 +129,7 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
         if (!predicate.test(loanCharge)) {
             return zero;
         }
-        if (loanCharge.isFeeCharge() && loanCharge.isDueAtDisbursement()) {
+        if (loanCharge.isFeeCharge() && loanCharge.isDueAtDisbursementOrDownPayment()) {
             return zero;
         }
         if (loanCharge.isInstalmentFee() && isInstallmentChargeApplicable) {

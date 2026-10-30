@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 
@@ -45,8 +46,15 @@ public class CommandProcessingResultBuilder {
     private ExternalId entityExternalId = ExternalId.empty();
     private ExternalId subEntityExternalId = ExternalId.empty();
     private ExternalId loanExternalId = ExternalId.empty();
+    private List<CommandProcessingSubResourceResult> subResources;
 
     public CommandProcessingResult build() {
+        if (this.subResources != null && !this.subResources.isEmpty()) {
+            return CommandProcessingResult.fromDetailsWithSubResources(this.commandId, this.officeId, this.groupId, this.clientId,
+                    this.loanId, this.savingsId, this.resourceIdentifier, this.entityId, this.gsimId, this.glimId,
+                    this.creditBureauReportData, this.transactionId, this.changes, this.productId, this.rollbackTransaction,
+                    this.entityExternalId, this.loanExternalId, this.subResources);
+        }
         return CommandProcessingResult.fromDetails(this.commandId, this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId,
                 this.resourceIdentifier, this.entityId, this.gsimId, this.glimId, this.creditBureauReportData, this.transactionId,
                 this.changes, this.productId, this.rollbackTransaction, this.subEntityId, this.entityExternalId, this.subEntityExternalId,
@@ -145,6 +153,11 @@ public class CommandProcessingResultBuilder {
 
     public CommandProcessingResultBuilder withLoanExternalId(final ExternalId loanExternalId) {
         this.loanExternalId = loanExternalId;
+        return this;
+    }
+
+    public CommandProcessingResultBuilder withSubResources(final List<CommandProcessingSubResourceResult> subResources) {
+        this.subResources = subResources;
         return this;
     }
 }

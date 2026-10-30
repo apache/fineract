@@ -143,6 +143,12 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private LoanTrancheDisbursementCharge loanTrancheDisbursementCharge;
 
+    // Tranche whose down payment period a down payment fee belongs to; null for other charges and single disbursement
+    // loans. Not lazy, so it is the same instance as in Loan.disbursementDetails (see isDownPaymentFeeOf)
+    @ManyToOne
+    @JoinColumn(name = "loan_disbursement_detail_id")
+    private LoanDisbursementDetails disbursementDetail;
+
     @OneToMany(mappedBy = "loanCharge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoanChargePaidBy> loanChargePaidBySet = new HashSet<>();
 
@@ -250,6 +256,21 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public boolean isDueAtDisbursement() {
         return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DISBURSEMENT)
                 || ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.TRANCHE_DISBURSEMENT);
+    }
+
+    public boolean isDueAtDownPayment() {
+        return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DOWN_PAYMENT);
+    }
+
+    // Compared as entity instances: LoanDisbursementDetails.equals only compares the expected date and principal, which
+    // tranches of the same day can share
+    @SuppressWarnings("ReferenceEquality")
+    public boolean isDownPaymentFeeOf(final LoanDisbursementDetails tranche) {
+        return isDueAtDownPayment() && tranche != null && this.disbursementDetail == tranche;
+    }
+
+    public boolean isDueAtDisbursementOrDownPayment() {
+        return isDueAtDisbursement() || isDueAtDownPayment();
     }
 
     public boolean isSpecifiedDueDate() {

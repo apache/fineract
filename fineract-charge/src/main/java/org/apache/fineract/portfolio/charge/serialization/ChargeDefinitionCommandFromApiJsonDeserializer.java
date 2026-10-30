@@ -179,7 +179,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             }
 
             if (chargeTimeType != null && chargeCalculationType != null) {
-                performChargeTimeNCalculationTypeValidation(baseDataValidator, chargeTimeType, chargeCalculationType);
+                final boolean isPenalty = Boolean.TRUE.equals(this.fromApiJsonHelper.extractBooleanNamed(PENALTY, element));
+                performChargeTimeNCalculationTypeValidation(baseDataValidator, chargeTimeType, chargeCalculationType, isPenalty);
             }
 
         } else if (appliesTo.isSavingsCharge()) {
@@ -478,15 +479,15 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateChargeTimeNCalculationType(Integer chargeTimeType, Integer chargeCalculationType) {
+    public void validateChargeTimeNCalculationType(Integer chargeTimeType, Integer chargeCalculationType, boolean isPenalty) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CHARGE);
-        performChargeTimeNCalculationTypeValidation(baseDataValidator, chargeTimeType, chargeCalculationType);
+        performChargeTimeNCalculationTypeValidation(baseDataValidator, chargeTimeType, chargeCalculationType, isPenalty);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     private void performChargeTimeNCalculationTypeValidation(DataValidatorBuilder baseDataValidator, final Integer chargeTimeType,
-            final Integer chargeCalculationType) {
+            final Integer chargeCalculationType, final boolean isPenalty) {
         if (chargeTimeType.equals(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue())) {
             baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE).value(chargeCalculationType)
                     .isOneOfTheseValues(ChargeCalculationType.validValuesForShareAccountActivation());
@@ -495,6 +496,10 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         if (chargeTimeType.equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())) {
             baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE).value(chargeCalculationType)
                     .isOneOfTheseValues(ChargeCalculationType.validValuesForTrancheDisbursement());
+        } else if (chargeTimeType.equals(ChargeTimeType.DOWN_PAYMENT.getValue())) {
+            baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE).value(chargeCalculationType)
+                    .isOneOfTheseValues(ChargeCalculationType.validValuesForDownPayment());
+            baseDataValidator.reset().parameter(PENALTY).value(isPenalty).isNotOneOfTheseValues(true);
         } else {
             baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE).value(chargeCalculationType)
                     .isNotOneOfTheseValues(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue());

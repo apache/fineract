@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -63,6 +64,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.service.LoanProductAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanProductUpdateUtil;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
@@ -71,7 +73,9 @@ import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationsJsonPar
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedFeeRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductCannotBeModifiedDueToNonClosedLoansException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductDateException;
@@ -140,6 +144,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                     command, this.aprCalculator, floatingRate, rates, loanProductPaymentAllocationRules, loanProductCreditAllocationRules);
 
             loanProduct.updateLoanProductInRelatedClasses();
+            validateDownPaymentCharges(loanProduct);
             loanProduct.setTransactionProcessingStrategyName(
                     loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(loanTransactionProcessingStrategyCode).getName());
 
@@ -260,6 +265,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                 }
             }
 
+            validateDownPaymentCharges(product);
+
             if (changes.containsKey("paymentAllocation")) {
                 final List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules = advancedPaymentJsonParser
                         .assembleLoanProductPaymentAllocationRules(command, product.getTransactionProcessingStrategyCode());
@@ -317,6 +324,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                 product.getLoanProductRelatedDetail().setSupportedInterestRefundTypes(supportedInterestRefundTypes);
             }
 
+            if (command.parameterExists(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES)) {
+                final JsonArray supportedTransactionsForFeeRefund = command
+                        .arrayOfParameterNamed(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES);
+                final List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes = new ArrayList<>();
+                supportedTransactionsForFeeRefund.iterator()
+                        .forEachRemaining(value -> supportedFeeRefundTypes.add(LoanSupportedFeeRefundTypes.valueOf(value.getAsString())));
+                product.getLoanProductRelatedDetail().setSupportedFeeRefundTypes(supportedFeeRefundTypes);
+            }
+
             if (command.parameterExists(LoanProductConstants.CHARGE_OFF_BEHAVIOUR)) {
                 product.getLoanProductRelatedDetail().setChargeOffBehaviour(
                         command.enumValueOfParameterNamed(LoanProductConstants.CHARGE_OFF_BEHAVIOUR, LoanChargeOffBehaviour.class));
@@ -352,6 +368,17 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                         || command.isChangeInBigDecimalParameterNamed("interestRateDifferential",
                                 product.getFloatingRates().getInterestRateDifferential()));
         return isChangeFromFloatingToFlatOrViceVersa || isChangeInCriticalFloatingRateParams;
+    }
+
+    private void validateDownPaymentCharges(final LoanProduct product) {
+        final LoanProductRelatedDetail relatedDetail = product.getLoanProductRelatedDetail();
+        if (relatedDetail.isEnableDownPayment() && LoanScheduleType.PROGRESSIVE.equals(relatedDetail.getLoanScheduleType())) {
+            return;
+        }
+        product.getCharges().stream().filter(Charge::isDownPaymentCharge).findFirst().ifPresent(charge -> {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.product.down.payment.charge.requires.progressive.down.payment",
+                    "Down payment charge can be attached only to a progressive loan product with down payment enabled.", charge.getId());
+        });
     }
 
     private List<Charge> assembleListOfProductCharges(final JsonCommand command, final String currencyCode) {

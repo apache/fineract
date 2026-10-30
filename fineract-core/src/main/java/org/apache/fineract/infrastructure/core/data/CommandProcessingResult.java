@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.data;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.ToString;
@@ -50,6 +51,7 @@ public class CommandProcessingResult implements Serializable {
     private final ExternalId resourceExternalId;
     private final ExternalId subResourceExternalId;
     private final ExternalId loanExternalId;
+    private final List<CommandProcessingSubResourceResult> subResources;
 
     private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
             final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
@@ -75,6 +77,45 @@ public class CommandProcessingResult implements Serializable {
         this.resourceExternalId = setExternalIdOrNull(resourceExternalId);
         this.subResourceExternalId = setExternalIdOrNull(subResourceExternalId);
         this.loanExternalId = setExternalIdOrNull(loanExternalId);
+        this.subResources = null;
+    }
+
+    /**
+     * Result with secondary resources (e.g. MIR/Payout interest + fee refunds). Keeps the first entry in
+     * {@code subResourceId} / {@code subResourceExternalId} for backward compatibility with clients that only read
+     * those fields.
+     */
+    private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
+            final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
+            final Map<String, Object> changes, final Long productId, final Long gsimId, final Long glimId,
+            final Map<String, Object> creditBureauReportData, Boolean rollbackTransaction, final ExternalId resourceExternalId,
+            final ExternalId loanExternalId, final List<CommandProcessingSubResourceResult> subResources) {
+        this.commandId = commandId;
+        this.officeId = officeId;
+        this.groupId = groupId;
+        this.clientId = clientId;
+        this.loanId = loanId;
+        this.savingsId = savingsId;
+        this.resourceIdentifier = resourceIdentifier;
+        this.resourceId = resourceId;
+        this.changes = changes;
+        this.transactionId = transactionId;
+        this.productId = productId;
+        this.gsimId = gsimId;
+        this.glimId = glimId;
+        this.creditBureauReportData = creditBureauReportData;
+        this.rollbackTransaction = rollbackTransaction;
+        this.resourceExternalId = setExternalIdOrNull(resourceExternalId);
+        this.loanExternalId = setExternalIdOrNull(loanExternalId);
+        this.subResources = subResources == null || subResources.isEmpty() ? null : List.copyOf(subResources);
+        if (this.subResources != null) {
+            final CommandProcessingSubResourceResult first = this.subResources.getFirst();
+            this.subResourceId = first.resourceId();
+            this.subResourceExternalId = setExternalIdOrNull(first.resourceExternalId());
+        } else {
+            this.subResourceId = null;
+            this.subResourceExternalId = null;
+        }
     }
 
     protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changes,
@@ -92,6 +133,13 @@ public class CommandProcessingResult implements Serializable {
     }
 
     public static CommandProcessingResult fromCommandProcessingResult(CommandProcessingResult commandResult, final Long resourceId) {
+        if (commandResult.subResources != null) {
+            return new CommandProcessingResult(commandResult.commandId, commandResult.officeId, commandResult.groupId,
+                    commandResult.clientId, commandResult.loanId, commandResult.savingsId, commandResult.resourceIdentifier, resourceId,
+                    commandResult.transactionId, commandResult.changes, commandResult.productId, commandResult.gsimId, commandResult.glimId,
+                    commandResult.creditBureauReportData, commandResult.rollbackTransaction, commandResult.resourceExternalId,
+                    commandResult.loanExternalId, commandResult.subResources);
+        }
         return new CommandProcessingResult(commandResult.commandId, commandResult.officeId, commandResult.groupId, commandResult.clientId,
                 commandResult.loanId, commandResult.savingsId, commandResult.resourceIdentifier, resourceId, commandResult.transactionId,
                 commandResult.changes, commandResult.productId, commandResult.gsimId, commandResult.glimId,
@@ -111,6 +159,16 @@ public class CommandProcessingResult implements Serializable {
         return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
                 transactionId, changes, productId, gsimId, glimId, creditBureauReportData, rollbackTransaction, subResourceId,
                 resourceExternalId, subResourceExternalId, loanExternalId);
+    }
+
+    public static CommandProcessingResult fromDetailsWithSubResources(final Long commandId, final Long officeId, final Long groupId,
+            final Long clientId, final Long loanId, final Long savingsId, final String resourceIdentifier, final Long entityId,
+            final Long gsimId, final Long glimId, final Map<String, Object> creditBureauReportData, final String transactionId,
+            final Map<String, Object> changes, final Long productId, final Boolean rollbackTransaction, final ExternalId resourceExternalId,
+            final ExternalId loanExternalId, final List<CommandProcessingSubResourceResult> subResources) {
+        return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
+                transactionId, changes, productId, gsimId, glimId, creditBureauReportData, rollbackTransaction, resourceExternalId,
+                loanExternalId, subResources);
     }
 
     public static CommandProcessingResult commandOnlyResult(final Long commandId) {

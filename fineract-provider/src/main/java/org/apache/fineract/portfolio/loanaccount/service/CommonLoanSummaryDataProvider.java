@@ -71,6 +71,7 @@ public abstract class CommonLoanSummaryDataProvider implements LoanSummaryDataPr
                 LoanTransactionType.GOODWILL_CREDIT);
 
         totalInterestRefund = fetchLoanTransactionBalanceByType(loanTransactionBalances, LoanTransactionType.INTEREST_REFUND);
+        final BigDecimal totalFeeRefund = fetchLoanTransactionBalanceByType(loanTransactionBalances, LoanTransactionType.FEE_REFUND);
 
         totalInterestPaymentWaiver = fetchLoanTransactionBalanceByType(loanTransactionBalances,
                 LoanTransactionType.INTEREST_PAYMENT_WAIVER);
@@ -136,7 +137,8 @@ public abstract class CommonLoanSummaryDataProvider implements LoanSummaryDataPr
                 .totalCreditBalanceRefund(totalCreditBalanceRefund).totalCreditBalanceRefundReversed(totalCreditBalanceRefundReversed)
                 .totalRepaymentTransaction(totalRepaymentTransaction).totalRepaymentTransactionReversed(totalRepaymentTransactionReversed)
                 .totalInterestPaymentWaiver(totalInterestPaymentWaiver).totalUnpaidPayableDueInterest(totalUnpaidPayableDueInterest)
-                .totalUnpaidPayableNotDueInterest(totalUnpaidPayableNotDueInterest).totalInterestRefund(totalInterestRefund).build();
+                .totalUnpaidPayableNotDueInterest(totalUnpaidPayableNotDueInterest).totalInterestRefund(totalInterestRefund)
+                .totalFeeRefund(totalFeeRefund).build();
     }
 
     private static BigDecimal fetchLoanTransactionBalanceByType(final Collection<? extends LoanTransactionBalance> loanTransactionBalances,

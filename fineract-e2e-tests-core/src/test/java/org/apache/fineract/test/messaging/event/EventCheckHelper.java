@@ -109,6 +109,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.AbstractLoanTra
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanDisbursalTransactionEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanRefundPostBusinessEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionFeeRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionGoodwillCreditPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionInterestPaymentWaiverPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionInterestRefundPostEvent;
@@ -497,6 +498,7 @@ public class EventCheckHelper {
             case REFUND_BY_CASH -> LoanRefundPostBusinessEvent.class;
             case INTEREST_PAYMENT_WAIVER -> LoanTransactionInterestPaymentWaiverPostEvent.class;
             case INTEREST_REFUND -> LoanTransactionInterestRefundPostEvent.class;
+            case FEE_REFUND -> LoanTransactionFeeRefundPostEvent.class;
             default -> throw new IllegalStateException(String.format("transaction type %s cannot be found", transactionType.getValue()));
         };
         return transactionEventCheck(loanId, transactionId, eventClass, externalOwnerId);

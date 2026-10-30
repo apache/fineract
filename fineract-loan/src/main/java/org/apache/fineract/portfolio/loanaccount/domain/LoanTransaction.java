@@ -212,6 +212,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.INTEREST_REFUND, paymentDetail, amount, date, externalId);
     }
 
+    public static LoanTransaction feeRefund(final Loan loan, final BigDecimal amount, final LocalDate date, final ExternalId externalId) {
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.FEE_REFUND, null, amount, date, externalId);
+    }
+
     public static LoanTransaction chargeAdjustment(final Loan loan, final BigDecimal amount, final LocalDate transactionDate,
             final ExternalId externalId, PaymentDetail paymentDetail) {
         return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_ADJUSTMENT, paymentDetail, amount, transactionDate,
@@ -655,7 +659,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isRepaymentLikeType() {
         return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
-                || isChargeAdjustment() || isDownPayment() || isInterestPaymentWaiver() || isInterestRefund()
+                || isChargeAdjustment() || isDownPayment() || isInterestPaymentWaiver() || isInterestRefund() || isFeeRefund()
                 || isCapitalizedIncomeAdjustment();
     }
 
@@ -981,7 +985,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     }
 
     public Boolean isAllowTypeTransactionAtTheTimeOfLastUndo() {
-        return isNotReversed() && (isDisbursement() || isAccrualActivity() || isRepaymentAtDisbursement() || isRepayment());
+        return isNotReversed()
+                && (isDisbursement() || isAccrualActivity() || isRepaymentAtDisbursement() || isRepayment() || isDownPayment());
     }
 
     public Money getOutstandingLoanBalanceMoney(final MonetaryCurrency currency) {
@@ -1030,6 +1035,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isInterestRefund() {
         return getTypeOf().isInterestRefund();
+    }
+
+    public boolean isFeeRefund() {
+        return getTypeOf().isFeeRefund();
     }
 
     public void updateAmount(BigDecimal bigDecimal) {

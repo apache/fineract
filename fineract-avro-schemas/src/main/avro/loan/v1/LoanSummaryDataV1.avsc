@@ -461,6 +461,14 @@
         },
         {
             "default": null,
+            "name": "totalFeeRefund",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "totalPrincipal",
             "type": [
                 "null",

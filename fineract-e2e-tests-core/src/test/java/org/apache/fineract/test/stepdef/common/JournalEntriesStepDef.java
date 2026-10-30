@@ -93,6 +93,30 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         checkJournalEntriesData(journalLinesActualList, table);
     }
 
+    @Then("Loan Transactions tab has a {string} transaction with date {string} which has no Journal entries")
+    public void journalEntryNotExistCheck(String transactionType, String transactionDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("staffInSelectedOfficeOnly", false);
+        queryParams.put("associations", "transactions");
+        GetLoansLoanIdResponse loanDetailsResponse = loansApi().retrieveOneLoan(loanId, queryParams);
+        String transactionTypeExpected = TransactionType.valueOf(transactionType).getValue();
+
+        List<GetLoansLoanIdTransactions> transactionsMatch = loanDetailsResponse.getTransactions().stream()
+                .filter(t -> transactionDate.equals(formatter.format(t.getDate()))
+                        && transactionTypeExpected.equals(t.getType().getCode().substring(20)))
+                .collect(Collectors.toList());
+        assertThat(transactionsMatch).as("Expected %s transaction on %s", transactionType, transactionDate).isNotEmpty();
+
+        List<List<JournalEntryTransactionItem>> journalLinesActualList = getJournalLinesActualList(transactionsMatch);
+        int totalJournalEntries = journalLinesActualList.stream().mapToInt(List::size).sum();
+        assertThat(totalJournalEntries).as("Expected no journal entries for transaction type %s on %s", transactionType, transactionDate)
+                .isZero();
+    }
+
     @Then("Loan transaction of type {string} on {string} has journal entries with external asset owner {string}")
     public void loanTransactionJournalEntriesWithOwner(String transactionType, String transactionDate, String owner) {
         assertExternalOwnerOnTransactionJournalEntries(transactionType, transactionDate, resolveExternalOwner(owner));

@@ -553,6 +553,7 @@ public class LoanTransactionsApiResource {
             case interestPaymentWaiver -> LoanTransactionType.INTEREST_PAYMENT_WAIVER;
             case accrualActivity -> LoanTransactionType.ACCRUAL_ACTIVITY;
             case interestRefund -> LoanTransactionType.INTEREST_REFUND;
+            case feeRefund -> LoanTransactionType.FEE_REFUND;
             case accrualAdjustment -> LoanTransactionType.ACCRUAL_ADJUSTMENT;
             case capitalizedIncome -> LoanTransactionType.CAPITALIZED_INCOME;
             case capitalizedIncomeAmortization -> LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION;
