@@ -20,7 +20,7 @@
 services:
   mariadb:
     container_name: mariadb
-    image: mariadb:12.2
+    image: mariadb:12.3
     volumes:
       - ./config/docker/mysql/conf.d/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf:ro
       - ./config/docker/mariadb/conf.d/mariadb_compat.cnf:/etc/mysql/conf.d/mariadb_compat.cnf:ro
