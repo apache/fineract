@@ -40,6 +40,7 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
 import org.apache.fineract.investor.domain.LoanOwnershipTransferBusinessEvent;
 import org.apache.fineract.investor.service.DelayedSettlementAttributeService;
+import org.apache.fineract.investor.service.ExternalAssetOwnerLoanAttributesWriteService;
 import org.apache.fineract.investor.service.ExternalAssetOwnerTransferOutstandingInterestCalculation;
 import org.apache.fineract.investor.service.LoanTransferabilityService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -71,6 +72,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
     private final ExternalAssetOwnerTransferOutstandingInterestCalculation externalAssetOwnerTransferOutstandingInterestCalculation;
     private final LoanCapitalizedIncomeAmortizationProcessingService loanCapitalizedIncomeAmortizationProcessingService;
     private final LoanBuyDownFeeAmortizationProcessingService loanBuyDownFeeAmortizationProcessingService;
+    private final ExternalAssetOwnerLoanAttributesWriteService externalAssetOwnerLoanAttributesWriteService;
 
     @Override
     public Loan execute(Loan loan) {
@@ -87,7 +89,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
             ExternalTransferStatus firstTransferStatus = transferDataList.get(0).getStatus();
             ExternalTransferStatus secondTransferStatus = transferDataList.get(1).getStatus();
 
-            if (delayedSettlementAttributeService.isEnabled(loan.getLoanProduct().getId())) {
+            if (delayedSettlementAttributeService.isEnabled(loanId, loan.getLoanProduct().getId())) {
                 throw new IllegalStateException(String.format("Delayed Settlement enabled, but found 2 transfers of statuses: %s and %s",
                         firstTransferStatus, secondTransferStatus));
             }
@@ -172,6 +174,8 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
 
     private ExternalAssetOwnerTransfer sellAsset(final Loan loan, final LocalDate settlementDate,
             final ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
+        externalAssetOwnerLoanAttributesWriteService.copyLoanProductAttributesIfAbsent(loan, externalAssetOwnerTransfer);
+
         // Link the remaining deferred income amortization to the current owner before the
         // loan <-> owner mapping is removed for the transfer.
         recognizeRemainingDeferredIncomeOnLoanSale(loan, settlementDate);
@@ -201,7 +205,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
 
     private ExternalAssetOwner determinePreviousOwnerAndCleanupIfNeeded(final Loan loan, final LocalDate settlementDate,
             final ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
-        if (!delayedSettlementAttributeService.isEnabled(loan.getLoanProduct().getId())
+        if (!delayedSettlementAttributeService.isEnabled(loan.getId(), loan.getLoanProduct().getId())
                 || ExternalTransferStatus.PENDING_INTERMEDIATE == externalAssetOwnerTransfer.getStatus()) {
             // Use the loan mapping as the source of truth for the current owner.
             // If a mapping exists, this is an owner-to-owner transfer — expire the current active and clean up.

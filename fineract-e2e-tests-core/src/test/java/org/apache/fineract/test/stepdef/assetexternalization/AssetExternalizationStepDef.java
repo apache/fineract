@@ -63,6 +63,7 @@ import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PutExternalAssetOwnerLoanAttributeRequest;
 import org.apache.fineract.client.models.PutExternalAssetOwnerLoanProductAttributeRequest;
 import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.data.AssetExternalizationErrorMessage;
@@ -1379,6 +1380,17 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
                 .isEqualTo(Boolean.parseBoolean(multiValue));
         assertThat(attribute.getAttributeValues()).as("Values of attribute %s in the template", attributeKey)
                 .contains(containedValues.split(",", -1)).doesNotContain(notContainedValues.split(",", -1));
+    }
+
+    @When("Admin sets external asset owner loan attribute {string} value {string} for the loan")
+    public void setExternalAssetOwnerLoanAttribute(final String attributeKey, final String attributeValue) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final Long loanId = loanResponse.getLoanId();
+
+        final CommandProcessingResult result = ok(() -> externalAssetOwnersApi().updateExternalAssetOwnerLoanAttribute(loanId,
+                new PutExternalAssetOwnerLoanAttributeRequest().attributeKey(attributeKey).attributeValue(attributeValue)));
+
+        assertThat(result.getResourceId()).as("Resource id of the loan-level attribute %s", attributeKey).isEqualTo(loanId);
     }
 
     @When("Admin deletes external asset owner loan product attribute {string} of the new loan product")

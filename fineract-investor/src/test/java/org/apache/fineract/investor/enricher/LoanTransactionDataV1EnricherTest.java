@@ -77,7 +77,7 @@ public class LoanTransactionDataV1EnricherTest {
         LoanTransactionDataV1 data = transaction(LoanTransactionType.REPAYMENT.getValue());
         stubActiveOwner();
         stubLoanProduct();
-        when(excludedTransactionTypesService.isExcluded(LOAN_PRODUCT_ID, LoanTransactionType.REPAYMENT)).thenReturn(false);
+        when(excludedTransactionTypesService.isExcluded(LOAN_ID, LOAN_PRODUCT_ID, LoanTransactionType.REPAYMENT)).thenReturn(false);
 
         underTest.enrich(data);
 
@@ -89,7 +89,7 @@ public class LoanTransactionDataV1EnricherTest {
         LoanTransactionDataV1 data = transaction(LoanTransactionType.BUY_DOWN_FEE.getValue());
         stubActiveOwner();
         stubLoanProduct();
-        when(excludedTransactionTypesService.isExcluded(LOAN_PRODUCT_ID, LoanTransactionType.BUY_DOWN_FEE)).thenReturn(true);
+        when(excludedTransactionTypesService.isExcluded(LOAN_ID, LOAN_PRODUCT_ID, LoanTransactionType.BUY_DOWN_FEE)).thenReturn(true);
 
         underTest.enrich(data);
 

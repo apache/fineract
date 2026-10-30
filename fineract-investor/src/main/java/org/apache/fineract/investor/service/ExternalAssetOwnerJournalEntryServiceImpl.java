@@ -63,10 +63,11 @@ public class ExternalAssetOwnerJournalEntryServiceImpl implements ExternalAssetO
 
     private void attributeToOwner(final JournalEntry journalEntry, final LoanTransactionOwnerTaggingData taggingData,
             final ExternalAssetOwnerTransferLoanMapping transferLoanMapping) {
-        if (excludedTransactionTypesService.isExcluded(taggingData.getLoanProductId(), taggingData.getTransactionType())) {
+        if (excludedTransactionTypesService.isExcluded(taggingData.getLoanId(), taggingData.getLoanProductId(),
+                taggingData.getTransactionType())) {
             log.debug(
-                    "Skipping external asset owner attribution of journal entry of loan transaction {}: transaction type {} is excluded for loan product {}",
-                    journalEntry.getLoanTransactionId(), taggingData.getTransactionType(), taggingData.getLoanProductId());
+                    "Skipping external asset owner attribution of journal entry of loan transaction {}: transaction type {} is excluded for loan {}",
+                    journalEntry.getLoanTransactionId(), taggingData.getTransactionType(), taggingData.getLoanId());
             return;
         }
 

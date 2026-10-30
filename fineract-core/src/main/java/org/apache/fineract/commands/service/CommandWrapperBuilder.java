@@ -187,6 +187,7 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ENTITY_DATATABLE_CHECK;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_EXTERNALSERVICES;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_EXTERNAL_ASSET_OWNER;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FAMILYMEMBERS;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FINANCIALACTIVITYACCOUNT;
@@ -3927,6 +3928,15 @@ public class CommandWrapperBuilder {
         this.productId = loanProductId;
         this.entityId = attributeId;
         this.href = "/external-asset-owners/loan-product/" + loanProductId + "/attributes/" + attributeId;
+        return this;
+    }
+
+    public CommandWrapperBuilder updateExternalAssetOwnerLoanAttribute(final Long loanId) {
+        this.actionName = ACTION_UPDATE;
+        this.entityName = ENTITY_EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE;
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/external-asset-owners/loans/" + loanId + "/attributes";
         return this;
     }
 

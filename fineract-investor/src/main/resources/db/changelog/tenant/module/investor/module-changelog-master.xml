@@ -46,4 +46,5 @@
   <include relativeToChangelogFile="true" file="parts/0022_add_external_asser_owner_create_permission.xml"/>
   <include relativeToChangelogFile="true" file="parts/0023_widen_external_asset_owner_loan_product_attribute_value.xml"/>
   <include relativeToChangelogFile="true" file="parts/0024_add_external_asset_owner_loan_product_attribute_delete_permission.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0025_add_external_asset_owner_loan_attributes.xml"/>
 </databaseChangeLog>

@@ -22,9 +22,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
 /**
  * Tells whether a loan transaction type must be kept out of external asset owner accounting and reporting for a given
- * loan product, based on the {@code EXCLUDED_TRANSACTION_TYPES} loan product attribute.
+ * loan, based on its {@code EXCLUDED_TRANSACTION_TYPES} attribute (loan-level copy first, loan product otherwise).
  */
 public interface ExcludedTransactionTypesService {
 
-    boolean isExcluded(Long loanProductId, LoanTransactionType transactionType);
+    boolean isExcluded(Long loanId, Long loanProductId, LoanTransactionType transactionType);
 }

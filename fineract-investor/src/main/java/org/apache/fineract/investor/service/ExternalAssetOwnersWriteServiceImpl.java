@@ -92,15 +92,17 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     private final ExternalAssetOwnersReadService externalAssetOwnersReadService;
     private final ExternalAssetOwnerValidator externalAssetOwnerValidator;
     private final ExternalAssetOwnerHelper externalAssetOwnerHelper;
+    private final ExternalAssetOwnerLoanAttributesWriteService externalAssetOwnerLoanAttributesWriteService;
 
     @Override
     @Transactional
     public CommandProcessingResult intermediarySaleLoanByLoanId(JsonCommand command) {
+        Long loanId = command.getLoanId();
+        externalAssetOwnerLoanAttributesWriteService.lockLoanLevelCopy(loanId);
         final JsonElement json = fromApiJsonHelper.parse(command.json());
         validateIntermediarySaleRequestBody(command.json());
-        Long loanId = command.getLoanId();
         LoanDataForExternalTransfer loanDataForExternalTransfer = fetchAndValidateLoanDataForExternalTransfer(loanId);
-        if (!delayedSettlementAttributeService.isEnabled(loanDataForExternalTransfer.getLoanProductId())) {
+        if (!delayedSettlementAttributeService.isEnabled(loanId, loanDataForExternalTransfer.getLoanProductId())) {
             throw new ExternalAssetOwnerInitiateTransferException(
                     String.format("Delayed Settlement Configuration is not enabled for the loan product: %s",
                             loanDataForExternalTransfer.getLoanProductShortName()));
@@ -118,10 +120,11 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     @Override
     @Transactional
     public CommandProcessingResult saleLoanByLoanId(JsonCommand command) {
+        externalAssetOwnerLoanAttributesWriteService.lockLoanLevelCopy(command.getLoanId());
         final JsonElement json = fromApiJsonHelper.parse(command.json());
         final LoanDataForExternalTransfer loanDataForExternalTransfer = fetchAndValidateLoanDataForExternalTransfer(command.getLoanId());
-        final boolean isDelayedSettlementEnabled = delayedSettlementAttributeService
-                .isEnabled(loanDataForExternalTransfer.getLoanProductId());
+        final boolean isDelayedSettlementEnabled = delayedSettlementAttributeService.isEnabled(command.getLoanId(),
+                loanDataForExternalTransfer.getLoanProductId());
         validateSaleRequestBody(command.json());
         ExternalId externalId = getTransferExternalIdFromJson(json);
         validateExternalId(externalId);
@@ -228,7 +231,8 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
 
     private ExternalAssetOwnerTransfer fetchAndValidateEffectiveTransferForBuyback(
             final LoanDataForExternalTransfer loanDataForExternalTransfer, final LocalDate settlementDate) {
-        if (delayedSettlementAttributeService.isEnabled(loanDataForExternalTransfer.getLoanProductId())) {
+        if (delayedSettlementAttributeService.isEnabled(loanDataForExternalTransfer.getId(),
+                loanDataForExternalTransfer.getLoanProductId())) {
             return fetchAndValidateEffectiveTransferForBuybackWithDelayedSettlement(loanDataForExternalTransfer, settlementDate);
         }
 

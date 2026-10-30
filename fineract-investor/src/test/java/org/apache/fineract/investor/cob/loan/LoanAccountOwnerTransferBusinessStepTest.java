@@ -57,6 +57,7 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
 import org.apache.fineract.investor.domain.LoanOwnershipTransferBusinessEvent;
 import org.apache.fineract.investor.service.DelayedSettlementAttributeService;
+import org.apache.fineract.investor.service.ExternalAssetOwnerLoanAttributesWriteService;
 import org.apache.fineract.investor.service.ExternalAssetOwnerTransferOutstandingInterestCalculation;
 import org.apache.fineract.investor.service.LoanTransferabilityService;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -87,6 +88,7 @@ import org.springframework.data.jpa.domain.Specification;
 public class LoanAccountOwnerTransferBusinessStepTest {
 
     public static final LocalDate FUTURE_DATE_9999_12_31 = LocalDate.of(9999, 12, 31);
+    private static final Long LOAN_ID = 1L;
     private static final Long LOAN_PRODUCT_ID = 2L;
     private final LocalDate actualDate = LocalDate.now(ZoneId.systemDefault());
     private static final MockedStatic<MoneyHelper> MONEY_HELPER = mockStatic(MoneyHelper.class);
@@ -118,6 +120,9 @@ public class LoanAccountOwnerTransferBusinessStepTest {
     @Mock
     private LoanBuyDownFeeAmortizationProcessingService loanBuyDownFeeAmortizationProcessingService;
 
+    @Mock
+    private ExternalAssetOwnerLoanAttributesWriteService externalAssetOwnerLoanAttributesWriteService;
+
     private LoanAccountOwnerTransferBusinessStep underTest;
 
     @BeforeAll
@@ -139,7 +144,8 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         underTest = new LoanAccountOwnerTransferBusinessStep(externalAssetOwnerTransferRepository,
                 externalAssetOwnerTransferLoanMappingRepository, loanJournalEntryPoster, businessEventNotifierService,
                 loanTransferabilityService, delayedSettlementAttributeService, externalAssetOwnerTransferOutstandingInterestCalculation,
-                loanCapitalizedIncomeAmortizationProcessingService, loanBuyDownFeeAmortizationProcessingService);
+                loanCapitalizedIncomeAmortizationProcessingService, loanBuyDownFeeAmortizationProcessingService,
+                externalAssetOwnerLoanAttributesWriteService);
     }
 
     @AfterEach
@@ -170,9 +176,9 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         when(loanProduct.getId()).thenReturn(LOAN_PRODUCT_ID);
 
         final Loan loanForProcessing = Mockito.mock(Loan.class);
-        when(loanForProcessing.getId()).thenReturn(1L);
+        when(loanForProcessing.getId()).thenReturn(LOAN_ID);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(delayedSettlementAttributeService.isEnabled(LOAN_PRODUCT_ID)).thenReturn(false);
+        when(delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(false);
 
         ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
@@ -198,9 +204,9 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         when(loanProduct.getId()).thenReturn(LOAN_PRODUCT_ID);
 
         final Loan loanForProcessing = Mockito.mock(Loan.class);
-        when(loanForProcessing.getId()).thenReturn(1L);
+        when(loanForProcessing.getId()).thenReturn(LOAN_ID);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(delayedSettlementAttributeService.isEnabled(LOAN_PRODUCT_ID)).thenReturn(true);
+        when(delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(true);
 
         ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
@@ -226,9 +232,9 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         when(loanProduct.getId()).thenReturn(LOAN_PRODUCT_ID);
 
         final Loan loanForProcessing = Mockito.mock(Loan.class);
-        when(loanForProcessing.getId()).thenReturn(1L);
+        when(loanForProcessing.getId()).thenReturn(LOAN_ID);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(delayedSettlementAttributeService.isEnabled(LOAN_PRODUCT_ID)).thenReturn(false);
+        when(delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(false);
 
         ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
@@ -305,7 +311,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
     public void givenLoanBuyback(final ExternalTransferStatus buybackStatus) {
         // given
         final Loan loanForProcessing = Mockito.mock(Loan.class);
-        when(loanForProcessing.getId()).thenReturn(1L);
+        when(loanForProcessing.getId()).thenReturn(LOAN_ID);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
@@ -336,6 +342,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
 
         verify(loanJournalEntryPoster).postJournalEntriesForExternalOwnerTransfer(loanForProcessing, firstResponseItem, null);
         verifyNoMoreInteractions(loanJournalEntryPoster);
+        verifyNoInteractions(externalAssetOwnerLoanAttributesWriteService);
 
         ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(2);
         verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, firstResponseItem);
@@ -356,9 +363,9 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         when(loanProduct.getId()).thenReturn(LOAN_PRODUCT_ID);
 
         final Loan loanForProcessing = Mockito.mock(Loan.class);
-        when(loanForProcessing.getId()).thenReturn(1L);
+        when(loanForProcessing.getId()).thenReturn(LOAN_ID);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(delayedSettlementAttributeService.isEnabled(LOAN_PRODUCT_ID)).thenReturn(isDelayedSettlementEnabled);
+        when(delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(isDelayedSettlementEnabled);
 
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
@@ -380,6 +387,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         // then
         verify(loanTransferabilityService).isTransferable(loanForProcessing, pendingTransfer);
         verifyNoMoreInteractions(loanTransferabilityService);
+        verify(externalAssetOwnerLoanAttributesWriteService).copyLoanProductAttributesIfAbsent(loanForProcessing, pendingTransfer);
         verify(externalAssetOwnerTransferRepository).findAllByLoanIdAndSettlementDateAndStatusInAndEffectiveDateToGreaterThanEqual(eq(1L),
                 eq(actualDate), any(), eq(FUTURE_DATE_9999_12_31));
 
@@ -427,7 +435,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
             final ExternalTransferSubStatus expectedSubStatus) {
         // given
         final Loan loanForProcessing = Mockito.mock(Loan.class);
-        when(loanForProcessing.getId()).thenReturn(1L);
+        when(loanForProcessing.getId()).thenReturn(LOAN_ID);
 
         ExternalAssetOwnerTransfer pendingTransfer = new ExternalAssetOwnerTransfer();
         pendingTransfer.setStatus(pendingStatus);
@@ -446,6 +454,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         final Loan processedLoan = underTest.execute(loanForProcessing);
         // then
         verify(loanTransferabilityService).isTransferable(loanForProcessing, pendingTransfer);
+        verifyNoInteractions(externalAssetOwnerLoanAttributesWriteService);
         verify(externalAssetOwnerTransferRepository, times(1))
                 .findAllByLoanIdAndSettlementDateAndStatusInAndEffectiveDateToGreaterThanEqual(eq(1L), eq(actualDate), any(),
                         eq(FUTURE_DATE_9999_12_31));
@@ -479,9 +488,9 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         when(loanProduct.getId()).thenReturn(LOAN_PRODUCT_ID);
 
         final Loan loanForProcessing = Mockito.mock(Loan.class);
-        when(loanForProcessing.getId()).thenReturn(1L);
+        when(loanForProcessing.getId()).thenReturn(LOAN_ID);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(delayedSettlementAttributeService.isEnabled(LOAN_PRODUCT_ID)).thenReturn(true);
+        when(delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(true);
 
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
@@ -555,9 +564,9 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         when(loanProduct.getId()).thenReturn(LOAN_PRODUCT_ID);
 
         final Loan loanForProcessing = Mockito.mock(Loan.class);
-        when(loanForProcessing.getId()).thenReturn(1L);
+        when(loanForProcessing.getId()).thenReturn(LOAN_ID);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(delayedSettlementAttributeService.isEnabled(LOAN_PRODUCT_ID)).thenReturn(true);
+        when(delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(true);
 
         when(externalAssetOwnerTransferRepository.findOne(any(Specification.class))).thenReturn(Optional.empty());
 

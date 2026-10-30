@@ -44,6 +44,7 @@ import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttri
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeInvalidValueException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributeNotFoundException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanProductAttributesException;
+import org.apache.fineract.investor.serialization.ExternalAssetOwnerAttributeValidator;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -684,7 +685,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
             MockitoAnnotations.openMocks(this);
             this.externalAssetOwnerLoanProductAttributesWriteService = new ExternalAssetOwnerLoanProductAttributesWriteServiceImpl(
                     fromApiJsonHelper, externalAssetOwnerLoanProductAttributesRepository, loanProductRepository,
-                    new ExternalAssetOwnerLoanProductAttributeProvider());
+                    new ExternalAssetOwnerAttributeValidator(fromApiJsonHelper, new ExternalAssetOwnerLoanProductAttributeProvider()));
             stubFromApiJsonHelper();
         }
 
