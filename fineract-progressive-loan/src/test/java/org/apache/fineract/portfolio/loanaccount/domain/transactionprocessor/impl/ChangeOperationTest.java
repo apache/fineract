@@ -142,6 +142,23 @@ public class ChangeOperationTest {
     }
 
     /**
+     * A down payment fee added after an auto down payment on the same business day must still replay before that
+     * transaction so reverse-replay can allocate the adjusted amount to the fee.
+     */
+    @Test
+    public void testDownPaymentFeeBeforeDownPaymentTransactionEvenIfCreatedLater() {
+        ChangeOperation downPaymentFee = createDownPaymentCharge("2026-01-01", "2026-01-01", "2026-01-01T12:00:00+01:00");
+        ChangeOperation downPaymentTxn = createDownPaymentTransaction("2026-01-01", "2026-01-01", "2026-01-01T10:00:00+01:00");
+        Collection<List<ChangeOperation>> permutations = Collections2.permutations(List.of(downPaymentFee, downPaymentTxn));
+        List<ChangeOperation> expected = List.of(downPaymentFee, downPaymentTxn);
+        for (List<ChangeOperation> permutation : permutations) {
+            Assertions.assertEquals(expected, permutation.stream().sorted().toList());
+        }
+        Assertions.assertEquals(-1, downPaymentFee.compareTo(downPaymentTxn));
+        Assertions.assertEquals(1, downPaymentTxn.compareTo(downPaymentFee));
+    }
+
+    /**
      * Charges submitted on the same day but due on different dates must replay in due-date order, whatever order they
      * were created in.
      */
@@ -174,11 +191,29 @@ public class ChangeOperationTest {
         return new ChangeOperation(charge);
     }
 
+    private ChangeOperation createDownPaymentCharge(String effectiveDate, String submittedDate, String creationDateTime) {
+        LoanCharge charge = Mockito.mock(LoanCharge.class);
+        Mockito.when(charge.getDueDate()).thenReturn(LocalDate.parse(effectiveDate));
+        Mockito.when(charge.getSubmittedOnDate()).thenReturn(LocalDate.parse(submittedDate));
+        Mockito.when(charge.getCreatedDate()).thenReturn(Optional.of(OffsetDateTime.parse(creationDateTime)));
+        Mockito.when(charge.isDueAtDownPayment()).thenReturn(true);
+        return new ChangeOperation(charge);
+    }
+
     private ChangeOperation createTransaction(String transactionDate, String submittedDate, String creationDateTime) {
         LoanTransaction transaction = Mockito.mock(LoanTransaction.class);
         Mockito.when(transaction.getSubmittedOnDate()).thenReturn(LocalDate.parse(submittedDate));
         Mockito.when(transaction.getTransactionDate()).thenReturn(LocalDate.parse(transactionDate));
         Mockito.when(transaction.getCreatedDate()).thenReturn(Optional.of(OffsetDateTime.parse(creationDateTime)));
+        return new ChangeOperation(transaction);
+    }
+
+    private ChangeOperation createDownPaymentTransaction(String transactionDate, String submittedDate, String creationDateTime) {
+        LoanTransaction transaction = Mockito.mock(LoanTransaction.class);
+        Mockito.when(transaction.getSubmittedOnDate()).thenReturn(LocalDate.parse(submittedDate));
+        Mockito.when(transaction.getTransactionDate()).thenReturn(LocalDate.parse(transactionDate));
+        Mockito.when(transaction.getCreatedDate()).thenReturn(Optional.of(OffsetDateTime.parse(creationDateTime)));
+        Mockito.when(transaction.isDownPayment()).thenReturn(true);
         return new ChangeOperation(transaction);
     }
 }

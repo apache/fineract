@@ -137,7 +137,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             final Map<String, Object> changes = chargeForUpdate.update(command);
 
             this.fromApiJsonDeserializer.validateChargeTimeNCalculationType(chargeForUpdate.getChargeTimeType(),
-                    chargeForUpdate.getChargeCalculation());
+                    chargeForUpdate.getChargeCalculation(), chargeForUpdate.isPenalty());
 
             // MIFOSX-900: Check if the Charge has been active before and now is
             // deactivated:

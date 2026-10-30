@@ -64,6 +64,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
     private final LoanBalanceService loanBalanceService;
     private final LoanTransactionService loanTransactionService;
     private final LoanJournalEntryPoster journalEntryPoster;
+    private final LoanChargeService loanChargeService;
 
     @Override
     public LoanTransaction handleDownPayment(ScheduleGeneratorDTO scheduleGeneratorDTO, JsonCommand command,
@@ -194,13 +195,10 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
         if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
             externalId = ExternalId.generate();
         }
-        Money downPaymentMoney = Money.of(loan.getCurrency(),
-                MathUtil.percentageOf(disbursementTransaction.getAmount(), disbursedAmountPercentageForDownPayment, 19));
-        if (loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf() != null) {
-            downPaymentMoney = Money.roundToMultiplesOf(downPaymentMoney,
-                    loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf());
-        }
-        final Money adjustedDownPaymentMoney = switch (loan.getLoanProductRelatedDetail().getLoanScheduleType()) {
+        final Money downPaymentMoney = Money.of(loan.getCurrency(),
+                loanChargeService.calculateDownPaymentAmount(disbursementTransaction.getAmount(), disbursedAmountPercentageForDownPayment,
+                        loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf(), loan.getCurrency()));
+        Money adjustedDownPaymentMoney = switch (loan.getLoanProductRelatedDetail().getLoanScheduleType()) {
             // For Cumulative loan: To check whether the loan was overpaid when the disbursement happened and to get the
             // proper amount after the disbursement we are using two balances:
             // 1. Whether the loan is still overpaid after the disbursement,
@@ -218,6 +216,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
             case PROGRESSIVE ->
                 MathUtil.negativeToZero(downPaymentMoney.minus(disbursementTransaction.getOverPaymentPortion(loan.getCurrency())));
         };
+        adjustedDownPaymentMoney = adjustedDownPaymentMoney.plus(loanChargeService.downPaymentFeesForNewAutoDownPayment(loan, disbursedOn));
 
         if (adjustedDownPaymentMoney.isGreaterThanZero()) {
             final LoanTransaction downPaymentTransaction = LoanTransaction.downPayment(loan.getOffice(), adjustedDownPaymentMoney, null,

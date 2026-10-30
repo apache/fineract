@@ -1762,6 +1762,8 @@ final class LoansApiResourceSwagger {
 
             private PutLoansLoanIdDisbursementData() {}
 
+            @Schema(example = "1")
+            public Long id;
             @Schema(example = "dd MMMM yyyy")
             public String dateFormat;
             @Schema(example = "en")
@@ -1918,6 +1920,8 @@ final class LoansApiResourceSwagger {
         public String note;
         @Schema(example = "28 June 2022")
         public String actualDisbursementDate;
+        @Schema(example = "false", description = "When true, active unpaid down payment fees due on the disbursement date are deactivated and not auto-collected")
+        public Boolean skipDownPaymentFee;
         @Schema(example = "31 March 2024")
         public String transactionDate;
         @Schema(example = "3")
