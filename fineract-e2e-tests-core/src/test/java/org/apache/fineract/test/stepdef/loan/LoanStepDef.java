@@ -99,6 +99,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSubStatus;
+import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTimeline;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
@@ -182,6 +183,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeOffUn
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanDisbursalTransactionEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionAccrualActivityPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionContractTerminationPostBusinessEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionFeeRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionLoanWithdrawalPostBusinessEvent;
 import org.apache.fineract.test.messaging.store.EventStore;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
@@ -2331,6 +2333,41 @@ public class LoanStepDef extends AbstractStepDef {
         Double totalOverdueActual = loanDetailsResponse.getSummary().getTotalOverdue().doubleValue();
         assertThat(totalOverdueActual).as(ErrorMessageHelper.wrongAmountInTotalOverdue(totalOverdueActual, totalOverdueExpected))
                 .isEqualTo(totalOverdueExpected);
+    }
+
+    @Then("Loan has {double} total fee refund amount")
+    public void loanTotalFeeRefund(final double totalFeeRefundExpected) {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanCreateResponse != null;
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        // summary is not returned for a loan that is not disbursed (e.g. after undo disbursal)
+        final GetLoansLoanIdSummary summary = Objects.requireNonNull(loanDetailsResponse).getSummary();
+        final BigDecimal totalFeeRefund = summary == null ? null : summary.getTotalFeeRefund();
+        final double totalFeeRefundActual = totalFeeRefund == null ? 0.0 : totalFeeRefund.doubleValue();
+        assertThat(totalFeeRefundActual)
+                .as("Wrong totalFeeRefund in loan summary. Actual: %s, expected: %s", totalFeeRefundActual, totalFeeRefundExpected)
+                .isEqualTo(totalFeeRefundExpected);
+    }
+
+    @Then("LoanTransactionFeeRefundPostBusinessEvent is raised on {string}")
+    public void checkLoanTransactionFeeRefundPostBusinessEvent(final String date) {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
+        final Long feeRefundTransactionId = loanDetailsResponse.getTransactions().stream()
+                .filter(t -> date.equals(FORMATTER.format(t.getDate())) && "loanTransactionType.feeRefund".equals(t.getType().getCode())
+                        && !Boolean.TRUE.equals(t.getManuallyReversed()))
+                .reduce((first, second) -> second)
+                .orElseThrow(() -> new IllegalStateException(String.format("No Fee Refund transaction found on %s", date))).getId();
+
+        eventAssertion.assertEventRaised(LoanTransactionFeeRefundPostEvent.class, feeRefundTransactionId);
     }
 
     @Then("Loan has {double} total interest overdue amount")
