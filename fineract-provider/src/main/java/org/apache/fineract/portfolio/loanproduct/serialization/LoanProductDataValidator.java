@@ -77,6 +77,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedFeeRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.exception.EqualAmortizationUnsupportedFeatureException;
@@ -202,7 +203,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.LOAN_SCHEDULE_TYPE,
             LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH,
             LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING, LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES,
-            LoanProductConstants.CHARGE_OFF_BEHAVIOUR, LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE,
+            LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES, LoanProductConstants.CHARGE_OFF_BEHAVIOUR,
+            LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE,
             LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME,
             LoanProductConstants.MONTH_END_DUE_DATE_STRATEGY_PARAMETER_NAME, LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME,
             LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME,
@@ -899,6 +901,19 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES).failWithCode(
                     "supported.only.for.progressive.loan.schedule.handling",
                     "Automatic interest refund functionality is only supported for Progressive loans");
+        }
+
+        if (AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategyCode)
+                && this.fromApiJsonHelper.parameterExists(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES, element)) {
+            final String[] supportedTransactionsForFeeRefund = this.fromApiJsonHelper
+                    .extractArrayNamed(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES, element);
+            Arrays.stream(supportedTransactionsForFeeRefund)
+                    .forEach(value -> baseDataValidator.reset().parameter(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES).value(value)
+                            .isOneOfEnumValues(LoanSupportedFeeRefundTypes.class));
+        } else if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES, element)) {
+            baseDataValidator.reset().parameter(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES).failWithCode(
+                    "supported.only.for.progressive.loan.schedule.handling",
+                    "Automatic fee refund functionality is only supported for Progressive loans");
         }
 
         if (AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategyCode)

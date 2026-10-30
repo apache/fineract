@@ -107,6 +107,7 @@ import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrat
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedFeeRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
@@ -474,6 +475,8 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> creditAllocationAllocationTypes = AllocationType.getValuesAsEnumOptionDataList();
         final List<StringEnumOptionData> supportedInterestRefundTypesOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(LoanSupportedInterestRefundTypes.class);
+        final List<StringEnumOptionData> supportedFeeRefundTypesOptions = ApiFacingEnum
+                .getValuesAsStringEnumOptionDataList(LoanSupportedFeeRefundTypes.class);
         final List<StringEnumOptionData> chargeOffBehaviourOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(LoanChargeOffBehaviour.class);
         final List<CodeValueData> chargeOffReasonOptions = codeValueReadPlatformService
@@ -511,10 +514,10 @@ public class LoanProductsApiResource {
                 advancedPaymentAllocationTransactionTypes, advancedPaymentAllocationFutureInstallmentAllocationRules,
                 advancedPaymentAllocationTypes, LoanScheduleType.getValuesAsEnumOptionDataList(),
                 LoanScheduleProcessingType.getValuesAsEnumOptionDataList(), creditAllocationTransactionTypes,
-                creditAllocationAllocationTypes, supportedInterestRefundTypesOptions, chargeOffBehaviourOptions, chargeOffReasonOptions,
-                daysInYearCustomStrategyOptions, capitalizedIncomeCalculationTypeOptions, capitalizedIncomeStrategyOptions,
-                capitalizedIncomeTypeOptions, buyDownFeeCalculationTypeOptions, buyDownFeeStrategyOptions, buyDownFeeIncomeTypeOptions,
-                writeOffReasonOptions, capitalizedIncomeClassificationOptions, buydownFeeClassificationOptions,
+                creditAllocationAllocationTypes, supportedInterestRefundTypesOptions, supportedFeeRefundTypesOptions,
+                chargeOffBehaviourOptions, chargeOffReasonOptions, daysInYearCustomStrategyOptions, capitalizedIncomeCalculationTypeOptions,
+                capitalizedIncomeStrategyOptions, capitalizedIncomeTypeOptions, buyDownFeeCalculationTypeOptions, buyDownFeeStrategyOptions,
+                buyDownFeeIncomeTypeOptions, writeOffReasonOptions, capitalizedIncomeClassificationOptions, buydownFeeClassificationOptions,
                 monthEndDueDateStrategyOptions);
     }
 

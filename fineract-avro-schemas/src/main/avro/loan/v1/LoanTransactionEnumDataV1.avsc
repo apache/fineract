@@ -269,6 +269,14 @@
         },
         {
             "default": null,
+            "name": "feeRefund",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
             "name": "accrualAdjustment",
             "type": [
                 "null",

@@ -684,6 +684,7 @@ final class LoansApiResourceSwagger {
             public BigDecimal totalUnpaidPayableNotDueInterest;
             @Schema(example = "0.000000")
             public BigDecimal totalInterestRefund;
+            public BigDecimal totalFeeRefund;
             public Set<GetLoansLoanIdOverdueCharges> overdueCharges;
             @Schema(example = "1")
             public Long chargeOffReasonId;
@@ -2022,6 +2023,19 @@ final class LoansApiResourceSwagger {
         public Long subResourceId;
         @Schema(example = "b4f8fefd-a14d-4487-8d80-6f2fb0e07836")
         public String subResourceExternalId;
+
+        static final class PostLoansLoanIdSubResource {
+
+            private PostLoansLoanIdSubResource() {}
+
+            @Schema(example = "22")
+            public Long resourceId;
+            @Schema(example = "b4f8fefd-a14d-4487-8d80-6f2fb0e07836")
+            public String resourceExternalId;
+        }
+
+        @Schema(description = "Additional secondary resources created by the command (e.g. interest and fee refunds)")
+        public List<PostLoansLoanIdSubResource> subResources;
         @Schema(description = "PostLoansLoanIdChanges")
         public PostLoansLoanIdChanges changes;
     }

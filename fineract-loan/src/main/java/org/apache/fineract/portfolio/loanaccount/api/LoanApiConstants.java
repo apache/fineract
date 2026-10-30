@@ -210,6 +210,7 @@ public interface LoanApiConstants {
             LoanTransactionType.GOODWILL_CREDIT, //
             LoanTransactionType.INTEREST_PAYMENT_WAIVER, //
             LoanTransactionType.INTEREST_REFUND, //
+            LoanTransactionType.FEE_REFUND, //
             LoanTransactionType.MERCHANT_ISSUED_REFUND, //
             LoanTransactionType.PAYOUT_REFUND, //
             LoanTransactionType.REPAYMENT //

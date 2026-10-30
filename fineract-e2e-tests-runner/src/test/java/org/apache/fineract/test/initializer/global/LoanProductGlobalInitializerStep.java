@@ -494,6 +494,54 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         });
 
         tasks.add(() -> {
+            // LP2 with Down-payment+autopayment + advanced payment allocation + Fee Refund on MIR/Payout Refund
+            // (LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND)
+            final String nameDownPaymentAutoAdvPaymentAllocationFeeRefund = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND
+                    .getName();
+            final PostLoanProductsRequest loanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefund = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2()//
+                    .name(nameDownPaymentAutoAdvPaymentAllocationFeeRefund)//
+                    .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                    .loanScheduleType("PROGRESSIVE") //
+                    .supportedFeeRefundTypes(Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefund = createLoanProductIdempotent(
+                    loanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefund);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND,
+                    responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocationFeeRefund);
+        });
+
+        tasks.add(() -> {
+            // LP2 with Down-payment (no auto down payment) + advanced payment allocation + Fee Refund on MIR/Payout
+            // Refund
+            // (LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND)
+            final String nameDownPaymentAdvPaymentAllocationFeeRefund = DefaultLoanProduct.LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND
+                    .getName();
+            final PostLoanProductsRequest loanProductsRequestDownPaymentAdvPaymentAllocationFeeRefund = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2()//
+                    .name(nameDownPaymentAdvPaymentAllocationFeeRefund)//
+                    .enableAutoRepaymentForDownPayment(false)//
+                    .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                    .loanScheduleType("PROGRESSIVE") //
+                    .supportedFeeRefundTypes(Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse responseLoanProductsRequestDownPaymentAdvPaymentAllocationFeeRefund = createLoanProductIdempotent(
+                    loanProductsRequestDownPaymentAdvPaymentAllocationFeeRefund);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND,
+                    responseLoanProductsRequestDownPaymentAdvPaymentAllocationFeeRefund);
+        });
+
+        tasks.add(() -> {
             // LP2 with Down-payment and interest
             // (LP2_DOWNPAYMENT_INTEREST)
             String name18 = DefaultLoanProduct.LP2_DOWNPAYMENT_INTEREST.getName();

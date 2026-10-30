@@ -64,6 +64,7 @@ public final class LoanTransactionTypeExternalEvents {
         register(LoanTransactionType.INTEREST_PAYMENT_WAIVER, LoanTransactionInterestPaymentWaiverPostBusinessEvent.class);
         register(LoanTransactionType.ACCRUAL_ACTIVITY, LoanTransactionAccrualActivityPostBusinessEvent.class);
         register(LoanTransactionType.INTEREST_REFUND, LoanTransactionInterestRefundPostBusinessEvent.class);
+        register(LoanTransactionType.FEE_REFUND, LoanTransactionFeeRefundPostBusinessEvent.class);
         register(LoanTransactionType.ACCRUAL_ADJUSTMENT, LoanAccrualAdjustmentTransactionBusinessEvent.class);
         register(LoanTransactionType.CAPITALIZED_INCOME, LoanCapitalizedIncomeTransactionCreatedBusinessEvent.class);
         register(LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION,

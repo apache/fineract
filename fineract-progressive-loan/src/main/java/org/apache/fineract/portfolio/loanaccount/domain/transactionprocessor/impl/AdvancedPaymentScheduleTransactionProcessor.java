@@ -587,7 +587,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case CHARGEBACK -> handleChargeback(loanTransaction, ctx);
             case CREDIT_BALANCE_REFUND -> handleCreditBalanceRefund(loanTransaction, ctx);
             case REPAYMENT, MERCHANT_ISSUED_REFUND, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_REFUND, CHARGE_ADJUSTMENT, DOWN_PAYMENT,
-                    WAIVE_INTEREST, RECOVERY_REPAYMENT, INTEREST_PAYMENT_WAIVER, CAPITALIZED_INCOME_ADJUSTMENT ->
+                    WAIVE_INTEREST, RECOVERY_REPAYMENT, INTEREST_PAYMENT_WAIVER, CAPITALIZED_INCOME_ADJUSTMENT, FEE_REFUND ->
                 handleRepayment(loanTransaction, ctx);
             case INTEREST_REFUND -> handleInterestRefund(loanTransaction, ctx);
             case CHARGE_OFF -> handleChargeOff(loanTransaction, ctx);
@@ -1574,7 +1574,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
         oldTransaction.getLoanChargesPaid().clear();
 
-        if (newTransaction.getTypeOf().isInterestRefund()) {
+        if (newTransaction.getTypeOf().isInterestRefund() || newTransaction.getTypeOf().isFeeRefund()) {
             newTransaction.getLoanTransactionRelations().stream().filter(
                     r -> r.getToTransaction().getTypeOf().isMerchantIssuedRefund() || r.getToTransaction().getTypeOf().isPayoutRefund())
                     .filter(r -> r.getToTransaction().isReversed())

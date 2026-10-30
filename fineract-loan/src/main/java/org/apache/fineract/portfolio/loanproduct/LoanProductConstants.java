@@ -170,6 +170,7 @@ public interface LoanProductConstants {
 
     String ENABLE_ACCRUAL_ACTIVITY_POSTING = "enableAccrualActivityPosting";
     String SUPPORTED_INTEREST_REFUND_TYPES = "supportedInterestRefundTypes";
+    String SUPPORTED_FEE_REFUND_TYPES = "supportedFeeRefundTypes";
     String CHARGE_OFF_BEHAVIOUR = "chargeOffBehaviour";
 
     String INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE = "interestRecognitionOnDisbursementDate";

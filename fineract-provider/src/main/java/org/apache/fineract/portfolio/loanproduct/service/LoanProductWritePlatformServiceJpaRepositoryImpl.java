@@ -75,6 +75,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocat
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedFeeRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductCannotBeModifiedDueToNonClosedLoansException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductDateException;
@@ -321,6 +322,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                     supportedInterestRefundTypes.add(LoanSupportedInterestRefundTypes.valueOf(value.getAsString()));
                 });
                 product.getLoanProductRelatedDetail().setSupportedInterestRefundTypes(supportedInterestRefundTypes);
+            }
+
+            if (command.parameterExists(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES)) {
+                final JsonArray supportedTransactionsForFeeRefund = command
+                        .arrayOfParameterNamed(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES);
+                final List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes = new ArrayList<>();
+                supportedTransactionsForFeeRefund.iterator()
+                        .forEachRemaining(value -> supportedFeeRefundTypes.add(LoanSupportedFeeRefundTypes.valueOf(value.getAsString())));
+                product.getLoanProductRelatedDetail().setSupportedFeeRefundTypes(supportedFeeRefundTypes);
             }
 
             if (command.parameterExists(LoanProductConstants.CHARGE_OFF_BEHAVIOUR)) {

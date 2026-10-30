@@ -296,4 +296,6 @@
     <include file="parts/0274_clear_npa_on_settled_loans.xml" relativeToChangelogFile="true" />
     <include file="parts/0275_add_deposit_product_validity_dates.xml" relativeToChangelogFile="true" />
     <include file="parts/0276_add_disbursement_detail_to_loan_charge.xml" relativeToChangelogFile="true" />
+    <include file="parts/0277_add_fee_refund_to_r_enum_value.xml" relativeToChangelogFile="true" />
+    <include file="parts/0278_fee_refund_business_events.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

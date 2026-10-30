@@ -164,6 +164,10 @@ public class LoanProductRelatedDetail {
     @Column(name = "supported_interest_refund_types")
     private List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes = List.of();
 
+    @Convert(converter = SupportedFeeRefundTypesListConverter.class)
+    @Column(name = "supported_fee_refund_types")
+    private List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes = List.of();
+
     @Column(name = "charge_off_behaviour")
     @Enumerated(EnumType.STRING)
     private LoanChargeOffBehaviour chargeOffBehaviour;
@@ -228,9 +232,9 @@ public class LoanProductRelatedDetail {
             final boolean enableAutoRepaymentForDownPayment, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
-            final DaysInYearCustomStrategyType daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
-            final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
+            final List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes, final LoanChargeOffBehaviour chargeOffBehaviour,
+            final boolean interestRecognitionOnDisbursementDate, final DaysInYearCustomStrategyType daysInYearCustomStrategy,
+            final boolean enableIncomeCapitalization, final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
             final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType,
             final Integer installmentAmountInMultiplesOf, final boolean enableBuyDownFee,
             final LoanBuyDownFeeCalculationType buyDownFeeCalculationType, final LoanBuyDownFeeStrategy buyDownFeeStrategy,
@@ -245,10 +249,10 @@ public class LoanProductRelatedDetail {
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment,
                 loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
-                chargeOffBehaviour, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
-                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, installmentAmountInMultiplesOf,
-                enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee,
-                monthEndDueDateStrategy);
+                supportedFeeRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy,
+                enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType,
+                installmentAmountInMultiplesOf, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
+                merchantBuyDownFee, monthEndDueDateStrategy);
     }
 
     protected LoanProductRelatedDetail() {
@@ -268,9 +272,9 @@ public class LoanProductRelatedDetail {
             final boolean enableAutoRepaymentForDownPayment, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
-            final DaysInYearCustomStrategyType daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
-            final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
+            final List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes, final LoanChargeOffBehaviour chargeOffBehaviour,
+            final boolean interestRecognitionOnDisbursementDate, final DaysInYearCustomStrategyType daysInYearCustomStrategy,
+            final boolean enableIncomeCapitalization, final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
             final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType,
             final Integer installmentAmountInMultiplesOf, final boolean enableBuyDownFee,
             final LoanBuyDownFeeCalculationType buyDownFeeCalculationType, final LoanBuyDownFeeStrategy buyDownFeeStrategy,
@@ -310,6 +314,7 @@ public class LoanProductRelatedDetail {
         this.loanScheduleProcessingType = loanScheduleProcessingType;
         this.enableAccrualActivityPosting = enableAccrualActivityPosting;
         this.supportedInterestRefundTypes = supportedInterestRefundTypes;
+        this.supportedFeeRefundTypes = supportedFeeRefundTypes;
         this.chargeOffBehaviour = chargeOffBehaviour;
         this.interestRecognitionOnDisbursementDate = interestRecognitionOnDisbursementDate;
         this.daysInYearCustomStrategy = daysInYearCustomStrategy;

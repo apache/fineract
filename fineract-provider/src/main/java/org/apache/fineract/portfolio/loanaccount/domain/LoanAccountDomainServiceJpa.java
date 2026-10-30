@@ -30,7 +30,6 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -52,6 +51,8 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionDownPaymentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionDownPaymentPreBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionFeeRefundPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionFeeRefundPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionGoodwillCreditPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionGoodwillCreditPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionInterestPaymentWaiverPostBusinessEvent;
@@ -72,6 +73,7 @@ import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
 import org.apache.fineract.organisation.holiday.domain.HolidayStatusType;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstruction;
@@ -202,6 +204,40 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final ExternalId txnExternalId = externalIdFactory.create();
         businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionInterestRefundPreBusinessEvent(loan));
         return LoanTransaction.interestRefund(loan, interestRefundAmount, refundTransaction.getDateOf(), txnExternalId);
+    }
+
+    /**
+     * Fee refund for the Down payment fees: refundAmount / totalDisbursed * (sum of the originally charged amount of
+     * the active Down payment fees), capped by what has not been refunded yet.
+     */
+    @Nullable
+    private LoanTransaction createFeeRefundLoanTransaction(final Loan loan, final LoanTransaction refundTransaction) {
+        final BigDecimal feeRefundAmount = calculateFeeRefundAmount(loan, refundTransaction.getAmount());
+        if (MathUtil.isZero(feeRefundAmount)) {
+            return null;
+        }
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionFeeRefundPreBusinessEvent(loan));
+        return LoanTransaction.feeRefund(loan, feeRefundAmount, refundTransaction.getDateOf(), externalIdFactory.create());
+    }
+
+    private BigDecimal calculateFeeRefundAmount(final Loan loan, final BigDecimal refundAmount) {
+        final MonetaryCurrency currency = loan.getCurrency();
+        final BigDecimal totalDisbursed = loan.getLoanTransactions().stream().filter(LoanTransaction::isNotReversed)
+                .filter(LoanTransaction::isDisbursement).map(LoanTransaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (!MathUtil.isGreaterThanZero(totalDisbursed) || !MathUtil.isGreaterThanZero(refundAmount)) {
+            return BigDecimal.ZERO;
+        }
+        // Original charged amounts: waivers / adjustments / payments do not reduce the base
+        final BigDecimal base = loan.getLoanCharges().stream().filter(LoanCharge::isActive).filter(LoanCharge::isDueAtDownPayment)
+                .map(LoanCharge::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (!MathUtil.isGreaterThanZero(base)) {
+            return BigDecimal.ZERO;
+        }
+        final BigDecimal alreadyRefunded = loan.getLoanTransactions().stream().filter(LoanTransaction::isNotReversed)
+                .filter(LoanTransaction::isFeeRefund).map(LoanTransaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        final BigDecimal remaining = base.subtract(alreadyRefunded).max(BigDecimal.ZERO);
+        final Money rawFeeRefund = Money.of(currency, refundAmount.multiply(base).divide(totalDisbursed, MoneyHelper.getMathContext()));
+        return rawFeeRefund.getAmount().min(Money.of(currency, remaining).getAmount());
     }
 
     @Override
@@ -807,7 +843,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
-    public Pair<LoanTransaction, LoanTransaction> makeRefund(final Loan loan, final ScheduleGeneratorDTO scheduleGeneratorDTO,
+    public RefundTransactionResult makeRefund(final Loan loan, final ScheduleGeneratorDTO scheduleGeneratorDTO,
             final LoanTransactionType loanTransactionType, final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PaymentDetail paymentDetail, final ExternalId txnExternalId, final Boolean interestRefundCalculationOverride) {
         // Pre-processing business event
@@ -829,7 +865,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 () -> loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
                         .map(LoanSupportedInterestRefundTypes::getTransactionType)
                         .anyMatch(transactionType -> transactionType.equals(loanTransactionType)));
+        final boolean shouldCreateFeeRefundTransaction = loan.getSupportedFeeRefundTransactionTypes().contains(loanTransactionType);
         LoanTransaction interestRefundTransaction = null;
+        LoanTransaction feeRefundTransaction = null;
 
         if (shouldCreateInterestRefundTransaction) {
             interestRefundTransaction = createInterestRefundLoanTransaction(loan, refundTransaction);
@@ -838,6 +876,16 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                         .linkToTransaction(interestRefundTransaction, refundTransaction, LoanTransactionRelationTypeEnum.RELATED));
             }
         }
+
+        if (shouldCreateFeeRefundTransaction) {
+            feeRefundTransaction = createFeeRefundLoanTransaction(loan, refundTransaction);
+            if (feeRefundTransaction != null) {
+                feeRefundTransaction.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(feeRefundTransaction,
+                        refundTransaction, LoanTransactionRelationTypeEnum.RELATED));
+            }
+        }
+        final RefundTransactionResult refundResult = new RefundTransactionResult(refundTransaction, interestRefundTransaction,
+                feeRefundTransaction);
 
         final LoanRepaymentScheduleInstallment currentInstallment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(transactionDate);
 
@@ -850,12 +898,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                             new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
             loan.getLoanTransactions().add(refundTransaction);
-            if (interestRefundTransaction != null) {
-                loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(),
-                        interestRefundTransaction,
+            for (final LoanTransaction derivedTransaction : refundResult.derivedTransactions()) {
+                loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), derivedTransaction,
                         new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                                 new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
-                loan.addLoanTransaction(interestRefundTransaction);
+                loan.addLoanTransaction(derivedTransaction);
             }
         } else {
             if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -864,18 +911,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             }
             loan.getLoanTransactions().add(refundTransaction);
-            if (interestRefundTransaction != null) {
-                loan.addLoanTransaction(interestRefundTransaction);
-            }
+            refundResult.derivedTransactions().forEach(loan::addLoanTransaction);
 
             reprocessLoanTransactionsService.reprocessTransactions(loan);
         }
 
         // Store and flush newly created transaction to generate PK
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(refundTransaction);
-        if (interestRefundTransaction != null) {
-            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(interestRefundTransaction);
-        }
+        refundResult.derivedTransactions().forEach(loanAccountService::saveLoanTransactionWithDataIntegrityViolationChecks);
 
         loanLifecycleStateMachine.determineAndTransition(loan, transactionDate);
 
@@ -892,7 +935,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             businessEventNotifierService
                     .notifyPostBusinessEvent(new LoanTransactionInterestRefundPostBusinessEvent(interestRefundTransaction));
         }
-        return Pair.of(refundTransaction, interestRefundTransaction);
+        if (feeRefundTransaction != null) {
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionFeeRefundPostBusinessEvent(feeRefundTransaction));
+        }
+        return refundResult;
     }
 
     @Override
