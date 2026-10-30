@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,8 +29,11 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -48,7 +53,8 @@ import org.mockito.Mockito;
  * only advances the due date once the outstanding reaches zero - so undoing it must give the amount back to that cycle
  * without resetting the outstanding to the full fee or rolling the due date back a cycle. Undoing the payment that
  * closed a cycle reopens that cycle with the undone amount outstanding, and a payment of a cycle that later payments
- * have moved past is an earlier-cycle payment the account refuses to undo on its own.
+ * have moved past is an earlier-cycle payment the account refuses to undo on its own. The account decides what came
+ * later by transaction id.
  */
 class SavingsAccountChargeUndoPaymentTest {
 
@@ -202,6 +208,124 @@ class SavingsAccountChargeUndoPaymentTest {
         assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo("35.00");
         assertThat(charge.getDueDate()).isEqualTo(DUE_DATE);
         assertThat(charge.isWaived()).isFalse();
+    }
+
+    @Test
+    void accountRefusesToUndoAPaymentOfAnEarlierCycleAndLeavesTheChargeAlone() {
+        final SavingsAccountCharge charge = weeklyFee();
+        final SavingsAccount account = account();
+        pay(account, charge, 1L, "40.00");
+        final SavingsAccountTransaction closingPayment = pay(account, charge, 2L, "5.00");
+        pay(account, charge, 3L, "10.00");
+
+        assertThatThrownBy(() -> account.undoTransaction(closingPayment)).isInstanceOf(PlatformApiDataValidationException.class)
+                .satisfies(e -> assertThat(((PlatformApiDataValidationException) e).getErrors().get(0).getUserMessageGlobalisationCode())
+                        .endsWith("transaction.undo.recurring.charge.has.later.transactions"));
+
+        assertThat(amountPaid(charge)).isEqualByComparingTo("55.00");
+        assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo("35.00");
+        assertThat(charge.getDueDate()).isEqualTo(DUE_DATE.plusWeeks(1));
+    }
+
+    @Test
+    void accountUndoesTheLatestPaymentsOneByOne() {
+        final SavingsAccountCharge charge = weeklyFee();
+        final SavingsAccount account = account();
+        pay(account, charge, 1L, "40.00");
+        final SavingsAccountTransaction closingPayment = pay(account, charge, 2L, "5.00");
+        final SavingsAccountTransaction openCyclePayment = pay(account, charge, 3L, "10.00");
+
+        account.undoTransaction(openCyclePayment);
+
+        assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo(FEE);
+        assertThat(charge.getDueDate()).isEqualTo(DUE_DATE.plusWeeks(1));
+
+        account.undoTransaction(closingPayment);
+
+        assertThat(amountPaid(charge)).isEqualByComparingTo("40.00");
+        assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo("5.00");
+        assertThat(charge.getDueDate()).isEqualTo(DUE_DATE);
+    }
+
+    @Test
+    void accountCountsLaterPaymentsOfTheOpenCycleWhenUndoingAnEarlierOne() {
+        final SavingsAccountCharge charge = weeklyFee();
+        final SavingsAccount account = account();
+        final SavingsAccountTransaction earlierPayment = pay(account, charge, 1L, "3.00");
+        pay(account, charge, 2L, "7.00");
+
+        account.undoTransaction(earlierPayment);
+
+        assertThat(amountPaid(charge)).isEqualByComparingTo("7.00");
+        assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo("38.00");
+        assertThat(charge.getDueDate()).isEqualTo(DUE_DATE);
+    }
+
+    @Test
+    void accountRefusesToUndoAWaiverFollowedByAPayment() {
+        final SavingsAccountCharge charge = weeklyFee();
+        final SavingsAccount account = account();
+        final SavingsAccountTransaction waiver = transaction(account, charge, 1L, charge.waive(currency), true);
+        pay(account, charge, 2L, "5.00");
+
+        assertThatThrownBy(() -> account.undoTransaction(waiver)).isInstanceOf(PlatformApiDataValidationException.class);
+
+        assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo("40.00");
+        assertThat(charge.getDueDate()).isEqualTo(DUE_DATE.plusWeeks(1));
+    }
+
+    @Test
+    void accountOrdersPaymentsByIdNotByTheirPositionInTheTransactions() {
+        final SavingsAccountCharge charge = weeklyFee();
+        final SavingsAccount account = account();
+        final SavingsAccountTransaction firstCycle = pay(null, charge, 1L, "45.00");
+        final SavingsAccountTransaction secondCycleBackdated = pay(account, charge, 2L, "45.00");
+        account.transactions.add(firstCycle);
+
+        assertThatThrownBy(() -> account.undoTransaction(firstCycle)).isInstanceOf(PlatformApiDataValidationException.class);
+
+        account.undoTransaction(secondCycleBackdated);
+
+        assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo(FEE);
+        assertThat(charge.getDueDate()).isEqualTo(DUE_DATE.plusWeeks(1));
+    }
+
+    private SavingsAccount account() {
+        final SavingsAccount account = new SavingsAccount();
+        account.currency = currency;
+        return account;
+    }
+
+    private SavingsAccountTransaction pay(final SavingsAccount account, final SavingsAccountCharge charge, final Long id,
+            final String amount) {
+        final Money paid = money(amount);
+        charge.pay(currency, paid);
+        return transaction(account, charge, id, paid, false);
+    }
+
+    // Added to the account's transactions unless account is null; reverse() marks it reversed like the entity does.
+    private SavingsAccountTransaction transaction(final SavingsAccount account, final SavingsAccountCharge charge, final Long id,
+            final Money amount, final boolean waiver) {
+        final SavingsAccountChargePaidBy paidBy = mock(SavingsAccountChargePaidBy.class);
+        when(paidBy.getSavingsAccountCharge()).thenReturn(charge);
+        final SavingsAccountTransaction transaction = mock(SavingsAccountTransaction.class);
+        final AtomicBoolean reversed = new AtomicBoolean();
+        when(transaction.getId()).thenReturn(id);
+        when(transaction.getAmount(currency)).thenReturn(amount);
+        when(transaction.isChargeTransaction()).thenReturn(!waiver);
+        when(transaction.isWaiveCharge()).thenReturn(waiver);
+        when(transaction.getSavingsAccountChargesPaid()).thenReturn(Set.of(paidBy));
+        when(transaction.isPaymentForCurrentCharge(charge)).thenReturn(true);
+        when(transaction.isReversed()).thenAnswer(invocation -> reversed.get());
+        when(transaction.isNotReversed()).thenAnswer(invocation -> !reversed.get());
+        doAnswer(invocation -> {
+            reversed.set(true);
+            return null;
+        }).when(transaction).reverse();
+        if (account != null) {
+            account.transactions.add(transaction);
+        }
+        return transaction;
     }
 
     private SavingsAccountCharge weeklyFee() {
