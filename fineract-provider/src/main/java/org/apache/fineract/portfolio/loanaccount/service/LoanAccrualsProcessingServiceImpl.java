@@ -1069,7 +1069,10 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             final LocalDate businessDate = DateUtils.getBusinessLocalDate();
             final LocalDate limitDate = latestAccrual != null && DateUtils.isAfter(latestAccrual, businessDate) ? latestAccrual
                     : businessDate;
-            final BigDecimal interestLimit = accruableInterestTill(loan, installments, limitDate);
+            // An open NPA loan stopped accruing at accruedTill; past that it keeps only the interest it was paid, so an
+            // undone repayment also takes back the income recognised on its receipt.
+            final boolean npa = loan.isNpa() && loan.isOpen();
+            final BigDecimal interestLimit = accruableInterestTill(loan, installments, npa ? loan.getAccruedTill() : limitDate, npa);
             final BigDecimal feeLimit = installments.stream().map(i -> MathUtil.nullToZero(i.getFeeChargesCharged()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             final BigDecimal penaltyLimit = installments.stream().map(i -> MathUtil.nullToZero(i.getPenaltyCharges()))
@@ -1106,10 +1109,11 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     /**
      * Interest a cumulative loan may have accrued by {@code limitDate}: what every installment due by then charges (net
      * of waivers), plus the in-progress installment's interest up to that date. Everything, once the loan is closed or
-     * overpaid.
+     * overpaid. With {@code floorOnPaidInterest}, an installment's interest paid counts too where it is higher (income
+     * on receipt of an NPA loan); a {@code null} date then means nothing was accrued before the loan turned NPA.
      */
     private BigDecimal accruableInterestTill(final Loan loan, final List<LoanRepaymentScheduleInstallment> installments,
-            final LocalDate limitDate) {
+            final LocalDate limitDate, final boolean floorOnPaidInterest) {
         final boolean settled = loan.isClosed() || loanBalanceService.isOverPaid(loan);
         final int firstInstallmentNumber = fetchFirstNormalInstallmentNumber(installments);
         LoanScheduleGenerator scheduleGenerator = null;
@@ -1117,17 +1121,23 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         for (final LoanRepaymentScheduleInstallment installment : installments) {
             final BigDecimal net = MathUtil.subtractToZero(MathUtil.nullToZero(installment.getInterestCharged()),
                     MathUtil.nullToZero(installment.getInterestWaived()));
-            if (settled || !DateUtils.isBefore(limitDate, installment.getDueDate())) {
-                accruable = accruable.add(net);
-            } else if (loan.isInterestBearing()
+            BigDecimal installmentAccruable = BigDecimal.ZERO;
+            if (settled || (limitDate != null && !DateUtils.isBefore(limitDate, installment.getDueDate()))) {
+                installmentAccruable = net;
+            } else if (limitDate != null && loan.isInterestBearing()
                     && isInPeriod(limitDate, installment, installment.getInstallmentNumber().equals(firstInstallmentNumber))) {
                 if (scheduleGenerator == null) {
                     final LoanProductRelatedDetail productDetail = loan.getLoanProductRelatedDetail();
                     scheduleGenerator = loanScheduleFactory.create(productDetail.getLoanScheduleType(), productDetail.getInterestMethod());
                 }
-                accruable = accruable.add(MathUtil.min(net,
-                        MathUtil.toBigDecimal(scheduleGenerator.getPeriodInterestTillDate(installment, limitDate)), false));
+                installmentAccruable = MathUtil.min(net,
+                        MathUtil.toBigDecimal(scheduleGenerator.getPeriodInterestTillDate(installment, limitDate)), false);
             }
+            if (floorOnPaidInterest) {
+                installmentAccruable = installmentAccruable
+                        .max(MathUtil.min(net, MathUtil.nullToZero(installment.getInterestPaid()), false));
+            }
+            accruable = accruable.add(installmentAccruable);
         }
         return accruable;
     }
