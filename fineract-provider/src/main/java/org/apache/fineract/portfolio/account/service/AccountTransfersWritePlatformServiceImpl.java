@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -527,6 +528,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         // what a caller can actually see, and reversal is scoped to this single transaction only - not every
         // transaction sharing the same details record (e.g. a recurring standing instruction).
         final AccountTransferTransaction transaction = accountTransferRepository.findById(accountTransferId)
+                .or(() -> resolveByAccountTransferDetailsId(accountTransferId))
                 .orElseThrow(() -> new AccountTransferNotFoundException(accountTransferId));
 
         if (transaction.isReversed()) {
@@ -582,6 +584,19 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 .withEntityId(transaction.getId());
 
         return builder.build();
+    }
+
+    /**
+     * create() hands back m_account_transfer_details.id as a transfer's resourceId (see
+     * FeignAccountTransferHelper#retrieveTransfersByAccountDetailId), a different id space from the transaction id the
+     * read/list APIs expose. A caller that undoes a transfer using the id create() gave them would otherwise get a 404.
+     * Falling back to the details id - and only when it maps to exactly one transaction, so a recurring standing
+     * instruction's shared details record is never guessed at - resolves that id too.
+     */
+    private Optional<AccountTransferTransaction> resolveByAccountTransferDetailsId(final Long accountTransferDetailsId) {
+        return accountTransferDetailRepository.findById(accountTransferDetailsId)
+                .map(AccountTransferDetails::getAccountTransferTransactions).filter(transactions -> transactions.size() == 1)
+                .map(transactions -> transactions.get(0));
     }
 
     private void validateAccessRights(final AccountTransferDetails accountTransferDetails) {
