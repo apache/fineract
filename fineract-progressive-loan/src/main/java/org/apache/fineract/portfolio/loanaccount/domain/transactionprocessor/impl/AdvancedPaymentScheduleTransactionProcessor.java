@@ -65,8 +65,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -133,7 +133,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.apache.fineract.portfolio.util.InstallmentProcessingHelper;
 import org.apache.fineract.util.LoopContext;
 import org.apache.fineract.util.LoopGuard;
-
+import org.apache.commons.lang3.tuple.Pair;
 @Slf4j
 public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
@@ -1193,6 +1193,19 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         } else if (hasNoCustomCreditAllocationRule(loanTransaction)) {
             super.processCreditTransaction(loanTransaction, ctx.getOverpaymentHolder(), ctx.getCurrency(), ctx.getInstallments());
         } else {
+
+            // =========================================================
+            // FINERACT-2977: Principal only Chargeback allocation
+            // =========================================================
+            if (loanTransaction.isChargeback()) {
+                LoanCreditAllocationRule chargebackRule = getChargebackAllocationRules(loanTransaction);
+                if (chargebackRule != null && chargebackRule.getAllocationTypes().contains(AllocationType.PRINCIPAL_ONLY)) {
+                    super.processCreditTransaction(loanTransaction, ctx.getOverpaymentHolder(), ctx.getCurrency(), ctx.getInstallments());
+                    return;
+                }
+            }
+            // =========================================================
+
             loanTransaction.resetDerivedComponents();
             MonetaryCurrency currency = ctx.getCurrency();
             final Comparator<LoanRepaymentScheduleInstallment> byDate = Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate);
@@ -1203,6 +1216,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             Money amountToDistribute = MathUtil.negativeToZero(transactionAmount).minus(totalOverpaid);
             Money overpaymentAmount = MathUtil.negativeToZero(transactionAmount.minus(amountToDistribute));
             loanTransaction.setOverPayments(overpaymentAmount);
+
             if (!transactionAmount.isGreaterThanZero()) {
                 return;
             }
@@ -1223,8 +1237,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             Map<AllocationType, Money> chargebackAllocation = calculateChargebackAllocationMap(originalAllocation,
                     transactionAmount.getAmount(), chargebackAllocationRule.getAllocationTypes(), currency);
 
-            loanTransaction.updateComponents(chargebackAllocation.get(PRINCIPAL), chargebackAllocation.get(INTEREST),
-                    chargebackAllocation.get(FEE), chargebackAllocation.get(PENALTY));
+            loanTransaction.updateComponents(chargebackAllocation.get(AllocationType.PRINCIPAL), chargebackAllocation.get(AllocationType.INTEREST),
+                    chargebackAllocation.get(AllocationType.FEE), chargebackAllocation.get(AllocationType.PENALTY));
 
             final LocalDate transactionDate = loanTransaction.getTransactionDate();
             boolean loanTransactionMapped = false;
@@ -1266,7 +1280,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             allocateOverpayment(loanTransaction, ctx);
         }
     }
-
     private Map<AllocationType, Money> adjustOriginalAllocationWithFormerChargebacks(LoanTransaction originalTransaction,
             Map<AllocationType, Money> originalAllocation, LoanTransaction chargebackTransaction, TransactionCtx ctx,
             LoanCreditAllocationRule chargebackAllocationRule) {
@@ -3328,6 +3341,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case FEE -> p -> p.getFeeChargesOutstanding(currency).isGreaterThanZero();
             case INTEREST -> p -> p.getInterestOutstanding(currency).isGreaterThanZero();
             case PRINCIPAL -> p -> p.getPrincipalOutstanding(currency).isGreaterThanZero();
+            case PRINCIPAL_ONLY -> p->p.getPrincipalOutstanding(currency).isGreaterThanZero();
         };
     }
 
