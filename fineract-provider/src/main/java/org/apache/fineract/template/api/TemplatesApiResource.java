@@ -125,7 +125,7 @@ public class TemplatesApiResource {
             Example Request:
 
             templates/template
-            """, responses = @ApiResponse(responseCode = "default", content = @Content(schema = @Schema(implementation = TemplateData.class))))
+            """, responses = @ApiResponse(responseCode = "default", content = @Content(schema = @Schema(implementation = TemplateDetailsData.class))))
     @AlternativeOperationId("template_20")
     public TemplateDetailsData retrieveTemplateDetails() {
         return templateDetails(null);
@@ -144,7 +144,7 @@ public class TemplatesApiResource {
 
     @GET
     @Path("{templateId}/template")
-    @Operation(operationId = "retrieveTemplateById", responses = @ApiResponse(responseCode = "default", content = @Content(schema = @Schema(implementation = TemplateData.class))))
+    @Operation(operationId = "retrieveTemplateById", responses = @ApiResponse(responseCode = "default", content = @Content(schema = @Schema(implementation = TemplateDetailsData.class))))
     @AlternativeOperationId("getTemplateByTemplate")
     public TemplateDetailsData retrieveTemplateById(@PathParam("templateId") final Long templateId) {
         return templateDetails(templateService.findOneById(templateId));
