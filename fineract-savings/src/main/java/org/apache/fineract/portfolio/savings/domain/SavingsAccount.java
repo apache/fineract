@@ -1197,6 +1197,11 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             addTransaction(transaction);
         }
 
+        final BigDecimal balanceAfterWithdrawal = this.getAccountBalance().subtract(transactionDTO.getTransactionAmount());
+        if (balanceAfterWithdrawal.compareTo(BigDecimal.ZERO) < 0) {
+            payOverdraftFee(transactionDTO.getTransactionDate(), backdatedTxnsAllowedTill, refNo);
+        }
+
         if (this.sub_status.equals(SavingsAccountSubStatusEnum.INACTIVE.getValue())
                 || this.sub_status.equals(SavingsAccountSubStatusEnum.DORMANT.getValue())) {
             this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
@@ -1252,6 +1257,14 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                     this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, backdatedTxnsAllowedTill,
                             refNo);
                 }
+            }
+        }
+    }
+
+    private void payOverdraftFee(final LocalDate transactionDate, final boolean backdatedTxnsAllowedTill, final String refNo) {
+        for (SavingsAccountCharge charge : this.charges()) {
+            if (charge.isOverdraftFee() && charge.isActive() && charge.getAmountOutstanding(this.getCurrency()).isGreaterThanZero()) {
+                this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, backdatedTxnsAllowedTill, refNo);
             }
         }
     }
