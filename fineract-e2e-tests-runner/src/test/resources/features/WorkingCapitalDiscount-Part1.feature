@@ -1825,3 +1825,63 @@ Feature: Working Capital Discount - Part1
     And Working capital loan account has the correct data:
       | status | principal | discount | totalDiscountFee | unrealizedIncome |
       | Active | 10000.0   | 1000.0   | 1000.0           | 1000.0           |
+
+  Scenario Outline: Standalone discount fee respects approved discount cap
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 1000            | 100000             | 1                 | 100      |
+    Then Working capital loan creation was successful
+    And Admin successfully approves the working capital loan on "01 January 2026" with "1000" amount and "53" discount amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "1000" EUR transaction amount
+    And Working capital loan account has the correct data:
+      | principal | discountProposed | discountApproved | discount | totalDiscountFee |
+      | 1000.0    | 100.0            | 53.0             | null     | 0.0              |
+    And Admin remembers the Working Capital loan outcome as "before rejected discount"
+    When Adding Discount fee with "54" amount on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                          |
+      | 400                | amount.cannot.exceed.approved.discount |
+    Then the Working Capital loan outcome matches the remembered "before rejected discount" outcome
+    And Working capital loan account has the correct data:
+      | principal | discountProposed | discountApproved | discount | totalDiscountFee |
+      | 1000.0    | 100.0            | 53.0             | null     | 0.0              |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+    When Admin adds Discount fee with "<acceptedFee>" amount on Working Capital loan account for last disbursement
+    Then Working capital loan account has the correct data:
+      | principal           | discountApproved | discount      | totalDiscountFee |
+      | <principalAfterFee> | 53.0             | <acceptedFee> | <acceptedFee>    |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | <acceptedFee>     | <acceptedFee>    | 0.0               | 0.0                   | false    |
+    Examples:
+      | acceptedFee | principalAfterFee |
+      | 53.0        | 1053.0            |
+      | 52.0        | 1052.0            |
+
+  Scenario: Standalone discount fee respects zero approved discount cap
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 1000            | 100000             | 1                 | 100      |
+    Then Working capital loan creation was successful
+    And Admin successfully approves the working capital loan on "01 January 2026" with "1000" amount and "0" discount amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "1000" EUR transaction amount
+    And Working capital loan account has the correct data:
+      | principal | discountProposed | discountApproved | discount | totalDiscountFee |
+      | 1000.0    | 100.0            | 0.0              | null     | 0.0              |
+    And Admin remembers the Working Capital loan outcome as "before rejected discount"
+    When Adding Discount fee with "1" amount on Working Capital loan account results an error with the following data:
+      | HTTP response code | Error message                          |
+      | 400                | amount.cannot.exceed.approved.discount |
+    Then the Working Capital loan outcome matches the remembered "before rejected discount" outcome
+    And Working capital loan account has the correct data:
+      | principal | discountProposed | discountApproved | discount | totalDiscountFee |
+      | 1000.0    | 100.0            | 0.0              | null     | 0.0              |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
