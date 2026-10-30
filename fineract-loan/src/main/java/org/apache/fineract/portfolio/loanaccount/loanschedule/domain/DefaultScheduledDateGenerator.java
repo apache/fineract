@@ -39,7 +39,6 @@ import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.MonthlyDueDateResolver;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -57,6 +56,9 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         boolean isFirstRepayment = true;
         for (int repaymentPeriodNumber = 1; repaymentPeriodNumber <= numberOfRepayments; repaymentPeriodNumber++) {
             nextRepaymentDate = generateNextRepaymentDate(lastRepaymentDate, loanApplicationTerms, isFirstRepayment);
+            while (!nextRepaymentDate.isAfter(lastAdjustedRepaymentDate)) {
+                nextRepaymentDate = generateNextRepaymentDate(nextRepaymentDate, loanApplicationTerms, isFirstRepayment);
+            }
 
             if (repaymentPeriodNumber == numberOfRepayments) { // last period
                 if (loanApplicationTerms.getFixedLength() != null
@@ -64,36 +66,15 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                     nextRepaymentDate = loanApplicationTerms.calculateMaxDateForFixedLength();
                 }
             }
-            LocalDate adjustRepaymentDate = adjustRepaymentDate(nextRepaymentDate, loanApplicationTerms, holidayDetailDTO)
+            LocalDate adjustedRepaymentDate = adjustRepaymentDate(nextRepaymentDate, loanApplicationTerms, holidayDetailDTO)
                     .getChangedScheduleDate();
-            adjustRepaymentDate = applyLoanTermVariations(loanApplicationTerms, adjustRepaymentDate);
             repaymentPeriods.add(LoanScheduleModelRepaymentPeriod.repayment(repaymentPeriodNumber, lastAdjustedRepaymentDate,
-                    adjustRepaymentDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, false, mc));
+                    adjustedRepaymentDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, false, mc));
             lastRepaymentDate = nextRepaymentDate;
-            lastAdjustedRepaymentDate = adjustRepaymentDate;
+            lastAdjustedRepaymentDate = adjustedRepaymentDate;
             isFirstRepayment = false;
         }
         return repaymentPeriods;
-    }
-
-    private LocalDate applyLoanTermVariations(final LoanApplicationTerms loanApplicationTerms, final LocalDate scheduledDueDate) {
-        LocalDate modifiedScheduledDueDate = scheduledDueDate;
-
-        if (LoanScheduleType.PROGRESSIVE.equals(loanApplicationTerms.getLoanScheduleType())) {
-            return modifiedScheduledDueDate;
-        }
-
-        // due date changes should be applied only for that dueDate
-        if (loanApplicationTerms.getLoanTermVariations() != null) {
-            if (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(scheduledDueDate)) {
-                LoanTermVariationsData loanTermVariationsData = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
-                if (DateUtils.isEqual(modifiedScheduledDueDate, loanTermVariationsData.getTermVariationApplicableFrom())) {
-                    modifiedScheduledDueDate = loanTermVariationsData.getDateValue();
-                    loanApplicationTerms.updateVariationDays(DateUtils.getDifferenceInDays(scheduledDueDate, modifiedScheduledDueDate));
-                }
-            }
-        }
-        return modifiedScheduledDueDate;
     }
 
     @Override

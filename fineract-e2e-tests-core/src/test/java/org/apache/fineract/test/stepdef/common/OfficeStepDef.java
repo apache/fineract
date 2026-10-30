@@ -84,15 +84,15 @@ public class OfficeStepDef extends AbstractStepDef {
 
     @When("Admin sets working days to weekdays")
     public void adminSetsWorkingDaysToWeekdays() {
-        WorkingDaysUpdateRequest request = new WorkingDaysUpdateRequest().extendTermForDailyRepayments(true).repaymentRescheduleType(2)
+        WorkingDaysUpdateRequest request = new WorkingDaysUpdateRequest().repaymentRescheduleType(2)
                 .recurrence("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR");
         WorkingDaysUpdateResponse workingDaysUpdateResponse = ok(() -> fineractClient.workingDays().updateWorkingDay(request));
         assertThat(workingDaysUpdateResponse).as("Working days were not updated").isNotNull();
     }
 
-    @After("@ResetWorkingDaysAfterAll")
+    @After("@LoanWorkingDaysFeature")
     public void resetWorkingDaysAfterAll() {
-        WorkingDaysUpdateRequest request = new WorkingDaysUpdateRequest().extendTermForDailyRepayments(true).repaymentRescheduleType(1)
+        WorkingDaysUpdateRequest request = new WorkingDaysUpdateRequest().extendTermForDailyRepayments(false).repaymentRescheduleType(2)
                 .recurrence("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU");
         WorkingDaysUpdateResponse workingDaysUpdateResponse = ok(() -> fineractClient.workingDays().updateWorkingDay(request));
         assertThat(workingDaysUpdateResponse).as("Working days were not updated").isNotNull();
