@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.jobs.service.retainedearning;
 
+import org.apache.fineract.infrastructure.jobs.service.retainedearning.listener.RetainedEarningJobListener;
+
 /**
  * Retained Earning job constant
  */
@@ -57,5 +59,22 @@ public final class RetainedEarningJobConstant {
      * Query parameter - office id
      */
     public static final String OFFICE_ID_QUERY_PARAM = "R_officeId";
+
+    /**
+     * Flow execution status returned by {@link RetainedEarningJobExecutionDecider} to continue to the summary step.
+     */
+    public static final String CONTINUE_JOB_EXECUTION = "CONTINUE_JOB_EXECUTION";
+
+    /**
+     * Flow execution status returned by {@link RetainedEarningJobExecutionDecider} to end the job without running the
+     * summary step, when entries already exist for the fiscal year end date.
+     */
+    public static final String NO_OP_EXECUTION = "NO_OP_EXECUTION";
+
+    /**
+     * Job execution context key holding the fiscal year end date computed once in {@link RetainedEarningJobListener}
+     * beforeJob and shared by {@link RetainedEarningJobExecutionDecider} and {@link RetainedEarningJobReader}.
+     */
+    public static final String FISCAL_YEAR_END_DATE_CONTEXT_KEY = "retainedEarning.fiscalYearEndDate";
 
 }

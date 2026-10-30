@@ -38,6 +38,8 @@ public class AnnualSummaryStepDef extends AbstractStepDef {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
     private static final String OFFICE_ID_CONFIG = "office-id";
+    private static final String RETAINED_EARNING_JOB_NAME = "RETAINED_EARNING";
+    private static final String NOOP_EXIT_CODE = "NOOP";
 
     private final JdbcTemplate testJdbcTemplate;
     private final FineractFeignClient fineractClient;
@@ -89,5 +91,17 @@ public class AnnualSummaryStepDef extends AbstractStepDef {
         assertThat(actualCount).as(
                 "acc_gl_journal_entry_annual_summary: expected %d row(s) for gl_code '%s', year_end_date %s, office %s, product_type %s but found %d",
                 expectedCount, glCode, yearEndDate, office.getOfficeId(), productType, actualCount).isEqualTo(expectedCount);
+    }
+
+    @Then("The last Retained Earning Job run was skipped without running the summary step")
+    public void lastRetainedEarningJobRunWasSkipped() {
+        final String exitCode = testJdbcTemplate.queryForObject("""
+                SELECT EXIT_CODE FROM BATCH_JOB_EXECUTION WHERE JOB_EXECUTION_ID = (
+                    SELECT MAX(e.JOB_EXECUTION_ID) FROM BATCH_JOB_EXECUTION e
+                    JOIN BATCH_JOB_INSTANCE i ON i.JOB_INSTANCE_ID = e.JOB_INSTANCE_ID
+                    WHERE i.JOB_NAME = ?)
+                """, String.class, RETAINED_EARNING_JOB_NAME);
+        assertThat(exitCode).as("BATCH_JOB_EXECUTION: expected exit code '%s' for the last %s run but found '%s'", NOOP_EXIT_CODE,
+                RETAINED_EARNING_JOB_NAME, exitCode).isEqualTo(NOOP_EXIT_CODE);
     }
 }

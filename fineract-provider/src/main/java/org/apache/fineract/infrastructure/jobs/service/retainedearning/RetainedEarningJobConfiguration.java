@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.infrastructure.jobs.service.retainedearning;
 
+import static org.apache.fineract.infrastructure.jobs.service.retainedearning.RetainedEarningJobConstant.CONTINUE_JOB_EXECUTION;
 import static org.apache.fineract.infrastructure.jobs.service.retainedearning.RetainedEarningJobConstant.JOB_SUMMARY_STEP_NAME;
+import static org.apache.fineract.infrastructure.jobs.service.retainedearning.RetainedEarningJobConstant.NO_OP_EXECUTION;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -47,6 +49,7 @@ public class RetainedEarningJobConfiguration {
     private final PlatformTransactionManager transactionManager;
     private final FineractProperties fineractProperties;
     private final RetainedEarningJobReader retainedEarningJobReader;
+    private final RetainedEarningJobExecutionDecider retainedEarningJobExecutionDecider;
 
     /**
      * Step to insert into summary table
@@ -70,7 +73,8 @@ public class RetainedEarningJobConfiguration {
     @Bean(name = "retainedEarning")
     public Job retainedEarning() {
         return new JobBuilder(JobName.RETAINED_EARNING.name(), jobRepository).listener(retainedEarningJobListener)
-                .start(retainedEarningSummaryStep()).build();
+                .start(retainedEarningJobExecutionDecider).on(NO_OP_EXECUTION).end().from(retainedEarningJobExecutionDecider)
+                .on(CONTINUE_JOB_EXECUTION).to(retainedEarningSummaryStep()).end().build();
     }
 
 }
