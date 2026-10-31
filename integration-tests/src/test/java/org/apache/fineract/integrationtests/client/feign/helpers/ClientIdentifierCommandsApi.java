@@ -33,12 +33,7 @@ import org.apache.fineract.client.models.PutClientsClientIdIdentifiersIdentifier
  * <p>
  * The generated {@code ClientIdentifierRequest} cannot express that here: the mapper's global {@code NON_NULL} drops a
  * null property, so {@code .issuanceDate(null).expiryDate(null)} reaches the server as <code>{}</code>. Declaring the
- * dates {@code nullable} in the spec would model them as {@code JsonNullable<String>} for SDK consumers, but
- * {@code fineract-client} (Retrofit/Gson) and {@code fineract-client-feign} (Jackson) both generate into
- * {@code org.apache.fineract.client.models}, and {@code integration-tests} puts the Retrofit artifact first on the test
- * classpath, so the Retrofit model wins the name clash and the Jackson annotations never reach the wire. Measured: the
- * Feign SDK's own mapper writes <code>{"expiryDate":null,"issuanceDate":null}</code>, while the same call from the test
- * JVM is rejected as having no parameters.
+ * dates {@code nullable} in the spec would model them as {@code JsonNullable<String>}; the spec does not do that yet.
  *
  * <p>
  * Same situation, same answer as {@link LoanProductCommandsApi}: the call stays typed end to end and binds the response

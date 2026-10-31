@@ -56,9 +56,9 @@ import org.apache.fineract.client.models.WorkingCapitalBreachData;
 import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalNearBreachData;
 import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalNearBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
@@ -75,6 +75,7 @@ public class WorkingCapitalLoanProductCRUDTest {
     private WorkingCapitalLoanProductHelper wclProductHelper;
     private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
     private final WorkingCapitalNearBreachHelper nearBreachHelper = new WorkingCapitalNearBreachHelper();
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @BeforeEach
     public void setup() {
@@ -859,6 +860,6 @@ public class WorkingCapitalLoanProductCRUDTest {
                 return firstBucket.getId();
             }
         }
-        return DelinquencyBucketsHelper.createDefaultWorkingCapitalBucket();
+        return delinquencyHelper.createDefaultWorkingCapitalBucket();
     }
 }

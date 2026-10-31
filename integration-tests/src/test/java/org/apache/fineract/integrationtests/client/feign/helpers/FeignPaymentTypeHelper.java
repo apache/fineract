@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
@@ -40,6 +41,10 @@ public class FeignPaymentTypeHelper {
 
     public PaymentTypeCreateResponse createPaymentType(PaymentTypeCreateRequest request) {
         return ok(() -> fineractClient.paymentType().createPaymentType(request));
+    }
+
+    public List<PaymentTypeData> retrieveAllPaymentTypes(Boolean onlyWithCode) {
+        return ok(() -> fineractClient.paymentType().getAllPaymentTypes(onlyWithCode));
     }
 
     public PaymentTypeData retrievePaymentType(Long paymentTypeId) {

@@ -40,10 +40,11 @@ import org.apache.fineract.client.models.LoanOriginatorsResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansOriginatorData;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignRoleHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.WorkingCapitalLoanOriginatorHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -55,6 +56,7 @@ import org.junit.jupiter.api.Test;
 
 public class WorkingCapitalLoanOriginatorsTest {
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final WorkingCapitalLoanHelper wcLoanHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
     private final WorkingCapitalLoanOriginatorHelper originatorHelper = new WorkingCapitalLoanOriginatorHelper();
@@ -316,6 +318,6 @@ public class WorkingCapitalLoanOriginatorsTest {
     }
 
     private Long createClient() {
-        return ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        return clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
     }
 }

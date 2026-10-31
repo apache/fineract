@@ -45,11 +45,12 @@ import org.apache.fineract.infrastructure.event.external.data.ExternalEventRespo
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEventHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
@@ -65,6 +66,7 @@ import org.junit.jupiter.api.Test;
  */
 public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationTest {
 
+    private static final FeignClientHelper CLIENT_HELPER = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private static final DateTimeFormatter API_DATE = DateTimeFormatter.ofPattern("dd MMMM yyyy");
     private static final String DISCOUNT_FEE_CODE = "loanTransactionType.discountFee";
     private static final String DISCOUNT_FEE_AMORTIZATION_CODE = "loanTransactionType.discountFeeAmortization";
@@ -108,7 +110,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
 
     @BeforeAll
     public static void setupAccounts() {
-        createdClientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        createdClientId = CLIENT_HELPER.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final FeignAccountHelper accountHelper = new FeignAccountHelper(FineractFeignClientHelper.getFineractFeignClient());
         fundSourceAccount = accountHelper.createLiabilityAccount("wcCoFundSource");
         loanPortfolioAccount = accountHelper.createAssetAccount("wcCoLoanPortfolio");

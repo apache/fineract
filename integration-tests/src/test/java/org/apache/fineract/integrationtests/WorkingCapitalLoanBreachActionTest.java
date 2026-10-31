@@ -32,9 +32,10 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachActionData;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEventHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
@@ -51,6 +52,7 @@ public class WorkingCapitalLoanBreachActionTest {
 
     private static final String WC_BREACH_PAUSE_EVENT = "WorkingCapitalLoanBreachPauseBusinessEvent";
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
     private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
@@ -61,7 +63,7 @@ public class WorkingCapitalLoanBreachActionTest {
     private final List<Long> createdLoanIds = new ArrayList<>();
     private final List<Long> createdProductIds = new ArrayList<>();
     private final List<Long> createdBreachIds = new ArrayList<>();
-    private final Long createdClientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+    private final Long createdClientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
     @AfterEach
     void cleanup() {

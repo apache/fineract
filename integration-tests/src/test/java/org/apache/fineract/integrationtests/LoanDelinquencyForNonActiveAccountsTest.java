@@ -26,11 +26,12 @@ import org.apache.fineract.client.models.GetLoansLoanIdLoanInstallmentLevelDelin
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.AmortizationType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestType;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -38,12 +39,14 @@ import org.junit.jupiter.api.Test;
 @Order(1)
 public class LoanDelinquencyForNonActiveAccountsTest extends FeignLoanTestBase {
 
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
+
     @Test
     public void testDelinquencyCalculationsForRejectedLoanAccount() {
         runAt("06 May 2024", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -75,9 +78,9 @@ public class LoanDelinquencyForNonActiveAccountsTest extends FeignLoanTestBase {
     @Test
     public void testDelinquencyCalculationsForRejectedLoanAccountCOBTest() {
         runAt("06 May 2024", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -116,9 +119,9 @@ public class LoanDelinquencyForNonActiveAccountsTest extends FeignLoanTestBase {
     @Test
     public void testDelinquencyCalculationsForClosedLoanAccount() {
         runAt("06 May 2024", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -151,9 +154,9 @@ public class LoanDelinquencyForNonActiveAccountsTest extends FeignLoanTestBase {
     @Test
     public void testDelinquencyCalculationsForOverPaidLoanAccount() {
         runAt("06 May 2024", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //

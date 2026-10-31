@@ -24,15 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -114,6 +111,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEv
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignPaymentTypeHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
@@ -127,7 +125,6 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestAccount
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestValidators;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
-import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAccountingHelper;
@@ -156,6 +153,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
     protected static FeignClientHelper clientHelper;
     protected static FeignChargesHelper chargesHelper;
     protected static FeignCodeHelper codeHelper;
+    protected static FeignPaymentTypeHelper paymentTypeHelper;
     protected static FeignGlobalConfigurationHelper globalConfigurationHelper;
     protected static FeignSchedulerHelper schedulerHelper;
     protected static FeignExternalEventHelper externalEventHelper;
@@ -175,6 +173,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         clientHelper = new FeignClientHelper(client);
         chargesHelper = new FeignChargesHelper(client);
         codeHelper = new FeignCodeHelper(client);
+        paymentTypeHelper = new FeignPaymentTypeHelper(client);
         globalConfigurationHelper = new FeignGlobalConfigurationHelper(client);
         schedulerHelper = new FeignSchedulerHelper(client);
         externalEventHelper = new FeignExternalEventHelper(client);
@@ -1187,26 +1186,6 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return loanHelper.addChargesForLoan(loanId, request);
     }
 
-    protected Long addChargesForLoan(Integer loanId, String chargeJson) {
-        Gson gson = new Gson();
-        HashMap<String, Object> chargeMap = gson.fromJson(chargeJson, new TypeToken<HashMap<String, Object>>() {}.getType());
-        PostLoansLoanIdChargesRequest request = new PostLoansLoanIdChargesRequest();
-        if (chargeMap.get("chargeId") != null) {
-            request.chargeId(Long.parseLong(chargeMap.get("chargeId").toString()));
-        }
-        if (chargeMap.get("amount") != null) {
-            request.amount(Double.valueOf(chargeMap.get("amount").toString()));
-        }
-        if (chargeMap.get("dueDate") != null) {
-            request.dueDate(chargeMap.get("dueDate").toString());
-        }
-        if (chargeMap.get("externalId") != null) {
-            request.externalId(chargeMap.get("externalId").toString());
-        }
-        request.dateFormat("dd MMMM yyyy").locale("en");
-        return loanHelper.addChargesForLoan(loanId.longValue(), request).getResourceId();
-    }
-
     protected PostLoansLoanIdTransactionsResponse makeWriteoff(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
         return writeOffLoan(loanExternalId, request);
     }
@@ -1876,7 +1855,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
     }
 
     protected Long getPaymentTypeId(int index) {
-        return PaymentTypeHelper.getAllPaymentTypes(false).get(index).getId();
+        return paymentTypeHelper.retrieveAllPaymentTypes(false).get(index).getId();
     }
 
     protected void reviewLoanTransactionRelations(Long loanId, Long transactionId, Integer expectedSize) {

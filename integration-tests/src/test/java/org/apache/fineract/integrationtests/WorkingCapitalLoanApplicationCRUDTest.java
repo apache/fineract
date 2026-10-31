@@ -48,10 +48,12 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoansPagedResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansTemplateResponse;
 import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFundHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
@@ -64,9 +66,13 @@ import org.junit.jupiter.api.Test;
 
 public class WorkingCapitalLoanApplicationCRUDTest {
 
+    private static final FeignFundHelper FUND_HELPER = new FeignFundHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private static final FeignDelinquencyHelper DELINQUENCY_HELPER = new FeignDelinquencyHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
     private static Long delinquencyBucketId;
     private static Long fundId;
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
     private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
@@ -74,8 +80,8 @@ public class WorkingCapitalLoanApplicationCRUDTest {
 
     @BeforeAll
     static void initDelinquency() {
-        delinquencyBucketId = DelinquencyBucketsHelper.createDefaultWorkingCapitalBucket();
-        fundId = FundsResourceHandler.createFund().getResourceId();
+        delinquencyBucketId = DELINQUENCY_HELPER.createDefaultWorkingCapitalBucket();
+        fundId = FUND_HELPER.createFund().getResourceId();
     }
 
     @Test
@@ -309,7 +315,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
 
         assertNotNull(loanId);
 
-        GetClientsClientIdAccountsResponse clientAccounts = ClientHelper.getClientAccounts(clientId);
+        GetClientsClientIdAccountsResponse clientAccounts = clientHelper.getClientAccounts(clientId);
         assertNotNull(clientAccounts);
         assertFalse(clientAccounts.getWorkingCapitalLoanAccounts().isEmpty(), "Client should have at least one working capital loan");
         boolean found = false;
@@ -362,7 +368,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
         assertNotNull(loanId3);
 
         try {
-            GetClientsClientIdAccountsResponse clientAccounts = ClientHelper.getClientAccounts(clientId);
+            GetClientsClientIdAccountsResponse clientAccounts = clientHelper.getClientAccounts(clientId);
             assertNotNull(clientAccounts);
             assertTrue(clientAccounts.getWorkingCapitalLoanAccounts().size() >= 3, "Client should have at least 3 working capital loans");
             final List<GetClientsWorkingCapitalLoanAccounts> ourLoans = new ArrayList<>();
@@ -1029,6 +1035,6 @@ public class WorkingCapitalLoanApplicationCRUDTest {
     }
 
     private Long createClient() {
-        return ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        return clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
     }
 }

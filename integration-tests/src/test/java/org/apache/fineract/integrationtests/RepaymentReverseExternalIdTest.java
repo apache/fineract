@@ -39,11 +39,12 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFundHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestAccounts;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Test;
 
 public class RepaymentReverseExternalIdTest extends FeignLoanTestBase {
@@ -55,6 +56,9 @@ public class RepaymentReverseExternalIdTest extends FeignLoanTestBase {
     private static final String reverseDate = "27 December 2024";
     private static final Double firstRepaymentAmount = 1000.0;
     private static final Double secondRepaymentAmount = 10.0;
+
+    private final FeignFundHelper fundHelper = new FeignFundHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void testReverseRepaymentUpdatesExternalIdCorrectlyForOverpayment() {
@@ -112,10 +116,10 @@ public class RepaymentReverseExternalIdTest extends FeignLoanTestBase {
         loanPaymentChannelToFundSourceMappings.paymentTypeId(1L);
         paymentChannelToFundSourceMappings.add(loanPaymentChannelToFundSourceMappings);
 
-        final Long fundId = FundsResourceHandler.createFund().getResourceId();
+        final Long fundId = fundHelper.createFund().getResourceId();
         assertNotNull(fundId);
 
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
         return new PostLoanProductsRequest().name(name).externalId(loanExternalId).enableAccrualActivityPosting(true).shortName(shortName)
                 .description(

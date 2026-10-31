@@ -32,8 +32,10 @@ import java.util.function.UnaryOperator;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
@@ -65,6 +67,8 @@ public class WorkingCapitalLoanEirValidationTest {
     private static final String EXPECTED_SCHEDULE_ERROR_CODE = "unable.to.calculate.valid.schedule";
     private static final String FLAT = "FLAT";
     private static final BigDecimal OVER_CAP_PRODUCT_DISCOUNT = BigDecimal.valueOf(300000);
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
+
     /**
      * Equal to the principal below, not above it: a discount worth more than the principal is refused by a rule of its
      * own before the feasibility check is ever reached, and this fixture is here to exercise the feasibility check.
@@ -542,6 +546,6 @@ public class WorkingCapitalLoanEirValidationTest {
     }
 
     private Long createClient() {
-        return ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        return clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
     }
 }

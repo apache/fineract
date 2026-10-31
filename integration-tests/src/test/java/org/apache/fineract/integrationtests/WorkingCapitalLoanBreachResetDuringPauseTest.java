@@ -32,8 +32,9 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
@@ -52,6 +53,7 @@ public class WorkingCapitalLoanBreachResetDuringPauseTest {
     private static final BigDecimal TOTAL_PAYMENT_VOLUME = BigDecimal.valueOf(10000);
     private static final BigDecimal BREACHED_AMOUNT = BigDecimal.valueOf(400);
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
     private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
@@ -60,7 +62,7 @@ public class WorkingCapitalLoanBreachResetDuringPauseTest {
     private final List<Long> createdLoanIds = new ArrayList<>();
     private final List<Long> createdProductIds = new ArrayList<>();
     private final List<Long> createdBreachIds = new ArrayList<>();
-    private final Long createdClientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+    private final Long createdClientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
     @AfterEach
     void cleanup() {

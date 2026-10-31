@@ -44,15 +44,15 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFundHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +65,7 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
 
     private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
     // asset
+    private final FeignFundHelper fundHelper = new FeignFundHelper(FineractFeignClientHelper.getFineractFeignClient());
     private Account loansReceivable;
     private Account interestFeeReceivable;
     private Account suspenseAccount;
@@ -83,6 +84,8 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
     private Account creditLossBadDebtFraud;
     private Account writtenOff;
     private Account goodwillExpenseAccount;
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @BeforeEach
     public void setup() {
@@ -108,7 +111,7 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
         runAt("14 September 2022", () -> {
             String loanExternalIdStr = UUID.randomUUID().toString();
             final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting();
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
             // apply charges
@@ -281,7 +284,7 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
     public void postChargeOffBackdatedTransactionReverseTest() {
         String loanExternalIdStr = UUID.randomUUID().toString();
         final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting();
-        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
         // apply charges
@@ -403,7 +406,7 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
     public void postChargeOffBackdatedTransactionReverseReplayTest() {
         String loanExternalIdStr = UUID.randomUUID().toString();
         final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting();
-        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
         // apply charges
@@ -547,7 +550,7 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
     public void transactionOnChargeOffDatePreChargeOffReverseReplayTest() {
         String loanExternalIdStr = UUID.randomUUID().toString();
         final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting();
-        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
         // apply charges
@@ -690,7 +693,7 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
     public void transactionOnChargeOffDatePostChargeOffReverseReplayTest() {
         String loanExternalIdStr = UUID.randomUUID().toString();
         final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting();
-        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
         // apply charges
@@ -832,7 +835,7 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
     public void transactionsOnChargeOffDatePreAndPostChargeOffDateTest() {
         String loanExternalIdStr = UUID.randomUUID().toString();
         final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting();
-        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
         // apply charges
@@ -937,7 +940,7 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
     public void transactionOnChargeOffDateReverseTest() {
         String loanExternalIdStr = UUID.randomUUID().toString();
         final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting();
-        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
         // apply charges
@@ -1081,12 +1084,12 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
         List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
 
-        String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
-        String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
+        String paymentTypeName = Utils.randomStringGenerator("P_T", 5);
+        String description = Utils.randomStringGenerator("PT_Desc", 15);
         Boolean isCashPayment = false;
         Long position = 1L;
 
-        var paymentTypesResponse = PaymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(paymentTypeName)
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(paymentTypeName)
                 .description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
@@ -1097,10 +1100,10 @@ public class LoanPostChargeOffScenariosTest extends FeignLoanTestBase {
         loanPaymentChannelToFundSourceMappings.paymentTypeId(paymentTypeIdOne.longValue());
         paymentChannelToFundSourceMappings.add(loanPaymentChannelToFundSourceMappings);
 
-        final Long fundId = FundsResourceHandler.createFund().getResourceId();
+        final Long fundId = fundHelper.createFund().getResourceId();
         Assertions.assertNotNull(fundId);
 
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
         PostLoanProductsRequest loanProductsRequest = new PostLoanProductsRequest().name(name)//
                 .shortName(shortName)//

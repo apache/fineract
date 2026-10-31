@@ -38,8 +38,8 @@ import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -52,7 +52,7 @@ public class LoanInterestRecalculationCOBTest extends FeignLoanTestBase {
 
     @BeforeAll
     public static void setup() {
-        client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
         // setup COB Business Steps to prevent test failing due other integration test configurations
         new FeignBusinessStepHelper(FineractFeignClientHelper.getFineractFeignClient()).updateSteps("LOAN_CLOSE_OF_BUSINESS",
                 "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION", "CHECK_LOAN_REPAYMENT_DUE",

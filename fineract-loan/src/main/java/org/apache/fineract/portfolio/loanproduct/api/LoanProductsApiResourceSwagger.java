@@ -146,6 +146,18 @@ public final class LoanProductsApiResourceSwagger {
         public List<CreditAllocationData> creditAllocation;
         @Schema(example = "false")
         public Boolean isLinkedToFloatingInterestRates;
+        @Schema(example = "1", description = "The floating rate the product follows, when isLinkedToFloatingInterestRates is true")
+        public Long floatingRatesId;
+        @Schema(example = "0.0")
+        public BigDecimal interestRateDifferential;
+        @Schema(example = "true")
+        public Boolean isFloatingInterestRateCalculationAllowed;
+        @Schema(example = "0.0")
+        public BigDecimal minDifferentialLendingRate;
+        @Schema(example = "0.0")
+        public BigDecimal defaultDifferentialLendingRate;
+        @Schema(example = "50.0")
+        public BigDecimal maxDifferentialLendingRate;
         @Schema(example = "false")
         public Boolean allowVariableInstallments;
         @Schema(example = "0", description = "Minimum days between two installments of a variable installment loan")

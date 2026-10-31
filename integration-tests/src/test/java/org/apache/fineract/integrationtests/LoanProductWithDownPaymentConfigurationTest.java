@@ -28,16 +28,19 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Test;
 
 public class LoanProductWithDownPaymentConfigurationTest extends FeignLoanTestBase {
 
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
+
     @Test
     public void loanProductCreationWithDownPaymentConfigurationTest() {
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -55,7 +58,7 @@ public class LoanProductWithDownPaymentConfigurationTest extends FeignLoanTestBa
 
     @Test
     public void loanProductUpdateWithEnableDownPaymentConfigurationTest() {
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
         GetLoanProductsProductIdResponse product = createLoanProductWithoutDownPayment(delinquencyBucketId);
         assertNotNull(product);
@@ -72,7 +75,7 @@ public class LoanProductWithDownPaymentConfigurationTest extends FeignLoanTestBa
 
     @Test
     public void loanProductEnableDownPaymentConfigurationValidationTests() {
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
         Boolean enableDownPayment = true;
 
         ArrayList<HashMap<String, Object>> loanProductErrorData = getLoanProductError(
