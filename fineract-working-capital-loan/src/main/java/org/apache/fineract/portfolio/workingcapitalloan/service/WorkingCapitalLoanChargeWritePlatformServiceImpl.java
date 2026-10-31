@@ -48,6 +48,7 @@ import org.apache.fineract.infrastructure.event.business.domain.workingcapitallo
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanChargeWaiverTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
@@ -97,6 +98,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements WorkingCapitalLoanChargeWritePlatformService {
 
+    private final PlatformSecurityContext context;
     private final WorkingCapitalLoanChargeDataValidator loanChargeDataValidator;
     private final WorkingCapitalLoanRepository workingCapitalLoanRepository;
     private final ChargeRepositoryWrapper chargeRepository;
@@ -135,6 +137,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         loanChargeDataValidator.validateCreateLoanCharge(command.json());
         WorkingCapitalLoan loan = workingCapitalLoanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
 
         final LoanStatus statusBeforeCharge = loan.getLoanStatus();
         // New charges cannot be added once the loan is charged off (modify/waive/pay of existing charges stay allowed).
@@ -357,6 +360,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
 
         final WorkingCapitalLoan loan = workingCapitalLoanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         final WorkingCapitalLoanCharge wcCharge = loanChargeRepository.findById(wcLoanChargeId)
                 .orElseThrow(() -> new WorkingCapitalLoanChargeNotFoundException(wcLoanChargeId));
 
@@ -438,6 +442,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
 
         final WorkingCapitalLoan loan = workingCapitalLoanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         final WorkingCapitalLoanCharge wcCharge = loanChargeRepository.findById(wcLoanChargeId)
                 .orElseThrow(() -> new WorkingCapitalLoanChargeNotFoundException(wcLoanChargeId));
 
