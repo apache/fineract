@@ -43,6 +43,12 @@ public class DefaultPlatformPasswordEncoder implements PlatformPasswordEncoder {
 
     @Override
     public boolean matches(final String rawPassword, final String encodedPassword) {
+        // A DelegatingPasswordEncoder picks the algorithm from the stored hash's "{id}" prefix and throws when it is
+        // missing. A hash without that prefix cannot be verified, so treat it as a non-match instead of surfacing the
+        // exception as a 500 to every caller.
+        if (encodedPassword == null || !encodedPassword.startsWith("{")) {
+            return false;
+        }
         return this.passwordEncoder.matches(rawPassword, encodedPassword);
     }
 }

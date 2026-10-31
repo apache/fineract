@@ -266,8 +266,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             if (passwordReuseRestrictionCount != null) {
                 final String rawPassword = command.stringValueOfParameterNamedAllowingNull(AppUserConstants.PASSWORD);
                 final Predicate<String> matchesSubmittedPassword = rawPassword != null
-                        ? storedPassword -> storedPassword.startsWith("{")
-                                && this.platformPasswordEncoder.matches(rawPassword, storedPassword)
+                        ? storedPassword -> this.platformPasswordEncoder.matches(rawPassword, storedPassword)
                         : passWordEncodedValue::equals;
                 List<AppUserPreviousPassword> previousPasswords;
                 if (passwordReuseRestrictionCount == 0) {

@@ -46,6 +46,11 @@ class JsonCommandTest {
 
         @Override
         public boolean matches(final String rawPassword, final String encodedPassword) {
+            // Mirror DefaultPlatformPasswordEncoder: a stored hash without an "{id}" prefix cannot be verified by the
+            // delegating encoder, so it is a non-match rather than a thrown exception.
+            if (encodedPassword == null || !encodedPassword.startsWith("{")) {
+                return false;
+            }
             return PASSWORD_ENCODER.matches(rawPassword, encodedPassword);
         }
     };
