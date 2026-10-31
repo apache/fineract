@@ -102,7 +102,7 @@ public class LoanReAgingService {
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
 
     public CommandProcessingResult reAge(final Long loanId, final JsonCommand command) {
-        final Loan loan = loanAssembler.assembleFrom(loanId);
+        final Loan loan = loanAssembler.assembleFromInUserScope(loanId);
         reAgingValidator.validateReAge(loan, command);
         BigDecimal userProvidedTxnAmount = command.bigDecimalValueOfParameterNamed(LoanReAgingApiConstants.transactionAmountParamName);
 
@@ -167,7 +167,7 @@ public class LoanReAgingService {
     }
 
     public CommandProcessingResult undoReAge(Long loanId, JsonCommand command) {
-        Loan loan = loanAssembler.assembleFrom(loanId);
+        Loan loan = loanAssembler.assembleFromInUserScope(loanId);
         reAgingValidator.validateUndoReAge(loan);
 
         Map<String, Object> changes = new LinkedHashMap<>();

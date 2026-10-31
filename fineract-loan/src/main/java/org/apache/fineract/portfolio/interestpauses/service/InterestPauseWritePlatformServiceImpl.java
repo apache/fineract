@@ -40,6 +40,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalance
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanScheduleVariationsAddedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanScheduleVariationsDeletedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.common.service.Validator;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -58,6 +59,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
     private final LoanAssembler loanAssembler;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanScheduleService loanScheduleService;
+    private final PlatformSecurityContext context;
 
     @Override
     public CommandProcessingResult createInterestPause(final ExternalId loanExternalId, final String startDateString,
@@ -104,6 +106,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
     }
 
     private CommandProcessingResult processDeleteInterestPause(Loan loan, Long variationId) {
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         validateActiveLoan(loan);
 
         LoanTermVariations variation = loanTermVariationsRepository
@@ -129,6 +132,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
         LocalDate startDate = parseDate(startDateString, dateFormat, locale);
         LocalDate endDate = parseDate(endDateString, dateFormat, locale);
 
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         validateActiveLoan(loan);
 
         LoanTermVariations variation = loanTermVariationsRepository
@@ -156,6 +160,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
 
     private CommandProcessingResult processInterestPause(final Loan loan, final LocalDate startDate, final LocalDate endDate,
             String dateFormat, String locale) {
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         validateActiveLoan(loan);
         validateInterestPauseDates(loan, startDate, endDate, dateFormat, locale, null);
 
