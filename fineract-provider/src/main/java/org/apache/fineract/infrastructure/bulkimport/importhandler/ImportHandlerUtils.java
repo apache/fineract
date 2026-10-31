@@ -20,6 +20,9 @@ package org.apache.fineract.infrastructure.bulkimport.importhandler;
 
 import com.google.common.base.Splitter;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -82,22 +85,41 @@ public final class ImportHandlerUtils {
         if (c == null || c.getCellType() == CellType.BLANK) {
             return null;
         }
-        FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
+            FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
             if (eval != null) {
-                CellValue value;
                 try {
-                    value = eval.evaluate(c);
-                    return ((Double) value.getNumberValue()).longValue();
+                    CellValue value = eval.evaluate(c);
+                    if (value != null) {
+                        if (value.getCellType() == CellType.BLANK) {
+                            return null;
+                        } else if (value.getCellType() == CellType.NUMERIC) {
+                            return ((Double) value.getNumberValue()).longValue();
+                        } else if (value.getCellType() == CellType.STRING) {
+                            String str = value.getStringValue();
+                            return StringUtils.isBlank(str) ? null : Long.parseLong(str.trim());
+                        }
+                    }
                 } catch (Exception e) {
                     log.error("Cell evaluation error: ", e);
                 }
             }
+            CellType cachedType = c.getCachedFormulaResultType();
+            if (cachedType == CellType.NUMERIC) {
+                return ((Double) c.getNumericCellValue()).longValue();
+            } else if (cachedType == CellType.STRING) {
+                String val = c.getStringCellValue().trim();
+                return StringUtils.isBlank(val) ? null : Long.parseLong(val);
+            } else if (cachedType == CellType.BLANK) {
+                return null;
+            }
             return null;
         } else if (c.getCellType() == CellType.NUMERIC) {
             return ((Double) c.getNumericCellValue()).longValue();
+        } else if (c.getCellType() == CellType.STRING && StringUtils.isNotBlank(c.getStringCellValue())) {
+            return Long.parseLong(c.getStringCellValue().trim());
         } else {
-            return Long.parseLong(row.getCell(colIndex).getStringCellValue());
+            return null;
         }
     }
 
@@ -107,26 +129,42 @@ public final class ImportHandlerUtils {
         if (c == null || c.getCellType() == CellType.BLANK) {
             return null;
         }
-        FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
+            FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
             if (eval != null) {
-                CellValue value;
                 try {
-                    value = eval.evaluate(c);
-
-                    String res = trimEmptyDecimalPortion(value.getStringValue());
-
-                    if (StringUtils.isNotEmpty(res)) {
-                        return res.trim();
+                    CellValue value = eval.evaluate(c);
+                    if (value != null) {
+                        if (value.getCellType() == CellType.BLANK) {
+                            return null;
+                        } else if (value.getCellType() == CellType.STRING) {
+                            String res = trimEmptyDecimalPortion(value.getStringValue());
+                            return StringUtils.isNotEmpty(res) ? res.trim() : null;
+                        } else if (value.getCellType() == CellType.NUMERIC) {
+                            return ((Double) value.getNumberValue()).intValue() + "";
+                        } else if (value.getCellType() == CellType.BOOLEAN) {
+                            return value.getBooleanValue() + "";
+                        }
                     }
                 } catch (Exception e) {
                     log.error("Cell evaluation error: ", e);
                 }
             }
+            CellType cachedType = c.getCachedFormulaResultType();
+            if (cachedType == CellType.STRING) {
+                String res = trimEmptyDecimalPortion(c.getStringCellValue().trim());
+                return StringUtils.isNotEmpty(res) ? res.trim() : null;
+            } else if (cachedType == CellType.NUMERIC) {
+                return ((Double) c.getNumericCellValue()).intValue() + "";
+            } else if (cachedType == CellType.BOOLEAN) {
+                return c.getBooleanCellValue() + "";
+            } else if (cachedType == CellType.BLANK) {
+                return null;
+            }
             return null;
         } else if (c.getCellType() == CellType.STRING) {
             String res = trimEmptyDecimalPortion(c.getStringCellValue().trim());
-            return res.trim();
+            return StringUtils.isNotEmpty(res) ? res.trim() : null;
 
         } else if (c.getCellType() == CellType.NUMERIC) {
             return ((Double) row.getCell(colIndex).getNumericCellValue()).intValue() + "";
@@ -146,12 +184,58 @@ public final class ImportHandlerUtils {
     }
 
     public static LocalDate readAsDate(int colIndex, Row row) {
+        return readAsDate(colIndex, row, null, null);
+    }
+
+    public static LocalDate readAsDate(int colIndex, Row row, String dateFormat, String locale) {
         Cell c = row.getCell(colIndex);
         if (c == null || c.getCellType() == CellType.BLANK) {
             return null;
         }
+        if (c.getCellType() == CellType.FORMULA) {
+            CellType cachedType = c.getCachedFormulaResultType();
+            if (cachedType == CellType.NUMERIC) {
+                LocalDateTime ldt = c.getLocalDateTimeCellValue();
+                return ldt == null ? null : ldt.toLocalDate();
+            } else if (cachedType == CellType.STRING) {
+                return parseDateString(c.getStringCellValue(), dateFormat, locale, row.getRowNum(), colIndex);
+            } else if (cachedType == CellType.BLANK) {
+                return null;
+            } else if (cachedType == CellType.ERROR) {
+                throw new IllegalArgumentException(
+                        "Formula at row " + (row.getRowNum() + 1) + ", column " + (colIndex + 1) + " resulted in an error");
+            } else {
+                return null;
+            }
+        } else if (c.getCellType() == CellType.NUMERIC) {
+            LocalDateTime ldt = c.getLocalDateTimeCellValue();
+            return ldt == null ? null : ldt.toLocalDate();
+        } else if (c.getCellType() == CellType.STRING) {
+            return parseDateString(c.getStringCellValue(), dateFormat, locale, row.getRowNum(), colIndex);
+        } else {
+            return null;
+        }
+    }
 
-        return LocalDate.ofInstant(c.getDateCellValue().toInstant(), DateUtils.getDateTimeZoneOfTenant());
+    private static LocalDate parseDateString(String dateStr, String dateFormat, String locale, int rowNum, int colIndex) {
+        if (StringUtils.isBlank(dateStr)) {
+            return null;
+        }
+        String trimmed = dateStr.trim();
+        if (StringUtils.isNotBlank(dateFormat)) {
+            try {
+                return DateUtils.toLocalDate(locale != null ? locale : "en", trimmed, dateFormat);
+            } catch (Exception e) {
+                log.debug("Date string '{}' did not match format '{}': {}", trimmed, dateFormat, e.getMessage());
+            }
+        }
+        try {
+            return LocalDate.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException e) {
+            log.debug("Date string '{}' did not match ISO_LOCAL_DATE: {}", trimmed, e.getMessage());
+        }
+        throw new IllegalArgumentException("Unable to parse date '" + trimmed + "' at row " + (rowNum + 1) + ", column " + (colIndex + 1)
+                + (StringUtils.isNotBlank(dateFormat) ? " (expected format: " + dateFormat + ")" : ""));
     }
 
     public static Boolean readAsBoolean(int colIndex, Row row) {
@@ -159,27 +243,45 @@ public final class ImportHandlerUtils {
         if (c == null || c.getCellType() == CellType.BLANK) {
             return false;
         }
-        FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
+            FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
             if (eval != null) {
-                CellValue value;
                 try {
-                    value = eval.evaluate(c);
-                    return value.getBooleanValue();
+                    CellValue value = eval.evaluate(c);
+                    if (value != null) {
+                        if (value.getCellType() == CellType.BLANK) {
+                            return false;
+                        } else if (value.getCellType() == CellType.BOOLEAN) {
+                            return value.getBooleanValue();
+                        } else if (value.getCellType() == CellType.STRING && StringUtils.isNotBlank(value.getStringValue())) {
+                            return Boolean.parseBoolean(value.getStringValue().trim());
+                        } else if (value.getCellType() == CellType.NUMERIC) {
+                            return value.getNumberValue() != 0;
+                        }
+                    }
                 } catch (Exception e) {
                     log.error("Cell evaluation error: ", e);
                 }
             }
+            CellType cachedType = c.getCachedFormulaResultType();
+            if (cachedType == CellType.BOOLEAN) {
+                return c.getBooleanCellValue();
+            } else if (cachedType == CellType.STRING) {
+                String val = c.getStringCellValue().trim();
+                return Boolean.parseBoolean(val);
+            } else if (cachedType == CellType.NUMERIC) {
+                return c.getNumericCellValue() != 0;
+            } else if (cachedType == CellType.BLANK) {
+                return false;
+            }
             return false;
         } else if (c.getCellType() == CellType.BOOLEAN) {
             return c.getBooleanCellValue();
+        } else if (c.getCellType() == CellType.STRING) {
+            String booleanString = c.getStringCellValue().trim();
+            return booleanString.equalsIgnoreCase("TRUE");
         } else {
-            String booleanString = row.getCell(colIndex).getStringCellValue().trim();
-            if (booleanString.equalsIgnoreCase("TRUE")) {
-                return true;
-            } else {
-                return false;
-            }
+            return false;
         }
     }
 
@@ -188,22 +290,41 @@ public final class ImportHandlerUtils {
         if (c == null || c.getCellType() == CellType.BLANK) {
             return null;
         }
-        FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
+            FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
             if (eval != null) {
-                CellValue value;
                 try {
-                    value = eval.evaluate(c);
-                    return ((Double) value.getNumberValue()).intValue();
+                    CellValue value = eval.evaluate(c);
+                    if (value != null) {
+                        if (value.getCellType() == CellType.BLANK) {
+                            return null;
+                        } else if (value.getCellType() == CellType.NUMERIC) {
+                            return ((Double) value.getNumberValue()).intValue();
+                        } else if (value.getCellType() == CellType.STRING) {
+                            String str = value.getStringValue();
+                            return StringUtils.isBlank(str) ? null : Integer.parseInt(str.trim());
+                        }
+                    }
                 } catch (Exception e) {
                     log.error("Cell evaluation error: ", e);
                 }
             }
+            CellType cachedType = c.getCachedFormulaResultType();
+            if (cachedType == CellType.NUMERIC) {
+                return ((Double) c.getNumericCellValue()).intValue();
+            } else if (cachedType == CellType.STRING) {
+                String val = c.getStringCellValue().trim();
+                return StringUtils.isBlank(val) ? null : Integer.parseInt(val);
+            } else if (cachedType == CellType.BLANK) {
+                return null;
+            }
             return null;
         } else if (c.getCellType() == CellType.NUMERIC) {
             return ((Double) c.getNumericCellValue()).intValue();
+        } else if (c.getCellType() == CellType.STRING && StringUtils.isNotBlank(c.getStringCellValue())) {
+            return Integer.parseInt(c.getStringCellValue().trim());
         } else {
-            return Integer.parseInt(row.getCell(colIndex).getStringCellValue());
+            return null;
         }
     }
 
@@ -212,22 +333,41 @@ public final class ImportHandlerUtils {
         if (c == null || c.getCellType() == CellType.BLANK) {
             return 0.0;
         }
-        FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
+            FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
             if (eval != null) {
-                CellValue value;
                 try {
-                    value = eval.evaluate(c);
-                    return value.getNumberValue();
+                    CellValue value = eval.evaluate(c);
+                    if (value != null) {
+                        if (value.getCellType() == CellType.BLANK) {
+                            return 0.0;
+                        } else if (value.getCellType() == CellType.NUMERIC) {
+                            return value.getNumberValue();
+                        } else if (value.getCellType() == CellType.STRING) {
+                            String str = value.getStringValue();
+                            return StringUtils.isBlank(str) ? 0.0 : Double.parseDouble(str.trim());
+                        }
+                    }
                 } catch (Exception e) {
                     log.error("Cell evaluation error: ", e);
                 }
             }
+            CellType cachedType = c.getCachedFormulaResultType();
+            if (cachedType == CellType.NUMERIC) {
+                return c.getNumericCellValue();
+            } else if (cachedType == CellType.STRING) {
+                String val = c.getStringCellValue().trim();
+                return StringUtils.isBlank(val) ? 0.0 : Double.parseDouble(val);
+            } else if (cachedType == CellType.BLANK) {
+                return 0.0;
+            }
             return 0.0;
         } else if (c.getCellType() == CellType.NUMERIC) {
             return row.getCell(colIndex).getNumericCellValue();
+        } else if (c.getCellType() == CellType.STRING && StringUtils.isNotBlank(c.getStringCellValue())) {
+            return Double.parseDouble(c.getStringCellValue().trim());
         } else {
-            return Double.parseDouble(row.getCell(colIndex).getStringCellValue());
+            return 0.0;
         }
     }
 
