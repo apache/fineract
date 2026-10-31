@@ -54,6 +54,7 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -387,6 +388,19 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
                 .isInstanceOf(SavingsAccountTransactionNotFoundException.class);
         verify(savingAccountAssembler).assembleFrom(savingsId, false);
         verify(savingAccountAssembler, never()).assembleFromInUserScope(anyLong(), anyBoolean());
+    }
+
+    @Test
+    void activate_shouldRejectUserOutsideAccountOfficeHierarchy() {
+        Long savingsId = 1L;
+        JsonCommand command = mock(JsonCommand.class);
+
+        when(savingAccountAssembler.assembleFromInUserScope(savingsId, false))
+                .thenThrow(new NoAuthorizationException("The user doesn't have enough permissions to access the resource."));
+
+        assertThatThrownBy(() -> service.activate(savingsId, command)).isInstanceOf(NoAuthorizationException.class);
+        verify(savingAccountAssembler, never()).assembleFrom(anyLong(), anyBoolean());
+        verify(savingAccountRepositoryWrapper, never()).saveAndFlush(any());
     }
 
     @Test

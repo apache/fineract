@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.fasterxml.jackson.databind.JsonNode;
 import feign.Headers;
 import feign.RequestLine;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
+import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
@@ -48,15 +50,17 @@ import org.junit.jupiter.api.Test;
 
 /**
  * FINERACT-2639: monetary savings transactions are only allowed for users whose office is the account's office or one
- * of its parents.
+ * of its parents. FINERACT-2982: the same applies to account activation, which can post the initial deposit.
  */
 public class SavingsOfficeHierarchyAccessIntegrationTest extends FeignSavingsTestBase {
 
     private static final String PASSWORD = "A1b2c3d4e5f$";
     private static final String DEPOSIT_AMOUNT = "100";
+    private static final String OPENING_BALANCE = "100";
     private static final LocalDate OFFICE_OPENING_DATE = LocalDate.of(2010, 1, 1);
     private static final String HIERARCHY_ERROR_MESSAGE = "The user doesn't have enough permissions to access the resource.";
     private static final Map<String, Boolean> DEPOSIT_PERMISSIONS = Map.of("DEPOSIT_SAVINGSACCOUNT", true, "READ_SAVINGSACCOUNT", true);
+    private static final Map<String, Boolean> ACTIVATION_PERMISSIONS = Map.of("ACTIVATE_SAVINGSACCOUNT", true, "READ_SAVINGSACCOUNT", true);
     private static final Map<String, Boolean> COLLECTION_SHEET_PERMISSIONS = Map.of("SAVE_COLLECTIONSHEET", true, "READ_SAVINGSACCOUNT",
             true);
 
@@ -106,6 +110,34 @@ public class SavingsOfficeHierarchyAccessIntegrationTest extends FeignSavingsTes
                 "User from the account's office must be able to save a collection sheet deposit");
     }
 
+    @Test
+    public void testSavingsActivationIsRestrictedToUserOfficeHierarchy() {
+        String today = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
+        Long accountOfficeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getOfficeId();
+        Long siblingOfficeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getOfficeId();
+
+        Long clientId = createClientInOffice(accountOfficeId);
+        Long productId = createSavingsProduct(
+                SavingsRequestBuilders.defaultSavingsProduct().minRequiredOpeningBalance(new BigDecimal(OPENING_BALANCE))).getResourceId();
+        Long savingsId = submitSavingsApplication(clientId, productId, today).getSavingsId();
+        approveSavings(savingsId, today);
+
+        FineractFeignClient siblingOfficeUser = createUserInOffice(siblingOfficeId, ACTIVATION_PERMISSIONS);
+        FineractFeignClient accountOfficeUser = createUserInOffice(accountOfficeId, ACTIVATION_PERMISSIONS);
+
+        CallFailedRuntimeException failure = FeignCalls.failVoid(() -> activate(siblingOfficeUser, savingsId, today));
+        assertEquals(403, failure.getStatus());
+        assertTrue(failure.getResponseBody().contains(HIERARCHY_ERROR_MESSAGE),
+                "Expected office hierarchy error but was: " + failure.getResponseBody());
+        verifySavingsStatus(savingsId, status -> status.getApproved());
+
+        assertNotNull(ok(() -> activate(accountOfficeUser, savingsId, today)).getResourceId(),
+                "User from the account's office must be able to activate the account");
+        verifySavingsStatus(savingsId, status -> status.getActive());
+        assertEquals(0, new BigDecimal(OPENING_BALANCE).compareTo(getSavingsDetails(savingsId).getSummary().getAccountBalance()),
+                "Activation must post the minimum opening balance as the initial deposit");
+    }
+
     interface IndividualCollectionSheetApi {
 
         @RequestLine("POST /v1/collectionsheet?command=saveCollectionSheet")
@@ -135,6 +167,10 @@ public class SavingsOfficeHierarchyAccessIntegrationTest extends FeignSavingsTes
         FeignUserHelper.createUser(new PostUsersRequest().username(username).firstname("Test").lastname("User").email("test@localhost")
                 .officeId(officeId).roles(List.of(roleId)).password(PASSWORD).repeatPassword(PASSWORD).sendPasswordToEmail(false));
         return FineractFeignClientHelper.createNewFineractFeignClient(username, PASSWORD);
+    }
+
+    private static PostSavingsAccountsAccountIdResponse activate(FineractFeignClient client, Long savingsId, String date) {
+        return client.savingsAccount().handleCommandsSavingsAccount(savingsId, SavingsRequestBuilders.activateSavings(date), "activate");
     }
 
     private static PostSavingsAccountTransactionsResponse deposit(FineractFeignClient client, Long savingsId, String date) {

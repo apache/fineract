@@ -30,6 +30,7 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.client.models.PostRecurringDepositAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignDepositTestBase;
@@ -38,6 +39,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignRoleHelper
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.DepositRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.DepositTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.DepositTestValidators;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
@@ -46,13 +48,17 @@ import org.junit.jupiter.api.Test;
 
 /**
  * FINERACT-2639: monetary recurring deposit transactions are only allowed for users whose office is the account's
- * office or one of its parents.
+ * office or one of its parents. FINERACT-2982: the same applies to account activation.
  */
 public class RecurringDepositOfficeHierarchyAccessIntegrationTest extends FeignDepositTestBase {
 
     private static final String PASSWORD = "A1b2c3d4e5f$";
     private static final LocalDate OFFICE_OPENING_DATE = LocalDate.of(2010, 1, 1);
     private static final String HIERARCHY_ERROR_MESSAGE = "The user doesn't have enough permissions to access the resource.";
+    private static final Map<String, Boolean> DEPOSIT_PERMISSIONS = Map.of("DEPOSIT_RECURRINGDEPOSITACCOUNT", true,
+            "READ_RECURRINGDEPOSITACCOUNT", true);
+    private static final Map<String, Boolean> ACTIVATION_PERMISSIONS = Map.of("ACTIVATE_RECURRINGDEPOSITACCOUNT", true,
+            "READ_RECURRINGDEPOSITACCOUNT", true);
 
     private final FeignOfficeHelper officeHelper = new FeignOfficeHelper(FineractFeignClientHelper.getFineractFeignClient());
 
@@ -75,8 +81,8 @@ public class RecurringDepositOfficeHierarchyAccessIntegrationTest extends FeignD
         recurringDepositHelper.activate(accountId, startDate);
         BigDecimal depositAmount = recurringDepositHelper.getAccount(accountId).getMandatoryRecommendedDepositAmount();
 
-        FineractFeignClient siblingOfficeUser = createUserInOffice(siblingOfficeId);
-        FineractFeignClient accountOfficeUser = createUserInOffice(accountOfficeId);
+        FineractFeignClient siblingOfficeUser = createUserInOffice(siblingOfficeId, DEPOSIT_PERMISSIONS);
+        FineractFeignClient accountOfficeUser = createUserInOffice(accountOfficeId, DEPOSIT_PERMISSIONS);
 
         CallFailedRuntimeException failure = FeignCalls.failVoid(() -> deposit(siblingOfficeUser, accountId, startDate, depositAmount));
         assertEquals(403, failure.getStatus());
@@ -87,6 +93,37 @@ public class RecurringDepositOfficeHierarchyAccessIntegrationTest extends FeignD
                 "User from the account's office must be able to make a deposit");
     }
 
+    @Test
+    public void testRecurringDepositActivationIsRestrictedToUserOfficeHierarchy() {
+        LocalDate today = Utils.getLocalDateOfTenant();
+        String validFrom = Utils.dateFormatter.format(today.minusMonths(3));
+        String validTo = Utils.dateFormatter.format(today.plusYears(10));
+        String startDate = Utils.dateFormatter.format(today.minusMonths(1));
+        Long accountOfficeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getOfficeId();
+        Long siblingOfficeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getOfficeId();
+
+        Long clientId = createClientInOffice(accountOfficeId);
+        Long productId = recurringDepositProductHelper.createProduct(DepositRequestBuilders.withChart(
+                DepositRequestBuilders.recurringDepositProduct().accountingRule(SavingsTestData.AccountingRule.NONE), validFrom, validTo,
+                DepositTestData.recurringChartSlabsFor("period"))).getResourceId();
+        Long accountId = recurringDepositHelper.submitApplication(DepositRequestBuilders.recurringDepositAccount(clientId, productId,
+                startDate, startDate, DepositTestData.PreClosurePenalInterestOnType.WHOLE_TERM)).getSavingsId();
+        recurringDepositHelper.approve(accountId, startDate);
+
+        FineractFeignClient siblingOfficeUser = createUserInOffice(siblingOfficeId, ACTIVATION_PERMISSIONS);
+        FineractFeignClient accountOfficeUser = createUserInOffice(accountOfficeId, ACTIVATION_PERMISSIONS);
+
+        CallFailedRuntimeException failure = FeignCalls.failVoid(() -> activate(siblingOfficeUser, accountId, startDate));
+        assertEquals(403, failure.getStatus());
+        assertTrue(failure.getResponseBody().contains(HIERARCHY_ERROR_MESSAGE),
+                "Expected office hierarchy error but was: " + failure.getResponseBody());
+        DepositTestValidators.verifyRecurringDepositIsApproved(recurringDepositHelper.getAccount(accountId).getStatus());
+
+        assertNotNull(ok(() -> activate(accountOfficeUser, accountId, startDate)).getResourceId(),
+                "User from the account's office must be able to activate the account");
+        DepositTestValidators.verifyRecurringDepositIsActive(recurringDepositHelper.getAccount(accountId).getStatus());
+    }
+
     private Long createClientInOffice(Long officeId) {
         return clientHelper.createClient(new PostClientsRequest().officeId(officeId).legalFormId(1L)
                 .firstname(Utils.randomFirstNameGenerator()).lastname(Utils.randomLastNameGenerator()).active(true)
@@ -94,13 +131,18 @@ public class RecurringDepositOfficeHierarchyAccessIntegrationTest extends FeignD
                 .getClientId();
     }
 
-    private FineractFeignClient createUserInOffice(Long officeId) {
+    private FineractFeignClient createUserInOffice(Long officeId, Map<String, Boolean> permissions) {
         String username = Utils.uniqueRandomStringGenerator("usr", 8);
         Long roleId = FeignRoleHelper.createRole();
-        FeignRoleHelper.addPermissionsToRole(roleId, Map.of("DEPOSIT_RECURRINGDEPOSITACCOUNT", true, "READ_RECURRINGDEPOSITACCOUNT", true));
+        FeignRoleHelper.addPermissionsToRole(roleId, permissions);
         FeignUserHelper.createUser(new PostUsersRequest().username(username).firstname("Test").lastname("User").email("test@localhost")
                 .officeId(officeId).roles(List.of(roleId)).password(PASSWORD).repeatPassword(PASSWORD).sendPasswordToEmail(false));
         return FineractFeignClientHelper.createNewFineractFeignClient(username, PASSWORD);
+    }
+
+    private static PostRecurringDepositAccountsAccountIdResponse activate(FineractFeignClient client, Long accountId, String date) {
+        return client.recurringDepositAccount().handleCommandsRecurringDepositAccount(accountId,
+                DepositRequestBuilders.activateRecurringDeposit(date), "activate");
     }
 
     private static PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse deposit(FineractFeignClient client,

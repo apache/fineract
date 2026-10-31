@@ -203,7 +203,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         this.savingsAccountTransactionDataValidator.validateActivation(command);
 
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFromInUserScope(savingsId, false);
 
         checkClientOrGroupActive(account);
         final Set<Long> existingTransactionIds = new HashSet<>();
