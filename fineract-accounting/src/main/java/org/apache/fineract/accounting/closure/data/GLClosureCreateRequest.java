@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.accounting.closure.data;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -43,7 +43,8 @@ public class GLClosureCreateRequest implements Serializable {
     private Long officeId;
 
     @NotNull(message = "{org.apache.fineract.accounting.closure.closingDate.not-null}")
-    private LocalDate closingDate;
+    @NotBlank(message = "{org.apache.fineract.accounting.closure.closingDate.not-blank}")
+    private String closingDate;
 
     @Size(max = 500, message = "{org.apache.fineract.accounting.closure.comments.size}")
     private String comments;

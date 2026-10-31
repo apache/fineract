@@ -19,6 +19,7 @@
 package org.apache.fineract.accounting.closure.data;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
@@ -39,6 +40,7 @@ public class GLClosureUpdateRequest implements Serializable {
     @Hidden
     private Long id;
 
+    @NotNull(message = "{org.apache.fineract.accounting.closure.comments.not-null}")
     @Size(max = 500, message = "{org.apache.fineract.accounting.closure.comments.size}")
     private String comments;
 }

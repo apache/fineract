@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.accounting.closure.data;
 
+import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
@@ -34,5 +35,6 @@ public class GLClosureDeleteRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @NotNull(message = "{org.apache.fineract.accounting.closure.id.not-null}")
     private Long id;
 }

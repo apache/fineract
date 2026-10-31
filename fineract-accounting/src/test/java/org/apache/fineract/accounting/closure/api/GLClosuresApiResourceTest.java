@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.UriInfo;
-import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.accounting.closure.command.GLClosureCreateCommand;
 import org.apache.fineract.accounting.closure.command.GLClosureDeleteCommand;
@@ -116,7 +115,7 @@ class GLClosuresApiResourceTest {
 
     @Test
     void testCreateGLClosure() {
-        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(OFFICE_ID).closingDate(LocalDate.now())
+        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(OFFICE_ID).closingDate("2022-12-01")
                 .comments("Test create").build();
 
         final GLClosureCreateResponse expectedResponse = GLClosureCreateResponse.builder().officeId(OFFICE_ID).resourceId(CLOSURE_ID)

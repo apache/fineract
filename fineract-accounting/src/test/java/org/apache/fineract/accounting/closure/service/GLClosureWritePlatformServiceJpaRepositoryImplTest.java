@@ -87,8 +87,24 @@ class GLClosureWritePlatformServiceJpaRepositoryImplTest {
     @Test
     void testCreateGLClosureSuccess() {
         final LocalDate closingDate = LocalDate.now().minusDays(1);
-        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(OFFICE_ID).closingDate(closingDate)
+        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(OFFICE_ID).closingDate(closingDate.toString())
                 .comments("Test closure").build();
+
+        when(officeRepositoryWrapper.findOneWithNotFoundDetection(OFFICE_ID)).thenReturn(office);
+        when(glClosureRepository.getLatestGLClosureByBranch(OFFICE_ID)).thenReturn(null);
+        when(glClosureRepository.saveAndFlush(any(GLClosure.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        final GLClosureCreateResponse response = underTest.createGLClosure(request);
+
+        assertNotNull(response);
+        assertEquals(OFFICE_ID, response.getOfficeId());
+        verify(glClosureRepository).saveAndFlush(any(GLClosure.class));
+    }
+
+    @Test
+    void testCreateGLClosureWithDocumentedDateFormatSuccess() {
+        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(OFFICE_ID).closingDate("06 December 2012")
+                .dateFormat("dd MMMM yyyy").locale("en").comments("Documented format closure").build();
 
         when(officeRepositoryWrapper.findOneWithNotFoundDetection(OFFICE_ID)).thenReturn(office);
         when(glClosureRepository.getLatestGLClosureByBranch(OFFICE_ID)).thenReturn(null);
@@ -104,7 +120,8 @@ class GLClosureWritePlatformServiceJpaRepositoryImplTest {
     @Test
     void testCreateGLClosureFutureDateThrowsException() {
         final LocalDate futureDate = LocalDate.now().plusDays(5);
-        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(OFFICE_ID).closingDate(futureDate).build();
+        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(OFFICE_ID).closingDate(futureDate.toString())
+                .build();
 
         when(officeRepositoryWrapper.findOneWithNotFoundDetection(OFFICE_ID)).thenReturn(office);
 
@@ -118,7 +135,8 @@ class GLClosureWritePlatformServiceJpaRepositoryImplTest {
 
         final GLClosure latestClosure = new GLClosure(office, latestClosingDate, "Latest");
 
-        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(OFFICE_ID).closingDate(closingDate).build();
+        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(OFFICE_ID).closingDate(closingDate.toString())
+                .build();
 
         when(officeRepositoryWrapper.findOneWithNotFoundDetection(OFFICE_ID)).thenReturn(office);
         when(glClosureRepository.getLatestGLClosureByBranch(OFFICE_ID)).thenReturn(latestClosure);
@@ -129,7 +147,8 @@ class GLClosureWritePlatformServiceJpaRepositoryImplTest {
     @Test
     void testCreateGLClosureDuplicateThrowsException() {
         final LocalDate closingDate = LocalDate.now().minusDays(1);
-        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(OFFICE_ID).closingDate(closingDate).build();
+        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(OFFICE_ID).closingDate(closingDate.toString())
+                .build();
 
         when(officeRepositoryWrapper.findOneWithNotFoundDetection(OFFICE_ID)).thenReturn(office);
         when(glClosureRepository.getLatestGLClosureByBranch(OFFICE_ID)).thenReturn(null);
@@ -153,6 +172,22 @@ class GLClosureWritePlatformServiceJpaRepositoryImplTest {
         assertEquals("Updated comments", response.getComments());
         assertEquals(OFFICE_ID, response.getOfficeId());
         verify(glClosureRepository).saveAndFlush(existingClosure);
+    }
+
+    @Test
+    void testUpdateGLClosureNullCommentsDoesNotWipeComments() {
+        final GLClosure existingClosure = new GLClosure(office, LocalDate.now().minusDays(5), "Existing comments");
+        when(glClosureRepository.findById(CLOSURE_ID)).thenReturn(Optional.of(existingClosure));
+        when(office.getId()).thenReturn(OFFICE_ID);
+
+        final GLClosureUpdateRequest request = GLClosureUpdateRequest.builder().id(CLOSURE_ID).comments(null).build();
+
+        final GLClosureUpdateResponse response = underTest.updateGLClosure(request);
+
+        assertNotNull(response);
+        assertEquals("Existing comments", response.getComments());
+        assertEquals(OFFICE_ID, response.getOfficeId());
+        assertEquals("Existing comments", existingClosure.getComments());
     }
 
     @Test

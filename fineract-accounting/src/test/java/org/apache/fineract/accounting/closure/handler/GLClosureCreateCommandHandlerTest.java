@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
 import org.apache.fineract.accounting.closure.command.GLClosureCreateCommand;
 import org.apache.fineract.accounting.closure.data.GLClosureCreateRequest;
 import org.apache.fineract.accounting.closure.data.GLClosureCreateResponse;
@@ -45,7 +44,7 @@ class GLClosureCreateCommandHandlerTest {
 
     @Test
     void testHandleSuccess() {
-        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(1L).closingDate(LocalDate.now().minusDays(1))
+        final GLClosureCreateRequest request = GLClosureCreateRequest.builder().officeId(1L).closingDate("2022-12-01")
                 .comments("Test closure").build();
 
         final GLClosureCreateCommand command = new GLClosureCreateCommand();
