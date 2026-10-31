@@ -208,7 +208,7 @@ dependencyManagement {
         dependency 'org.owasp.esapi:esapi:2.7.0.0'
         dependency 'org.awaitility:awaitility:4.3.0'
 
-        dependencySet(group: 'org.apache.poi', version: '5.5.1') {
+        dependencySet(group: 'org.apache.poi', version: '6.0.0') {
             entry 'poi'
             entry 'poi-ooxml'
         }
