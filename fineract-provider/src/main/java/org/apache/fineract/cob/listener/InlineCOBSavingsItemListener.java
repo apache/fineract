@@ -16,9 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.savings;
+package org.apache.fineract.cob.listener;
 
-public enum SavingsLockOwner {
-    SAVINGS_COB_CHUNK_PROCESSING, //
-    SAVINGS_INLINE_COB_PROCESSING; //
+import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.cob.domain.LockingService;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.springframework.transaction.support.TransactionTemplate;
+
+public class InlineCOBSavingsItemListener extends AbstractItemListener<SavingsAccount> {
+
+    public InlineCOBSavingsItemListener(LockingService savingsLockingService, TransactionTemplate requiresNewTransactionJdbcTemplate) {
+        super(savingsLockingService, requiresNewTransactionJdbcTemplate);
+    }
+
+    @Override
+    protected LockOwner getLockOwner() {
+        return LockOwner.SAVINGS_INLINE_COB_PROCESSING;
+    }
+
+    @Override
+    protected String getAccountTypeLabel() {
+        return "Savings";
+    }
 }
