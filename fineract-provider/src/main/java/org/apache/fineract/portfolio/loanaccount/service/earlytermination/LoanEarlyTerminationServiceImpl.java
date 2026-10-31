@@ -115,7 +115,7 @@ public class LoanEarlyTerminationServiceImpl {
 
     private CommandProcessingResult applyTermination(final JsonCommand command, final TerminationKind kind,
             final BiConsumer<JsonCommand, Long> requestValidation) {
-        Loan loan = loanAssembler.assembleFrom(command.getLoanId());
+        Loan loan = loanAssembler.assembleFromInUserScope(command.getLoanId());
         loanUtilService.checkClientOrGroupActive(loan);
 
         validateTerminationEligibility(loan, kind);
@@ -164,7 +164,7 @@ public class LoanEarlyTerminationServiceImpl {
 
     private CommandProcessingResult undoTermination(final JsonCommand command, final TerminationKind kind) {
         final Long loanId = command.getLoanId();
-        final Loan loan = loanAssembler.assembleFrom(loanId);
+        final Loan loan = loanAssembler.assembleFromInUserScope(loanId);
         final LoanTransaction termination = kind.transactionFinder().apply(loan);
 
         businessEventNotifierService.notifyPreBusinessEvent(kind.undoneEvent().apply(termination));

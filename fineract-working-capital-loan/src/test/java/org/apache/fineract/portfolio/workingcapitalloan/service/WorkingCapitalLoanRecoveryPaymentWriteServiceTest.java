@@ -47,7 +47,9 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanRecoveryPaymentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
@@ -119,6 +121,10 @@ class WorkingCapitalLoanRecoveryPaymentWriteServiceTest {
     @Mock
     private JsonCommand command;
 
+    @Mock
+    private Office office;
+    @Mock
+    private PlatformSecurityContext context;
     @InjectMocks
     private WorkingCapitalLoanRecoveryPaymentWriteServiceImpl recoveryPaymentService;
 
@@ -135,6 +141,7 @@ class WorkingCapitalLoanRecoveryPaymentWriteServiceTest {
 
         balance = WorkingCapitalLoanBalance.createFor(loan);
         when(loanRepository.findById(LOAN_ID)).thenReturn(Optional.of(loan));
+        when(loan.getOffice()).thenReturn(office);
         when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.getBalance()).thenReturn(balance);
         when(loan.getLoanProduct()).thenReturn(loanProduct);

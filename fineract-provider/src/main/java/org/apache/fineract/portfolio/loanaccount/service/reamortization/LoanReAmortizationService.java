@@ -87,7 +87,7 @@ public class LoanReAmortizationService {
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
 
     public CommandProcessingResult reAmortize(final Long loanId, final JsonCommand command) {
-        final Loan loan = loanAssembler.assembleFrom(loanId);
+        final Loan loan = loanAssembler.assembleFromInUserScope(loanId);
         reAmortizationValidator.validateReAmortize(loan, command);
 
         final LoanTransaction reAmortizeTransaction = createReAmortizeTransaction(loan, command);
@@ -115,7 +115,7 @@ public class LoanReAmortizationService {
     }
 
     public CommandProcessingResult undoReAmortize(Long loanId, JsonCommand command) {
-        Loan loan = loanAssembler.assembleFrom(loanId);
+        Loan loan = loanAssembler.assembleFromInUserScope(loanId);
         final LoanTransaction reAmortizeTransaction = reAmortizationValidator.findAndValidateReAmortizeTransactionForUndo(loan);
 
         Map<String, Object> changes = new LinkedHashMap<>();

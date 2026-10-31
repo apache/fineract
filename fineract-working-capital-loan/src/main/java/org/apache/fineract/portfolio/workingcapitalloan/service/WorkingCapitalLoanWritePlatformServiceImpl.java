@@ -325,6 +325,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     public CommandProcessingResult disburseLoan(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = this.loanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
 
         if (!this.stateMachine.canTransition(WorkingCapitalLoanEvent.LOAN_DISBURSED, loan)) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
@@ -436,6 +437,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     public CommandProcessingResult undoDisbursal(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = this.loanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
 
         this.validator.validateUndoDisbursal(command.json());
 
@@ -524,6 +526,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     @Override
     public CommandProcessingResult makeDiscountFee(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         validator.validateRelatedResourceIdIsPositiveNumber(command.parsedJson());
         validator.validateRelatedExternalResourceId(command.parsedJson());
         return processDiscountFee(loan, relatedTransactionFromBody(command), command);
@@ -533,6 +536,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     public CommandProcessingResult makeDiscountFeeForDisbursement(final Long loanId, final Long disbursementTransactionId,
             final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         validator.validateRelatedResourceIsNotInBody(command.parsedJson());
         return processDiscountFee(loan,
                 new TransactionReference(disbursementTransactionId, ExternalId.empty(), WorkingCapitalLoanConstants.transactionIdParamName),
@@ -671,6 +675,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     @Override
     public CommandProcessingResult makeDiscountFeeAdjustment(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         validator.validateRelatedResourceIdIsPositiveNumber(command.parsedJson());
         validator.validateRelatedExternalResourceId(command.parsedJson());
         return processDiscountFeeAdjustment(loan, relatedTransactionFromBody(command), command);
@@ -680,6 +685,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     public CommandProcessingResult makeDiscountFeeAdjustmentForDiscountFee(final Long loanId, final Long discountFeeTransactionId,
             final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         validator.validateRelatedResourceIsNotInBody(command.parsedJson());
         return processDiscountFeeAdjustment(loan,
                 new TransactionReference(discountFeeTransactionId, ExternalId.empty(), WorkingCapitalLoanConstants.transactionIdParamName),
@@ -802,6 +808,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     @Override
     public CommandProcessingResult undoTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         final WorkingCapitalLoanTransaction transaction = transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
                 .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
                         "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
@@ -821,6 +828,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     @Override
     public CommandProcessingResult adjustByDeltaTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         final WorkingCapitalLoanTransaction transaction = transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
                 .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
                         "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
@@ -914,6 +922,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     @Override
     public CommandProcessingResult adjustTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         final WorkingCapitalLoanTransaction transaction = transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
                 .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
                         "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
@@ -1159,6 +1168,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             final LoanTransactionType transactionType) {
         final WorkingCapitalLoan loan = this.loanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         this.validator.validateRepayment(command.json(), loan, transactionType);
 
         final LoanStatus oldStatus = loan.getLoanStatus();
@@ -1257,6 +1267,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     public CommandProcessingResult creditBalanceRefund(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = this.loanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         this.validator.validateCreditBalanceRefund(command.json(), loan);
 
         final LoanStatus oldStatus = loan.getLoanStatus();

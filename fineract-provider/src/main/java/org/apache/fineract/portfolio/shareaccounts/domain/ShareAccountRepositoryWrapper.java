@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.domain;
 
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accounts.exceptions.ShareAccountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,14 +27,22 @@ import org.springframework.stereotype.Service;
 public class ShareAccountRepositoryWrapper {
 
     private final ShareAccountRepository shareAccountRepository;
+    private final PlatformSecurityContext context;
 
     @Autowired
-    public ShareAccountRepositoryWrapper(final ShareAccountRepository shareAccountRepository) {
+    public ShareAccountRepositoryWrapper(final ShareAccountRepository shareAccountRepository, final PlatformSecurityContext context) {
         this.shareAccountRepository = shareAccountRepository;
+        this.context = context;
     }
 
     public ShareAccount findOneWithNotFoundDetection(final Long accountId) {
         return this.shareAccountRepository.findById(accountId).orElseThrow(() -> new ShareAccountNotFoundException(accountId));
+    }
+
+    public ShareAccount findOneInUserScope(final Long accountId) {
+        final ShareAccount account = findOneWithNotFoundDetection(accountId);
+        this.context.validateAccessRights(account.getClient().getOffice().getHierarchy());
+        return account;
     }
 
     public void save(final ShareAccount shareAccount) {
