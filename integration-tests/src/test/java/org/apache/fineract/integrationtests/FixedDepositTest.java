@@ -38,8 +38,10 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -49,6 +51,7 @@ import org.apache.fineract.client.models.GetFixedDepositAccountsAccountIdSummary
 import org.apache.fineract.client.models.GetFixedDepositAccountsAccountIdTransactionsResponse;
 import org.apache.fineract.client.models.GetFixedDepositAccountsStatus;
 import org.apache.fineract.client.models.GetInterestRateChartsChartSlabs;
+import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostFixedDepositAccountsRequest;
 import org.apache.fineract.client.models.PostFixedDepositProductsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
@@ -1299,6 +1302,88 @@ public class FixedDepositTest extends FeignDepositTestBase {
             fixedDepositHelper.close(fixedDepositAccountId, CLOSED_ON_DATE, reInvest, null);
 
             DepositTestValidators.verifyFixedDepositAccountIsClosed(statusOf(fixedDepositAccountId));
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+    }
+
+    @Test
+    public void testMaturityJobPostsJournalEntriesOnceForReinvest() {
+        verifyMaturityJobPostsEachTransactionOnce(CLOSURE_TYPE_REINVEST);
+    }
+
+    @Test
+    public void testMaturityJobPostsJournalEntriesOnceForReinvestPrincipalOnly() {
+        verifyMaturityJobPostsEachTransactionOnce(CLOSURE_TYPE_REINVEST_PRINCIPAL_ONLY);
+    }
+
+    @Test
+    public void testMaturityJobPostsJournalEntriesOnceForTransferToSavings() {
+        verifyMaturityJobPostsEachTransactionOnce(CLOSURE_TYPE_TRANSFER_TO_SAVINGS);
+    }
+
+    private void verifyMaturityJobPostsEachTransactionOnce(final int maturityInstructionId) {
+        try {
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account liabilityAccount = accountHelper.createLiabilityAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+
+            DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+
+            Calendar todaysDate = Calendar.getInstance();
+            int currentYear = todaysDate.get(Calendar.YEAR);
+            todaysDate.set(currentYear, Calendar.JANUARY, 1);
+            final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+            final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+            todaysDate.set(currentYear + 1, Calendar.MARCH, 1);
+            final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            businessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE.name(), LocalDate.of(currentYear + 1, 3, 1).toString());
+
+            Long fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, CASH_BASED, assetAccount, liabilityAccount,
+                    incomeAccount, expenseAccount);
+            Long clientId = clientHelper.createClient();
+
+            PostFixedDepositAccountsRequest request = DepositRequestBuilders
+                    .fixedDepositAccount(clientId, fixedDepositProductId, SUBMITTED_ON_DATE, WHOLE_TERM)
+                    .maturityInstructionId(maturityInstructionId);
+            if (maturityInstructionId == CLOSURE_TYPE_TRANSFER_TO_SAVINGS) {
+                getMappedLiabilityFinancialAccount();
+                Long savingsProductId = createSavingsProduct(MINIMUM_OPENING_BALANCE, CASH_BASED, assetAccount, liabilityAccount,
+                        incomeAccount, expenseAccount);
+                Long savingsId = savingsHelper.submitApplication(clientId, savingsProductId, SUBMITTED_ON_DATE).getSavingsId();
+                savingsHelper.approveSavings(savingsId, SUBMITTED_ON_DATE);
+                savingsHelper.activateSavings(savingsId, SUBMITTED_ON_DATE);
+                request.transferToSavingsId(savingsId);
+            }
+            Long fixedDepositAccountId = fixedDepositHelper.submitApplication(request).getSavingsId();
+            fixedDepositHelper.approve(fixedDepositAccountId, SUBMITTED_ON_DATE);
+            fixedDepositHelper.activate(fixedDepositAccountId, SUBMITTED_ON_DATE);
+
+            schedulerHelper.executeAndAwaitJob("Update Deposit Accounts Maturity details");
+
+            List<GetFixedDepositAccountsAccountIdTransactionsResponse> transactions = fixedDepositHelper
+                    .getTransactions(fixedDepositAccountId).stream().filter(transaction -> !Boolean.TRUE.equals(transaction.getReversed()))
+                    .toList();
+            Assertions.assertTrue(
+                    transactions.stream()
+                            .anyMatch(transaction -> transaction.getTransactionType() != null
+                                    && Boolean.TRUE.equals(transaction.getTransactionType().getWithdrawal())),
+                    "The maturity job must pay out the deposit");
+
+            // Check every transaction of the deposit, so a transaction that is not posted at all fails as well
+            Map<String, List<JournalEntryTransactionItem>> entriesByTransaction = journalEntryHelper
+                    .getJournalEntriesForSavings(fixedDepositAccountId).getPageItems().stream()
+                    .collect(Collectors.groupingBy(JournalEntryTransactionItem::getTransactionId));
+            for (GetFixedDepositAccountsAccountIdTransactionsResponse transaction : transactions) {
+                String transactionId = "S" + transaction.getId();
+                Assertions.assertEquals(2, entriesByTransaction.getOrDefault(transactionId, List.of()).size(),
+                        "Transaction " + transactionId + " must be posted once (one debit, one credit)");
+            }
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
