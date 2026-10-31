@@ -147,6 +147,7 @@ public final class SavingsAccountData implements Serializable {
     private transient Long glAccountIdForSavingsControl;
     private transient Long glAccountIdForInterestOnSavings;
     private transient Long glAccountIdForIncomeFromInterest;
+    private transient Long glAccountIdForSavingsReference;
 
     private Long glAccountIdForInterestPayable;
     private Long glAccountIdForOverdraftPorfolio;
@@ -306,6 +307,10 @@ public final class SavingsAccountData implements Serializable {
 
     public void setGlAccountIdForInterestOnSavings(final Long glAccountIdForInterestOnSavings) {
         this.glAccountIdForInterestOnSavings = glAccountIdForInterestOnSavings;
+    }
+
+    public void setGlAccountIdForSavingsReference(final Long glAccountIdForSavingsReference) {
+        this.glAccountIdForSavingsReference = glAccountIdForSavingsReference;
     }
 
     public void setHelpers(final SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionSummaryWrapper,
