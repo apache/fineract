@@ -24,14 +24,16 @@ dependencies {
 
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
-    implementation(project(path: ':fineract-core'))
-    implementation('org.apache.avro:avro')
     implementation(
-            project(path: ':fineract-avro-schemas')
+            project(path: ':fineract-core'),
+            project(path: ':fineract-command'),
+            project(path: ':fineract-avro-schemas'),
             )
+    implementation('org.apache.avro:avro')
 
     implementation(
             'org.springframework.boot:spring-boot-starter-webmvc',
+            'org.springframework.boot:spring-boot-starter-validation',
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-batch-jdbc',
             'org.springframework.batch:spring-batch-integration',
