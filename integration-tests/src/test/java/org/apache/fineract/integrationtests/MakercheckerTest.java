@@ -141,6 +141,9 @@ public class MakercheckerTest extends FeignIntegrationTest {
                     Map.of("actionName", "WITHDRAWAL", "entityName", "SAVINGSACCOUNT", "makerId", makerUserId.toString()));
             assertEquals(1, auditDetails.size(), "More than one command exists");
             Long savingCommandId = auditDetails.get(0).getId();
+            // a command awaiting approval has only its submitted identifiers
+            assertEquals(savingsId, auditDetails.get(0).getSubmittedSavingsAccountId());
+            assertEquals(savingsId, auditDetails.get(0).getSavingsAccountId());
 
             // check by the same user should fail
             assertEquals(400, fail(() -> approve(makerClient, clientCommandId)).getStatus());
