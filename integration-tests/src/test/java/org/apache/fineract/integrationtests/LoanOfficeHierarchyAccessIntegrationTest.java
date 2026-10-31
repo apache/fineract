@@ -29,9 +29,14 @@ import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivi
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.feign.util.FeignCalls;
+import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.client.models.PostCodeValueDataResponse;
+import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
@@ -46,15 +51,11 @@ import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
+import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionApiConstants;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.apache.fineract.client.models.GetCodesResponse;
-import org.apache.fineract.client.models.PostCodeValueDataResponse;
-import org.apache.fineract.client.models.PostCodeValuesDataRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
-import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionApiConstants;
+
 /**
  * FINERACT-2639: monetary loan transactions are only allowed for users whose office is the loan's office or one of its
  * parents.
@@ -69,10 +70,8 @@ public class LoanOfficeHierarchyAccessIntegrationTest extends FeignLoanTestBase 
     private static final String HIERARCHY_ERROR_MESSAGE = "The user doesn't have enough permissions to access the resource.";
     private static final Map<String, Boolean> REPAYMENT_PERMISSIONS = Map.of("REPAYMENT_LOAN", true, "READ_LOAN", true);
     private static final Map<String, Boolean> UNDO_DISBURSAL_PERMISSIONS = Map.of("DISBURSALUNDO_LOAN", true, "READ_LOAN", true);
-    private static final Map<String, Boolean> CAPITALIZED_INCOME_PERMISSIONS = Map.of(
-        "CAPITALIZEDINCOME_LOAN", true,
-        "CAPITALIZEDINCOMEADJUSTMENT_LOAN", true,
-        "READ_LOAN", true);
+    private static final Map<String, Boolean> CAPITALIZED_INCOME_PERMISSIONS = Map.of("CAPITALIZEDINCOME_LOAN", true,
+            "CAPITALIZEDINCOMEADJUSTMENT_LOAN", true, "READ_LOAN", true);
 
     private final FeignOfficeHelper officeHelper = new FeignOfficeHelper(FineractFeignClientHelper.getFineractFeignClient());
 
@@ -174,80 +173,64 @@ public class LoanOfficeHierarchyAccessIntegrationTest extends FeignLoanTestBase 
     }
 
     @Test
-public void testCapitalizedIncomeOperationsAreRestrictedToUserOfficeHierarchy() {
-    Long loanOfficeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getOfficeId();
-    Long siblingOfficeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getOfficeId();
+    public void testCapitalizedIncomeOperationsAreRestrictedToUserOfficeHierarchy() {
+        Long loanOfficeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getOfficeId();
+        Long siblingOfficeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getOfficeId();
 
-    Long clientId = createClientInOffice(loanOfficeId);
+        Long clientId = createClientInOffice(loanOfficeId);
 
-    GetCodesResponse code = codeHelper.retrieveCodeByName(
-            LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE);
-    PostCodeValueDataResponse classificationCode = codeHelper.createCodeValue(code.getId(),
-            new PostCodeValuesDataRequest().name(Utils.uniqueRandomStringGenerator("CLASS_", 6)).isActive(true).position(10));
-    Long classificationId = classificationCode.getSubResourceId();
+        GetCodesResponse code = codeHelper.retrieveCodeByName(LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE);
+        PostCodeValueDataResponse classificationCode = codeHelper.createCodeValue(code.getId(),
+                new PostCodeValuesDataRequest().name(Utils.uniqueRandomStringGenerator("CLASS_", 6)).isActive(true).position(10));
+        Long classificationId = classificationCode.getSubResourceId();
 
-    Long productId = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-            .capitalizedIncomeCalculationType(
-                    org.apache.fineract.client.models.PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-            .capitalizedIncomeStrategy(
-                    org.apache.fineract.client.models.PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-            .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
-            .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
-            .capitalizedIncomeType(
-                    org.apache.fineract.client.models.PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        Long productId = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(
+                        org.apache.fineract.client.models.PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(
+                        org.apache.fineract.client.models.PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(org.apache.fineract.client.models.PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
-    FineractFeignClient siblingUser = createUserInOffice(siblingOfficeId, CAPITALIZED_INCOME_PERMISSIONS);
-    FineractFeignClient loanOfficeUser = createUserInOffice(loanOfficeId, CAPITALIZED_INCOME_PERMISSIONS);
+        FineractFeignClient siblingUser = createUserInOffice(siblingOfficeId, CAPITALIZED_INCOME_PERMISSIONS);
+        FineractFeignClient loanOfficeUser = createUserInOffice(loanOfficeId, CAPITALIZED_INCOME_PERMISSIONS);
 
-    runAt("1 April 2024", () -> {
-        Long loanId = applyAndApproveProgressiveLoan(clientId, productId, "1 January 2024", 500.0, 7.0, 3, null);
-        disburseLoan(loanId, java.math.BigDecimal.valueOf(100), "1 January 2024");
+        runAt("1 April 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(clientId, productId, "1 January 2024", 500.0, 7.0, 3, null);
+            disburseLoan(loanId, java.math.BigDecimal.valueOf(100), "1 January 2024");
 
-        PostLoansLoanIdTransactionsRequest addRequest = new PostLoansLoanIdTransactionsRequest()
-                .transactionAmount(50.0)
-                .transactionDate("1 January 2024")
-                .dateFormat("dd MMMM yyyy")
-                .locale("en")
-                .classificationId(classificationId);
+            PostLoansLoanIdTransactionsRequest addRequest = new PostLoansLoanIdTransactionsRequest().transactionAmount(50.0)
+                    .transactionDate("1 January 2024").dateFormat("dd MMMM yyyy").locale("en").classificationId(classificationId);
 
-        CallFailedRuntimeException addFailure = FeignCalls.fail(
-                () -> siblingUser.loanTransactions().handleCommandsLoanTransaction(
-                        loanId, addRequest, Map.of("command", "capitalizedIncome")));
+            CallFailedRuntimeException addFailure = FeignCalls.fail(() -> siblingUser.loanTransactions()
+                    .handleCommandsLoanTransaction(loanId, addRequest, Map.of("command", "capitalizedIncome")));
 
-        assertEquals(403, addFailure.getStatus());
-        assertTrue(addFailure.getResponseBody().contains(HIERARCHY_ERROR_MESSAGE),
-                "Expected office hierarchy error but was: " + addFailure.getResponseBody());
+            assertEquals(403, addFailure.getStatus());
+            assertTrue(addFailure.getResponseBody().contains(HIERARCHY_ERROR_MESSAGE),
+                    "Expected office hierarchy error but was: " + addFailure.getResponseBody());
 
-        PostLoansLoanIdTransactionsResponse added = ok(
-                () -> loanOfficeUser.loanTransactions().handleCommandsLoanTransaction(
-                        loanId, addRequest, Map.of("command", "capitalizedIncome")));
+            PostLoansLoanIdTransactionsResponse added = ok(() -> loanOfficeUser.loanTransactions().handleCommandsLoanTransaction(loanId,
+                    addRequest, Map.of("command", "capitalizedIncome")));
 
-        assertNotNull(added.getResourceId(),
-                "User from the loan's office must be able to add capitalized income");
+            assertNotNull(added.getResourceId(), "User from the loan's office must be able to add capitalized income");
 
-        Long capitalizedIncomeId = added.getResourceId();
+            Long capitalizedIncomeId = added.getResourceId();
 
-        PostLoansLoanIdTransactionsTransactionIdRequest adjustmentRequest =
-                new PostLoansLoanIdTransactionsTransactionIdRequest()
-                        .transactionAmount(50.0)
-                        .transactionDate("1 April 2024")
-                        .dateFormat("dd MMMM yyyy")
-                        .locale("en");
+            PostLoansLoanIdTransactionsTransactionIdRequest adjustmentRequest = new PostLoansLoanIdTransactionsTransactionIdRequest()
+                    .transactionAmount(50.0).transactionDate("1 April 2024").dateFormat("dd MMMM yyyy").locale("en");
 
-        CallFailedRuntimeException adjustmentFailure = FeignCalls.fail(
-                () -> siblingUser.loanTransactions().adjustLoanTransaction(
-                        loanId, capitalizedIncomeId, adjustmentRequest, "capitalizedIncomeAdjustment"));
+            CallFailedRuntimeException adjustmentFailure = FeignCalls.fail(() -> siblingUser.loanTransactions()
+                    .adjustLoanTransaction(loanId, capitalizedIncomeId, adjustmentRequest, "capitalizedIncomeAdjustment"));
 
-        assertEquals(403, adjustmentFailure.getStatus());
-        assertTrue(adjustmentFailure.getResponseBody().contains(HIERARCHY_ERROR_MESSAGE),
-                "Expected office hierarchy error but was: " + adjustmentFailure.getResponseBody());
+            assertEquals(403, adjustmentFailure.getStatus());
+            assertTrue(adjustmentFailure.getResponseBody().contains(HIERARCHY_ERROR_MESSAGE),
+                    "Expected office hierarchy error but was: " + adjustmentFailure.getResponseBody());
 
-        PostLoansLoanIdTransactionsResponse adjusted = ok(
-                () -> loanOfficeUser.loanTransactions().adjustLoanTransaction(
-                        loanId, capitalizedIncomeId, adjustmentRequest, "capitalizedIncomeAdjustment"));
+            PostLoansLoanIdTransactionsResponse adjusted = ok(() -> loanOfficeUser.loanTransactions().adjustLoanTransaction(loanId,
+                    capitalizedIncomeId, adjustmentRequest, "capitalizedIncomeAdjustment"));
 
-        assertNotNull(adjusted.getLoanId(),
-                "User from the loan's office must be able to adjust capitalized income");
-    });
-}
+            assertNotNull(adjusted.getLoanId(), "User from the loan's office must be able to adjust capitalized income");
+        });
+    }
 }
