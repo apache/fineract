@@ -85,9 +85,11 @@ public class FeignLoanHelper {
     private static final String CREATE_LOAN_PRODUCT_URL = "/fineract-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
 
     private final FineractFeignClient fineractClient;
+    private final LoanProductTemplateApi loanProductTemplateApi;
 
     public FeignLoanHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+        this.loanProductTemplateApi = fineractClient.create(LoanProductTemplateApi.class);
     }
 
     public CommandProcessingResult createInterestPause(Long loanId, InterestPauseRequestDto request) {
@@ -181,6 +183,10 @@ public class FeignLoanHelper {
 
     public GetLoanProductsProductIdResponse retrieveLoanProduct(Long productId) {
         return ok(() -> fineractClient.loanProducts().retrieveOneLoanProduct(productId));
+    }
+
+    public GetLoanProductsProductIdResponse retrieveLoanProductWithTemplate(Long productId) {
+        return ok(() -> loanProductTemplateApi.retrieveLoanProductWithTemplate(productId));
     }
 
     public PutLoanProductsProductIdResponse updateLoanProduct(Long productId, PutLoanProductsProductIdRequest request) {

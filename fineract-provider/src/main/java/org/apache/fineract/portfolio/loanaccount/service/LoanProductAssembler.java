@@ -119,6 +119,8 @@ public class LoanProductAssembler {
                 .fromInt(command.integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME));
 
         final Integer repaymentEvery = command.integerValueOfParameterNamed("repaymentEvery");
+        final Integer firstRepaymentDayOfMonth = command.integerValueOfParameterNamed(LoanProductConstants.FIRST_REPAYMENT_DAY_OF_MONTH);
+        final Integer secondRepaymentDayOfMonth = command.integerValueOfParameterNamed(LoanProductConstants.SECOND_REPAYMENT_DAY_OF_MONTH);
         final Integer numberOfRepayments = command.integerValueOfParameterNamed("numberOfRepayments");
         final Boolean isLinkedToFloatingInterestRates = command.booleanObjectValueOfParameterNamed("isLinkedToFloatingInterestRates");
         if (isLinkedToFloatingInterestRates != null && isLinkedToFloatingInterestRates) {
@@ -341,26 +343,26 @@ public class LoanProductAssembler {
                 name, shortName, description, currency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate, interestMethod,
                 interestCalculationPeriodMethod, allowPartialPeriodInterestCalculation, repaymentEvery, repaymentFrequencyType,
-                numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment,
-                recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
-                inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate, externalId,
-                useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
-                graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
-                interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuarantorFunds,
-                loanProductGuaranteeDetails, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
-                canDefineEmiAmount, installmentAmountInMultiplesOf, loanConfigurableAttributes, isLinkedToFloatingInterestRates,
-                floatingRate, interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate,
-                defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed,
-                minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
-                isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
-                allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, dueDaysForRepaymentEvent,
-                overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
-                repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
-                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate,
-                daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
-                capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                merchantBuyDownFee, allowFullTermForTranche, monthEndDueDateStrategy);
-
+                firstRepaymentDayOfMonth, secondRepaymentDayOfMonth, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments,
+                graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged,
+                amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate,
+                externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
+                outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
+                isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
+                holdGuarantorFunds, loanProductGuaranteeDetails, principalThresholdForLastInstallment,
+                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineEmiAmount, installmentAmountInMultiplesOf, loanConfigurableAttributes,
+                isLinkedToFloatingInterestRates, floatingRate, interestRateDifferential, minDifferentialLendingRate,
+                maxDifferentialLendingRate, defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed,
+                isVariableInstallmentsAllowed, minimumGapBetweenInstallments, maximumGapBetweenInstallments,
+                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment,
+                disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
+                dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment,
+                enableAutoRepaymentForDownPayment, repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType,
+                loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
+                interestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee, allowFullTermForTranche,
+                monthEndDueDateStrategy);
     }
 
     private void populateBorrowerCycleVariations(final JsonCommand command,
