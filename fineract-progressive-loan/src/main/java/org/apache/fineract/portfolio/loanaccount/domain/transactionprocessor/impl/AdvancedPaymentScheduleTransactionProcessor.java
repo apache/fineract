@@ -4389,8 +4389,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 outstandingFeesBalance.set(outstandingFeesBalance.get().add(feesOutstanding));
                 outstandingPenaltiesBalance.set(outstandingPenaltiesBalance.get().add(penaltiesOutstanding));
 
-                i.setFeeChargesCharged(i.getFeeChargesPaid());
-                i.setPenaltyCharges(i.getPenaltyChargesPaid());
+                i.setFeeChargesCharged(MathUtil.add(i.getFeeChargesPaid(), i.getFeeChargesWaived(), i.getFeeChargesWrittenOff()));
+                i.setPenaltyCharges(MathUtil.add(i.getPenaltyChargesPaid(), i.getPenaltyChargesWaived(), i.getPenaltyChargesWrittenOff()));
             }
             if (isEqualInstallmentForFeesAndPenalties) {
                 BigDecimal paid = MathUtil.nullToZero(i.getFeeChargesPaid());
