@@ -75,6 +75,13 @@ public class ClientRepositoryWrapper {
     }
 
     @Transactional(readOnly = true)
+    public Client findOneInUserScope(final Long clientId, final boolean loadLazyCollections) {
+        final Client client = this.findOneWithNotFoundDetection(clientId, loadLazyCollections);
+        this.context.validateAccessRights(client.getOffice().getHierarchy());
+        return client;
+    }
+
+    @Transactional(readOnly = true)
     public Client getActiveClientInUserScope(Long clientId) {
         final Client client = this.findOneWithNotFoundDetection(clientId);
         if (client.isNotActive()) {

@@ -358,6 +358,8 @@ final class ClientsApiResourceSwagger {
         public String submittedOnDate;
         @Schema(example = "+353851239876")
         public String mobileNo;
+        @Schema(example = "4", description = "Savings product of the account opened automatically when the client is activated")
+        public Long savingsProductId;
         @Schema(description = "List of PostClientsDatatable")
         public List<PostClientsDatatable> datatables;
         @Schema(description = "Address requests")
