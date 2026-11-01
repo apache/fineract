@@ -474,14 +474,12 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                     updateUniqueConstraintsForTable(datatableName, changeColumns, mapColumnNameDefinition);
                     // update indexes
                     updateIndexesForTable(datatableName, changeColumns, mapColumnNameDefinition);
-                } catch (final Exception e) {
+                } catch (final RuntimeException e) {
                     log.error("Exception while modifying a datatable", e);
                     if (e.getMessage().contains("Error on rename")) {
                         throw new PlatformServiceUnavailableException("error.msg.datatable.column.update.not.allowed",
                                 "One of the column name modification not allowed", e);
                     }
-                    // handle all other exceptions in here
-
                     // check if exception message contains the
                     // "invalid use of null value" SQL exception message
                     // throw a 503 HTTP error -
@@ -490,6 +488,9 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                         throw new PlatformServiceUnavailableException("error.msg.datatable.column.update.not.allowed",
                                 "One of the data table columns contains null values", e);
                     }
+                    // Any other failed DDL must surface: swallowing it answered 200 (MariaDB/MySQL) or left the
+                    // PostgreSQL transaction aborted, so the next statement failed with an unrelated error.
+                    throw e;
                 }
             }
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
