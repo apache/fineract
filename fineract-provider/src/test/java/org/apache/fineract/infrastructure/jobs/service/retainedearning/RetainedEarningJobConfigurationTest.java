@@ -57,6 +57,9 @@ class RetainedEarningJobConfigurationTest {
     private RetainedEarningJobReader retainedEarningJobReader;
 
     @Mock
+    private RetainedEarningJobExecutionDecider retainedEarningJobExecutionDecider;
+
+    @Mock
     private PlatformTransactionManager transactionManager;
 
     @Mock

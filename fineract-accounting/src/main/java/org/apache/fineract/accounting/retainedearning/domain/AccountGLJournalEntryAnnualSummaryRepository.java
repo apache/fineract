@@ -19,13 +19,18 @@
 package org.apache.fineract.accounting.retainedearning.domain;
 
 import java.time.LocalDate;
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 /**
  * Repository for retained earning summary entity.
  */
 public interface AccountGLJournalEntryAnnualSummaryRepository extends JpaRepository<AccountGLJournalEntryAnnualSummary, Long> {
 
-    List<AccountGLJournalEntryAnnualSummary> findByYearEndDate(LocalDate yerEndDate);
+    @Query("""
+            SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END
+            FROM AccountGLJournalEntryAnnualSummary s
+            WHERE s.yearEndDate = :yearEndDate
+            """)
+    boolean existsByYearEndDate(LocalDate yearEndDate);
 }

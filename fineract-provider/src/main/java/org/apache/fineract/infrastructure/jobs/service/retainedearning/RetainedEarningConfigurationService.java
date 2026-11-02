@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Job-specific configuration wrapper that isolates retained earning config access from the platform-wide
- * {@link ConfigurationDomainService}. Centralizes the fiscal year date calculation used by both the Reader and Writer.
+ * {@link ConfigurationDomainService}. Centralizes the fiscal year date calculation used by the job listener.
  */
 @Component
 @RequiredArgsConstructor

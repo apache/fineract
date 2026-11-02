@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.infrastructure.jobs.service.retainedearning;
 
+import static org.apache.fineract.infrastructure.jobs.service.retainedearning.RetainedEarningJobConstant.FISCAL_YEAR_END_DATE_CONTEXT_KEY;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.data.AccountGLJournalEntryAnnualSummaryData;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.services.RetainedEarningDataService;
 import org.apache.fineract.portfolio.PortfolioProductType;
@@ -48,11 +48,13 @@ public class RetainedEarningJobReader implements ItemReader<AccountGLJournalEntr
     private final RetainedEarningDataService retainedEarningDataService;
     private final RetainedEarningConfigurationService retainedEarningConfigurationService;
 
+    private StepExecution stepExecution;
     private ListItemReader<AccountGLJournalEntryAnnualSummaryData> delegate;
 
     @Override
-    public void beforeStep(StepExecution stepExecution) {
-        log.info("Starting RetainedEarningJobReader step at {}", ThreadLocalContextUtil.getBusinessDate());
+    public void beforeStep(final StepExecution stepExecution) {
+        log.info("Starting RetainedEarningJobReader step for jobExecutionId={}", stepExecution.getJobExecution().getId());
+        this.stepExecution = stepExecution;
     }
 
     @Override
@@ -65,23 +67,22 @@ public class RetainedEarningJobReader implements ItemReader<AccountGLJournalEntr
 
     private void initialize() {
         try {
-            final LocalDate currentDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.BUSINESS_DATE);
-            final LocalDate lastDayOfPreviousFiscalYear = retainedEarningConfigurationService.getLastDayOfPreviousFiscalYear(currentDate);
+            final LocalDate fiscalYearEnd = stepExecution.getJobExecution().getExecutionContext().get(FISCAL_YEAR_END_DATE_CONTEXT_KEY,
+                    LocalDate.class);
 
-            log.info("Retained earning job started: businessDate={}, fiscalYearEnd={}, dayOfWeek={}", currentDate,
-                    lastDayOfPreviousFiscalYear, currentDate.getDayOfWeek());
+            log.info("Retained earning job reader initializing for fiscalYearEnd={}", fiscalYearEnd);
 
             final List<AccountGLJournalEntryAnnualSummaryData> processedData = new ArrayList<>();
-            processedData.addAll(fetchAndProcess(retainedEarningConfigurationService.getReportName(), PortfolioProductType.LOAN,
-                    lastDayOfPreviousFiscalYear));
+            processedData
+                    .addAll(fetchAndProcess(retainedEarningConfigurationService.getReportName(), PortfolioProductType.LOAN, fiscalYearEnd));
             processedData.addAll(fetchAndProcess(retainedEarningConfigurationService.getWorkingCapitalReportName(),
-                    PortfolioProductType.WORKING_CAPITAL_LOAN, lastDayOfPreviousFiscalYear));
+                    PortfolioProductType.WORKING_CAPITAL_LOAN, fiscalYearEnd));
 
             delegate = new ListItemReader<>(processedData);
-            log.info("Initialized with {} total records for fiscalYearEnd={}", processedData.size(), lastDayOfPreviousFiscalYear);
+            log.info("Initialized with {} total records for fiscalYearEnd={}", processedData.size(), fiscalYearEnd);
 
         } catch (Exception e) {
-            log.error("Failed to initialize RetainedEarningJobReader", e);
+            log.error("Failed to initialize RetainedEarningJobReader for jobExecutionId={}", stepExecution.getJobExecution().getId(), e);
             throw new RuntimeException("Error initializing reader: " + e.getMessage(), e);
         }
     }

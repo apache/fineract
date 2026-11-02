@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.service.retainedearning;
 
+import static org.apache.fineract.infrastructure.jobs.service.retainedearning.RetainedEarningJobConstant.JOB_SUMMARY_STEP_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -25,22 +26,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.accounting.retainedearning.domain.AccountGLJournalEntryAnnualSummary;
-import org.apache.fineract.accounting.retainedearning.domain.AccountGLJournalEntryAnnualSummaryRepository;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.data.AccountGLJournalEntryAnnualSummaryData;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.services.RetainedEarningDataService;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +42,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.job.JobInstance;
+import org.springframework.batch.core.job.parameters.JobParameters;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.infrastructure.item.Chunk;
 
@@ -58,41 +54,17 @@ class RetainedEarningJobWriterTest {
     @Mock
     private RetainedEarningDataService retainedEarningDataService;
 
-    @Mock
-    private AccountGLJournalEntryAnnualSummaryRepository annualSummaryRepository;
-
-    @Mock
-    private RetainedEarningConfigurationService retainedEarningConfigurationService;
-
     @InjectMocks
     private RetainedEarningJobWriter retainedEarningJobWriter;
 
-    @Mock
-    private StepExecution stepExecution;
-
     @BeforeEach
     public void setup() {
-        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default tenant", "UTC", null));
-    }
-
-    private void setBusinessDate(LocalDate date) {
-        HashMap<BusinessDateType, LocalDate> businessDateMap = new HashMap<>();
-        businessDateMap.put(BusinessDateType.COB_DATE, date.minusDays(1));
-        businessDateMap.put(BusinessDateType.BUSINESS_DATE, date);
-        ThreadLocalContextUtil.setBusinessDates(businessDateMap);
-    }
-
-    private void setupWriteMode(LocalDate businessDate) {
-        setBusinessDate(businessDate);
-        LocalDate fiscalEnd = LocalDate.of(businessDate.getYear() - 1, 12, 31);
-        when(retainedEarningConfigurationService.getLastDayOfPreviousFiscalYear(businessDate)).thenReturn(fiscalEnd);
-        when(annualSummaryRepository.findByYearEndDate(fiscalEnd)).thenReturn(Collections.emptyList());
-        retainedEarningJobWriter.beforeStep(stepExecution);
+        final JobExecution jobExecution = new JobExecution(1L, new JobInstance(1L, "test"), new JobParameters());
+        retainedEarningJobWriter.beforeStep(new StepExecution(JOB_SUMMARY_STEP_NAME, jobExecution));
     }
 
     @Test
     public void testWriteWithValidItems() {
-        setupWriteMode(LocalDate.of(LocalDate.now(ZoneId.systemDefault()).getYear(), 1, 1));
         List<AccountGLJournalEntryAnnualSummaryData> testItems = createTestData();
         Chunk<AccountGLJournalEntryAnnualSummaryData> chunk = new Chunk<>(testItems);
 
@@ -103,7 +75,6 @@ class RetainedEarningJobWriterTest {
 
     @Test
     public void testWriteWithNullItems() {
-        setupWriteMode(LocalDate.of(LocalDate.now(ZoneId.systemDefault()).getYear(), 1, 1));
         List<AccountGLJournalEntryAnnualSummaryData> testItems = new ArrayList<>(createTestData());
         testItems.add(null);
         Chunk<AccountGLJournalEntryAnnualSummaryData> chunk = new Chunk<>(testItems);
@@ -125,7 +96,6 @@ class RetainedEarningJobWriterTest {
 
     @Test
     public void testWriteWithServiceException() {
-        setupWriteMode(LocalDate.of(LocalDate.now(ZoneId.systemDefault()).getYear(), 1, 1));
         List<AccountGLJournalEntryAnnualSummaryData> testItems = createTestData();
         Chunk<AccountGLJournalEntryAnnualSummaryData> chunk = new Chunk<>(testItems);
 
@@ -135,33 +105,6 @@ class RetainedEarningJobWriterTest {
             retainedEarningJobWriter.write(chunk);
         });
         assertEquals("Test exception", exception.getMessage());
-    }
-
-    @Test
-    public void testWritePersistsOnNonJanFirstWhenNoEntriesExist() {
-        setupWriteMode(LocalDate.of(2026, 1, 3));
-
-        List<AccountGLJournalEntryAnnualSummaryData> testItems = createTestData();
-        Chunk<AccountGLJournalEntryAnnualSummaryData> chunk = new Chunk<>(testItems);
-        retainedEarningJobWriter.write(chunk);
-
-        verify(retainedEarningDataService, times(1)).insertRetainedEarningSummaryBatch(testItems);
-    }
-
-    @Test
-    public void testWriteSkipsWhenEntriesAlreadyExist() {
-        LocalDate businessDate = LocalDate.of(LocalDate.now(ZoneId.systemDefault()).getYear(), 1, 1);
-        setBusinessDate(businessDate);
-        LocalDate fiscalEnd = LocalDate.of(businessDate.getYear() - 1, 12, 31);
-        when(retainedEarningConfigurationService.getLastDayOfPreviousFiscalYear(businessDate)).thenReturn(fiscalEnd);
-        when(annualSummaryRepository.findByYearEndDate(fiscalEnd)).thenReturn(List.of(new AccountGLJournalEntryAnnualSummary()));
-        retainedEarningJobWriter.beforeStep(stepExecution);
-
-        List<AccountGLJournalEntryAnnualSummaryData> testItems = createTestData();
-        Chunk<AccountGLJournalEntryAnnualSummaryData> chunk = new Chunk<>(testItems);
-        retainedEarningJobWriter.write(chunk);
-
-        verify(retainedEarningDataService, never()).insertRetainedEarningSummaryBatch(anyList());
     }
 
     private List<AccountGLJournalEntryAnnualSummaryData> createTestData() {
