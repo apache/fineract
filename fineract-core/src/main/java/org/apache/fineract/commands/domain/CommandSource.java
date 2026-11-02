@@ -53,6 +53,11 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
     @Column(name = "entity_name", nullable = true, length = 100)
     private String entityName;
 
+    /*
+     * The identifier columns below (office, group, client, loan, savings, product, transaction, resource, subresource
+     * and their external ids) hold what the command was submitted with. On rows where resultIdsWritten is set, what the
+     * command returned is in the matching result_* columns; older rows hold the returned values here instead.
+     */
     @Column(name = "office_id")
     private Long officeId;
 
@@ -144,6 +149,58 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
     @Column(name = "is_sanitized", nullable = false)
     private boolean sanitized;
 
+    /*
+     * Identifiers returned by the command. The columns above keep the identifiers the command was submitted with.
+     */
+    @Column(name = "result_office_id")
+    private Long resultOfficeId;
+
+    @Column(name = "result_group_id")
+    private Long resultGroupId;
+
+    @Column(name = "result_client_id")
+    private Long resultClientId;
+
+    @Column(name = "result_loan_id")
+    private Long resultLoanId;
+
+    @Column(name = "result_savings_account_id")
+    private Long resultSavingsId;
+
+    @Column(name = "result_product_id")
+    private Long resultProductId;
+
+    @Column(name = "result_transaction_id", length = 100)
+    private String resultTransactionId;
+
+    @Column(name = "result_resource_id")
+    private Long resultResourceId;
+
+    @Column(name = "result_resource_external_id", length = 100)
+    private ExternalId resultResourceExternalId;
+
+    @Column(name = "result_subresource_id")
+    private Long resultSubResourceId;
+
+    @Column(name = "result_subresource_external_id", length = 100)
+    private ExternalId resultSubResourceExternalId;
+
+    @Column(name = "result_loan_external_id", length = 100)
+    private ExternalId resultLoanExternalId;
+
+    /*
+     * Rows written before the result columns existed have the returned identifiers in the request columns instead.
+     */
+    @Column(name = "result_ids_written", nullable = false)
+    private boolean resultIdsWritten;
+
+    /*
+     * Set on every row inserted since the request columns stopped being overwritten, so they hold the submitted
+     * identifiers whatever happens to the command afterwards.
+     */
+    @Column(name = "submitted_ids_kept", nullable = false)
+    private boolean submittedIdsKept;
+
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,
             String idempotencyKey, Integer status, boolean sanitized) {
         return CommandSource.builder() //
@@ -167,7 +224,7 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
                 .creditBureauId(command.getCreditBureauId()) //
                 .organisationCreditBureauId(command.getOrganisationCreditBureauId()) //
                 .clientIp(IpAddressUtils.getClientIp()) //
-                .loanExternalId(command.getLoanExternalId()).sanitized(sanitized).build(); //
+                .loanExternalId(command.getLoanExternalId()).sanitized(sanitized).submittedIdsKept(true).build(); //
     }
 
     public String getPermissionCode() {
@@ -215,18 +272,23 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
         return checker != null && isRejected();
     }
 
+    /**
+     * Stores the identifiers returned by the command in the result columns, leaving the request columns untouched so
+     * the command stays searchable by what it was submitted with.
+     */
     public void updateForAudit(final CommandProcessingResult result) {
-        this.officeId = result.getOfficeId();
-        this.groupId = result.getGroupId();
-        this.clientId = result.getClientId();
-        this.loanId = result.getLoanId();
-        this.savingsId = result.getSavingsId();
-        this.productId = result.getProductId();
-        this.transactionId = result.getTransactionId();
-        this.resourceId = result.getResourceId();
-        this.resourceExternalId = result.getResourceExternalId();
-        this.subResourceId = result.getSubResourceId();
-        this.subResourceExternalId = result.getSubResourceExternalId();
-        this.loanExternalId = result.getLoanExternalId();
+        this.resultOfficeId = result.getOfficeId();
+        this.resultGroupId = result.getGroupId();
+        this.resultClientId = result.getClientId();
+        this.resultLoanId = result.getLoanId();
+        this.resultSavingsId = result.getSavingsId();
+        this.resultProductId = result.getProductId();
+        this.resultTransactionId = result.getTransactionId();
+        this.resultResourceId = result.getResourceId();
+        this.resultResourceExternalId = result.getResourceExternalId();
+        this.resultSubResourceId = result.getSubResourceId();
+        this.resultSubResourceExternalId = result.getSubResourceExternalId();
+        this.resultLoanExternalId = result.getLoanExternalId();
+        this.resultIdsWritten = true;
     }
 }
