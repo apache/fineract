@@ -171,6 +171,7 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
 
     private Method validateTransactionsForTransfer;
     private Method undoWithdrawalFee;
+    private Method getLastChargePayment;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -180,6 +181,9 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         undoWithdrawalFee = SavingsAccountWritePlatformServiceJpaRepositoryImpl.class.getDeclaredMethod("undoWithdrawalFee",
                 SavingsAccount.class, SavingsAccountTransaction.class);
         undoWithdrawalFee.setAccessible(true);
+        getLastChargePayment = SavingsAccountWritePlatformServiceJpaRepositoryImpl.class.getDeclaredMethod("getLastChargePayment",
+                List.class);
+        getLastChargePayment.setAccessible(true);
     }
 
     @AfterEach
@@ -261,6 +265,19 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         when(savingsAccount.getTransactions()).thenReturn(List.of(transaction));
 
         assertThatNoException().isThrownBy(() -> validateTransactionsForTransfer.invoke(service, savingsAccount, transferDate));
+    }
+
+    @Test
+    void getLastChargePayment_backdatedLaterPayment_picksHighestId() throws Exception {
+        final SavingsAccountTransaction laterBackdated = mock(SavingsAccountTransaction.class);
+        when(laterBackdated.getId()).thenReturn(2L);
+        when(laterBackdated.getTransactionDate()).thenReturn(LocalDate.of(2026, 10, 10));
+        final SavingsAccountTransaction earlier = mock(SavingsAccountTransaction.class);
+        when(earlier.getId()).thenReturn(1L);
+        when(earlier.getTransactionDate()).thenReturn(LocalDate.of(2026, 10, 20));
+
+        assertThat(getLastChargePayment.invoke(service, List.of(laterBackdated, earlier))).isSameAs(laterBackdated);
+        assertThat(getLastChargePayment.invoke(service, List.of())).isNull();
     }
 
     @Test

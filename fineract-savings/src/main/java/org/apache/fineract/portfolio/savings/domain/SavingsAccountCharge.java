@@ -331,6 +331,34 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
     }
 
     public void undoPayment(final MonetaryCurrency currency, final Money transactionAmount) {
+        undoPayment(currency, transactionAmount, Money.zero(currency));
+    }
+
+    /**
+     * Undoes a payment of {@code transactionAmount}. {@code paidAfterwards} is what this charge received, and still
+     * holds, from payments made after the one being undone.
+     * <p>
+     * A recurring fee only tracks its current cycle: pay() advances the due date and resets the outstanding once a
+     * cycle is fully paid, and amountPaid accumulates across cycles. Its open cycle is made of the latest payments, so
+     * the undone payment belongs to it when the later payments do not cover what the open cycle has received. Otherwise
+     * it closed the previous cycle, which is reopened with the undone amount outstanding. Callers must refuse to undo a
+     * payment of an earlier cycle, see {@link #isPaymentOfEarlierCycle(MonetaryCurrency, Money)}.
+     */
+    public void undoPayment(final MonetaryCurrency currency, final Money transactionAmount, final Money paidAfterwards) {
+        if (isRecurringFee()) {
+            this.amountPaid = getAmountPaid(currency).minus(transactionAmount).getAmount();
+            if (paidAfterwards.isLessThan(getPaidOnOpenCycle(currency))) {
+                this.amountOutstanding = getAmountOutstanding(currency).plus(transactionAmount).getAmount();
+            } else {
+                this.amountOutstanding = transactionAmount.getAmount();
+                this.waived = false;
+                updateToPreviousDueDate();
+            }
+            this.paid = false;
+            this.status = true;
+            return;
+        }
+
         Money amountPaid = getAmountPaid(currency);
         amountPaid = amountPaid.minus(transactionAmount);
         this.amountPaid = amountPaid.getAmount();
@@ -339,11 +367,24 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
         if (this.isWithdrawalFee()) {
             this.amountOutstanding = BigDecimal.ZERO;
         }
-        // to reset amount outstanding for annual and monthly fee
-        resetPropertiesForRecurringFees();
-        updateToPreviousDueDate();// reset annual and monthly due date.
         this.paid = false;
         this.status = true;
+    }
+
+    /**
+     * Whether a payment followed by {@code paidAfterwards} of later payments was made on a cycle before the one closed
+     * last: the later payments fill the open cycle and still leave some over for a closed cycle. Such a payment cannot
+     * be undone on its own, since only the current cycle is tracked.
+     */
+    public boolean isPaymentOfEarlierCycle(final MonetaryCurrency currency, final Money paidAfterwards) {
+        return isRecurringFee() && paidAfterwards.isGreaterThanZero()
+                && paidAfterwards.isGreaterThanOrEqualTo(getPaidOnOpenCycle(currency));
+    }
+
+    // waive() always closes a whole cycle, so the open cycle carries no waiver and its paid part is what is not
+    // outstanding.
+    private Money getPaidOnOpenCycle(final MonetaryCurrency currency) {
+        return getAmount(currency).minus(getAmountOutstanding(currency));
     }
 
     public Money waive(final MonetaryCurrency currency) {
@@ -368,6 +409,10 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
         this.status = true;
 
         resetPropertiesForRecurringFees();
+        if (isRecurringFee()) {
+            // the waiver closed the cycle by waiving what was left of it, which is what the reopened cycle owes again
+            this.amountOutstanding = transactionAmount.getAmount();
+        }
         updateToPreviousDueDate();
     }
 
