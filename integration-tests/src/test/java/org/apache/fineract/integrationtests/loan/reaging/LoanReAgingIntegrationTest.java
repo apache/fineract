@@ -682,6 +682,69 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
     }
 
     @Test
+    public void test_LoanReAge_AfterMaturity_WithInterestRecalculation_ChargesInterestOnReAgedInstallments() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("15 September 2022", () -> {
+            Long clientId = createClient();
+
+            // 4 monthly installments, 24% a year, declining balance, daily interest, 30/360, interest recalculation
+            // with daily rest
+            PostLoanProductsRequest product = create4IProgressive() //
+                    .numberOfRepayments(4) //
+                    .repaymentEvery(1) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L) //
+                    .interestRatePerPeriod(24D);
+            Long loanProductId = createLoanProduct(product);
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "15 September 2022", 1000.0, 4)//
+                    .transactionProcessingStrategyCode(LoanTestData.TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(1)//
+                    .loanTermFrequency(4)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(24))//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);
+            Long loanId = applyForLoan(applicationRequest);
+            approveLoan(loanId, approveLoanRequest(1000.0, "15 September 2022"));
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "15 September 2022");
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000, null, "15 September 2022"), //
+                    installment(242.62, 20.0, 262.62, false, "15 October 2022"), //
+                    installment(247.47, 15.15, 262.62, false, "15 November 2022"), //
+                    installment(252.42, 10.20, 262.62, false, "15 December 2022"), //
+                    installment(257.49, 5.15, 262.64, false, "15 January 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 1, 15), LocalDate.of(2023, 1, 15));
+            createdLoanId.set(loanId);
+        });
+
+        // No repayment at all, re-age two months after the maturity date with the default interest handling
+        runAt("20 March 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "15 April 2023", 3, LoanReAgeInterestHandlingType.DEFAULT.name());
+
+            // The original installments are zeroed. The first re-aged installment carries the overdue interest of the
+            // original term (4 x 20.00) plus the interest from the maturity date to its due date on the full 1000
+            // (60.00); the following installments are charged the interest of their own period on their opening
+            // balance and the loan amortises to zero.
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000, null, "15 September 2022"), //
+                    installment(0, true, "15 October 2022"), //
+                    installment(0, true, "15 November 2022"), //
+                    installment(0, true, "15 December 2022"), //
+                    installment(0, true, "15 January 2023"), //
+                    installment(247.55, 140.0, 387.55, false, "15 April 2023"), //
+                    installment(372.50, 15.05, 387.55, false, "15 May 2023"), //
+                    installment(379.95, 7.60, 387.55, false, "15 June 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 6, 15), LocalDate.of(2023, 6, 15));
+        });
+    }
+
+    @Test
     public void testReAgeTemplate_WithMixOfPastAndFutureInstallments() {
         AtomicLong createdLoanId = new AtomicLong();
 

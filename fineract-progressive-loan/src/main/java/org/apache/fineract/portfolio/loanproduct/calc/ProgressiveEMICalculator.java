@@ -1205,6 +1205,10 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                     false);
         }
 
+        // Collected while attaching rather than re-derived from dates afterwards: after maturity the first re-aged
+        // period starts on the maturity date, not on the transaction date, and a date based filter would leave it
+        // out of the EMI adjustment.
+        final List<RepaymentPeriod> reAgedRepaymentPeriods = new ArrayList<>();
         for (final RepaymentPeriod newPeriod : newPeriods) {
             final Money newPrincipal = newPeriod.getDuePrincipal();
             final Money newInterest = newPeriod.getDueInterest();
@@ -1215,6 +1219,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 firstPeriod.getInterestPeriods().getLast().setDueDate(newPeriod.getDueDate());
                 firstPeriod.setEmi(newPrincipal.add(newInterest));
                 calculateRateFactorForRepaymentPeriod(firstRepaymentPeriod, scheduleModel);
+                reAgedRepaymentPeriods.add(firstPeriod);
             } else {
                 final RepaymentPeriod rp = RepaymentPeriod.create(
                         !existingRepaymentPeriods.isEmpty() ? existingRepaymentPeriods.getLast() : null,
@@ -1227,14 +1232,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
                 existingRepaymentPeriods.add(rp);
                 calculateRateFactorForRepaymentPeriod(rp, scheduleModel);
+                reAgedRepaymentPeriods.add(rp);
             }
         }
-
-        final List<RepaymentPeriod> reAgedRepaymentPeriods = existingRepaymentPeriods.stream()
-                .filter(repaymentPeriod -> (repaymentPeriod.getFromDate().isEqual(targetDate)
-                        && repaymentPeriod.getDueDate().isEqual(reAgeFirstDueDate))
-                        || !repaymentPeriod.getFromDate().isBefore(reAgeFirstDueDate))
-                .toList();
 
         calculateOutstandingBalance(scheduleModel);
         calculateLastUnpaidRepaymentPeriodEMI(scheduleModel, targetDate);
@@ -1278,8 +1278,15 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final List<RepaymentPeriod> periodsBeforeTransactionDate = existingRepaymentPeriods.stream()
                 .filter(rp -> !rp.getFromDate().isAfter(transactionDate) && !rp.isFullyPaid()).toList();
 
+        // The overdue recalculation places the aggregated negative balance correction on the transaction date, except
+        // when the transaction is after maturity: the recalculation is clamped to the maturity date and the correction
+        // sits on the interest period ending there. Reverse it wherever it was placed, otherwise the re-aged periods
+        // start from the balance net of that correction instead of the full outstanding principal.
+        final LocalDate maturityDate = existingRepaymentPeriods.getLast().getDueDate();
+        final LocalDate overdueCorrectionDate = transactionDate.isAfter(maturityDate) ? maturityDate : transactionDate;
+
         periodsBeforeTransactionDate.forEach(rp -> {
-            rp.getInterestPeriods().stream().filter(ip -> ip.getDueDate().isEqual(transactionDate)).forEach(ip -> {
+            rp.getInterestPeriods().stream().filter(ip -> ip.getDueDate().isEqual(overdueCorrectionDate)).forEach(ip -> {
                 if (!ip.getBalanceCorrectionAmount().isZero()) {
                     ip.addBalanceCorrectionAmount(ip.getBalanceCorrectionAmount().negated());
                 }
