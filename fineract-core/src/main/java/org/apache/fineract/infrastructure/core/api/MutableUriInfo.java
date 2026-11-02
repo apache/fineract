@@ -136,6 +136,11 @@ public class MutableUriInfo implements UriInfo {
     }
 
     @Override
+    public String getMatchedResourceTemplate() {
+        return delegate.getMatchedResourceTemplate();
+    }
+
+    @Override
     public URI resolve(URI uri) {
         return delegate.resolve(uri);
     }
