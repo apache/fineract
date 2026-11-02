@@ -377,7 +377,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             sqlBuilder.append("atsi.recurrence_type as recurrenceType, atsi.recurrence_frequency as recurrenceFrequency,");
             sqlBuilder.append("atsi.recurrence_interval as recurrenceInterval, atsi.recurrence_on_day as recurrenceOnDay,");
             sqlBuilder.append("atsi.recurrence_on_month as recurrenceOnMonth,");
-            sqlBuilder.append("atsi.allow_partial_transfer as allowPartialTransfer,");
+            sqlBuilder.append("atsi.allow_partial_transfer as allowPartialTransfer, atsi.last_run_date as lastRunDate,");
             sqlBuilder.append("atd.id as accountDetailId,atd.transfer_type as transferType,");
             sqlBuilder.append("fromoff.id as fromOfficeId, fromoff.name as fromOfficeName,");
             sqlBuilder.append("tooff.id as toOfficeId, tooff.name as toOfficeName,");
@@ -515,11 +515,12 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             }
 
             final boolean allowPartialTransfer = rs.getBoolean("allowPartialTransfer");
+            final LocalDate lastRunDate = JdbcSupport.getLocalDate(rs, "lastRunDate");
 
             return StandingInstructionData.instance(id, accountDetailId, name, fromOffice, toOffice, fromClient, toClient, fromAccountType,
                     fromAccount, toAccountType, toAccount, transferTypeEnum, priorityEnum, instructionTypeEnum, statusEnum, transferAmount,
                     validFrom, validTill, recurrenceTypeEnum, recurrenceFrequencyEnum, recurrenceInterval, recurrenceOnMonthDay,
-                    allowPartialTransfer);
+                    allowPartialTransfer, lastRunDate);
         }
     }
 
