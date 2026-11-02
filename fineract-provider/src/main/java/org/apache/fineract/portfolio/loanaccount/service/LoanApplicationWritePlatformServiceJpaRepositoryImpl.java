@@ -460,13 +460,15 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-        if (realCause.getMessage().contains("loan_account_no_UNIQUE")
-                || (realCause.getCause() != null && realCause.getCause().getMessage().contains("loan_account_no_UNIQUE"))) {
+        if (realCause.getMessage().contains("loan_account_no_UNIQUE") || realCause.getMessage().contains("m_loan_account_no_key")
+                || (realCause.getCause() != null && (realCause.getCause().getMessage().contains("loan_account_no_UNIQUE")
+                        || realCause.getCause().getMessage().contains("m_loan_account_no_key")))) {
             final String accountNo = command.stringValueOfParameterNamed("accountNo");
             throw new PlatformDataIntegrityException("error.msg.loan.duplicate.accountNo",
                     "Loan with accountNo `" + accountNo + "` already exists", "accountNo", accountNo);
-        } else if (realCause.getMessage().contains("loan_externalid_UNIQUE")
-                || (realCause.getCause() != null && realCause.getCause().getMessage().contains("loan_externalid_UNIQUE"))
+        } else if (realCause.getMessage().contains("loan_externalid_UNIQUE") || realCause.getMessage().contains("m_loan_external_id_key")
+                || (realCause.getCause() != null && (realCause.getCause().getMessage().contains("loan_externalid_UNIQUE")
+                        || realCause.getCause().getMessage().contains("m_loan_external_id_key")))
                 || realCause.getMessage().toLowerCase().contains("external_id_unique")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.loan.duplicate.externalId",
