@@ -77,12 +77,7 @@ public class LoanCreditAllocationRule extends AbstractAuditableWithUTCDateTimeCu
             return CreditAllocationStrategy.PRINCIPAL_ONLY;
         }
         return rules.stream().filter(rule -> rule.getTransactionType().getLoanTransactionType() == transactionType).findFirst()
-                .map(rule -> {
-                    if (rule.getAllocationStrategy() == null) {
-                        throw new IllegalStateException("Credit allocation rule " + rule.getId() + " has no allocation strategy");
-                    }
-                    return rule.getAllocationStrategy();
-                }).orElse(CreditAllocationStrategy.PRINCIPAL_ONLY);
+                .map(LoanCreditAllocationRule::getAllocationStrategy).orElse(CreditAllocationStrategy.PRINCIPAL_ONLY);
     }
 
 }

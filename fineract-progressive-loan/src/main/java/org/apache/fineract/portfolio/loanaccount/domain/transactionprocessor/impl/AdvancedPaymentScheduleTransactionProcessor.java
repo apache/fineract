@@ -1215,11 +1215,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case PRINCIPAL_ONLY ->
                 super.processCreditTransaction(loanTransaction, ctx.getOverpaymentHolder(), ctx.getCurrency(), ctx.getInstallments());
             case RULE_BASED -> processCreditTransactionByCreditAllocationRule(loanTransaction, ctx);
-            // Unreachable, do not remove: resolveAllocationStrategy never returns null. A switch statement over
-            // an enum is only checked for exhaustiveness when it has a "case null" (or pattern) label, so this
-            // branch is what makes the compiler reject a new CreditAllocationStrategy until it is handled here.
-            // Do not add a default branch.
-            case null -> throw new IllegalStateException("Unreachable: resolveAllocationStrategy never returns null");
         }
     }
 
@@ -1379,14 +1374,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     @NotNull
     private LoanCreditAllocationRule getChargebackAllocationRules(LoanTransaction loanTransaction) {
-        LoanCreditAllocationRule rule = loanTransaction.getLoan().getCreditAllocationRules().stream()
+        return loanTransaction.getLoan().getCreditAllocationRules().stream()
                 .filter(tr -> tr.getTransactionType().equals(CreditAllocationTransactionType.CHARGEBACK)).findFirst().orElseThrow();
-        // an empty order would allocate nothing, leaving every portion of the chargeback at zero
-        if (rule.getAllocationTypes() == null || rule.getAllocationTypes().isEmpty()) {
-            throw new IllegalStateException("Rule based chargeback allocation rule " + rule.getId() + " of loan "
-                    + loanTransaction.getLoan().getId() + " has no allocation order");
-        }
-        return rule;
     }
 
     @NotNull

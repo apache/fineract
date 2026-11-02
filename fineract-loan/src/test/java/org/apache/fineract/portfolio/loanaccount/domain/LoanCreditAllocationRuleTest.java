@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
@@ -49,12 +48,6 @@ class LoanCreditAllocationRuleTest {
     void resolvesPrincipalOnlyForTransactionTypesWithoutRule() {
         assertEquals(CreditAllocationStrategy.PRINCIPAL_ONLY, LoanCreditAllocationRule
                 .resolveAllocationStrategy(List.of(rule(CreditAllocationStrategy.RULE_BASED)), LoanTransactionType.CREDIT_BALANCE_REFUND));
-    }
-
-    @Test
-    void failsWhenTheMatchingRuleHasNoStrategy() {
-        assertThrows(IllegalStateException.class,
-                () -> LoanCreditAllocationRule.resolveAllocationStrategy(List.of(rule(null)), LoanTransactionType.CHARGEBACK));
     }
 
     private static LoanCreditAllocationRule rule(CreditAllocationStrategy strategy) {

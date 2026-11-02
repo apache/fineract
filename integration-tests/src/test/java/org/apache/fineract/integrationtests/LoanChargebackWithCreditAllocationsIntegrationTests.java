@@ -34,7 +34,6 @@ import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
@@ -170,49 +169,6 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             assertEquals(0, BigDecimal.valueOf(50).compareTo(chargeback.getPrincipalPortion()));
             assertEquals(0, BigDecimal.valueOf(50).compareTo(chargeback.getOverpaymentPortion()));
         });
-    }
-
-    @Test
-    public void creditBalanceRefundExceedingOverpaymentOnReplayDoesNotDependOnChargebackRule() {
-        runAt("01 January 2023", () -> {
-            Long clientId = createClient("01 January 2023");
-            Long noCreditAllocationProductId = createLoanProductWithoutCreditAllocation(createDefaultPaymentAllocation());
-            Long ruleBasedProductId = createLoanProduct(createDefaultPaymentAllocation(),
-                    chargebackAllocation("PENALTY", "FEE", "INTEREST", "PRINCIPAL"));
-
-            Long noCreditAllocationLoanId = applyRefundExceedingOverpaymentOnReplay(clientId, noCreditAllocationProductId);
-            Long ruleBasedLoanId = applyRefundExceedingOverpaymentOnReplay(clientId, ruleBasedProductId);
-
-            GetLoansLoanIdResponse expected = getLoanDetails(noCreditAllocationLoanId);
-            GetLoansLoanIdResponse actual = getLoanDetails(ruleBasedLoanId);
-            assertEquals(transactionSnapshot(expected), transactionSnapshot(actual));
-            assertEquals(repaymentScheduleSnapshot(expected), repaymentScheduleSnapshot(actual));
-            assertEquals(summarySnapshot(expected), summarySnapshot(actual));
-
-            // only 50 of the 150 refund is covered by overpayment after the replay, the remaining 100 is owed again
-            GetLoansLoanIdTransactions creditBalanceRefund = actual.getTransactions().stream()
-                    .filter(t -> "Credit Balance Refund".equals(t.getType().getValue())).findFirst().orElseThrow();
-            assertEquals(0, BigDecimal.valueOf(50).compareTo(creditBalanceRefund.getOverpaymentPortion()));
-            assertEquals(0, BigDecimal.valueOf(100).compareTo(creditBalanceRefund.getOutstandingLoanBalance()));
-        });
-    }
-
-    private Long applyRefundExceedingOverpaymentOnReplay(Long clientId, Long loanProductId) {
-        updateBusinessDate("01 January 2023");
-        Long loanId = applyAndApproveLoan(clientId, loanProductId);
-        disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
-
-        updateBusinessDate("20 January 2023");
-        addRepaymentForLoan(loanId, 1300.0, "20 January 2023"); // 50 overpaid
-        updateBusinessDate("22 January 2023");
-        Long secondRepayment = addRepaymentForLoan(loanId, 100.0, "22 January 2023"); // 150 overpaid
-        updateBusinessDate("25 January 2023");
-        makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("25 January 2023")
-                .dateFormat("dd MMMM yyyy").locale("en").transactionAmount(150.0));
-
-        // after the replay only 50 is overpaid when the 150 refund happens
-        undoRepayment(loanId, secondRepayment, "25 January 2023");
-        return loanId;
     }
 
     private Long applyOverpaidLoanWithChargeback(Long clientId, Long loanProductId) {

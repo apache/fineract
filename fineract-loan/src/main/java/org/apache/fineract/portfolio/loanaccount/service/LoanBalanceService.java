@@ -185,19 +185,19 @@ public class LoanBalanceService {
             } else if (loanTransaction.isChargeback() || loanTransaction.isCreditBalanceRefund()) {
                 Money transactionOutstanding = loanTransaction.getPrincipalPortion(loan.getCurrency());
                 if (loanTransaction.isOverPaid()) {
-                    CreditAllocationStrategy creditAllocationStrategy = LoanCreditAllocationRule
-                            .resolveAllocationStrategy(loan.getCreditAllocationRules(), loanTransaction.getTypeOf());
-                    transactionOutstanding = switch (creditAllocationStrategy) {
-                        // in case of advanced payment strategy and creditAllocations the full amount is recognized
-                        // first
-                        case RULE_BASED -> loanTransaction.getPrincipalPortion(loan.getCurrency())
-                                .minus(loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream() //
-                                        .map(mapping -> mapping.getPrincipalPortion(loan.getCurrency())) //
-                                        .reduce(Money.zero(loan.getCurrency()), Money::plus));
+                    // in case of advanced payment strategy and rule based creditAllocations the full amount is
+                    // recognized first
+                    if (loan.getCreditAllocationRules() != null && loan.getCreditAllocationRules().stream()
+                            .anyMatch(rule -> rule.getAllocationStrategy() == CreditAllocationStrategy.RULE_BASED)) {
+                        Money payedPrincipal = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream() //
+                                .map(mapping -> mapping.getPrincipalPortion(loan.getCurrency())) //
+                                .reduce(Money.zero(loan.getCurrency()), Money::plus);
+                        transactionOutstanding = loanTransaction.getPrincipalPortion(loan.getCurrency()).minus(payedPrincipal);
+                    } else {
                         // in case legacy payment strategy
-                        case PRINCIPAL_ONLY ->
-                            loanTransaction.getAmount(loan.getCurrency()).minus(loanTransaction.getOverPaymentPortion(loan.getCurrency()));
-                    };
+                        transactionOutstanding = loanTransaction.getAmount(loan.getCurrency())
+                                .minus(loanTransaction.getOverPaymentPortion(loan.getCurrency()));
+                    }
                     if (transactionOutstanding.isLessThanZero()) {
                         transactionOutstanding = Money.zero(loan.getCurrency());
                     }

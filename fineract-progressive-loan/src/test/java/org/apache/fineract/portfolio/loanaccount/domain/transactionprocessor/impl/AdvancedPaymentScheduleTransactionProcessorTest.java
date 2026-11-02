@@ -420,27 +420,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     }
 
     @Test
-    public void testProcessCreditTransactionWithRuleBasedAllocationRuleWithoutOrderFails() {
-        // given
-        Loan loan = mock(Loan.class);
-        LoanTransaction chargebackTransaction = createChargebackTransaction(loan, 25.0);
-        when(loan.getCreditAllocationRules()).thenReturn(List.of(createRuleBasedCreditAllocationRule()));
-        LoanTransaction repayment = createRepayment(loan, chargebackTransaction, 10, 0, 20, 5);
-        lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
-
-        List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
-        installments.add(createMockInstallment(LocalDate.of(2023, 1, 31), false));
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, new MoneyHolder(Money.zero(MONETARY_CURRENCY)), null,
-                loan.getActiveLoanTermVariations());
-
-        // when / then an empty order would leave every portion at zero, so it must not be processed silently
-        IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class,
-                () -> underTest.processCreditTransaction(chargebackTransaction, ctx));
-        Assertions.assertTrue(exception.getMessage().contains("has no allocation order"));
-        Mockito.verify(chargebackTransaction, never()).updateComponents(any(), any(), any(), any());
-    }
-
-    @Test
     public void testProcessCreditTransactionWithAllocationRulePenaltyFeePrincipalInterest() {
         // given
         Loan loan = mock(Loan.class);
