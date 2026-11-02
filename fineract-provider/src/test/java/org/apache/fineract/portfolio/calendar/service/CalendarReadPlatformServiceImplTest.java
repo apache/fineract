@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.junit.jupiter.api.AfterEach;
@@ -130,7 +131,7 @@ class CalendarReadPlatformServiceImplTest {
         when(rs.getString("title")).thenReturn("Calendar");
         when(rs.getBoolean("repeating")).thenReturn(repeating);
         when(rs.getString("recurrence")).thenReturn(recurrence);
-        when(rs.getDate("startDate")).thenReturn(Date.valueOf(LocalDate.now().minusMonths(2)));
+        when(rs.getDate("startDate")).thenReturn(Date.valueOf(DateUtils.getLocalDateOfTenant().minusMonths(2)));
         return rs;
     }
 }
