@@ -1222,9 +1222,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
                 if (changes.get("reinvestedDepositId") != null) {
                     Long reinvestedDepositId = (Long) changes.get("reinvestedDepositId");
-                    Money amountForDeposit = account.activateWithBalance();
                     final FixedDepositAccount reinvestAccount = (FixedDepositAccount) this.depositAccountAssembler
                             .assembleFrom(reinvestedDepositId, DepositAccountType.FIXED_DEPOSIT);
+                    Money amountForDeposit = reinvestAccount.activateWithBalance();
                     Money activationChargeAmount = getActivationCharge(reinvestAccount);
                     if (activationChargeAmount.isGreaterThanZero()) {
                         payActivationCharge(reinvestAccount);

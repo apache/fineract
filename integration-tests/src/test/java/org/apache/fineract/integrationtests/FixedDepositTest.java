@@ -1241,6 +1241,63 @@ public class FixedDepositTest extends FeignDepositTestBase {
     }
 
     @Test
+    public void testMaturityJobReinvestsPrincipalAndInterestIntoNewDeposit() {
+        try {
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account liabilityAccount = accountHelper.createLiabilityAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+
+            DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+
+            Calendar todaysDate = Calendar.getInstance();
+            int currentYear = todaysDate.get(Calendar.YEAR);
+            todaysDate.set(currentYear, Calendar.JANUARY, 1);
+            final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+            todaysDate.set(currentYear + 1, Calendar.MARCH, 1);
+            final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+            todaysDate = Calendar.getInstance();
+            todaysDate.set(currentYear, Calendar.JANUARY, 1);
+            final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+            final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            businessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE.name(), LocalDate.of(currentYear + 1, 3, 1).toString());
+
+            Long fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, CASH_BASED, assetAccount, liabilityAccount,
+                    incomeAccount, expenseAccount);
+            Long clientId = clientHelper.createClient();
+            Long fixedDepositAccountId = applyForFixedDepositApplication(clientId, fixedDepositProductId, SUBMITTED_ON_DATE, WHOLE_TERM,
+                    CLOSURE_TYPE_REINVEST);
+            fixedDepositHelper.approve(fixedDepositAccountId, APPROVED_ON_DATE);
+            fixedDepositHelper.activate(fixedDepositAccountId, APPROVED_ON_DATE);
+            final BigDecimal principal = fixedDepositHelper.getAccount(fixedDepositAccountId).getDepositAmount();
+
+            schedulerHelper.executeAndAwaitJob("Update Deposit Accounts Maturity details");
+
+            DepositTestValidators.verifyFixedDepositAccountIsClosed(statusOf(fixedDepositAccountId));
+            final BigDecimal maturityAmount = fixedDepositHelper.getAccount(fixedDepositAccountId).getMaturityAmount();
+            Assertions.assertTrue(maturityAmount.compareTo(principal) > 0, "The maturity amount must include the interest");
+
+            Long reinvestedDepositId = clientHelper.getClientAccounts(clientId).getSavingsAccounts().stream()
+                    .map(account -> account.getId()).filter(id -> !fixedDepositAccountId.equals(id)).findFirst().orElse(null);
+            Assertions.assertNotNull(reinvestedDepositId, "The maturity job must open a new deposit");
+
+            GetFixedDepositAccountsAccountIdResponse reinvestedDeposit = fixedDepositHelper.getAccount(reinvestedDepositId);
+            Assertions.assertEquals(0, maturityAmount.compareTo(reinvestedDeposit.getDepositAmount()),
+                    "The new deposit must be opened for the maturity amount");
+            Assertions.assertEquals(0, maturityAmount.compareTo(reinvestedDeposit.getSummary().getAccountBalance()),
+                    "The new deposit must hold the maturity amount " + maturityAmount + ", but holds "
+                            + reinvestedDeposit.getSummary().getAccountBalance());
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+    }
+
+    @Test
     public void testCloseFixedDepositForCLOSURE_TYPE_REINVEST() {
         testClosureTypeReinvestVariants(CLOSURE_TYPE_REINVEST);
     }
