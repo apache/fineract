@@ -37,12 +37,16 @@ import static org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDat
 import static org.apache.fineract.util.TimeZoneConstants.ASIA_MANILA_ID;
 import static org.apache.fineract.util.TimeZoneConstants.EUROPE_BERLIN_ID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.junit.context.WithTenantContext;
 import org.apache.fineract.junit.context.WithTenantContextExtension;
 import org.apache.fineract.junit.system.WithSystemProperty;
@@ -176,6 +180,24 @@ public class DefaultScheduledDateGeneratorTest {
 
         assertThat(progressiveDueDates(numberOfRepayments, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR", LocalDate.of(2024, 12, 22),
                 LocalDate.of(2025, 1, 22))).containsExactlyElementsOf(expectedDueDates.subList(0, numberOfRepayments));
+    }
+
+    @Test
+    @WithSystemTimeZone(EUROPE_BERLIN_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    public void test_generateRepaymentPeriodsWithFirstRepaymentOnDisbursementDate() {
+        final List<LocalDate> expectedDueDates = List.of(LocalDate.of(2024, 1, 8), LocalDate.of(2024, 2, 8), LocalDate.of(2024, 3, 8));
+        final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+
+        // runs in its own thread, so a due date that never moves forward fails the test instead of hanging the build
+        final List<LocalDate> dueDates = assertTimeoutPreemptively(Duration.ofSeconds(10), () -> {
+            ThreadLocalContextUtil.setTenant(tenant);
+            return progressiveDueDates(3, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR", LocalDate.of(2024, 1, 8),
+                    LocalDate.of(2024, 1, 8));
+        });
+
+        assertThat(dueDates).containsExactlyElementsOf(expectedDueDates);
     }
 
     @Test

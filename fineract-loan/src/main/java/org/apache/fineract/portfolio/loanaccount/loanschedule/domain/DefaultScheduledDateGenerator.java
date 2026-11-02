@@ -56,8 +56,10 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         boolean isFirstRepayment = true;
         for (int repaymentPeriodNumber = 1; repaymentPeriodNumber <= numberOfRepayments; repaymentPeriodNumber++) {
             nextRepaymentDate = generateNextRepaymentDate(lastRepaymentDate, loanApplicationTerms, isFirstRepayment);
-            while (!nextRepaymentDate.isAfter(lastAdjustedRepaymentDate)) {
-                nextRepaymentDate = generateNextRepaymentDate(nextRepaymentDate, loanApplicationTerms, isFirstRepayment);
+            // skip due dates the previous adjusted due date has already passed; the first repayment date is kept as
+            // given, like for cumulative loans, even when it falls on the schedule start date
+            while (!isFirstRepayment && !nextRepaymentDate.isAfter(lastAdjustedRepaymentDate)) {
+                nextRepaymentDate = generateNextRepaymentDate(nextRepaymentDate, loanApplicationTerms, false);
             }
 
             if (repaymentPeriodNumber == numberOfRepayments) { // last period
