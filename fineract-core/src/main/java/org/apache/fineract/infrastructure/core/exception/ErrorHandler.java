@@ -42,6 +42,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.batch.domain.Header;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.exceptionmapper.DatabaseUnavailableSupport;
 import org.apache.fineract.infrastructure.core.exceptionmapper.DefaultExceptionMapper;
 import org.apache.fineract.infrastructure.core.exceptionmapper.FineractExceptionMapper;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
@@ -149,6 +150,9 @@ public final class ErrorHandler {
 
     public static RuntimeException getMappable(@NotNull Throwable t, String msgCode, String defaultMsg, String param,
             final Object... defaultMsgArgs) {
+        if (t instanceof RuntimeException re && DatabaseUnavailableSupport.isDatabaseUnavailable(re)) {
+            return re; // keep it mappable to HTTP 503, not a data integrity error
+        }
         String msg = defaultMsg == null ? t.getMessage() : defaultMsg;
         String codePfx = "error.msg" + (param == null ? "" : ("." + param));
         Object[] args = defaultMsgArgs == null ? new Object[] { t } : defaultMsgArgs;

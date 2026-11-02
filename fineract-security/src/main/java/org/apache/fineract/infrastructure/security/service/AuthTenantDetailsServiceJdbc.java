@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.service;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantMapper;
@@ -45,6 +46,7 @@ public class AuthTenantDetailsServiceJdbc implements AuthTenantDetailsService {
 
     @Override
     @Cacheable(value = "tenantsById")
+    @Retry(name = "tenantContextLookup")
     public FineractPlatformTenant loadTenantById(final String tenantIdentifier, final boolean isReport) {
 
         try {

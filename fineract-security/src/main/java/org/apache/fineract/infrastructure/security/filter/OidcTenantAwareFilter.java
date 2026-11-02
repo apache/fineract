@@ -32,7 +32,10 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.AuthTenantDetailsService;
 import org.apache.fineract.infrastructure.security.service.TenantOidcConfigService;
 import org.jspecify.annotations.NonNull;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
@@ -73,6 +76,8 @@ public class OidcTenantAwareFilter extends OncePerRequestFilter {
                 log.debug("OIDC tenant context set to '{}' for {}", tenantId, request.getRequestURI());
             }
             filterChain.doFilter(request, response);
+        } catch (DataAccessResourceFailureException | CannotCreateTransactionException | TransientDataAccessResourceException e) {
+            throw e; // the database is down: let DatabaseUnavailableFilter answer 503
         } catch (Exception e) {
             log.warn("OIDC tenant resolution failed for '{}', request will continue without tenant context", request.getRequestURI(), e);
             filterChain.doFilter(request, response);
