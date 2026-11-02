@@ -143,7 +143,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final boolean postReversals = false;
         this.depositAccountTransactionDataValidator.validateActivation(command);
         final MathContext mc = MathContext.DECIMAL64;
-        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.FIXED_DEPOSIT);
         checkClientOrGroupActive(account);
 
@@ -250,7 +250,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final boolean postReversals = false;
         this.depositAccountTransactionDataValidator.validateActivation(command);
 
-        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFromInUserScope(savingsId,
                 DepositAccountType.RECURRING_DEPOSIT);
         checkClientOrGroupActive(account);
 
