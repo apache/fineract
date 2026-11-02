@@ -906,11 +906,12 @@ public class LoanAccrualsProcessingServiceImplTest {
     }
 
     /**
-     * One catch-up accrual dated today covers installments that fell due earlier. Reprocessing must attribute it to
-     * them in order and must NOT reverse it, although its date lies in today's installment.
+     * Interest received while NPA is recognised on receipt, in one accrual dated on the receipt date, although it was
+     * paid for installments that fell due earlier. Reprocessing must attribute it to them in order and must NOT reverse
+     * it, although its date lies in today's installment.
      */
     @Test
-    void reallocateCumulativeAccruals_ShouldFillEarlierInstallmentsFromACatchUpWithoutReversingIt() {
+    void reallocateNpaCumulativeAccruals_ShouldFillEarlierInstallmentsFromAnOnReceiptAccrualWithoutReversingIt() {
         final LocalDate today = DateUtils.getBusinessLocalDate();
         final LoanRepaymentScheduleInstallment first = dailyInstallment(1, today.minusDays(2));
         final LoanRepaymentScheduleInstallment second = dailyInstallment(2, today.minusDays(1));
@@ -918,30 +919,37 @@ public class LoanAccrualsProcessingServiceImplTest {
         when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(first, second, third));
         when(loan.isClosed()).thenReturn(false);
         when(loan.isInterestBearing()).thenReturn(true);
-        // One catch-up dated today for all three installments' interest.
-        final LoanTransaction catchUp = accrual(today, "24.66", false);
+        // The loan turned NPA before its first accrual; all three installments' interest was then paid and recognised.
+        when(loan.getAccruedTill()).thenReturn(null);
+        when(first.getInterestPaid()).thenReturn(new BigDecimal("8.22"));
+        when(second.getInterestPaid()).thenReturn(new BigDecimal("8.22"));
+        when(third.getInterestPaid()).thenReturn(new BigDecimal("8.22"));
+        final LoanTransaction onReceipt = accrual(today, "24.66", false);
 
-        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateCumulativeAccruals", loan, List.of(catchUp), today, true);
+        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateNpaCumulativeAccruals", loan, List.of(onReceipt), today,
+                true);
 
-        verify(catchUp, never()).reverse();
+        verify(onReceipt, never()).reverse();
         verify(first).setInterestAccrued(new BigDecimal("8.22"));
         verify(second).setInterestAccrued(new BigDecimal("8.22"));
         verify(third).setInterestAccrued(new BigDecimal("8.22"));
     }
 
     @Test
-    void reallocateCumulativeAccruals_ShouldReverseTheLatestAccrualWhenOverAccrued() {
-        // After a reschedule only 8.22 is accruable by today, but 16.44 was accrued: the latest accrual goes.
+    void reallocateNpaCumulativeAccruals_ShouldReverseTheLatestAccrualWhenOverAccrued() {
+        // Only 8.22 was accruable when accrual stopped and nothing was paid since, but 16.44 was accrued: the latest
+        // accrual goes (e.g. the repayment it was recognised on was undone).
         final LocalDate today = DateUtils.getBusinessLocalDate();
         final LoanRepaymentScheduleInstallment first = dailyInstallment(1, today);
         final LoanRepaymentScheduleInstallment later = dailyInstallment(2, today.plusDays(30));
         when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(first, later));
         when(loan.isClosed()).thenReturn(false);
         when(loan.isInterestBearing()).thenReturn(false);
+        when(loan.getAccruedTill()).thenReturn(today);
         final LoanTransaction older = accrual(today.minusDays(1), "8.22", false);
         final LoanTransaction latest = accrual(today, "8.22", false);
 
-        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateCumulativeAccruals", loan, List.of(older, latest),
+        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateNpaCumulativeAccruals", loan, List.of(older, latest),
                 today.plusDays(30), false);
 
         verify(latest).reverse();
@@ -951,16 +959,17 @@ public class LoanAccrualsProcessingServiceImplTest {
     }
 
     @Test
-    void reallocateCumulativeAccruals_ShouldNetAccrualAdjustments() {
+    void reallocateNpaCumulativeAccruals_ShouldNetAccrualAdjustments() {
         final LocalDate today = DateUtils.getBusinessLocalDate();
         final LoanRepaymentScheduleInstallment first = dailyInstallment(1, today.minusDays(1));
         final LoanRepaymentScheduleInstallment second = dailyInstallment(2, today);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(first, second));
         when(loan.isClosed()).thenReturn(false);
+        when(loan.getAccruedTill()).thenReturn(today);
         final LoanTransaction accrual = accrual(today.minusDays(1), "16.44", false);
         final LoanTransaction adjustment = accrual(today, "8.22", true);
 
-        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateCumulativeAccruals", loan, List.of(accrual, adjustment),
+        ReflectionTestUtils.invokeMethod(accrualsProcessingService, "reallocateNpaCumulativeAccruals", loan, List.of(accrual, adjustment),
                 today, true);
 
         verify(accrual, never()).reverse();
