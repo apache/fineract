@@ -92,6 +92,58 @@ class SavingsAccountFreeWithdrawalResetTest {
         assertThat(charge.getResetChargeDate()).isEqualTo(afterRestartPeriod);
     }
 
+    @Test
+    void weeksRestartPeriod_notElapsed_doesNotRestartFreeWithdrawalCount() {
+        final SavingsAccountCharge charge = freeWithdrawalFeeCharge(1, PeriodFrequencyType.WEEKS);
+        final SavingsAccount account = activeAccountWith(charge);
+
+        // 2 free withdrawals are allowed per 1 week; the 3rd one, 3 days after activation, must be charged
+        assertThat(withdrawOn(account, LocalDate.of(2026, 1, 2))).isEqualByComparingTo("0");
+        assertThat(withdrawOn(account, LocalDate.of(2026, 1, 3))).isEqualByComparingTo("0");
+        assertThat(withdrawOn(account, LocalDate.of(2026, 1, 4))).as("fee charged within the 1-week restart period")
+                .isEqualByComparingTo(FEE);
+    }
+
+    @Test
+    void weeksRestartPeriod_elapsed_restartsFreeWithdrawalCount() {
+        final SavingsAccountCharge charge = freeWithdrawalFeeCharge(1, PeriodFrequencyType.WEEKS);
+        final SavingsAccount account = activeAccountWith(charge);
+
+        useUpFreeWithdrawals(account, charge);
+
+        // 1 week after activation (Jan 8): the count must restart
+        final LocalDate afterRestartPeriod = LocalDate.of(2026, 1, 8);
+        assertThat(withdrawOn(account, afterRestartPeriod)).isEqualByComparingTo("0");
+        assertThat(charge.getFreeWithdrawalCount()).isEqualTo(1);
+        assertThat(charge.getResetChargeDate()).isEqualTo(afterRestartPeriod);
+    }
+
+    @Test
+    void yearsRestartPeriod_notElapsed_doesNotRestartFreeWithdrawalCount() {
+        final SavingsAccountCharge charge = freeWithdrawalFeeCharge(1, PeriodFrequencyType.YEARS);
+        final SavingsAccount account = activeAccountWith(charge);
+
+        useUpFreeWithdrawals(account, charge);
+
+        // 6 months after activation, within the 1-year restart period: still charged
+        assertThat(withdrawOn(account, LocalDate.of(2026, 7, 1))).isEqualByComparingTo(FEE);
+        assertThat(charge.getFreeWithdrawalCount()).isEqualTo(2);
+        assertThat(charge.getResetChargeDate()).isNull();
+    }
+
+    @Test
+    void yearsRestartPeriod_elapsed_restartsFreeWithdrawalCount() {
+        final SavingsAccountCharge charge = freeWithdrawalFeeCharge(1, PeriodFrequencyType.YEARS);
+        final SavingsAccount account = activeAccountWith(charge);
+
+        useUpFreeWithdrawals(account, charge);
+
+        final LocalDate afterRestartPeriod = LocalDate.of(2027, 1, 1);
+        assertThat(withdrawOn(account, afterRestartPeriod)).isEqualByComparingTo("0");
+        assertThat(charge.getFreeWithdrawalCount()).isEqualTo(1);
+        assertThat(charge.getResetChargeDate()).isEqualTo(afterRestartPeriod);
+    }
+
     private void useUpFreeWithdrawals(final SavingsAccount account, final SavingsAccountCharge charge) {
         assertThat(withdrawOn(account, LocalDate.of(2026, 1, 2))).isEqualByComparingTo("0");
         assertThat(charge.getFreeWithdrawalCount()).isEqualTo(1);
