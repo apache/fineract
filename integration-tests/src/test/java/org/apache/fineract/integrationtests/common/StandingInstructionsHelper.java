@@ -27,6 +27,7 @@ import org.apache.fineract.client.models.GetStandingInstructionRunHistoryRespons
 import org.apache.fineract.client.models.GetStandingInstructionsStandingInstructionIdResponse;
 import org.apache.fineract.client.models.PostStandingInstructionsResponse;
 import org.apache.fineract.client.models.StandingInstructionCreationRequest;
+import org.apache.fineract.client.models.StandingInstructionUpdatesRequest;
 
 public class StandingInstructionsHelper {
 
@@ -74,6 +75,12 @@ public class StandingInstructionsHelper {
                         build(clientId, fromAccountId, toAccountId, fromAccountType, toAccountType, validFrom, validTo, monthDay)
                                 .amount(amount).allowPartialTransfer(allowPartialTransfer)));
         return response.getResourceId();
+    }
+
+    /** Marks the instruction as deleted so later runs of the job in the same database skip it. */
+    public void deleteStandingInstruction(final Long standingInstructionId) {
+        ok(() -> FineractFeignClientHelper.getFineractFeignClient().standingInstructions().updateStandingInstruction(standingInstructionId,
+                "delete", new StandingInstructionUpdatesRequest()));
     }
 
     public GetStandingInstructionsStandingInstructionIdResponse getStandingInstructionById(final Long standingInstructionId) {

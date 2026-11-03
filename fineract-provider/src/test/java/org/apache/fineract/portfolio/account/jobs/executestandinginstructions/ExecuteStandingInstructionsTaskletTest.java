@@ -19,7 +19,10 @@
 package org.apache.fineract.portfolio.account.jobs.executestandinginstructions;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,6 +38,7 @@ import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
@@ -59,14 +63,20 @@ class ExecuteStandingInstructionsTaskletTest {
     private final StandingInstructionReadPlatformService readPlatformService = mock(StandingInstructionReadPlatformService.class);
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService = mock(
             AccountTransfersWritePlatformService.class);
-    private final ExecuteStandingInstructionsTasklet tasklet = new ExecuteStandingInstructionsTasklet(readPlatformService,
-            mock(JdbcTemplate.class), mock(DatabaseSpecificSQLGenerator.class), accountTransfersWritePlatformService,
-            mock(SavingsAccountAssembler.class));
+    private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+    private final DatabaseSpecificSQLGenerator sqlGenerator = mock(DatabaseSpecificSQLGenerator.class);
+    private final ExecuteStandingInstructionsTasklet tasklet = new ExecuteStandingInstructionsTasklet(readPlatformService, jdbcTemplate,
+            sqlGenerator, accountTransfersWritePlatformService, mock(SavingsAccountAssembler.class));
+
+    private static final String EXPECTED_INSERT = "INSERT INTO m_account_transfer_standing_instructions_history (standing_instruction_id, "
+            + "status, amount, execution_time, error_log) VALUES (?, ?, ?, now(), ?)";
+    private static final BigDecimal AMOUNT = new BigDecimal("123.456789");
 
     @BeforeEach
     void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+        when(sqlGenerator.escape("status")).thenReturn("status");
     }
 
     @AfterEach
@@ -130,6 +140,46 @@ class ExecuteStandingInstructionsTaskletTest {
                 .containsExactly(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 15), LocalDate.of(2026, 1, 29), LocalDate.of(2026, 2, 12));
     }
 
+    @Test
+    void failedTransferMessageWithQuoteIsBoundAsParameter() {
+        givenBusinessDate(LocalDate.of(2026, 4, 30));
+        givenActiveInstruction(PeriodFrequencyType.WEEKS, 1, LocalDate.of(2026, 4, 30), 0, 0, AMOUNT);
+        doThrow(new IllegalStateException("Account 'SAV-01' can't be debited")).when(accountTransfersWritePlatformService)
+                .transferFunds(any(AccountTransferDTO.class));
+
+        assertThrows(JobExecutionException.class, () -> tasklet.execute(mock(StepContribution.class), mock(ChunkContext.class)));
+
+        verify(jdbcTemplate).update(EXPECTED_INSERT, 1L, "failed", AMOUNT,
+                "Exception while trasfering funds Account 'SAV-01' can't be debited");
+    }
+
+    @Test
+    void failedTransferMessageLongerThanColumnIsTruncated() {
+        givenBusinessDate(LocalDate.of(2026, 4, 30));
+        givenActiveInstruction(PeriodFrequencyType.WEEKS, 1, LocalDate.of(2026, 4, 30), 0, 0, AMOUNT);
+        String longMessage = "x".repeat(ExecuteStandingInstructionsTasklet.ERROR_LOG_MAX_LENGTH + 100);
+        doThrow(new IllegalStateException(longMessage)).when(accountTransfersWritePlatformService)
+                .transferFunds(any(AccountTransferDTO.class));
+
+        assertThrows(JobExecutionException.class, () -> tasklet.execute(mock(StepContribution.class), mock(ChunkContext.class)));
+
+        String expectedErrorLog = ("Exception while trasfering funds " + longMessage).substring(0,
+                ExecuteStandingInstructionsTasklet.ERROR_LOG_MAX_LENGTH);
+        verify(jdbcTemplate).update(EXPECTED_INSERT, 1L, "failed", AMOUNT, expectedErrorLog);
+    }
+
+    @Test
+    void successfulTransferIsRecordedWithExactAmountAndEmptyErrorLog() throws Exception {
+        givenBusinessDate(LocalDate.of(2026, 4, 30));
+        givenActiveInstruction(PeriodFrequencyType.WEEKS, 1, LocalDate.of(2026, 4, 30), 0, 0, AMOUNT);
+
+        tasklet.execute(mock(StepContribution.class), mock(ChunkContext.class));
+
+        verify(jdbcTemplate).update(EXPECTED_INSERT, 1L, "success", AMOUNT, "");
+        verify(jdbcTemplate).update("UPDATE m_account_transfer_standing_instructions SET last_run_date = ? where id = ?",
+                LocalDate.of(2026, 4, 30), 1L);
+    }
+
     private List<LocalDate> dueDates(PeriodFrequencyType frequencyType, int interval, LocalDate validFrom, int recurrenceOnDay,
             int recurrenceOnMonth, LocalDate until) {
         List<LocalDate> dueDates = new ArrayList<>();
@@ -148,6 +198,11 @@ class ExecuteStandingInstructionsTaskletTest {
 
     private void givenActiveInstruction(PeriodFrequencyType frequencyType, int interval, LocalDate validFrom, int recurrenceOnDay,
             int recurrenceOnMonth) {
+        givenActiveInstruction(frequencyType, interval, validFrom, recurrenceOnDay, recurrenceOnMonth, new BigDecimal("100"));
+    }
+
+    private void givenActiveInstruction(PeriodFrequencyType frequencyType, int interval, LocalDate validFrom, int recurrenceOnDay,
+            int recurrenceOnMonth, BigDecimal amount) {
         StandingInstructionData data = mock(StandingInstructionData.class);
         PortfolioAccountData fromAccount = mock(PortfolioAccountData.class);
         PortfolioAccountData toAccount = mock(PortfolioAccountData.class);
@@ -162,7 +217,7 @@ class ExecuteStandingInstructionsTaskletTest {
         when(data.getValidFrom()).thenReturn(validFrom);
         when(data.getRecurrenceOnDay()).thenReturn(recurrenceOnDay);
         when(data.getRecurrenceOnMonth()).thenReturn(recurrenceOnMonth);
-        when(data.getAmount()).thenReturn(new BigDecimal("100"));
+        when(data.getAmount()).thenReturn(amount);
         when(data.getFromAccountTypeEnum()).thenReturn(PortfolioAccountType.SAVINGS);
         when(data.getToAccountTypeEnum()).thenReturn(PortfolioAccountType.SAVINGS);
         when(data.getFromAccount()).thenReturn(fromAccount);
