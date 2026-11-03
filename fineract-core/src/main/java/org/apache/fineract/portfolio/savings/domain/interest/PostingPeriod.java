@@ -71,6 +71,10 @@ public final class PostingPeriod {
 
     private boolean overdraftInterest = false;
 
+    // the other period the overdraft split builds for the same posting interval. It starts from the closing balance
+    // of this one, and the two are calculated together
+    private PostingPeriod secondPartOfInterval;
+
     public void setOverdraftInterestRateAsFraction(BigDecimal overdraftInterestRateAsFraction) {
         this.overdraftInterestRateAsFraction = overdraftInterestRateAsFraction;
     }
