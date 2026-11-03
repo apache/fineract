@@ -56,7 +56,6 @@ import org.springframework.stereotype.Component;
 public class LoanInterestPauseApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
-    private static final String MODIFY_RESOURCE_NAME_FOR_PERMISSIONS = "UPDATE LOAN";
 
     private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -72,7 +71,7 @@ public class LoanInterestPauseApiResource {
     public CommandProcessingResult createInterestPause(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @RequestBody(required = true) final InterestPauseRequestDto request) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MODIFY_RESOURCE_NAME_FOR_PERMISSIONS);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createInterestPause(loanId).withJson(request.toJson()).build();
 
@@ -90,7 +89,7 @@ public class LoanInterestPauseApiResource {
             @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @RequestBody(required = true) final InterestPauseRequestDto request) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MODIFY_RESOURCE_NAME_FOR_PERMISSIONS);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createInterestPauseByExternalId(loanExternalId)
                 .withJson(request.toJson()).build();
@@ -134,7 +133,7 @@ public class LoanInterestPauseApiResource {
     public Response deleteInterestPause(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("variationId") @Parameter(description = "variationId") final Long variationId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MODIFY_RESOURCE_NAME_FOR_PERMISSIONS);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteInterestPause(loanId, variationId).build();
 
@@ -152,7 +151,7 @@ public class LoanInterestPauseApiResource {
             @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("variationId") @Parameter(description = "variationId") final Long variationId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MODIFY_RESOURCE_NAME_FOR_PERMISSIONS);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteInterestPause(loanExternalId, variationId).build();
 
@@ -172,7 +171,7 @@ public class LoanInterestPauseApiResource {
             @PathParam("variationId") @Parameter(description = "variationId") final Long variationId,
             @RequestBody(required = true) final InterestPauseRequestDto request) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MODIFY_RESOURCE_NAME_FOR_PERMISSIONS);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateInterestPause(loanId, variationId)
                 .withJson(request.toJson()).build();
@@ -192,7 +191,7 @@ public class LoanInterestPauseApiResource {
             @PathParam("variationId") @Parameter(description = "variationId") final Long variationId,
             @RequestBody(required = true) final InterestPauseRequestDto request) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MODIFY_RESOURCE_NAME_FOR_PERMISSIONS);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateInterestPause(loanExternalId, variationId)
                 .withJson(request.toJson()).build();
