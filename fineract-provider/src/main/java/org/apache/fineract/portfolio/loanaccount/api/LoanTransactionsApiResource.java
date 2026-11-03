@@ -572,6 +572,9 @@ public class LoanTransactionsApiResource {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
+        if (!loanExternalId.isEmpty()) {
+            builder.withLoanExternalId(loanExternalId);
+        }
         Long resolvedLoanId = loanId == null ? loanReadPlatformService.getResolvedLoanId(loanExternalId) : loanId;
 
         CommandWrapper commandRequest = null;
@@ -740,6 +743,9 @@ public class LoanTransactionsApiResource {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
+        if (!loanExternalId.isEmpty()) {
+            builder.withLoanExternalId(loanExternalId);
+        }
         ExternalId transactionExternalId = ExternalIdFactory.produce(transactionExternalIdStr);
 
         Long resolvedLoanId = loanId == null ? loanReadPlatformService.getResolvedLoanId(loanExternalId) : loanId;

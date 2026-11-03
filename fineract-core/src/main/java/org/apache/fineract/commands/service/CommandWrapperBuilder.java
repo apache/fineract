@@ -4035,6 +4035,11 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder withLoanExternalId(final ExternalId loanExternalId) {
+        this.loanExternalId = loanExternalId;
+        return this;
+    }
+
     public CommandWrapperBuilder createInterestPauseByExternalId(final String loanExternalId) {
         this.actionName = ACTION_CREATE;
         this.entityName = ENTITY_INTEREST_PAUSE;
