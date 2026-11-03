@@ -237,7 +237,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
         @Schema(example = "1")
         public Long id;
         @Schema(example = "000000001")
-        public Long accountNo;
+        public String accountNo;
         @Schema(example = "1")
         public Long clientId;
         @Schema(example = "Sangamesh N")
@@ -438,7 +438,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
             @Schema(example = "5")
             public Long accountId;
             @Schema(example = "RD000023")
-            public Long accountNumber;
+            public String accountNumber;
             public Set<GetRecurringDepositAccountsChartSlabs> chartSlabs;
             public Set<GetRecurringDepositAccountsPeriodTypes> periodTypes;
         }
@@ -446,7 +446,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
         @Schema(example = "1")
         public Long id;
         @Schema(example = "RD000023")
-        public Long accountNo;
+        public String accountNo;
         @Schema(example = "RD-23")
         public String externalId;
         @Schema(example = "1")

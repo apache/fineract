@@ -220,7 +220,7 @@ final class FixedDepositAccountsApiResourceSwagger {
         @Schema(example = "1")
         public Long id;
         @Schema(example = "000000001")
-        public Long accountNo;
+        public String accountNo;
         @Schema(example = "1")
         public Long clientId;
         @Schema(example = "Sangamesh N")
@@ -461,7 +461,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             @Schema(example = "5")
             public Long accountId;
             @Schema(example = "FD000023")
-            public Long accountNumber;
+            public String accountNumber;
             public Set<GetFixedDepositAccountsChartSlabs> chartSlabs;
             public Set<GetFixedDepositAccountsPeriodTypes> periodTypes;
         }
@@ -504,7 +504,7 @@ final class FixedDepositAccountsApiResourceSwagger {
         @Schema(example = "1")
         public Long id;
         @Schema(example = "FD000023")
-        public Long accountNo;
+        public String accountNo;
         @Schema(example = "FD-23")
         public String externalId;
         @Schema(example = "1")

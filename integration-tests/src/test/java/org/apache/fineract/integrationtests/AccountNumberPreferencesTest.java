@@ -38,10 +38,16 @@ import org.apache.fineract.client.models.PutAccountNumberFormatsResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignCenterHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFixedDepositHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFixedDepositProductHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRecurringDepositHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRecurringDepositProductHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.DepositRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.DepositTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.FeignErrors;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
@@ -59,6 +65,8 @@ public class AccountNumberPreferencesTest extends FeignLoanTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(AccountNumberPreferencesTest.class);
     private static final String DEFAULT_CLIENT_ACTIVATION_DATE = "04 March 2011";
     private static final String SAVINGS_SUBMITTED_DATE = "08 January 2013";
+    private static final String DEPOSIT_CHART_VALID_FROM = "01 January 2013";
+    private static final String DEPOSIT_CHART_VALID_TO = "01 January 2030";
     private static final long CLIENT_ACCOUNT_TYPE = 1L;
     private static final long LOAN_ACCOUNT_TYPE = 2L;
     private static final long SAVINGS_ACCOUNT_TYPE = 3L;
@@ -71,6 +79,8 @@ public class AccountNumberPreferencesTest extends FeignLoanTestBase {
     private Long loanId;
     private Long savingsProductId;
     private Long savingsId;
+    private Long fixedDepositProductId;
+    private Long recurringDepositProductId;
     private final String loanPrincipalAmount = "100000.00";
     private final String numberOfRepayments = "12";
     private final String interestRatePerPeriod = "18";
@@ -80,6 +90,10 @@ public class AccountNumberPreferencesTest extends FeignLoanTestBase {
     private FeignCollateralHelper collateralHelper;
     private FeignSavingsHelper savingsHelper;
     private FeignSavingsProductHelper savingsProductHelper;
+    private FeignFixedDepositHelper fixedDepositHelper;
+    private FeignFixedDepositProductHelper fixedDepositProductHelper;
+    private FeignRecurringDepositHelper recurringDepositHelper;
+    private FeignRecurringDepositProductHelper recurringDepositProductHelper;
     private Long clientAccountNumberPreferenceId;
     private Long loanAccountNumberPreferenceId;
     private Long savingsAccountNumberPreferenceId;
@@ -104,6 +118,10 @@ public class AccountNumberPreferencesTest extends FeignLoanTestBase {
         this.collateralHelper = new FeignCollateralHelper(fineractClient());
         this.savingsHelper = new FeignSavingsHelper(fineractClient());
         this.savingsProductHelper = new FeignSavingsProductHelper(fineractClient());
+        this.fixedDepositHelper = new FeignFixedDepositHelper(fineractClient());
+        this.fixedDepositProductHelper = new FeignFixedDepositProductHelper(fineractClient());
+        this.recurringDepositHelper = new FeignRecurringDepositHelper(fineractClient());
+        this.recurringDepositProductHelper = new FeignRecurringDepositProductHelper(fineractClient());
     }
 
     @Test
@@ -144,6 +162,7 @@ public class AccountNumberPreferencesTest extends FeignLoanTestBase {
     private void createLoanAndSavingsProduct() {
         this.createLoanProduct();
         this.createSavingsProduct();
+        this.createDepositProducts();
     }
 
     private void deleteAllAccountNumberPreferences() {
@@ -168,6 +187,8 @@ public class AccountNumberPreferencesTest extends FeignLoanTestBase {
         this.createAndValidateClientEntity(this.isAccountPreferenceSetUp);
         this.createAndValidateLoanEntity(this.isAccountPreferenceSetUp);
         this.createAndValidateSavingsEntity(this.isAccountPreferenceSetUp);
+        this.createAndValidateFixedDepositEntity(this.isAccountPreferenceSetUp);
+        this.createAndValidateRecurringDepositEntity(this.isAccountPreferenceSetUp);
         this.createAndValidateGroup(this.isAccountPreferenceSetUp);
         this.createAndValidateCenter(this.isAccountPreferenceSetUp);
     }
@@ -177,6 +198,8 @@ public class AccountNumberPreferencesTest extends FeignLoanTestBase {
         this.createAndValidateClientEntity(this.isAccountPreferenceSetUp);
         this.createAndValidateLoanEntity(this.isAccountPreferenceSetUp);
         this.createAndValidateSavingsEntity(this.isAccountPreferenceSetUp);
+        this.createAndValidateFixedDepositEntity(this.isAccountPreferenceSetUp);
+        this.createAndValidateRecurringDepositEntity(this.isAccountPreferenceSetUp);
         this.createAndValidateGroup(this.isAccountPreferenceSetUp);
         this.createAndValidateCenter(this.isAccountPreferenceSetUp);
     }
@@ -445,6 +468,52 @@ public class AccountNumberPreferencesTest extends FeignLoanTestBase {
         } else {
             this.validateAccountNumberLengthAndStartsWithPrefix(savingsAccountNo, null);
             LOG.info("SUCCESSFULLY CREATED SAVINGS APPLICATION (ID:{} )", this.savingsId);
+        }
+    }
+
+    private void createDepositProducts() {
+        this.fixedDepositProductId = fixedDepositProductHelper.createProduct(DepositRequestBuilders.withChart(
+                DepositRequestBuilders.fixedDepositProduct().accountingRule(SavingsTestData.AccountingRule.NONE), DEPOSIT_CHART_VALID_FROM,
+                DEPOSIT_CHART_VALID_TO, DepositTestData.periodRangeChartSlabs())).getResourceId();
+        this.recurringDepositProductId = recurringDepositProductHelper
+                .createProduct(DepositRequestBuilders.withChart(
+                        DepositRequestBuilders.recurringDepositProduct().accountingRule(SavingsTestData.AccountingRule.NONE),
+                        DEPOSIT_CHART_VALID_FROM, DEPOSIT_CHART_VALID_TO, DepositTestData.recurringChartSlabsFor("period")))
+                .getResourceId();
+    }
+
+    private void createAndValidateFixedDepositEntity(Boolean isAccountPreferenceSetUp) {
+        Long fixedDepositId = fixedDepositHelper.submitApplication(DepositRequestBuilders.fixedDepositAccount(this.clientId,
+                this.fixedDepositProductId, SAVINGS_SUBMITTED_DATE, DepositTestData.PreClosurePenalInterestOnType.WHOLE_TERM))
+                .getSavingsId();
+        String fixedDepositAccountNo = fixedDepositHelper.getAccount(fixedDepositId).getAccountNo();
+        String productShortName = fixedDepositProductHelper.getProduct(this.fixedDepositProductId).getShortName();
+        validateDepositAccountNumber(isAccountPreferenceSetUp, fixedDepositAccountNo, productShortName);
+    }
+
+    private void createAndValidateRecurringDepositEntity(Boolean isAccountPreferenceSetUp) {
+        Long recurringDepositId = recurringDepositHelper
+                .submitApplication(DepositRequestBuilders.recurringDepositAccount(this.clientId, this.recurringDepositProductId,
+                        SAVINGS_SUBMITTED_DATE, SAVINGS_SUBMITTED_DATE, DepositTestData.PreClosurePenalInterestOnType.WHOLE_TERM))
+                .getSavingsId();
+        String recurringDepositAccountNo = recurringDepositHelper.getAccount(recurringDepositId).getAccountNo();
+        String productShortName = recurringDepositProductHelper.getProduct(this.recurringDepositProductId).getShortName();
+        validateDepositAccountNumber(isAccountPreferenceSetUp, recurringDepositAccountNo, productShortName);
+    }
+
+    /**
+     * Fixed and recurring deposits are savings accounts, so their numbers follow the savings account number preference.
+     */
+    private void validateDepositAccountNumber(Boolean isAccountPreferenceSetUp, String accountNo, String productShortName) {
+        if (isAccountPreferenceSetUp) {
+            String savingsPrefixName = retrieveAccountNumberFormat(this.savingsAccountNumberPreferenceId).getPrefixType().getValue();
+            if (savingsPrefixName.equals(this.officeName)) {
+                this.validateAccountNumberLengthAndStartsWithPrefix(accountNo, clientHelper.getClient(this.clientId).getOfficeName());
+            } else if (savingsPrefixName.equals(this.savingsShortName)) {
+                this.validateAccountNumberLengthAndStartsWithPrefix(accountNo, productShortName);
+            }
+        } else {
+            this.validateAccountNumberLengthAndStartsWithPrefix(accountNo, null);
         }
     }
 
