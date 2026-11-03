@@ -18,11 +18,24 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
+import jakarta.persistence.QueryHint;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 
 public interface GlobalConfigurationRepository
         extends JpaRepository<GlobalConfigurationProperty, Long>, JpaSpecificationExecutor<GlobalConfigurationProperty> {
 
     GlobalConfigurationProperty findOneByName(String name);
+
+    /**
+     * Loads every property without registering the instances in the EclipseLink unit of work: the result is a read-only
+     * snapshot served from the transaction-scoped cache, so it must not carry change-tracking cost or be flushed back.
+     * Callers that modify a property must load it with {@link #findOneByName(String)}.
+     */
+    @Query("select p from GlobalConfigurationProperty p")
+    @QueryHints(@QueryHint(name = "eclipselink.read-only", value = "true"))
+    List<GlobalConfigurationProperty> findAllReadOnly();
 }

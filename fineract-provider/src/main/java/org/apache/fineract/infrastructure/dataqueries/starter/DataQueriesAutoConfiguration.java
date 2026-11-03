@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.dataqueries.starter;
 
 import org.apache.fineract.infrastructure.codes.service.CodeReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.serialization.DatatableCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -63,11 +64,11 @@ public class DataQueriesAutoConfiguration {
             final DataTableValidator dataTableValidator, final NamedParameterJdbcTemplate namedParameterJdbcTemplate,
             final DatatableKeywordGenerator datatableKeywordGenerator, final SearchUtil searchUtil,
             final BusinessEventNotifierService businessEventNotifierService, final DatatableReadService datatableReadService,
-            final DatatableUtil datatableUtil) {
+            final DatatableUtil datatableUtil, final GlobalConfigurationRepositoryWrapper globalConfigurationRepository) {
         return new DatatableWriteServiceImpl(jdbcTemplate, databaseTypeResolver, sqlGenerator, context, fromJsonHelper, genericDataService,
                 fromApiJsonDeserializer, configurationDomainService, codeReadPlatformService, dataTableValidator,
                 namedParameterJdbcTemplate, datatableKeywordGenerator, searchUtil, businessEventNotifierService, datatableReadService,
-                datatableUtil);
+                datatableUtil, globalConfigurationRepository);
     }
 
 }

@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.configuration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -100,7 +100,7 @@ public class MoneyHelperInitializationService {
      * @return the rounding mode value
      */
     private int getRoundingModeFromConfiguration() {
-        GlobalConfigurationProperty roundingModeProperty = globalConfigurationRepository
+        GlobalConfigurationPropertyData roundingModeProperty = globalConfigurationRepository
                 .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.ROUNDING_MODE);
         return roundingModeProperty.getValue().intValue();
     }

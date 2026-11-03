@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
-import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanorigination.data.LoanApplicationOriginatorData;
@@ -59,9 +59,6 @@ class LoanOriginatorHelperTest {
 
     @Mock
     private CodeValueRepositoryWrapper codeValueRepositoryWrapper;
-
-    @Mock
-    private GlobalConfigurationProperty globalConfigurationProperty;
 
     private LoanOriginatorHelper helper;
 
@@ -119,9 +116,8 @@ class LoanOriginatorHelperTest {
     void findOrCreateOriginatorIdThrowsCreationNotAllowedWhenFlagDisabledOnApplicationPath() {
         final LoanApplicationOriginatorData data = new LoanApplicationOriginatorData(null, "EXT-APP", "n", null, null);
         when(loanOriginatorRepository.findByExternalId(any(ExternalId.class))).thenReturn(Optional.empty());
-        when(globalConfigurationProperty.isEnabled()).thenReturn(false);
         when(globalConfigurationRepository.findOneByNameWithNotFoundDetection(ENABLE_ORIGINATOR_CREATION_DURING_LOAN_APPLICATION))
-                .thenReturn(globalConfigurationProperty);
+                .thenReturn(new GlobalConfigurationPropertyData().setEnabled(false));
 
         assertThrows(LoanOriginatorCreationNotAllowedException.class, () -> helper.findOrCreateOriginatorId(data));
 
