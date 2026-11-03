@@ -83,6 +83,10 @@ public class FeignDatatableHelper {
         return ok(() -> fineractClient.dataTables().updateDatatable(datatableName, request));
     }
 
+    public CallFailedRuntimeException updateDatatableExpectingError(String datatableName, PutDataTablesRequest request) {
+        return fail(() -> fineractClient.dataTables().updateDatatable(datatableName, request));
+    }
+
     public GetDataTablesResponse getDatatable(String datatableName) {
         return ok(() -> fineractClient.dataTables().getDatatable(datatableName));
     }
