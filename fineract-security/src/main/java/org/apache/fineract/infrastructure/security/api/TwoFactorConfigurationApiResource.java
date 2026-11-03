@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TwoFactorConfigurationApiResource {
 
-    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "TWOFACTOR_CONFIG";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "TWOFACTOR_CONFIGURATION";
 
     private final PlatformSecurityContext context;
     private final TwoFactorConfigurationService configurationService;

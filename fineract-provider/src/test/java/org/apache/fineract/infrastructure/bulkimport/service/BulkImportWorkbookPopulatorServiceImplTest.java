@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.ws.rs.core.Response;
@@ -66,6 +67,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 class BulkImportWorkbookPopulatorServiceImplTest {
 
     private final PlatformSecurityContext context = mock(PlatformSecurityContext.class);
+    private final AppUser appUser = mock(AppUser.class);
     private final BulkImportWorkbookPopulatorServiceImpl service = new BulkImportWorkbookPopulatorServiceImpl(context,
             readService(OfficeReadPlatformService.class), readService(StaffReadService.class), readService(ClientReadPlatformService.class),
             readService(CenterReadPlatformService.class), readService(GroupReadPlatformService.class),
@@ -90,7 +92,7 @@ class BulkImportWorkbookPopulatorServiceImplTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
-        when(context.authenticatedUser()).thenReturn(mock(AppUser.class));
+        when(context.authenticatedUser()).thenReturn(appUser);
     }
 
     @AfterEach
@@ -126,5 +128,13 @@ class BulkImportWorkbookPopulatorServiceImplTest {
         Response response = service.getTemplate(entityType.toString(), null, null, null, LookupMode.INCLUDE);
 
         assertEquals(200, response.getStatus());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = GlobalEntityType.class, names = { "LOANS", "LOAN_TRANSACTIONS", "GL_JOURNAL_ENTRIES" })
+    void fundTemplatesCheckFundReadPermission(GlobalEntityType entityType) {
+        service.getTemplate(entityType.toString(), null, null, "dd MMMM yyyy", LookupMode.EXCLUDE);
+
+        verify(appUser).validateHasReadPermission("FUND");
     }
 }
