@@ -2345,8 +2345,12 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
                         }
                         isFirstRepayment = false;
                         LocalDate prevLastInstDate = lastInstallmentDate;
-                        lastInstallmentDate = getScheduledDateGenerator()
-                                .adjustRepaymentDate(actualRepaymentDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
+                        final AdjustedDateDetailsDTO adjustedDateDetailsDTO = getScheduledDateGenerator()
+                                .adjustRepaymentDate(actualRepaymentDate, loanApplicationTerms, holidayDetailDTO);
+                        lastInstallmentDate = adjustedDateDetailsDTO.getChangedScheduleDate();
+                        // a "reschedule to next repayment date" holiday moves the repayment chain itself, as in the
+                        // full generation; keeping the unmoved date pulls every regenerated due date back one period
+                        actualRepaymentDate = adjustedDateDetailsDTO.getChangedActualRepaymentDate();
                         LocalDate modifiedLastInstDate = null;
                         LoanTermVariationsData variation1 = null;
                         boolean hasDueDateVariation = false;
