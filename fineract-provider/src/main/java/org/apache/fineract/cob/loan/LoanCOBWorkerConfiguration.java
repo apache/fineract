@@ -49,7 +49,6 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
@@ -155,12 +154,9 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     @StepScope
     public ItemTransactionProcessor<Loan> cobWorkerItemProcessor() {
-        final TransactionTemplate requiresNewTransactionTemplate = new TransactionTemplate(transactionManager);
-        requiresNewTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return new ItemTransactionProcessor<>(new LoanItemProcessor(cobBusinessStepService, progressiveLoanModelProcessingService),
                 new LoanItemWriter(loanLockingService, loanRepository),
-                loanId -> loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId)),
-                requiresNewTransactionTemplate);
+                loanId -> loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId)), transactionManager);
     }
 
     @Bean

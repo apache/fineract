@@ -48,7 +48,6 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
@@ -134,12 +133,10 @@ public class WorkingCapitalLoanCOBWorkerConfiguration {
     @StepScope
     public ItemTransactionProcessor<WorkingCapitalLoan> workingCapitalLoanCOBWorkerItemProcessor(
             final COBBusinessStepService cobBusinessStepService, final WorkingCapitalLoanModelProcessingService modelProcessingService) {
-        final TransactionTemplate requiresNewTransactionTemplate = new TransactionTemplate(transactionManager);
-        requiresNewTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return new ItemTransactionProcessor<>(new WorkingCapitalLoanCOBWorkerItemProcessor(cobBusinessStepService, modelProcessingService),
                 new WorkingCapitalLoanCOBWorkerItemWriter(wpcLoanLockingService, workingCapitalLoanRepository),
                 loanId -> workingCapitalLoanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId)),
-                requiresNewTransactionTemplate);
+                transactionManager);
     }
 
     @Bean

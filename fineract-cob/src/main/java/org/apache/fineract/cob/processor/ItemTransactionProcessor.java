@@ -29,8 +29,9 @@ import org.springframework.batch.infrastructure.item.Chunk;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
  * Processes and writes one COB item in a transaction of its own.
@@ -44,19 +45,24 @@ import org.springframework.transaction.support.TransactionTemplate;
  * <p>
  * The item is loaded again inside the new transaction, so the business steps work on an instance it manages rather than
  * on the one the reader loaded in the chunk transaction. The step's own writer has nothing left to do.
+ * <p>
+ * Propagation is fixed to REQUIRES_NEW here rather than taken from the caller: joining the chunk transaction would let
+ * one failing item doom the chunk again.
  */
 @RequiredArgsConstructor
 public class ItemTransactionProcessor<I extends AbstractPersistableCustom<Long>> implements ItemProcessor<I, I>, StepExecutionListener {
 
+    private static final TransactionDefinition ITEM_TRANSACTION = new DefaultTransactionDefinition(
+            TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
     private final AbstractItemProcessor<I> delegate;
     private final ItemWriter<I> writer;
     private final Function<Long, I> loader;
-    private final TransactionTemplate requiresNewTransactionTemplate;
+    private final PlatformTransactionManager transactionManager;
 
     @Override
     public I process(@NonNull I item) throws Exception {
-        PlatformTransactionManager transactionManager = requiresNewTransactionTemplate.getTransactionManager();
-        TransactionStatus status = transactionManager.getTransaction(requiresNewTransactionTemplate);
+        TransactionStatus status = transactionManager.getTransaction(ITEM_TRANSACTION);
         try {
             I processed = delegate.process(loader.apply(item.getId()));
             writer.write(Chunk.of(processed));

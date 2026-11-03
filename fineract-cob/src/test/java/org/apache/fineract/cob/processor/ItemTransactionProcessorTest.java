@@ -38,7 +38,6 @@ import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * One item's processing and writing commit or roll back on their own, so a failing item cannot doom the chunk.
@@ -56,9 +55,7 @@ class ItemTransactionProcessorTest {
 
     @BeforeEach
     void setUp() {
-        TransactionTemplate template = new TransactionTemplate(transactionManager);
-        template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        processor = new ItemTransactionProcessor<>(delegate, writer, id -> loadedItem, template);
+        processor = new ItemTransactionProcessor<>(delegate, writer, id -> loadedItem, transactionManager);
     }
 
     @Test
@@ -70,6 +67,16 @@ class ItemTransactionProcessorTest {
         verify(delegate).process(loadedItem);
         verify(writer).write(Chunk.of(loadedItem));
         assertThat(transactionManager.events).containsExactly("begin", "commit");
+    }
+
+    @Test
+    void suspendsTheChunkTransactionRatherThanJoiningIt() throws Exception {
+        transactionManager.chunkTransactionActive = true;
+        when(delegate.process(loadedItem)).thenReturn(loadedItem);
+
+        processor.process(readItem);
+
+        assertThat(transactionManager.events).containsExactly("suspend", "begin", "commit", "resume");
     }
 
     @Test
@@ -122,6 +129,7 @@ class ItemTransactionProcessorTest {
     private static final class RecordingTransactionManager extends AbstractPlatformTransactionManager {
 
         private final List<String> events = new ArrayList<>();
+        private boolean chunkTransactionActive;
 
         @Override
         protected Object doGetTransaction() {
@@ -131,6 +139,22 @@ class ItemTransactionProcessorTest {
         @Override
         protected void doBegin(Object transaction, TransactionDefinition definition) {
             events.add("begin");
+        }
+
+        @Override
+        protected boolean isExistingTransaction(Object transaction) {
+            return chunkTransactionActive;
+        }
+
+        @Override
+        protected Object doSuspend(Object transaction) {
+            events.add("suspend");
+            return transaction;
+        }
+
+        @Override
+        protected void doResume(Object transaction, Object suspendedResources) {
+            events.add("resume");
         }
 
         @Override

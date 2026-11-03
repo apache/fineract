@@ -36,7 +36,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.batch.core.listener.StepExecutionListener;
 import org.springframework.batch.core.listener.StepListener;
 import org.springframework.batch.core.listener.StepListenerFactoryBean;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Guards the COB item components against double step-listener registration.
@@ -69,7 +69,7 @@ class CobStepListenerRegistrationTest {
                 Arguments.of("ItemTransactionProcessor",
                         new ItemTransactionProcessor<>(new LoanItemProcessor(businessStepService, modelProcessingService),
                                 new LoanItemWriter(mock(LockingService.class), loanRepository), loanId -> null,
-                                mock(TransactionTemplate.class))));
+                                mock(PlatformTransactionManager.class))));
     }
 
     @ParameterizedTest(name = "{0} registers exactly once as a step listener")
