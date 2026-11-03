@@ -71,6 +71,10 @@ public final class CommonEnumerations {
                 optionData = new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
                         codePrefix + PeriodFrequencyType.YEARS.getCode(), "Years");
             break;
+            case SEMI_MONTHLY:
+                optionData = new EnumOptionData(PeriodFrequencyType.SEMI_MONTHLY.getValue().longValue(),
+                        codePrefix + PeriodFrequencyType.SEMI_MONTHLY.getCode(), "Semi Monthly");
+            break;
             default:
                 optionData = new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(),
                         "Invalid");

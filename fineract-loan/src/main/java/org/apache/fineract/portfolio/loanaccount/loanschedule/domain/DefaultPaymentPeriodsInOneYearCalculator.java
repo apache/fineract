@@ -48,6 +48,9 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             case YEARS:
                 paymentPeriodsInOneYear = 1;
             break;
+            case SEMI_MONTHLY:
+                paymentPeriodsInOneYear = 24;
+            break;
             case INVALID:
                 paymentPeriodsInOneYear = 0;
             break;
@@ -88,6 +91,7 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
         return switch (repaymentPeriodFrequencyType) {
             case DAYS -> noDaysInterestCalculationGrace.divide(repayEveryBD, mc);
             case WEEKS -> noDaysInterestCalculationGrace.divide(BigDecimal.valueOf(7).multiply(repayEveryBD), mc);
+            case SEMI_MONTHLY -> noDaysInterestCalculationGrace.divide(BigDecimal.valueOf(15).multiply(repayEveryBD), mc);
             case MONTHS -> noDaysInterestCalculationGrace.divide(BigDecimal.valueOf(30).multiply(repayEveryBD), mc);
             case YEARS -> noDaysInterestCalculationGrace.divide(BigDecimal.valueOf(365).multiply(repayEveryBD), mc);
             case WHOLE_TERM -> {

@@ -108,6 +108,8 @@ public final class LoanEnumerations {
                     codePrefix + PeriodFrequencyType.MONTHS.getCode(), "Months");
             case YEARS -> new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
                     codePrefix + PeriodFrequencyType.YEARS.getCode(), "Years");
+            case SEMI_MONTHLY -> new EnumOptionData(PeriodFrequencyType.SEMI_MONTHLY.getValue().longValue(),
+                    codePrefix + PeriodFrequencyType.SEMI_MONTHLY.getCode(), "Semi Monthly");
             default ->
                 new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
         };
@@ -128,6 +130,8 @@ public final class LoanEnumerations {
                     codePrefix + PeriodFrequencyType.MONTHS.getCode(), "Months");
             case YEARS -> new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
                     codePrefix + PeriodFrequencyType.YEARS.getCode(), "Years");
+            case SEMI_MONTHLY -> new EnumOptionData(PeriodFrequencyType.SEMI_MONTHLY.getValue().longValue(),
+                    codePrefix + PeriodFrequencyType.SEMI_MONTHLY.getCode(), "Semi Monthly");
             default ->
                 new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
         };
@@ -183,6 +187,8 @@ public final class LoanEnumerations {
                     codePrefix + PeriodFrequencyType.MONTHS.getCode(), "Months");
             case YEARS -> new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
                     codePrefix + PeriodFrequencyType.YEARS.getCode(), "Years");
+            case SEMI_MONTHLY -> new EnumOptionData(PeriodFrequencyType.SEMI_MONTHLY.getValue().longValue(),
+                    codePrefix + PeriodFrequencyType.SEMI_MONTHLY.getCode(), "Semi Monthly");
             default ->
                 new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
         };

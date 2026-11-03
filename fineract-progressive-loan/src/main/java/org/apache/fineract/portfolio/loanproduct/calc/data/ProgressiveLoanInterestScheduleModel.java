@@ -50,6 +50,8 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.MonthlyDueDateResolver;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyDueDays;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyScheduleDates;
 import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 
 @Data
@@ -484,6 +486,10 @@ public class ProgressiveLoanInterestScheduleModel {
                 months -> MonthlyDueDateResolver.plusMonths(instance, months, loanProductRelatedDetail.getMonthEndDueDateStrategy());
             case WEEKS -> instance::plusWeeks;
             case DAYS -> instance::plusDays;
+            case SEMI_MONTHLY -> {
+                final SemiMonthlyDueDays dueDays = loanProductRelatedDetail.semiMonthlyDueDays();
+                yield periods -> SemiMonthlyScheduleDates.plusPeriods(instance, periods, dueDays);
+            }
             default -> throw new UnsupportedOperationException();
         };
     }

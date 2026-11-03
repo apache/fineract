@@ -198,13 +198,14 @@ public class DefaultScheduledDateGeneratorTest {
         ApplicationCurrency dollarCurrency = new ApplicationCurrency("USD", "US Dollar", 2, 0, "currency.USD", "$");
         Money principalAmount = Money.of(fromApplicationCurrency(dollarCurrency), BigDecimal.valueOf(10_000L));
 
-        return LoanApplicationTerms.assembleFrom(dollarCurrency.toData(), repaidEvery, MONTHS, 4, repaidEvery, MONTHS, null, INVALID,
-                EQUAL_PRINCIPAL, FLAT, ZERO, MONTHS, ZERO, SAME_AS_REPAYMENT_PERIOD, false, principalAmount, expectedDisbursementDate, null,
-                null, null, null, null, null, null, Money.of(fromApplicationCurrency(dollarCurrency), ZERO), false, null, EMPTY_LIST,
-                BigDecimal.valueOf(36_000L), null, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null, null, null, ZERO,
-                null, NONE, null, ZERO, EMPTY_LIST, false, 0, false, holidayDetailDTO, false, false, false, null, false, false, null, false,
-                DISBURSEMENT_DATE, expectedDisbursementDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, null, false, null, null,
-                false, null, false, null, null, null, false, null, null, null, false, false, null);
+        return LoanApplicationTerms.assembleFrom(dollarCurrency.toData(), repaidEvery, MONTHS, 4, repaidEvery, MONTHS, null, null, null,
+                INVALID, EQUAL_PRINCIPAL, FLAT, ZERO, MONTHS, ZERO, SAME_AS_REPAYMENT_PERIOD, false, principalAmount,
+                expectedDisbursementDate, null, null, null, null, null, null, null, Money.of(fromApplicationCurrency(dollarCurrency), ZERO),
+                false, null, EMPTY_LIST, BigDecimal.valueOf(36_000L), null, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null,
+                null, null, null, null, ZERO, null, NONE, null, ZERO, EMPTY_LIST, false, 0, false, holidayDetailDTO, false, false, false,
+                null, false, false, null, false, DISBURSEMENT_DATE, expectedDisbursementDate, CUMULATIVE,
+                LoanScheduleProcessingType.HORIZONTAL, null, false, null, null, false, null, false, null, null, null, false, null, null,
+                null, false, false, null);
     }
 
     private LoanApplicationTerms createLoanApplicationTerms(LocalDate dueRepaymentPeriodDate, HolidayDetailDTO holidayDetailDTO) {
@@ -231,8 +232,8 @@ public class DefaultScheduledDateGeneratorTest {
             final int numberOfRepayments, final PeriodFrequencyType repaymentFrequency, final Integer fixedLength,
             final MonthEndDueDateStrategy monthEndDueDateStrategy, final HolidayDetailDTO holidayDetailDTO) {
         return LoanApplicationTerms.assembleFrom(currency.toData(), 1, repaymentFrequency, numberOfRepayments, 1, repaymentFrequency, null,
-                INVALID, EQUAL_PRINCIPAL, FLAT, ZERO, repaymentFrequency, ZERO, SAME_AS_REPAYMENT_PERIOD, false, principalAmount,
-                expectedDisbursementDate, null, calculatedFirstRepaymentDate, null, null, null, null, null,
+                null, null, INVALID, EQUAL_PRINCIPAL, FLAT, ZERO, repaymentFrequency, ZERO, SAME_AS_REPAYMENT_PERIOD, false,
+                principalAmount, expectedDisbursementDate, null, calculatedFirstRepaymentDate, null, null, null, null, null,
                 Money.of(fromApplicationCurrency(currency), ZERO), false, null, EMPTY_LIST, BigDecimal.valueOf(36_000L), null,
                 DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null, null, null, ZERO, null, NONE, null, ZERO,
                 EMPTY_LIST, true, 0, false, holidayDetailDTO, false, false, false, null, false, false, null, false, DISBURSEMENT_DATE,

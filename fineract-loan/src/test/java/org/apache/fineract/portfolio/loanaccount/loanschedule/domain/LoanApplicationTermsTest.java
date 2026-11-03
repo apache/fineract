@@ -115,7 +115,7 @@ class LoanApplicationTermsTest {
         Money principalAmount = Money.of(fromApplicationCurrency(currency), BigDecimal.valueOf(100));
         LocalDate disbursementDate = LocalDate.of(2024, 1, 1);
         LocalDate firstRepaymentDate = LocalDate.of(2024, 2, 1);
-        return LoanApplicationTerms.assembleFrom(currency.toData(), 1, MONTHS, NUMBER_OF_REPAYMENTS, 1, MONTHS, null, INVALID,
+        return LoanApplicationTerms.assembleFrom(currency.toData(), 1, MONTHS, NUMBER_OF_REPAYMENTS, 1, MONTHS, null, null, null, INVALID,
                 EQUAL_PRINCIPAL, FLAT, ZERO, MONTHS, ZERO, SAME_AS_REPAYMENT_PERIOD, false, principalAmount, disbursementDate, null,
                 firstRepaymentDate, null, null, null, null, null, Money.of(fromApplicationCurrency(currency), ZERO), false, null,
                 emptyList(), BigDecimal.valueOf(36_000L), null, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null,

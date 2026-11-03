@@ -223,6 +223,10 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return loanHelper.retrieveLoanProduct(productId);
     }
 
+    protected GetLoanProductsProductIdResponse retrieveLoanProductWithTemplate(Long productId) {
+        return loanHelper.retrieveLoanProductWithTemplate(productId);
+    }
+
     protected PutLoanProductsProductIdResponse updateLoanProduct(Long productId, PutLoanProductsProductIdRequest request) {
         return loanHelper.updateLoanProduct(productId, request);
     }

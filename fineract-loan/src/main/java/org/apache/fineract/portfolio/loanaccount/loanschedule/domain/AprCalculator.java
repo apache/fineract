@@ -45,6 +45,9 @@ public class AprCalculator {
             case MONTHS:
                 defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(12));
             break;
+            case SEMI_MONTHLY:
+                defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(24));
+            break;
             case YEARS:
                 defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(1));
             break;
@@ -61,6 +64,9 @@ public class AprCalculator {
                     break;
                     case MONTHS:
                         defaultAnnualNominalInterestRate = ratePerPeriod.multiply(BigDecimal.valueOf(12));
+                    break;
+                    case SEMI_MONTHLY:
+                        defaultAnnualNominalInterestRate = ratePerPeriod.multiply(BigDecimal.valueOf(24));
                     break;
                     case YEARS:
                         defaultAnnualNominalInterestRate = ratePerPeriod.multiply(BigDecimal.valueOf(1));
