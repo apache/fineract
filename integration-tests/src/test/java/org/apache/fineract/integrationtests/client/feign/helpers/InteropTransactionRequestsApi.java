@@ -16,17 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.integrationtests.common.report;
+package org.apache.fineract.integrationtests.client.feign.helpers;
 
-import java.io.IOException;
+import feign.Headers;
+import feign.RequestLine;
 import java.util.Map;
-import okhttp3.ResponseBody;
-import org.apache.fineract.integrationtests.common.FineractClientHelper;
-import retrofit2.Response;
 
-public class ReportHelper {
+/**
+ * The interoperation transaction request endpoint with a free-form body. The generated {@code InterOperationApi} types
+ * {@code expiration} as a date-time, so it cannot send the formatted date string the server parses with the request's
+ * {@code dateFormat} and {@code locale}.
+ */
+@Headers({ "Accept: application/json", "Content-Type: application/json" })
+public interface InteropTransactionRequestsApi {
 
-    public Response<ResponseBody> runReport(String reportName, Map<String, String> reportParameters) throws IOException {
-        return FineractClientHelper.getFineractClient().reportsRun.runReportGetFile(reportName, reportParameters).execute();
-    }
+    @RequestLine("POST /v1/interoperation/requests")
+    Map<String, Object> createTransactionRequest(Map<String, Object> request);
 }

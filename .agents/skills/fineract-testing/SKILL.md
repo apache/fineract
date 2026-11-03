@@ -60,11 +60,9 @@ IT-01 to IT-20 in `integration-feign.adoc` before writing one.
 4. Make calls through `FeignCalls` (`ok`, `executeVoid`, `fail`, `failVoid`) from
    `fineract-client-feign/src/main/java/org/apache/fineract/client/feign/util/FeignCalls.java`,
    and assert the exact status and error code of a failure (IT-02, IT-10).
-5. Never import `io.restassured`, and never add a file to
-   `config/checkstyle/restassured-baseline.xml`: the `FeignNoRestAssured` check in
-   `config/checkstyle/checkstyle.xml` fails the build. A test you migrate off REST
-   Assured deletes its baseline entry in the same change (`integration-feign.adoc`,
-   "The Baseline").
+5. Never import `io.restassured`: the `FeignNoRestAssured` check in
+   `config/checkstyle/checkstyle.xml` fails the build, and REST Assured is no longer
+   on any test classpath.
 6. If the generated model lacks a field, add it to the matching `*ApiResourceSwagger`
    class and regenerate both clients. Do not work around it in the test (IT-05,
    "Fixing a Generated Model at Source").

@@ -19,6 +19,11 @@
 package org.apache.fineract.portfolio.shareproducts.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -69,6 +74,7 @@ public class ShareDividendApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List all share dividends", operationId = "retrieveAllShareDividends")
     @AlternativeOperationId("retrieveAll_39")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ShareDividendApiResourceSwagger.GetShareProductDividendsResponse.class)))
     public String retrieveAll(@PathParam("productId") final Long productId, @QueryParam("offset") final Integer offset,
             @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
             @QueryParam("sortOrder") final String sortOrder, @QueryParam("status") final Integer status) {
@@ -88,6 +94,7 @@ public class ShareDividendApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a share dividend", operationId = "retrieveOneShareDividend")
     @AlternativeOperationId("retrieveDividendDetails")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ShareDividendApiResourceSwagger.GetShareProductDividendDetailsResponse.class)))
     public String retrieveDividendDetails(@PathParam("dividendId") final Long dividendId, @QueryParam("offset") final Integer offset,
             @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
             @QueryParam("sortOrder") final String sortOrder, @QueryParam("accountNo") final String accountNo,
@@ -109,7 +116,10 @@ public class ShareDividendApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a share dividend", operationId = "createShareDividend")
     @AlternativeOperationId("createDividendDetail")
-    public String createDividendDetail(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ShareDividendApiResourceSwagger.PostShareProductDividendsRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
+    public String createDividendDetail(@PathParam("productId") final Long productId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         this.platformSecurityContext.authenticatedUser();
         CommandWrapper commandWrapper = new CommandWrapperBuilder().createShareProductDividendPayoutCommand(productId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -123,6 +133,7 @@ public class ShareDividendApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a share dividend", operationId = "updateShareDividend")
     @AlternativeOperationId("updateDividendDetail")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public String updateDividendDetail(@PathParam("productId") final Long productId, @PathParam("dividendId") final Long dividendId,
             @QueryParam("command") final String commandParam, final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper;

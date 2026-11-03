@@ -27,8 +27,8 @@ import org.apache.fineract.client.models.CommandProcessingResult;
 /**
  * Updating an external service takes <code>{"&lt;property name&gt;": value}</code>, where the property names belong to
  * the service ({@code s3_access_key}, {@code username}, {@code server_key}). The generated
- * {@code PutExternalServiceRequest} only models the SMTP credentials, and a snake_case property cannot reach the wire
- * from this module: the Retrofit model shadows the Feign one here, and its getters would serialise as camelCase.
+ * {@code PutExternalServiceRequest} only models the SMTP credentials, so the service's own property names are sent as a
+ * plain map.
  */
 @Headers({ "Accept: application/json", "Content-Type: application/json" })
 public interface ExternalServiceCommandsApi {

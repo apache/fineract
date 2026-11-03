@@ -24,10 +24,8 @@ import feign.RequestLine;
 import org.apache.fineract.client.models.CommandProcessingResult;
 
 /**
- * The credit report request names the borrower's national id {@code NRC}. In {@code integration-tests} the generated
- * {@code PostCreditReportRequest} resolves to the Retrofit model, which carries that name only in a Gson annotation, so
- * Jackson writes the field as {@code nrc}; the server then reads no national id and calls the bureau's search URL
- * without one.
+ * The credit report request names the borrower's national id {@code NRC}. This sends that exact key: under any other
+ * name the server reads no national id and calls the bureau's search URL without one.
  */
 @Headers({ "Accept: application/json", "Content-Type: application/json" })
 public interface CreditBureauIntegrationCommandsApi {

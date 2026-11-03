@@ -36,9 +36,6 @@ dependencies {
             project(path: ':fineract-progressive-loan', configuration: 'runtimeElements')
             )
 
-    // Retrofit client for existing tests
-    testImplementation project(path: ':fineract-client', configuration: 'runtimeElements')
-
     // Feign client - exclude fineract-client module to avoid Retrofit/Feign model conflicts
     // Both generated and hand-written Feign services are available in feign.services package
     testImplementation(project(path: ':fineract-client-feign', configuration: 'runtimeElements')) {
@@ -49,13 +46,6 @@ dependencies {
         exclude group: 'javax.servlet', module: 'javax.servlet-api'
         exclude group: 'javax.validation'
     }
-    testImplementation ('io.rest-assured:rest-assured') {
-        exclude group: 'commons-logging'
-        exclude group: 'org.apache.sling'
-        exclude group: 'com.sun.xml.bind'
-    }
-    testImplementation 'org.apache.groovy:groovy-xml'
-    testImplementation 'org.apache.groovy:groovy-json'
     testImplementation 'org.awaitility:awaitility'
 
     testCompileOnly 'com.github.spotbugs:spotbugs-annotations'

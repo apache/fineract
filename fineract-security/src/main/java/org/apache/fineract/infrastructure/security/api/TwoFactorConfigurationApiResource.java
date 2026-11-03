@@ -19,6 +19,11 @@
 package org.apache.fineract.infrastructure.security.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -55,6 +60,7 @@ public class TwoFactorConfigurationApiResource {
     @GET
     @Operation(operationId = "retrieveAll_4")
     @AlternativeOperationId("retrieveAll_9")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TwoFactorConfigurationApiResourceSwagger.GetTwoFactorConfigurationResponse.class)))
     public String retrieveAll() {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         Map<String, Object> configurationMap = configurationService.retrieveAll();
@@ -65,7 +71,9 @@ public class TwoFactorConfigurationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "updateConfiguration_1")
     @AlternativeOperationId("updateConfiguration_3")
-    public String updateConfiguration(final String apiRequestBodyAsJson) {
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TwoFactorConfigurationApiResourceSwagger.PutTwoFactorConfigurationRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TwoFactorConfigurationApiResourceSwagger.PutTwoFactorConfigurationResponse.class)))
+    public String updateConfiguration(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateTwoFactorConfiguration().withJson(apiRequestBodyAsJson)
                 .build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

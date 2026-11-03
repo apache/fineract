@@ -32,8 +32,9 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -41,13 +42,15 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Feig
 
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE = new BigDecimal(25);
 
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
+
     @Test
     public void testNextPaymentDateForUnpaidInstallmentsWithNPlusOneTest() {
         runAt("01 November 2023", () -> {
             try {
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("next-unpaid-due-date"));
-                Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+                Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
                 Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(false, true, false, 0);
 
@@ -113,7 +116,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Feig
             try {
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("next-unpaid-due-date"));
-                Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+                Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
                 Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, false, 0);
 
@@ -210,7 +213,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Feig
 
     private Long createLoanProductWith25PctDownPaymentAndDelinquencyBucket(boolean autoDownPaymentEnabled, boolean multiDisburseEnabled,
             boolean installmentLevelDelinquencyEnabled, Integer graceOnArrearsAging) {
-        Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+        Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                 Pair.of(1, 3), //
                 Pair.of(4, 10), //
                 Pair.of(11, 60), //

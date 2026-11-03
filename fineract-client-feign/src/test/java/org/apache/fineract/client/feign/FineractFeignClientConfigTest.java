@@ -19,6 +19,7 @@
 package org.apache.fineract.client.feign;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import feign.RequestLine;
 import java.util.concurrent.TimeUnit;
@@ -83,6 +84,14 @@ class FineractFeignClientConfigTest {
 
         TestApi client = config.createClient(TestApi.class);
         assertNotNull(client);
+    }
+
+    @Test
+    void testWithoutCredentialsCannotBeCombinedWithCredentials() {
+        FineractFeignClientConfig.Builder builder = FineractFeignClientConfig.builder().baseUrl("http://localhost:8080")
+                .credentials("admin", "password").withoutCredentials();
+
+        assertThrows(IllegalStateException.class, builder::build);
     }
 
     interface TestApi {

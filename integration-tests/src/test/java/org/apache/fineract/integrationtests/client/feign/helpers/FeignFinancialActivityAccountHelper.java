@@ -43,6 +43,10 @@ public class FeignFinancialActivityAccountHelper {
         PostFinancialActivityAccountsRequest request = new PostFinancialActivityAccountsRequest()//
                 .financialActivityId(financialActivityId.longValue())//
                 .glAccountId(glAccount.getAccountID().longValue());
+        return createMapping(request);
+    }
+
+    public PostFinancialActivityAccountsResponse createMapping(PostFinancialActivityAccountsRequest request) {
         return ok(() -> fineractClient.mappingFinancialActivitiesToAccounts().createGLAccountMappingFinancialActivityAccount(request));
     }
 

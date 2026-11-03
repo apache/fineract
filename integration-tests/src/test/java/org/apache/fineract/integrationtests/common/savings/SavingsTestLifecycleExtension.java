@@ -18,11 +18,8 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.format.DateTimeFormatter;
@@ -35,13 +32,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.SavingsAccountData;
-import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.FineractClientHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.extension.AfterAllCallback;
@@ -50,48 +49,47 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 @Slf4j
 public class SavingsTestLifecycleExtension implements AfterAllCallback {
 
-    private SavingsAccountHelper savingsAccountHelper;
+    private final FineractFeignClient fineractClient = FineractFeignClientHelper.getFineractFeignClient();
+    private final FeignSavingsHelper savingsHelper = new FeignSavingsHelper(fineractClient);
+    private final FeignSavingsTransactionHelper savingsTransactionHelper = new FeignSavingsTransactionHelper(fineractClient);
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     private static final int CLEANUP_THREAD_COUNT = 10;
     private final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_FORMAT).toFormatter();
 
     @Override
     public void afterAll(ExtensionContext context) {
-        Utils.initializeRESTAssured();
         BusinessDateHelper.runAt(DateTimeFormatter.ofPattern(DATE_FORMAT).format(Utils.getLocalDateOfTenant()), () -> {
-            RequestSpecification requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-            requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-            requestSpec.header("Fineract-Platform-TenantId", "default");
-            ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-            this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
             String jobName = "Post Interest For Savings";
             SchedulerJobHelper.executeAndAwaitJob(jobName);
             // Close open savings accounts
-            List<Long> savingsIds = SavingsAccountHelper.getSavingsIdsByStatusId(300);
+            List<Long> savingsIds = ok(() -> fineractClient.defaultApi().getSavingsAccountsByStatus(300));
             runInParallel(savingsIds, this::closeSavingsAccount);
         });
     }
 
     private void closeSavingsAccount(Long savingsId) {
         try {
-            SavingsAccountData savingsAccountData = Calls
-                    .ok(FineractClientHelper.getFineractClient().savingsAccounts.retrieveSavingsAccount(savingsId, false, null, "all"));
+            SavingsAccountData savingsAccountData = savingsHelper.getSavingsDetails(savingsId);
             BigDecimal accountBalance = MathUtil.subtract(savingsAccountData.getSummary().getAvailableBalance(),
                     savingsAccountData.getMinRequiredBalance(), MathContext.DECIMAL64);
             if (accountBalance.compareTo(BigDecimal.ZERO) > 0) {
-                savingsAccountHelper.closeSavingsAccount(savingsId, new PostSavingsAccountsAccountIdRequest().locale("en")
-                        .dateFormat(DATE_FORMAT).closedOnDate(dateFormatter.format(Utils.getLocalDateOfTenant())).withdrawBalance(true));
+                closeSavingsAccount(savingsId, new PostSavingsAccountsAccountIdRequest().locale("en").dateFormat(DATE_FORMAT)
+                        .closedOnDate(dateFormatter.format(Utils.getLocalDateOfTenant())).withdrawBalance(true));
             } else if (accountBalance.compareTo(BigDecimal.ZERO) < 0) {
-                savingsAccountHelper.depositIntoSavingsAccount(savingsId,
+                savingsTransactionHelper.deposit(savingsId,
                         new PostSavingsAccountTransactionsRequest().locale("en").dateFormat(DATE_FORMAT)
                                 .transactionDate(dateFormatter.format(Utils.getLocalDateOfTenant())).transactionAmount(accountBalance.abs())
                                 .paymentTypeId(1));
-                savingsAccountHelper.closeSavingsAccount(savingsId, new PostSavingsAccountsAccountIdRequest().locale("en")
-                        .dateFormat(DATE_FORMAT).closedOnDate(dateFormatter.format(Utils.getLocalDateOfTenant())));
+                closeSavingsAccount(savingsId, new PostSavingsAccountsAccountIdRequest().locale("en").dateFormat(DATE_FORMAT)
+                        .closedOnDate(dateFormatter.format(Utils.getLocalDateOfTenant())));
             }
         } catch (Exception e) {
             log.warn("Unable to close savings account: {}, Reason: {}", savingsId, e.getMessage());
         }
+    }
+
+    private void closeSavingsAccount(Long savingsId, PostSavingsAccountsAccountIdRequest request) {
+        ok(() -> fineractClient.savingsAccount().handleCommandsSavingsAccount(savingsId, request, "close"));
     }
 
     private void runInParallel(List<Long> ids, Consumer<Long> action) {

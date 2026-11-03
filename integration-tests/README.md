@@ -16,5 +16,5 @@
 - Example:
   - `BACKEND_PROTOCOL=http`
 
-## Migration to fineract-client-feign
-We are currently migrating integration tests from RestAssured to the Feign-based Fineract client. For detailed instructions and patterns, see the [Test Migration Guide](TEST_MIGRATION_GUIDE.md).
+## Writing tests
+The tests call the server through the generated Feign client (`fineract-client-feign`). See the Feign Integration Tests chapter of the documentation (`fineract-doc/src/docs/en/chapters/testing/integration-feign.adoc`).

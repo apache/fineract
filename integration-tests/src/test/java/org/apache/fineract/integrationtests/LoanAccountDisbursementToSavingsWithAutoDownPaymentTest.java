@@ -46,6 +46,7 @@ import org.apache.fineract.client.models.SavingsAccountTransactionData;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
@@ -53,7 +54,6 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuil
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
-import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -66,14 +66,14 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Fei
 
     private static FeignSavingsHelper savingsHelper;
     private static FeignSavingsProductHelper savingsProductHelper;
-    private static FinancialActivityAccountHelper financialActivityAccountHelper;
+    private static FeignFinancialActivityAccountHelper financialActivityAccountHelper;
 
     @BeforeAll
     public static void setupSavingsAndFinancialActivityHelpers() {
         FineractFeignClient client = FineractFeignClientHelper.getFineractFeignClient();
         savingsHelper = new FeignSavingsHelper(client);
         savingsProductHelper = new FeignSavingsProductHelper(client);
-        financialActivityAccountHelper = new FinancialActivityAccountHelper(null);
+        financialActivityAccountHelper = new FeignFinancialActivityAccountHelper(FineractFeignClientHelper.getFineractFeignClient());
     }
 
     @Test
@@ -166,7 +166,7 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Fei
     private void mapLiabilityTransferFinancialActivity(Long loanProductId) {
         Long fundSourceAccountId = retrieveLoanProduct(loanProductId).getAccountingMappings().getFundSourceAccount().getId();
         PostFinancialActivityAccountsResponse response = financialActivityAccountHelper
-                .createFinancialActivityAccount(new PostFinancialActivityAccountsRequest()
+                .createMapping(new PostFinancialActivityAccountsRequest()
                         .financialActivityId((long) AccountingConstants.FinancialActivity.LIABILITY_TRANSFER.getValue())
                         .glAccountId(fundSourceAccountId));
         assertNotNull(response.getResourceId());
@@ -243,10 +243,10 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Fei
 
     @AfterEach
     public void tearDown() {
-        List<GetFinancialActivityAccountsResponse> financialActivities = financialActivityAccountHelper.getAllFinancialActivityAccounts();
+        List<GetFinancialActivityAccountsResponse> financialActivities = financialActivityAccountHelper.getAllMappings();
         for (GetFinancialActivityAccountsResponse financialActivity : financialActivities) {
             DeleteFinancialActivityAccountsResponse deletedFinancialActivityAccount = financialActivityAccountHelper
-                    .deleteFinancialActivityAccount(financialActivity.getId());
+                    .deleteMapping(financialActivity.getId());
             Assertions.assertNotNull(deletedFinancialActivityAccount);
             Assertions.assertEquals(financialActivity.getId(), deletedFinancialActivityAccount.getResourceId());
         }

@@ -34,7 +34,6 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelpe
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.BeforeAll;
@@ -80,7 +79,6 @@ public class GroupTest extends FeignLoanTestBase {
 
     @Test
     public void testGroupCreationWithoutExternalIdGeneratesOne() {
-        final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
         try {
             final PostGroupsRequest request = groupRequest(null);

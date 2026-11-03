@@ -56,13 +56,13 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBatchHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.AmortizationType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInMonthType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInYearCustomStrategy;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInYearType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -86,7 +86,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
 
     @BeforeAll
     public static void setupTestData() {
-        client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        client = clientHelper.createClient(ClientRequestBuilders.defaultClient());
     }
 
     private Long commonLoanProductId() {
@@ -103,7 +103,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             double amount = 1000.0;
             String loanDisbursementDate = "1 January 2023";
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
             Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
@@ -161,7 +161,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             double amount = 1000.0;
             String loanDisbursementDate = "1 January 2023";
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
             Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
@@ -204,7 +204,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             double amount = 1000.0;
             String loanDisbursementDate = "1 January 2023";
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
             Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
@@ -251,7 +251,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             double amount = 1000.0;
             String loanDisbursementDate = "1 January 2023";
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
             Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
@@ -314,7 +314,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             double amount = 1000.0;
             String loanDisbursementDate = "1 January 2023";
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
             Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
@@ -1554,7 +1554,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             double amount = 1000.0;
             String loanDisbursementDate = "1 January 2023";
 
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
             LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
             Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
@@ -1600,7 +1600,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             Long loanProductId = createLoanProduct(loanProductRequest);
             assertNotNull(loanProductId);
 
-            PostClientsResponse clientResponse = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            PostClientsResponse clientResponse = clientHelper.createClient(ClientRequestBuilders.defaultClient());
             Long clientId = clientResponse.getClientId();
             assertNotNull(clientId);
 
@@ -1696,7 +1696,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             Long loanProductId = createLoanProduct(loanProductRequest);
             assertNotNull(loanProductId);
 
-            PostClientsResponse clientResponse = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            PostClientsResponse clientResponse = clientHelper.createClient(ClientRequestBuilders.defaultClient());
             Long clientId = clientResponse.getClientId();
             assertNotNull(clientId);
 
@@ -1779,7 +1779,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             Long loanProductId = createLoanProduct(loanProductRequest);
             assertNotNull(loanProductId);
 
-            PostClientsResponse clientResponse = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            PostClientsResponse clientResponse = clientHelper.createClient(ClientRequestBuilders.defaultClient());
             Long clientId = clientResponse.getClientId();
             assertNotNull(clientId);
 
@@ -1883,7 +1883,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             Long loanProductId = createLoanProduct(loanProductRequest);
             assertNotNull(loanProductId);
 
-            PostClientsResponse clientResponse = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            PostClientsResponse clientResponse = clientHelper.createClient(ClientRequestBuilders.defaultClient());
             Long clientId = clientResponse.getClientId();
             assertNotNull(clientId);
 

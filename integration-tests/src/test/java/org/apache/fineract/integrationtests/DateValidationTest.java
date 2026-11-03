@@ -18,124 +18,97 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.PostClientsRequest;
-import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.PostFixedDepositAccountsCharges;
+import org.apache.fineract.client.models.PostFixedDepositAccountsRequest;
+import org.apache.fineract.client.models.PostFixedDepositProductsRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFixedDepositHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFixedDepositProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.InteropTransactionRequestsApi;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.DepositRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.DepositTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.FeignErrors;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountHelper;
-import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProductHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.interoperation.InteropHelper;
 import org.apache.fineract.interoperation.domain.InteropInitiatorType;
 import org.apache.fineract.interoperation.domain.InteropTransactionRole;
 import org.apache.fineract.interoperation.domain.InteropTransactionScenario;
 import org.apache.fineract.interoperation.util.InteropUtil;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class DateValidationTest {
 
-    public static final String WHOLE_TERM = "1";
-    public static final String MINIMUM_OPENING_BALANCE = "1000.0";
-    public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification errorResponseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
-    private LoanTransactionHelper loanTransactionHelper;
-    private InteropHelper interopHelper;
-    private AccountHelper accountHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.errorResponseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        this.interopHelper = new InteropHelper(requestSpec, errorResponseSpec);
-        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
-    }
+    private final FineractFeignClient fineractClient = FineractFeignClientHelper.getFineractFeignClient();
+    private final FeignClientHelper clientHelper = new FeignClientHelper(fineractClient);
+    private final FeignLoanHelper loanHelper = new FeignLoanHelper(fineractClient);
+    private final FeignAccountHelper accountHelper = new FeignAccountHelper(fineractClient);
+    private final FeignFixedDepositProductHelper fixedDepositProductHelper = new FeignFixedDepositProductHelper(fineractClient);
+    private final FeignFixedDepositHelper fixedDepositHelper = new FeignFixedDepositHelper(fineractClient);
 
     @Test
     public void testShouldFailIfDateIsInvalid() {
 
         String invalidDate = "31 June 2022";
 
-        PostClientsRequest postClientsRequest = ClientHelper.defaultClientCreationRequest();
+        Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
 
-        PostClientsResponse client = clientHelper.createClient(postClientsRequest);
-        Long clientId = client.getClientId();
+        final Long loanProductID = loanHelper.createLoanProduct(new LoanProductTestBuilder().withPrincipal("1000")
+                .withRepaymentTypeAsMonth().withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth()
+                .withinterestRatePerPeriod("0").withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment()
+                .withInterestTypeAsDecliningBalance().withAccountingRuleAsNone().withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0").withInArrearsTolerance("1001").withMultiDisburse()
+                .withDisallowExpectedDisbursements(true).buildRequest(null)).getResourceId();
 
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
-                .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
-                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
-                .withAccountingRuleAsNone().withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30")
-                .withDaysInYear("365").withMoratorium("0", "0").withInArrearsTolerance("1001").withMultiDisburse()
-                .withDisallowExpectedDisbursements(true).build(null);
-        final Integer loanProductID = loanTransactionHelper.getLoanProductId(loanProductJSON);
-
-        loanTransactionHelper = new LoanTransactionHelper(requestSpec, errorResponseSpec);
-
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate(invalidDate).withSubmittedOnDate("01 March 2022").withLoanType("individual")
-                .build(clientId.toString(), loanProductID.toString(), null);
-        HashMap<String, Object> response = (HashMap) loanTransactionHelper.createLoanAccount(loanApplicationJSON, "");
-        List<HashMap<String, Object>> errors = (List) response.get("errors");
-        assertNotNull(errors);
-        HashMap<String, Object> error = errors.get(0);
-        assertNotNull(error);
+        final PostLoansRequest loanApplication = new PostLoansRequest().clientId(clientId).productId(loanProductID)
+                .principal(new BigDecimal("1000")).loanTermFrequency(1).loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
+                .numberOfRepayments(1).repaymentEvery(1).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
+                .interestRatePerPeriod(BigDecimal.ZERO).interestType(LoanTestData.InterestType.FLAT)
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)
+                .transactionProcessingStrategyCode(LoanTestData.TransactionProcessingStrategyCode.MIFOS_STANDARD_STRATEGY)
+                .expectedDisbursementDate(invalidDate).submittedOnDate("01 March 2022").loanType("individual")
+                .maxOutstandingLoanBalance(new BigDecimal("36000")).collateral(List.of()).locale("en_GB").dateFormat("dd MMMM yyyy");
+        CallFailedRuntimeException exception = loanHelper.applyForLoanExpectingError(loanApplication);
+        assertEquals(400, exception.getStatus());
         assertEquals(
                 "The parameter `expectedDisbursementDate` is invalid based on the dateFormat: `dd MMMM yyyy` and locale: `en_GB` provided:",
-                error.get("developerMessage"));
+                FeignErrors.firstError(exception).developerMessage());
     }
 
     @Test
     public void testShouldFailWithInvalidDateTime() {
         String requestCode = UUID.randomUUID().toString();
         InteropTransactionRole role = InteropTransactionRole.PAYER;
-        String requestBody = buildRequestBody(requestCode, role);
-        String response = interopHelper.postTransactionRequest(requestCode, role, requestBody);
-        HashMap<String, Object> map = new Gson().fromJson(response, new TypeToken<HashMap<String, Object>>() {}.getType());
-        List<Map<String, Object>> errors = (List) map.get("errors");
-        assertNotNull(errors);
-        Map<String, Object> error = errors.get(0);
-        assertNotNull(error);
+        Map<String, Object> request = buildRequestBody(requestCode, role);
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient.create(InteropTransactionRequestsApi.class).createTransactionRequest(request));
+        assertEquals(400, exception.getStatus());
         assertEquals("The parameter `expiration` is invalid based on the dateFormat: `dd MMMM yyyy HH:mm:ss` and locale: `en` provided:",
-                error.get("developerMessage"));
+                FeignErrors.firstError(exception).developerMessage());
     }
 
     @Test
@@ -155,28 +128,22 @@ public class DateValidationTest {
         todaysDate = LocalDate.now(ZoneId.systemDefault()).minusMonths(1);
         final String SUBMITTED_ON_DATE = todaysDate.format(formatter);
 
-        PostClientsRequest postClientsRequest = ClientHelper.defaultClientCreationRequest();
-
-        Long clientId = clientHelper.createClient(postClientsRequest).getClientId();
+        Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         Assertions.assertNotNull(clientId);
 
-        Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, assetAccount, liabilityAccount, incomeAccount,
+        Long fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, assetAccount, liabilityAccount, incomeAccount,
                 expenseAccount);
         Assertions.assertNotNull(fixedDepositProductId);
 
         final Integer maturityInstructionId = 400;
-        String response = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
-                maturityInstructionId, getCharges());
-        HashMap<String, Object> map = new Gson().fromJson(response, new TypeToken<HashMap<String, Object>>() {}.getType());
-        List<Map<String, Object>> errors = (List) map.get("errors");
-        assertNotNull(errors);
-        Map<String, Object> error = errors.get(0);
-        assertNotNull(error);
+        CallFailedRuntimeException exception = fixedDepositHelper.submitApplicationExpectingError(
+                fixedDepositApplication(clientId, fixedDepositProductId, SUBMITTED_ON_DATE, maturityInstructionId));
+        assertEquals(400, exception.getStatus());
         assertEquals("The parameter `feeOnMonthDay` is invalid based on the monthDayFormat: `dd MMM` and locale: `en_GB` provided:",
-                error.get("developerMessage"));
+                FeignErrors.firstError(exception).developerMessage());
     }
 
-    private String buildRequestBody(final String requestCode, final InteropTransactionRole role) {
+    private Map<String, Object> buildRequestBody(final String requestCode, final InteropTransactionRole role) {
         HashMap<String, Object> map = new HashMap<>();
         map.put(InteropUtil.PARAM_TRANSACTION_CODE, UUID.randomUUID().toString());
         map.put(InteropUtil.PARAM_REQUEST_CODE, requestCode);
@@ -197,33 +164,24 @@ public class DateValidationTest {
         typeMap.put(InteropUtil.PARAM_INITIATOR_TYPE, InteropInitiatorType.CONSUMER);
         map.put(InteropUtil.PARAM_TRANSACTION_TYPE, typeMap);
 
-        return new Gson().toJson(map);
+        return map;
     }
 
-    private Integer createFixedDepositProduct(final String validFrom, final String validTo, Account... accounts) {
+    private Long createFixedDepositProduct(final String validFrom, final String validTo, Account assetAccount, Account liabilityAccount,
+            Account incomeAccount, Account expenseAccount) {
         log.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
-        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
-        fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsCashBased(accounts);
-        final String fixedDepositProductJSON = fixedDepositProductHelper.withPeriodRangeChart() //
-                .build(validFrom, validTo, true);
-        return FixedDepositProductHelper.createFixedDepositProduct(fixedDepositProductJSON, requestSpec, responseSpec);
+        PostFixedDepositProductsRequest request = DepositRequestBuilders.withCashBasedAccounting(
+                DepositRequestBuilders.fixedDepositProduct(), assetAccount, liabilityAccount, incomeAccount, expenseAccount);
+        request = DepositRequestBuilders.withChart(request, validFrom, validTo, DepositTestData.periodRangeChartSlabs());
+        return fixedDepositProductHelper.createProduct(request).getResourceId();
     }
 
-    private String applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
-            final Integer maturityInstructionId, final List<HashMap<String, String>> charges) {
+    private PostFixedDepositAccountsRequest fixedDepositApplication(final Long clientId, final Long productId, final String submittedOnDate,
+            final Integer maturityInstructionId) {
         log.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
-        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.errorResponseSpec) //
-                .withSubmittedOnDate(submittedOnDate).withMaturityInstructionId(maturityInstructionId).withCharges(charges)
-                .build(clientID, productID, WHOLE_TERM);
-        return FixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec,
-                this.errorResponseSpec);
-    }
-
-    private List<HashMap<String, String>> getCharges() {
-        List<HashMap<String, String>> list = new ArrayList<>();
-        HashMap<String, String> map = new HashMap<>();
-        map.put("feeOnMonthDay", "31 June");
-        list.add(map);
-        return list;
+        return DepositRequestBuilders
+                .fixedDepositAccount(clientId, productId, submittedOnDate, DepositTestData.PreClosurePenalInterestOnType.WHOLE_TERM)
+                .locale("en_GB").monthDayFormat("dd MMM").maturityInstructionId(maturityInstructionId)
+                .charges(List.of(new PostFixedDepositAccountsCharges().feeOnMonthDay("31 June")));
     }
 }

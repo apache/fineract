@@ -33,13 +33,13 @@ import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEventHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyRangeScheduleHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalLoanNearBreachActionsHelper;
@@ -52,6 +52,8 @@ import org.junit.jupiter.api.BeforeAll;
 public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
 
     protected static final BigDecimal DEFAULT_PERIOD_PAYMENT_RATE = BigDecimal.valueOf(18);
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
+
     /**
      * The inline WC COB replays every skipped business day inside one request, so an unbounded leap blows the client
      * read timeout; the business date is advanced in chunks of this size instead.
@@ -149,8 +151,8 @@ public abstract class FeignWorkingCapitalTestBase extends FeignIntegrationTest {
     }
 
     protected Long createDelinquencyRange(String classification, int minimumAgeDays, Integer maximumAgeDays) {
-        return DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest().classification(classification)
-                .minimumAgeDays(minimumAgeDays).maximumAgeDays(maximumAgeDays).locale("en")).getResourceId();
+        return delinquencyHelper.createRange(new DelinquencyRangeRequest().classification(classification).minimumAgeDays(minimumAgeDays)
+                .maximumAgeDays(maximumAgeDays).locale("en")).getResourceId();
     }
 
     protected Long createWcProductWithDelinquencyBucket(int frequencyDays, BigDecimal minimumPaymentPercent, List<Long> rangeIds) {

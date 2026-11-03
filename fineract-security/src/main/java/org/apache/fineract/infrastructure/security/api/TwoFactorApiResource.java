@@ -19,6 +19,12 @@
 package org.apache.fineract.infrastructure.security.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -68,6 +74,7 @@ public class TwoFactorApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TwoFactorApiResourceSwagger.GetTwoFactorDeliveryMethodsResponse.class))))
     public String getOTPDeliveryMethods(@Context final UriInfo uriInfo) {
         AppUser user = context.authenticatedUser();
 
@@ -77,6 +84,7 @@ public class TwoFactorApiResource {
 
     @POST
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TwoFactorApiResourceSwagger.PostTwoFactorRequestTokenResponse.class)))
     public String requestToken(@QueryParam("deliveryMethod") final String deliveryMethod,
             @QueryParam("extendedToken") @DefaultValue("false") boolean extendedAccessToken, @Context final UriInfo uriInfo) {
         final AppUser user = context.authenticatedUser();
@@ -88,6 +96,7 @@ public class TwoFactorApiResource {
     @Path("validate")
     @POST
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TwoFactorApiResourceSwagger.PostTwoFactorValidateResponse.class)))
     public String validate(@QueryParam("token") final String token) {
         final AppUser user = context.authenticatedUser();
 
@@ -101,7 +110,9 @@ public class TwoFactorApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "updateConfiguration")
     @AlternativeOperationId("updateConfiguration_2")
-    public String updateConfiguration(final String apiRequestBodyAsJson) {
+    @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TwoFactorApiResourceSwagger.PostTwoFactorInvalidateRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TwoFactorApiResourceSwagger.PostTwoFactorInvalidateResponse.class)))
+    public String updateConfiguration(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().invalidateTwoFactorAccessToken().withJson(apiRequestBodyAsJson)
                 .build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

@@ -43,11 +43,12 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,6 +62,8 @@ public class DelinquencyAndChargebackIntegrationTest extends FeignLoanTestBase {
     private static final Double doubleZERO = Double.valueOf("0.00");
     private static final DateTimeFormatter BUSINESS_DATE_FORMAT = DateTimeFormatter.ofPattern(LoanTestData.DATETIME_PATTERN);
 
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
+
     @ParameterizedTest
     @MethodSource("loanProductFactory")
     public void testLoanClassificationStepAsPartOfCOB(String strategyCode, boolean advancedAllocation) {
@@ -73,7 +76,7 @@ public class DelinquencyAndChargebackIntegrationTest extends FeignLoanTestBase {
             log.info("Current Business date {}", businessDate);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
 
-            final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+            final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
             final Long clientId = createClient("01 January 2012");
             final Long loanProductId = createLoanProduct(strategyCode, advancedAllocation, delinquencyBucketId);
 
@@ -165,7 +168,7 @@ public class DelinquencyAndChargebackIntegrationTest extends FeignLoanTestBase {
             log.info("Current Business date {}", businessDate);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
 
-            final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+            final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
             final Long clientId = createClient("01 January 2012");
             final Long loanProductId = createLoanProduct(strategyCode, advancedAllocation, delinquencyBucketId);
 
@@ -292,7 +295,7 @@ public class DelinquencyAndChargebackIntegrationTest extends FeignLoanTestBase {
             log.info("Loan Delinquency Range is {}", delinquencyRange.getClassification());
         }
         evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, Double.valueOf(adjustments));
-        DelinquencyBucketsHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, pastDueDays, delinquentAmount);
+        FeignDelinquencyHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, pastDueDays, delinquentAmount);
         validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf(outstanding));
 
         return delinquencyRange;

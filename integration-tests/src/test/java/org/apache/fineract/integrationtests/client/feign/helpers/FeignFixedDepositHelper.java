@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.DeleteFixedDepositAccountsAccountIdResponse;
 import org.apache.fineract.client.models.GetFixedDepositAccountsAccountIdResponse;
 import org.apache.fineract.client.models.GetFixedDepositAccountsAccountIdSummary;
@@ -61,6 +63,10 @@ public class FeignFixedDepositHelper {
 
     public PostFixedDepositAccountsResponse submitApplication(PostFixedDepositAccountsRequest request) {
         return ok(() -> fineractClient.fixedDepositAccount().createFixedDepositAccount(request));
+    }
+
+    public CallFailedRuntimeException submitApplicationExpectingError(PostFixedDepositAccountsRequest request) {
+        return fail(() -> fineractClient.fixedDepositAccount().createFixedDepositAccount(request));
     }
 
     public PutFixedDepositAccountsAccountIdResponse updateApplication(Long accountId, PutFixedDepositAccountsAccountIdRequest request) {

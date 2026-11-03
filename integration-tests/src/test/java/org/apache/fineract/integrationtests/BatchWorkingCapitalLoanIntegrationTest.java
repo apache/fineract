@@ -45,11 +45,12 @@ import org.apache.fineract.client.models.WorkingCapitalLoanBreachActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachActionData;
 import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.batch.BatchServiceHelper;
-import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyActionHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyRangeScheduleHelper;
@@ -72,6 +73,7 @@ import org.junit.jupiter.api.Test;
  */
 public class BatchWorkingCapitalLoanIntegrationTest {
 
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
     private final BatchServiceHelper batchServiceHelper = new BatchServiceHelper();
     private final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
@@ -86,6 +88,8 @@ public class BatchWorkingCapitalLoanIntegrationTest {
     private final List<Long> createdNearBreachIds = new ArrayList<>();
     private final List<Long> createdDelinquencyBucketIds = new ArrayList<>();
     private final List<Long> createdDelinquencyRangeIds = new ArrayList<>();
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @AfterEach
     void cleanupEntities() {
@@ -893,7 +897,7 @@ public class BatchWorkingCapitalLoanIntegrationTest {
     }
 
     private Long createProductWithDelinquencyBucket() {
-        final PostDelinquencyRangeResponse range = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest()
+        final PostDelinquencyRangeResponse range = delinquencyHelper.createRange(new DelinquencyRangeRequest()
                 .classification(Utils.randomStringGenerator("DLQ_R_", 10)).minimumAgeDays(1).maximumAgeDays(30).locale("en"));
         assertNotNull(range);
         createdDelinquencyRangeIds.add(range.getResourceId());
@@ -929,7 +933,7 @@ public class BatchWorkingCapitalLoanIntegrationTest {
     }
 
     private Long createClient() {
-        return ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        return clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
     }
 
     private Long extractResourceId(final String responseBody) {

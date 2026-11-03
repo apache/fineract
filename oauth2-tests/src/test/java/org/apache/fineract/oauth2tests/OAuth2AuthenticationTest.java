@@ -18,21 +18,22 @@
  */
 package org.apache.fineract.oauth2tests;
 
-import static io.restassured.RestAssured.given;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Splitter;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import feign.Body;
+import feign.FeignException;
+import feign.Headers;
+import feign.Param;
+import feign.RequestLine;
+import feign.Response;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
@@ -41,6 +42,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.ApiResponse;
+import org.apache.fineract.client.models.GetUserDetailsResponse;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,102 +55,78 @@ import org.openqa.selenium.chrome.ChromeOptions;
 
 public class OAuth2AuthenticationTest {
 
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpec401;
-    private RequestSpecification requestSpec;
-    private RequestSpecification requestFormSpec;
+    private static final String SERVER_URL = "https://localhost:8443/fineract-provider";
+    private static final String REDIRECT_URI = "http://localhost:3000/callback";
 
-    public static final String TENANT_PARAM_NAME = "tenantIdentifier";
-    public static final String DEFAULT_TENANT = "default";
-    public static final String TENANT_IDENTIFIER = TENANT_PARAM_NAME + '=' + DEFAULT_TENANT;
-    private static final String HEALTH_URL = "/fineract-provider/actuator/health";
+    // The server only accepts OAuth2 bearer tokens, so the client sends no Basic credentials of its own.
+    private final FineractFeignClient fineractClient = FineractFeignClient.builder().baseUrl(SERVER_URL + "/api").withoutCredentials()
+            .disableSslVerification(true).build();
+    private final ServerPagesApi serverPagesApi = FineractFeignClient.builder().baseUrl(SERVER_URL).withoutCredentials()
+            .disableSslVerification(true).build().create(ServerPagesApi.class);
 
     @BeforeEach
     public void setup() throws InterruptedException {
-        initializeRestAssured();
-
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-
-        // Login with basic authentication
         awaitSpringBootActuatorHealthyUp();
-
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestFormSpec = new RequestSpecBuilder().setContentType(ContentType.URLENC).build();
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpec401 = new ResponseSpecBuilder().expectStatusCode(401).build();
     }
 
     @Test
     public void testActuatorAccess() {
-        performServerGet(requestSpec, responseSpec, "/fineract-provider/actuator/info", null);
+        try (Response response = serverPagesApi.actuatorInfo()) {
+            assertEquals(200, response.status());
+        }
     }
 
     @Test
     public void testApiDocsAccess() {
-        performServerGet(requestSpec, responseSpec, "/fineract-provider/legacy-docs/apiLive.htm", null);
+        try (Response response = serverPagesApi.legacyApiDocs()) {
+            assertEquals(200, response.status());
+        }
     }
 
     @Test
     public void testAccessWithoutAuthentication() {
-        performServerGet(requestSpec, responseSpec401, "/fineract-provider/api/v1/offices/1?" + TENANT_IDENTIFIER, null);
+        assertThrows(FeignException.Unauthorized.class, () -> fineractClient.offices().retrieveOneOffice(1L));
     }
 
     @Test
     public void testGetOAuth2UserDetails() throws IOException, InterruptedException {
-        performServerGet(requestSpec, responseSpec401, "/fineract-provider/api/v1/offices/1?" + TENANT_IDENTIFIER, null);
+        assertThrows(FeignException.Unauthorized.class, () -> fineractClient.offices().retrieveOneOffice(1L));
 
-        String token = loginAndClaimToken(
-                "https://localhost:8443/fineract-provider/oauth2/authorize" + "?response_type=code&client_id=frontend-client"
-                        + "&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&scope=read&state=xyz"
-                        + "&code_challenge=zudG_xkz8WrPPMq2MwmFP-NRvNapCL0OD-xYWRapTsU" + "&code_challenge_method=S256",
-                requestFormSpec);
+        String token = loginAndClaimToken(SERVER_URL + "/oauth2/authorize" + "?response_type=code&client_id=frontend-client"
+                + "&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&scope=read&state=xyz"
+                + "&code_challenge=zudG_xkz8WrPPMq2MwmFP-NRvNapCL0OD-xYWRapTsU" + "&code_challenge_method=S256");
 
-        RequestSpecification requestSpecWithToken = new RequestSpecBuilder() //
-                .setContentType(ContentType.JSON) //
-                .addHeader("Authorization", "Bearer " + token) //
-                .build();
-
-        Boolean authenticationCheck = performServerGet(requestSpecWithToken, responseSpec,
-                "/fineract-provider/api/v1/userdetails?" + TENANT_IDENTIFIER, "authenticated");
-        assertEquals(authenticationCheck, true);
+        ApiResponse<GetUserDetailsResponse> response = ok(
+                () -> fineractClient.fetchAuthenticatedUserDetails().fetchAuthenticatedUserDataWithHttpInfo(bearer(token)));
+        assertEquals(200, response.getStatusCode());
+        assertTrue(response.getData().getAuthenticated());
     }
 
-    private static void initializeRestAssured() {
-        RestAssured.baseURI = "https://localhost";
-        RestAssured.port = 8443;
-        RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
-        RestAssured.useRelaxedHTTPSValidation();
-    }
+    private void awaitSpringBootActuatorHealthyUp() throws InterruptedException {
+        final int maxAttempts = 10;
+        Integer lastStatus = null;
 
-    private static void awaitSpringBootActuatorHealthyUp() throws InterruptedException {
-        int attempt = 0;
-        final int max_attempts = 10;
-        Response response = null;
-
-        do {
-            try {
-                response = RestAssured.get(HEALTH_URL);
-
-                if (response.statusCode() == 200) {
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            try (Response response = serverPagesApi.actuatorHealth()) {
+                if (response.status() == 200) {
                     return;
                 }
-
-                Thread.sleep(3000);
-            } catch (Exception e) {
-                Thread.sleep(3000);
+                lastStatus = response.status();
+            } catch (RuntimeException e) {
+                // the server is not accepting connections yet
             }
-            attempt++;
-        } while (attempt < max_attempts);
+            Thread.sleep(3000);
+        }
 
-        fail(HEALTH_URL + " returned " + response.prettyPrint());
+        fail("/actuator/health returned " + (lastStatus == null ? "no response" : lastStatus));
     }
 
-    public String loginAndClaimToken(String url, RequestSpecification requestSpec) throws IOException {
+    public String loginAndClaimToken(String url) throws IOException {
         CompletableFuture<String> futureToken = new CompletableFuture<>();
         HttpServer server = HttpServer.create(new InetSocketAddress(3000), 0);
         server.createContext("/callback", exchange -> {
             try {
-                String token = claimTokenOnCallback(requestSpec, exchange);
+                String token = claimTokenOnCallback(exchange);
                 futureToken.complete(token); // complete future with value
                 exchange.sendResponseHeaders(200, 0);
             } catch (Exception e) {
@@ -182,7 +162,7 @@ public class OAuth2AuthenticationTest {
         return new ChromeDriver(options);
     }
 
-    private String claimTokenOnCallback(RequestSpecification requestSpec, HttpExchange exchange) {
+    private String claimTokenOnCallback(HttpExchange exchange) {
         String query = exchange.getRequestURI().getQuery();
         String code = null;
         if (query != null) {
@@ -196,26 +176,39 @@ public class OAuth2AuthenticationTest {
                 }
             }
         }
-        Map<String, String> formParams = Map.of("grant_type", "authorization_code", "code", code, "redirect_uri",
-                "http://localhost:3000/callback", "client_id", "frontend-client", "code_verifier",
-                "gyQBFpozcvcosvPt7m9Q1A4SqSf1yJtPIERruioHLjQ");
-        return performServerPost(requestSpec, responseSpec, "/fineract-provider/oauth2/token", formParams, "access_token");
+        String authorizationCode = code;
+        ApiResponse<TokenResponse> response = ok(() -> serverPagesApi.token(authorizationCode, REDIRECT_URI, "frontend-client",
+                "gyQBFpozcvcosvPt7m9Q1A4SqSf1yJtPIERruioHLjQ"));
+        assertEquals(200, response.getStatusCode());
+        return response.getData().accessToken();
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
-        if (jsonAttributeToGetBack == null) {
-            return (T) json;
-        }
-        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
+    private static Map<String, String> bearer(String token) {
+        return Map.of("Authorization", "Bearer " + token);
     }
 
-    public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String putURL, final Map<String, String> formBody, final String jsonAttributeToGetBack) {
-        final String response = given().spec(requestSpec).header("Content-Type", "application/x-www-form-urlencoded").formParams(formBody)
-                .expect().spec(responseSpec).log().ifError().when().post(putURL).andReturn().asString();
-        return (T) JsonPath.from(response).get(jsonAttributeToGetBack);
+    /**
+     * The actuator, the legacy API docs and the OAuth2 token endpoint are served outside {@code /api} and are not part
+     * of the OpenAPI spec, so the generated client has no operations for them.
+     */
+    interface ServerPagesApi {
+
+        @RequestLine("GET /actuator/health")
+        Response actuatorHealth();
+
+        @RequestLine("GET /actuator/info")
+        Response actuatorInfo();
+
+        @RequestLine("GET /legacy-docs/apiLive.htm")
+        Response legacyApiDocs();
+
+        @RequestLine("POST /oauth2/token")
+        @Headers("Content-Type: application/x-www-form-urlencoded")
+        @Body("grant_type=authorization_code&code={code}&redirect_uri={redirectUri}&client_id={clientId}&code_verifier={codeVerifier}")
+        ApiResponse<TokenResponse> token(@Param("code") String code, @Param("redirectUri") String redirectUri,
+                @Param("clientId") String clientId, @Param("codeVerifier") String codeVerifier);
+    }
+
+    record TokenResponse(@JsonProperty("access_token") String accessToken) {
     }
 }

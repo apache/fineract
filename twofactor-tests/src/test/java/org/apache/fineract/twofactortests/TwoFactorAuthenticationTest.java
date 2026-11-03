@@ -18,50 +18,47 @@
  */
 package org.apache.fineract.twofactortests;
 
-import static io.restassured.RestAssured.given;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import feign.FeignException;
+import feign.RequestLine;
+import feign.Response;
 import jakarta.mail.MessagingException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.ApiResponse;
+import org.apache.fineract.client.models.GetTwoFactorConfigurationResponse;
+import org.apache.fineract.client.models.GetTwoFactorDeliveryMethodsResponse;
+import org.apache.fineract.client.models.PostAuthenticationRequest;
+import org.apache.fineract.client.models.PostAuthenticationResponse;
+import org.apache.fineract.client.models.PostTwoFactorInvalidateRequest;
+import org.apache.fineract.client.models.PostTwoFactorRequestTokenResponse;
+import org.apache.fineract.client.models.PostTwoFactorValidateResponse;
+import org.apache.fineract.client.models.PutTwoFactorConfigurationRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class TwoFactorAuthenticationTest {
 
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpec403;
-    private ResponseSpecification responseSpec401;
-    private RequestSpecification requestSpecWithoutBasic;
-    private RequestSpecification requestSpec;
-    private String basicAuthenticationKey;
-
-    public static final String TENANT_PARAM_NAME = "tenantIdentifier";
-    public static final String DEFAULT_TENANT = "default";
-    public static final String TENANT_IDENTIFIER = TENANT_PARAM_NAME + '=' + DEFAULT_TENANT;
-    private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
-    private static final String HEALTH_URL = "/fineract-provider/actuator/health";
+    private static final String SERVER_URL = "https://localhost:8443/fineract-provider";
+    private static final String TFA_TOKEN_HEADER = "Fineract-Platform-TFA-Token";
     private static final ServerSetup SMTP_SETUP = ServerSetupTest.SMTP.createCopy("0.0.0.0");
 
     @RegisterExtension
@@ -69,237 +66,203 @@ public class TwoFactorAuthenticationTest {
             .withConfiguration(GreenMailConfiguration.aConfig().withUser("support@cloudmicrofinance.com", "support81"))
             .withPerMethodLifecycle(true);
 
+    // Every call sets its own Authorization header: the Basic key the login returned, alone or with a two-factor token.
+    private final FineractFeignClient fineractClient = FineractFeignClient.builder().baseUrl(SERVER_URL + "/api").withoutCredentials()
+            .disableSslVerification(true).build();
+    private final ServerPagesApi serverPagesApi = FineractFeignClient.builder().baseUrl(SERVER_URL).withoutCredentials()
+            .disableSslVerification(true).build().create(ServerPagesApi.class);
+    private Map<String, String> basicAuthentication;
+
     @BeforeEach
     public void setup() throws InterruptedException {
-        initializeRestAssured();
-
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-
-        // Login with basic authentication
         awaitSpringBootActuatorHealthyUp();
-        String json = RestAssured.given().contentType(ContentType.JSON).body("{\"username\":\"mifos\", \"password\":\"password\"}").expect()
-                .log().ifError().when().post(LOGIN_URL).asString();
-        assertFalse(StringUtils.isBlank(json));
-
-        this.basicAuthenticationKey = JsonPath.with(json).get("base64EncodedAuthenticationKey");
-        assertFalse(StringUtils.isBlank(this.basicAuthenticationKey));
-
-        this.requestSpec.header("Authorization", "Basic " + basicAuthenticationKey);
-
-        this.requestSpecWithoutBasic = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpec403 = new ResponseSpecBuilder().expectStatusCode(403).build();
-        this.responseSpec401 = new ResponseSpecBuilder().expectStatusCode(401).build();
+        String basicAuthenticationKey = login().getBase64EncodedAuthenticationKey();
+        assertFalse(StringUtils.isBlank(basicAuthenticationKey));
+        this.basicAuthentication = Map.of("Authorization", "Basic " + basicAuthenticationKey);
     }
 
     @Test
     public void testActuatorAccess() {
-        performServerGet(requestSpecWithoutBasic, responseSpec, "/fineract-provider/actuator/info", null);
+        try (Response response = serverPagesApi.actuatorInfo()) {
+            assertEquals(200, response.status());
+        }
     }
 
     @Test
     public void testApiDocsAccess() {
-        performServerGet(requestSpecWithoutBasic, responseSpec, "/fineract-provider/legacy-docs/apiLive.htm", null);
+        try (Response response = serverPagesApi.legacyApiDocs()) {
+            assertEquals(200, response.status());
+        }
     }
 
     @Test
     public void testAccessWithoutTwofactor() {
-        performServerGet(requestSpec, responseSpec403, "/fineract-provider/api/v1/offices/1?" + TENANT_IDENTIFIER, "");
+        assertThrows(FeignException.Forbidden.class, () -> fineractClient.offices().retrieveOneOffice(1L, basicAuthentication));
     }
 
     @Test
     public void testCheckTwofactorEnabled() {
-        String json = RestAssured.given().contentType(ContentType.JSON).body("{\"username\":\"mifos\", \"password\":\"password\"}").expect()
-                .log().ifError().when().post("/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER).asString();
-        assertFalse(StringUtils.isBlank(json));
-        Boolean key = JsonPath.with(json).get("isTwoFactorAuthenticationRequired");
-        assertEquals(true, key);
+        assertTrue(login().getIsTwoFactorAuthenticationRequired());
     }
 
     @Test
     public void testGetTwofactorMethods() {
-        String json = RestAssured.given().spec(requestSpec).expect().log().ifError().when()
-                .get("/fineract-provider/api/v1/twofactor?" + TENANT_IDENTIFIER).asString();
-        assertFalse(StringUtils.isBlank(json));
-        List<HashMap<String, Object>> twoFactorMethods = JsonPath.with(json).getList("$");
-        assertEquals("email", twoFactorMethods.get(0).get("name"));
-        assertEquals("demomfi@mifos.org", twoFactorMethods.get(0).get("target"));
+        List<GetTwoFactorDeliveryMethodsResponse> twoFactorMethods = expect200(
+                () -> fineractClient.twoFactor().getOTPDeliveryMethodsWithHttpInfo(basicAuthentication));
+        assertEquals("email", twoFactorMethods.get(0).getName());
+        assertEquals("demomfi@mifos.org", twoFactorMethods.get(0).getTarget());
     }
 
     @Test
     public void testTwofactorLogin() throws IOException, MessagingException {
         assertEquals(0, greenMail.getReceivedMessages().length);
-        performServerPost(requestSpec, responseSpec,
-                "/fineract-provider/api/v1/twofactor?deliveryMethod=email&extendedToken=false&" + TENANT_IDENTIFIER, "", "");
+        PostTwoFactorRequestTokenResponse tokenRequest = requestEmailToken();
         assertEquals(1, greenMail.getReceivedMessages().length);
+        assertEquals("email", tokenRequest.getDeliveryMethod().getName());
+        assertEquals("demomfi@mifos.org", tokenRequest.getDeliveryMethod().getTarget());
+        assertFalse(tokenRequest.getExtendedAccessToken());
+        assertNotNull(tokenRequest.getRequestTime());
 
-        Pattern p = Pattern.compile("token is (.+).");
-        Matcher m = p.matcher((CharSequence) greenMail.getReceivedMessages()[0].getContent());
-
-        String token = null;
-
-        while (m.find()) {
-            token = m.group(1);
-        }
-
+        String token = readToken(0);
         assertNotNull(token);
-        String tfaToken = performServerPost(requestSpec, responseSpec,
-                "/fineract-provider/api/v1/twofactor/validate?token=" + token + "&" + TENANT_IDENTIFIER, "", "token");
+        PostTwoFactorValidateResponse accessToken = validateWithTimes(token);
+        String tfaToken = accessToken.getToken();
         assertNotNull(tfaToken);
+        assertTrue(accessToken.getValidTo() > accessToken.getValidFrom());
 
-        RequestSpecification requestSpecWithTFA = new RequestSpecBuilder() //
-                .setContentType(ContentType.JSON) //
-                .addHeader("Fineract-Platform-TFA-Token", tfaToken) //
-                .addHeader("Authorization", "Basic " + basicAuthenticationKey) //
-                .build();
+        Map<String, String> twoFactorAuthentication = withTwoFactorToken(tfaToken);
 
-        performServerGet(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/offices/1?" + TENANT_IDENTIFIER, "");
+        expect200(() -> fineractClient.offices().retrieveOneOfficeWithHttpInfo(1L, twoFactorAuthentication));
+        assertEquals(retrieveConfiguration(twoFactorAuthentication).getOtpTokenLiveTime(), tokenRequest.getTokenLiveTimeInSec());
 
-        performServerPost(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/twofactor/invalidate?" + TENANT_IDENTIFIER,
-                "{ \"token\": \"" + tfaToken + "\" }", "");
+        assertEquals(tfaToken, invalidate(tfaToken, twoFactorAuthentication));
 
-        performServerGet(requestSpecWithTFA, responseSpec401, "/fineract-provider/api/v1/offices/1?" + TENANT_IDENTIFIER, "");
+        assertThrows(FeignException.Unauthorized.class, () -> fineractClient.offices().retrieveOneOffice(1L, twoFactorAuthentication));
     }
 
     @Test
     public void testTfaConfigSettings() throws IOException, MessagingException {
         assertEquals(0, greenMail.getReceivedMessages().length);
-        performServerPost(requestSpec, responseSpec,
-                "/fineract-provider/api/v1/twofactor?deliveryMethod=email&extendedToken=false&" + TENANT_IDENTIFIER, "", "");
+        requestEmailToken();
         assertEquals(1, greenMail.getReceivedMessages().length);
 
-        Pattern p = Pattern.compile("token is (.+).");
-        Matcher m = p.matcher((CharSequence) greenMail.getReceivedMessages()[0].getContent());
+        String token = readToken(0);
+        assertNotNull(token);
+        String tfaToken = validate(token);
+        assertNotNull(tfaToken);
 
+        Map<String, String> twoFactorAuthentication = withTwoFactorToken(tfaToken);
+
+        assertEquals(token.length(), retrieveConfiguration(twoFactorAuthentication).getOtpTokenLength());
+
+        try {
+            assertEquals(10, updateOtpTokenLength(10, twoFactorAuthentication));
+
+            requestEmailToken();
+            assertEquals(2, greenMail.getReceivedMessages().length);
+
+            String token2 = readToken(1);
+            assertNotNull(token2);
+            assertEquals(10, token2.length());
+
+            tfaToken = validate(token2);
+            assertNotNull(tfaToken);
+            twoFactorAuthentication = withTwoFactorToken(tfaToken);
+
+            assertEquals(token2.length(), retrieveConfiguration(twoFactorAuthentication).getOtpTokenLength());
+        } finally {
+            updateOtpTokenLength(token.length(), twoFactorAuthentication);
+
+            assertEquals(token.length(), retrieveConfiguration(twoFactorAuthentication).getOtpTokenLength());
+
+            invalidate(tfaToken, twoFactorAuthentication);
+        }
+    }
+
+    private PostAuthenticationResponse login() {
+        return ok(() -> fineractClient.authenticationHttpBasic()
+                .authenticate(new PostAuthenticationRequest().username("mifos").password("password")));
+    }
+
+    private PostTwoFactorRequestTokenResponse requestEmailToken() {
+        return expect200(() -> fineractClient.twoFactor().requestTokenWithHttpInfo("email", false, basicAuthentication));
+    }
+
+    private String validate(String token) {
+        return validateWithTimes(token).getToken();
+    }
+
+    private PostTwoFactorValidateResponse validateWithTimes(String token) {
+        return expect200(() -> fineractClient.twoFactor().validateWithHttpInfo(token, basicAuthentication));
+    }
+
+    private String invalidate(String tfaToken, Map<String, String> twoFactorAuthentication) {
+        return expect200(() -> fineractClient.twoFactor()
+                .updateConfigurationWithHttpInfo(new PostTwoFactorInvalidateRequest().token(tfaToken), twoFactorAuthentication))
+                .getResourceIdentifier();
+    }
+
+    private GetTwoFactorConfigurationResponse retrieveConfiguration(Map<String, String> twoFactorAuthentication) {
+        return expect200(() -> fineractClient.defaultApi().retrieveAll4WithHttpInfo(twoFactorAuthentication));
+    }
+
+    private Integer updateOtpTokenLength(int otpTokenLength, Map<String, String> twoFactorAuthentication) {
+        return expect200(() -> fineractClient.defaultApi().updateConfiguration1WithHttpInfo(
+                new PutTwoFactorConfigurationRequest().otpTokenLength(otpTokenLength), twoFactorAuthentication)).getChanges()
+                .getOtpTokenLength();
+    }
+
+    private Map<String, String> withTwoFactorToken(String tfaToken) {
+        return Map.of("Authorization", basicAuthentication.get("Authorization"), TFA_TOKEN_HEADER, tfaToken);
+    }
+
+    private static String readToken(int messageIndex) throws IOException, MessagingException {
+        Matcher m = Pattern.compile("token is (.+).").matcher((CharSequence) greenMail.getReceivedMessages()[messageIndex].getContent());
         String token = null;
-
         while (m.find()) {
             token = m.group(1);
         }
-
-        assertNotNull(token);
-        String tfaToken = performServerPost(requestSpec, responseSpec,
-                "/fineract-provider/api/v1/twofactor/validate?token=" + token + "&" + TENANT_IDENTIFIER, "", "token");
-        assertNotNull(tfaToken);
-
-        RequestSpecification requestSpecWithTFA = new RequestSpecBuilder() //
-                .setContentType(ContentType.JSON) //
-                .addHeader("Fineract-Platform-TFA-Token", tfaToken) //
-                .addHeader("Authorization", "Basic " + basicAuthenticationKey) //
-                .build();
-
-        // Get the configuration and check one of the values (OTP token length)
-        LinkedHashMap<String, Object> json = performServerGet(requestSpecWithTFA, responseSpec,
-                "/fineract-provider/api/v1/twofactor/configure?" + TENANT_IDENTIFIER, "");
-        assertEquals(json.get("otp-token-length"), token.length());
-
-        try {
-            // Update OTP token length
-            performServerPut(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/twofactor/configure?" + TENANT_IDENTIFIER,
-                    "{\"otp-token-length\": 10 }", "");
-
-            // Login again
-            performServerPost(requestSpec, responseSpec,
-                    "/fineract-provider/api/v1/twofactor?deliveryMethod=email&extendedToken=false&" + TENANT_IDENTIFIER, "", "");
-            assertEquals(2, greenMail.getReceivedMessages().length);
-
-            Matcher m2 = p.matcher((CharSequence) greenMail.getReceivedMessages()[1].getContent());
-
-            String token2 = null;
-
-            while (m2.find()) {
-                token2 = m2.group(1);
-            }
-
-            assertNotNull(token2);
-
-            // Check that the configuration has worked and length is now 10
-            assertEquals(10, token2.length());
-
-            tfaToken = performServerPost(requestSpec, responseSpec,
-                    "/fineract-provider/api/v1/twofactor/validate?token=" + token2 + "&" + TENANT_IDENTIFIER, "", "token");
-            assertNotNull(tfaToken);
-
-            requestSpecWithTFA = new RequestSpecBuilder() //
-                    .setContentType(ContentType.JSON) //
-                    .addHeader("Fineract-Platform-TFA-Token", tfaToken) //
-                    .addHeader("Authorization", "Basic " + basicAuthenticationKey) //
-                    .build();
-
-            // Get the configuration and check one of the values (OTP token length)
-            json = performServerGet(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/twofactor/configure?" + TENANT_IDENTIFIER,
-                    "");
-            assertEquals(json.get("otp-token-length"), token2.length());
-        } finally {
-            // Update OTP token length back to original value
-            performServerPut(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/twofactor/configure?" + TENANT_IDENTIFIER,
-                    "{\"otp-token-length\": " + token.length() + "}", "");
-
-            // Check that configuration has been reset
-            json = performServerGet(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/twofactor/configure?" + TENANT_IDENTIFIER,
-                    "");
-            assertEquals(json.get("otp-token-length"), token.length());
-
-            // Invalidate token for re-login
-            performServerPost(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/twofactor/invalidate?" + TENANT_IDENTIFIER,
-                    "{ \"token\": \"" + tfaToken + "\" }", "");
-        }
+        return token;
     }
 
-    private static void initializeRestAssured() {
-        RestAssured.baseURI = "https://localhost";
-        RestAssured.port = 8443;
-        RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
-        RestAssured.useRelaxedHTTPSValidation();
+    private static <T> T expect200(Supplier<ApiResponse<T>> call) {
+        ApiResponse<T> response = ok(call);
+        assertEquals(200, response.getStatusCode());
+        return response.getData();
     }
 
-    private static void awaitSpringBootActuatorHealthyUp() throws InterruptedException {
+    private void awaitSpringBootActuatorHealthyUp() throws InterruptedException {
         final int maxAttempts = 10;
-        Response response = null;
+        Integer lastStatus = null;
 
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
-            try {
-                response = RestAssured.get(HEALTH_URL);
-
-                if (response.statusCode() == 200) {
+            try (Response response = serverPagesApi.actuatorHealth()) {
+                if (response.status() == 200) {
                     return;
                 }
-
-                Thread.sleep(3000);
-            } catch (Exception e) {
-                Thread.sleep(3000);
+                lastStatus = response.status();
+            } catch (RuntimeException e) {
+                // the server is not accepting connections yet
             }
+            Thread.sleep(3000);
         }
 
-        fail(HEALTH_URL + " returned " + (response == null ? "no response" : response.prettyPrint()));
+        fail("/actuator/health returned " + (lastStatus == null ? "no response" : lastStatus));
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
-        if (jsonAttributeToGetBack == null) {
-            return (T) json;
-        }
-        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
-    }
+    /**
+     * The actuator and the legacy API docs are served outside {@code /api} and are not part of the OpenAPI spec, so the
+     * generated client has no operations for them.
+     */
+    interface ServerPagesApi {
 
-    @SuppressWarnings("unchecked")
-    private static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().post(postURL)
-                .andReturn().asString();
-        if (jsonAttributeToGetBack == null) {
-            return (T) json;
-        }
-        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
-    }
+        @RequestLine("GET /actuator/health")
+        Response actuatorHealth();
 
-    @SuppressWarnings("unchecked")
-    public static <T> T performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().put(putURL)
-                .andReturn().asString();
-        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
+        @RequestLine("GET /actuator/info")
+        Response actuatorInfo();
+
+        @RequestLine("GET /legacy-docs/apiLive.htm")
+        Response legacyApiDocs();
     }
 }

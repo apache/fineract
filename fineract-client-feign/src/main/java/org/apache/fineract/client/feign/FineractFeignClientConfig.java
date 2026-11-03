@@ -55,6 +55,7 @@ public final class FineractFeignClientConfig {
     private final String baseUrl;
     private final String username;
     private final String password;
+    private final boolean withoutCredentials;
     private final String tenantId;
     private final int connectTimeout;
     private final int readTimeout;
@@ -73,6 +74,7 @@ public final class FineractFeignClientConfig {
         this.baseUrl = builder.baseUrl;
         this.username = builder.username;
         this.password = builder.password;
+        this.withoutCredentials = builder.withoutCredentials;
         this.tenantId = builder.tenantId;
         this.connectTimeout = builder.connectTimeout;
         this.readTimeout = builder.readTimeout;
@@ -95,12 +97,15 @@ public final class FineractFeignClientConfig {
         JacksonEncoder jacksonEncoder = new JacksonEncoder(ObjectMapperFactory.getShared());
         Encoder multipartEncoder = new FineractMultipartEncoder(jacksonEncoder);
 
-        return Feign.builder().client(getOrCreateHttpClient()).encoder(multipartEncoder)
+        Feign.Builder feignBuilder = Feign.builder().client(getOrCreateHttpClient()).encoder(multipartEncoder)
                 .decoder(new ApiResponseDecoder(new JacksonDecoder(ObjectMapperFactory.getShared())))
                 .errorDecoder(new FineractErrorDecoder())
                 .options(new Request.Options(connectTimeout, TimeUnit.MILLISECONDS, readTimeout, TimeUnit.MILLISECONDS, true))
-                .retryer(Retryer.NEVER_RETRY).requestInterceptor(new BasicAuthRequestInterceptor(username, password))
-                .requestInterceptor(new TenantIdRequestInterceptor(tenantId)).logger(new Slf4jLogger(apiType))
+                .retryer(Retryer.NEVER_RETRY);
+        if (!withoutCredentials) {
+            feignBuilder.requestInterceptor(new BasicAuthRequestInterceptor(username, password));
+        }
+        return feignBuilder.requestInterceptor(new TenantIdRequestInterceptor(tenantId)).logger(new Slf4jLogger(apiType))
                 .logLevel(debugEnabled ? feign.Logger.Level.FULL : feign.Logger.Level.BASIC).target(apiType, baseUrl);
     }
 
@@ -203,6 +208,7 @@ public final class FineractFeignClientConfig {
         private String baseUrl;
         private String username;
         private String password;
+        private boolean withoutCredentials;
         private String tenantId = "default";
         private int connectTimeout = 30000; // 30 seconds
         private int readTimeout = 60000; // 60 seconds
@@ -224,6 +230,11 @@ public final class FineractFeignClientConfig {
         public Builder credentials(String username, String password) {
             this.username = username;
             this.password = password;
+            return this;
+        }
+
+        public Builder withoutCredentials() {
+            this.withoutCredentials = true;
             return this;
         }
 
@@ -282,6 +293,12 @@ public final class FineractFeignClientConfig {
         public FineractFeignClientConfig build() {
             if (baseUrl == null || baseUrl.trim().isEmpty()) {
                 throw new IllegalStateException("baseUrl is required");
+            }
+            if (withoutCredentials) {
+                if (username != null || password != null) {
+                    throw new IllegalStateException("credentials and withoutCredentials cannot be combined");
+                }
+                return new FineractFeignClientConfig(this);
             }
             if (username == null || username.trim().isEmpty()) {
                 throw new IllegalStateException("username is required");

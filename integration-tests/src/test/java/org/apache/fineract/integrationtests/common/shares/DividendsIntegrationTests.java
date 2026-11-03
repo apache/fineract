@@ -18,179 +18,123 @@
  */
 package org.apache.fineract.integrationtests.common.shares;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
+import org.apache.fineract.client.models.AccountRequest;
+import org.apache.fineract.client.models.GetShareProductDividendDetailsPageItems;
+import org.apache.fineract.client.models.GetShareProductDividendDetailsResponse;
+import org.apache.fineract.client.models.GetShareProductDividendsPageItems;
+import org.apache.fineract.client.models.GetShareProductDividendsResponse;
+import org.apache.fineract.client.models.PostShareProductDividendsRequest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignShareAccountHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class DividendsIntegrationTests {
 
+    private static final String DATE_FORMAT = "dd MMMM yyyy";
+
     private final String[] dates = { "01 Jan 2015", "01 Apr 2015", "01 Oct 2015", "01 Dec 2015", "01 Mar 2016" };
-    private final String[] shares = { "100", "200", "300", "100", "500" };
+    private final long[] shares = { 100, 200, 300, 100, 500 };
 
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
+    private final FeignClientHelper clientHelper = new FeignClientHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignSavingsHelper savingsHelper = new FeignSavingsHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignSavingsProductHelper savingsProductHelper = new FeignSavingsProductHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignShareAccountHelper shareAccountHelper = new FeignShareAccountHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
-
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreateDividends() {
-        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
-        final Integer productId = createShareProduct();
-        ArrayList<Integer> shareAccounts = new ArrayList<>();
+        final Long productId = shareAccountHelper.createShareProduct(FeignShareAccountHelper.defaultShareProduct());
+        ArrayList<Long> shareAccounts = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+            final Long clientId = clientHelper.createClient();
             Assertions.assertNotNull(clientId);
-            Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
+            final Long savingsAccountId = openSavingsAccount(clientId);
             Assertions.assertNotNull(savingsAccountId);
-            final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId, dates[i], shares[i]);
+            final Long shareAccountId = createShareAccount(clientId, productId, savingsAccountId, dates[i], shares[i]);
             shareAccounts.add(shareAccountId);
             Assertions.assertNotNull(shareAccountId);
-            Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
-                    responseSpec);
-            Assertions.assertNotNull(shareAccountData);
-            // Approve share Account
-            Map<String, Object> approveMap = new HashMap<>();
-            approveMap.put("note", "Share Account Approval Note");
-            approveMap.put("dateFormat", "dd MMMM yyyy");
-            approveMap.put("approvedDate", "01 Jan 2016");
-            approveMap.put("locale", "en");
-            String approve = new Gson().toJson(approveMap);
-            ShareAccountTransactionHelper.postCommand("approve", shareAccountId, approve, requestSpec, responseSpec);
-            // Activate Share Account
-            Map<String, Object> activateMap = new HashMap<>();
-            activateMap.put("dateFormat", "dd MMMM yyyy");
-            activateMap.put("activatedDate", "01 Jan 2016");
-            activateMap.put("locale", "en");
-            String activateJson = new Gson().toJson(activateMap);
-            ShareAccountTransactionHelper.postCommand("activate", shareAccountId, activateJson, requestSpec, responseSpec);
+            Assertions.assertNotNull(shareAccountHelper.getShareAccount(shareAccountId));
+            shareAccountHelper.approve(shareAccountId, "01 Jan 2016", "Share Account Approval Note", DATE_FORMAT, "en");
+            shareAccountHelper.activate(shareAccountId, "01 Jan 2016", DATE_FORMAT, "en");
         }
 
-        Map<String, Object> dividendsMap = new HashMap<>();
-        dividendsMap.put("dividendPeriodStartDate", "01 Jan 2015");
-        dividendsMap.put("dividendPeriodEndDate", "01 Apr 2016");
-        dividendsMap.put("dividendAmount", "50000");
-        dividendsMap.put("dateFormat", "dd MMMM yyyy");
-        dividendsMap.put("locale", "en");
-        String createDividendsJson = new Gson().toJson(dividendsMap);
-        final Integer dividendId = ShareDividendsTransactionHelper.createShareProductDividends(productId, createDividendsJson, requestSpec,
-                responseSpec);
+        final Long dividendId = shareAccountHelper.createDividend(productId,
+                new PostShareProductDividendsRequest().dividendPeriodStartDate("01 Jan 2015").dividendPeriodEndDate("01 Apr 2016")
+                        .dividendAmount(new BigDecimal("50000")).dateFormat(DATE_FORMAT).locale("en"));
 
-        Map<String, Object> productdividends = ShareDividendsTransactionHelper.retrieveAllDividends(productId, requestSpec, responseSpec);
-        Assertions.assertEquals("1", String.valueOf(productdividends.get("totalFilteredRecords")));
-        Map<String, Object> dividend = ((List<Map<String, Object>>) productdividends.get("pageItems")).get(0);
-        Assertions.assertEquals("50000.0", String.valueOf(dividend.get("amount")));
-        Map<String, Object> status = (Map<String, Object>) dividend.get("status");
-        Assertions.assertEquals("shareAccountDividendStatusType.initiated", String.valueOf(status.get("code")));
-        List<Integer> startdateList = (List<Integer>) dividend.get("dividendPeriodStartDate");
-        Calendar cal = Calendar.getInstance();
-        cal.set(startdateList.get(0), startdateList.get(1) - 1, startdateList.get(2));
-        Date startDate = cal.getTime();
-        Assertions.assertEquals("01 January 2015", simple.format(startDate));
-        List<Integer> enddateList = (List<Integer>) dividend.get("dividendPeriodEndDate");
-        cal = Calendar.getInstance();
-        cal.set(enddateList.get(0), enddateList.get(1) - 1, enddateList.get(2));
-        Date endDate = cal.getTime();
-        Assertions.assertEquals("01 April 2016", simple.format(endDate));
+        GetShareProductDividendsResponse productdividends = shareAccountHelper.getDividends(productId);
+        Assertions.assertEquals(1, productdividends.getTotalFilteredRecords());
+        GetShareProductDividendsPageItems dividend = productdividends.getPageItems().get(0);
+        Assertions.assertEquals(50000.0f, dividend.getAmount().floatValue());
+        Assertions.assertEquals("shareAccountDividendStatusType.initiated", dividend.getStatus().getCode());
+        Assertions.assertEquals(LocalDate.of(2015, 1, 1), dividend.getDividendPeriodStartDate());
+        Assertions.assertEquals(LocalDate.of(2016, 4, 1), dividend.getDividendPeriodEndDate());
 
-        Map<String, Object> dividenddetails = ShareDividendsTransactionHelper.retrieveDividendDetails(productId, dividendId, requestSpec,
-                responseSpec);
-        Assertions.assertEquals("5", String.valueOf(dividenddetails.get("totalFilteredRecords")));
-        List<Map<String, Object>> pageItems = (List<Map<String, Object>>) dividenddetails.get("pageItems");
-        for (Map<String, Object> dividendData : pageItems) {
-            Map<String, Object> accountData = (Map<String, Object>) dividendData.get("accountData");
-            String accountId = String.valueOf(accountData.get("id"));
-            if (String.valueOf(shareAccounts.get(0)).equals(accountId)) {
-                Assertions.assertEquals("11320.755", String.valueOf(dividendData.get("amount")));
-            } else if (String.valueOf(shareAccounts.get(1)).equals(accountId)) {
-                Assertions.assertEquals("18172.791", String.valueOf(dividendData.get("amount")));
-            } else if (String.valueOf(shareAccounts.get(2)).equals(accountId)) {
-                Assertions.assertEquals("13629.593", String.valueOf(dividendData.get("amount")));
-            } else if (String.valueOf(shareAccounts.get(3)).equals(accountId)) {
-                Assertions.assertEquals("3028.7983", String.valueOf(dividendData.get("amount")));
-            } else if (String.valueOf(shareAccounts.get(4)).equals(accountId)) {
-                Assertions.assertEquals("3848.0637", String.valueOf(dividendData.get("amount")));
-            }
-            Map<String, Object> statusMap = (Map<String, Object>) dividendData.get("status");
-            Assertions.assertEquals("shareAccountDividendStatusType.initiated", String.valueOf(statusMap.get("code")));
-        }
+        GetShareProductDividendDetailsResponse dividenddetails = shareAccountHelper.getDividendDetails(productId, dividendId);
+        Assertions.assertEquals(5, dividenddetails.getTotalFilteredRecords());
+        verifyAccountDividends(dividenddetails.getPageItems(), shareAccounts);
 
-        String jsonString = "";
-        ShareDividendsTransactionHelper.postCommand("approve", productId, dividendId, jsonString, requestSpec, responseSpec);
+        shareAccountHelper.approveDividend(productId, dividendId);
 
-        productdividends = ShareDividendsTransactionHelper.retrieveAllDividends(productId, requestSpec, responseSpec);
-        Assertions.assertEquals("1", String.valueOf(productdividends.get("totalFilteredRecords")));
-        dividend = ((List<Map<String, Object>>) productdividends.get("pageItems")).get(0);
-        Assertions.assertEquals("50000.0", String.valueOf(dividend.get("amount")));
-        status = (Map<String, Object>) dividend.get("status");
-        Assertions.assertEquals("shareAccountDividendStatusType.approved", String.valueOf(status.get("code")));
-        startdateList = (List<Integer>) dividend.get("dividendPeriodStartDate");
-        cal = Calendar.getInstance();
-        cal.set(startdateList.get(0), startdateList.get(1) - 1, startdateList.get(2));
-        startDate = cal.getTime();
-        Assertions.assertEquals("01 January 2015", simple.format(startDate));
-        enddateList = (List<Integer>) dividend.get("dividendPeriodEndDate");
-        cal = Calendar.getInstance();
-        cal.set(enddateList.get(0), enddateList.get(1) - 1, enddateList.get(2));
-        endDate = cal.getTime();
-        Assertions.assertEquals("01 April 2016", simple.format(endDate));
+        productdividends = shareAccountHelper.getDividends(productId);
+        Assertions.assertEquals(1, productdividends.getTotalFilteredRecords());
+        dividend = productdividends.getPageItems().get(0);
+        Assertions.assertEquals(50000.0f, dividend.getAmount().floatValue());
+        Assertions.assertEquals("shareAccountDividendStatusType.approved", dividend.getStatus().getCode());
+        Assertions.assertEquals(LocalDate.of(2015, 1, 1), dividend.getDividendPeriodStartDate());
+        Assertions.assertEquals(LocalDate.of(2016, 4, 1), dividend.getDividendPeriodEndDate());
 
-        dividenddetails = ShareDividendsTransactionHelper.retrieveDividendDetails(productId, dividendId, requestSpec, responseSpec);
-        Assertions.assertEquals("5", String.valueOf(dividenddetails.get("totalFilteredRecords")));
-        pageItems = (List<Map<String, Object>>) dividenddetails.get("pageItems");
-        for (Map<String, Object> dividendData : pageItems) {
-            Map<String, Object> accountData = (Map<String, Object>) dividendData.get("accountData");
-            String accountId = String.valueOf(accountData.get("id"));
-            if (String.valueOf(shareAccounts.get(0)).equals(accountId)) {
-                Assertions.assertEquals("11320.755", String.valueOf(dividendData.get("amount")));
-            } else if (String.valueOf(shareAccounts.get(1)).equals(accountId)) {
-                Assertions.assertEquals("18172.791", String.valueOf(dividendData.get("amount")));
-            } else if (String.valueOf(shareAccounts.get(2)).equals(accountId)) {
-                Assertions.assertEquals("13629.593", String.valueOf(dividendData.get("amount")));
-            } else if (String.valueOf(shareAccounts.get(3)).equals(accountId)) {
-                Assertions.assertEquals("3028.7983", String.valueOf(dividendData.get("amount")));
-            } else if (String.valueOf(shareAccounts.get(4)).equals(accountId)) {
-                Assertions.assertEquals("3848.0637", String.valueOf(dividendData.get("amount")));
-            }
-            Map<String, Object> statusMap = (Map<String, Object>) dividendData.get("status");
-            Assertions.assertEquals("shareAccountDividendStatusType.initiated", String.valueOf(statusMap.get("code")));
-        }
-
+        dividenddetails = shareAccountHelper.getDividendDetails(productId, dividendId);
+        Assertions.assertEquals(5, dividenddetails.getTotalFilteredRecords());
+        verifyAccountDividends(dividenddetails.getPageItems(), shareAccounts);
     }
 
-    private Integer createShareProduct() {
-        String shareProductJson = new ShareProductHelper().build();
-        return ShareProductTransactionHelper.createShareProduct(shareProductJson, requestSpec, responseSpec);
+    private static void verifyAccountDividends(List<GetShareProductDividendDetailsPageItems> pageItems, List<Long> shareAccounts) {
+        for (GetShareProductDividendDetailsPageItems dividendData : pageItems) {
+            Long accountId = dividendData.getAccountData().getId();
+            if (shareAccounts.get(0).equals(accountId)) {
+                Assertions.assertEquals(11320.755f, dividendData.getAmount().floatValue());
+            } else if (shareAccounts.get(1).equals(accountId)) {
+                Assertions.assertEquals(18172.791f, dividendData.getAmount().floatValue());
+            } else if (shareAccounts.get(2).equals(accountId)) {
+                Assertions.assertEquals(13629.593f, dividendData.getAmount().floatValue());
+            } else if (shareAccounts.get(3).equals(accountId)) {
+                Assertions.assertEquals(3028.7983f, dividendData.getAmount().floatValue());
+            } else if (shareAccounts.get(4).equals(accountId)) {
+                Assertions.assertEquals(3848.0637f, dividendData.getAmount().floatValue());
+            }
+            Assertions.assertEquals("shareAccountDividendStatusType.initiated", dividendData.getStatus().getCode());
+        }
     }
 
-    private Integer createShareAccount(final Integer clientId, final Integer productId, final Integer savingsAccountId,
-            String applicationDate, String requestedShares) {
-        String josn = new ShareAccountHelper().withClientId(String.valueOf(clientId)).withProductId(String.valueOf(productId))
-                .withExternalId("External1").withSavingsAccountId(String.valueOf(savingsAccountId)).withSubmittedDate("01 Jan 2016")
-                .withApplicationDate(applicationDate).withRequestedShares(requestedShares).build();
-        return ShareAccountTransactionHelper.createShareAccount(josn, requestSpec, responseSpec);
+    private Long openSavingsAccount(final Long clientId) {
+        final Long savingsProductId = savingsProductHelper
+                .createSavingsProduct(SavingsRequestBuilders.defaultSavingsProduct().minRequiredOpeningBalance(BigDecimal.valueOf(1000)))
+                .getResourceId();
+        final Long savingsId = savingsHelper.submitApplication(clientId, savingsProductId, "08 January 2013").getSavingsId();
+        SavingsTestValidators.verifySavingsIsPending(savingsHelper.getSavingsStatus(savingsId));
+        savingsHelper.approveSavings(savingsId, "09 January 2013");
+        SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsId));
+        savingsHelper.activateSavings(savingsId, "01 March 2013");
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
+        return savingsId;
+    }
+
+    private Long createShareAccount(final Long clientId, final Long productId, final Long savingsAccountId, String applicationDate,
+            long requestedShares) {
+        return shareAccountHelper.applyShareAccount(new AccountRequest().clientId(clientId).productId(productId).externalId("External1")
+                .savingsAccountId(savingsAccountId).submittedDate("01 Jan 2016").applicationDate(applicationDate)
+                .requestedShares(requestedShares).dateFormat(DATE_FORMAT).locale("en_GB"));
     }
 }

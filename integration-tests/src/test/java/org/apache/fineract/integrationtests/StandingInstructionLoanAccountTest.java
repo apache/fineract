@@ -33,13 +33,13 @@ import org.apache.fineract.client.models.GetStandingInstructionHistoryPageItemsR
 import org.apache.fineract.client.models.GetStandingInstructionsResponse;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
-import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.junit.jupiter.api.AfterEach;
@@ -55,7 +55,7 @@ public class StandingInstructionLoanAccountTest extends FeignLoanTestBase {
     private static FeignSavingsHelper savingsHelper;
     private static FeignSavingsProductHelper savingsProductHelper;
     private static FeignSavingsTransactionHelper savingsTransactionHelper;
-    private static FinancialActivityAccountHelper financialActivityAccountHelper;
+    private static FeignFinancialActivityAccountHelper financialActivityAccountHelper;
 
     @BeforeAll
     public static void setupSavingsHelpers() {
@@ -63,13 +63,13 @@ public class StandingInstructionLoanAccountTest extends FeignLoanTestBase {
         savingsHelper = new FeignSavingsHelper(client);
         savingsProductHelper = new FeignSavingsProductHelper(client);
         savingsTransactionHelper = new FeignSavingsTransactionHelper(client);
-        financialActivityAccountHelper = new FinancialActivityAccountHelper(null);
+        financialActivityAccountHelper = new FeignFinancialActivityAccountHelper(FineractFeignClientHelper.getFineractFeignClient());
     }
 
     @AfterEach
     public void deleteFinancialActivityMappings() {
-        for (GetFinancialActivityAccountsResponse mapping : financialActivityAccountHelper.getAllFinancialActivityAccounts()) {
-            financialActivityAccountHelper.deleteFinancialActivityAccount(mapping.getId());
+        for (GetFinancialActivityAccountsResponse mapping : financialActivityAccountHelper.getAllMappings()) {
+            financialActivityAccountHelper.deleteMapping(mapping.getId());
         }
     }
 
@@ -132,11 +132,11 @@ public class StandingInstructionLoanAccountTest extends FeignLoanTestBase {
     }
 
     private void mapLiabilityTransferFinancialActivity(Long loanProductId) {
-        if (!financialActivityAccountHelper.getAllFinancialActivityAccounts().isEmpty()) {
+        if (!financialActivityAccountHelper.getAllMappings().isEmpty()) {
             return;
         }
         Long fundSourceAccountId = retrieveLoanProduct(loanProductId).getAccountingMappings().getFundSourceAccount().getId();
-        financialActivityAccountHelper.createFinancialActivityAccount(new PostFinancialActivityAccountsRequest()
+        financialActivityAccountHelper.createMapping(new PostFinancialActivityAccountsRequest()
                 .financialActivityId((long) AccountingConstants.FinancialActivity.LIABILITY_TRANSFER.getValue())
                 .glAccountId(fundSourceAccountId));
     }

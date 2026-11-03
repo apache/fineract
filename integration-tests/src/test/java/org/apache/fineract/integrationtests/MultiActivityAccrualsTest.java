@@ -26,7 +26,7 @@ import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ public class MultiActivityAccrualsTest extends FeignLoanTestBase {
 
     @BeforeEach
     public void setup() {
-        Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         Long loanProductId = createLoanProduct(create4IProgressive().currencyCode("USD").enableAccrualActivityPosting(true));
 
         loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, disbursementDate, 600.0, 9.99, 4, null);

@@ -19,17 +19,25 @@
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
 import org.apache.fineract.client.models.DeleteDelinquencyRangeResponse;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
 import org.apache.fineract.client.models.DelinquencyBucketResponse;
+import org.apache.fineract.client.models.DelinquencyRangeData;
 import org.apache.fineract.client.models.DelinquencyRangeRequest;
 import org.apache.fineract.client.models.DelinquencyRangeResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdDelinquencySummary;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PutDelinquencyBucketResponse;
@@ -37,6 +45,7 @@ import org.apache.fineract.client.models.PutDelinquencyRangeResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
 
+@Slf4j
 public class FeignDelinquencyHelper {
 
     private final FineractFeignClient fineractClient;
@@ -79,13 +88,23 @@ public class FeignDelinquencyHelper {
     }
 
     public Long createDefaultBucket() {
+        return createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(createDefaultRanges()))
+                .getResourceId();
+    }
+
+    public Long createDefaultWorkingCapitalBucket() {
+        MinimumPaymentPeriodAndRule rule = new MinimumPaymentPeriodAndRule().frequency(30).frequencyType("DAYS")
+                .minimumPayment(BigDecimal.valueOf(3.0)).minimumPaymentType("PERCENTAGE");
+        return createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("WC_DLQ_B_", 10)).ranges(createDefaultRanges())
+                .bucketType("WORKING_CAPITAL").minimumPaymentPeriodAndRule(rule)).getResourceId();
+    }
+
+    private List<Long> createDefaultRanges() {
         Long range1Id = createRange(new DelinquencyRangeRequest().classification(Utils.randomStringGenerator("DLQ_R_", 10))
                 .minimumAgeDays(1).maximumAgeDays(3).locale(LoanTestData.LOCALE)).getResourceId();
         Long range2Id = createRange(new DelinquencyRangeRequest().classification(Utils.randomStringGenerator("DLQ_R_", 10))
                 .minimumAgeDays(4).maximumAgeDays(60).locale(LoanTestData.LOCALE)).getResourceId();
-        return createBucket(
-                new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(List.of(range1Id, range2Id)))
-                .getResourceId();
+        return List.of(range1Id, range2Id);
     }
 
     public DelinquencyBucketResponse getBucket(Long bucketId) {
@@ -102,5 +121,28 @@ public class FeignDelinquencyHelper {
 
     public DeleteDelinquencyBucketResponse deleteBucket(Long bucketId) {
         return ok(() -> fineractClient.delinquencyRangeAndBucketsManagement().deleteBucket(bucketId));
+    }
+
+    public static void evaluateLoanCollectionData(GetLoansLoanIdResponse getLoansLoanIdResponse, Integer pastDueDays,
+            Double amountExpected) {
+        GetLoansLoanIdDelinquencySummary getCollectionData = getLoansLoanIdResponse.getDelinquent();
+        if (getCollectionData != null) {
+            log.info("Loan Delinquency Data in Days {} and Amount {}", getCollectionData.getPastDueDays(),
+                    getCollectionData.getDelinquentAmount());
+            assertEquals(pastDueDays, getCollectionData.getPastDueDays(), "Past due days");
+            assertEquals(amountExpected, Utils.getDoubleValue(getCollectionData.getDelinquentAmount()), "Amount expected");
+        } else {
+            log.info("Loan Delinquency Data is null");
+        }
+
+        DelinquencyRangeData delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
+        if (delinquencyRange != null) {
+            log.info("Loan Delinquency Classification is {} : ({} - {}) {}", delinquencyRange.getClassification(),
+                    delinquencyRange.getMinimumAgeDays(), delinquencyRange.getMaximumAgeDays(), pastDueDays);
+            assertTrue(delinquencyRange.getMinimumAgeDays() <= pastDueDays, "Min Age Days");
+            assertTrue(delinquencyRange.getMaximumAgeDays() >= pastDueDays, "Max Age Days");
+        } else {
+            log.info("Loan Delinquency Classification is null");
+        }
     }
 }

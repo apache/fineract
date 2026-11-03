@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetGlobalConfigurationsResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -67,10 +69,31 @@ public class FeignGlobalConfigurationHelper {
 
     public void manageConfigurations(String configName, boolean enabled) {
         updateConfigurationByName(configName, enabled);
+        assertEquals(enabled, retrieveConfigurationByName(configName).getEnabled());
     }
 
     public void updateGlobalConfiguration(String configName, PutGlobalConfigurationsRequest request) {
         ok(() -> fineractClient.globalConfiguration().updateConfigurationByName(configName, request));
+    }
+
+    public CallFailedRuntimeException updateGlobalConfigurationExpectingError(String configName, PutGlobalConfigurationsRequest request) {
+        return fail(() -> fineractClient.globalConfiguration().updateConfigurationByName(configName, request));
+    }
+
+    public GetGlobalConfigurationsResponse retrieveAllConfigurations() {
+        return ok(() -> fineractClient.globalConfiguration().retrieveConfiguration(false));
+    }
+
+    public GlobalConfigurationPropertyData retrieveConfigurationByName(String configName) {
+        return ok(() -> fineractClient.globalConfiguration().retrieveOneByName(configName));
+    }
+
+    public CallFailedRuntimeException retrieveConfigurationByNameExpectingError(String configName) {
+        return fail(() -> fineractClient.globalConfiguration().retrieveOneByName(configName));
+    }
+
+    public GlobalConfigurationPropertyData retrieveConfigurationById(Long configId) {
+        return ok(() -> fineractClient.globalConfiguration().retrieveOneGlobalConfiguration(configId));
     }
 
     public void updateConfigurationStringValue(String configName, String stringValue) {
@@ -89,8 +112,7 @@ public class FeignGlobalConfigurationHelper {
     }
 
     private List<GlobalConfigurationPropertyData> getConfigurationList() {
-        GetGlobalConfigurationsResponse response = ok(() -> fineractClient.globalConfiguration().retrieveConfiguration(false));
-        return response.getGlobalConfiguration();
+        return retrieveAllConfigurations().getGlobalConfiguration();
     }
 
     /** Restores every modifiable global configuration to its default so a test cannot leak state into the next one. */

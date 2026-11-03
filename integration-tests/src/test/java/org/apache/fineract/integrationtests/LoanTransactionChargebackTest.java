@@ -49,6 +49,7 @@ import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestAccounts;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
@@ -56,9 +57,9 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.Da
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInYearType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.TransactionExt;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
@@ -77,6 +78,8 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
     private LocalDate todaysDate;
     private String operationDate;
     private static Long clientId;
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @BeforeEach
     public void setup() {
@@ -228,7 +231,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
             }
 
             evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, Double.valueOf(baseAmount));
-            DelinquencyBucketsHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, Double.valueOf("0.00"));
+            FeignDelinquencyHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, Double.valueOf("0.00"));
         } finally {
             final LocalDate todaysDate = Utils.getLocalDateOfTenant();
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, todaysDate);
@@ -361,7 +364,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
             // Get loan details expecting to have a delinquency classification
             getLoansLoanIdResponse = getLoanDetails(loanId);
-            DelinquencyBucketsHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 4, Double.valueOf("800.00"));
+            FeignDelinquencyHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 4, Double.valueOf("800.00"));
         } finally {
             updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
@@ -529,7 +532,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
             evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, expectedAmount);
 
-            DelinquencyBucketsHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, Double.valueOf("0.00"));
+            FeignDelinquencyHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, Double.valueOf("0.00"));
 
             // Second round, array size equal to 1
             reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
@@ -541,7 +544,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
             validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, expectedAmount);
 
             evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, expectedAmount);
-            DelinquencyBucketsHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, Double.valueOf("0.00"));
+            FeignDelinquencyHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, Double.valueOf("0.00"));
 
             // Third round, array size equal to 2
             reviewLoanTransactionRelations(loanId, transactionId, 2, Double.valueOf("0.00"));
@@ -554,7 +557,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
             evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, expectedAmount);
 
-            DelinquencyBucketsHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, Double.valueOf("0.00"));
+            FeignDelinquencyHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, Double.valueOf("0.00"));
         } finally {
             updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
@@ -1324,7 +1327,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
     private Long createAccounts(final Integer daysToSubtract, final Integer numberOfRepayments, final boolean withJournalEntries,
             String strategyCode, boolean advancedAllocation) {
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
         final Long loanProductId = createChargebackLoanProduct(strategyCode, advancedAllocation, delinquencyBucketId, withJournalEntries);
         final LocalDate transactionDate = this.todaysDate.minusDays(daysToSubtract + (30L * (numberOfRepayments - 1)));
         String operationDate = Utils.dateFormatter.format(transactionDate);

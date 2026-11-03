@@ -48,15 +48,15 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFundHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
-import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Assertions;
@@ -67,12 +67,15 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
     private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
 
     // Charge-off accounting and balances
+    private final FeignFundHelper fundHelper = new FeignFundHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
+
     @Test
     public void loanChargeOffWithAdvancedPaymentStrategyTest() {
         runAt("10 September 2022", () -> {
             String loanExternalIdStr = UUID.randomUUID().toString();
             final Long loanProductId = createLoanProductWithPeriodicAccrualAccountingAndAdvancedPaymentAllocationStrategy();
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
             // apply charges
@@ -134,7 +137,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
         runAt("9 September 2022", () -> {
             String loanExternalIdStr = UUID.randomUUID().toString();
             final Long loanProductId = createLoanProductWithPeriodicAccrualAccountingAndAdvancedPaymentAllocationStrategy();
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
             // apply charges
@@ -204,7 +207,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Long loanProductId = createLoanProductWithPeriodicAccrualAccountingAndAdvancedPaymentAllocationStrategy();
-        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
         final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
         // make Repayment
@@ -248,7 +251,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
         runAt("3 September 2022", () -> {
             String loanExternalIdStr = UUID.randomUUID().toString();
             final Long loanProductId = createLoanProductWithPeriodicAccrualAccountingAndAdvancedPaymentAllocationStrategy();
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
             // apply charges
@@ -364,7 +367,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
         runAt("7 September 2022", () -> {
             String loanExternalIdStr = UUID.randomUUID().toString();
             final Long loanProductId = createLoanProductWithPeriodicAccrualAccountingAndAdvancedPaymentAllocationStrategy();
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
             // apply charges
@@ -584,12 +587,12 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
         List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
 
-        String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
-        String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
+        String paymentTypeName = Utils.randomStringGenerator("P_T", 5);
+        String description = Utils.randomStringGenerator("PT_Desc", 15);
         Boolean isCashPayment = false;
         Long position = 1L;
 
-        var paymentTypesResponse = PaymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(paymentTypeName)
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(paymentTypeName)
                 .description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
@@ -600,11 +603,11 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
         loanPaymentChannelToFundSourceMappings.paymentTypeId(paymentTypeIdOne.longValue());
         paymentChannelToFundSourceMappings.add(loanPaymentChannelToFundSourceMappings);
 
-        final Long fundId = FundsResourceHandler.createFund().getResourceId();
+        final Long fundId = fundHelper.createFund().getResourceId();
         Assertions.assertNotNull(fundId);
 
         // Delinquency Bucket
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
         String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);

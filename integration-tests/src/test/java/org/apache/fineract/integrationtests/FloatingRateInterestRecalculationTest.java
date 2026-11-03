@@ -21,9 +21,7 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.JsonParser;
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.client.models.FloatingRateCreateRequest;
 import org.apache.fineract.client.models.FloatingRateCreateResponse;
@@ -32,7 +30,6 @@ import org.apache.fineract.client.models.FloatingRateUpdateRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -77,7 +74,7 @@ public class FloatingRateInterestRecalculationTest extends FeignLoanTestBase {
             final Account expenseAccount = accountHelper.createExpenseAccount("floatingRateExpense2");
             final Account overpaymentAccount = accountHelper.createLiabilityAccount("floatingRateOverpayment2");
 
-            Integer loanProductId = createCumulativeFloatingRateLoanProduct(floatingRateId, assetAccount, incomeAccount, expenseAccount,
+            Long loanProductId = createCumulativeFloatingRateLoanProduct(floatingRateId, assetAccount, incomeAccount, expenseAccount,
                     overpaymentAccount);
             assertNotNull(loanProductId);
 
@@ -116,7 +113,7 @@ public class FloatingRateInterestRecalculationTest extends FeignLoanTestBase {
             final Account expenseAccount = accountHelper.createExpenseAccount("floatingRateExpense");
             final Account overpaymentAccount = accountHelper.createLiabilityAccount("floatingRateOverpayment");
 
-            Integer loanProductId = createCumulativeFloatingRateLoanProduct(floatingRateId, assetAccount, incomeAccount, expenseAccount,
+            Long loanProductId = createCumulativeFloatingRateLoanProduct(floatingRateId, assetAccount, incomeAccount, expenseAccount,
                     overpaymentAccount);
             assertNotNull(loanProductId);
 
@@ -212,37 +209,31 @@ public class FloatingRateInterestRecalculationTest extends FeignLoanTestBase {
         return response.getResourceId();
     }
 
-    private Integer createCumulativeFloatingRateLoanProduct(Long floatingRateId, Account... accounts) {
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withPrincipal("10000").withNumberOfRepayments("12")
-                .withRepaymentTypeAsMonth().withRepaymentAfterEvery("1").withInterestTypeAsDecliningBalance()
-                .withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+    private Long createCumulativeFloatingRateLoanProduct(Long floatingRateId, Account... accounts) {
+        return createLoanProduct(new LoanProductTestBuilder().withPrincipal("10000").withNumberOfRepayments("12").withRepaymentTypeAsMonth()
+                .withRepaymentAfterEvery("1").withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualInstallments()
+                .withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                 .withInterestRecalculationDetails(LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                         LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN,
                         LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE)
                 .withInterestRecalculationRestFrequencyDetails(LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "1", null, null)
-                .withDaysInMonth("30").withDaysInYear("360").withAccountingRulePeriodicAccrual(accounts).build(null, null);
-
-        loanProductMap.remove("interestRatePerPeriod");
-        loanProductMap.remove("interestRateFrequencyType");
-
-        loanProductMap.put("isLinkedToFloatingInterestRates", true);
-        loanProductMap.put("floatingRatesId", floatingRateId);
-        loanProductMap.put("interestRateDifferential", "0");
-        loanProductMap.put("isFloatingInterestRateCalculationAllowed", true);
-        loanProductMap.put("minDifferentialLendingRate", "0");
-        loanProductMap.put("defaultDifferentialLendingRate", "0");
-        loanProductMap.put("maxDifferentialLendingRate", "50");
-
-        String responseJson = FeignRawHttpHelper.post("/loanproducts", Utils.convertToJson(loanProductMap));
-        return JsonParser.parseString(responseJson).getAsJsonObject().get("resourceId").getAsInt();
+                .withDaysInMonth("30").withDaysInYear("360").withAccountingRulePeriodicAccrual(accounts).buildRequest()//
+                .interestRatePerPeriod(null)//
+                .interestRateFrequencyType(null)//
+                .isLinkedToFloatingInterestRates(true)//
+                .floatingRatesId(floatingRateId)//
+                .interestRateDifferential(BigDecimal.ZERO)//
+                .isFloatingInterestRateCalculationAllowed(true)//
+                .minDifferentialLendingRate(BigDecimal.ZERO)//
+                .defaultDifferentialLendingRate(BigDecimal.ZERO)//
+                .maxDifferentialLendingRate(BigDecimal.valueOf(50)));
     }
 
-    private Long createAndDisburseLoan(Long clientId, Integer loanProductId, String disburseDateStr) {
+    private Long createAndDisburseLoan(Long clientId, Long loanProductId, String disburseDateStr) {
         // the product supplies the rate, so the application sends no interestRatePerPeriod
-        final Long loanId = applyForLoan(
-                LoanRequestBuilders.legacyIndividualApplication(clientId, loanProductId.longValue(), "10000", 12, null, disburseDateStr)
-                        .isFloatingInterestRate(true)//
-                        .interestRateDifferential(BigDecimal.ZERO));
+        final Long loanId = applyForLoan(LoanRequestBuilders
+                .legacyIndividualApplication(clientId, loanProductId, "10000", 12, null, disburseDateStr).isFloatingInterestRate(true)//
+                .interestRateDifferential(BigDecimal.ZERO));
         approveLoan(loanId, approveLoanRequest(10000.0, disburseDateStr));
         disburseLoanWithNetDisbursalAmount(loanId, disburseDateStr, "10000");
         return loanId;

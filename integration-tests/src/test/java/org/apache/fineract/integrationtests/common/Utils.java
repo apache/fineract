@@ -18,26 +18,14 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static io.restassured.RestAssured.given;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MONTHS;
 import static java.time.temporal.ChronoUnit.WEEKS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.SecureRandom;
@@ -51,30 +39,24 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.ConfigProperties;
-import org.apache.http.conn.HttpHostConnectException;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Util for RestAssured tests. This class here in src/integrationTest is copy/pasted to src/test; please keep them in
- * sync.
+ * Shared test data generators and tenant date helpers for the integration tests.
  */
 @SuppressWarnings("unchecked")
 public final class Utils {
@@ -82,7 +64,6 @@ public final class Utils {
     public static final String TENANT_PARAM_NAME = "tenantIdentifier";
     public static final String DEFAULT_TENANT = ConfigProperties.Backend.TENANT;
     public static final String TENANT_IDENTIFIER = TENANT_PARAM_NAME + '=' + DEFAULT_TENANT;
-    private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
     public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
@@ -91,7 +72,6 @@ public final class Utils {
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     private static final SecureRandom random = new SecureRandom();
     private static final Gson gson = new Gson();
-    private static final String HEALTH_URL = "/fineract-provider/actuator/health";
 
     private static final ConcurrentHashMap<String, Set<String>> uniqueRandomStringContainer = new ConcurrentHashMap<>();
     public static final String SOURCE_SET_NUMBERS_AND_LETTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -189,58 +169,6 @@ public final class Utils {
 
     private Utils() {}
 
-    @Deprecated(forRemoval = true)
-    public static void initializeRESTAssured() {
-        RestAssured.baseURI = ConfigProperties.Backend.PROTOCOL + "://" + ConfigProperties.Backend.HOST;
-        RestAssured.port = ConfigProperties.Backend.PORT;
-        RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
-        RestAssured.useRelaxedHTTPSValidation();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static RequestSpecification initializeDefaultRequestSpecification() {
-        RequestSpecification requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        return requestSpec;
-    }
-
-    @Deprecated(forRemoval = true)
-    public static ResponseSpecification initializeDefaultResponseSpecification() {
-        return new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
-
-    private static void awaitSpringBootActuatorHealthyUp() {
-        int attempt = 0;
-        final int max_attempts = 10;
-        Response response = null;
-        Exception lastException = null;
-        do {
-            try {
-                response = RestAssured.get(HEALTH_URL);
-                int healthHttpStatus = response.statusCode();
-                if (healthHttpStatus == 200) {
-                    LOG.info("{} return HTTP 200, application is now ready for integration testing!", HEALTH_URL);
-                    return;
-                } else {
-                    LOG.info("{} returned HTTP {}, going to wait and retry (attempt {})", HEALTH_URL, healthHttpStatus, attempt++);
-                    sleep(3);
-                }
-            } catch (Exception e) {
-                LOG.info("{} caused {}, going to wait and retry (attempt {})", HEALTH_URL, e.getMessage(), attempt++);
-                lastException = e;
-                sleep(3);
-            }
-        } while (attempt < max_attempts);
-
-        if (lastException != null) {
-            LOG.error("{} still not reachable, giving up", HEALTH_URL, lastException);
-            throw new AssertionError(HEALTH_URL + " not reachable", lastException);
-        } else {
-            LOG.error("{} still has not returned HTTP 200, giving up (last) body: {}", HEALTH_URL, response.prettyPrint());
-            fail(HEALTH_URL + " returned " + response.prettyPrint());
-        }
-    }
-
     /**
      * Wait until the given condition is true or the maxRun is reached.
      *
@@ -265,152 +193,6 @@ public final class Utils {
             LOG.warn("Unexpected InterruptedException", e);
             throw new IllegalStateException("Unexpected InterruptedException", e);
         }
-    }
-
-    @Deprecated(forRemoval = true)
-    public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
-        return loginIntoServerAndGetBase64EncodedAuthenticationKey(ConfigProperties.Backend.USERNAME, ConfigProperties.Backend.PASSWORD);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static String loginIntoServerAndGetBase64EncodedAuthenticationKey(String username, String password) {
-        awaitSpringBootActuatorHealthyUp();
-        try {
-            LOG.info("Logging in, for integration test...");
-            // system.out.println("-----------------------------------LOGIN-----------------------------------------");
-            String json = RestAssured.given().contentType(ContentType.JSON)
-                    .body("{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}").expect().log().ifError().when()
-                    .post(LOGIN_URL).asString();
-            assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
-            String key = JsonPath.with(json).get("base64EncodedAuthenticationKey");
-            assertThat("Failed to obtain key: " + json, StringUtils.isBlank(key), is(false));
-            return key;
-        } catch (final Exception e) {
-            if (e instanceof HttpHostConnectException) {
-                final HttpHostConnectException hh = (HttpHostConnectException) e;
-                fail("Failed to connect to fineract platform:" + hh.getMessage());
-            }
-
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Deprecated(forRemoval = true)
-    public static String performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String url) {
-        return performServerGet(requestSpec, responseSpec, url, null);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Response performServerGetRaw(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, Function<RequestSpecification, RequestSpecification> requestMapper) {
-        return requestMapper.apply(given().spec(requestSpec)).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
-        if (jsonAttributeToGetBack == null) {
-            return (T) json;
-        }
-        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T> T performServerPatch(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().patch(getURL).andReturn()
-                .asString();
-        if (jsonAttributeToGetBack == null) {
-            return (T) json;
-        }
-        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static List<String> performServerGetList(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
-        final JsonPath jsonPath = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).jsonPath();
-        List<String> items = jsonPath.getList(jsonAttributeToGetBack);
-        return items;
-    }
-
-    @Deprecated(forRemoval = true)
-    public static JsonElement performServerGetArray(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final int position, final String jsonAttributeToGetBack) {
-        final JsonPath jsonPath = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).jsonPath();
-        List<Map<String, Object>> items = jsonPath.getList("$");
-        return gson.fromJson(((ArrayList) items.get(position).get(jsonAttributeToGetBack)).toString(), JsonArray.class);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static String performGetTextResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL) {
-        return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static String performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String postURL, final String jsonBodyToSend) {
-        return performServerPost(requestSpec, responseSpec, postURL, jsonBodyToSend, null);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
-        LOG.info("JSON {}", jsonBodyToSend);
-        RequestSpecification spec = given().spec(requestSpec);
-        if (StringUtils.isNotBlank(jsonBodyToSend)) {
-            spec = spec.body(jsonBodyToSend);
-        }
-        final String json = spec.expect().spec(responseSpec).log().ifError().when().post(postURL).andReturn().asString();
-        if (jsonAttributeToGetBack == null) {
-            return (T) json;
-        }
-        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Response performServerPutRaw(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String putURL, Function<RequestSpecification, RequestSpecification> bodyMapper) {
-        return bodyMapper.apply(given().spec(requestSpec)).expect().spec(responseSpec).log().ifError().when().put(putURL).andReturn();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static String performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String putURL, final String jsonBodyToSend) {
-        return performServerPut(requestSpec, responseSpec, putURL, jsonBodyToSend, null);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T> T performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().put(putURL)
-                .andReturn().asString();
-        if (jsonAttributeToGetBack == null) {
-            return (T) json;
-        }
-        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String deleteURL, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().delete(deleteURL).andReturn()
-                .asString();
-        if (jsonAttributeToGetBack == null) {
-            return (T) json;
-        }
-        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String deleteURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when()
-                .delete(deleteURL).andReturn().asString();
-        return (T) (jsonAttributeToGetBack == null ? json : JsonPath.from(json).get(jsonAttributeToGetBack));
     }
 
     public static String convertDateToURLFormat(final String dateToBeConvert) throws ParseException {
@@ -540,18 +322,6 @@ public final class Utils {
             return calendar.getTime();
         }
         return null;
-    }
-
-    @Deprecated(forRemoval = true)
-    public static String performServerOutputTemplateLocationGet(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String getURL, final String importDocumentId) {
-        return given().spec(requestSpec).queryParam("importDocumentId", importDocumentId).expect().spec(responseSpec).log().ifError().when()
-                .get(getURL).andReturn().asString();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static String emptyJson() {
-        return "{}";
     }
 
     public static String randomDateGenerator(String dateFormat) {

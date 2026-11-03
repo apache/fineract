@@ -33,12 +33,12 @@ import org.apache.fineract.client.models.PostTaxesComponentsRequest;
 import org.apache.fineract.client.models.PostTaxesGroupRequest;
 import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
 import org.apache.fineract.client.models.PutTaxesComponentsTaxComponentIdRequest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -48,20 +48,22 @@ import org.junit.jupiter.api.Test;
 public class TaxComponentEditLockTest {
 
     private FineractFeignClient fineractClient;
+    private FeignAccountHelper accountHelper;
 
     @BeforeEach
     public void setup() {
         fineractClient = FineractFeignClientHelper.getFineractFeignClient();
+        accountHelper = new FeignAccountHelper(fineractClient);
     }
 
     @Test
     void unlinkedComponent_percentageAndAccountsCanBeChanged() {
         BusinessDateHelper.runAt("01 January 2024", () -> {
-            final Account creditAccount = AccountHelper.createLiabilityGlAccount("taxComponent");
+            final Account creditAccount = accountHelper.createLiabilityAccount("taxComponent");
             final Long taxComponentId = createTaxComponent(creditAccount);
             assertTrue(retrieve(taxComponentId).getEditable());
 
-            final Account newCreditAccount = AccountHelper.createLiabilityGlAccount("taxComponent");
+            final Account newCreditAccount = accountHelper.createLiabilityAccount("taxComponent");
             ok(() -> fineractClient.taxComponents().updateTaxComponent(taxComponentId,
                     new PutTaxesComponentsTaxComponentIdRequest().percentage(7.0f)
                             .creditAccountType(Integer.valueOf(newCreditAccount.getAccountType().toString()))
@@ -76,7 +78,7 @@ public class TaxComponentEditLockTest {
     @Test
     void linkedComponent_onlyTheNameCanBeChanged() {
         BusinessDateHelper.runAt("01 January 2024", () -> {
-            final Account creditAccount = AccountHelper.createLiabilityGlAccount("taxComponent");
+            final Account creditAccount = accountHelper.createLiabilityAccount("taxComponent");
             final Long taxComponentId = createTaxComponent(creditAccount);
             linkToCharge(createTaxGroup(taxComponentId));
             assertFalse(retrieve(taxComponentId).getEditable());
@@ -91,7 +93,7 @@ public class TaxComponentEditLockTest {
             assertEquals(400, percentageChange.getStatus());
             assertTrue(percentageChange.getMessage().contains("percentage.cannot.be.modified.for.linked.tax.component"));
 
-            final Account otherAccount = AccountHelper.createLiabilityGlAccount("taxComponent");
+            final Account otherAccount = accountHelper.createLiabilityAccount("taxComponent");
             final CallFailedRuntimeException accountChange = fail(() -> fineractClient.taxComponents().updateTaxComponent(taxComponentId,
                     wholeForm(creditAccount).percentage(5.0f).creditAccountId(otherAccount.getAccountID().longValue())));
             assertEquals(400, accountChange.getStatus());

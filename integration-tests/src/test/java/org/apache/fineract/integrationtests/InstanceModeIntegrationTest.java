@@ -30,7 +30,7 @@ import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.support.instancemode.ConfigureInstanceMode;
@@ -85,7 +85,7 @@ public class InstanceModeIntegrationTest {
     @Test
     public void testCreateClientDoesntWork_WhenReadOnly() {
         // given
-        PostClientsRequest request = ClientHelper.defaultClientCreationRequest();
+        PostClientsRequest request = ClientRequestBuilders.defaultClient();
         // when/then
         assertEquals(405, clientHelper.createClientExpectingError(request).getStatus());
     }
@@ -94,7 +94,7 @@ public class InstanceModeIntegrationTest {
     @Test
     public void testCreateClientWorks_WhenWriteOnly() {
         // given
-        PostClientsRequest request = ClientHelper.defaultClientCreationRequest();
+        PostClientsRequest request = ClientRequestBuilders.defaultClient();
         // when
         var result = clientHelper.createClient(request);
         // then
@@ -105,7 +105,7 @@ public class InstanceModeIntegrationTest {
     @Test
     public void testCreateClientDoesntWork_WhenBatchOnly() {
         // given
-        PostClientsRequest request = ClientHelper.defaultClientCreationRequest();
+        PostClientsRequest request = ClientRequestBuilders.defaultClient();
         // when/then
         assertEquals(405, clientHelper.createClientExpectingError(request).getStatus());
     }

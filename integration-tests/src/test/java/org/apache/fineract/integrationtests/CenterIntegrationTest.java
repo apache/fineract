@@ -40,11 +40,11 @@ import org.apache.fineract.client.models.PutCentersCenterIdRequest;
 import org.apache.fineract.client.models.PutCentersChanges;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignCenterHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -158,7 +158,8 @@ public class CenterIntegrationTest {
 
     @Test
     public void testCenterCreationWithoutExternalIdGeneratesOne() {
-        final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
+        final FeignGlobalConfigurationHelper globalConfigurationHelper = new FeignGlobalConfigurationHelper(
+                FineractFeignClientHelper.getFineractFeignClient());
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
         try {
             Long officeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getResourceId();

@@ -110,7 +110,7 @@ public class SqlInjectionReportingServiceIntegrationTest {
     private void createTestReportIfNotExists() {
         try {
             Long existingId = findReportIdByName(TEST_REPORT_NAME);
-            // First try to get the report to see if it exists - use direct RestAssured call to handle 404
+            // Reuse the report if it already exists
             if (existingId != null) {
                 testReportId = existingId;
                 log.info("Found existing test report '{}' with ID: {}", TEST_REPORT_NAME, testReportId);
@@ -122,7 +122,6 @@ public class SqlInjectionReportingServiceIntegrationTest {
         }
 
         try {
-            // Use direct RestAssured call to handle different response codes
             testReportId = ok(() -> reports()
                     .createReport(reportRequest(TEST_REPORT_NAME, TEST_REPORT_SQL, "Test report for SQL injection prevention tests")))
                     .getResourceId();

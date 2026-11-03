@@ -29,6 +29,7 @@ import org.apache.fineract.client.models.BusinessDateUpdateResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 
 @Slf4j
 public final class BusinessDateHelper {
@@ -58,14 +59,14 @@ public final class BusinessDateHelper {
 
     public static void runAt(String date, Runnable runnable) {
         try {
-            new GlobalConfigurationHelper().updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
+            new FeignGlobalConfigurationHelper(FineractFeignClientHelper.getFineractFeignClient()).updateGlobalConfiguration(
+                    GlobalConfigurationConstants.ENABLE_BUSINESS_DATE, new PutGlobalConfigurationsRequest().enabled(true));
             updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE).date(date)
                     .dateFormat(DATETIME_PATTERN).locale("en"));
             runnable.run();
         } finally {
-            new GlobalConfigurationHelper().updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
+            new FeignGlobalConfigurationHelper(FineractFeignClientHelper.getFineractFeignClient()).updateGlobalConfiguration(
+                    GlobalConfigurationConstants.ENABLE_BUSINESS_DATE, new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 }

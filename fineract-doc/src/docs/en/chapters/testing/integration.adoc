@@ -7,11 +7,11 @@ Integration tests in Apache Fineract validate the complete API layer and busines
 === Architecture
 
 * *Location*: `integration-tests/src/test/java/org/apache/fineract/integrationtests`
-* *Framework*: JUnit 5. Tests under `client/feign` drive the server through the generated Feign client; the remainder still use REST Assured for HTTP communication
-* *Base Class*: Most tests extend `BaseLoanIntegrationTest` or `IntegrationTest`; Feign tests extend `FeignLoanTestBase` or `FeignSavingsTestBase`
+* *Framework*: JUnit 5. Every test drives the server through the generated Feign client
+* *Base Class*: Loan tests extend `FeignLoanTestBase`, savings tests `FeignSavingsTestBase`
 * *Prerequisites*: Running Apache Fineract instance (default: https://localhost:8443)
 
-New tests should be written against the generated Feign client, which is covered in <<_feign_integration_tests,Feign Integration Tests>>. The rest of this chapter describes the setup shared by both, and the REST Assured pattern used by the tests that have not yet been migrated.
+Writing a test against the generated Feign client is covered in <<_feign_integration_tests,Feign Integration Tests>>. This chapter describes the setup and how to run the suite.
 
 === Key Characteristics
 
@@ -350,7 +350,7 @@ CAUTION: Overriding it on the command line with `-Dorg.gradle.jvmargs` replaces 
 
 === Loan Test Base Class Overview
 
-`FeignLoanTestBase` is the base class for loan-related integration tests, and provides the helpers described below. `BaseLoanIntegrationTest` offers the same surface for the REST Assured tests that have not yet been migrated.
+`FeignLoanTestBase` is the base class for loan-related integration tests, and provides the helpers described below.
 
 ==== Pre-configured Loan Product Creation
 
@@ -444,26 +444,6 @@ verifyArrears(loanId, expectedArrears);
 ==== Test Setup Pattern
 
 A test extending `FeignLoanTestBase` needs no setup block; the base class builds the client and its helpers.
-
-The REST Assured tests that have not yet been migrated build a request specification per test:
-
-[source,java]
-----
-@BeforeEach
-public void setup() {
-    Utils.initializeRESTAssured();
-    this.requestSpec = new RequestSpecBuilder()
-        .setContentType(ContentType.JSON)
-        .build();
-    this.requestSpec.header("Authorization", "Basic " +
-        Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-    this.responseSpec = new ResponseSpecBuilder()
-        .expectStatusCode(200)
-        .build();
-}
-----
-
-Do not copy this into a new test. `loginIntoServerAndGetBase64EncodedAuthenticationKey` authenticates against the server on every test method.
 
 ==== Date-Specific Operations
 

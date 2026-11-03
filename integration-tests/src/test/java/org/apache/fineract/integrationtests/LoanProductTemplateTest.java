@@ -21,17 +21,18 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.fineract.client.models.GetLoanProductsTemplateResponse;
-import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class LoanProductTemplateTest {
 
-    private static LoanProductHelper loanProductHelper;
+    private static FeignLoanHelper loanProductHelper;
 
     @BeforeAll
     public static void setup() {
-        loanProductHelper = new LoanProductHelper();
+        loanProductHelper = new FeignLoanHelper(FineractFeignClientHelper.getFineractFeignClient());
     }
 
     @Test

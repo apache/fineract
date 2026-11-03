@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.products.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.util.Set;
 
 /**
@@ -427,8 +428,8 @@ final class ProductsApiResourceSwagger {
         public Integer totalShares;
         @Schema(example = "50")
         public Integer totalSharesIssued;
-        @Schema(example = "1")
-        public Integer unitPrice;
+        @Schema(example = "1.0")
+        public BigDecimal unitPrice;
         @Schema(example = "50")
         public Integer shareCapital;
         @Schema(example = "1")
@@ -577,6 +578,10 @@ final class ProductsApiResourceSwagger {
         public String locale;
         @Schema(example = "5.0")
         public Double unitPrice;
+        @Schema(example = "2000")
+        public Integer totalShares;
+        @Schema(example = "2000")
+        public Integer sharesIssued;
     }
 
     @Schema(description = "PutProductsTypeProductIdResponse")

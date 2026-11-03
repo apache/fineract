@@ -40,9 +40,9 @@ import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignRoleHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -154,9 +154,10 @@ public class SavingsOfficeHierarchyAccessIntegrationTest extends FeignSavingsTes
     }
 
     private Long createClientInOffice(Long officeId) {
-        return clientHelper.createClient(new PostClientsRequest().officeId(officeId).legalFormId(1L)
-                .firstname(Utils.randomFirstNameGenerator()).lastname(Utils.randomLastNameGenerator()).active(true)
-                .activationDate(ClientHelper.DEFAULT_DATE).dateFormat(SavingsTestData.DATETIME_PATTERN).locale(SavingsTestData.LOCALE))
+        return clientHelper
+                .createClient(new PostClientsRequest().officeId(officeId).legalFormId(1L).firstname(Utils.randomFirstNameGenerator())
+                        .lastname(Utils.randomLastNameGenerator()).active(true).activationDate(ClientTestData.DEFAULT_ACTIVATION_DATE)
+                        .dateFormat(SavingsTestData.DATETIME_PATTERN).locale(SavingsTestData.LOCALE))
                 .getClientId();
     }
 

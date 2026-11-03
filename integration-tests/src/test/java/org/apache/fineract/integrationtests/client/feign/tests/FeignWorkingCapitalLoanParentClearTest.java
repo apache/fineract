@@ -32,11 +32,11 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignWorkingCapitalTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.WorkingCapitalLoanCommandsApi;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
@@ -52,6 +52,7 @@ public class FeignWorkingCapitalLoanParentClearTest extends FeignWorkingCapitalT
     private static final String WCL = "validation.msg.WORKINGCAPITALLOAN.";
 
     private final List<Long> createdLoanIds = new ArrayList<>();
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @AfterAll
     void cleanup() {
@@ -117,7 +118,7 @@ public class FeignWorkingCapitalLoanParentClearTest extends FeignWorkingCapitalT
                 .create(new WorkingCapitalNearBreachRequest().nearBreachName(Utils.randomStringGenerator("WC_NEAR_BREACH_", 8))
                         .nearBreachFrequency(10).nearBreachFrequencyType("DAYS").nearBreachThreshold(BigDecimal.valueOf(30)))
                 .getResourceId();
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultWorkingCapitalBucket();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultWorkingCapitalBucket();
 
         return productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder() //
                 .withName("WCL Parent Clear " + Utils.uniqueRandomStringGenerator("", 8)) //

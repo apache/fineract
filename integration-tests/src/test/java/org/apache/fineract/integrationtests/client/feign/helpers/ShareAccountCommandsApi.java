@@ -24,8 +24,8 @@ import feign.RequestLine;
 import org.apache.fineract.client.models.PostAccountsTypeAccountIdResponse;
 
 /**
- * Feign interface for the one share-account command whose body the generated client cannot express. It binds to the
- * generated response model, so the call stays typed end to end and does not build a JSON body by hand.
+ * Feign interface for the two share-account commands whose body the generated client cannot express. It binds to the
+ * generated response model, so the calls stay typed end to end and do not build a JSON body by hand.
  *
  * <p>
  * Every other share command goes through the generated {@code fineractClient.shareAccount()} API.
@@ -43,14 +43,22 @@ public interface ShareAccountCommandsApi {
      * with {@code extractJsonArrayNamed} and treats each entry as a purchased-share transaction id. The generated model
      * declares the array shape, so sending a count through it produces
      * {@code validation.msg.shareaccount.requestedshares.cannot.be.blank}. Retyping the field to a number at source
-     * would break the approve path instead, so this one operation gets its own request model.
+     * would break the approve path instead, so this operation gets its own request model.
      */
     @RequestLine("POST /v1/accounts/{type}/{accountId}?command=redeemshares")
     PostAccountsTypeAccountIdResponse redeemShares(@Param("type") String type, @Param("accountId") Long accountId,
-            RedeemSharesRequest request);
+            ShareCountRequest request);
 
-    /** Request body for {@link #redeemShares}, with {@code requestedShares} as the share count the command reads. */
-    class RedeemSharesRequest {
+    /**
+     * Applies for additional shares on an active share account. {@code validateAndApplyAddtionalShares} reads
+     * {@code requestedShares} as a share count, like {@link #redeemShares}, so it takes the same request model.
+     */
+    @RequestLine("POST /v1/accounts/{type}/{accountId}?command=applyadditionalshares")
+    PostAccountsTypeAccountIdResponse applyAdditionalShares(@Param("type") String type, @Param("accountId") Long accountId,
+            ShareCountRequest request);
+
+    /** Request body for the commands above, with {@code requestedShares} as the share count they read. */
+    class ShareCountRequest {
 
         private String requestedDate;
         private String dateFormat;
@@ -61,7 +69,7 @@ public interface ShareAccountCommandsApi {
             return requestedDate;
         }
 
-        public RedeemSharesRequest requestedDate(String requestedDate) {
+        public ShareCountRequest requestedDate(String requestedDate) {
             this.requestedDate = requestedDate;
             return this;
         }
@@ -70,7 +78,7 @@ public interface ShareAccountCommandsApi {
             return dateFormat;
         }
 
-        public RedeemSharesRequest dateFormat(String dateFormat) {
+        public ShareCountRequest dateFormat(String dateFormat) {
             this.dateFormat = dateFormat;
             return this;
         }
@@ -79,7 +87,7 @@ public interface ShareAccountCommandsApi {
             return locale;
         }
 
-        public RedeemSharesRequest locale(String locale) {
+        public ShareCountRequest locale(String locale) {
             this.locale = locale;
             return this;
         }
@@ -88,7 +96,7 @@ public interface ShareAccountCommandsApi {
             return requestedShares;
         }
 
-        public RedeemSharesRequest requestedShares(Long requestedShares) {
+        public ShareCountRequest requestedShares(Long requestedShares) {
             this.requestedShares = requestedShares;
             return this;
         }

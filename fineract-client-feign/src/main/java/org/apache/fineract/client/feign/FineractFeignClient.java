@@ -850,6 +850,17 @@ public final class FineractFeignClient {
         }
 
         /**
+         * Sends no Basic Authentication header, for calls that authenticate another way (such as an OAuth2 bearer token
+         * passed in the call's headers) or not at all.
+         *
+         * @return This builder instance
+         */
+        public Builder withoutCredentials() {
+            configBuilder.withoutCredentials();
+            return this;
+        }
+
+        /**
          * Sets the connection timeout.
          *
          * @param timeout

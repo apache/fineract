@@ -33,9 +33,10 @@ import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansRequestChargeData;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +48,8 @@ public class LoanAccountDisbursementToSavingsAccountingTest extends FeignLoanTes
     private static final double FEE_AMOUNT = 10.0;
     private static final String REPAYMENT_AT_DISBURSEMENT = "Repayment (at time of disbursement)";
 
-    private final FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(null);
+    private final FeignFinancialActivityAccountHelper financialActivityAccountHelper = new FeignFinancialActivityAccountHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
     private Long createdFinancialActivityMappingId;
 
     @Test
@@ -94,7 +96,7 @@ public class LoanAccountDisbursementToSavingsAccountingTest extends FeignLoanTes
 
     private Long getOrCreateLiabilityTransferAccountId() {
         Integer financialActivityId = AccountingConstants.FinancialActivity.LIABILITY_TRANSFER.getValue();
-        GetFinancialActivityAccountsResponse existingMapping = financialActivityAccountHelper.getAllFinancialActivityAccounts().stream()
+        GetFinancialActivityAccountsResponse existingMapping = financialActivityAccountHelper.getAllMappings().stream()
                 .filter(mapping -> mapping.getFinancialActivityData() != null
                         && financialActivityId.equals(mapping.getFinancialActivityData().getId()))
                 .findFirst().orElse(null);
@@ -103,10 +105,8 @@ public class LoanAccountDisbursementToSavingsAccountingTest extends FeignLoanTes
         }
 
         Long liabilityTransferAccountId = getAccounts().getOverpaymentAccount().getAccountID().longValue();
-        createdFinancialActivityMappingId = financialActivityAccountHelper
-                .createFinancialActivityAccount(new PostFinancialActivityAccountsRequest()
-                        .financialActivityId(financialActivityId.longValue()).glAccountId(liabilityTransferAccountId))
-                .getResourceId();
+        createdFinancialActivityMappingId = financialActivityAccountHelper.createMapping(new PostFinancialActivityAccountsRequest()
+                .financialActivityId(financialActivityId.longValue()).glAccountId(liabilityTransferAccountId)).getResourceId();
         assertNotNull(createdFinancialActivityMappingId);
         return liabilityTransferAccountId;
     }
@@ -114,7 +114,7 @@ public class LoanAccountDisbursementToSavingsAccountingTest extends FeignLoanTes
     @AfterEach
     public void deleteCreatedFinancialActivityMapping() {
         if (createdFinancialActivityMappingId != null) {
-            financialActivityAccountHelper.deleteFinancialActivityAccount(createdFinancialActivityMappingId);
+            financialActivityAccountHelper.deleteMapping(createdFinancialActivityMappingId);
         }
     }
 }

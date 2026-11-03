@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.function.Function;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.AmortizationType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInMonthType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInYearType;
@@ -32,6 +33,7 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.In
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RescheduleStrategyMethod;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.TransactionProcessingStrategyCode;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -416,7 +418,7 @@ public interface LoanProductTemplates {
     }
 
     default PostLoanProductsRequest create4IProgressive() {
-        final Long delinquencyBucketId = org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper
+        final Long delinquencyBucketId = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient())
                 .createDefaultBucket();
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("4I_PROGRESSIVE_", 6))//
                 .shortName(Utils.uniqueRandomStringGenerator("", 4))//

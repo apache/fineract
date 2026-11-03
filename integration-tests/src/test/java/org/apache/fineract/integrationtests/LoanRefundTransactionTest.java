@@ -29,8 +29,8 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +41,7 @@ public class LoanRefundTransactionTest extends FeignLoanTestBase {
     @Test
     public void testMerchantIssuedRefundCreatesAndReversesInterestRefund() {
         runAt("01 July 2024", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createAndDisburseLoanForMerchantIssuedRefundWithInterestRefund(clientId);
             final PostLoansLoanIdTransactionsResponse merchantIssuedRefundResponse = makeMerchantIssuedRefund(loanId,
                     new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("01 July 2024")
@@ -72,7 +72,7 @@ public class LoanRefundTransactionTest extends FeignLoanTestBase {
     @Test
     public void testPayoutRefundCreatesAndReversesInterestRefund() {
         runAt("01 July 2024", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createAndDisburseLoanForPayoutRefundWithInterestRefund(clientId);
             final PostLoansLoanIdTransactionsResponse payoutRefundResponse = makePayoutRefund(loanId,
                     new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("01 July 2024")
@@ -101,7 +101,7 @@ public class LoanRefundTransactionTest extends FeignLoanTestBase {
     @Test
     public void testMerchantIssuedRefundDoesNotCreateInterestRefundWithLessThanOrEqualToZeroInterest() {
         runAt("20 April 2025", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             Long loanId = createLoanForRefundWithInterestRefund(clientId, "MERCHANT_ISSUED_REFUND", "05 April 2025", 500.0, 20.99, 6);
             disburseLoan(loanId, BigDecimal.valueOf(265.91), "05 April 2025");
             disburseLoan(loanId, BigDecimal.valueOf(1.99), "05 April 2025");
@@ -125,7 +125,7 @@ public class LoanRefundTransactionTest extends FeignLoanTestBase {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
 
         runAt("24 September 2025", () -> {
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
             final Long loanId = createLoanForRefundWithInterestRefund(clientId, "MERCHANT_ISSUED_REFUND", "24 September 2025", 116.89,
                     35.99, 3);
             loanIdRef.set(loanId);
