@@ -208,7 +208,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         }
 
         matcher.appendTail(preparedSql);
-        return new PreparedQuery(this.genericDataService.wrapSQL(preparedSql.toString()), paramValues);
+        return new PreparedQuery(preparedSql.toString(), paramValues);
     }
 
     /**
