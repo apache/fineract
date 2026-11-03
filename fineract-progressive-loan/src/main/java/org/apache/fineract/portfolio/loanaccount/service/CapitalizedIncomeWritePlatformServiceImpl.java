@@ -78,7 +78,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
     @Override
     public CommandProcessingResult addCapitalizedIncome(final Long loanId, final JsonCommand command) {
         loanTransactionValidator.validateCapitalizedIncome(command, loanId);
-        final Loan loan = loanAssembler.assembleFrom(loanId);
+        final Loan loan = loanAssembler.assembleFromInUserScope(loanId);
         final Map<String, Object> changes = new LinkedHashMap<>();
         // Create payment details
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
@@ -134,7 +134,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
     public CommandProcessingResult capitalizedIncomeAdjustment(final Long loanId, final Long capitalizedIncomeTransactionId,
             final JsonCommand command) {
         loanTransactionValidator.validateCapitalizedIncomeAdjustment(command, loanId, capitalizedIncomeTransactionId);
-        final Loan loan = loanAssembler.assembleFrom(loanId);
+        final Loan loan = loanAssembler.assembleFromInUserScope(loanId);
         final Map<String, Object> changes = new LinkedHashMap<>();
         // Create payment details
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
