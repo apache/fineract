@@ -84,14 +84,14 @@ public class AuditIntegrationTest extends FeignIntegrationTest {
 
     /**
      * Here we Create/Update different Entities and verify an audit is generated for each action. This can be further
-     * extened with more entities and actions in similiar way.
+     * extended with more entities and actions in similar way.
      */
     @Test
     public void auditShouldbeCreated() {
-        // Audits recieved after all actions are performed.
+        // Audits received after all actions are performed.
         List<AuditData> auditsRecieved;
 
-        // Audits recieved before any action is performed, needed in special
+        // Audits received before any action is performed, needed in special
         // cases eg: reactivate client, close client
         List<AuditData> auditsRecievedInitial;
 
