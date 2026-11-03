@@ -97,11 +97,12 @@ class SavingsAccountFreeWithdrawalResetTest {
         final SavingsAccountCharge charge = freeWithdrawalFeeCharge(1, PeriodFrequencyType.WEEKS);
         final SavingsAccount account = activeAccountWith(charge);
 
-        // 2 free withdrawals are allowed per 1 week; the 3rd one, 3 days after activation, must be charged
-        assertThat(withdrawOn(account, LocalDate.of(2026, 1, 2))).isEqualByComparingTo("0");
-        assertThat(withdrawOn(account, LocalDate.of(2026, 1, 3))).isEqualByComparingTo("0");
-        assertThat(withdrawOn(account, LocalDate.of(2026, 1, 4))).as("fee charged within the 1-week restart period")
-                .isEqualByComparingTo(FEE);
+        useUpFreeWithdrawals(account, charge);
+
+        // the day before the 1-week restart date (2026-01-08): still charged, the count must not restart
+        assertThat(withdrawOn(account, LocalDate.of(2026, 1, 7))).isEqualByComparingTo(FEE);
+        assertThat(charge.getFreeWithdrawalCount()).isEqualTo(2);
+        assertThat(charge.getResetChargeDate()).isNull();
     }
 
     @Test
@@ -125,8 +126,8 @@ class SavingsAccountFreeWithdrawalResetTest {
 
         useUpFreeWithdrawals(account, charge);
 
-        // 6 months after activation, within the 1-year restart period: still charged
-        assertThat(withdrawOn(account, LocalDate.of(2026, 7, 1))).isEqualByComparingTo(FEE);
+        // the day before the 1-year restart date (2027-01-01): still charged, the count must not restart
+        assertThat(withdrawOn(account, LocalDate.of(2026, 12, 31))).isEqualByComparingTo(FEE);
         assertThat(charge.getFreeWithdrawalCount()).isEqualTo(2);
         assertThat(charge.getResetChargeDate()).isNull();
     }
