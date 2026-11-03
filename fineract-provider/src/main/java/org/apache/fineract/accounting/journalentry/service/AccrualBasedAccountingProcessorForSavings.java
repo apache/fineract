@@ -158,15 +158,17 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
                 // Post journal entry if earned interest amount is greater than
                 // zero
                 if (savingsTransactionDTO.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    // the interest was expensed when it accrued, so both parts come out of Interest Payable, as for an
+                    // account in credit and as the Post Interest job books them
                     this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
-                            AccrualAccountsForSavings.INTEREST_ON_SAVINGS.getValue(),
+                            AccrualAccountsForSavings.INTEREST_PAYABLE.getValue(),
                             AccrualAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), savingsProductId, paymentTypeId, savingsId,
                             transactionId, transactionDate, overdraftAmount, isReversal);
                     if (isPositive) {
                         this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
-                                AccrualAccountsForSavings.INTEREST_ON_SAVINGS.getValue(),
-                                AccrualAccountsForSavings.SAVINGS_CONTROL.getValue(), savingsProductId, paymentTypeId, savingsId,
-                                transactionId, transactionDate, amount.subtract(overdraftAmount), isReversal);
+                                AccrualAccountsForSavings.INTEREST_PAYABLE.getValue(), AccrualAccountsForSavings.SAVINGS_CONTROL.getValue(),
+                                savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate,
+                                amount.subtract(overdraftAmount), isReversal);
                     }
                 }
             }
