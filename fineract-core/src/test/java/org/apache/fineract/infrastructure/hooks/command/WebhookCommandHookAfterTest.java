@@ -39,6 +39,7 @@ import java.util.Map;
 import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.HookableCommand;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.hooks.event.HookEvent;
 import org.apache.fineract.infrastructure.hooks.event.HookEventSource;
@@ -71,7 +72,8 @@ class WebhookCommandHookAfterTest {
         when(user.getId()).thenReturn(1L);
         when(user.getUsername()).thenReturn("mifos");
         when(user.getDisplayName()).thenReturn("App Administrator");
-        underTest = new WebhookCommandHookAfter(context, eventPublisher, mapper);
+        underTest = new WebhookCommandHookAfter(
+                new WebhookCommandEventPublisher(context, eventPublisher, mapper, mock(ErrorHandler.class)));
     }
 
     @AfterEach
