@@ -52,7 +52,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.StepContribution;
+import org.springframework.batch.infrastructure.support.transaction.ResourcelessTransactionManager;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
 
 class ExecuteStandingInstructionsTaskletTest {
 
@@ -61,7 +63,7 @@ class ExecuteStandingInstructionsTaskletTest {
             AccountTransfersWritePlatformService.class);
     private final ExecuteStandingInstructionsTasklet tasklet = new ExecuteStandingInstructionsTasklet(readPlatformService,
             mock(JdbcTemplate.class), mock(DatabaseSpecificSQLGenerator.class), accountTransfersWritePlatformService,
-            mock(SavingsAccountAssembler.class));
+            mock(SavingsAccountAssembler.class), new TransactionTemplate(new ResourcelessTransactionManager()));
 
     @BeforeEach
     void setUp() {

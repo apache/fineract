@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -63,7 +64,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.StepContribution;
+import org.springframework.batch.infrastructure.support.transaction.ResourcelessTransactionManager;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
 
 public class ExecuteOverdueAndCurrentStandingInstructionsTest {
 
@@ -123,7 +126,7 @@ public class ExecuteOverdueAndCurrentStandingInstructionsTest {
 
         assertThat(transferredAmount()).isEqualByComparingTo(INSTALLMENT_DUE)
                 .describedAs("the whole installment is attempted even though only part of it is available");
-        assertThat(historyRow()).contains("'failed'");
+        assertThat(historyStatus()).isEqualTo("failed");
         verifyNoInteractions(savingsAccountAssembler);
     }
 
@@ -136,7 +139,7 @@ public class ExecuteOverdueAndCurrentStandingInstructionsTest {
 
         assertThat(transferredAmount()).isEqualByComparingTo(JUST_UNDER_THE_INSTALLMENT)
                 .describedAs("only what the savings account can release is transferred");
-        assertThat(historyRow()).contains("'partial'").describedAs("a partly covered installment is distinguishable from a full one");
+        assertThat(historyStatus()).isEqualTo("partial").describedAs("a partly covered installment is distinguishable from a full one");
     }
 
     /**
@@ -153,7 +156,7 @@ public class ExecuteOverdueAndCurrentStandingInstructionsTest {
         assertThrows(JobExecutionException.class, this::runTheJob);
 
         assertThat(transferredAmount()).isEqualByComparingTo(INSTALLMENT_DUE);
-        assertThat(historyRow()).contains("'failed'");
+        assertThat(historyStatus()).isEqualTo("failed");
     }
 
     @Test
@@ -165,7 +168,7 @@ public class ExecuteOverdueAndCurrentStandingInstructionsTest {
         runTheJob();
 
         assertThat(transferredAmount()).isEqualByComparingTo("39950").describedAs("the withdrawal fee is left on the account");
-        assertThat(historyRow()).contains("'partial'");
+        assertThat(historyStatus()).isEqualTo("partial");
     }
 
     @Test
@@ -187,7 +190,7 @@ public class ExecuteOverdueAndCurrentStandingInstructionsTest {
         runTheJob();
 
         assertThat(transferredAmount()).isEqualByComparingTo(INSTALLMENT_DUE);
-        assertThat(historyRow()).contains("'success'").describedAs("opting in does not turn a fully covered run into a partial one");
+        assertThat(historyStatus()).isEqualTo("success").describedAs("opting in does not turn a fully covered run into a partial one");
     }
 
     private void runTheJob() throws Exception {
@@ -196,7 +199,8 @@ public class ExecuteOverdueAndCurrentStandingInstructionsTest {
 
     private ExecuteStandingInstructionsTasklet tasklet() {
         return new ExecuteStandingInstructionsTasklet(standingInstructionReadPlatformService, jdbcTemplate, sqlGenerator,
-                accountTransfersWritePlatformService, savingsAccountAssembler);
+                accountTransfersWritePlatformService, savingsAccountAssembler,
+                new TransactionTemplate(new ResourcelessTransactionManager()));
     }
 
     private void givenAnInstructionDueToday(final boolean allowPartialTransfer) {
@@ -230,10 +234,14 @@ public class ExecuteOverdueAndCurrentStandingInstructionsTest {
         return transfer.getValue().getTransactionAmount();
     }
 
-    private String historyRow() {
-        ArgumentCaptor<String> insert = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).update(insert.capture());
-        return insert.getValue();
+    /** The status bound to the single history row the job inserted. */
+    private String historyStatus() {
+        final List<Object[]> inserts = mockingDetails(jdbcTemplate).getInvocations().stream().filter(
+                invocation -> invocation.getMethod().getName().equals("update") && String.valueOf((Object) invocation.getArgument(0))
+                        .startsWith("INSERT INTO m_account_transfer_standing_instructions_history"))
+                .map(invocation -> invocation.getRawArguments()).toList();
+        assertThat(inserts).hasSize(1);
+        return (String) ((Object[]) inserts.get(0)[1])[1];
     }
 
     /** A dues-based standing instruction repaying a loan from a savings account, active and in date. */

@@ -26,8 +26,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -56,16 +58,21 @@ import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
 public class ExecuteStandingInstructionsTasklet implements Tasklet {
+
+    /** Length of m_account_transfer_standing_instructions_history.error_log. */
+    private static final int ERROR_LOG_MAX_LENGTH = 500;
 
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
     private final SavingsAccountAssembler savingsAccountAssembler;
+    private final TransactionTemplate requiresNewTransactionTemplate;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -95,6 +102,29 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
             }
 
             if (isDueForTransfer && transactionAmount != null && transactionAmount.compareTo(BigDecimal.ZERO) > 0) {
+                executeInstruction(errors, data, transactionDate, transactionAmount);
+            }
+        }
+        if (!errors.isEmpty()) {
+            throw new JobExecutionException(errors);
+        }
+        return RepeatStatus.FINISHED;
+    }
+
+    /**
+     * Runs one instruction in its own transaction, so that a failing instruction neither rolls back nor prevents the
+     * transfers of the others in the same run; the job still fails at the end when any instruction failed. A successful
+     * or partial transfer, its history row and last_run_date commit together. A failed transfer is rolled back and its
+     * history row, carrying the amount that was attempted, is written in a transaction of its own.
+     */
+    private void executeInstruction(final List<Throwable> errors, final StandingInstructionData data, final LocalDate transactionDate,
+            final BigDecimal amountDue) {
+        final Long instructionId = data.getId();
+        final AtomicReference<AccountTransferDTO> attempted = new AtomicReference<>();
+        final StringBuilder errorLog = new StringBuilder();
+        try {
+            requiresNewTransactionTemplate.executeWithoutResult(status -> {
+                BigDecimal transactionAmount = amountDue;
                 SavingsAccount fromSavingsAccount = null;
                 StandingInstructionHistoryStatus statusIfTransferred = StandingInstructionHistoryStatus.SUCCESS;
                 if (data.isAllowPartialTransfer() && PortfolioAccountType.SAVINGS.equals(data.getFromAccountTypeEnum())) {
@@ -104,7 +134,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                     // when nothing can be covered the full amount is attempted, so the run is recorded as failed as
                     // before
                     if (MathUtil.isGreaterThanZero(coverableAmount) && MathUtil.isLessThan(coverableAmount, transactionAmount)) {
-                        log.warn("Standing instruction {} transfers only {} of the {} due from savings account {}", data.getId(),
+                        log.warn("Standing instruction {} transfers only {} of the {} due from savings account {}", instructionId,
                                 coverableAmount, transactionAmount, data.getFromAccount().getId());
                         transactionAmount = coverableAmount;
                         statusIfTransferred = StandingInstructionHistoryStatus.PARTIAL;
@@ -112,65 +142,48 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                 }
                 final boolean isRegularTransaction = true;
                 final boolean isExceptionForBalanceCheck = false;
-                AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount,
+                final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount,
                         data.getFromAccountTypeEnum(), data.getToAccountTypeEnum(), data.getFromAccount().getId(),
                         data.getToAccount().getId(), data.getName() + " Standing instruction trasfer ", null, null, null, null,
                         data.toTransferType(), null, null, data.getTransferTypeEnum().getValue(), null, null, ExternalId.empty(), null,
                         null, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
-                final boolean transferCompleted = transferAmount(errors, accountTransferDTO, data.getId(), statusIfTransferred);
-
-                if (transferCompleted) {
-                    final String updateQuery = "UPDATE m_account_transfer_standing_instructions SET last_run_date = ? where id = ?";
-                    jdbcTemplate.update(updateQuery, transactionDate, data.getId());
-                }
-
-            }
-        }
-        if (!errors.isEmpty()) {
-            throw new JobExecutionException(errors);
-        }
-        return RepeatStatus.FINISHED;
-    }
-
-    private boolean transferAmount(final List<Throwable> errors, final AccountTransferDTO accountTransferDTO, final Long instructionId,
-            final StandingInstructionHistoryStatus statusIfTransferred) {
-        boolean transferCompleted = true;
-        StringBuilder errorLog = new StringBuilder();
-        StringBuilder updateQuery = new StringBuilder(
-                "INSERT INTO m_account_transfer_standing_instructions_history (standing_instruction_id, " + sqlGenerator.escape("status")
-                        + ", amount,execution_time, error_log) VALUES (");
-        try {
-            accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+                attempted.set(accountTransferDTO);
+                accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+                insertHistory(instructionId, statusIfTransferred, transactionAmount, "");
+                jdbcTemplate.update("UPDATE m_account_transfer_standing_instructions SET last_run_date = ? where id = ?", transactionDate,
+                        instructionId);
+            });
         } catch (final PlatformApiDataValidationException e) {
             errors.add(new Exception("Validation exception while transfering funds for standing Instruction id" + instructionId + " from "
-                    + accountTransferDTO.getFromAccountId() + " to " + accountTransferDTO.getToAccountId(), e));
+                    + data.getFromAccount().getId() + " to " + data.getToAccount().getId(), e));
             errorLog.append("Validation exception while trasfering funds ").append(e.getDefaultUserMessage());
         } catch (final InsufficientAccountBalanceException e) {
             errors.add(new Exception("InsufficientAccountBalance Exception while trasfering funds for standing Instruction id"
-                    + instructionId + " from " + accountTransferDTO.getFromAccountId() + " to " + accountTransferDTO.getToAccountId(), e));
+                    + instructionId + " from " + data.getFromAccount().getId() + " to " + data.getToAccount().getId(), e));
             errorLog.append("InsufficientAccountBalance Exception ");
         } catch (final AbstractPlatformServiceUnavailableException e) {
             errors.add(new Exception("Platform exception while trasfering funds for standing Instruction id" + instructionId + " from "
-                    + accountTransferDTO.getFromAccountId() + " to " + accountTransferDTO.getToAccountId(), e));
+                    + data.getFromAccount().getId() + " to " + data.getToAccount().getId(), e));
             errorLog.append("Platform exception while trasfering funds ").append(e.getDefaultUserMessage());
         } catch (Exception e) {
             errors.add(new Exception("Unhandled System Exception while trasfering funds for standing Instruction id" + instructionId
-                    + " from " + accountTransferDTO.getFromAccountId() + " to " + accountTransferDTO.getToAccountId(), e));
+                    + " from " + data.getFromAccount().getId() + " to " + data.getToAccount().getId(), e));
             errorLog.append("Exception while trasfering funds ").append(e.getMessage());
+        }
+        if (!errorLog.isEmpty()) {
+            final BigDecimal attemptedAmount = attempted.get() == null ? amountDue : attempted.get().getTransactionAmount();
+            requiresNewTransactionTemplate
+                    .executeWithoutResult(status -> insertHistory(instructionId, StandingInstructionHistoryStatus.FAILED, attemptedAmount,
+                            StringUtils.abbreviate(errorLog.toString(), ERROR_LOG_MAX_LENGTH)));
+        }
+    }
 
-        }
-        updateQuery.append(instructionId).append(",");
-        StandingInstructionHistoryStatus status = statusIfTransferred;
-        if (errorLog.length() > 0) {
-            transferCompleted = false;
-            status = StandingInstructionHistoryStatus.FAILED;
-        }
-        updateQuery.append("'").append(status.getValue()).append("',");
-        updateQuery.append(accountTransferDTO.getTransactionAmount().doubleValue());
-        updateQuery.append(", now(),");
-        updateQuery.append("'").append(errorLog).append("')");
-        jdbcTemplate.update(updateQuery.toString());
-        return transferCompleted;
+    private void insertHistory(final Long instructionId, final StandingInstructionHistoryStatus status, final BigDecimal amount,
+            final String errorLog) {
+        jdbcTemplate.update(
+                "INSERT INTO m_account_transfer_standing_instructions_history (standing_instruction_id, " + sqlGenerator.escape("status")
+                        + ", amount, execution_time, error_log) VALUES (?, ?, ?, now(), ?)",
+                instructionId, status.getValue(), amount, errorLog);
     }
 
     /**

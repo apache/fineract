@@ -526,6 +526,9 @@ final class StandingInstructionApiResourceSwagger {
         public Integer recurrenceInterval;
         @Schema(example = "[4, 3]")
         public LocalDate recurrenceOnMonthDay;
+        @Schema(example = "[2014, 5, 3]", description = "Business date on which the Execute Standing Instruction job last transferred "
+                + "funds (success or partial) for this instruction; absent when it never has")
+        public LocalDate lastRunDate;
     }
 
     @Schema(description = "PutStandingInstructionsStandingInstructionIdResponse")

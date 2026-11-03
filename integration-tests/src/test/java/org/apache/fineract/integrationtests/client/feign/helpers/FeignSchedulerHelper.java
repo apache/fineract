@@ -64,6 +64,18 @@ public class FeignSchedulerHelper {
     }
 
     public void executeAndAwaitJob(String jobDisplayName) {
+        JobDetailHistoryDataSwagger finalRunHistory = executeAndAwaitJobRun(jobDisplayName);
+        String status = finalRunHistory.getStatus();
+        if (!"success".equals(status)) {
+            fail("Job status is not success for job " + jobDisplayName + ": " + finalRunHistory);
+        }
+    }
+
+    /**
+     * Triggers the job through the scheduler, waits for that run to finish and returns its job_run_history entry,
+     * whatever its status.
+     */
+    public JobDetailHistoryDataSwagger executeAndAwaitJobRun(String jobDisplayName) {
         stopScheduler();
 
         List<GetJobsResponse> allJobs = ok(() -> fineractClient.schedulerJob().retrieveAllSchedulerJobs());
@@ -80,10 +92,7 @@ public class FeignSchedulerHelper {
 
         assertEquals("application", finalRunHistory.getTriggerType(),
                 "Job was not triggered by the test for jobId=" + jobId + ": " + finalRunHistory);
-        String status = finalRunHistory.getStatus();
-        if (!"success".equals(status)) {
-            fail("Job status is not success for jobId=" + jobId + ": " + finalRunHistory);
-        }
+        return finalRunHistory;
     }
 
     private boolean isNewCompletedRunHistory(JobDetailHistoryDataSwagger latestRunHistory, Long previousRunHistoryId) {
