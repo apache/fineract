@@ -37,6 +37,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.models.AuditData;
+import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
@@ -72,6 +73,7 @@ public class ClientActivationIdempotencyRetryIntegrationTest extends FeignIntegr
     private static final String CLIENT_ACTIVATION_IN_FUTURE = "error.msg.clients.activationDate.in.the.future";
     private static final String CLIENT_SUBMITTED_IN_FUTURE = "error.msg.clients.submittedOnDate.in.the.future";
     private static final String GROUP_ACTIVATION_IN_FUTURE = "error.msg.group.activationDate.in.the.future";
+    private static final int MAX_KEY_LENGTH = 63;
 
     private static final Long SUPER_USER_ROLE_ID = 1L;
     private static final String USER_PASSWORD = "A1b2c3d4e5f$";
@@ -92,7 +94,10 @@ public class ClientActivationIdempotencyRetryIntegrationTest extends FeignIntegr
         businessDateHelper = new FeignBusinessDateHelper(fineractClient());
         configHelper = new FeignGlobalConfigurationHelper(fineractClient());
         originalBusinessDateEnabled = Boolean.TRUE.equals(configHelper.getGlobalConfigurationByName(ENABLE_BUSINESS_DATE).getEnabled());
-        originalBusinessDate = businessDateHelper.getBusinessDate(BUSINESS_DATE).getDate();
+        // on a fresh database no business date has been set yet
+        originalBusinessDate = fineractClient().businessDateManagement().getBusinessDates().stream()
+                .filter(businessDate -> businessDate.getType() != null && BUSINESS_DATE.equals(businessDate.getType().getValue()))
+                .map(BusinessDateResponse::getDate).findFirst().orElse(null);
     }
 
     @BeforeEach
@@ -243,39 +248,52 @@ public class ClientActivationIdempotencyRetryIntegrationTest extends FeignIntegr
 
     @Test
     @Order(8)
-    void renamedKeyCollidesWithLiteralClientKey_failureMovesToNextFreeNumberAndRetryExecutes() {
+    void clientKeyEndingWithRenameSuffix_isAcceptedAndUnaffectedByTheRename() {
         String key = UUID.randomUUID().toString();
-        String literalKey = key + "_RE2";
-        PostClientsRequest literalRequest = ClientRequestBuilders.createActivePersonClientWithExternalId(LAGGED_BUSINESS_DATE);
-        IdempotentCallOutcome<PostClientsResponse> literal = createClient(literalRequest, literalKey);
-        assertEquals(200, literal.status(), "The literal-key request must succeed on the lagged business date: " + literal);
-        assertFalse(literal.servedFromCache(), "The literal-key request must execute: " + literal);
-        Long literalClientId = literal.data().getClientId();
+        PostClientsRequest ownRequest = ClientRequestBuilders.createActivePersonClientWithExternalId(LAGGED_BUSINESS_DATE);
+        IdempotentCallOutcome<PostClientsResponse> own = createClient(ownRequest, key + "_RE1");
+        assertEquals(200, own.status(), "A client key ending with _RE<n> must be accepted: " + own);
+        Long ownClientId = own.data().getClientId();
 
         PostClientsRequest request = ClientRequestBuilders.createActivePersonClientWithExternalId(REQUEST_DATE);
-        IdempotentCallOutcome<PostClientsResponse> first = createClient(request, key);
-        assertFreshFailure(first, CLIENT_ACTIVATION_IN_FUTURE);
+        assertFreshFailure(createClient(request, key), CLIENT_ACTIVATION_IN_FUTURE);
 
         moveBusinessDateTo(REQUEST_DATE);
 
         IdempotentCallOutcome<PostClientsResponse> retry = createClient(request, key);
-        assertEquals(200, retry.status(), "Retry must run again despite the rename collision: " + retry);
+        assertEquals(200, retry.status(), "The failure must be renamed, freeing the original key: " + retry);
         assertFalse(retry.servedFromCache(), "Retry must not be served from cache: " + retry);
-        assertNotNull(retry.data().getClientId(), "Successful retry must return the created clientId");
         assertEquals(1, clientHelper.countClientsByExternalId(request.getExternalId()), "Exactly one client must be created");
 
-        IdempotentCallOutcome<PostClientsResponse> literalReplay = createClient(literalRequest, literalKey);
-        assertEquals(200, literalReplay.status(), "The literal key must keep its own result: " + literalReplay);
-        assertTrue(literalReplay.servedFromCache(), "The literal key must be served from cache: " + literalReplay);
-        assertEquals(literalClientId, literalReplay.data().getClientId(), "The literal key must replay its own clientId");
-        assertEquals(1, clientHelper.countClientsByExternalId(literalRequest.getExternalId()), "The literal-key client must exist once");
+        IdempotentCallOutcome<PostClientsResponse> ownReplay = createClient(ownRequest, key + "_RE1");
+        assertEquals(200, ownReplay.status(), "The client's own _RE1 key must still replay its result: " + ownReplay);
+        assertTrue(ownReplay.servedFromCache(), "The client's own _RE1 key must be served from cache: " + ownReplay);
+        assertEquals(ownClientId, ownReplay.data().getClientId(), "The replay must return the client created under the _RE1 key");
+    }
 
-        assertCachedReplayOf(first, createClient(request, key + "_RE3"));
+    @Test
+    @Order(9)
+    void keyTooLongForTheRenameSuffix_isFreedUnderAHashAndRetryExecutes() {
+        String uuid = UUID.randomUUID().toString();
+        String key = uuid + "k".repeat(MAX_KEY_LENGTH - uuid.length());
+        PostClientsRequest request = ClientRequestBuilders.createActivePersonClientWithExternalId(REQUEST_DATE);
+
+        assertFreshFailure(createClient(request, key), CLIENT_ACTIVATION_IN_FUTURE);
+
+        moveBusinessDateTo(REQUEST_DATE);
+
+        IdempotentCallOutcome<PostClientsResponse> retry = createClient(request, key);
+        assertEquals(200, retry.status(), "A key with no room for the suffix must still be freed: " + retry);
+        assertFalse(retry.servedFromCache(), "Retry must not be served from cache: " + retry);
+        assertEquals(1, clientHelper.countClientsByExternalId(request.getExternalId()), "Exactly one client must be created");
     }
 
     private void assertActivationFailureReplayedAfterBusinessDateMoves() {
+        assertActivationFailureReplayedAfterBusinessDateMoves(UUID.randomUUID().toString());
+    }
+
+    private void assertActivationFailureReplayedAfterBusinessDateMoves(String key) {
         PostClientsRequest request = ClientRequestBuilders.createActivePersonClientWithExternalId(REQUEST_DATE);
-        String key = UUID.randomUUID().toString();
 
         IdempotentCallOutcome<PostClientsResponse> first = createClient(request, key);
         assertFreshFailure(first, CLIENT_ACTIVATION_IN_FUTURE);

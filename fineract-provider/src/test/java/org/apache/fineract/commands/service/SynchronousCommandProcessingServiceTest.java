@@ -858,7 +858,7 @@ public class SynchronousCommandProcessingServiceTest {
     }
 
     @Test
-    public void recoverableFailureWhileApprovingMakerRow_doesNotRenameMakerKey() {
+    public void recoverableFailureWhileApprovingMakerRow_renamesMakerKey() {
         long makerCommandId = 7L;
         CommandSource commandSource = failingCommand(makerCommandId);
         when(commandSourceService.getCommandSource(makerCommandId)).thenReturn(commandSource);
@@ -867,8 +867,10 @@ public class SynchronousCommandProcessingServiceTest {
 
         assertThrows(PlatformApiDataValidationException.class, () -> underTest.executeCommand(commandWrapper, jsonCommand, true));
 
-        verify(commandSourceService).saveResult(commandSource);
-        verify(commandSourceService, never()).saveRecoverableErrorResult(any());
+        verify(commandSourceService, never()).saveInitial(any(), any(), any(), any());
+        verify(commandSource).setStatus(CommandProcessingResultType.ERROR);
+        verify(commandSourceService).saveRecoverableErrorResult(commandSource);
+        verify(commandSourceService, never()).saveResult(any(CommandSource.class));
     }
 
     @Test
