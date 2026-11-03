@@ -22,6 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
@@ -31,6 +34,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelpe
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignTellerHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.FeignErrors;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +50,7 @@ public class AllocateCashToCashierValidationTest extends FeignIntegrationTest {
     private FeignTellerHelper tellerHelper;
     private Long tellerId;
     private Long cashierId;
+    private final List<Long> createdFinancialActivityAccountIds = new ArrayList<>();
 
     @BeforeAll
     public void ensureCashierFinancialActivityAccountsExist() {
@@ -55,21 +60,32 @@ public class AllocateCashToCashierValidationTest extends FeignIntegrationTest {
 
         // Allocating cash to a cashier posts journal entries between these two financial-activity accounts; the
         // teller endpoint 404s if either mapping is missing, so tests must not rely on it being seeded already.
-        ensureFinancialActivityAccountMapping(financialActivityAccountHelper, accountHelper,
-                FinancialActivity.CASH_AT_MAINVAULT.getValue());
-        ensureFinancialActivityAccountMapping(financialActivityAccountHelper, accountHelper, FinancialActivity.CASH_AT_TELLER.getValue());
+        // Only one mapping per financial activity is allowed, so the ones created here are deleted again in
+        // deleteCreatedFinancialActivityAccounts; a mapping that existed before this class ran is left alone.
+        ensureFinancialActivityAccountMapping(financialActivityAccountHelper, accountHelper, FinancialActivity.CASH_AT_MAINVAULT.getValue())
+                .ifPresent(createdFinancialActivityAccountIds::add);
+        ensureFinancialActivityAccountMapping(financialActivityAccountHelper, accountHelper, FinancialActivity.CASH_AT_TELLER.getValue())
+                .ifPresent(createdFinancialActivityAccountIds::add);
     }
 
-    private static void ensureFinancialActivityAccountMapping(final FeignFinancialActivityAccountHelper financialActivityAccountHelper,
-            final FeignAccountHelper accountHelper, final Integer financialActivityId) {
+    @AfterAll
+    public void deleteCreatedFinancialActivityAccounts() {
+        final FeignFinancialActivityAccountHelper financialActivityAccountHelper = new FeignFinancialActivityAccountHelper(
+                fineractClient());
+        createdFinancialActivityAccountIds.forEach(financialActivityAccountHelper::deleteMapping);
+    }
+
+    private static Optional<Long> ensureFinancialActivityAccountMapping(
+            final FeignFinancialActivityAccountHelper financialActivityAccountHelper, final FeignAccountHelper accountHelper,
+            final Integer financialActivityId) {
         final boolean alreadyMapped = financialActivityAccountHelper.getAllMappings().stream()
                 .anyMatch(mapping -> financialActivityId.equals(mapping.getFinancialActivityData().getId()));
         if (alreadyMapped) {
-            return;
+            return Optional.empty();
         }
 
         final Account assetAccount = accountHelper.createAssetAccount();
-        financialActivityAccountHelper.createMapping(financialActivityId, assetAccount);
+        return Optional.of(financialActivityAccountHelper.createMapping(financialActivityId, assetAccount).getResourceId());
     }
 
     @BeforeEach
