@@ -241,8 +241,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     @Override
     public Page<JournalEntryData> retrieveAll(final SearchParameters searchParameters, final Long glAccountId,
-            final Boolean onlyManualEntries, final LocalDate fromDate, final LocalDate toDate, final LocalDate submittedOnDateFrom,
-            final LocalDate submittedOnDateTo, final String transactionId, final Integer entityType,
+            final Boolean onlyManualEntries, final Boolean manualEntry, final LocalDate fromDate, final LocalDate toDate,
+            final LocalDate submittedOnDateFrom, final LocalDate submittedOnDateTo, final String transactionId, final Integer entityType,
             final JournalEntryAssociationParametersData associationParametersData) {
         GLJournalEntryMapper rm = getGlJournalEntryMapper(associationParametersData);
         final StringBuilder sqlBuilder = new StringBuilder(200);
@@ -344,6 +344,13 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 objectArray[arrayPos] = Boolean.TRUE;
                 arrayPos = arrayPos + 1;
             }
+        }
+
+        if (manualEntry != null) {
+            sqlBuilder.append(whereClose).append(" journalEntry.manual_entry = ?");
+            whereClose = " and ";
+            objectArray[arrayPos] = manualEntry;
+            arrayPos = arrayPos + 1;
         }
 
         if (searchParameters.hasLoanId()) {
@@ -524,7 +531,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         final SearchParameters searchParameters = SearchParameters.builder().orphansOnly(false).officeId(officeId).offset(0)
                 .orderBy("journalEntry.id").sortOrder("ASC").currencyCode(currencyCode).build();
 
-        return retrieveAll(searchParameters, contraId, onlyManualEntries, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo,
+        return retrieveAll(searchParameters, contraId, onlyManualEntries, null, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo,
                 transactionId, entityType, associationParametersData);
 
     }
