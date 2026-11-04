@@ -26,8 +26,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * Publishes the {@link org.apache.fineract.infrastructure.hooks.event.HookEvent} with {@code status: Exception} for a
- * failed command processed by the new command processing, as the legacy {@code SynchronousCommandProcessingService}
- * does for every command.
+ * failed command processed by the new command processing, as the legacy command processing publishes a failure event
+ * for every command.
  */
 @RequiredArgsConstructor
 @Component
@@ -41,8 +41,9 @@ final class WebhookCommandHookError implements CommandHookError<Object> {
             return;
         }
 
-        // The command's work has been rolled back, so there is no commit to wait for: publish right away, as in the
-        // legacy command processing.
+        // Publish right away, as in the legacy command processing: when the handler fails, its work is rolled back, so
+        // there is no commit to wait for. A hook can also fail after the handler has committed, e.g. when the audit
+        // hook can't store the command. The event then reports the error the API returns, for a change that was saved.
         publisher.publishError(hookable, command.getPayload(), error);
     }
 }
