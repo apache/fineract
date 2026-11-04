@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.group.handler;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -31,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@CommandType(entity = "CENTER", action = "UNASSIGNSTAFF")
 @RequiredArgsConstructor
 public class UnassignStaffFromCenterCommandHandler implements NewCommandSourceHandler {
 

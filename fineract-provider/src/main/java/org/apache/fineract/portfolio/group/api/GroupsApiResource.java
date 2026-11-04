@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.group.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonElement;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,6 +29,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -65,6 +71,7 @@ import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
+import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -87,15 +94,9 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
-import org.apache.fineract.portfolio.group.command.AssociateClientsCommand;
-import org.apache.fineract.portfolio.group.command.DisassociateClientsCommand;
 import org.apache.fineract.portfolio.group.command.GroupActivateCommand;
 import org.apache.fineract.portfolio.group.command.GroupAssignStaffCommand;
 import org.apache.fineract.portfolio.group.command.GroupUnassignStaffCommand;
-import org.apache.fineract.portfolio.group.data.AssociateClientsRequest;
-import org.apache.fineract.portfolio.group.data.AssociateClientsResponse;
-import org.apache.fineract.portfolio.group.data.DisassociateClientsRequest;
-import org.apache.fineract.portfolio.group.data.DisassociateClientsResponse;
 import org.apache.fineract.portfolio.group.data.GroupActivateRequest;
 import org.apache.fineract.portfolio.group.data.GroupActivateResponse;
 import org.apache.fineract.portfolio.group.data.GroupAssignStaffRequest;
@@ -150,6 +151,8 @@ public class GroupsApiResource {
     private final GSIMReadPlatformService gsimReadPlatformService;
     private final SqlValidator sqlValidator;
     private final CommandDispatcher commandDispatcher;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
     @GET
     @Path("template")
@@ -362,59 +365,12 @@ public class GroupsApiResource {
     @Operation(summary = "Unassign a Staff", operationId = "unassignLoanOfficerGroup", description = "Allows you to unassign the Staff.\n\n"
             + "Mandatory Fields: staffId")
     @AlternativeOperationId("unassignLoanOfficer")
-    public GroupUnassignStaffResponse unassignLoanOfficer(@PathParam("groupId") final Long groupId, GroupUnassignStaffRequest request) {
+    public GroupUnassignStaffResponse unassignLoanOfficer(@PathParam("groupId") final Long groupId,
+            @Valid final GroupUnassignStaffRequest request) {
         request.setGroupId(groupId);
         final GroupUnassignStaffCommand command = new GroupUnassignStaffCommand();
         command.setPayload(request);
         return commandDispatcher.<GroupUnassignStaffRequest, GroupUnassignStaffResponse>dispatch(command).get();
-    }
-
-    @POST
-    @Path("{groupId}/associateClients")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Associate Clients to a Group", operationId = "associateClients", description = "Associate existing clients to an existing Group")
-    public AssociateClientsResponse associateClients(@PathParam("groupId") final Long groupId, AssociateClientsRequest request) {
-        request.setGroupId(groupId);
-        final AssociateClientsCommand command = new AssociateClientsCommand();
-        command.setPayload(request);
-        return commandDispatcher.<AssociateClientsRequest, AssociateClientsResponse>dispatch(command).get();
-    }
-
-    @POST
-    @Path("{groupId}/disassociateClients")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Disassociate Clients from a Group", operationId = "disassociateClients", description = "Disassociate clients from an existing Group")
-    public DisassociateClientsResponse disassociateClients(@PathParam("groupId") final Long groupId, DisassociateClientsRequest request) {
-        request.setGroupId(groupId);
-        final DisassociateClientsCommand command = new DisassociateClientsCommand();
-        command.setPayload(request);
-        return commandDispatcher.<DisassociateClientsRequest, DisassociateClientsResponse>dispatch(command).get();
-    }
-
-    @POST
-    @Path("{groupId}/activate")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Activate a Group", operationId = "activateGroup", description = "Activate a Group in Pending state")
-    public GroupActivateResponse activate(@PathParam("groupId") final Long groupId, GroupActivateRequest request) {
-        request.setGroupId(groupId);
-        final GroupActivateCommand command = new GroupActivateCommand();
-        command.setPayload(request);
-        return commandDispatcher.<GroupActivateRequest, GroupActivateResponse>dispatch(command).get();
-    }
-
-    @POST
-    @Path("{groupId}/assignStaff")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Assign Staff to Group", operationId = "assignStaff", description = "Assign a Staff to an existing Group")
-    public GroupAssignStaffResponse assignStaff(@PathParam("groupId") final Long groupId, GroupAssignStaffRequest request) {
-        request.setGroupId(groupId);
-        final GroupAssignStaffCommand command = new GroupAssignStaffCommand();
-        command.setPayload(request);
-        return commandDispatcher.<GroupAssignStaffRequest, GroupAssignStaffResponse>dispatch(command).get();
     }
 
     @PUT
@@ -455,7 +411,7 @@ public class GroupsApiResource {
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Associate Clients | Disassociate Clients | Transfer Clients across groups | Generate Collection Sheet | Save Collection Sheet | Assign a Role | Unassign a Role | Update a Role | Close a Group", operationId = "handleCommandsGroup", description = "Handles remaining group commands. Activate, AssignStaff and UnassignStaff have been migrated to dedicated typed endpoints.")
+    @Operation(summary = "Activate a Group | Associate Clients | Disassociate Clients | Transfer Clients across groups | Generate Collection Sheet | Save Collection Sheet | Unassign a Staff | Assign a Staff | Assign a Role | Unassign a Role | Update a Role | Close a Group", operationId = "handleCommandsGroup", description = "Handles group commands selected via the `command` query parameter.")
     @AlternativeOperationId("activateOrGenerateCollectionSheet")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdRequest.class)))
     public String activateOrGenerateCollectionSheet(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
@@ -465,7 +421,38 @@ public class GroupsApiResource {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         CommandProcessingResult result = null;
-        if (is(commandParam, "generateCollectionSheet")) {
+        if (is(commandParam, "activate")) {
+            final GroupActivateRequest request = parseAndValidate(apiRequestBodyAsJson, GroupActivateRequest.class);
+            request.setGroupId(groupId);
+            final GroupActivateCommand command = new GroupActivateCommand();
+            command.setPayload(request);
+            final GroupActivateResponse response = commandDispatcher.<GroupActivateRequest, GroupActivateResponse>dispatch(command).get();
+            return toApiJsonSerializer.serialize(response);
+        } else if (is(commandParam, "assignStaff")) {
+            final GroupAssignStaffRequest request = parseAndValidate(apiRequestBodyAsJson, GroupAssignStaffRequest.class);
+            request.setGroupId(groupId);
+            final GroupAssignStaffCommand command = new GroupAssignStaffCommand();
+            command.setPayload(request);
+            final GroupAssignStaffResponse response = commandDispatcher.<GroupAssignStaffRequest, GroupAssignStaffResponse>dispatch(command)
+                    .get();
+            return toApiJsonSerializer.serialize(response);
+        } else if (is(commandParam, "unassignStaff")) {
+            final GroupUnassignStaffRequest request = parseAndValidate(apiRequestBodyAsJson, GroupUnassignStaffRequest.class);
+            request.setGroupId(groupId);
+            final GroupUnassignStaffCommand command = new GroupUnassignStaffCommand();
+            command.setPayload(request);
+            final GroupUnassignStaffResponse response = commandDispatcher
+                    .<GroupUnassignStaffRequest, GroupUnassignStaffResponse>dispatch(command).get();
+            return toApiJsonSerializer.serialize(response);
+        } else if (is(commandParam, "associateClients")) {
+            final CommandWrapper commandRequest = builder.associateClientsToGroup(groupId).build();
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, "disassociateClients")) {
+            final CommandWrapper commandRequest = builder.disassociateClientsFromGroup(groupId).build();
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, "generateCollectionSheet")) {
             final JsonElement parsedQuery = fromJsonHelper.parse(apiRequestBodyAsJson);
             final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, fromJsonHelper);
             final JLGCollectionSheetData collectionSheet = collectionSheetReadPlatformService.generateGroupCollectionSheet(groupId, query);
@@ -496,9 +483,28 @@ public class GroupsApiResource {
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return toApiJsonSerializer.serialize(result);
         } else {
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "generateCollectionSheet",
-                    "saveCollectionSheet", "assignRole", "unassignRole", "updateRole", "transferClients", "close" });
+            throw new UnrecognizedQueryParamException("command", commandParam,
+                    new Object[] { "activate", "assignStaff", "unassignStaff", "associateClients", "disassociateClients",
+                            "generateCollectionSheet", "saveCollectionSheet", "assignRole", "unassignRole", "updateRole", "transferClients",
+                            "close" });
         }
+    }
+
+    private <T> T parseAndValidate(final String apiRequestBodyAsJson, final Class<T> type) {
+        if (StringUtils.isBlank(apiRequestBodyAsJson)) {
+            throw new InvalidJsonException();
+        }
+        final T request;
+        try {
+            request = objectMapper.readValue(apiRequestBodyAsJson, type);
+        } catch (final JsonProcessingException e) {
+            throw new InvalidJsonException();
+        }
+        final Set<ConstraintViolation<T>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        return request;
     }
 
     private boolean is(final String commandParam, final String commandValue) {

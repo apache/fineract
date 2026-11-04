@@ -19,7 +19,9 @@
 
 package org.apache.fineract.portfolio.group.data;
 
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.Serial;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,9 +31,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupUnassignStaffRequest {
+public class GroupUnassignStaffRequest implements Serializable {
 
-    @NotNull
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    @JsonIgnore
     private Long groupId;
 
     private Long staffId;
