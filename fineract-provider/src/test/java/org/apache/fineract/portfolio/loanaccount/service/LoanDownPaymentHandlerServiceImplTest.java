@@ -274,4 +274,51 @@ public class LoanDownPaymentHandlerServiceImplTest {
         verify(businessEventNotifierService, Mockito.never()).notifyPostBusinessEvent(Mockito.any(LoanBalanceChangedBusinessEvent.class));
         verify(loanTransactionRepository, Mockito.never()).saveAndFlush(any(LoanTransaction.class));
     }
+
+    @Test
+    public void testLatestInterestWaiverKeepsOnlyTheRecognizedInterest() {
+        final Loan loan = loanProcessedOnTheLatestTransactionPath();
+        final LoanTransaction waiver = transactionOnTheLatestPath(loan, true);
+
+        underTest.handleRepaymentOrRecoveryOrWaiverTransaction(loan, waiver, null, Mockito.mock(ScheduleGeneratorDTO.class));
+
+        verify(loanTransactionProcessingService).processLatestTransaction(any(), Mockito.eq(waiver), any());
+        verify(waiver).adjustInterestComponent();
+    }
+
+    @Test
+    public void testLatestRepaymentInterestIsNotAdjusted() {
+        final Loan loan = loanProcessedOnTheLatestTransactionPath();
+        final LoanTransaction repayment = transactionOnTheLatestPath(loan, false);
+
+        underTest.handleRepaymentOrRecoveryOrWaiverTransaction(loan, repayment, null, Mockito.mock(ScheduleGeneratorDTO.class));
+
+        verify(loanTransactionProcessingService).processLatestTransaction(any(), Mockito.eq(repayment), any());
+        verify(repayment, Mockito.never()).adjustInterestComponent();
+    }
+
+    private Loan loanProcessedOnTheLatestTransactionPath() {
+        final Loan loan = Mockito.mock(Loan.class);
+        final LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
+        final Money interestOutstanding = Mockito.mock(Money.class);
+        final MonetaryCurrency currency = new MonetaryCurrency("USD", 2, 1);
+        when(loan.getCurrency()).thenReturn(currency);
+        when(loan.loanCurrency()).thenReturn(currency);
+        when(loan.getLoanProduct()).thenReturn(loanProduct);
+        when(loan.getTotalInterestOutstandingOnLoan()).thenReturn(interestOutstanding);
+        when(loanTransactionService.isChronologicallyLatestRepaymentOrWaiver(any(), any())).thenReturn(true);
+        when(loanTransactionProcessingService.canProcessLatestTransactionOnly(any(), any(), any())).thenReturn(true);
+        return loan;
+    }
+
+    private static LoanTransaction transactionOnTheLatestPath(final Loan loan, final boolean interestWaiver) {
+        final LoanTransaction transaction = Mockito.mock(LoanTransaction.class);
+        final Money amount = Mockito.mock(Money.class);
+        when(transaction.isInterestWaiver()).thenReturn(interestWaiver);
+        when(transaction.isNotWaiver()).thenReturn(!interestWaiver);
+        when(transaction.isNotRepaymentLikeType()).thenReturn(interestWaiver);
+        when(transaction.isNotRecoveryRepayment()).thenReturn(true);
+        when(transaction.getAmount(loan.getCurrency())).thenReturn(amount);
+        return transaction;
+    }
 }

@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.persistence.FlushModeHandler;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -41,6 +42,7 @@ import org.mockito.MockedStatic;
 class LoanBalanceServiceTest {
 
     private static final MonetaryCurrency USD = new MonetaryCurrency("USD", 2, 0);
+    private static final LocalDate TODAY = LocalDate.of(2026, 10, 28);
 
     private static MockedStatic<MoneyHelper> moneyHelperMock;
 
@@ -90,6 +92,56 @@ class LoanBalanceServiceTest {
         Money totalRecovered = service.calculateTotalRecoveredPayments(loan);
 
         assertThat(totalRecovered.isZero()).isTrue();
+    }
+
+    @Test
+    void receivableInterestIsZeroWhenInterestWasReceivedBeforeItsAccrual() {
+        // The interest was repaid before the accrual job posted it: nothing is left receivable.
+        Loan loan = loanWith(repayment("250"), accrual("250"));
+
+        Money receivable = service.getReceivableInterest(loan, TODAY);
+
+        assertThat(receivable.isZero()).isTrue();
+    }
+
+    @Test
+    void receivableInterestIsTheAccruedInterestNotYetReceived() {
+        Loan loan = loanWith(accrual("100"), accrual("50"), repayment("120"));
+
+        Money receivable = service.getReceivableInterest(loan, TODAY);
+
+        assertThat(receivable.getAmount()).isEqualByComparingTo("30");
+    }
+
+    @Test
+    void receivableInterestIsNeverNegative() {
+        Loan loan = loanWith(accrual("40"), repayment("100"));
+
+        Money receivable = service.getReceivableInterest(loan, TODAY);
+
+        assertThat(receivable.isZero()).isTrue();
+    }
+
+    private static LoanTransaction accrual(String interest) {
+        LoanTransaction transaction = interestTransaction(interest);
+        when(transaction.isAccrual()).thenReturn(true);
+        return transaction;
+    }
+
+    private static LoanTransaction repayment(String interest) {
+        LoanTransaction transaction = interestTransaction(interest);
+        when(transaction.isRepaymentLikeType()).thenReturn(true);
+        return transaction;
+    }
+
+    private static LoanTransaction interestTransaction(String interest) {
+        // built before stubbing: Money.of calls the statically mocked MoneyHelper
+        Money interestPortion = Money.of(USD, new BigDecimal(interest));
+        LoanTransaction transaction = mock(LoanTransaction.class);
+        when(transaction.isNotReversed()).thenReturn(true);
+        when(transaction.getTransactionDate()).thenReturn(TODAY);
+        when(transaction.getInterestPortion(USD)).thenReturn(interestPortion);
+        return transaction;
     }
 
     private static Loan loanWith(LoanTransaction... transactions) {
