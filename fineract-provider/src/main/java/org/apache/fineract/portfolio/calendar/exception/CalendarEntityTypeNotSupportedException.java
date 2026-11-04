@@ -26,4 +26,8 @@ public class CalendarEntityTypeNotSupportedException extends AbstractPlatformRes
         super("calendar.entitytype.not.supported", "Calendar does not support resource " + resource);
     }
 
+    public CalendarEntityTypeNotSupportedException(final String resource, final Throwable cause) {
+        super("calendar.entitytype.not.supported", "Calendar does not support resource " + resource);
+        initCause(cause);
+    }
 }
