@@ -18,26 +18,33 @@
  */
 package org.apache.fineract.organisation.office.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.organisation.office.service.OfficeWritePlatformService;
-import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.organisation.office.data.OfficeUpdateRequest;
+import org.apache.fineract.organisation.office.data.OfficeUpdateResponse;
+import org.apache.fineract.organisation.office.service.OfficeWriteService;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "OFFICE", action = "UPDATE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class UpdateOfficeCommandHandler implements NewCommandSourceHandler {
+public class UpdateOfficeCommandHandler implements CommandHandler<OfficeUpdateRequest, OfficeUpdateResponse> {
 
-    private final OfficeWritePlatformService writePlatformService;
+    private final OfficeWriteService officeWriteService;
 
-    @Transactional
+    @Retry(name = "commandOfficeUpdate", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    public OfficeUpdateResponse handle(final Command<OfficeUpdateRequest> command) {
+        return officeWriteService.updateOffice(command.getPayload());
+    }
 
-        return this.writePlatformService.updateOffice(command.entityId(), command);
+    @Override
+    public OfficeUpdateResponse fallback(final Command<OfficeUpdateRequest> command, final Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }

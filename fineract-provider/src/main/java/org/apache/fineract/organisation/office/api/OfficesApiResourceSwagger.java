@@ -95,7 +95,7 @@ final class OfficesApiResourceSwagger {
     @Schema(description = "PostOfficesResponse")
     public static final class PostOfficesResponse {
 
-        private PostOfficesResponse() {
+        PostOfficesResponse() {
 
         }
 
