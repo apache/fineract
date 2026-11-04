@@ -31,13 +31,11 @@ class SavingsHelperPeriodBoundaryTest {
 
     private static final Integer FINANCIAL_YEAR_BEGINNING_MONTH = 1;
 
-    private final SavingsHelper savingsHelper = new SavingsHelper(null);
-
     @Test
     void quarterlyPostingStartingOnQuarterEndIncludesThatBoundary() {
         LocalDate quarterEnd = LocalDate.of(2025, 3, 31);
 
-        List<LocalDateInterval> periods = savingsHelper.determineInterestPostingPeriods(quarterEnd, quarterEnd,
+        List<LocalDateInterval> periods = SavingsInterestCalculationUtil.determineInterestPostingPeriods(quarterEnd, quarterEnd,
                 SavingsPostingInterestPeriodType.QUATERLY, FINANCIAL_YEAR_BEGINNING_MONTH, Collections.emptyList());
 
         assertThat(periods).hasSize(1);
@@ -49,7 +47,7 @@ class SavingsHelperPeriodBoundaryTest {
     void biannualPostingStartingOnPeriodEndIncludesThatBoundary() {
         LocalDate periodEnd = LocalDate.of(2025, 6, 30);
 
-        List<LocalDateInterval> periods = savingsHelper.determineInterestPostingPeriods(periodEnd, periodEnd,
+        List<LocalDateInterval> periods = SavingsInterestCalculationUtil.determineInterestPostingPeriods(periodEnd, periodEnd,
                 SavingsPostingInterestPeriodType.BIANNUAL, FINANCIAL_YEAR_BEGINNING_MONTH, Collections.emptyList());
 
         assertThat(periods).hasSize(1);

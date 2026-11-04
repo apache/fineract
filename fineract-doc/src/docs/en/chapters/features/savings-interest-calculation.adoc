@@ -1,0 +1,224 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= Savings and Deposit Interest Calculation
+
+== Purpose
+
+This section describes where the interest of savings accounts, fixed deposits and recurring deposits is calculated, and how the result reaches the account. It is aimed at developers changing that logic. The functional behaviour (posting period types, posting dates) is described in <<_savings_interest_posting>>.
+
+== Design Rule: the Entity Stores, the Service Calculates
+
+The JPA entities `SavingsAccount`, `FixedDepositAccount` and `RecurringDepositAccount` do not calculate interest and do not call calculation helpers, not even static ones. A service reads the state of the account, calculates the posting periods and hands the result to the entity, which only stores it.
+
+[cols="1,2,2", options="header"]
+|===
+|Layer |Responsibility |Must not
+
+|Entity
+|Hold the account state; validate its own state transitions; store the results it receives (posting transactions, maturity details, summary figures); expose overridable hooks where deposit types behave differently.
+|Call `SavingsInterestCalculationUtil`, `SavingsHelper` or any other service; receive a service as a method parameter.
+
+|Calculation service
+|Read the account state through its public API, fetch what needs the database (interest posting transaction ids), calculate the posting periods and pass the result to the entity.
+|Duplicate behaviour that differs per deposit type with `instanceof`; use the entity hooks or a method per deposit type instead.
+|===
+
+When new interest logic is needed, add it to one of the services below and give the entity a method that receives the result.
+
+[NOTE]
+====
+The transaction summary totals (total deposits, withdrawals, interest posted, fees, etc.) are still derived inside the `SavingsAccountSummary` embeddable through `SavingsAccountTransactionSummaryWrapper`. Moving them out of the entity is a separate change, because every entity operation that changes transactions (deposit, withdrawal, escheat, closure) refreshes the summary.
+====
+
+== Components
+
+[cols="2,1,4", options="header"]
+|===
+|Class |Module |Responsibility
+
+|`SavingsAccountInterestCalculationService`
+|`fineract-savings`
+|Recalculates the daily balances of a `SavingsAccount` and calculates the interest earned per posting period up to a date. Stores the interest period summaries and refreshes the transaction summary of the account. Used for regular savings accounts and, through the generic paths, for fixed and recurring deposits.
+
+|`DepositAccountInterestCalculationService`
+|`fineract-provider`
+|Maturity date and amount, maturity status, maturity interest posting, premature closure interest and premature amount preview of fixed and recurring deposits. Offers one method per deposit type, because both types calculate differently (see <<_differences_between_fixed_and_recurring_deposits>>).
+
+|`SavingsAccountPostInterestService`
+|`fineract-savings`
+|Posts interest on a `SavingsAccount`: calls `SavingsAccountInterestCalculationService` and creates, reverses or corrects the interest posting and withholding tax transactions.
+
+|`SavingsAccountInterestPostingService`
+|`fineract-savings`
+|Same calculation over the `SavingsAccountData` DTO, used by the interest posting scheduler job (`SavingsSchedularInterestPoster`), which persists with JDBC batches instead of the entity.
+
+|`SavingsInterestCalculationUtil`
+|`fineract-core`
+|Stateless period math: splits a date range into posting periods (`determineInterestPostingPeriods`) and calculates the interest of each period (`calculateInterestForAllPostingPeriods`). Called only by the services above.
+
+|`SavingsHelper`
+|`fineract-core`
+|Database lookup of the interest posting transaction ids linked to account transfers (`fetchPostInterestTransactionIds`). Called only by the services above.
+|===
+
+== Savings Account Interest Calculation
+
+`SavingsAccountInterestCalculationService.calculateInterestUsing(account, ...)` performs, in this order:
+
+. Resolves the effective calculation date through the entity hook `interestCalculationUpToDate(date)` (see <<_polymorphic_hooks>>).
+. Recalculates the daily balances of the account transactions (`SavingsAccount.recalculateDailyBalances`). When backdated transactions are allowed up to a pivot date, the opening balance is the running balance on the pivot date.
+. If the account has a nominal interest rate or an overdraft interest rate:
+.. determines the posting periods from the start interest calculation date, including the manual "post interest as on" dates;
+.. builds one `PostingPeriod` per interval from the non-interest-posting transactions, the effective interest rate and the minimum balance rules;
+.. calculates the interest of every period and stores the period summaries on the account (`SavingsAccountSummary.updateFromInterestPeriodSummaries`).
+. Refreshes the transaction summary of the account.
+. Returns the posting periods. The caller decides what to do with them: posting interest, closing the account, or only showing the accrued interest.
+
+.Interest posting on a savings account
+[plantuml,format=svg]
+....
+@startuml
+participant "Write service" as W
+participant "SavingsAccountPostInterestService" as P
+participant "SavingsAccountInterestCalculationService" as C
+participant "SavingsHelper" as H
+participant "SavingsAccount" as A
+
+W -> P : postInterest(account, ...)
+P -> A : interestPostingUpToDate(postingDate)
+P -> C : calculateInterestUsing(account, ...)
+C -> A : interestCalculationUpToDate(date)
+C -> A : recalculateDailyBalances(...)
+C -> H : fetchPostInterestTransactionIds(accountId)
+C -> C : build and calculate posting periods
+C -> A : getSummary().updateFromInterestPeriodSummaries(...)
+C --> P : posting periods
+P -> A : addTransaction(interest posting / withholding tax)
+P -> A : recalculateDailyBalances(...)
+@enduml
+....
+
+== Polymorphic Hooks
+
+The entity keeps the behaviour that differs per deposit type as overridable methods. The services call them instead of checking the account type.
+
+[cols="2,2,3", options="header"]
+|===
+|Hook |Overridden by |Behaviour
+
+|`interestCalculationUpToDate(date)`
+|`FixedDepositAccount`, `RecurringDepositAccount`
+|Caps the interest calculation date at the day before maturity. Identity for a regular savings account.
+
+|`interestPostingUpToDate(date)`
+|`RecurringDepositAccount`
+|Caps the interest posting date at the day before maturity. Fixed deposits intentionally do not override it, so they keep the uncapped date on the generic posting path.
+
+|`getEffectiveInterestRateAsFraction(mc, date)`
+|`FixedDepositAccount`, `RecurringDepositAccount`
+|Applies the interest rate chart (and the premature closure penalty in the three-argument variant) instead of the nominal rate.
+
+|`isTransferInterestToOtherAccount()`
+|`FixedDepositAccount`, `RecurringDepositAccount`
+|Whether the interest is transferred to a linked account instead of being credited to the deposit.
+
+|`minBalanceForInterestCalculation()`
+|`FixedDepositAccount`
+|Minimum balance required to earn interest.
+|===
+
+== Fixed and Recurring Deposits
+
+Each operation is calculated by `DepositAccountInterestCalculationService` and stored by an entity method that receives the result.
+
+[cols="2,3,2", options="header"]
+|===
+|Operation |Calculated by the service |Stored by the entity
+
+|Maturity date and amount
+|`updateMaturityDateAndAmount(account, ...)`; for a fixed deposit not yet active, `updateMaturityDateAndAmountBeforeAccountActivation(account, ...)` projects the deposit amount as a single deposit.
+|`FixedDepositAccount.updateMaturityDetails(maturityAmount, maturityDate)`; `RecurringDepositAccount.updateMaturityDetails(maturityDate, totalDeposit, totalInterest)`. An open-ended recurring deposit (no maturity date) only stores the deposit amount.
+
+|Maturity status
+|`updateMaturityStatus(account, ...)` posts the maturity interest when the entity reports the account as matured.
+|`updateMaturityStatus()` (fixed) / `updateMaturityStatus(today)` (recurring) validate that the account is active, set the `MATURED` status and return `true` when due.
+
+|Maturity interest
+|`postMaturityInterest(account, ...)` calculates the posting periods up to maturity (a recurring deposit first sets its closed-on date).
+|`postMaturityInterest(postingPeriods)` (fixed) / `postMaturityInterest(postingPeriods, closeDate, postReversals)` (recurring) create or correct the interest posting transactions.
+
+|Premature closure
+|`postPreMaturityInterest(account, closeDate, ...)` calculates the interest earned up to the day before the closure date.
+|`postPreMaturityInterest(closeDate, interestOnMaturity, ...)` posts the part not yet posted and stores the account balance as the maturity amount.
+
+|Premature amount preview
+|`calculatePreMatureAmount(account, date, ...)` returns the balance minus the interest posted plus the interest earned up to the date.
+|Nothing is stored.
+|===
+
+The entry points are `DepositAccountDomainServiceJpa` (deposits, withdrawals and closures), `DepositAccountWritePlatformServiceJpaRepositoryImpl` (interest calculation and posting commands, recommended deposit amount update and the maturity details update run by `UpdateDepositsAccountMaturityDetailsTasklet`), `DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl` (application submission and modification) and `DepositAccountPreMatureCalculationPlatformServiceImpl` (premature amount preview).
+
+.Maturity status update of a fixed deposit
+[plantuml,format=svg]
+....
+@startuml
+start
+:DepositAccountInterestCalculationService.updateMaturityStatus(account);
+:FixedDepositAccount.updateMaturityStatus();
+if (account active?) then (no)
+  :reject with "not.in.active.state";
+  stop
+endif
+if (maturity date in the future?) then (yes)
+  :return false;
+  stop
+else (no)
+  :set status MATURED and return true;
+endif
+:SavingsAccountInterestCalculationService.calculateInterestUsing(account, maturityDate, ...);
+:FixedDepositAccount.postMaturityInterest(postingPeriods);
+stop
+@enduml
+....
+
+=== Differences between Fixed and Recurring Deposits
+
+Both deposit types calculate the interest payable up to maturity with their own rules. The service keeps them in separate methods so neither behaviour changes the other.
+
+[cols="2,2,2", options="header"]
+|===
+|Aspect |Fixed deposit |Recurring deposit
+
+|Start of the posting periods
+|Submitted or activation date
+|Deposit start date
+
+|Transactions used for the maturity amount
+|Existing non-interest-posting transactions (or the projected single deposit before activation), with end-of-day balances reset to the maturity date during the calculation
+|Existing transactions plus the pending schedule installments projected as future deposits
+
+|Interest period summaries stored on the account
+|Every time the interest payable is calculated
+|Only for the premature closure calculation
+|===
+
+== Recommended Deposit Amount Update
+
+When the recommended deposit amount of a recurring deposit changes, `DepositAccountRecurringDetail.updateMandatoryRecommendedDepositAmount` only updates the amount and the schedule installments. The caller, `DepositAccountWritePlatformServiceJpaRepositoryImpl.updateDepositAmountForRDAccount`, then recalculates the maturity date and amount through `DepositAccountInterestCalculationService`. One entity no longer triggers a calculation on another.

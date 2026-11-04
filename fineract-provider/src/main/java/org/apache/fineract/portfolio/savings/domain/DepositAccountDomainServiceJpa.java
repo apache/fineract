@@ -61,6 +61,7 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
+import org.apache.fineract.portfolio.savings.service.DepositAccountInterestCalculationService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountActivationService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountDomainService;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -77,6 +78,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
     private final AccountNumberGenerator accountNumberGenerator;
     private final DepositAccountAssembler depositAccountAssembler;
     private final SavingsAccountDomainService savingsAccountDomainService;
+    private final DepositAccountInterestCalculationService depositAccountInterestCalculationService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
@@ -134,8 +136,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             this.savingsAccountRepository.saveAndFlush(account);
         }
         account.handleScheduleInstallments(deposit);
-        account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth);
+        this.depositAccountInterestCalculationService.updateMaturityDateAndAmount(account, mc, isPreMatureClosure,
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         account.updateOverduePayments(DateUtils.getBusinessLocalDate());
         if (isAnyActivationChargesDue) {
             postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
@@ -204,15 +206,15 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
         }
-        account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+        this.depositAccountInterestCalculationService.postMaturityInterest(account, isSavingsInterestPostingAtCurrentPeriodEnd,
+                financialYearBeginningMonth);
         account.setClosedOnDate(closedDate);
         if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             ExternalId externalId = this.externalIdFactory.create();
             FixedDepositAccount reinvestedDeposit = account.reInvest(account.getAccountBalance(), externalId);
-            this.depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
-            reinvestedDeposit.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
-                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+            this.depositAccountInterestCalculationService.updateMaturityDateAndAmountBeforeAccountActivation(reinvestedDeposit, mc,
+                    isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
             this.savingsAccountRepository.saveAndFlush(reinvestedDeposit);
             autoGenerateAccountNumber(reinvestedDeposit);
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
@@ -270,7 +272,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
         }
-        account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+        this.depositAccountInterestCalculationService.postMaturityInterest(account, isSavingsInterestPostingAtCurrentPeriodEnd,
+                financialYearBeginningMonth);
         account.setClosedOnDate(closedDate);
         if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
@@ -283,9 +286,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             ExternalId externalId = this.externalIdFactory.create();
 
             FixedDepositAccount reinvestedDeposit = account.reInvest(reInvestAmount, externalId);
-            this.depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
-            reinvestedDeposit.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
-                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+            this.depositAccountInterestCalculationService.updateMaturityDateAndAmountBeforeAccountActivation(reinvestedDeposit, mc,
+                    isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
 
             this.savingsAccountRepository.saveAndFlush(reinvestedDeposit);
             autoGenerateAccountNumber(reinvestedDeposit);
@@ -357,7 +359,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
         }
-        account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, closedDate, postReversals);
+        this.depositAccountInterestCalculationService.postMaturityInterest(account, isSavingsInterestPostingAtCurrentPeriodEnd,
+                financialYearBeginningMonth, closedDate, postReversals);
         final BigDecimal transactionAmount = account.getAccountBalance();
         if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
@@ -368,7 +371,6 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 reInvestAmount = account.getAccountBalance();
             }
             RecurringDepositAccount reinvestedDeposit = account.reInvest(reInvestAmount);
-            depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
             this.savingsAccountRepository.save(reinvestedDeposit);
             final CalendarInstance calendarInstance = getCalendarInstance(account, reinvestedDeposit);
             this.calendarInstanceRepository.save(calendarInstance);
@@ -379,8 +381,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             frequency = frequency == -1 ? 1 : frequency;
             reinvestedDeposit.generateSchedule(frequencyType, frequency, calendar);
             reinvestedDeposit.processAccountUponActivation(fmt, postReversals, relaxingDaysConfigForPivotDate);
-            reinvestedDeposit.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth);
+            this.depositAccountInterestCalculationService.updateMaturityDateAndAmount(reinvestedDeposit, mc, isPreMatureClosure,
+                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
             this.savingsAccountRepository.save(reinvestedDeposit);
             autoGenerateAccountNumber(reinvestedDeposit);
 
@@ -407,6 +409,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         }
 
         account.close(user, command, changes);
+        account.updateSavingsAccountSummary(
+                SavingsAccountTransactionSummaryWrapper.calculateSummaryTotals(account.getCurrency(), account.getTransactions()));
 
         this.savingsAccountRepository.save(account);
 
@@ -470,8 +474,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         Long savingsTransactionId = null;
 
         // post interest
-        account.postPreMaturityInterest(closedDate, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth);
+        this.depositAccountInterestCalculationService.postPreMaturityInterest(account, closedDate, isPreMatureClosure,
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
 
         final Integer closureTypeValue = command.integerValueOfParameterNamed(DepositsApiConstants.onAccountClosureIdParamName);
         DepositAccountOnClosureType closureType = DepositAccountOnClosureType.fromInt(closureTypeValue);
@@ -495,6 +499,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         }
 
         account.prematureClosure(user, command, changes);
+        account.updateSavingsAccountSummary(
+                SavingsAccountTransactionSummaryWrapper.calculateSummaryTotals(account.getCurrency(), account.getTransactions()));
 
         this.savingsAccountRepository.save(account);
 
@@ -526,8 +532,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         Long savingsTransactionId = null;
         // post interest
-        account.postPreMaturityInterest(closedDate, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postReversals);
+        this.depositAccountInterestCalculationService.postPreMaturityInterest(account, closedDate, isPreMatureClosure,
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postReversals);
 
         final Integer closureTypeValue = command.integerValueOfParameterNamed(DepositsApiConstants.onAccountClosureIdParamName);
         DepositAccountOnClosureType closureType = DepositAccountOnClosureType.fromInt(closureTypeValue);
@@ -551,6 +557,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         }
 
         account.prematureClosure(user, command, changes);
+        account.updateSavingsAccountSummary(
+                SavingsAccountTransactionSummaryWrapper.calculateSummaryTotals(account.getCurrency(), account.getTransactions()));
         this.savingsAccountRepository.save(account);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         return savingsTransactionId;

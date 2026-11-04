@@ -102,6 +102,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl implements DepositApplicationProcessWritePlatformService {
 
     private final PlatformSecurityContext context;
+    private final DepositAccountInterestCalculationService depositAccountInterestCalculationService;
     private final SavingsAccountRepositoryWrapper savingAccountRepository;
     private final FixedDepositAccountRepository fixedDepositAccountRepository;
     private final RecurringDepositAccountRepository recurringDepositAccountRepository;
@@ -169,8 +170,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final MathContext mc = MathContext.DECIMAL64;
             final boolean isPreMatureClosure = false;
 
-            account.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth);
+            this.depositAccountInterestCalculationService.updateMaturityDateAndAmountBeforeAccountActivation(account, mc,
+                    isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
             this.fixedDepositAccountRepository.saveAndFlush(account);
 
             if (account.isAccountNumberRequiresAutoGeneration()) {
@@ -248,8 +249,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             frequency = frequency == -1 ? 1 : frequency;
             account.generateSchedule(frequencyType, frequency, calendar);
             final boolean isPreMatureClosure = false;
-            account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth);
+            this.depositAccountInterestCalculationService.updateMaturityDateAndAmount(account, mc, isPreMatureClosure,
+                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
             account.validateApplicableInterestRate();
             savingAccountRepository.save(account);
             businessEventNotifierService.notifyPostBusinessEvent(new RecurringDepositAccountCreateBusinessEvent(account));
@@ -357,8 +358,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 }
                 final MathContext mc = MathContext.DECIMAL64;
                 final boolean isPreMatureClosure = false;
-                account.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
-                        isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+                this.depositAccountInterestCalculationService.updateMaturityDateAndAmountBeforeAccountActivation(account, mc,
+                        isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
                 this.savingAccountRepository.save(account);
             }
 
@@ -458,8 +459,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 frequency = frequency == -1 ? 1 : frequency;
                 account.generateSchedule(frequencyType, frequency, calendar);
                 final boolean isPreMatureClosure = false;
-                account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                        financialYearBeginningMonth);
+                this.depositAccountInterestCalculationService.updateMaturityDateAndAmount(account, mc, isPreMatureClosure,
+                        isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
                 account.validateApplicableInterestRate();
                 this.savingAccountRepository.save(account);
 
