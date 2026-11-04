@@ -598,7 +598,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     protected boolean updateWithHoldTransaction(final BigDecimal amount, final SavingsAccountTransaction withholdTransaction) {
         boolean isTaxAdded = false;
-        if (this.taxGroup != null && amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
+        if (this.taxGroup != null && withholdTransaction != null && amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, withholdTransaction.getTransactionDate(),
                     this.taxGroup.getTaxGroupMappings(), amount.scale());
             BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
