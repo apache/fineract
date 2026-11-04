@@ -23,15 +23,18 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.GetLoanProductsResponse;
 import org.apache.fineract.test.data.ChargeCalculationType;
 import org.apache.fineract.test.data.ChargePaymentMode;
@@ -45,10 +48,12 @@ import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Slf4j
 public class ChargeStepDef extends AbstractStepDef {
 
     private static final String CURRENCY_CODE = "EUR";
     private static final String LOCALE_EN = "en";
+    private static final String REMEMBERED_CHARGE_PREFIX = "rememberedCharge:";
 
     @Autowired
     private FineractFeignClient fineractClient;
@@ -96,6 +101,42 @@ public class ChargeStepDef extends AbstractStepDef {
                 .locale(LOCALE_EN) //
                 .penalty(false);
         ok(() -> fineractClient.charges().createCharge(request));
+    }
+
+    @When("Admin remembers charge {string} for restoration")
+    public void rememberChargeForRestoration(final String chargeType) {
+        final ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
+        final Long chargeId = chargeProductResolver.resolve(chargeProductType);
+        final GetChargesResponse charge = ok(() -> fineractClient.charges().retrieveOneCharge(chargeId));
+        assertThat(charge).as("Charge %s before modification", chargeId).isNotNull();
+        assertThat(charge.getId()).as("Charge ID before modification").isEqualTo(chargeId);
+        assertThat(charge.getAmount()).as("Charge %s amount before modification", chargeId).isNotNull();
+        assertThat(charge.getChargeCalculationType()).as("Charge %s calculation type before modification", chargeId).isNotNull();
+        assertThat(charge.getChargeCalculationType().getId()).as("Charge %s calculation type ID before modification", chargeId).isNotNull();
+        assertThat(testContext().get().containsKey(REMEMBERED_CHARGE_PREFIX + chargeId))
+                .as("Charge %s has already been remembered for restoration", chargeId).isFalse();
+        testContext().set(REMEMBERED_CHARGE_PREFIX + chargeId, charge);
+    }
+
+    @After(value = "@ProgressiveLoanBackdatedPeriodicAccrual", order = Integer.MAX_VALUE - 1)
+    public void restoreRememberedCharges() {
+        final List<GetChargesResponse> charges = testContext().get().entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(REMEMBERED_CHARGE_PREFIX)).map(entry -> (GetChargesResponse) entry.getValue())
+                .toList();
+        final IllegalStateException cleanupFailure = new IllegalStateException("Unable to restore remembered charges");
+        charges.forEach((final GetChargesResponse charge) -> {
+            try {
+                final ChargeRequest request = new ChargeRequest().amount(charge.getAmount())
+                        .chargeCalculationType(Math.toIntExact(charge.getChargeCalculationType().getId())).locale(LOCALE_EN);
+                ok(() -> fineractClient.charges().updateCharge(charge.getId(), request));
+            } catch (final RuntimeException | AssertionError exception) {
+                log.error("Failed to restore remembered charge {}", charge.getId(), exception);
+                cleanupFailure.addSuppressed(new IllegalStateException("Charge " + charge.getId(), exception));
+            }
+        });
+        if (cleanupFailure.getSuppressed().length > 0) {
+            throw cleanupFailure;
+        }
     }
 
     @When("Admin updates charge {string} with {string} calculation type and {double} % of transaction amount")

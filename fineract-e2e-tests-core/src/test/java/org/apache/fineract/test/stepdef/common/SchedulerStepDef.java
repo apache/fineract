@@ -48,6 +48,12 @@ public class SchedulerStepDef extends AbstractStepDef {
         jobService.executeAndWait(job);
     }
 
+    @And("Admin successfully runs the {string} job")
+    public void runJobSuccessfully(final String jobName) {
+        final DefaultJob job = DefaultJob.valueOf(jobName);
+        jobService.executeAndWaitForSuccess(job);
+    }
+
     @And("Admin runs the Add Accrual Transactions job")
     public void runAccrualTransaction() {
         jobService.executeAndWait(DefaultJob.ADD_ACCRUAL_TRANSACTIONS);
