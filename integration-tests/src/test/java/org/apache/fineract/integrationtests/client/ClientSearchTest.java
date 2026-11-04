@@ -252,7 +252,7 @@ public class ClientSearchTest extends FeignIntegrationTest {
         PostClientsRequest request3 = ClientRequestBuilders.defaultClient();
         clientHelper.createClient(request3);
         // when
-        PageClientSearchData result = clientHelper.searchClients(client2DisplayName.toLowerCase());
+        PageClientSearchData result = clientHelper.searchClients(client2DisplayName.toLowerCase(Locale.ROOT));
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getDisplayName()).isEqualTo(client2DisplayName);
@@ -338,7 +338,7 @@ public class ClientSearchTest extends FeignIntegrationTest {
         PostClientsRequest request3 = ClientRequestBuilders.defaultClient();
         clientHelper.createClient(request3);
         // when
-        PageClientSearchData result = clientHelper.searchClients(documentKey.toLowerCase());
+        PageClientSearchData result = clientHelper.searchClients(documentKey.toLowerCase(Locale.ROOT));
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getMobileNo()).isEqualTo(request1.getMobileNo());

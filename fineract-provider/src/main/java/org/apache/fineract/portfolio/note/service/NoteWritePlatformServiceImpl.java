@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.note.service;
 
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Strings;
@@ -201,7 +202,7 @@ public class NoteWritePlatformServiceImpl implements NoteWritePlatformService {
         }
 
         if (note == null) {
-            throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());
+            throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase(Locale.ROOT));
         }
 
         return Pair.of(note, officeId);

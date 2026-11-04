@@ -32,6 +32,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetCodesResponse;
@@ -231,7 +232,8 @@ public class WorkingCapitalLoanDisbursementTest {
             assertEquals(400, ex.getStatus());
             assertNotNull(ex.getDeveloperMessage());
             final String msg = ex.getDeveloperMessage();
-            assertTrue(msg.contains("classificationId") || msg.contains("Code value") || msg.toLowerCase().contains("code value"),
+            assertTrue(
+                    msg.contains("classificationId") || msg.contains("Code value") || msg.toLowerCase(Locale.ROOT).contains("code value"),
                     "Expected validation message for invalid classificationId: " + msg);
         });
     }
@@ -589,8 +591,8 @@ public class WorkingCapitalLoanDisbursementTest {
             final CallFailedRuntimeException ex = applicationHelper.runDisburseExpectingFailure(loanId, disburseJson);
             assertEquals(400, ex.getStatus());
             assertNotNull(ex.getDeveloperMessage());
-            assertTrue(ex.getDeveloperMessage().toLowerCase().contains("transactionamount") || ex.getDeveloperMessage().contains("positive")
-                    || ex.getDeveloperMessage().contains("greater"));
+            assertTrue(ex.getDeveloperMessage().toLowerCase(Locale.ROOT).contains("transactionamount")
+                    || ex.getDeveloperMessage().contains("positive") || ex.getDeveloperMessage().contains("greater"));
         });
     }
 
@@ -695,7 +697,7 @@ public class WorkingCapitalLoanDisbursementTest {
             final CallFailedRuntimeException ex = applicationHelper.runDisburseExpectingFailure(loanId, disburseJson);
             assertEquals(400, ex.getStatus());
             assertNotNull(ex.getDeveloperMessage());
-            assertTrue(ex.getDeveloperMessage().contains("note") || ex.getDeveloperMessage().toLowerCase().contains("length"),
+            assertTrue(ex.getDeveloperMessage().contains("note") || ex.getDeveloperMessage().toLowerCase(Locale.ROOT).contains("length"),
                     "Expected message about note length: " + ex.getDeveloperMessage());
         });
     }
@@ -787,7 +789,9 @@ public class WorkingCapitalLoanDisbursementTest {
                     null, null, null, null, null, null, null, null, sharedExternalId);
             final CallFailedRuntimeException ex = applicationHelper.runDisburseExpectingFailure(loanId2, disburseJson2);
             assertEquals(400, ex.getStatus());
-            assertTrue(ex.getDeveloperMessage().contains("externalId") && ex.getDeveloperMessage().toLowerCase().contains("already"),
+            assertTrue(
+                    ex.getDeveloperMessage().contains("externalId")
+                            && ex.getDeveloperMessage().toLowerCase(Locale.ROOT).contains("already"),
                     "Expected duplicate transaction externalId error: " + ex.getDeveloperMessage());
         });
     }
@@ -884,7 +888,7 @@ public class WorkingCapitalLoanDisbursementTest {
                     WorkingCapitalLoanDisbursementTestBuilder.buildUndoDisburseRequest(longNote));
             assertEquals(400, ex.getStatus());
             assertNotNull(ex.getDeveloperMessage());
-            assertTrue(ex.getDeveloperMessage().contains("note") || ex.getDeveloperMessage().toLowerCase().contains("length"),
+            assertTrue(ex.getDeveloperMessage().contains("note") || ex.getDeveloperMessage().toLowerCase(Locale.ROOT).contains("length"),
                     "Expected message about note length: " + ex.getDeveloperMessage());
         });
     }
@@ -1175,7 +1179,9 @@ public class WorkingCapitalLoanDisbursementTest {
             final CallFailedRuntimeException ex = applicationHelper.runDisburseExpectingFailure(loanId, disburseJson);
             assertEquals(400, ex.getStatus());
             assertNotNull(ex.getDeveloperMessage());
-            assertTrue(ex.getDeveloperMessage().contains("paymentTypeId") || ex.getDeveloperMessage().toLowerCase().contains("payment"),
+            assertTrue(
+                    ex.getDeveloperMessage().contains("paymentTypeId")
+                            || ex.getDeveloperMessage().toLowerCase(Locale.ROOT).contains("payment"),
                     "Expected message about invalid paymentTypeId: " + ex.getDeveloperMessage());
         });
     }
@@ -1202,7 +1208,9 @@ public class WorkingCapitalLoanDisbursementTest {
             final CallFailedRuntimeException ex = applicationHelper.runDisburseExpectingFailure(loanId, disburseJson);
             assertEquals(400, ex.getStatus());
             assertNotNull(ex.getDeveloperMessage());
-            assertTrue(ex.getDeveloperMessage().contains("accountNumber") || ex.getDeveloperMessage().toLowerCase().contains("length"),
+            assertTrue(
+                    ex.getDeveloperMessage().contains("accountNumber")
+                            || ex.getDeveloperMessage().toLowerCase(Locale.ROOT).contains("length"),
                     "Expected message about accountNumber length: " + ex.getDeveloperMessage());
         });
     }

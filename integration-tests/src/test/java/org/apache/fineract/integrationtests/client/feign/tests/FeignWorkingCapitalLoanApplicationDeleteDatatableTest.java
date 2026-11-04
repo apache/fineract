@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.feign.util.FeignCalls;
@@ -187,7 +188,7 @@ public class FeignWorkingCapitalLoanApplicationDeleteDatatableTest extends Feign
     }
 
     private String createWcLoanDatatable(final boolean multiRow) {
-        final String name = Utils.uniqueRandomStringGenerator("dt_wc_loan_", 5).toLowerCase();
+        final String name = Utils.uniqueRandomStringGenerator("dt_wc_loan_", 5).toLowerCase(Locale.ROOT);
         datatableHelper.createDatatable(new PostDataTablesRequest().datatableName(name).apptableName(WC_LOAN_APP_TABLE_NAME)
                 .multiRow(multiRow).columns(List.of(new PostColumnHeaderData().name("note").type("String").length(50L).mandatory(false))));
         createdDatatables.add(name);

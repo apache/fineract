@@ -953,7 +953,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final String levelName = groupLevel.getLevelName();
             final String errorMessage = levelName + " activation date should be greater than or equal to the parent Office's creation date "
                     + activationDate.toString();
-            throw new InvalidGroupStateTransitionException(levelName.toLowerCase(), "activate.date",
+            throw new InvalidGroupStateTransitionException(levelName.toLowerCase(Locale.ROOT), "activate.date",
                     "cannot.be.before.office.activation.date", errorMessage, activationDate, groupOffice.getOpeningLocalDate());
         }
     }
@@ -1128,12 +1128,12 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         if (realCause.getMessage().contains("'external_id'")) {
             final String errorMessageForUser = levelName + " with externalId `" + externalId + "` already exists.";
-            final String errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.externalId";
+            final String errorMessageForMachine = "error.msg." + levelName.toLowerCase(Locale.ROOT) + ".duplicate.externalId";
             throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser,
                     GroupingTypesApiConstants.externalIdParamName, externalId);
         } else if (realCause.getMessage().contains("'name'")) {
             final String errorMessageForUser = levelName + " with name `" + name + "` already exists.";
-            final String errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.name";
+            final String errorMessageForMachine = "error.msg." + levelName.toLowerCase(Locale.ROOT) + ".duplicate.name";
             throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, GroupingTypesApiConstants.nameParamName,
                     name);
         }

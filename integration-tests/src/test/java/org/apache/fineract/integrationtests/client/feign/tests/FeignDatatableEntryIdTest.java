@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -191,7 +192,7 @@ public class FeignDatatableEntryIdTest extends FeignIntegrationTest {
 
     private String createClientDatatable(boolean multiRow) {
         PostDataTablesRequest request = new PostDataTablesRequest()//
-                .datatableName(Utils.uniqueRandomStringGenerator("dt_client_entry_id_", 5).toLowerCase())//
+                .datatableName(Utils.uniqueRandomStringGenerator("dt_client_entry_id_", 5).toLowerCase(Locale.ROOT))//
                 .apptableName(CLIENT_APP_TABLE_NAME)//
                 .entitySubType("PERSON")//
                 .multiRow(multiRow)//

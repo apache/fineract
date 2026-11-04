@@ -24,6 +24,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -101,7 +102,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
             return this.jdbcTemplate.queryForObject(sql, rm, paramList.toArray()); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
-            throw new NoteNotFoundException(noteId, resourceId, noteType.name().toLowerCase(), e);
+            throw new NoteNotFoundException(noteId, resourceId, noteType.name().toLowerCase(Locale.ROOT), e);
         }
     }
 
