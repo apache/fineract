@@ -149,6 +149,17 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @JoinColumn(name = "loan_disbursement_detail_id")
     private LoanDisbursementDetails disbursementDetail;
 
+    // Configured down payment fee a fee created by a downPaymentFeeAmount override replaces; only an active fee holds
+    // it
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "replaced_loan_charge_id")
+    private LoanCharge replacedLoanCharge;
+
+    // Created by a downPaymentFeeAmount override; a full undo of the disbursement deactivates it, with or without a
+    // replaced fee
+    @Column(name = "is_down_payment_fee_override", nullable = false)
+    private boolean downPaymentFeeOverride;
+
     @OneToMany(mappedBy = "loanCharge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoanChargePaidBy> loanChargePaidBySet = new HashSet<>();
 
@@ -606,6 +617,7 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         if (!active) {
             this.overdueInstallmentCharge = null;
             this.loanTrancheDisbursementCharge = null;
+            this.replacedLoanCharge = null;
             this.clearLoanInstallmentCharges();
         }
     }

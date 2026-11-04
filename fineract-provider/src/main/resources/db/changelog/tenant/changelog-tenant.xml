@@ -299,4 +299,6 @@
     <include file="parts/0277_add_result_columns_to_command_source.xml" relativeToChangelogFile="true" />
     <include file="parts/0278_add_payment_detail_to_share_account_transactions.xml" relativeToChangelogFile="true" />
     <include file="parts/0279_add_disbursement_detail_to_loan_charge.xml" relativeToChangelogFile="true" />
+    <include file="parts/0280_add_replaced_loan_charge_to_loan_charge.xml" relativeToChangelogFile="true" />
+    <include file="parts/0281_add_down_payment_fee_override_to_loan_charge.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

@@ -209,6 +209,7 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanDownPaymentTr
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanOfficerValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
+import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementService.DownPaymentFeesPreparation;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentFeeEventNotifier.FeeState;
 import org.apache.fineract.portfolio.loanaccount.service.adjustment.LoanAdjustmentParameter;
 import org.apache.fineract.portfolio.loanaccount.service.adjustment.LoanAdjustmentService;
@@ -398,9 +399,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     .filter(tranche -> tranche.actualDisbursementDate() != null).toList();
             final boolean skipDownPaymentFee = command
                     .booleanPrimitiveValueOfParameterNamed(LoanApiConstants.skipDownPaymentFeeParameterName);
-            final boolean downPaymentFeesSkipped = loanDisbursementService.prepareDownPaymentFeesForDisbursement(loan, disbursedTranches,
-                    actualDisbursementDate, skipDownPaymentFee);
-            boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal()) || downPaymentFeesSkipped;
+            final BigDecimal downPaymentFeeAmount = command
+                    .bigDecimalValueOfParameterNamed(LoanApiConstants.downPaymentFeeAmountParameterName);
+            final DownPaymentFeesPreparation downPaymentFees = loanDisbursementService.prepareDownPaymentFeesForDisbursement(loan,
+                    disbursedTranches, actualDisbursementDate, skipDownPaymentFee, downPaymentFeeAmount);
+            boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal()) || downPaymentFees.feesDeactivated();
             Money amountToDisburse = disburseAmount.copy();
             final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
@@ -432,7 +435,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             regenerateScheduleOnDisbursement(command, loan, recalculateSchedule, scheduleGeneratorDTO, nextPossibleRepaymentDate,
                     rescheduledRepaymentDate);
             loanDisbursementService.completeDownPaymentFeesForDisbursement(loan, disbursedTranches, actualDisbursementDate,
-                    skipDownPaymentFee);
+                    skipDownPaymentFee, downPaymentFeeAmount, downPaymentFees.replacedFee());
             boolean downPaymentEnabled = loan.getLoanProductRelatedDetail().isEnableDownPayment();
             if (loan.isInterestBearingAndInterestRecalculationEnabled() || downPaymentEnabled) {
                 createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
@@ -3214,6 +3217,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final boolean isDisbursedAmountChanged = !MathUtil.isEqualTo(loan.getApprovedPrincipal(),
                     loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount());
             loan.getLoanRepaymentScheduleDetail().setPrincipal(loan.getApprovedPrincipal());
+            loanDisbursementService.restoreDownPaymentFeesReplacedByOverride(loan);
             // Remove All the Disbursement Details If the Loan Product is disabled and exists one
             if (loan.loanProduct().isDisallowExpectedDisbursements() && !loan.getDisbursementDetails().isEmpty()) {
                 for (LoanDisbursementDetails disbursementDetail : loan.getAllDisbursementDetails()) {

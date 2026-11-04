@@ -366,20 +366,39 @@ public class LoanChargeStepDef extends AbstractStepDef {
 
     @Then("LoanDeleteChargeBusinessEvent is raised for the {string} charge due on {string}")
     public void checkLoanDeleteChargeBusinessEventForChargeDueOn(final String chargeName, final String dueDate) {
-        // The API does not return a deactivated or deleted charge and the delete event carries only its id, so the id
-        // is taken from the event raised when the charge was created
+        final List<LoanChargeDataV1> addedCharges = addedChargesOfLoan(chargeName, dueDate);
+
+        eventAssertion.assertEventRaised(LoanDeleteChargeEvent.class, addedCharges.getLast().getId());
+    }
+
+    @Then("LoanDeleteChargeBusinessEvent is raised for the {string} charge due on {string} with {double} EUR amount")
+    public void checkLoanDeleteChargeBusinessEventForChargeDueOnWithAmount(final String chargeName, final String dueDate,
+            final double amount) {
+        // a replaced down payment fee and the fee replacing it share the name and due date, the amount tells them apart
+        final List<LoanChargeDataV1> addedCharges = addedChargesOfLoan(chargeName, dueDate).stream()
+                .filter(charge -> charge.getAmount().compareTo(BigDecimal.valueOf(amount)) == 0).toList();
+        assertThat(addedCharges).as("%s charges due on %s with %s EUR amount", chargeName, dueDate, amount).hasSize(1);
+
+        eventAssertion.assertEventRaised(LoanDeleteChargeEvent.class, addedCharges.getFirst().getId());
+    }
+
+    // The API does not return a deactivated or deleted charge and the delete event carries only its id, so the charges
+    // are taken from the events raised when they were created
+    private List<LoanChargeDataV1> addedChargesOfLoan(final String chargeName, final String dueDate) {
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         final long loanId = loanResponse.getLoanId();
         final String eventDueDate = LocalDate.parse(dueDate, DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT))
                 .format(DateTimeFormatter.ofPattern(DATE_FORMAT_EVENTS));
-        final Long chargeId = eventStore.<LoanChargeDataV1, LoanAddChargeEvent>findReceivedAndVerifiedByType(new LoanAddChargeEvent())
-                .stream().map(EventMessage::getData)
-                .filter(data -> Long.valueOf(loanId).equals(data.getLoanId()) && chargeName.equals(data.getName())
-                        && eventDueDate.equals(data.getDueDate()))
-                .map(LoanChargeDataV1::getId).reduce((first, second) -> second).orElseThrow(() -> new IllegalStateException(
-                        "No LoanAddChargeBusinessEvent of loan %s for the %s charge due on %s".formatted(loanId, chargeName, dueDate)));
-
-        eventAssertion.assertEventRaised(LoanDeleteChargeEvent.class, chargeId);
+        final List<LoanChargeDataV1> addedCharges = eventStore
+                .<LoanChargeDataV1, LoanAddChargeEvent>findReceivedAndVerifiedByType(new LoanAddChargeEvent()).stream()
+                .map(EventMessage::getData).filter(data -> Long.valueOf(loanId).equals(data.getLoanId())
+                        && chargeName.equals(data.getName()) && eventDueDate.equals(data.getDueDate()))
+                .toList();
+        if (addedCharges.isEmpty()) {
+            throw new IllegalStateException(
+                    "No LoanAddChargeBusinessEvent of loan %s for the %s charge due on %s".formatted(loanId, chargeName, dueDate));
+        }
+        return addedCharges;
     }
 
     private void checkChargeEventOfActiveCharge(final Class<? extends AbstractLoanChargeEvent> eventClazz, final String chargeName,

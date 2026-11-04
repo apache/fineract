@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,10 +42,12 @@ import java.util.List;
 import java.util.Set;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
@@ -52,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentSchedulePro
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDisbursementValidator;
+import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementService.DownPaymentFeesPreparation;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -168,7 +172,7 @@ public class LoanDisbursementServiceTest {
         final boolean deactivated;
         try (MockedConstruction<LoanRepaymentScheduleProcessingWrapper> wrapper = mockConstruction(
                 LoanRepaymentScheduleProcessingWrapper.class)) {
-            deactivated = underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(disbursed), JAN_2, true);
+            deactivated = underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(disbursed), JAN_2, true, null).feesDeactivated();
             assertEquals(1, wrapper.constructed().size());
         }
 
@@ -187,7 +191,8 @@ public class LoanDisbursementServiceTest {
         final Loan loan = mockLoan(disbursedTrancheFee, applicationFee, otherTrancheFee);
         when(loan.isApproved()).thenReturn(true);
 
-        final boolean deactivated = underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(disbursed), JAN_2, false);
+        final boolean deactivated = underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(disbursed), JAN_2, false, null)
+                .feesDeactivated();
 
         assertFalse(deactivated);
         verify(loanChargeService).updateDownPaymentFee(eq(loan), eq(disbursedTrancheFee), eq(JAN_2));
@@ -202,8 +207,8 @@ public class LoanDisbursementServiceTest {
         final LoanCharge applicationFee = mockFee(20L, flatFee, null);
         final Loan loan = mockLoan(applicationFee);
 
-        underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche(JAN_2)), JAN_2, false);
-        underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche(JAN_2)), JAN_2, true);
+        underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche(JAN_2)), JAN_2, false, null);
+        underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche(JAN_2)), JAN_2, true, null);
 
         verify(loanChargeService, never()).updateDownPaymentFee(eq(loan), eq(applicationFee), any());
         verify(applicationFee, never()).setActive(false);
@@ -253,12 +258,95 @@ public class LoanDisbursementServiceTest {
         verify(loanChargeService).create(eq(loan), eq(flatFee), any(), any(), any(), any(), eq(JAN_1), any(), any(), any(), any());
     }
 
+    @Test
+    public void testOverrideReplacesTheConfiguredFeeWithAFlatFeeLinkedToIt() {
+        final LoanDisbursementDetails disbursed = tranche(JAN_1);
+        final LoanCharge configuredFee = mockFee(10L, flatFee, disbursed);
+        final Loan loan = mockLoan(configuredFee);
+        when(loan.isApproved()).thenReturn(true);
+        when(loanChargeService.calculateDownPaymentAmountBase(loan, disbursed)).thenReturn(BigDecimal.valueOf(250));
+        final BigDecimal override = BigDecimal.valueOf(15);
+        final LoanCharge overrideFee = mockFee(20L, flatFee, null);
+        when(loanChargeService.create(eq(loan), eq(flatFee), any(), eq(override), any(), eq(ChargeCalculationType.FLAT), eq(JAN_1), any(),
+                any(), any(), any())).thenReturn(overrideFee);
+
+        final DownPaymentFeesPreparation preparation;
+        try (MockedConstruction<LoanRepaymentScheduleProcessingWrapper> wrapper = mockConstruction(
+                LoanRepaymentScheduleProcessingWrapper.class)) {
+            preparation = underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(disbursed), JAN_1, false, override);
+            assertEquals(1, wrapper.constructed().size());
+        }
+        // the configured fee is deactivated unchanged
+        assertTrue(preparation.feesDeactivated());
+        assertEquals(configuredFee, preparation.replacedFee());
+        verify(configuredFee).setActive(false);
+        verify(loanChargeService, never()).updateDownPaymentFee(any(), eq(configuredFee), any());
+        when(loan.getActiveCharges()).thenReturn(Set.of());
+
+        try (MockedStatic<TemporaryConfigurationServiceContainer> configuration = mockStatic(
+                TemporaryConfigurationServiceContainer.class)) {
+            configuration.when(TemporaryConfigurationServiceContainer::isExternalIdAutoGenerationEnabled).thenReturn(false);
+            underTest.completeDownPaymentFeesForDisbursement(loan, List.of(disbursed), JAN_1, false, override, preparation.replacedFee());
+        }
+
+        verify(overrideFee).setDisbursementDetail(disbursed);
+        verify(overrideFee).setReplacedLoanCharge(configuredFee);
+        verify(overrideFee).setDownPaymentFeeOverride(true);
+        verify(loanChargeService).addLoanCharge(loan, overrideFee);
+    }
+
+    @Test
+    public void testOverrideIsRejectedWhenTheDisbursementHasTwoFeesOfTheSameCharge() {
+        final LoanDisbursementDetails disbursed = tranche(JAN_1);
+        final LoanCharge firstFee = mockFee(10L, flatFee, null);
+        final LoanCharge secondFee = mockFee(20L, flatFee, null);
+        final Loan loan = mockLoan(firstFee, secondFee);
+        when(loan.isApproved()).thenReturn(true);
+        when(loanChargeService.calculateDownPaymentAmountBase(loan, disbursed)).thenReturn(BigDecimal.valueOf(250));
+
+        assertThrows(PlatformApiDataValidationException.class,
+                () -> underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(disbursed), JAN_1, false, BigDecimal.valueOf(15)));
+
+        verifyUntouched(firstFee);
+        verifyUntouched(secondFee);
+    }
+
+    @Test
+    public void testFullUndoRestoresTheConfiguredFeeReplacedByTheOverride() {
+        final LoanCharge configuredFee = mockFee(10L, flatFee, tranche(JAN_1));
+        when(configuredFee.isActive()).thenReturn(false);
+        final LoanCharge overrideFee = mockFee(20L, flatFee, tranche(JAN_1));
+        when(overrideFee.isDownPaymentFeeOverride()).thenReturn(true);
+        when(overrideFee.getReplacedLoanCharge()).thenReturn(configuredFee);
+        final LoanCharge otherTrancheFee = mockFee(30L, flatFee, tranche(JAN_2));
+        final Loan loan = mockLoan(overrideFee, otherTrancheFee);
+
+        underTest.restoreDownPaymentFeesReplacedByOverride(loan);
+
+        verifyDeactivated(overrideFee);
+        verify(configuredFee).setActive(true);
+        verifyUntouched(otherTrancheFee);
+    }
+
+    @Test
+    public void testFullUndoDeactivatesAnOverrideFeeWithoutAReplacedFeeAndKeepsAConfiguredFee() {
+        final LoanCharge overrideFee = mockFee(20L, flatFee, tranche(JAN_1));
+        when(overrideFee.isDownPaymentFeeOverride()).thenReturn(true);
+        final LoanCharge configuredFee = mockFee(30L, flatFee, tranche(JAN_2));
+        final Loan loan = mockLoan(overrideFee, configuredFee);
+
+        underTest.restoreDownPaymentFeesReplacedByOverride(loan);
+
+        verifyDeactivated(overrideFee);
+        verifyUntouched(configuredFee);
+    }
+
     private void disburse(final Loan loan, final LoanDisbursementDetails tranche, final LocalDate date) {
         try (MockedStatic<TemporaryConfigurationServiceContainer> configuration = mockStatic(
                 TemporaryConfigurationServiceContainer.class)) {
             configuration.when(TemporaryConfigurationServiceContainer::isExternalIdAutoGenerationEnabled).thenReturn(false);
-            underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche), date, false);
-            underTest.completeDownPaymentFeesForDisbursement(loan, List.of(tranche), date, false);
+            underTest.prepareDownPaymentFeesForDisbursement(loan, List.of(tranche), date, false, null);
+            underTest.completeDownPaymentFeesForDisbursement(loan, List.of(tranche), date, false, null, null);
         }
     }
 
