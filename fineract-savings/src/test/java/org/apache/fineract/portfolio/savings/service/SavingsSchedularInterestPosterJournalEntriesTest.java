@@ -19,10 +19,12 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +38,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -145,6 +148,20 @@ class SavingsSchedularInterestPosterJournalEntriesTest {
                 OVERDRAFT_PORTFOLIO_GL_ACCOUNT_ID, INCOME_FROM_INTEREST_GL_ACCOUNT_ID);
 
         assertThat(journalEntriesWrittenFor(overdraftInterest, CASH_BASED)).containsExactly("CREDIT 105 5", "DEBIT 106 5");
+    }
+
+    @Test
+    void aTransactionTypeWithoutAGlRuleFailsTheJobWithAClearError() {
+        // the job doesn't create withholding tax today, and selectAccountId gives it no GL accounts
+        final SavingsAccountTransactionData withholdTax = transaction(SavingsAccountTransactionType.WITHHOLD_TAX, "5", null, null, null);
+        final SavingsAccountData account = accountWith(withholdTax, CASH_BASED);
+        when(savingsAccountWritePlatformService.postInterest(account, false, null, false)).thenReturn(account);
+        poster.setSavingAccounts(List.of(account));
+
+        assertThatThrownBy(poster::postInterest).isInstanceOfSatisfying(JobExecutionException.class,
+                failure -> assertThat(failure.getCauses()).singleElement().isInstanceOf(IllegalStateException.class)
+                        .extracting(Throwable::getMessage).asString().contains("savingsAccountTransactionType.withholdTax"));
+        verify(jdbcTemplate, never()).batchUpdate(startsWith("INSERT INTO acc_gl_journal_entry"), anyList());
     }
 
     private List<String> journalEntriesWrittenFor(final SavingsAccountTransactionData transaction, final boolean cashBasedAccounting)

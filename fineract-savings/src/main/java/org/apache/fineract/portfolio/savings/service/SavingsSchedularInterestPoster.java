@@ -145,10 +145,16 @@ public class SavingsSchedularInterestPoster {
                                         glAccountId(savingsAccountData, leg.accountTypeToCredit()), leg.amount(), currencyCode, userId,
                                         auditDatetime);
                             }
-                        } else {
+                        } else if (savingsAccountTransactionData.getTransactionType().isOverDraftInterestPosting()) {
                             addJournalEntryPair(paramsForGLInsertion, savingsAccountData, savingsAccountTransactionData,
                                     savingsAccountTransactionData.getAccountDebit(), savingsAccountTransactionData.getAccountCredit(),
                                     savingsAccountTransactionData.getAmount(), currencyCode, userId, auditDatetime);
+                        } else {
+                            // the job only has GL rules for the transactions it posts; another type would otherwise be
+                            // booked without accounts and fail the whole batch insert with a less obvious error
+                            throw new IllegalStateException("The Post Interest For Savings job has no GL rule for transaction type "
+                                    + savingsAccountTransactionData.getTransactionType().getCode() + " on savings account "
+                                    + savingsAccountData.getId());
                         }
                     }
 
