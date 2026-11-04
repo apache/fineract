@@ -25,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForSavings;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
+import org.apache.fineract.accounting.common.SavingsInterestPostingLegs;
+import org.apache.fineract.accounting.common.SavingsInterestPostingLegs.Leg;
 import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.SavingsDTO;
 import org.apache.fineract.accounting.journalentry.data.SavingsTransactionDTO;
@@ -56,6 +58,13 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
             final List<ChargePaymentDTO> penaltyPayments = savingsTransactionDTO.getPenaltyPayments();
 
             this.helper.checkForBranchClosures(latestGLClosure, transactionDate);
+
+            // a reversal undoes what was booked for the transaction, so it mirrors the stored entries instead of
+            // rebuilding them from the rules below, which may not be the ones the transaction was booked with
+            if (isReversal) {
+                this.helper.createJournalEntriesForReversedSavingsTransaction(transactionId, transactionDate);
+                continue;
+            }
 
             if (savingsTransactionDTO.getTransactionType().isWithdrawal() && savingsTransactionDTO.isOverdraftTransaction()) {
                 boolean isPositive = amount.subtract(overdraftAmount).compareTo(BigDecimal.ZERO) > 0;
@@ -145,33 +154,13 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
             }
             /**
-             * Handle Interest Applications and reversals of Interest Applications
+             * Handle Interest Applications, from the rules the Post Interest job books them with
              **/
-            else if (savingsTransactionDTO.getTransactionType().isInterestPosting() && savingsTransactionDTO.isOverdraftTransaction()) {
-                boolean isPositive = amount.subtract(overdraftAmount).compareTo(BigDecimal.ZERO) > 0;
-                // Post journal entry if earned interest amount is greater than
-                // zero
-                if (savingsTransactionDTO.getAmount().compareTo(BigDecimal.ZERO) > 0) {
-                    this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
-                            CashAccountsForSavings.INTEREST_ON_SAVINGS.getValue(),
-                            CashAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), savingsProductId, paymentTypeId, savingsId,
-                            transactionId, transactionDate, overdraftAmount, isReversal);
-                    if (isPositive) {
-                        this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
-                                CashAccountsForSavings.INTEREST_ON_SAVINGS.getValue(), CashAccountsForSavings.SAVINGS_CONTROL.getValue(),
-                                savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate,
-                                amount.subtract(overdraftAmount), isReversal);
-                    }
-                }
-            }
-
             else if (savingsTransactionDTO.getTransactionType().isInterestPosting()) {
-                // Post journal entry if earned interest amount is greater than
-                // zero
-                if (savingsTransactionDTO.getAmount().compareTo(BigDecimal.ZERO) > 0) {
-                    this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
-                            CashAccountsForSavings.INTEREST_ON_SAVINGS.getValue(), CashAccountsForSavings.SAVINGS_CONTROL.getValue(),
-                            savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
+                for (final Leg leg : SavingsInterestPostingLegs.legsFor(true, amount, overdraftAmount)) {
+                    this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode, leg.accountTypeToDebit(),
+                            leg.accountTypeToCredit(), savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate,
+                            leg.amount(), isReversal);
                 }
             }
 

@@ -618,23 +618,14 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     }
 
     @Test
-    void selectAccountId_cashBasedInterestPosting_debitsInterestOnSavings() {
+    void selectAccountId_interestPosting_leavesTheAccountsToTheSharedRules() {
         final SavingsAccountTransactionData transaction = transactionOfType(SavingsAccountTransactionType.INTEREST_POSTING);
 
         service.selectAccountId(transaction, savingsAccountWithGlAccounts(true));
-
-        verify(transaction).setAccountDebit(INTEREST_ON_SAVINGS_GL_ACCOUNT_ID);
-        verify(transaction).setAccountCredit(SAVINGS_CONTROL_GL_ACCOUNT_ID);
-    }
-
-    @Test
-    void selectAccountId_accrualInterestPosting_debitsInterestPayable() {
-        final SavingsAccountTransactionData transaction = transactionOfType(SavingsAccountTransactionType.INTEREST_POSTING);
-
         service.selectAccountId(transaction, savingsAccountWithGlAccounts(false));
 
-        verify(transaction).setAccountDebit(INTEREST_PAYABLE_GL_ACCOUNT_ID);
-        verify(transaction).setAccountCredit(SAVINGS_CONTROL_GL_ACCOUNT_ID);
+        verify(transaction, never()).setAccountDebit(any());
+        verify(transaction, never()).setAccountCredit(any());
     }
 
     @Test

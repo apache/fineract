@@ -66,6 +66,8 @@ class SavingsSchedularInterestPosterJournalEntriesTest {
     private static final Long OVERDRAFT_PORTFOLIO_GL_ACCOUNT_ID = 106L;
     private static final CurrencyData CURRENCY = new MonetaryCurrency("USD", 2, null).toData();
     private static final LocalDate POSTING_DATE = LocalDate.of(2026, 9, 30);
+    private static final boolean CASH_BASED = true;
+    private static final boolean ACCRUAL = false;
 
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService = mock(SavingsAccountWritePlatformService.class);
     private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
@@ -102,30 +104,39 @@ class SavingsSchedularInterestPosterJournalEntriesTest {
 
     @Test
     void interestThatPaysDownPartOfAnOverdraftIsSplitBetweenOverdraftPortfolioAndSavingsControl() throws Exception {
-        final SavingsAccountTransactionData posting = interestPosting("50", "10", INTEREST_ON_SAVINGS_GL_ACCOUNT_ID);
+        final SavingsAccountTransactionData posting = interestPosting("50", "10");
 
-        assertThat(journalEntriesWrittenFor(posting)).containsExactly("CREDIT 106 10", "DEBIT 101 10", "CREDIT 102 40", "DEBIT 101 40");
+        assertThat(journalEntriesWrittenFor(posting, CASH_BASED)).containsExactly("CREDIT 106 10", "DEBIT 101 10", "CREDIT 102 40",
+                "DEBIT 101 40");
     }
 
     @Test
     void interestThatLeavesTheAccountOverdrawnIsCreditedToOverdraftPortfolioOnly() throws Exception {
-        final SavingsAccountTransactionData posting = interestPosting("50", "50", INTEREST_ON_SAVINGS_GL_ACCOUNT_ID);
+        final SavingsAccountTransactionData posting = interestPosting("50", "50");
 
-        assertThat(journalEntriesWrittenFor(posting)).containsExactly("CREDIT 106 50", "DEBIT 101 50");
+        assertThat(journalEntriesWrittenFor(posting, CASH_BASED)).containsExactly("CREDIT 106 50", "DEBIT 101 50");
     }
 
     @Test
     void accrualInterestKeepsDebitingInterestPayableForBothParts() throws Exception {
-        final SavingsAccountTransactionData posting = interestPosting("50", "10", INTEREST_PAYABLE_GL_ACCOUNT_ID);
+        final SavingsAccountTransactionData posting = interestPosting("50", "10");
 
-        assertThat(journalEntriesWrittenFor(posting)).containsExactly("CREDIT 106 10", "DEBIT 103 10", "CREDIT 102 40", "DEBIT 103 40");
+        assertThat(journalEntriesWrittenFor(posting, ACCRUAL)).containsExactly("CREDIT 106 10", "DEBIT 103 10", "CREDIT 102 40",
+                "DEBIT 103 40");
     }
 
     @Test
     void interestPostedToAnAccountInCreditIsCreditedToSavingsControl() throws Exception {
-        final SavingsAccountTransactionData posting = interestPosting("50", null, INTEREST_ON_SAVINGS_GL_ACCOUNT_ID);
+        final SavingsAccountTransactionData posting = interestPosting("50", null);
 
-        assertThat(journalEntriesWrittenFor(posting)).containsExactly("CREDIT 102 50", "DEBIT 101 50");
+        assertThat(journalEntriesWrittenFor(posting, CASH_BASED)).containsExactly("CREDIT 102 50", "DEBIT 101 50");
+    }
+
+    @Test
+    void accrualInterestPostedToAnAccountInCreditDebitsInterestPayable() throws Exception {
+        final SavingsAccountTransactionData posting = interestPosting("50", null);
+
+        assertThat(journalEntriesWrittenFor(posting, ACCRUAL)).containsExactly("CREDIT 102 50", "DEBIT 103 50");
     }
 
     @Test
@@ -133,11 +144,12 @@ class SavingsSchedularInterestPosterJournalEntriesTest {
         final SavingsAccountTransactionData overdraftInterest = transaction(SavingsAccountTransactionType.OVERDRAFT_INTEREST, "5", "5",
                 OVERDRAFT_PORTFOLIO_GL_ACCOUNT_ID, INCOME_FROM_INTEREST_GL_ACCOUNT_ID);
 
-        assertThat(journalEntriesWrittenFor(overdraftInterest)).containsExactly("CREDIT 105 5", "DEBIT 106 5");
+        assertThat(journalEntriesWrittenFor(overdraftInterest, CASH_BASED)).containsExactly("CREDIT 105 5", "DEBIT 106 5");
     }
 
-    private List<String> journalEntriesWrittenFor(final SavingsAccountTransactionData transaction) throws Exception {
-        final SavingsAccountData account = accountWith(transaction);
+    private List<String> journalEntriesWrittenFor(final SavingsAccountTransactionData transaction, final boolean cashBasedAccounting)
+            throws Exception {
+        final SavingsAccountData account = accountWith(transaction, cashBasedAccounting);
         when(savingsAccountWritePlatformService.postInterest(account, false, null, false)).thenReturn(account);
         poster.setSavingAccounts(List.of(account));
 
@@ -150,10 +162,11 @@ class SavingsSchedularInterestPosterJournalEntriesTest {
                 + " " + row[0] + " " + ((BigDecimal) row[12]).stripTrailingZeros().toPlainString()).toList();
     }
 
-    private static SavingsAccountTransactionData interestPosting(final String amount, final String overdraftAmount,
-            final Long debitAccountId) {
-        return transaction(SavingsAccountTransactionType.INTEREST_POSTING, amount, overdraftAmount, debitAccountId,
-                SAVINGS_CONTROL_GL_ACCOUNT_ID);
+    /**
+     * An interest posting gets no GL accounts from selectAccountId: the job books it from SavingsInterestPostingLegs.
+     */
+    private static SavingsAccountTransactionData interestPosting(final String amount, final String overdraftAmount) {
+        return transaction(SavingsAccountTransactionType.INTEREST_POSTING, amount, overdraftAmount, null, null);
     }
 
     /** A new transaction from the posting service, with the GL accounts selectAccountId gave it. */
@@ -170,14 +183,16 @@ class SavingsSchedularInterestPosterJournalEntriesTest {
         return transaction;
     }
 
-    private static SavingsAccountData accountWith(final SavingsAccountTransactionData transaction) {
+    private static SavingsAccountData accountWith(final SavingsAccountTransactionData transaction, final boolean cashBasedAccounting) {
         final SavingsAccountData account = mock(SavingsAccountData.class);
+        when(account.isCashBasedAccountingEnabledOnSavingsProduct()).thenReturn(cashBasedAccounting);
         when(account.getId()).thenReturn(SAVINGS_ACCOUNT_ID);
         when(account.getCurrency()).thenReturn(CURRENCY);
         when(account.getSummary()).thenReturn(mock(SavingsAccountSummaryData.class));
         when(account.getSavingsAccountTransactionData()).thenReturn(List.of(transaction));
         when(account.getGlAccountIdForInterestOnSavings()).thenReturn(INTEREST_ON_SAVINGS_GL_ACCOUNT_ID);
         when(account.getGlAccountIdForSavingsControl()).thenReturn(SAVINGS_CONTROL_GL_ACCOUNT_ID);
+        when(account.getGlAccountIdForInterestPayable()).thenReturn(INTEREST_PAYABLE_GL_ACCOUNT_ID);
         when(account.getGlAccountIdForOverdraftPorfolio()).thenReturn(OVERDRAFT_PORTFOLIO_GL_ACCOUNT_ID);
         return account;
     }

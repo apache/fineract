@@ -279,9 +279,39 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         });
     }
 
+    @Test
+    public void testReversingAJobPostedOverdraftInterestPostingNetsEveryAccountToZero() {
+        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            final PostSavingsProductsRequest product = withCashMappings(accrualProduct(OVERDRAFT_INTEREST_RATE), accounts)//
+                    .allowOverdraft(true)//
+                    .overdraftLimit(OVERDRAFT_LIMIT)//
+                    .nominalAnnualInterestRateOverdraft(BigDecimal.valueOf(OVERDRAFT_INTEREST_RATE));
+            final Long savingsProductId = savingsProductHelper.createSavingsProduct(product).getResourceId();
+            assertNotNull(savingsProductId, "Failed to create cash-based savings product with overdraft.");
+            final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
+            withdraw(savingsAccountId, AMOUNT, startDateString());
+
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
+            final SavingsAccountTransactionData posting = overdraftInterestPostingOf(savingsAccountId);
+
+            // the deposit lowers the overdraft, and with it the overdraft interest of the period, so the posting is
+            // reversed and posted again
+            deposit(savingsAccountId, BACKDATED_DEPOSIT, BACKDATED_DEPOSIT_DATE);
+
+            assertReversed(savingsAccountId, posting);
+            final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(posting);
+            assertHasEntry(journalEntries, DEBIT, accounts.overdraftPortfolioControl(),
+                    "DEBIT to Overdraft Portfolio Control (Asset) Account not found for the job's overdraft interest posting.");
+            // the job books overdraft interest from its own rule; the reversal mirrors those entries
+            assertEveryAccountNetsToZero(journalEntries);
+        });
+    }
+
     /**
-     * Reversals don't go through the job: the accounting processor rebuilds the entries of the reversed posting from
-     * its own rules and swaps debit and credit. They only cancel the job's entries if both book the same accounts.
+     * Reversals don't go through the job: the accounting processor reverses the entries stored for the reversed
+     * posting, so they cancel the job's entries whichever rules booked them.
      */
     private void verifyReversedJobPostingNetsEveryAccountToZero(final Long savingsAccountId, final AccrualAccounts accounts) {
         schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
@@ -290,13 +320,21 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         // the deposit changes the interest of the posting period, so the posting is reversed and posted again
         deposit(savingsAccountId, BACKDATED_DEPOSIT, BACKDATED_DEPOSIT_DATE);
 
-        assertTrue(Boolean.TRUE.equals(savingsTransactionHelper.getTransaction(savingsAccountId, posting.getId()).getReversed()),
-                "The backdated deposit did not reverse the interest posting.");
+        assertReversed(savingsAccountId, posting);
         final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(posting);
         assertHasEntry(journalEntries, CREDIT, accounts.overdraftPortfolioControl(), OVERDRAWN_BY,
                 "CREDIT to Overdraft Portfolio Control (Asset) Account not found for the job's posting.");
         assertHasEntry(journalEntries, DEBIT, accounts.overdraftPortfolioControl(), OVERDRAWN_BY,
                 "DEBIT to Overdraft Portfolio Control (Asset) Account not found for the reversal of the job's posting.");
+        assertEveryAccountNetsToZero(journalEntries);
+    }
+
+    private void assertReversed(final Long savingsAccountId, final SavingsAccountTransactionData posting) {
+        assertTrue(Boolean.TRUE.equals(savingsTransactionHelper.getTransaction(savingsAccountId, posting.getId()).getReversed()),
+                "The backdated deposit did not reverse the posting.");
+    }
+
+    private void assertEveryAccountNetsToZero(final List<JournalEntryTransactionItem> journalEntries) {
         final Map<Long, BigDecimal> balances = journalEntries.stream()
                 .collect(Collectors.groupingBy(JournalEntryTransactionItem::getGlAccountId,
                         Collectors.reducing(BigDecimal.ZERO,
