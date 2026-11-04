@@ -21,19 +21,31 @@ package org.apache.fineract.organisation.office.api;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.organisation.office.data.OfficeCreateResponse;
 import org.apache.fineract.organisation.office.data.OfficeData;
+import org.apache.fineract.organisation.office.data.OfficeUpdateResponse;
 import org.mapstruct.Mapper;
 
 @Mapper(config = MapstructMapperConfig.class)
 public interface OfficeSwaggerMapper {
 
-    OfficesApiResourceSwagger.PutOfficesOfficeIdResponse toPutOfficesOfficeIdResponse(CommandProcessingResult commandProcessingResult);
+    OfficesApiResourceSwagger.PostOfficesResponse toPostOfficesResponse(OfficeCreateResponse response);
+
+    OfficesApiResourceSwagger.PutOfficesOfficeIdResponse toPutOfficesOfficeIdResponse(OfficeUpdateResponse response);
 
     default OfficesApiResourceSwagger.PutOfficesOfficeIdResponse.PutOfficesOfficeIdResponseChanges toPutOfficesOfficeIdResponseChanges(
             Map<String, Object> changes) {
+        if (changes == null) {
+            return null;
+        }
         OfficesApiResourceSwagger.PutOfficesOfficeIdResponse.PutOfficesOfficeIdResponseChanges response = new OfficesApiResourceSwagger.PutOfficesOfficeIdResponse.PutOfficesOfficeIdResponseChanges();
-        Optional.ofNullable(changes).map(c -> c.get("name")).ifPresent(c -> response.name = String.valueOf(c));
+        Optional.ofNullable(changes.get("name")).ifPresent(c -> response.name = String.valueOf(c));
+        Optional.ofNullable(changes.get("openingDate")).ifPresent(c -> response.openingDate = String.valueOf(c));
+        Optional.ofNullable(changes.get("dateFormat")).ifPresent(c -> response.dateFormat = String.valueOf(c));
+        Optional.ofNullable(changes.get("locale")).ifPresent(c -> response.locale = String.valueOf(c));
+        Optional.ofNullable(changes.get("parentId"))
+                .ifPresent(c -> response.parentId = c instanceof Number ? ((Number) c).longValue() : Long.parseLong(String.valueOf(c)));
+        Optional.ofNullable(changes.get("externalId")).ifPresent(c -> response.externalId = String.valueOf(c));
         return response;
     }
 

@@ -74,11 +74,15 @@ public class FeignOfficeHelper {
     }
 
     public PutOfficesOfficeIdResponse updateOffice(Long officeId, String name, String openingDate) {
+        return updateOffice(officeId, name, openingDate, "dd MMMM yyyy", "en");
+    }
+
+    public PutOfficesOfficeIdResponse updateOffice(Long officeId, String name, String openingDate, String dateFormat, String locale) {
         PutOfficesOfficeIdRequest request = new PutOfficesOfficeIdRequest()//
                 .name(name)//
                 .openingDate(openingDate)//
-                .dateFormat("dd MMMM yyyy")//
-                .locale("en");
+                .dateFormat(dateFormat)//
+                .locale(locale);
         return ok(() -> fineractClient.offices().updateOffice(officeId, request));
     }
 

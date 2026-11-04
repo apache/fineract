@@ -32,15 +32,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.office.exception.CannotUpdateOfficeWithParentOfficeSameAsSelf;
 import org.apache.fineract.organisation.office.exception.RootOfficeParentCannotBeUpdated;
 
@@ -75,12 +74,8 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
         return new Office(null, name, openingDate, externalId);
     }
 
-    public static Office fromJson(final Office parentOffice, final JsonCommand command) {
-
-        final String name = command.stringValueOfParameterNamed("name");
-        final LocalDate openingDate = command.localDateValueOfParameterNamed("openingDate");
-        final String externalId = command.stringValueOfParameterNamed("externalId");
-        return new Office(parentOffice, name, openingDate, ExternalIdFactory.produce(externalId));
+    public static Office create(final Office parentOffice, final String name, final LocalDate openingDate, final ExternalId externalId) {
+        return new Office(parentOffice, name, openingDate, externalId);
     }
 
     protected Office() {
@@ -109,47 +104,28 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
         this.children.add(office);
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
-
+    public Map<String, Object> update(final String newName, final LocalDate newOpeningDate, final ExternalId newExternalId) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
-        final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();
-
-        final String parentIdParamName = "parentId";
-
-        if (command.parameterExists(parentIdParamName) && this.parent == null) {
-            throw new RootOfficeParentCannotBeUpdated();
-        }
-
-        if (this.parent != null && command.isChangeInLongParameterNamed(parentIdParamName, this.parent.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(parentIdParamName);
-            actualChanges.put(parentIdParamName, newValue);
-        }
-
         final String openingDateParamName = "openingDate";
-        if (command.isChangeInLocalDateParameterNamed(openingDateParamName, getOpeningLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(openingDateParamName);
-            actualChanges.put(openingDateParamName, valueAsInput);
-            actualChanges.put("dateFormat", dateFormatAsInput);
-            actualChanges.put("locale", localeAsInput);
-
-            this.openingDate = command.localDateValueOfParameterNamed(openingDateParamName);
+        if (newOpeningDate != null && !Objects.equals(newOpeningDate, getOpeningLocalDate())) {
+            actualChanges.put(openingDateParamName, newOpeningDate);
+            this.openingDate = newOpeningDate;
         }
 
         final String nameParamName = "name";
-        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(nameParamName);
-            actualChanges.put(nameParamName, newValue);
-            this.name = newValue;
+        if (newName != null && !Objects.equals(newName, this.name)) {
+            actualChanges.put(nameParamName, newName);
+            this.name = newName;
         }
 
         final String externalIdParamName = "externalId";
-        if (command.isChangeInStringParameterNamed(externalIdParamName,
-                Optional.ofNullable(this.externalId).map(ExternalId::getValue).orElse(null))) {
-            final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
-            actualChanges.put(externalIdParamName, newValue);
-            this.externalId = ExternalIdFactory.produce(StringUtils.defaultIfEmpty(newValue, null));
+        if (newExternalId != null) {
+            String currentExternalId = Optional.ofNullable(this.externalId).map(ExternalId::getValue).orElse(null);
+            if (!Objects.equals(newExternalId.getValue(), currentExternalId)) {
+                actualChanges.put(externalIdParamName, newExternalId.getValue());
+                this.externalId = newExternalId;
+            }
         }
 
         return actualChanges;

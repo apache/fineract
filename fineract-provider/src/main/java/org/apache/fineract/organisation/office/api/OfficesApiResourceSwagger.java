@@ -95,7 +95,7 @@ final class OfficesApiResourceSwagger {
     @Schema(description = "PostOfficesResponse")
     public static final class PostOfficesResponse {
 
-        private PostOfficesResponse() {
+        PostOfficesResponse() {
 
         }
 
@@ -130,10 +130,21 @@ final class OfficesApiResourceSwagger {
     @Schema(description = "PutOfficesOfficeIdResponse")
     public static final class PutOfficesOfficeIdResponse {
 
+        @Schema(description = "PutOfficesOfficeIdResponseChanges")
         public static final class PutOfficesOfficeIdResponseChanges {
 
             @Schema(example = "Name is updated")
             public String name;
+            @Schema(example = "02 July 2007")
+            public String openingDate;
+            @Schema(example = "dd MMMM yyyy")
+            public String dateFormat;
+            @Schema(example = "en")
+            public String locale;
+            @Schema(example = "2")
+            public Long parentId;
+            @Schema(example = "SYS54-88")
+            public String externalId;
         }
 
         @Schema(example = "3")
