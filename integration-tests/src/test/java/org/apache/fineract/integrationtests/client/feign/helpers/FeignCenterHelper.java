@@ -33,14 +33,14 @@ import org.apache.fineract.client.models.DeleteCentersCenterIdResponse;
 import org.apache.fineract.client.models.GetCentersCenterIdResponse;
 import org.apache.fineract.client.models.GetCentersPageItems;
 import org.apache.fineract.client.models.GetCentersResponse;
-import org.apache.fineract.client.models.GroupAssignStaffRequest;
-import org.apache.fineract.client.models.GroupAssignStaffResponse;
 import org.apache.fineract.client.models.GroupUnassignStaffRequest;
 import org.apache.fineract.client.models.GroupUnassignStaffResponse;
 import org.apache.fineract.client.models.PostCentersCenterIdChanges;
 import org.apache.fineract.client.models.PostCentersCenterIdRequest;
 import org.apache.fineract.client.models.PostCentersRequest;
 import org.apache.fineract.client.models.PostCentersResponse;
+import org.apache.fineract.client.models.PostGroupsGroupIdChanges;
+import org.apache.fineract.client.models.PostGroupsGroupIdRequest;
 import org.apache.fineract.client.models.PutCentersCenterIdRequest;
 import org.apache.fineract.client.models.PutCentersChanges;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
@@ -183,13 +183,11 @@ public class FeignCenterHelper {
         return changes.getGroupMembers().stream().map(Long::valueOf).toList();
     }
 
-    /**
-     * Assigns a staff member to the center; returns the staffId from changes.
-     */
+    /** Assigns a staff member to the center; returns the staffId from changes. A center is a group server-side. */
     public Long assignStaff(Long centerId, Long staffId) {
-        GroupAssignStaffRequest request = new GroupAssignStaffRequest().staffId(staffId);
-        GroupAssignStaffResponse response = ok(() -> fineractClient.groups().assignStaff(centerId, request));
-        return extractStaffId(response.getChanges());
+        PostGroupsGroupIdChanges changes = ok(() -> fineractClient.groups().handleCommandsGroup(centerId,
+                new PostGroupsGroupIdRequest().staffId(staffId), Map.of("command", "assignStaff"))).getChanges();
+        return changes == null ? null : changes.getStaffId();
     }
 
     /**

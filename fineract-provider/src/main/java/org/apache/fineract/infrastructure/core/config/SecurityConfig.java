@@ -404,14 +404,6 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_FLOATINGRATE")
 
                     // group
-                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups/*/activate"))
-                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "ACTIVATE_GROUP")
-                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups/*/assignStaff"))
-                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "ASSIGNSTAFF_GROUP")
-                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups/*/associateClients"))
-                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "ASSOCIATECLIENTS_GROUP")
-                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups/*/disassociateClients"))
-                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DISASSOCIATECLIENTS_GROUP")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups/*/command/unassign_staff"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UNASSIGNSTAFF_GROUP")
 

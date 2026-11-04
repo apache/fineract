@@ -20,10 +20,6 @@ package org.apache.fineract.portfolio.group.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.group.data.AssociateClientsRequest;
-import org.apache.fineract.portfolio.group.data.AssociateClientsResponse;
-import org.apache.fineract.portfolio.group.data.DisassociateClientsRequest;
-import org.apache.fineract.portfolio.group.data.DisassociateClientsResponse;
 import org.apache.fineract.portfolio.group.data.GroupActivateRequest;
 import org.apache.fineract.portfolio.group.data.GroupActivateResponse;
 import org.apache.fineract.portfolio.group.data.GroupAssignStaffRequest;
@@ -39,9 +35,9 @@ public interface GroupingTypesWritePlatformService {
 
     GroupUnassignStaffResponse unassignGroupStaff(GroupUnassignStaffRequest request);
 
-    AssociateClientsResponse associateClientsToGroup(AssociateClientsRequest request);
+    CommandProcessingResult associateClientsToGroup(Long groupId, JsonCommand command);
 
-    DisassociateClientsResponse disassociateClientsFromGroup(DisassociateClientsRequest request);
+    CommandProcessingResult disassociateClientsFromGroup(Long groupId, JsonCommand command);
 
     CommandProcessingResult createCenter(JsonCommand command);
 
