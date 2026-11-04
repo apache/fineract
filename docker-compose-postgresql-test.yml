@@ -73,4 +73,7 @@ services:
       FINERACT_EXTERNAL_EVENTS_ENABLED: "true"
       FINERACT_REPORT_EXPORT_S3_ENABLED: "true"
       FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
+      # Small sizes so the standing-instruction integration tests run more than one partition, page and chunk.
+      EXECUTE_STANDING_INSTRUCTIONS_PARTITION_SIZE: "1"
+      EXECUTE_STANDING_INSTRUCTIONS_CHUNK_SIZE: "2"
 # FOR TESTING PURPOSES ONLY! NOT SUITABLE FOR PRODUCTION USAGE!
