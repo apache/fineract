@@ -338,6 +338,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                 List<SavingsAccountTransactionData> secondaryInterestPublication = isOverdraftAccountType ? interestPostingTxs
                         : overdraftTxs;
 
+                final int periodsBeforeInterval = allPostingPeriods.size();
                 periodStartingBalance = appendPostingPeriodIfAny(periodInterval, periodStartingBalance, primaryInterestPublication,
                         monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
                         upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
@@ -351,6 +352,12 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
                         isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft(), allPostingPeriods,
                         isOverdraftAccountType ? false : true, false);
+
+                // the second part starts from the closing balance of the first, so the two are calculated together. A
+                // part without balance is not added and leaves nothing to link
+                if (allPostingPeriods.size() == periodsBeforeInterval + 2) {
+                    allPostingPeriods.get(periodsBeforeInterval).setSecondPartOfInterval(allPostingPeriods.get(periodsBeforeInterval + 1));
+                }
 
             } else {
                 periodStartingBalance = appendPostingPeriodIfAny(periodInterval, periodStartingBalance,

@@ -161,6 +161,28 @@ class SavingsAccountOverdraftInterestSplitTest {
                 .isCloseTo(interestFor(withoutSplit, businessDate, ACTIVATION_DATE, quarterEnd), within(new BigDecimal("0.01")));
     }
 
+    @Test
+    void overdraftSplitLinksTheTwoPeriodsOfAnInterval() {
+        final LocalDate businessDate = LocalDate.of(2025, 2, 2);
+        final LocalDate januaryEnd = LocalDate.of(2025, 1, 31);
+
+        // in credit from Jan 1 to Jan 7 and overdrawn after, so the split builds two periods for January
+        final List<PostingPeriod> january = januaryPeriods(service.calculateInterestUsing(MATH_CONTEXT, businessDate, false, false, 1, null,
+                false, accountOverdrawnWithinFirstMonth(true, SavingsPostingInterestPeriodType.MONTHLY, "21")), januaryEnd);
+        assertThat(january).hasSize(2);
+        assertThat(january.get(0).getSecondPartOfInterval()).isSameAs(january.get(1));
+        assertThat(january.get(1).getSecondPartOfInterval()).isNull();
+
+        final List<PostingPeriod> januaryWithoutSplit = januaryPeriods(service.calculateInterestUsing(MATH_CONTEXT, businessDate, false,
+                false, 1, null, false, accountOverdrawnWithinFirstMonth(false, SavingsPostingInterestPeriodType.MONTHLY, "21")),
+                januaryEnd);
+        assertThat(januaryWithoutSplit).singleElement().satisfies(period -> assertThat(period.getSecondPartOfInterval()).isNull());
+    }
+
+    private static List<PostingPeriod> januaryPeriods(final List<PostingPeriod> postingPeriods, final LocalDate januaryEnd) {
+        return postingPeriods.stream().filter(period -> period.getPeriodInterval().endDate().equals(januaryEnd)).toList();
+    }
+
     private BigDecimal interestFor(final SavingsAccountData account, final LocalDate businessDate, final LocalDate periodStart,
             final LocalDate periodEnd) {
         return interestFor(account, businessDate, periodStart, periodEnd, period -> true);

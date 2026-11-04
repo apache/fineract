@@ -51,17 +51,22 @@ public class CompoundInterestHelper {
         int index = 0;
         while (index < allPeriods.size()) {
             final PostingPeriod postingPeriod = allPeriods.get(index);
-            // the overdraft split builds two periods for one posting interval, which are calculated together. It adds
-            // them one right after the other, so they are next to each other in the list
-            final PostingPeriod otherPeriodOfInterval = index + 1 < allPeriods.size()
-                    && hasSameInterval(postingPeriod, allPeriods.get(index + 1)) ? allPeriods.get(index + 1) : null;
+            // the overdraft split builds two periods for one posting interval and links them, so they are calculated
+            // together
+            final PostingPeriod secondPartOfInterval = postingPeriod.getSecondPartOfInterval();
             final List<PostingPeriod> periodsOfInterval;
-            if (otherPeriodOfInterval == null) {
+            if (secondPartOfInterval == null) {
                 postingPeriod.calculateInterest(compoundInterestValues);
                 periodsOfInterval = List.of(postingPeriod);
             } else {
-                PostingPeriod.calculateInterestForSplitInterval(postingPeriod, otherPeriodOfInterval, compoundInterestValues);
-                periodsOfInterval = List.of(postingPeriod, otherPeriodOfInterval);
+                // a period between the two parts would be calculated out of order
+                if (index + 1 == allPeriods.size() || allPeriods.get(index + 1) != secondPartOfInterval) {
+                    throw new IllegalStateException(
+                            "The second part of the split posting period from " + postingPeriod.getPeriodInterval().startDate() + " to "
+                                    + postingPeriod.getPeriodInterval().endDate() + " must come right after the first");
+                }
+                PostingPeriod.calculateInterestForSplitInterval(postingPeriod, secondPartOfInterval, compoundInterestValues);
+                periodsOfInterval = List.of(postingPeriod, secondPartOfInterval);
             }
 
             for (final PostingPeriod period : periodsOfInterval) {
@@ -81,10 +86,5 @@ public class CompoundInterestHelper {
         }
 
         return interestEarned;
-    }
-
-    private static boolean hasSameInterval(final PostingPeriod postingPeriod, final PostingPeriod other) {
-        return postingPeriod.getPeriodInterval().startDate().equals(other.getPeriodInterval().startDate())
-                && postingPeriod.getPeriodInterval().endDate().equals(other.getPeriodInterval().endDate());
     }
 }
