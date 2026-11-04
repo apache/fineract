@@ -144,15 +144,15 @@ public class FeignGroupHelper {
         postGroupCommand(groupId, DISASSOCIATE_CLIENTS_COMMAND, new PostGroupsGroupIdRequest().clientMembers(List.of(clientId)));
     }
 
-    /** Assigns a staff member to the group; returns the {@code changes} object (contains {@code staffId}). */
-    public PostGroupsGroupIdChanges assignStaff(Long groupId, Long staffId) {
-        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, new PostGroupsGroupIdRequest().staffId(staffId));
+    /** Assigns a staff member to the group; returns the staffId from changes. */
+    public Long assignStaff(Long groupId, Long staffId) {
+        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, new PostGroupsGroupIdRequest().staffId(staffId)).getStaffId();
     }
 
-    /** Assigns staff to the group and cascades it to member client accounts; returns the {@code changes} object. */
-    public PostGroupsGroupIdChanges assignStaffInheritStaffForClientAccounts(Long groupId, Long staffId) {
+    /** Assigns staff to the group and cascades to member client accounts; returns the staffId. */
+    public Long assignStaffInheritStaffForClientAccounts(Long groupId, Long staffId) {
         PostGroupsGroupIdRequest request = new PostGroupsGroupIdRequest().staffId(staffId).inheritStaffForClientAccounts(true);
-        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, request);
+        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, request).getStaffId();
     }
 
     private PostGroupsGroupIdChanges postGroupCommand(Long groupId, String command, PostGroupsGroupIdRequest request) {
