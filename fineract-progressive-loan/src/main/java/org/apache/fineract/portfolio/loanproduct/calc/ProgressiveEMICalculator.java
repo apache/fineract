@@ -790,7 +790,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         boolean isBeforeFirstDisbursement = targetDate.isBefore(scheduleModelCopy.repaymentPeriods().getFirst().getFromDate());
         boolean isAfterMaturityDate = !targetDate.isBefore(scheduleModelCopy.getLastRepaymentPeriod().getDueDate());
         if (isBeforeFirstDisbursement) {
-            scheduleModelCopy.repaymentPeriods().forEach(rp -> rp.getInterestPeriods().clear());
+            scheduleModelCopy.repaymentPeriods().forEach(rp -> scheduleModelCopy.removeInterestPeriods(rp, 0));
             return scheduleModelCopy;
         } else if (isAfterMaturityDate) {
             return scheduleModelCopy;
@@ -806,7 +806,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 if (rp.getDueDate().isAfter(targetDate)) {
                     if (rp.equals(repaymentPeriod)) {
                         rp.findInterestPeriod(targetDate).ifPresent(ip -> {
-                            ip.setDueDate(targetDate);
+                            scheduleModelCopy.truncateInterestPeriodDueDate(ip, targetDate);
                             int index = rp.getInterestPeriods().indexOf(ip);
                             int nextIdx = index + 1;
                             boolean thereIsInterestPeriodFromDateOnTargetDate = ip.getRepaymentPeriod().getInterestPeriods()
@@ -818,8 +818,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                                 ip.addCreditedPrincipalAmount(nextInterestPeriod.getCreditedPrincipal());
                                 ip.addCreditedInterestAmount(nextInterestPeriod.getCreditedInterest());
                             }
-                            ip.getRepaymentPeriod().getInterestPeriods()
-                                    .subList(nextIdx, ip.getRepaymentPeriod().getInterestPeriods().size()).clear();
+                            scheduleModelCopy.removeInterestPeriods(ip.getRepaymentPeriod(), nextIdx);
                         });
                     } else if (rp.getPrevious().isPresent() && rp.getPrevious().get().equals(repaymentPeriod)
                             && (rp.getInterestPeriods().getFirst().getCreditedInterest().isGreaterThanZero()
@@ -828,12 +827,11 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                         // period
                         // if so, we need to retain that interest period, but need to update due date to match with from
                         // date -> 0 interest
-                        rp.getInterestPeriods().getFirst().setDueDate(rp.getInterestPeriods().getFirst().getFromDate());
-                        if (rp.getInterestPeriods().size() > 1) {
-                            rp.getInterestPeriods().subList(1, rp.getInterestPeriods().size()).clear();
-                        }
+                        scheduleModelCopy.truncateInterestPeriodDueDate(rp.getInterestPeriods().getFirst(),
+                                rp.getInterestPeriods().getFirst().getFromDate());
+                        scheduleModelCopy.removeInterestPeriods(rp, 1);
                     } else {
-                        rp.getInterestPeriods().clear();
+                        scheduleModelCopy.removeInterestPeriods(rp, 0);
                     }
                 }
             });
@@ -2022,10 +2020,10 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         return new EmiAdjustment(repaymentPeriods.getFirst().getEmi(), repaymentPeriods.getFirst().getEmi().copy(0.0), repaymentPeriods, 0);
     }
 
-    private void calculateRateFactorForScheduleTillDateInclusive(ProgressiveLoanInterestScheduleModel scheduleModelCopy,
-            LocalDate targetDate) {
+    private void calculateRateFactorForScheduleTillDateInclusive(final ProgressiveLoanInterestScheduleModel scheduleModelCopy,
+            final LocalDate targetDate) {
         scheduleModelCopy.findRepaymentPeriod(targetDate).flatMap(rp -> rp.findInterestPeriod(targetDate))
-                .ifPresent(ip -> ip.setDueDate(targetDate));
+                .ifPresent(ip -> scheduleModelCopy.truncateInterestPeriodDueDate(ip, targetDate));
 
         calculateRateFactorForPeriods(scheduleModelCopy.repaymentPeriods(), scheduleModelCopy);
 

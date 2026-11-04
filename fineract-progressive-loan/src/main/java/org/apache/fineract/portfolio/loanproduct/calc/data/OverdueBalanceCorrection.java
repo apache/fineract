@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanproduct.calc.data;
 
 import java.time.LocalDate;
+import org.apache.fineract.infrastructure.core.serialization.gson.JsonExclude;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
 /**
@@ -31,6 +32,21 @@ import org.apache.fineract.organisation.monetary.domain.Money;
  *            the correction amount (+X for inflation, -X for deflation)
  * @param affectedRpDueDate
  *            the dueDate of the RepaymentPeriod that received this correction (for beyond/onTarget detection)
+ * @param ownerRpDueDate
+ *            the dueDate of the RepaymentPeriod holding the InterestPeriod, set when a calculation copy moves the
+ *            correction to a truncated InterestPeriod
+ * @param interestPeriodRemoved
+ *            whether a calculation copy removed the InterestPeriod holding the correction, so there is nothing to
+ *            reverse
  */
-public record OverdueBalanceCorrection(LocalDate correctionDate, Money amount, LocalDate affectedRpDueDate) {
+public record OverdueBalanceCorrection(LocalDate correctionDate, Money amount, LocalDate affectedRpDueDate,
+        @JsonExclude LocalDate ownerRpDueDate, @JsonExclude boolean interestPeriodRemoved) {
+
+    public OverdueBalanceCorrection(final LocalDate correctionDate, final Money amount, final LocalDate affectedRpDueDate) {
+        this(correctionDate, amount, affectedRpDueDate, null, false);
+    }
+
+    public OverdueBalanceCorrection withInterestPeriodRemoved() {
+        return new OverdueBalanceCorrection(correctionDate, amount, affectedRpDueDate, ownerRpDueDate, true);
+    }
 }

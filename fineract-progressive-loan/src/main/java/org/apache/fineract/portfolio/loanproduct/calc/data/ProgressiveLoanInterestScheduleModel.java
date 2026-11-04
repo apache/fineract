@@ -41,6 +41,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Setter;
@@ -120,15 +121,74 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     /**
-     * Reverses all recorded overdue corrections on this model by subtracting each correction's amount from the
-     * corresponding InterestPeriod's balanceCorrectionAmount.
+     * Reverses recorded overdue corrections on the interest period holding them. A correction without such an interest
+     * period is reversed by a balance change on its date. Corrections whose interest period was removed by
+     * {@link #removeInterestPeriods(RepaymentPeriod, int)} have nothing left to reverse. Clears the correction
+     * tracking.
      */
     public void reverseOverdueCorrections() {
-        for (final OverdueBalanceCorrection oc : overdueCorrections) {
-            changeOutstandingBalanceAndUpdateInterestPeriods(oc.correctionDate(), zero(), oc.amount().negated(), zero());
-        }
+        overdueCorrections.stream().filter(correction -> !correction.interestPeriodRemoved())
+                .forEach(correction -> findInterestPeriodForOverdueCorrection(correction).ifPresentOrElse(
+                        interestPeriod -> interestPeriod.addBalanceCorrectionAmount(correction.amount().negated()),
+                        () -> changeOutstandingBalanceAndUpdateInterestPeriods(correction.correctionDate(), zero(),
+                                correction.amount().negated(), zero())));
         overdueCorrections.clear();
         this.lastOverdueBalanceChange = null;
+    }
+
+    /**
+     * Removes the interest periods of a repayment period from the given index and marks the overdue corrections
+     * recorded on them as removed. Used when a calculation copy is truncated at a date.
+     */
+    public void removeInterestPeriods(final RepaymentPeriod repaymentPeriod, final int fromIndex) {
+        final List<InterestPeriod> interestPeriods = repaymentPeriod.getInterestPeriods();
+        final List<InterestPeriod> removedInterestPeriods = interestPeriods.subList(fromIndex, interestPeriods.size());
+        if (removedInterestPeriods.isEmpty()) {
+            return;
+        }
+        final Predicate<OverdueBalanceCorrection> isOnRemovedInterestPeriod = fromIndex == 0
+                ? correction -> findRepaymentPeriodForOverdueCorrection(correction)
+                        .filter(period -> isSameInstance(period, repaymentPeriod)).isPresent()
+                : correction -> findInterestPeriodForOverdueCorrection(correction).filter(
+                        interestPeriod -> removedInterestPeriods.stream().anyMatch(removed -> isSameInstance(removed, interestPeriod)))
+                        .isPresent();
+        overdueCorrections.replaceAll((final OverdueBalanceCorrection correction) -> !correction.interestPeriodRemoved()
+                && isOnRemovedInterestPeriod.test(correction) ? correction.withInterestPeriodRemoved() : correction);
+        removedInterestPeriods.clear();
+    }
+
+    public void truncateInterestPeriodDueDate(final InterestPeriod interestPeriod, final LocalDate dueDate) {
+        overdueCorrections.replaceAll((final OverdueBalanceCorrection correction) -> {
+            if (findInterestPeriodForOverdueCorrection(correction).filter(period -> isSameInstance(period, interestPeriod)).isEmpty()) {
+                return correction;
+            }
+            return new OverdueBalanceCorrection(dueDate, correction.amount(), correction.affectedRpDueDate(),
+                    interestPeriod.getRepaymentPeriod().getDueDate(), false);
+        });
+        interestPeriod.setDueDate(dueDate);
+    }
+
+    /**
+     * Repayment and interest periods compare by value, but an overdue correction belongs to one period instance. Plain
+     * JDK identity check: the embeddable schedule generator jar does not ship Guava.
+     */
+    private static boolean isSameInstance(final Object first, final Object second) {
+        return first == second;
+    }
+
+    private Optional<RepaymentPeriod> findRepaymentPeriodForOverdueCorrection(final OverdueBalanceCorrection correction) {
+        if (correction.interestPeriodRemoved()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(correction.ownerRpDueDate())
+                .map(dueDate -> repaymentPeriods.stream().filter(period -> period.getDueDate().isEqual(dueDate)).findFirst())
+                .orElseGet(() -> findRepaymentPeriodForBalanceChange(correction.correctionDate()));
+    }
+
+    private Optional<InterestPeriod> findInterestPeriodForOverdueCorrection(final OverdueBalanceCorrection correction) {
+        return findRepaymentPeriodForOverdueCorrection(correction)
+                .flatMap((final RepaymentPeriod period) -> findInterestPeriodEndingOn(period, correction.correctionDate(),
+                        isLastRepaymentPeriod(period) && correction.correctionDate().isEqual(period.getDueDate())));
     }
 
     public ProgressiveLoanInterestScheduleModel deepCopy(final MathContext mc) {
@@ -295,8 +355,14 @@ public class ProgressiveLoanInterestScheduleModel {
             var lastInterestPeriod = repaymentPeriod.getLastInterestPeriod();
             return lastInterestPeriod.getLength() == 0 ? Optional.of(lastInterestPeriod) : Optional.empty();
         }
-        return repaymentPeriod.getInterestPeriods().stream()//
-                .filter(interestPeriod -> balanceChangeDate.isEqual(interestPeriod.getDueDate()))//
+        return findInterestPeriodEndingOn(repaymentPeriod, balanceChangeDate, false);
+    }
+
+    private Optional<InterestPeriod> findInterestPeriodEndingOn(final RepaymentPeriod repaymentPeriod, final LocalDate dueDate,
+            final boolean lastMatch) {
+        final List<InterestPeriod> interestPeriods = lastMatch ? repaymentPeriod.getInterestPeriods().reversed()
+                : repaymentPeriod.getInterestPeriods();
+        return interestPeriods.stream().filter((final InterestPeriod interestPeriod) -> dueDate.isEqual(interestPeriod.getDueDate()))
                 .findFirst();
     }
 
