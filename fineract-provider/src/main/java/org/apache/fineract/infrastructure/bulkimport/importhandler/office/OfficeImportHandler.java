@@ -18,23 +18,22 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.office;
 
-import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import java.util.function.Supplier;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
-import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
-import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.organisation.office.command.OfficeCreateCommand;
+import org.apache.fineract.organisation.office.data.OfficeCreateRequest;
+import org.apache.fineract.organisation.office.data.OfficeCreateResponse;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -52,11 +51,11 @@ public class OfficeImportHandler implements ImportHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(OfficeImportHandler.class);
     static final String PARENT_OFFICE_ID_NOT_POSITIVE = "Parent OfficeId must be a positive number";
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CommandDispatcher dispatcher;
 
     @Autowired
-    public OfficeImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+    public OfficeImportHandler(final CommandDispatcher dispatcher) {
+        this.dispatcher = dispatcher;
     }
 
     @Override
@@ -72,8 +71,7 @@ public class OfficeImportHandler implements ImportHandler {
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(officeSheet, 0);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
-            Row row;
-            row = officeSheet.getRow(rowIndex);
+            Row row = officeSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, OfficeConstants.STATUS_COL)) {
                 offices.add(readOffice(row, locale, dateFormat, rowErrors));
             }
@@ -81,7 +79,7 @@ public class OfficeImportHandler implements ImportHandler {
         return offices;
     }
 
-    private OfficeData readOffice(Row row, final String locale, final String dateFormat, final Map<Integer, String> rowErrors) {
+    private OfficeData readOffice(final Row row, final String locale, final String dateFormat, final Map<Integer, String> rowErrors) {
         String officeName = ImportHandlerUtils.readAsString(OfficeConstants.OFFICE_NAME_COL, row);
         Long parentId = readParentOfficeId(row, rowErrors);
         LocalDate openedDate = ImportHandlerUtils.readAsDate(OfficeConstants.OPENED_ON_COL, row);
@@ -115,9 +113,6 @@ public class OfficeImportHandler implements ImportHandler {
     private Count importEntity(final Workbook workbook, final List<OfficeData> offices, final String dateFormat, final String locale,
             final Map<Integer, String> rowErrors) {
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
-        GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
-
         int successCount = 0;
         int errorCount = 0;
         String errorMessage;
@@ -127,12 +122,14 @@ public class OfficeImportHandler implements ImportHandler {
                 if (rowError != null) {
                     throw new IllegalArgumentException(rowError);
                 }
-                String payload = gsonBuilder.create().toJson(office);
-                final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                        .createOffice() //
-                        .withJson(payload) //
-                        .build(); //
-                commandsSourceWritePlatformService.logCommandSource(commandRequest);
+                final var command = new OfficeCreateCommand();
+                final String openingDateStr = office.getOpeningDate() != null ? office.getOpeningDate().toString() : null;
+                final var request = OfficeCreateRequest.builder().name(office.getName()).parentId(office.getParentId())
+                        .openingDate(openingDateStr).externalId(office.getExternalId() != null ? office.getExternalId().getValue() : null)
+                        .build();
+                command.setPayload(request);
+                final Supplier<OfficeCreateResponse> response = dispatcher.dispatch(command);
+                response.get();
                 successCount++;
                 Cell statusCell = officeSheet.getRow(office.getRowIndex()).createCell(OfficeConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
