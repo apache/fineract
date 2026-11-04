@@ -120,7 +120,7 @@ public class AccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Submit new share application", operationId = "createShareAccount", description = "Submits new share application\n\n"
             + "Mandatory Fields: clientId, productId, submittedDate, savingsAccountId, requestedShares, applicationDate\n\n"
-            + "Optional Fields: accountNo, externalId\n\n"
+            + "Optional Fields: accountNo, externalId, paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber\n\n"
             + "Inherited from Product (if not provided): minimumActivePeriod, minimumActivePeriodFrequencyType, lockinPeriodFrequency, lockinPeriodFrequencyType")
     @AlternativeOperationId("createAccount")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountRequest.class)))

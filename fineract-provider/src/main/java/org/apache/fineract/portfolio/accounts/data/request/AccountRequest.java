@@ -55,4 +55,10 @@ public class AccountRequest implements Serializable {
     private Long id;
     private String currencyCode;
     private String applicationDate;
+    private Long paymentTypeId;
+    private String accountNumber;
+    private String checkNumber;
+    private String routingCode;
+    private String receiptNumber;
+    private String bankNumber;
 }

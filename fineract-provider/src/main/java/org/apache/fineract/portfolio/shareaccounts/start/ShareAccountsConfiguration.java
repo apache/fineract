@@ -31,6 +31,7 @@ import org.apache.fineract.portfolio.accounts.service.AccountsCommandsService;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountDomainService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
@@ -115,9 +116,10 @@ public class ShareAccountsConfiguration {
             ShareAccountRepositoryWrapper shareAccountRepository, ShareProductRepositoryWrapper shareProductRepository,
             AccountNumberGenerator accountNumberGenerator, AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
             JournalEntryWritePlatformService journalEntryWritePlatformService, NoteRepository noteRepository,
-            BusinessEventNotifierService businessEventNotifierService) {
+            BusinessEventNotifierService businessEventNotifierService,
+            PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
         return new ShareAccountWritePlatformServiceJpaRepositoryImpl(accountDataSerializer, shareAccountRepository, shareProductRepository,
                 accountNumberGenerator, accountNumberFormatRepository, journalEntryWritePlatformService, noteRepository,
-                businessEventNotifierService);
+                businessEventNotifierService, paymentDetailWritePlatformService);
     }
 }
