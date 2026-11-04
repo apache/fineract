@@ -34,7 +34,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
+import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPosterTask;
@@ -63,6 +65,7 @@ public class PostInterestForSavingTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         final Queue<List<SavingsAccountData>> queue = new ArrayDeque<>();
+        final List<Throwable> errors = new ArrayList<>();
         final int threadPoolSize = Integer.parseInt((String) chunkContext.getStepContext().getJobParameters().get("thread-pool-size"));
         taskExecutor.setCorePoolSize(threadPoolSize);
         taskExecutor.setMaxPoolSize(threadPoolSize);
@@ -89,15 +92,19 @@ public class PostInterestForSavingTasklet implements Tasklet {
                     log.debug("Starting Interest posting - total records - {}", totalFilteredRecords);
                     List<SavingsAccountData> queueElement = queue.element();
                     maxSavingsIdInList = queueElement.get(queueElement.size() - 1).getId();
-                    postInterest(queue.remove(), threadPoolSize, backdatedTxnsAllowedTill, pageSize, maxSavingsIdInList, queue);
+                    postInterest(queue.remove(), threadPoolSize, backdatedTxnsAllowedTill, pageSize, maxSavingsIdInList, queue, errors);
                 } while (!CollectionUtils.isEmpty(queue));
             }
+        }
+        if (!errors.isEmpty()) {
+            throw new JobExecutionException(errors);
         }
         return RepeatStatus.FINISHED;
     }
 
     private void postInterest(List<SavingsAccountData> savingsAccounts, int threadPoolSize, final boolean backdatedTxnsAllowedTill,
-            final int pageSize, Long maxSavingsIdInList, Queue<List<SavingsAccountData>> queue) {
+            final int pageSize, Long maxSavingsIdInList, Queue<List<SavingsAccountData>> queue, List<Throwable> errors)
+            throws JobExecutionException {
         List<Callable<Void>> posters = new ArrayList<>();
         int fromIndex = 0;
         int size = savingsAccounts.size();
@@ -167,7 +174,7 @@ public class PostInterestForSavingTasklet implements Tasklet {
         List<Future<Void>> responses = new ArrayList<>();
         posters.forEach(poster -> responses.add(taskExecutor.submit(poster)));
 
-        checkCompletion(responses);
+        checkCompletion(responses, errors);
         log.debug("Queue size {}", queue.size());
     }
 
@@ -183,26 +190,25 @@ public class PostInterestForSavingTasklet implements Tasklet {
         return list.subList(fromIndex, toIndex);
     }
 
-    private void checkCompletion(List<Future<Void>> responses) {
-        try {
-            for (Future<Void> f : responses) {
-                f.get();
-            }
-            boolean allThreadsExecuted;
-            int noOfThreadsExecuted = 0;
-            for (Future<Void> future : responses) {
-                if (future.isDone()) {
-                    noOfThreadsExecuted++;
+    private void checkCompletion(List<Future<Void>> responses, List<Throwable> errors) throws JobExecutionException {
+        for (Future<Void> response : responses) {
+            try {
+                response.get();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                errors.add(e);
+                break;
+            } catch (ExecutionException e) {
+                log.error("Execution exception while interest posting entries", e);
+                if (e.getCause() instanceof MultiException multiException) {
+                    errors.addAll(multiException.getCauses());
+                } else {
+                    errors.add(e.getCause());
                 }
             }
-            allThreadsExecuted = noOfThreadsExecuted == responses.size();
-            if (!allThreadsExecuted) {
-                log.error("All threads could not execute.");
-            }
-        } catch (InterruptedException e1) {
-            log.error("Interrupted while interest posting entries", e1);
-        } catch (ExecutionException e2) {
-            log.error("Execution exception while interest posting entries", e2);
+        }
+        if (Thread.currentThread().isInterrupted()) {
+            throw new JobExecutionException(errors);
         }
     }
 }

@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
+import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -73,7 +74,11 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
             final int threadPoolSize = Integer.parseInt(jobParameters.getString("thread-pool-size"));
             final int batchSize = Integer.parseInt(jobParameters.getString("batch-size"));
 
-            recalculateInterest(office, threadPoolSize, batchSize);
+            final List<Throwable> errors = new ArrayList<>();
+            recalculateInterest(office, threadPoolSize, batchSize, errors);
+            if (!errors.isEmpty()) {
+                throw new JobExecutionException(errors);
+            }
         } else {
             Collection<Long> loanIds = loanReadPlatformService.fetchLoansForInterestRecalculation();
             if (!loanIds.isEmpty()) {
@@ -94,7 +99,8 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
         return RepeatStatus.FINISHED;
     }
 
-    private void recalculateInterest(OfficeData office, int threadPoolSize, int batchSize) {
+    private void recalculateInterest(OfficeData office, int threadPoolSize, int batchSize, List<Throwable> errors)
+            throws JobExecutionException {
         final int pageSize = batchSize * threadPoolSize;
         taskExecutor.setCorePoolSize(threadPoolSize);
         taskExecutor.setMaxPoolSize(threadPoolSize);
@@ -108,14 +114,14 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
         while (!CollectionUtils.isEmpty(loanIds)) {
             int totalFilteredRecords = loanIds.size();
             log.debug("Starting accrual - total filtered records - {}", totalFilteredRecords);
-            recalculateInterest(loanIds, threadPoolSize);
+            recalculateInterest(loanIds, threadPoolSize, errors);
             maxLoanIdInList = loanIds.get(loanIds.size() - 1);
             loanIds = Collections.synchronizedList(
                     this.loanReadPlatformService.fetchLoansForInterestRecalculation(pageSize, maxLoanIdInList, officeHierarchy));
         }
     }
 
-    private void recalculateInterest(List<Long> loanIds, int threadPoolSize) {
+    private void recalculateInterest(List<Long> loanIds, int threadPoolSize, List<Throwable> errors) throws JobExecutionException {
         if (loanIds == null || loanIds.isEmpty()) {
             return;
         }
@@ -129,29 +135,28 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
                     recalculateInterestPoster.setFineractContext(ThreadLocalContextUtil.getContext());
                     return (Callable<Void>) recalculateInterestPoster;
                 }).map(taskExecutor::submit).toList();
-        checkCompletion(responses);
+        checkCompletion(responses, errors);
     }
 
-    private void checkCompletion(List<Future<Void>> responses) {
-        try {
-            for (Future<Void> f : responses) {
-                f.get();
-            }
-            boolean allThreadsExecuted = false;
-            int noOfThreadsExecuted = 0;
-            for (Future<Void> future : responses) {
-                if (future.isDone()) {
-                    noOfThreadsExecuted++;
+    private void checkCompletion(List<Future<Void>> responses, List<Throwable> errors) throws JobExecutionException {
+        for (Future<Void> response : responses) {
+            try {
+                response.get();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                errors.add(e);
+                break;
+            } catch (ExecutionException e) {
+                log.error("Execution exception while posting IR entries", e);
+                if (e.getCause() instanceof MultiException multiException) {
+                    errors.addAll(multiException.getCauses());
+                } else {
+                    errors.add(e.getCause());
                 }
             }
-            allThreadsExecuted = noOfThreadsExecuted == responses.size();
-            if (!allThreadsExecuted) {
-                log.error("All threads could not execute.");
-            }
-        } catch (InterruptedException e1) {
-            log.error("Interrupted while posting IR entries", e1);
-        } catch (ExecutionException e2) {
-            log.error("Execution exception while posting IR entries", e2);
+        }
+        if (Thread.currentThread().isInterrupted()) {
+            throw new JobExecutionException(errors);
         }
     }
 }
