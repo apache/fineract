@@ -156,6 +156,17 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
             baseDataValidator.reset().parameter(LoanApiConstants.fixedEmiAmountParameterName).value(emiAmount).ignoreIfNull()
                     .positiveAmount().notGreaterThanMax(principal);
 
+            final BigDecimal downPaymentFeeAmount = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(LoanApiConstants.downPaymentFeeAmountParameterName, element);
+            baseDataValidator.reset().parameter(LoanApiConstants.downPaymentFeeAmountParameterName).value(downPaymentFeeAmount)
+                    .ignoreIfNull().positiveAmount();
+            if (downPaymentFeeAmount != null && Boolean.TRUE
+                    .equals(this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.skipDownPaymentFeeParameterName, element))) {
+                baseDataValidator.reset().parameter(LoanApiConstants.downPaymentFeeAmountParameterName).value(downPaymentFeeAmount)
+                        .failWithCodeAndMessage("cannot.be.passed.with.skipDownPaymentFee",
+                                "Down payment fee amount cannot be passed together with skipDownPaymentFee.");
+            }
+
             validatePaymentDetails(baseDataValidator, element);
 
             if (command.parameterExists("postDatedChecks")) {
@@ -974,13 +985,14 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
             disbursementParameters = new HashSet<>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale", "dateFormat",
                     LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.fixedEmiAmountParameterName,
                     LoanApiConstants.disbursementNetDisbursalAmountParameterName, LoanApiConstants.ORIGINATORS_PARAM,
-                    LoanApiConstants.skipDownPaymentFeeParameterName));
+                    LoanApiConstants.skipDownPaymentFeeParameterName, LoanApiConstants.downPaymentFeeAmountParameterName));
         } else {
             disbursementParameters = new HashSet<>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale", "dateFormat",
                     "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber", "adjustRepaymentDate",
                     LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.fixedEmiAmountParameterName,
                     LoanApiConstants.postDatedChecks, LoanApiConstants.disbursementNetDisbursalAmountParameterName,
-                    LoanApiConstants.ORIGINATORS_PARAM, LoanApiConstants.skipDownPaymentFeeParameterName));
+                    LoanApiConstants.ORIGINATORS_PARAM, LoanApiConstants.skipDownPaymentFeeParameterName,
+                    LoanApiConstants.downPaymentFeeAmountParameterName));
         }
         return disbursementParameters;
     }

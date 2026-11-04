@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
@@ -215,6 +216,17 @@ public class DownPaymentFeesTest {
         fee.setChargeTime(ChargeTimeType.DOWN_PAYMENT.getValue());
         fee.setDisbursementDetail(null);
         assertFalse(fee.isDownPaymentFeeAwaitingDisbursement());
+    }
+
+    @Test
+    public void testOnlyAnActiveFeeKeepsTheFeeItReplaces() {
+        final LoanCharge configuredFee = new LoanCharge();
+        final LoanCharge overrideFee = new LoanCharge();
+        overrideFee.setReplacedLoanCharge(configuredFee);
+
+        overrideFee.setActive(false);
+
+        assertNull(overrideFee.getReplacedLoanCharge());
     }
 
     @Test

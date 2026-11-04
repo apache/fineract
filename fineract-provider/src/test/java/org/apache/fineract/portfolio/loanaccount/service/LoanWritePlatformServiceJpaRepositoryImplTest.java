@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -87,6 +88,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
+import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementService.DownPaymentFeesPreparation;
 import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNotActiveException;
 import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
@@ -420,6 +422,8 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
         when(loanLifecycleStateMachine.dryTransition(any(), any())).thenReturn(LoanStatus.ACTIVE);
         when(loanDisbursementService.adjustDisburseAmount(any(), any(), any())).thenReturn(Money.of(currency, BigDecimal.valueOf(20000)));
+        lenient().when(loanDisbursementService.prepareDownPaymentFeesForDisbursement(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(new DownPaymentFeesPreparation(false, null));
         when(externalIdFactory.createFromCommand(any(), any())).thenReturn(ExternalId.empty());
 
         PortfolioAccountData linkedAccount = PortfolioAccountData.lookup(2L, "SA001");
@@ -504,6 +508,8 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
         when(loanLifecycleStateMachine.dryTransition(any(), any())).thenReturn(LoanStatus.ACTIVE);
         when(loanDisbursementService.adjustDisburseAmount(any(), any(), any())).thenReturn(Money.of(currency, BigDecimal.valueOf(20000)));
+        lenient().when(loanDisbursementService.prepareDownPaymentFeesForDisbursement(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(new DownPaymentFeesPreparation(false, null));
         when(externalIdFactory.createFromCommand(any(), any())).thenReturn(ExternalId.empty());
 
         // The loan has NO linked savings account — this is the bug scenario that used to NPE.
@@ -585,6 +591,8 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
         when(loanLifecycleStateMachine.dryTransition(any(), any())).thenReturn(LoanStatus.ACTIVE);
         when(loanDisbursementService.adjustDisburseAmount(any(), any(), any())).thenReturn(Money.of(currency, BigDecimal.valueOf(20000)));
+        lenient().when(loanDisbursementService.prepareDownPaymentFeesForDisbursement(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(new DownPaymentFeesPreparation(false, null));
         when(externalIdFactory.createFromCommand(any(), any())).thenReturn(ExternalId.empty());
         PortfolioAccountData linkedAccount = PortfolioAccountData.lookup(2L, "SA001");
         when(accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(LOAN_ID)).thenReturn(linkedAccount);
@@ -764,6 +772,8 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(configurationDomainService.isPaymentTypeApplicableForDisbursementCharge()).thenReturn(false);
         when(loan.getPrincipal()).thenReturn(principal);
         when(loanDisbursementService.adjustDisburseAmount(loan, fixture.command, actualDisbursementDate)).thenReturn(principal);
+        lenient().when(loanDisbursementService.prepareDownPaymentFeesForDisbursement(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(new DownPaymentFeesPreparation(false, null));
         when(externalIdFactory.createFromCommand(fixture.command, LoanApiConstants.externalIdParameterName)).thenReturn(ExternalId.empty());
         when(loan.getTotalOverpaidAsMoney()).thenReturn(Money.zero(currency));
         when(loan.getOffice()).thenReturn(office);
