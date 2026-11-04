@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
-import static java.time.temporal.ChronoUnit.DAYS;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
@@ -1281,19 +1280,19 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             } else {
                 discountCharge(1, charge);
             }
-        } else { // calculation for days
-            long completedDays;
-
-            if (resetDate == null) {
-                completedDays = DAYS.between(this.activatedOnDate, DateUtils.getBusinessLocalDate());
-
+        } else { // calculation for days, weeks and years
+            final LocalDate restartFrom = resetDate == null ? this.activatedOnDate : resetDate;
+            final Integer restartFrequencyType = charge.getRestartFrequencyEnum();
+            final LocalDate restartOn;
+            if (PeriodFrequencyType.WEEKS.getValue().equals(restartFrequencyType)) {
+                restartOn = restartFrom.plusWeeks(restartPeriod);
+            } else if (PeriodFrequencyType.YEARS.getValue().equals(restartFrequencyType)) {
+                restartOn = restartFrom.plusYears(restartPeriod);
             } else {
-                completedDays = DAYS.between(resetDate, DateUtils.getBusinessLocalDate());
+                restartOn = restartFrom.plusDays(restartPeriod);
             }
 
-            int totalDays = (int) completedDays;
-
-            if (totalDays < restartPeriod) {
+            if (DateUtils.getBusinessLocalDate().isBefore(restartOn)) {
                 countValidation(charge, transactionAmount, transactionDate, refNo);
             } else {
                 discountCharge(1, charge);
