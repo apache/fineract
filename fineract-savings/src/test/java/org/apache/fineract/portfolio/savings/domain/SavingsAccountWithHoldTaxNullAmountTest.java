@@ -74,6 +74,22 @@ class SavingsAccountWithHoldTaxNullAmountTest {
         }).doesNotThrowAnyException();
     }
 
+    /**
+     * An account can carry a tax group and not withhold: the product withholds and the account was opened with
+     * {@code withHoldTax=false}. {@code applyWithholdTaxForDepositAccounts} then finds no withholding transaction to
+     * update and passes {@code null}; with interest posted this threw {@code NullPointerException: Cannot invoke
+     * "SavingsAccountTransaction.getTransactionDate()" because "withholdTransaction" is null} on premature closure.
+     */
+    @Test
+    void updateWithHoldTransaction_withNoTransactionToUpdate_doesNotThrowAndAddsNoTax() {
+        SavingsAccount account = accountWithTaxGroup();
+
+        assertThatCode(() -> {
+            boolean isTaxAdded = account.updateWithHoldTransaction(new BigDecimal("1500.00"), null);
+            assertThat(isTaxAdded).isFalse();
+        }).doesNotThrowAnyException();
+    }
+
     @Test
     void createWithHoldTransaction_withZeroAmount_addsNoTax() {
         SavingsAccount account = accountWithTaxGroup();
