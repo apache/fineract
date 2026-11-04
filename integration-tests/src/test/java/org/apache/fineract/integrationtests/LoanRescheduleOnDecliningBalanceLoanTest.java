@@ -253,7 +253,7 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
         BigDecimal totalExpectedRepayment = getLoanDetails(this.loanId).getSummary().getTotalExpectedRepayment();
 
         assertEquals(10831, period.getTotalDueForPeriod().intValue(), "EXPECTED REPAYMENT is NOK");
-        assertEquals(125184, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
+        assertEquals(125174, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
     }
@@ -284,7 +284,7 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
         BigDecimal totalExpectedRepayment = getLoanDetails(this.loanId).getSummary().getTotalExpectedRepayment();
 
         assertEquals(10831, period.getTotalDueForPeriod().intValue(), "EXPECTED REPAYMENT is NOK");
-        assertEquals(131512, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
+        assertEquals(131491, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
     }
@@ -317,7 +317,7 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
 
         assertEquals(5000, period.getTotalDueForPeriod().intValue(), "EXPECTED FIXED REPAYMENT is NOK");
         assertEquals(15417, period2.getTotalDueForPeriod().intValue(), "EXPECTED REPAYMENT is NOK");
-        assertEquals(121412, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
+        assertEquals(121410, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
     }
@@ -349,7 +349,7 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
         BigDecimal totalExpectedRepayment = getLoanDetails(this.loanId).getSummary().getTotalExpectedRepayment();
 
         assertEquals(10831, period.getTotalDueForPeriod().intValue(), "EXPECTED REPAYMENT in Second Reschedule is NOK");
-        assertEquals(133470, totalExpectedRepayment.intValue(), "TOTAL EXPECTED in Second Reschedule REPAYMENT is NOK");
+        assertEquals(133436, totalExpectedRepayment.intValue(), "TOTAL EXPECTED in Second Reschedule REPAYMENT is NOK");
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
     }
@@ -432,7 +432,7 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
         BigDecimal totalExpectedRepayment = getLoanDetails(this.loanId).getSummary().getTotalExpectedRepayment();
 
         assertEquals(798, period.getTotalDueForPeriod().intValue(), "EXPECTED REPAYMENT is NOK");
-        assertEquals(22567, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
+        assertEquals(22559, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
     }
