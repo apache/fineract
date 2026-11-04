@@ -93,7 +93,6 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -196,18 +195,28 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
     private LoanWritePlatformServiceJpaRepositoryImpl loanWritePlatformService;
 
     private Loan loan;
-    private AppUser appUser;
     private JsonCommand command;
     private static final Long LOAN_ID = 1L;
 
     @BeforeEach
     public void setUp() {
-        appUser = mock(AppUser.class);
-
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, DateUtils.parseLocalDate("2025-05-20"))));
 
-        when(context.getAuthenticatedUserIfPresent()).thenReturn(appUser);
+    }
+
+    @Test
+    public void closeLoan_shouldLoadLoanInUserScope() {
+        Loan loan = mock(Loan.class);
+        JsonCommand command = mock(JsonCommand.class);
+        when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
+        when(command.json()).thenReturn("{}");
+        doThrow(new IllegalStateException("Stop after loading the loan")).when(loan).isChargedOff();
+
+        assertThrows(IllegalStateException.class, () -> loanWritePlatformService.closeLoan(LOAN_ID, command));
+
+        verify(loanAssembler).assembleFromInUserScope(LOAN_ID);
+        verify(loanAssembler, never()).assembleFrom(LOAN_ID);
     }
 
     private void setupMoneyHelper() {
