@@ -1,0 +1,25 @@
+= Office hierarchy access
+
+Fineract represents an office hierarchy as a dot-delimited path. The head
+office uses `"."`, while child offices append their identifiers, for example
+`.1.`, `.1.2.`, and `.1.2.3.`. Access checks use this path as a prefix:
+users can access resources in their own office and subordinate offices, but
+not resources belonging to a parent or unrelated office.
+
+Account transfers validate the office hierarchy of both the source and target
+accounts before processing. This applies to savings-to-savings,
+savings-to-loan, and loan-to-savings transfers.
+
+Loan and savings write operations also load accounts in the authenticated
+user's office scope. Users can perform these operations only on accounts in
+their own office or a subordinate office:
+
+* loans: close, close as rescheduled, loan officer assignment (single and
+  bulk) and removal, adding, removing and updating tranches, and marking as
+  fraud
+* savings accounts: interest calculation, charge inactivation, field officer
+  assignment and removal, withholding tax updates, and blocking or unblocking
+  the account, its credits or its debits
+
+Operations run by scheduled jobs, such as escheat, dormancy handling and
+interest recalculation, are not restricted this way.

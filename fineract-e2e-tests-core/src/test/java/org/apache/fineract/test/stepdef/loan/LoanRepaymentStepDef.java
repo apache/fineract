@@ -52,6 +52,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PostUsersResponse;
+import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.data.TransactionType;
 import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
@@ -154,6 +155,37 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
                 repaymentRequest, Map.<String, Object>of("command", "repayment")));
         testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, repaymentResponse);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
+    @Then("Created user cannot make {string} repayment on {string} with {double} EUR transaction amount")
+    public void createdUserCannotMakeRepayment(String repaymentType, String transactionDate, double transactionAmount) {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+        DefaultPaymentType paymentType = DefaultPaymentType.valueOf(repaymentType);
+        long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
+        PostLoansLoanIdTransactionsRequest repaymentRequest = loanRequestFactory.defaultRepaymentRequest().transactionDate(transactionDate)
+                .transactionAmount(transactionAmount).paymentTypeId(paymentTypeValue).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
+
+        String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
+        String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
+        FineractFeignClient userClient = fineractClientConfiguration.fineractFeignClientForUser(username, password);
+
+        CallFailedRuntimeException exception = fail(() -> userClient.loanTransactions().handleCommandsLoanTransaction(loanId,
+                repaymentRequest, Map.<String, Object>of("command", "repayment")));
+        assertThat(exception.getStatus()).isEqualTo(403);
+    }
+
+    @Then("Created user cannot mark the loan as fraud")
+    public void createdUserCannotMarkLoanAsFraud() {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+        String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
+        String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
+        FineractFeignClient userClient = fineractClientConfiguration.fineractFeignClientForUser(username, password);
+
+        CallFailedRuntimeException exception = fail(() -> userClient.loans().updateLoanApplication(loanId,
+                new PutLoansLoanIdRequest().fraud(true), Map.of("command", "markAsFraud")));
+        assertThat(exception.getStatus()).isEqualTo(403);
     }
 
     @And("Created user makes externalID controlled {string} repayment on {string} with {double} EUR transaction amount")
