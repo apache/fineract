@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.staff.exception;
 
+import java.util.Locale;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
@@ -33,7 +34,7 @@ public class StaffRoleException extends AbstractPlatformResourceNotFoundExceptio
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("-", " ").toLowerCase();
+            return name().toString().replaceAll("-", " ").toLowerCase(Locale.ROOT);
         }
     }
 

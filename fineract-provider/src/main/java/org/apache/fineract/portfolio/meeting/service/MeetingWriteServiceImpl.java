@@ -191,7 +191,7 @@ public class MeetingWriteServiceImpl implements MeetingWriteService {
                 entityType.getValue());
 
         if (calendarInstance == null) {
-            throw new CalendarInstanceNotFoundException("for." + entityType.name().toLowerCase() + "not.found",
+            throw new CalendarInstanceNotFoundException("for." + entityType.name().toLowerCase(Locale.ROOT) + "not.found",
                     "No Calendar Instance details found for group with identifier " + entityId + " and calendar with identifier "
                             + calendarId,
                     entityId, calendarId);

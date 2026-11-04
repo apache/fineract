@@ -22,6 +22,7 @@ import feign.Response;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Locale;
 import java.util.Optional;
 import org.apache.fineract.client.feign.services.DocumentsApiFixed;
 import org.apache.fineract.client.feign.services.ImagesApi;
@@ -54,7 +55,7 @@ public final class FeignParts {
         if (dotPos == -1) {
             return null;
         }
-        String ext = fileName.substring(dotPos + 1).toLowerCase();
+        String ext = fileName.substring(dotPos + 1).toLowerCase(Locale.ROOT);
 
         return switch (ext) {
             case "jpg", "jpeg" -> "image/jpeg";

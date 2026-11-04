@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.tax.service;
 
 import jakarta.persistence.PersistenceException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -148,7 +149,7 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve,
             final String nameConstraint, final String errorCodeEntity, final String entityLabel) {
         final String message = realCause == null ? null : realCause.getMessage();
-        if (message != null && message.toLowerCase().contains(nameConstraint)) {
+        if (message != null && message.toLowerCase(Locale.ROOT).contains(nameConstraint)) {
             final String name = command.stringValueOfParameterNamed(TaxApiConstants.nameParamName);
             throw new PlatformDataIntegrityException("error.msg." + errorCodeEntity + ".duplicate.name",
                     entityLabel + " with name `" + name + "` already exists", TaxApiConstants.nameParamName, name);

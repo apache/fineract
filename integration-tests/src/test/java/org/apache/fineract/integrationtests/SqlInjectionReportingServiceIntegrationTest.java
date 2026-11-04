@@ -282,7 +282,7 @@ public class SqlInjectionReportingServiceIntegrationTest {
         // Should get 404 or validation error, not SQL execution error
         assertTrue(exception.getStatus() == SC_NOT_FOUND || exception.getResponseBody().toLowerCase(Locale.ROOT).contains("validation"),
                 "Expected 404 or a validation error, got: " + exception.getMessage());
-        assertFalse(exception.getMessage().toLowerCase().contains("sql syntax"));
+        assertFalse(exception.getMessage().toLowerCase(Locale.ROOT).contains("sql syntax"));
     }
 
     /**
@@ -332,7 +332,9 @@ public class SqlInjectionReportingServiceIntegrationTest {
         } catch (CallFailedRuntimeException e) {
             // Should not get SQL syntax errors - only validation errors
             assertNoSqlError(e);
-            assertFalse(e.getMessage().toLowerCase().contains("error") && e.getMessage().toLowerCase().contains("position"),
+            assertFalse(
+                    e.getMessage().toLowerCase(Locale.ROOT).contains("error")
+                            && e.getMessage().toLowerCase(Locale.ROOT).contains("position"),
                     "Should not get PostgreSQL position error. Got: " + e.getMessage());
             log.info("PostgreSQL escaping prevented SQL injection with validation error");
         }
@@ -413,7 +415,8 @@ public class SqlInjectionReportingServiceIntegrationTest {
         } catch (CallFailedRuntimeException e) {
             // Should get parameter validation error, not SQL injection
             assertNoSqlError(e);
-            assertFalse(e.getMessage().toLowerCase().contains("table") && e.getMessage().toLowerCase().contains("exist"),
+            assertFalse(
+                    e.getMessage().toLowerCase(Locale.ROOT).contains("table") && e.getMessage().toLowerCase(Locale.ROOT).contains("exist"),
                     "Should not get table exists error. Got: " + e.getMessage());
         }
     }
@@ -462,8 +465,8 @@ public class SqlInjectionReportingServiceIntegrationTest {
         } catch (CallFailedRuntimeException e) {
             assertTrue(e.getStatus() == SC_NOT_FOUND || e.getStatus() == SC_BAD_REQUEST,
                     "Expected safe failure (404/400), but got: " + e.getMessage());
-            assertFalse(e.getMessage().toLowerCase().contains("syntax error"));
-            assertFalse(e.getMessage().toLowerCase().contains("sql"));
+            assertFalse(e.getMessage().toLowerCase(Locale.ROOT).contains("syntax error"));
+            assertFalse(e.getMessage().toLowerCase(Locale.ROOT).contains("sql"));
 
             log.info("Cross-database compatibility test passed - got expected safe response");
         }
@@ -492,9 +495,9 @@ public class SqlInjectionReportingServiceIntegrationTest {
     }
 
     private void assertNoSqlError(RuntimeException exception) {
-        assertFalse(exception.getMessage().toLowerCase().contains("syntax error"),
+        assertFalse(exception.getMessage().toLowerCase(Locale.ROOT).contains("syntax error"),
                 "Should not get SQL syntax error, got: " + exception.getMessage());
-        assertFalse(exception.getMessage().toLowerCase().contains("you have an error in your sql"),
+        assertFalse(exception.getMessage().toLowerCase(Locale.ROOT).contains("you have an error in your sql"),
                 "Should not get SQL error, got: " + exception.getMessage());
     }
 

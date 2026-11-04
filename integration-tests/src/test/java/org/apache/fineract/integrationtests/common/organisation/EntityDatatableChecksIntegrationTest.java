@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -389,10 +390,10 @@ public class EntityDatatableChecksIntegrationTest extends FeignLoanTestBase {
     @Test
     public void createClientWithDatatableUsingEntitySubtype() {
         // creating datatable for client entity person subentity
-        final String datatableNamePerson = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_person_", 5).toLowerCase()
-                .toLowerCase();
-        final String datatableNameEntity = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_entity_", 5).toLowerCase()
-                .toLowerCase();
+        final String datatableNamePerson = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_person_", 5).toLowerCase(Locale.ROOT)
+                .toLowerCase(Locale.ROOT);
+        final String datatableNameEntity = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_entity_", 5).toLowerCase(Locale.ROOT)
+                .toLowerCase(Locale.ROOT);
 
         String itsAString = "itsastring";
         final List<PostColumnHeaderData> datatableColumnsList = List

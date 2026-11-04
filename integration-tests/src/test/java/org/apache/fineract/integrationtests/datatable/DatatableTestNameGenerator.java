@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.datatable;
 
+import java.util.Locale;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public abstract class DatatableTestNameGenerator {
@@ -25,6 +26,6 @@ public abstract class DatatableTestNameGenerator {
     private DatatableTestNameGenerator() {}
 
     public static String generateDatatableName(DatatableEntity datatableEntity) {
-        return Utils.uniqueRandomStringGenerator("dt_%s_".formatted(datatableEntity.getReferencedTableName()), 5).toLowerCase();
+        return Utils.uniqueRandomStringGenerator("dt_%s_".formatted(datatableEntity.getReferencedTableName()), 5).toLowerCase(Locale.ROOT);
     }
 }
