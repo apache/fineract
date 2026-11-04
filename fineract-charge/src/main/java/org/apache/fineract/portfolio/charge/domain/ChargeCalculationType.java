@@ -92,6 +92,10 @@ public enum ChargeCalculationType {
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue() };
     }
 
+    public static Object[] validValuesForDownPayment() {
+        return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue() };
+    }
+
     public static ChargeCalculationType fromInt(final Integer chargeCalculation) {
         return switch (chargeCalculation) {
             case 1 -> FLAT;

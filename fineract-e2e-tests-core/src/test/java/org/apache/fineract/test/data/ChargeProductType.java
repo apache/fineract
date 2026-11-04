@@ -44,7 +44,9 @@ public enum ChargeProductType {
     LOAN_PERCENTAGE_AMOUNT_DUE_DATE_FEE("% Amount due date fee"), //
     LOAN_PERCENTAGE_INTEREST_DUE_DATE_FEE("% Interest due date fee"), //
     WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE("Working Capital Loan Fee"), //
-    WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY("Working Capital Loan Penalty"); //
+    WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY("Working Capital Loan Penalty"), //
+    LOAN_DOWN_PAYMENT_FEE("Down Payment Fee"), //
+    LOAN_DOWN_PAYMENT_PERCENTAGE_FEE("Down Payment percentage fee"); //
 
     public final String name;
 

@@ -90,6 +90,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanSchedu
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTransitionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDownPaymentTransactionValidator;
+import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentFeeEventNotifier.FeeState;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
@@ -131,6 +132,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator;
     private final LoanScheduleService loanScheduleService;
     private final LoanOriginatorLinkingService loanOriginatorLinkingService;
+    private final LoanDownPaymentFeeEventNotifier loanDownPaymentFeeEventNotifier;
 
     @Transactional
     @Override
@@ -177,6 +179,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
             // Trigger business event
             businessEventNotifierService.notifyPostBusinessEvent(new LoanCreatedBusinessEvent(loan));
+            loanDownPaymentFeeEventNotifier.notifyFeeChanges(loan, Map.of());
             // Building response
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -283,6 +286,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         try {
             Loan loan = retrieveLoanBy(loanId);
+            final Map<Long, FeeState> downPaymentFeesBefore = loanDownPaymentFeeEventNotifier.captureFees(loan);
             // Validations (prior assembling)
             this.loanApplicationValidator.validateForModify(command, loan);
             // Assembling loan
@@ -312,6 +316,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
 
             businessEventNotifierService.notifyPostBusinessEvent(new LoanApplicationModifiedBusinessEvent(loan));
+            loanDownPaymentFeeEventNotifier.notifyFeeChanges(loan, downPaymentFeesBefore);
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(loanId) //

@@ -32,6 +32,8 @@ public final class LoanScheduleModelDownPaymentPeriod implements LoanScheduleMod
     private final LocalDate periodDate;
     private final Money principalDue;
     private final Money outstandingLoanBalance;
+    private Money feeChargesDue;
+    private Money penaltyChargesDue;
 
     public static LoanScheduleModelDownPaymentPeriod downPayment(final int periodNumber, final LocalDate periodDate,
             final Money principalDue, final Money outstandingLoanBalance) {
@@ -49,7 +51,7 @@ public final class LoanScheduleModelDownPaymentPeriod implements LoanScheduleMod
     @Override
     public LoanSchedulePeriodData toData() {
         return LoanSchedulePeriodData.downPaymentOnlyPeriod(this.periodNumber, this.periodDate, this.principalDue.getAmount(),
-                this.outstandingLoanBalance.getAmount());
+                this.outstandingLoanBalance.getAmount(), feeChargesDue(), penaltyChargesDue());
     }
 
     @Override
@@ -94,17 +96,26 @@ public final class LoanScheduleModelDownPaymentPeriod implements LoanScheduleMod
 
     @Override
     public BigDecimal feeChargesDue() {
-        return BigDecimal.ZERO;
+        return this.feeChargesDue == null ? BigDecimal.ZERO : this.feeChargesDue.getAmount();
     }
 
     @Override
     public BigDecimal penaltyChargesDue() {
-        return BigDecimal.ZERO;
+        return this.penaltyChargesDue == null ? BigDecimal.ZERO : this.penaltyChargesDue.getAmount();
     }
 
     @Override
-    public void addLoanCharges(BigDecimal feeCharge, BigDecimal penaltyCharge) {
-
+    public void addLoanCharges(final BigDecimal feeCharge, final BigDecimal penaltyCharge) {
+        if (feeCharge != null && feeCharge.compareTo(BigDecimal.ZERO) != 0) {
+            this.feeChargesDue = this.feeChargesDue == null
+                    ? Money.of(this.principalDue.getCurrencyData(), feeCharge, this.principalDue.getMc())
+                    : this.feeChargesDue.plus(feeCharge, this.principalDue.getMc());
+        }
+        if (penaltyCharge != null && penaltyCharge.compareTo(BigDecimal.ZERO) != 0) {
+            this.penaltyChargesDue = this.penaltyChargesDue == null
+                    ? Money.of(this.principalDue.getCurrencyData(), penaltyCharge, this.principalDue.getMc())
+                    : this.penaltyChargesDue.plus(penaltyCharge, this.principalDue.getMc());
+        }
     }
 
     @Override

@@ -133,8 +133,9 @@ public class LoanBalanceService {
         }
         if (MathUtil.isZero(summary.getTotalFeeChargesOutstanding())) {
             for (final LoanCharge charge : charges) {
+                // the fee of a tranche that is not disbursed yet is in no installment, so the summary does not cover it
                 if (charge.isActive() && charge.isFeeCharge() && !charge.isPaid() && !charge.isWaived()
-                        && MathUtil.isGreaterThanZero(charge.getAmount())) {
+                        && !charge.isDownPaymentFeeAwaitingDisbursement() && MathUtil.isGreaterThanZero(charge.getAmount())) {
                     charge.reconcileFullyPaid();
                 }
             }

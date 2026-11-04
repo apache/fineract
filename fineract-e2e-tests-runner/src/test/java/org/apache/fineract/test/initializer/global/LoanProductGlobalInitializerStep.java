@@ -401,6 +401,31 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         });
 
         tasks.add(() -> {
+            // LP2 with Down-payment+autopayment + advanced payment allocation + expected tranches (disbursementData)
+            // (LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_EXPECTED_TRANCHES)
+            String nameDownPaymentAutoExpectedTranches = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_EXPECTED_TRANCHES.getName();
+            PostLoanProductsRequest loanProductsRequestDownPaymentAutoExpectedTranches = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2()//
+                    .name(nameDownPaymentAutoExpectedTranches)//
+                    .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                    .loanScheduleType("PROGRESSIVE") //
+                    .multiDisburseLoan(true)//
+                    .disallowExpectedDisbursements(false)//
+                    .maxTrancheCount(10)//
+                    .outstandingLoanBalance(10000.0)//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoExpectedTranches = createLoanProductIdempotent(
+                    loanProductsRequestDownPaymentAutoExpectedTranches);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_EXPECTED_TRANCHES,
+                    responseLoanProductsRequestDownPaymentAutoExpectedTranches);
+        });
+
+        tasks.add(() -> {
             // LP2 with Down-payment+autopayment + advanced payment allocation, no installmentAmountInMultiplesOf
             // (LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_NO_MULTIPLES_OF)
             final String nameDownPaymentAutoAdvPmtAllocNoMultiplesOf = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_NO_MULTIPLES_OF

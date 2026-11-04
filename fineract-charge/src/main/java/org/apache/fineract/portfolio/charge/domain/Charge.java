@@ -733,6 +733,10 @@ public class Charge extends AbstractPersistableCustom<Long> {
                 || ChargeTimeType.fromInt(this.chargeTimeType).equals(ChargeTimeType.TRANCHE_DISBURSEMENT);
     }
 
+    public boolean isDownPaymentCharge() {
+        return ChargeTimeType.fromInt(this.chargeTimeType).equals(ChargeTimeType.DOWN_PAYMENT);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
