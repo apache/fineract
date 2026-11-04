@@ -111,7 +111,7 @@ public class GuarantorImportHandler implements ImportHandler {
         String addressLine1 = ImportHandlerUtils.readAsString(GuarantorConstants.ADDRESS_LINE_1_COL, row);
         String addressLine2 = ImportHandlerUtils.readAsString(GuarantorConstants.ADDRESS_LINE_2_COL, row);
         String city = ImportHandlerUtils.readAsString(GuarantorConstants.CITY_COL, row);
-        LocalDate dob = ImportHandlerUtils.readAsDate(GuarantorConstants.DOB_COL, row);
+        LocalDate dob = ImportHandlerUtils.readAsDate(GuarantorConstants.DOB_COL, row, dateFormat, locale);
         String zip = ImportHandlerUtils.readAsString(GuarantorConstants.ZIP_COL, row);
         Integer savingsId = ImportHandlerUtils.readAsInt(GuarantorConstants.SAVINGS_ID_COL, row);
         BigDecimal amount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(GuarantorConstants.AMOUNT, row));

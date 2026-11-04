@@ -97,7 +97,7 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private ClosingOfSavingsAccounts readSavingsClosed(Row row, String locale, String dateFormat) {
-        LocalDate closedOnDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.CLOSED_ON_DATE, row);
+        LocalDate closedOnDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.CLOSED_ON_DATE, row, dateFormat, locale);
         Long onAccountClosureId = ImportHandlerUtils.readAsLong(FixedDepositConstants.ON_ACCOUNT_CLOSURE_ID, row);
         Long toSavingsAccountId = ImportHandlerUtils.readAsLong(FixedDepositConstants.TO_SAVINGS_ACCOUNT_ID, row);
         if (closedOnDate != null) {
@@ -109,7 +109,7 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private SavingsActivation readSavingsActivation(Row row, String locale, String dateFormat) {
-        LocalDate activationDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.ACTIVATION_DATE_COL, row);
+        LocalDate activationDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.ACTIVATION_DATE_COL, row, dateFormat, locale);
         if (activationDate != null) {
             return SavingsActivation.importInstance(activationDate, row.getRowNum(), locale, dateFormat);
         } else {
@@ -118,7 +118,7 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private SavingsApproval readSavingsApproval(Row row, String locale, String dateFormat) {
-        LocalDate approvalDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.APPROVED_DATE_COL, row);
+        LocalDate approvalDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.APPROVED_DATE_COL, row, dateFormat, locale);
         if (approvalDate != null) {
             return SavingsApproval.importInstance(approvalDate, row.getRowNum(), locale, dateFormat);
         } else {
@@ -134,7 +134,7 @@ public class FixedDepositImportHandler implements ImportHandler {
         String fieldOfficerName = ImportHandlerUtils.readAsString(FixedDepositConstants.FIELD_OFFICER_NAME_COL, row);
         Long fieldOfficerId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME),
                 fieldOfficerName);
-        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.SUBMITTED_ON_DATE_COL, row);
+        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.SUBMITTED_ON_DATE_COL, row, dateFormat, locale);
         String interestCompoundingPeriodType = ImportHandlerUtils.readAsString(FixedDepositConstants.INTEREST_COMPOUNDING_PERIOD_COL, row);
         Long interestCompoundingPeriodTypeId = null;
         EnumOptionData interestCompoundingPeriodTypeEnum = null;
@@ -243,21 +243,21 @@ public class FixedDepositImportHandler implements ImportHandler {
             if (ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_1, row) != null) {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(FixedDepositConstants.CHARGE_ID_1, row),
                         BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_1, row)),
-                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_1, row)));
+                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_1, row, dateFormat, locale)));
             }
         } else {
             charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(FixedDepositConstants.CHARGE_ID_1, row), null,
-                    ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_1, row)));
+                    ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_1, row, dateFormat, locale)));
         }
 
         if (charge2 != null) {
             if (ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_2, row) != null) {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(FixedDepositConstants.CHARGE_ID_2, row),
                         BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_2, row)),
-                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_2, row)));
+                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_2, row, dateFormat, locale)));
             } else {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(FixedDepositConstants.CHARGE_ID_2, row), null,
-                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_2, row)));
+                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_2, row, dateFormat, locale)));
             }
         }
         String status = ImportHandlerUtils.readAsString(FixedDepositConstants.STATUS_COL, row);

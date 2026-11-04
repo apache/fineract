@@ -94,7 +94,7 @@ public class GroupImportHandler implements ImportHandler {
     }
 
     private CalendarData readMeeting(Row row, String locale, String dateFormat) {
-        LocalDate meetingStartDate = ImportHandlerUtils.readAsDate(GroupConstants.MEETING_START_DATE_COL, row);
+        LocalDate meetingStartDate = ImportHandlerUtils.readAsDate(GroupConstants.MEETING_START_DATE_COL, row, dateFormat, locale);
         Boolean isRepeating = ImportHandlerUtils.readAsBoolean(GroupConstants.IS_REPEATING_COL, row);
         String frequency = ImportHandlerUtils.readAsString(GroupConstants.FREQUENCY_COL, row);
         EnumOptionData frequencyEnum = new EnumOptionData(null, null, ImportHandlerUtils.getFrequencyId(frequency));
@@ -128,10 +128,10 @@ public class GroupImportHandler implements ImportHandler {
         }
         String externalId = ImportHandlerUtils.readAsString(GroupConstants.EXTERNAL_ID_COL, row);
         Boolean active = ImportHandlerUtils.readAsBoolean(GroupConstants.ACTIVE_COL, row);
-        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(GroupConstants.SUBMITTED_ON_DATE_COL, row);
+        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(GroupConstants.SUBMITTED_ON_DATE_COL, row, dateFormat, locale);
         LocalDate activationDate = null;
         if (active) {
-            activationDate = ImportHandlerUtils.readAsDate(GroupConstants.ACTIVATION_DATE_COL, row);
+            activationDate = ImportHandlerUtils.readAsDate(GroupConstants.ACTIVATION_DATE_COL, row, dateFormat, locale);
         } else {
             activationDate = submittedOnDate;
         }

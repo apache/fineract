@@ -96,7 +96,7 @@ public class SavingsImportHandler implements ImportHandler {
     }
 
     private SavingsActivation readSavingsActivation(Row row, String locale, String dateFormat) {
-        LocalDate activationDate = ImportHandlerUtils.readAsDate(SavingsConstants.ACTIVATION_DATE_COL, row);
+        LocalDate activationDate = ImportHandlerUtils.readAsDate(SavingsConstants.ACTIVATION_DATE_COL, row, dateFormat, locale);
         if (activationDate != null) {
             return SavingsActivation.importInstance(activationDate, row.getRowNum(), locale, dateFormat);
         } else {
@@ -105,7 +105,7 @@ public class SavingsImportHandler implements ImportHandler {
     }
 
     private SavingsApproval readSavingsApproval(Row row, String locale, String dateFormat) {
-        LocalDate approvalDate = ImportHandlerUtils.readAsDate(SavingsConstants.APPROVED_DATE_COL, row);
+        LocalDate approvalDate = ImportHandlerUtils.readAsDate(SavingsConstants.APPROVED_DATE_COL, row, dateFormat, locale);
         if (approvalDate != null) {
             return SavingsApproval.importInstance(approvalDate, row.getRowNum(), locale, dateFormat);
         } else {
@@ -120,7 +120,7 @@ public class SavingsImportHandler implements ImportHandler {
         String fieldOfficerName = ImportHandlerUtils.readAsString(SavingsConstants.FIELD_OFFICER_NAME_COL, row);
         Long fieldOfficerId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME),
                 fieldOfficerName);
-        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(SavingsConstants.SUBMITTED_ON_DATE_COL, row);
+        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(SavingsConstants.SUBMITTED_ON_DATE_COL, row, dateFormat, locale);
 
         BigDecimal nominalAnnualInterestRate = null;
         if (ImportHandlerUtils.readAsDouble(SavingsConstants.NOMINAL_ANNUAL_INTEREST_RATE_COL, row) != null) {
@@ -226,10 +226,10 @@ public class SavingsImportHandler implements ImportHandler {
             if (ImportHandlerUtils.readAsDouble(SavingsConstants.CHARGE_AMOUNT_1, row) != null) {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(SavingsConstants.CHARGE_ID_1, row),
                         BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(SavingsConstants.CHARGE_AMOUNT_1, row)),
-                        ImportHandlerUtils.readAsDate(SavingsConstants.CHARGE_DUE_DATE_1, row)));
+                        ImportHandlerUtils.readAsDate(SavingsConstants.CHARGE_DUE_DATE_1, row, dateFormat, locale)));
             } else {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(SavingsConstants.CHARGE_ID_1, row), null,
-                        ImportHandlerUtils.readAsDate(SavingsConstants.CHARGE_DUE_DATE_1, row)));
+                        ImportHandlerUtils.readAsDate(SavingsConstants.CHARGE_DUE_DATE_1, row, dateFormat, locale)));
             }
         }
 
@@ -237,10 +237,10 @@ public class SavingsImportHandler implements ImportHandler {
             if (ImportHandlerUtils.readAsDouble(SavingsConstants.CHARGE_AMOUNT_2, row) != null) {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(SavingsConstants.CHARGE_ID_2, row),
                         BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(SavingsConstants.CHARGE_AMOUNT_2, row)),
-                        ImportHandlerUtils.readAsDate(SavingsConstants.CHARGE_DUE_DATE_2, row)));
+                        ImportHandlerUtils.readAsDate(SavingsConstants.CHARGE_DUE_DATE_2, row, dateFormat, locale)));
             } else {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(SavingsConstants.CHARGE_ID_2, row), null,
-                        ImportHandlerUtils.readAsDate(SavingsConstants.CHARGE_DUE_DATE_2, row)));
+                        ImportHandlerUtils.readAsDate(SavingsConstants.CHARGE_DUE_DATE_2, row, dateFormat, locale)));
             }
         }
         String status = ImportHandlerUtils.readAsString(SavingsConstants.STATUS_COL, row);

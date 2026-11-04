@@ -94,7 +94,7 @@ public class CenterImportHandler implements ImportHandler {
     }
 
     private CalendarData readMeeting(final Row row, final String locale, final String dateFormat) {
-        LocalDate meetingStartDate = ImportHandlerUtils.readAsDate(CenterConstants.MEETING_START_DATE_COL, row);
+        LocalDate meetingStartDate = ImportHandlerUtils.readAsDate(CenterConstants.MEETING_START_DATE_COL, row, dateFormat, locale);
         Boolean isRepeating = ImportHandlerUtils.readAsBoolean(CenterConstants.IS_REPEATING_COL, row);
         String frequency = ImportHandlerUtils.readAsString(CenterConstants.FREQUENCY_COL, row);
         EnumOptionData frequencyEnum = new EnumOptionData(null, null, ImportHandlerUtils.getFrequencyId(frequency));
@@ -124,10 +124,10 @@ public class CenterImportHandler implements ImportHandler {
 
         String externalId = ImportHandlerUtils.readAsString(CenterConstants.EXTERNAL_ID_COL, row);
         Boolean active = ImportHandlerUtils.readAsBoolean(CenterConstants.ACTIVE_COL, row);
-        LocalDate submittedOn = ImportHandlerUtils.readAsDate(CenterConstants.SUBMITTED_ON_DATE_COL, row);
+        LocalDate submittedOn = ImportHandlerUtils.readAsDate(CenterConstants.SUBMITTED_ON_DATE_COL, row, dateFormat, locale);
         LocalDate activationDate;
         if (Boolean.TRUE.equals(active)) {
-            activationDate = ImportHandlerUtils.readAsDate(CenterConstants.ACTIVATION_DATE_COL, row);
+            activationDate = ImportHandlerUtils.readAsDate(CenterConstants.ACTIVATION_DATE_COL, row, dateFormat, locale);
         } else {
             activationDate = submittedOn;
         }

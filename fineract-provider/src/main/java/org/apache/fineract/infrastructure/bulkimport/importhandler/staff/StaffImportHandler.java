@@ -84,7 +84,7 @@ public class StaffImportHandler implements ImportHandler {
         if (ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL, row) != null) {
             mobileNo = ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL, row).toString();
         }
-        LocalDate joinedOnDate = ImportHandlerUtils.readAsDate(StaffConstants.JOINED_ON_COL, row);
+        LocalDate joinedOnDate = ImportHandlerUtils.readAsDate(StaffConstants.JOINED_ON_COL, row, dateFormat, locale);
         String externalId = ImportHandlerUtils.readAsString(StaffConstants.EXTERNAL_ID_COL, row);
         Boolean isActive = ImportHandlerUtils.readAsBoolean(StaffConstants.IS_ACTIVE_COL, row);
 

@@ -95,8 +95,8 @@ public class ClientPersonImportHandler implements ImportHandler {
             staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
         }
         ExternalId externalId = externalIdFactory.create(ImportHandlerUtils.readAsString(ClientPersonConstants.EXTERNAL_ID_COL, row));
-        LocalDate submittedOn = ImportHandlerUtils.readAsDate(ClientPersonConstants.SUBMITTED_ON_COL, row);
-        LocalDate activationDate = ImportHandlerUtils.readAsDate(ClientPersonConstants.ACTIVATION_DATE_COL, row);
+        LocalDate submittedOn = ImportHandlerUtils.readAsDate(ClientPersonConstants.SUBMITTED_ON_COL, row, dateFormat, locale);
+        LocalDate activationDate = ImportHandlerUtils.readAsDate(ClientPersonConstants.ACTIVATION_DATE_COL, row, dateFormat, locale);
         Boolean active = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.ACTIVE_COL, row);
         if (!active) {
             activationDate = submittedOn;
@@ -105,7 +105,7 @@ public class ClientPersonImportHandler implements ImportHandler {
         if (ImportHandlerUtils.readAsLong(ClientPersonConstants.MOBILE_NO_COL, row) != null) {
             mobileNo = Objects.requireNonNull(ImportHandlerUtils.readAsLong(ClientPersonConstants.MOBILE_NO_COL, row)).toString();
         }
-        LocalDate dob = ImportHandlerUtils.readAsDate(ClientPersonConstants.DOB_COL, row);
+        LocalDate dob = ImportHandlerUtils.readAsDate(ClientPersonConstants.DOB_COL, row, dateFormat, locale);
 
         String clientType = ImportHandlerUtils.readAsString(ClientPersonConstants.CLIENT_TYPE_COL, row);
         Long clientTypeId = null;

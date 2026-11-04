@@ -89,7 +89,7 @@ public class SharedAccountImportHandler implements ImportHandler {
         Long productId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME),
                 productName);
 
-        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(SharedAccountsConstants.SUBMITTED_ON_COL, row);
+        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(SharedAccountsConstants.SUBMITTED_ON_COL, row, dateFormat, locale);
 
         String externalId = ImportHandlerUtils.readAsString(SharedAccountsConstants.EXTERNAL_ID_COL, row);
 
@@ -119,7 +119,7 @@ public class SharedAccountImportHandler implements ImportHandler {
                 lockPeriodFrequencyType = 3;
             }
         }
-        LocalDate applicationDate = ImportHandlerUtils.readAsDate(SharedAccountsConstants.APPLICATION_DATE_COL, row);
+        LocalDate applicationDate = ImportHandlerUtils.readAsDate(SharedAccountsConstants.APPLICATION_DATE_COL, row, dateFormat, locale);
         Boolean allowDividendCalc = ImportHandlerUtils
                 .readAsBoolean(SharedAccountsConstants.ALLOW_DIVIDEND_CALCULATION_FOR_INACTIVE_CLIENTS_COL, row);
 

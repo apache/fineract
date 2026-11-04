@@ -128,7 +128,7 @@ public class JournalEntriesImportHandler implements ImportHandler {
 
     private JournalEntryData readAddJournalEntries(final Workbook workbook, final Row row, LocalDate transactionDate, final String locale,
             final String dateFormat) {
-        LocalDate transactionDateCheck = ImportHandlerUtils.readAsDate(JournalEntryConstants.TRANSACION_ON_DATE_COL, row);
+        LocalDate transactionDateCheck = ImportHandlerUtils.readAsDate(JournalEntryConstants.TRANSACION_ON_DATE_COL, row, dateFormat, locale);
         if (transactionDateCheck != null) {
             transactionDate = transactionDateCheck;
         }

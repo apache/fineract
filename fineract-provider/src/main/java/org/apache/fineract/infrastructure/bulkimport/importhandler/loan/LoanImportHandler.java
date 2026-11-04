@@ -106,7 +106,7 @@ public class LoanImportHandler implements ImportHandler {
         if (ImportHandlerUtils.readAsDouble(LoanConstants.TOTAL_AMOUNT_REPAID_COL, row) != null) {
             repaymentAmount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.TOTAL_AMOUNT_REPAID_COL, row));
         }
-        LocalDate lastRepaymentDate = ImportHandlerUtils.readAsDate(LoanConstants.LAST_REPAYMENT_DATE_COL, row);
+        LocalDate lastRepaymentDate = ImportHandlerUtils.readAsDate(LoanConstants.LAST_REPAYMENT_DATE_COL, row, dateFormat, locale);
         String repaymentType = ImportHandlerUtils.readAsString(LoanConstants.REPAYMENT_TYPE_COL, row);
         Long repaymentTypeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME),
                 repaymentType);
@@ -119,7 +119,7 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private DisbursementData readDisbursalData(final Row row, final String locale, final String dateFormat) {
-        LocalDate disbursedDate = ImportHandlerUtils.readAsDate(LoanConstants.DISBURSED_DATE_COL, row);
+        LocalDate disbursedDate = ImportHandlerUtils.readAsDate(LoanConstants.DISBURSED_DATE_COL, row, dateFormat, locale);
         String linkAccountId = null;
         if (ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row) != null) {
             linkAccountId = Objects.requireNonNull(ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row)).toString();
@@ -131,7 +131,7 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private LoanApprovalData readLoanApproval(final Row row, final String locale, final String dateFormat) {
-        LocalDate approvedDate = ImportHandlerUtils.readAsDate(LoanConstants.APPROVED_DATE_COL, row);
+        LocalDate approvedDate = ImportHandlerUtils.readAsDate(LoanConstants.APPROVED_DATE_COL, row, dateFormat, locale);
         if (approvedDate != null) {
             return LoanApprovalData.importInstance(approvedDate, row.getRowNum(), locale, dateFormat);
         }
@@ -148,7 +148,7 @@ public class LoanImportHandler implements ImportHandler {
         String loanOfficerName = ImportHandlerUtils.readAsString(LoanConstants.LOAN_OFFICER_NAME_COL, row);
         Long loanOfficerId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME),
                 loanOfficerName);
-        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(LoanConstants.SUBMITTED_ON_DATE_COL, row);
+        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(LoanConstants.SUBMITTED_ON_DATE_COL, row, dateFormat, locale);
         String fundName = ImportHandlerUtils.readAsString(LoanConstants.FUND_NAME_COL, row);
         Long fundId;
         if (fundName == null) {
@@ -248,8 +248,8 @@ public class LoanImportHandler implements ImportHandler {
         Integer graceOnPrincipalPayment = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_PRINCIPAL_PAYMENT_COL, row);
         Integer graceOnInterestPayment = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_INTEREST_PAYMENT_COL, row);
         Integer graceOnInterestCharged = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_INTEREST_CHARGED_COL, row);
-        LocalDate interestChargedFromDate = ImportHandlerUtils.readAsDate(LoanConstants.INTEREST_CHARGED_FROM_COL, row);
-        LocalDate firstRepaymentOnDate = ImportHandlerUtils.readAsDate(LoanConstants.FIRST_REPAYMENT_COL, row);
+        LocalDate interestChargedFromDate = ImportHandlerUtils.readAsDate(LoanConstants.INTEREST_CHARGED_FROM_COL, row, dateFormat, locale);
+        LocalDate firstRepaymentOnDate = ImportHandlerUtils.readAsDate(LoanConstants.FIRST_REPAYMENT_COL, row, dateFormat, locale);
         String loanType = null;
         EnumOptionData loanTypeEnumOption = null;
         if (ImportHandlerUtils.readAsString(LoanConstants.LOAN_TYPE_COL, row) != null) {
@@ -297,10 +297,10 @@ public class LoanImportHandler implements ImportHandler {
                     chargeAmount = LoanCharge.percentageOf(principal, amountOrPercentage);
                 }
 
-                charges.add(new LoanChargeData(chargeOneId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_1, row),
+                charges.add(new LoanChargeData(chargeOneId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_1, row, dateFormat, locale),
                         chargeAmount, chargeOneAmountTypeEnum, chargeOneTimeTypeEnum));
             } else {
-                charges.add(new LoanChargeData(chargeOneId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_1, row), null));
+                charges.add(new LoanChargeData(chargeOneId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_1, row, dateFormat, locale), null));
             }
         }
 
@@ -319,10 +319,10 @@ public class LoanImportHandler implements ImportHandler {
                     chargeAmount = LoanCharge.percentageOf(principal, amountOrPercentage);
                 }
 
-                charges.add(new LoanChargeData(chargeTwoId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row),
+                charges.add(new LoanChargeData(chargeTwoId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row, dateFormat, locale),
                         chargeAmount, chargeTwoAmountTypeEnum, chargeTwoTimeTypeEnum));
             } else {
-                charges.add(new LoanChargeData(chargeTwoId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row), null));
+                charges.add(new LoanChargeData(chargeTwoId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row, dateFormat, locale), null));
             }
         }
 
