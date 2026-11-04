@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBApiFi
 import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBFilterHelper;
 import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanModelCheckerFilter;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
+import org.apache.fineract.infrastructure.security.filter.DatabaseUnavailableAwareAuthenticationEntryPoint;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.service.AuthTenantDetailsService;
@@ -406,7 +407,7 @@ public class SecurityConfig {
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/**")).access(allOfRequestManagers(authorizationManagers));
-        }).httpBasic(hb -> hb.authenticationEntryPoint(basicAuthenticationEntryPoint())).csrf(AbstractHttpConfigurer::disable)
+        }).httpBasic(hb -> hb.authenticationEntryPoint(databaseUnavailableAwareEntryPoint())).csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(tenantAwareBasicAuthenticationFilter(), SecurityContextHolderFilter.class)
                 .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class)
@@ -489,7 +490,7 @@ public class SecurityConfig {
 
     public TenantAwareBasicAuthenticationFilter tenantAwareBasicAuthenticationFilter() throws Exception {
         TenantAwareBasicAuthenticationFilter filter = new TenantAwareBasicAuthenticationFilter(authenticationManagerBean(),
-                basicAuthenticationEntryPoint(), toApiJsonSerializer, configurationDomainService, cacheWritePlatformService,
+                databaseUnavailableAwareEntryPoint(), toApiJsonSerializer, configurationDomainService, cacheWritePlatformService,
                 userNotificationService, basicAuthTenantDetailsService, businessDateReadPlatformService);
 
         filter.setRequestMatcher(API_MATCHER.matcher("/api/**"));
@@ -501,6 +502,10 @@ public class SecurityConfig {
         BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
         basicAuthenticationEntryPoint.setRealmName("Fineract Platform API");
         return basicAuthenticationEntryPoint;
+    }
+
+    private DatabaseUnavailableAwareAuthenticationEntryPoint databaseUnavailableAwareEntryPoint() {
+        return new DatabaseUnavailableAwareAuthenticationEntryPoint(basicAuthenticationEntryPoint());
     }
 
     @Bean(name = "customAuthenticationProvider")

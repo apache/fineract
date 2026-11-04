@@ -51,6 +51,8 @@ dependencies {
 
             'org.springdoc:springdoc-openapi-starter-webmvc-ui',
             'org.mapstruct:mapstruct',
+
+            'io.github.resilience4j:resilience4j-spring-boot4',
             )
 
     // JPA for security entities
