@@ -31,7 +31,9 @@ import java.time.OffsetTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -48,6 +50,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
+import org.apache.fineract.portfolio.tax.data.TaxDetailsData;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Isolation;
@@ -132,7 +135,10 @@ public class SavingsSchedularInterestPoster {
                     final String key = savingsAccountTransactionData.getRefNo();
                     final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
                     savingsAccountTransactionData.setId(dataFromFetch.getId());
-                    if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
+                    if (savingsAccountTransactionData.isWithHoldTaxAndNotReversed()) {
+                        addWithholdTaxJournalEntries(paramsForGLInsertion, savingsAccountData, savingsAccountTransactionData, currencyCode,
+                                userId);
+                    } else if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
                             && savingsAccountData.getGlAccountIdForInterestOnSavings() != 0) {
                         OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
                         if (savingsAccountTransactionData.getTransactionType().isInterestPosting()) {
@@ -157,7 +163,9 @@ public class SavingsSchedularInterestPoster {
                                     + savingsAccountData.getId());
                         }
                     }
-
+                } else if (savingsAccountTransactionData.getId() != null && savingsAccountTransactionData.isWithHoldTaxAndReversed()) {
+                    addJournalEntryReversalsForWithholdTax(paramsForGLInsertion, savingsAccountData, savingsAccountTransactionData,
+                            currencyCode, userId);
                 }
             }
         }
@@ -186,6 +194,70 @@ public class SavingsSchedularInterestPoster {
                 JournalEntryType.CREDIT, amount, currencyCode, userId, auditDatetime));
         paramsForGLInsertion.add(journalEntryParams(savingsAccountData, savingsAccountTransactionData, debitAccountId,
                 JournalEntryType.DEBIT, amount, currencyCode, userId, auditDatetime));
+    }
+
+    // Mirrors the accounting processors for savings: savings control is debited with the total withheld
+    // tax, and the credit account of each tax component is credited with that component's share. A tax
+    // component without a credit account falls back to the product's savings reference account.
+    private void addWithholdTaxJournalEntries(final List<Object[]> paramsForGLInsertion, final SavingsAccountData savingsAccountData,
+            final SavingsAccountTransactionData savingsAccountTransactionData, final String currencyCode, final Long userId) {
+        if (savingsAccountData.getGlAccountIdForSavingsControl() == null || savingsAccountData.getGlAccountIdForSavingsControl() == 0) {
+            return;
+        }
+        final OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
+        paramsForGLInsertion.add(
+                journalEntryParams(savingsAccountData, savingsAccountTransactionData, savingsAccountData.getGlAccountIdForSavingsControl(),
+                        JournalEntryType.DEBIT, savingsAccountTransactionData.getAmount(), currencyCode, userId, auditDatetime));
+        if (savingsAccountTransactionData.getTaxDetails() != null) {
+            for (final TaxDetailsData taxDetailsData : savingsAccountTransactionData.getTaxDetails()) {
+                Long creditAccountId = null;
+                if (taxDetailsData.getTaxComponent() != null && taxDetailsData.getTaxComponent().getCreditAccount() != null) {
+                    creditAccountId = taxDetailsData.getTaxComponent().getCreditAccount().getId();
+                }
+                if (creditAccountId == null) {
+                    creditAccountId = savingsAccountData.getGlAccountIdForSavingsReference();
+                }
+                if (creditAccountId != null && creditAccountId != 0) {
+                    paramsForGLInsertion.add(journalEntryParams(savingsAccountData, savingsAccountTransactionData, creditAccountId,
+                            JournalEntryType.CREDIT, taxDetailsData.getAmount(), currencyCode, userId, auditDatetime));
+                }
+            }
+        }
+    }
+
+    // A withhold tax transaction reversed in the update batch above keeps the journal entries it booked
+    // when it was posted, so its tax would stay credited in the GL on top of the corrected transaction.
+    // The accounting processors reverse such a transaction by booking entries with the debit and credit
+    // sides swapped under the same transaction id, so do the same here: read back the entries booked for
+    // the transaction and book the mirror of what is still outstanding per GL account. A transaction
+    // whose entries were already reversed nets to zero per account and books nothing.
+    private void addJournalEntryReversalsForWithholdTax(final List<Object[]> paramsForGLInsertion,
+            final SavingsAccountData savingsAccountData, final SavingsAccountTransactionData savingsAccountTransactionData,
+            final String currencyCode, final Long userId) {
+        final List<Map<String, Object>> bookedEntries = this.jdbcTemplate.queryForList(queryForJournalEntriesOfTransaction(),
+                SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId());
+        final Map<Long, BigDecimal> outstandingByAccountId = new LinkedHashMap<>();
+        for (final Map<String, Object> bookedEntry : bookedEntries) {
+            final Long accountId = ((Number) bookedEntry.get("account_id")).longValue();
+            final Integer entryType = ((Number) bookedEntry.get("type_enum")).intValue();
+            final BigDecimal amount = (BigDecimal) bookedEntry.get("amount");
+            final BigDecimal signedAmount = JournalEntryType.fromInt(entryType) == JournalEntryType.DEBIT ? amount : amount.negate();
+            outstandingByAccountId.merge(accountId, signedAmount, BigDecimal::add);
+        }
+        final OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
+        for (final Map.Entry<Long, BigDecimal> outstanding : outstandingByAccountId.entrySet()) {
+            if (outstanding.getValue().signum() > 0) {
+                paramsForGLInsertion.add(journalEntryParams(savingsAccountData, savingsAccountTransactionData, outstanding.getKey(),
+                        JournalEntryType.CREDIT, outstanding.getValue(), currencyCode, userId, auditDatetime));
+            } else if (outstanding.getValue().signum() < 0) {
+                paramsForGLInsertion.add(journalEntryParams(savingsAccountData, savingsAccountTransactionData, outstanding.getKey(),
+                        JournalEntryType.DEBIT, outstanding.getValue().negate(), currencyCode, userId, auditDatetime));
+            }
+        }
+    }
+
+    private String queryForJournalEntriesOfTransaction() {
+        return "SELECT account_id, type_enum, amount FROM acc_gl_journal_entry WHERE transaction_id = ?";
     }
 
     private Object[] journalEntryParams(final SavingsAccountData savingsAccountData,
@@ -313,8 +385,43 @@ public class SavingsSchedularInterestPoster {
                 final String key = savingsAccountTransactionData.getRefNo();
                 savingsAccountTransactionMap.put(key, savingsAccountTransactionData);
             }
+            // tax details go first: batchUpdateJournalEntries assigns the fetched ids to the new
+            // transactions, and the tax details insert below still needs to recognise them as new (id null)
+            batchInsertTaxDetails(successfulAccounts, savingsAccountTransactionMap);
             batchUpdateJournalEntries(successfulAccounts, savingsAccountTransactionMap);
         }
+    }
+
+    private void batchInsertTaxDetails(final List<SavingsAccountData> savingsAccountDataList,
+            final HashMap<String, SavingsAccountTransactionData> savingsAccountTransactionDataHashMap) throws DataAccessException {
+        final String queryForTaxDetailsInsertion = batchQueryForTaxDetailsInsertion();
+        final List<Object[]> paramsForTaxDetailsInsertion = new ArrayList<>();
+        for (final SavingsAccountData savingsAccountData : savingsAccountDataList) {
+            final List<SavingsAccountTransactionData> savingsAccountTransactionDataList = savingsAccountData
+                    .getSavingsAccountTransactionData();
+            for (final SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
+                if (savingsAccountTransactionData.getId() == null && savingsAccountTransactionData.isWithHoldTaxAndNotReversed()
+                        && savingsAccountTransactionData.getTaxDetails() != null
+                        && !savingsAccountTransactionData.getTaxDetails().isEmpty()) {
+                    final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap
+                            .get(savingsAccountTransactionData.getRefNo());
+                    if (dataFromFetch != null) {
+                        for (final TaxDetailsData taxDetailsData : savingsAccountTransactionData.getTaxDetails()) {
+                            paramsForTaxDetailsInsertion.add(new Object[] { dataFromFetch.getId(), taxDetailsData.getTaxComponent().getId(),
+                                    taxDetailsData.getAmount() });
+                        }
+                    }
+                }
+            }
+        }
+        if (!paramsForTaxDetailsInsertion.isEmpty()) {
+            this.jdbcTemplate.batchUpdate(queryForTaxDetailsInsertion, paramsForTaxDetailsInsertion);
+        }
+    }
+
+    private String batchQueryForTaxDetailsInsertion() {
+        return "INSERT INTO m_savings_account_transaction_tax_details (savings_transaction_id, tax_component_id, amount) "
+                + "VALUES (?, ?, ?)";
     }
 
     private String batchQueryForTransactionInsertion() {
