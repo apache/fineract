@@ -93,6 +93,77 @@ public class LoanNpaInterestIncomeOnReceiptTest extends FeignLoanTestBase {
     }
 
     /**
+     * Once the repayment brings the loan up to date, the NPA job clears the flag and normal accrual resumes. A later
+     * backdated repayment reprocesses the accruals: the income recognised on receipt must stay with the installments it
+     * was paid for, so nothing is reversed and nothing is accrued twice.
+     */
+    @Test
+    public void incomeRecognisedOnReceiptStaysWithItsInstallmentsAfterTheLoanLeavesNpa() {
+        final Long loanId = createOverdueLoanThatBecomesNpa();
+        runAt(NPA_REPAYMENT_DATE, () -> repayEverythingDueBy(loanId, LocalDate.of(2024, 1, 10)));
+
+        for (LocalDate date = LocalDate.of(2024, 1, 11); !date.isAfter(LocalDate.of(2024, 1, 13)); date = date.plusDays(1)) {
+            runAt(date.format(dateTimeFormatter), () -> {
+                schedulerHelper.executeAndAwaitJob("Update Non Performing Assets");
+                executeInlineCOB(loanId);
+            });
+        }
+        assertTrue(!Boolean.TRUE.equals(getLoanDetails(loanId).getIsNPA()), "The loan is no longer NPA once it is up to date");
+        assertInterestReceivableIsAccruedNotPaid(loanId, "after accrual resumed");
+
+        runAt("13 January 2024", () -> {
+            addRepayment(loanId, repayment(10.0, "11 January 2024"));
+            assertInterestReceivableIsAccruedNotPaid(loanId, "after a backdated repayment reprocessed the accruals");
+
+            final double totalOutstanding = Utils.getDoubleValue(getLoanDetails(loanId).getSummary().getTotalOutstanding());
+            addRepayment(loanId, repayment(totalOutstanding, "13 January 2024"));
+            verifyLoanStatus(getLoanDetails(loanId), GetLoansLoanIdStatus::getClosedObligationsMet);
+            assertBalancesMatchInterestPaid(loanId, "after the closing repayment");
+        });
+    }
+
+    /**
+     * A fee paid while the loan is NPA was never accrued; it is recognised on receipt like interest, so Fee Receivable
+     * does not go negative.
+     */
+    @Test
+    public void feePaidWhileNpaIsRecognisedAsIncome() {
+        final Long loanId = createOverdueLoanThatBecomesNpa();
+        final Long feeId = createCharge(10.0, "EUR").getResourceId();
+
+        runAt(NPA_REPAYMENT_DATE, () -> {
+            addLoanCharge(loanId, feeId, NPA_REPAYMENT_DATE, 10.0);
+            repayEverythingDueBy(loanId, LocalDate.of(2024, 1, 10));
+
+            final double feePaid = Utils.getDoubleValue(getLoanDetails(loanId).getSummary().getFeeChargesPaid());
+            assertEquals(10.0, feePaid, DELTA, "The fee was paid");
+            assertEquals(0.0, balance(loanId, getAssetAccountId("feeReceivable"), true), DELTA, "Fee Receivable after the NPA repayment");
+            assertEquals(feePaid, balance(loanId, getIncomeAccountId("feeIncome"), false), DELTA, "Fee Income after the NPA repayment");
+            assertBalancesMatchInterestPaid(loanId, "after the NPA repayment");
+        });
+    }
+
+    /**
+     * Income recognised on a backdated repayment is dated with the repayment, so the receivable never goes negative in
+     * between.
+     */
+    @Test
+    public void incomeRecognisedOnABackdatedRepaymentIsDatedWithIt() {
+        final Long loanId = createOverdueLoanThatBecomesNpa();
+
+        runAt("12 January 2024", () -> {
+            repayEverythingDueBy(loanId, LocalDate.of(2024, 1, 10));
+
+            final LocalDate repaymentDate = LocalDate.of(2024, 1, 10);
+            final double interestPaid = Utils.getDoubleValue(getLoanDetails(loanId).getSummary().getInterestPaid());
+            assertEquals(0.0, interimJournalBalance(loanId, getAssetAccountId("interestReceivable"), repaymentDate, true), DELTA,
+                    "Interest Receivable on the repayment date");
+            assertEquals(interestPaid, interimJournalBalance(loanId, getIncomeAccountId("interestIncome"), repaymentDate, false), DELTA,
+                    "Interest Income on the repayment date");
+        });
+    }
+
+    /**
      * Disburses 1000 over 12 daily installments on a cumulative, periodic-accrual product that turns NPA after 5
      * overdue days, then runs the close of business and the NPA job daily without any repayment until the loan is NPA.
      */
@@ -141,6 +212,20 @@ public class LoanNpaInterestIncomeOnReceiptTest extends FeignLoanTestBase {
         assertTrue(interestPaid > 0, "Interest was paid " + when);
         assertEquals(0.0, interestReceivable(loanId), DELTA, "Interest Receivable " + when);
         assertEquals(interestPaid, interestIncome(loanId), DELTA, "Interest Income " + when);
+    }
+
+    /**
+     * Interest Receivable holds exactly the interest accrued and not yet paid: Interest Income less the interest paid.
+     */
+    private void assertInterestReceivableIsAccruedNotPaid(Long loanId, String when) {
+        final double interestPaid = Utils.getDoubleValue(getLoanDetails(loanId).getSummary().getInterestPaid());
+        final double receivable = interestReceivable(loanId);
+        assertTrue(receivable >= -DELTA, "Interest Receivable is not negative " + when + ": " + receivable);
+        assertEquals(interestIncome(loanId) - interestPaid, receivable, DELTA, "Interest Receivable " + when);
+    }
+
+    private double balance(Long loanId, Long glAccountId, boolean debitNormal) {
+        return interimJournalBalance(loanId, glAccountId, JOURNAL_CUTOFF, debitNormal);
     }
 
     private double interestReceivable(Long loanId) {
