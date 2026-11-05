@@ -231,6 +231,7 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
         return match;
     }
 
+    @SuppressWarnings("ReturnValueIgnored") // Reading the size loads the lazy collection
     public void loadLazyCollections() {
         this.children.size();
     }

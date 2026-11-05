@@ -111,7 +111,7 @@ public class StaffImportHandler implements ImportHandler {
 
                 final Supplier<StaffCreateResponse> response = dispatcher.dispatch(command);
 
-                response.get();
+                var unused = response.get();
 
                 successCount++;
                 Cell statusCell = staffSheet.getRow(staff.getRowIndex()).createCell(StaffConstants.STATUS_COL);
