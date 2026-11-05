@@ -3574,9 +3574,41 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 8  | 32   | 22 November 2026  |                 | 20.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 0.0    | 0.0        | 0.0    | 10.0        |
       | 9  | 30   | 22 December 2026  |                 | 10.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 0.0    | 0.0        | 0.0    | 10.0        |
       | 10 | 31   | 22 January 2027   |                 | 0.0             | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 0.0    | 0.0        | 0.0    | 10.0        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      | 650.0         | 20.31    | 0.0  | 0.0       | 670.31 | 640.31 | 200.0      | 420.31 | 30.0        |
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 620.0          | 50.0                  | 30.0                  | 20.31            | 20.31         | 0.0                  | 0.0          | 0.0       | 0.0              | 30.0              |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 April 2026    | Disbursement     | 600.0  | 0.0       | 0.0      | 0.0  | 0.0       | 600.0        | false    | false    |
+      | 20 April 2026    | Repayment        | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 400.0        | false    | false    |
+      | 14 October 2026  | Accrual          | 20.31  | 0.0       | 20.31    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 October 2026  | Repayment        | 420.31 | 400.0     | 20.31    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 October 2026  | Chargeback       | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 50.0         | false    | false    |
+      | 21 October 2026  | Repayment        | 20.0   | 20.0      | 0.0      | 0.0  | 0.0       | 30.0         | false    | false    |
+      | 22 October 2026  | Re-age           | 30.0   | 30.0      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
 #   --- A repayment after the re-age must reach the re-aged installments ---
     When Loan Pay-off is made on "22 October 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 650.0          | 50.0                  | 0.0                   | 20.31            | 20.31         | 0.0                  | 0.0          | 0.0       | 0.0              | 0.0               |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 April 2026    | Disbursement     | 600.0  | 0.0       | 0.0      | 0.0  | 0.0       | 600.0        | false    | false    |
+      | 20 April 2026    | Repayment        | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 400.0        | false    | false    |
+      | 14 October 2026  | Accrual          | 20.31  | 0.0       | 20.31    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 October 2026  | Repayment        | 420.31 | 400.0     | 20.31    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 October 2026  | Chargeback       | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 50.0         | false    | false    |
+      | 21 October 2026  | Repayment        | 20.0   | 20.0      | 0.0      | 0.0  | 0.0       | 30.0         | false    | false    |
+      | 22 October 2026  | Re-age           | 30.0   | 30.0      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 October 2026  | Repayment        | 30.0   | 30.0      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "22 October 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 30.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 30.0  |        |
 
   @AdvancedPaymentAllocation
   Scenario: Verify re-aging after maturity - UC7: credit balance refund on additional installment is partly covered by overpayment
@@ -3599,9 +3631,73 @@ Feature: LoanReAgingEqualAmortization - Part3
     When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
       | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+#   --- Only the outstanding 10 is re-aged, the refunded part and the fee stay paid on the additional installment ---
     Then Loan has 1169.69 principal paid and 579.69 principal adjustments amount
+    Then Loan Repayment schedule has 10 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 14 April 2026     |                 | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 30   | 14 May 2026       | 20 October 2026 | 500.73          | 99.27         | 3.66     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 2  | 31   | 14 June 2026      | 20 October 2026 | 401.13          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 3  | 30   | 14 July 2026      | 20 October 2026 | 301.53          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 4  | 31   | 14 August 2026    | 20 October 2026 | 200.0           | 101.53        | 9.99     | 0.0  | 0.0       | 111.52 | 111.52 | 0.0        | 111.52 | 0.0         |
+      | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
+      | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
+      | 7  | 6    | 20 October 2026   | 22 October 2026 | 0.0             | 569.69        | 0.0      | 10.0 | 0.0       | 579.69 | 579.69 | 0.0        | 10.0   | 0.0         |
+      | 8  | 33   | 22 November 2026  |                 | 6.67            | 3.33          | 0.0      | 0.0  | 0.0       | 3.33   | 0.0    | 0.0        | 0.0    | 3.33        |
+      | 9  | 30   | 22 December 2026  |                 | 3.34            | 3.33          | 0.0      | 0.0  | 0.0       | 3.33   | 0.0    | 0.0        | 0.0    | 3.33        |
+      | 10 | 31   | 22 January 2027   |                 | 0.0             | 3.34          | 0.0      | 0.0  | 0.0       | 3.34   | 0.0    | 0.0        | 0.0    | 3.34        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      | 1179.69       | 20.31    | 10.0 | 0.0       | 1210.0 | 1200.0 | 200.0      | 430.31 | 10.0        |
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 1169.69        | 579.69                | 10.0                  | 20.31            | 20.31         | 0.0                  | 10.0         | 10.0      | 0.0              | 10.0              |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type      | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 April 2026    | Disbursement          | 600.0  | 0.0       | 0.0      | 0.0  | 0.0       | 600.0        | false    | false    |
+      | 20 April 2026    | Repayment             | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 400.0        | false    | false    |
+      | 14 October 2026  | Accrual               | 20.31  | 0.0       | 20.31    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 October 2026  | Repayment             | 1000.0 | 400.0     | 20.31    | 10.0 | 0.0       | 0.0          | false    | true     |
+      | 20 October 2026  | Credit Balance Refund | 579.69 | 10.0      | 0.0      | 0.0  | 0.0       | 10.0         | false    | true     |
+      | 22 October 2026  | Re-age                | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 15 October 2026 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
     When Loan Pay-off is made on "22 October 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Repayment schedule has 10 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 14 April 2026     |                 | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 30   | 14 May 2026       | 20 October 2026 | 500.73          | 99.27         | 3.66     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 2  | 31   | 14 June 2026      | 20 October 2026 | 401.13          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 3  | 30   | 14 July 2026      | 20 October 2026 | 301.53          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 4  | 31   | 14 August 2026    | 20 October 2026 | 200.0           | 101.53        | 9.99     | 0.0  | 0.0       | 111.52 | 111.52 | 0.0        | 111.52 | 0.0         |
+      | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
+      | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
+      | 7  | 6    | 20 October 2026   | 22 October 2026 | 0.0             | 569.69        | 0.0      | 10.0 | 0.0       | 579.69 | 579.69 | 0.0        | 10.0   | 0.0         |
+      | 8  | 33   | 22 November 2026  | 22 October 2026 | 6.67            | 3.33          | 0.0      | 0.0  | 0.0       | 3.33   | 3.33   | 3.33       | 0.0    | 0.0         |
+      | 9  | 30   | 22 December 2026  | 22 October 2026 | 3.34            | 3.33          | 0.0      | 0.0  | 0.0       | 3.33   | 3.33   | 3.33       | 0.0    | 0.0         |
+      | 10 | 31   | 22 January 2027   | 22 October 2026 | 0.0             | 3.34          | 0.0      | 0.0  | 0.0       | 3.34   | 3.34   | 3.34       | 0.0    | 0.0         |
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 1179.69        | 579.69                | 0.0                   | 20.31            | 20.31         | 0.0                  | 10.0         | 10.0      | 0.0              | 0.0               |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type      | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 April 2026    | Disbursement          | 600.0  | 0.0       | 0.0      | 0.0  | 0.0       | 600.0        | false    | false    |
+      | 20 April 2026    | Repayment             | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 400.0        | false    | false    |
+      | 14 October 2026  | Accrual               | 20.31  | 0.0       | 20.31    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 October 2026  | Repayment             | 1000.0 | 400.0     | 20.31    | 10.0 | 0.0       | 0.0          | false    | true     |
+      | 20 October 2026  | Credit Balance Refund | 579.69 | 10.0      | 0.0      | 0.0  | 0.0       | 10.0         | false    | true     |
+      | 22 October 2026  | Re-age                | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 October 2026  | Repayment             | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 October 2026  | Accrual               | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          | false    | false    |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 15 October 2026 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "22 October 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 10.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 10.0  |        |
 
   @AdvancedPaymentAllocation
   Scenario: Verify re-aging after maturity - UC8: interest of chargeback is not accrued again with default interest handling
@@ -3633,5 +3729,62 @@ Feature: LoanReAgingEqualAmortization - Part3
     And Admin runs inline COB job for Loan
 #   --- 45.67 interest on the schedule, 5 of it is the chargeback interest that must not be accrued again ---
     Then Loan has 40.67 total Accruals
+    Then Loan Repayment schedule has 9 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 14 April 2026     |                 | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 30   | 14 May 2026       | 14 May 2026     | 502.07          | 97.93         | 5.0      | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 14 June 2026      | 22 October 2026 | 502.07          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0  | 0.0         |
+      | 3  | 30   | 14 July 2026      | 22 October 2026 | 502.07          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0  | 0.0         |
+      | 4  | 31   | 14 August 2026    | 22 October 2026 | 502.07          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0  | 0.0         |
+      | 5  | 31   | 14 September 2026 | 22 October 2026 | 502.07          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0  | 0.0         |
+      | 6  | 30   | 14 October 2026   | 22 October 2026 | 502.07          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0  | 0.0         |
+      | 7  | 39   | 22 November 2026  |                 | 384.16          | 162.91        | 31.57    | 0.0  | 0.0       | 194.48 | 0.0    | 0.0        | 0.0  | 194.48      |
+      | 8  | 30   | 22 December 2026  |                 | 194.23          | 189.93        | 4.55     | 0.0  | 0.0       | 194.48 | 0.0    | 0.0        | 0.0  | 194.48      |
+      | 9  | 31   | 22 January 2027   |                 | 0.0             | 194.23        | 4.55     | 0.0  | 0.0       | 198.78 | 0.0    | 0.0        | 0.0  | 198.78      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 645.0         | 45.67    | 0.0  | 0.0       | 690.67 | 102.93 | 0.0        | 0.0  | 587.74      |
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 97.93          | 45.0                  | 547.07                | 45.67            | 5.0           | 40.67                | 0.0          | 0.0       | 0.0              | 587.74            |
+    Then Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 April 2026    | Disbursement     | 600.0  | 0.0       | 0.0      | 0.0  | 0.0       | 600.0        | false    | false    |
+      | 14 May 2026      | Repayment        | 102.93 | 97.93     | 5.0      | 0.0  | 0.0       | 502.07       | false    | false    |
+      | 20 October 2026  | Chargeback       | 50.0   | 45.0      | 5.0      | 0.0  | 0.0       | 547.07       | false    | false    |
+      | 22 October 2026  | Re-age           | 572.97 | 547.07    | 25.9     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Loan Pay-off is made on "24 January 2027"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Repayment schedule has 9 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 14 April 2026     |                 | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 30   | 14 May 2026       | 14 May 2026     | 502.07          | 97.93         | 5.0      | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 0.0    | 0.0         |
+      | 2  | 31   | 14 June 2026      | 22 October 2026 | 502.07          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0    | 0.0         |
+      | 3  | 30   | 14 July 2026      | 22 October 2026 | 502.07          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0    | 0.0         |
+      | 4  | 31   | 14 August 2026    | 22 October 2026 | 502.07          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0    | 0.0         |
+      | 5  | 31   | 14 September 2026 | 22 October 2026 | 502.07          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0    | 0.0         |
+      | 6  | 30   | 14 October 2026   | 22 October 2026 | 502.07          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0    | 0.0         |
+      | 7  | 39   | 22 November 2026  | 24 January 2027 | 384.16          | 162.91        | 31.57    | 0.0  | 0.0       | 194.48 | 194.48 | 0.0        | 194.48 | 0.0         |
+      | 8  | 30   | 22 December 2026  | 24 January 2027 | 194.23          | 189.93        | 4.55     | 0.0  | 0.0       | 194.48 | 194.48 | 0.0        | 194.48 | 0.0         |
+      | 9  | 31   | 22 January 2027   | 24 January 2027 | 0.0             | 194.23        | 4.55     | 0.0  | 0.0       | 198.78 | 198.78 | 0.0        | 198.78 | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      | 645.0         | 45.67    | 0.0  | 0.0       | 690.67 | 690.67 | 0.0        | 587.74 | 0.0         |
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 645.0          | 45.0                  | 0.0                   | 45.67            | 45.67         | 0.0                  | 0.0          | 0.0       | 0.0              | 0.0               |
+    Then Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 April 2026    | Disbursement     | 600.0  | 0.0       | 0.0      | 0.0  | 0.0       | 600.0        | false    | false    |
+      | 14 May 2026      | Repayment        | 102.93 | 97.93     | 5.0      | 0.0  | 0.0       | 502.07       | false    | false    |
+      | 20 October 2026  | Chargeback       | 50.0   | 45.0      | 5.0      | 0.0  | 0.0       | 547.07       | false    | false    |
+      | 22 October 2026  | Re-age           | 572.97 | 547.07    | 25.9     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 January 2027  | Repayment        | 587.74 | 547.07    | 40.67    | 0.0  | 0.0       | 0.0          | false    | false    |
+#   --- The pay-off needs no accrual adjustment, the accrued interest was right all along ---
+    Then Loan has 40.67 total Accruals
+    Then Loan has no "Accrual Adjustment" transaction with transaction date later than "14 April 2026", including reversed transactions
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "24 January 2027" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          |        | 547.07 |
+      | ASSET     | 112603       | Interest/Fee Receivable   |        | 40.67  |
+      | LIABILITY | 145023       | Suspense/Clearing account | 587.74 |        |
