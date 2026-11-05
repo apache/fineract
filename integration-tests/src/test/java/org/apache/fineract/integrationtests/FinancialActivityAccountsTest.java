@@ -48,6 +48,7 @@ public class FinancialActivityAccountsTest extends FeignIntegrationTest {
     private FeignFinancialActivityAccountHelper financialActivityAccountHelper;
     private final Integer assetTransferFinancialActivityId = FinancialActivity.ASSET_TRANSFER.getValue();
     public static final Integer LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID = FinancialActivity.LIABILITY_TRANSFER.getValue();
+    public static final Integer CASH_AT_TELLER_FINANCIAL_ACTIVITY_ID = FinancialActivity.CASH_AT_TELLER.getValue();
 
     @BeforeAll
     public void setup() {
@@ -120,6 +121,25 @@ public class FinancialActivityAccountsTest extends FeignIntegrationTest {
 
         /*** Trying to fetch a Deleted Account Mapping should give me a 404 **/
         assertEquals(NOT_FOUND, financialActivityAccountHelper.getMappingExpectingError(deletedFinancialActivityAccountId).getStatus());
+    }
+
+    @Test
+    public void testTellerFinancialActivityAccountCanBeUpdated() {
+        Account tellerCashAccount = accountHelper.createAssetAccount();
+        Account replacementTellerCashAccount = accountHelper.createAssetAccount();
+        Assertions.assertNotNull(tellerCashAccount);
+        Assertions.assertNotNull(replacementTellerCashAccount);
+
+        Long financialActivityAccountId = financialActivityAccountHelper
+                .createMapping(CASH_AT_TELLER_FINANCIAL_ACTIVITY_ID, tellerCashAccount).getResourceId();
+        Assertions.assertNotNull(financialActivityAccountId);
+        assertFinancialActivityAccountCreation(financialActivityAccountId, CASH_AT_TELLER_FINANCIAL_ACTIVITY_ID, tellerCashAccount);
+
+        PutFinancialActivityAccountsChanges changes = financialActivityAccountHelper
+                .updateMapping(financialActivityAccountId, CASH_AT_TELLER_FINANCIAL_ACTIVITY_ID, replacementTellerCashAccount).getChanges();
+        Assertions.assertEquals(replacementTellerCashAccount.getAccountID().longValue(), changes.getGlAccountId());
+        assertFinancialActivityAccountCreation(financialActivityAccountId, CASH_AT_TELLER_FINANCIAL_ACTIVITY_ID,
+                replacementTellerCashAccount);
     }
 
     private void assertFinancialActivityAccountCreation(Long financialActivityAccountId, Integer financialActivityId, Account glAccount) {
