@@ -18,22 +18,36 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.DatatableEntry;
 import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
-import org.apache.fineract.client.models.PostGroupsRequest;
-import org.apache.fineract.client.models.PostGroupsResponse;
+import org.apache.fineract.client.models.GroupCreateRequest;
+import org.apache.fineract.client.models.GroupCreateResponse;
+import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.client.models.PostColumnHeaderData;
+import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCenterHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDatatableHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.BeforeAll;
@@ -49,12 +63,16 @@ public class GroupTest extends FeignLoanTestBase {
 
     private static FeignGroupHelper groupHelper;
     private static FeignStaffHelper staffHelper;
+    private static FeignCenterHelper centerHelper;
+    private static FeignDatatableHelper datatableHelper;
 
     @BeforeAll
     public static void setupGroupHelpers() {
         FineractFeignClient client = FineractFeignClientHelper.getFineractFeignClient();
         groupHelper = new FeignGroupHelper(client);
         staffHelper = new FeignStaffHelper(client);
+        centerHelper = new FeignCenterHelper(client);
+        datatableHelper = new FeignDatatableHelper(client);
     }
 
     @Test
@@ -81,8 +99,8 @@ public class GroupTest extends FeignLoanTestBase {
     public void testGroupCreationWithoutExternalIdGeneratesOne() {
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
         try {
-            final PostGroupsRequest request = groupRequest(null);
-            final PostGroupsResponse response = ok(() -> fineractClient().groups().createGroup(request));
+            final GroupCreateRequest request = groupRequest(null);
+            final GroupCreateResponse response = ok(() -> fineractClient().groups().createGroup(request));
 
             final GetGroupsGroupIdResponse group = ok(() -> fineractClient().groups().retrieveOneGroup(response.getGroupId(), false, null));
             assertThat(group.getExternalId()).isNotBlank();
@@ -95,15 +113,111 @@ public class GroupTest extends FeignLoanTestBase {
     @Test
     public void testGroupCreationWithExternalIdIsPersisted() {
         final String externalId = UUID.randomUUID().toString();
-        final PostGroupsRequest request = groupRequest(externalId);
-        final PostGroupsResponse response = ok(() -> fineractClient().groups().createGroup(request));
+        final GroupCreateRequest request = groupRequest(externalId);
+        final GroupCreateResponse response = ok(() -> fineractClient().groups().createGroup(request));
 
         final GetGroupsGroupIdResponse group = ok(() -> fineractClient().groups().retrieveOneGroup(response.getGroupId(), false, null));
         assertThat(group.getExternalId()).isEqualTo(externalId);
     }
 
-    private static PostGroupsRequest groupRequest(final String externalId) {
-        final PostGroupsRequest request = new PostGroupsRequest();
+    @Test
+    public void testActiveGroupWithoutActivationDateReturns400() {
+        final GroupCreateRequest request = new GroupCreateRequest();
+        request.officeId(1L);
+        request.name(Utils.uniqueRandomStringGenerator("Group_Name_", 5));
+        request.active(true);
+        request.dateFormat("dd MMMM yyyy");
+        request.locale("en");
+        // activationDate intentionally omitted: the @AssertTrue constraint on GroupCreateRequest must reject this.
+
+        final CallFailedRuntimeException error = fail(() -> fineractClient().groups().createGroup(request));
+        assertEquals(400, error.getStatus());
+    }
+
+    @Test
+    public void testGroupCreationUnderCenterUsesCenterOffice() {
+        final Long centerOfficeId = 1L;
+        final Long centerId = centerHelper.createActiveCenter().getResourceId();
+
+        final GroupCreateRequest request = new GroupCreateRequest();
+        request.centerId(centerId);
+        // officeId is mandatory on the DTO even though the service derives the real office from the center.
+        request.officeId(centerOfficeId);
+        request.name(Utils.uniqueRandomStringGenerator("Group_Name_", 5));
+        request.active(false);
+
+        final GroupCreateResponse response = ok(() -> fineractClient().groups().createGroup(request));
+
+        final GetGroupsGroupIdResponse group = ok(() -> fineractClient().groups().retrieveOneGroup(response.getGroupId(), false, null));
+        assertThat(group.getOfficeId()).isEqualTo(centerOfficeId);
+    }
+
+    @Test
+    public void testGroupCreationWithClientFromAnotherOfficeFails() {
+        // The office must open before the client's activation date below, or client creation itself 400s.
+        final Long otherOfficeId = new OfficeHelper().createOffice(LocalDate.of(2000, 1, 1)).getOfficeId();
+
+        final PostClientsRequest clientRequest = new PostClientsRequest()//
+                .officeId(otherOfficeId)//
+                .legalFormId(1L)//
+                .firstname(Utils.randomFirstNameGenerator())//
+                .lastname(Utils.randomLastNameGenerator())//
+                .active(true)//
+                .activationDate("04 March 2011")//
+                .dateFormat("dd MMMM yyyy")//
+                .locale("en");
+        final Long otherOfficeClientId = clientHelper.createClient(clientRequest).getClientId();
+
+        final GroupCreateRequest request = groupRequest(null);
+        request.clientMembers(Set.of(otherOfficeClientId));
+
+        final CallFailedRuntimeException error = fail(() -> fineractClient().groups().createGroup(request));
+        assertEquals(403, error.getStatus());
+    }
+
+    @Test
+    public void testGroupCreationSavesDatatableEntry() {
+        final String datatableName = Utils.uniqueRandomStringGenerator("dt_group_", 5).toLowerCase();
+        final PostDataTablesRequest createDatatableRequest = new PostDataTablesRequest().datatableName(datatableName)
+                .apptableName(EntityTables.GROUP.getName()).multiRow(false).addColumnsItem(new PostColumnHeaderData().name("aNote")
+                        .type("String").mandatory(false).length(50L).code("").unique(false).indexed(false));
+        datatableHelper.createDatatable(createDatatableRequest);
+
+        Long groupId = null;
+        try {
+            final GroupCreateRequest request = groupRequest(null);
+            request.datatables(List.of(new DatatableEntry().registeredTableName(datatableName).data(Map.of("aNote", "note"))));
+
+            final GroupCreateResponse response = ok(() -> fineractClient().groups().createGroup(request));
+            groupId = response.getGroupId();
+
+            assertThat(datatableHelper.getDatatableEntries(datatableName, groupId).path("data").size()).isEqualTo(1);
+        } finally {
+            if (groupId != null) {
+                datatableHelper.deleteDatatableEntries(datatableName, groupId);
+            }
+            datatableHelper.deleteDatatable(datatableName);
+        }
+    }
+
+    @Test
+    public void testGroupCreationWithNonDefaultLocaleAndDateFormat() {
+        final GroupCreateRequest request = new GroupCreateRequest();
+        request.officeId(1L);
+        request.name(Utils.uniqueRandomStringGenerator("Group_Name_", 5));
+        request.active(true);
+        request.activationDate("04 mars 2011");
+        request.dateFormat("dd MMMM yyyy");
+        request.locale("fr");
+
+        final GroupCreateResponse response = ok(() -> fineractClient().groups().createGroup(request));
+
+        final GetGroupsGroupIdResponse group = ok(() -> fineractClient().groups().retrieveOneGroup(response.getGroupId(), false, null));
+        assertThat(group.getActive()).isTrue();
+    }
+
+    private static GroupCreateRequest groupRequest(final String externalId) {
+        final GroupCreateRequest request = new GroupCreateRequest();
         request.officeId(1L);
         request.name(Utils.uniqueRandomStringGenerator("Group_Name_", 5));
         request.externalId(externalId);

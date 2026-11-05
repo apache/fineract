@@ -18,15 +18,22 @@
  */
 package org.apache.fineract.portfolio.group.service;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +53,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
@@ -70,6 +78,9 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.LoanStatusMapper;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
+import org.apache.fineract.portfolio.group.data.DatatableEntry;
+import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
+import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupLevel;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
@@ -167,45 +178,10 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 submittedOnDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
             }
 
-            final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
-                    clientMembers, groupMembers, submittedOnDate, currentUser, accountNo);
-
-            boolean rollbackTransaction = false;
-            if (newGroup.isActive()) {
-                this.groupRepository.saveAndFlush(newGroup);
-                // validate Group creation rules for Group
-                if (newGroup.isGroup()) {
-                    validateGroupRulesBeforeActivation(newGroup);
-                }
-
-                if (newGroup.isCenter()) {
-                    final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateCenter(null).build();
-                    rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
-                } else {
-                    final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateGroup(null).build();
-                    rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
-                }
-            }
-
-            if (!newGroup.isCenter() && newGroup.hasActiveClients()) {
-                final CommandWrapper commandWrapper = new CommandWrapperBuilder().associateClientsToGroup(newGroup.getId()).build();
-                rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
-            }
-
-            this.groupRepository.save(newGroup);
-
-            // Account Number generation
-            if (StringUtils.isBlank(accountNo)) {
-                generateAccountNumber(newGroup);
-            }
-
-            /*
-             * Generate hierarchy for a new center/group and all the child groups if they exist
-             */
-            newGroup.generateHierarchy();
-
-            this.groupRepository.saveAndFlush(newGroup);
-            newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
+            final Map.Entry<Group, Boolean> outcome = createAndPersistGroupingType(groupOffice, staff, parentGroup, groupLevel, name,
+                    externalId, active, activationDate, clientMembers, groupMembers, submittedOnDate, currentUser, accountNo);
+            final Group newGroup = outcome.getKey();
+            final boolean rollbackTransaction = outcome.getValue();
 
             if (newGroup.isGroup()) {
                 if (command.parameterExists(GroupingTypesApiConstants.datatables)) {
@@ -250,6 +226,61 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }
     }
 
+    /**
+     * Shared by the legacy {@code JsonCommand} create path ({@link #createGroupingType}, used for centers) and the
+     * typed {@link #createGroup(GroupCreateRequest)} path: builds the {@link Group} entity, applies the
+     * activation/association permission checks, generates the account number and hierarchy, and persists it. Returns
+     * the persisted group together with whether maker-checker is enabled for those tasks (the legacy caller parks the
+     * command for checker approval; the typed caller rejects the request instead, see the call site).
+     */
+    private Map.Entry<Group, Boolean> createAndPersistGroupingType(final Office groupOffice, final Staff staff, final Group parentGroup,
+            final GroupLevel groupLevel, final String name, final String externalId, final boolean active, final LocalDate activationDate,
+            final Set<Client> clientMembers, final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser,
+            final String accountNo) {
+
+        final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
+                clientMembers, groupMembers, submittedOnDate, currentUser, accountNo);
+
+        boolean rollbackTransaction = false;
+        if (newGroup.isActive()) {
+            this.groupRepository.saveAndFlush(newGroup);
+            // validate Group creation rules for Group
+            if (newGroup.isGroup()) {
+                validateGroupRulesBeforeActivation(newGroup);
+            }
+
+            if (newGroup.isCenter()) {
+                final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateCenter(null).build();
+                rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
+            } else {
+                final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateGroup(null).build();
+                rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
+            }
+        }
+
+        if (!newGroup.isCenter() && newGroup.hasActiveClients()) {
+            final CommandWrapper commandWrapper = new CommandWrapperBuilder().associateClientsToGroup(newGroup.getId()).build();
+            rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
+        }
+
+        this.groupRepository.save(newGroup);
+
+        // Account Number generation
+        if (StringUtils.isBlank(accountNo)) {
+            generateAccountNumber(newGroup);
+        }
+
+        /*
+         * Generate hierarchy for a new center/group and all the child groups if they exist
+         */
+        newGroup.generateHierarchy();
+
+        this.groupRepository.saveAndFlush(newGroup);
+        newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
+
+        return Map.entry(newGroup, rollbackTransaction);
+    }
+
     @Transactional
     @Override
     public CommandProcessingResult createCenter(final JsonCommand command) {
@@ -261,23 +292,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         CommandProcessingResult commandProcessingResult = createGroupingType(command, GroupTypes.CENTER, centerId);
 
         businessEventNotifierService.notifyPostBusinessEvent(new CentersCreateBusinessEvent(commandProcessingResult));
-
-        return commandProcessingResult;
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult createGroup(final Long centerId, final JsonCommand command) {
-
-        if (centerId != null) {
-            this.fromApiJsonDeserializer.validateForCreateCenterGroup(command);
-        } else {
-            this.fromApiJsonDeserializer.validateForCreateGroup(command);
-        }
-
-        CommandProcessingResult commandProcessingResult = createGroupingType(command, GroupTypes.GROUP, centerId);
-
-        businessEventNotifierService.notifyPostBusinessEvent(new GroupsCreateBusinessEvent(commandProcessingResult));
 
         return commandProcessingResult;
     }
@@ -689,23 +703,10 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     }
 
     private Set<Client> assembleSetOfClients(final Long groupOfficeId, final JsonCommand command) {
-
-        final Set<Client> clientMembers = new HashSet<>();
         final String[] clientMembersArray = command.arrayValueOfParameterNamed(GroupingTypesApiConstants.clientMembersParamName);
-
-        if (!ObjectUtils.isEmpty(clientMembersArray)) {
-            for (final String clientId : clientMembersArray) {
-                final Long id = Long.valueOf(clientId);
-                final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(id);
-                if (!client.isOfficeIdentifiedBy(groupOfficeId)) {
-                    final String errorMessage = "Client with identifier " + clientId + " must have the same office as group.";
-                    throw new InvalidOfficeException("client", "attach.to.group", errorMessage, clientId, groupOfficeId);
-                }
-                clientMembers.add(client);
-            }
-        }
-
-        return clientMembers;
+        final Set<Long> clientMemberIds = ObjectUtils.isEmpty(clientMembersArray) ? Collections.emptySet()
+                : Arrays.stream(clientMembersArray).map(Long::valueOf).collect(Collectors.toSet());
+        return assembleSetOfClients(groupOfficeId, clientMemberIds);
     }
 
     private Set<Group> assembleSetOfChildGroups(final Long officeId, final JsonCommand command) {
@@ -735,36 +736,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
      */
     private void handleGroupDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve,
             final GroupTypes groupLevel) {
-        String levelName = "Invalid";
-        switch (groupLevel) {
-            case CENTER:
-                levelName = "Center";
-            break;
-            case GROUP:
-                levelName = "Group";
-            break;
-            case INVALID:
-            break;
-        }
-
-        String errorMessageForUser = null;
-        String errorMessageForMachine = null;
-        if (realCause.getMessage().contains("'external_id'")) {
-            final String externalId = command.stringValueOfParameterNamed(GroupingTypesApiConstants.externalIdParamName);
-            errorMessageForUser = levelName + " with externalId `" + externalId + "` already exists.";
-            errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.externalId";
-            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser,
-                    GroupingTypesApiConstants.externalIdParamName, externalId);
-        } else if (realCause.getMessage().contains("'name'")) {
-            final String name = command.stringValueOfParameterNamed(GroupingTypesApiConstants.nameParamName);
-            errorMessageForUser = levelName + " with name `" + name + "` already exists.";
-            errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.name";
-            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, GroupingTypesApiConstants.nameParamName,
-                    name);
-        }
-
-        log.error("Error occurred.", dve);
-        throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
+        final String name = command.stringValueOfParameterNamed(GroupingTypesApiConstants.nameParamName);
+        final String externalId = command.stringValueOfParameterNamed(GroupingTypesApiConstants.externalIdParamName);
+        handleGroupDataIntegrityIssuesTyped(name, externalId, realCause, dve, groupLevel);
     }
 
     @Override
@@ -950,4 +924,154 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             }
         }
     }
+
+    @Transactional
+    @Override
+    public GroupCreateResponse createGroup(final GroupCreateRequest request) {
+        try {
+            final Long centerId = request.getCenterId();
+            final AppUser currentUser = this.context.authenticatedUser();
+
+            Long officeId;
+            Group parentGroup = null;
+            if (centerId == null) {
+                officeId = request.getOfficeId();
+            } else {
+                parentGroup = this.groupRepository.findOneWithNotFoundDetection(centerId);
+                officeId = parentGroup.officeId();
+            }
+
+            final Office groupOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
+            final Locale locale = StringUtils.isBlank(request.getLocale()) ? null : JsonParserHelper.localeFromString(request.getLocale());
+            final LocalDate activationDate = DateUtils.parseLocalDate(request.getActivationDate(), request.getDateFormat(), locale);
+            final GroupLevel groupLevel = this.groupLevelRepository.findById(GroupTypes.GROUP.getId())
+                    .orElseThrow(() -> new GroupLevelNotFoundException(GroupTypes.GROUP.getId()));
+
+            validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(groupOffice, groupLevel, activationDate);
+
+            Staff staff = null;
+            final Long staffId = request.getStaffId();
+            if (staffId != null) {
+                staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupOffice.getHierarchy());
+            }
+
+            final Set<Client> clientMembers = assembleSetOfClients(officeId, request.getClientMembers());
+            final Set<Group> groupMembers = Collections.emptySet();
+
+            final boolean active = Boolean.TRUE.equals(request.getActive());
+
+            LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
+            if (active && activationDate != null && DateUtils.isAfter(submittedOnDate, activationDate)) {
+                submittedOnDate = activationDate;
+            }
+            if (request.getSubmittedOnDate() != null && !request.getSubmittedOnDate().isBlank()) {
+                submittedOnDate = DateUtils.parseLocalDate(request.getSubmittedOnDate(), request.getDateFormat(), locale);
+            }
+
+            final String accountNo = request.getAccountNo();
+            final String externalId = this.externalIdFactory.create(request.getExternalId()).getValue();
+
+            // createAndPersistGroupingType() also calls commandProcessingService.validateRollbackCommand(...) for the
+            // activate/associate-clients permission checks, which additionally signals whether maker-checker is
+            // enabled for those tasks. Legacy parks the command for checker approval in that case; the new command
+            // pipeline has no persistence for an "awaiting approval" command yet (maker-checker is a separate,
+            // not-yet-started proposal, see fineract-command/README.md), so until that exists we reject the request
+            // outright rather than silently activating/associating without the configured approval.
+            final Map.Entry<Group, Boolean> outcome = createAndPersistGroupingType(groupOffice, staff, parentGroup, groupLevel,
+                    request.getName(), externalId, active, activationDate, clientMembers, groupMembers, submittedOnDate, currentUser,
+                    accountNo);
+            if (outcome.getValue()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.group.maker.checker.not.supported",
+                        "Maker-checker is enabled for group activation or client association, which this endpoint does not yet support.");
+            }
+            final Group newGroup = outcome.getKey();
+
+            if (request.getDatatables() != null && !request.getDatatables().isEmpty()) {
+                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getValue(), EntityTables.GROUP.getName(),
+                        newGroup.getId(), null, toJsonArray(request.getDatatables()));
+            }
+
+            this.entityDatatableChecksWritePlatformService.runTheCheck(newGroup.getId(), EntityTables.GROUP.getName(),
+                    StatusEnum.CREATE.getValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
+
+            final CommandProcessingResult commandProcessingResult = new CommandProcessingResultBuilder() //
+                    .withOfficeId(groupOffice.getId()) //
+                    .withGroupId(newGroup.getId()) //
+                    .withEntityId(newGroup.getId()) //
+                    .build();
+
+            businessEventNotifierService.notifyPostBusinessEvent(new GroupsCreateBusinessEvent(commandProcessingResult));
+
+            return GroupCreateResponse.builder().resourceId(newGroup.getId()).officeId(groupOffice.getId()).groupId(newGroup.getId())
+                    .build();
+
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleGroupDataIntegrityIssuesTyped(request.getName(), request.getExternalId(), dve.getMostSpecificCause(), dve,
+                    GroupTypes.GROUP);
+            return GroupCreateResponse.builder().build();
+        } catch (final PersistenceException dve) {
+            final Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleGroupDataIntegrityIssuesTyped(request.getName(), request.getExternalId(), throwable, dve, GroupTypes.GROUP);
+            return GroupCreateResponse.builder().build();
+        }
+    }
+
+    private JsonArray toJsonArray(final List<DatatableEntry> datatableEntries) {
+        final Gson gson = new Gson();
+        final JsonArray array = new JsonArray();
+        for (final DatatableEntry entry : datatableEntries) {
+            final JsonObject jsonEntry = new JsonObject();
+            jsonEntry.addProperty("registeredTableName", entry.getRegisteredTableName());
+            jsonEntry.add("data", gson.toJsonTree(entry.getData()));
+            array.add(jsonEntry);
+        }
+        return array;
+    }
+
+    private Set<Client> assembleSetOfClients(final Long groupOfficeId, final Set<Long> clientMemberIds) {
+        final Set<Client> clientMembers = new HashSet<>();
+        if (clientMemberIds == null || clientMemberIds.isEmpty()) {
+            return clientMembers;
+        }
+        for (final Long clientId : clientMemberIds) {
+            final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+            if (!client.isOfficeIdentifiedBy(groupOfficeId)) {
+                final String errorMessage = "Client with identifier " + clientId + " must have the same office as group.";
+                throw new InvalidOfficeException("client", "attach.to.group", errorMessage, clientId.toString(), groupOfficeId);
+            }
+            clientMembers.add(client);
+        }
+        return clientMembers;
+    }
+
+    private void handleGroupDataIntegrityIssuesTyped(final String name, final String externalId, final Throwable realCause,
+            final Exception dve, final GroupTypes groupLevel) {
+        String levelName = "Invalid";
+        switch (groupLevel) {
+            case CENTER:
+                levelName = "Center";
+            break;
+            case GROUP:
+                levelName = "Group";
+            break;
+            case INVALID:
+            break;
+        }
+
+        if (realCause.getMessage().contains("'external_id'")) {
+            final String errorMessageForUser = levelName + " with externalId `" + externalId + "` already exists.";
+            final String errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.externalId";
+            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser,
+                    GroupingTypesApiConstants.externalIdParamName, externalId);
+        } else if (realCause.getMessage().contains("'name'")) {
+            final String errorMessageForUser = levelName + " with name `" + name + "` already exists.";
+            final String errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.name";
+            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, GroupingTypesApiConstants.nameParamName,
+                    name);
+        }
+
+        log.error("Error occurred.", dve);
+        throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
+    }
+
 }
