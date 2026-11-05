@@ -35,8 +35,7 @@ public final class CommandJsonMapper {
 
     private final ObjectMapper mapper;
 
-    @SuppressWarnings("unchecked")
-    public <T> T map(JsonNode source) {
+    public Object map(JsonNode source) {
         if (source == null) {
             return null;
         }
@@ -44,7 +43,7 @@ public final class CommandJsonMapper {
         var canonicalName = source.get(COMMAND_JSON_CLASS_ATTRIBUTE).asString();
 
         try {
-            return (T) mapper.convertValue(source, Class.forName(canonicalName));
+            return mapper.convertValue(source, Class.forName(canonicalName));
         } catch (Exception e) {
             log.error("Error while mapping json node", e);
         }

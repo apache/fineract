@@ -1936,6 +1936,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return loanHelper.getAdvancedPaymentAllocationRules(loanId);
     }
 
+    @SuppressWarnings("TypeParameterUnusedInFormals") // Callers choose the type of the parsed JSON
     protected <T> T getLoanProductError(PostLoanProductsRequest request, String jsonAttributeToGetBack) {
         return loanHelper.getLoanProductError(request, jsonAttributeToGetBack);
     }
