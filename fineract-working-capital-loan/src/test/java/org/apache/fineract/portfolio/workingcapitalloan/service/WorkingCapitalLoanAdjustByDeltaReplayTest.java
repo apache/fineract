@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -166,6 +167,8 @@ class WorkingCapitalLoanAdjustByDeltaReplayTest {
     @Mock
     private JsonCommand command;
 
+    @Mock
+    private Office office;
     @InjectMocks
     private WorkingCapitalLoanWritePlatformServiceImpl writePlatformService;
 
@@ -176,6 +179,7 @@ class WorkingCapitalLoanAdjustByDeltaReplayTest {
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
 
         when(loanRepository.findById(LOAN_ID)).thenReturn(Optional.of(loan));
+        when(loan.getOffice()).thenReturn(office);
         when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
         when(loan.getBalance()).thenReturn(balance);

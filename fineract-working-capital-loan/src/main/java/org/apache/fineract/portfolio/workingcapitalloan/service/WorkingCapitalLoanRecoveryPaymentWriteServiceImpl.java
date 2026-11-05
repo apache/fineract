@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanRecoveryPaymentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
@@ -68,6 +69,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WorkingCapitalLoanRecoveryPaymentWriteServiceImpl implements WorkingCapitalLoanRecoveryPaymentWriteService {
 
+    private final PlatformSecurityContext context;
     private final WorkingCapitalLoanRepository loanRepository;
     private final WorkingCapitalLoanDataValidator validator;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
@@ -86,6 +88,7 @@ public class WorkingCapitalLoanRecoveryPaymentWriteServiceImpl implements Workin
     public CommandProcessingResult recoveryPayment(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = this.loanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         this.validator.validateRecoveryPayment(command, loan);
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(WorkingCapitalLoanConstants.transactionDateParamName);
