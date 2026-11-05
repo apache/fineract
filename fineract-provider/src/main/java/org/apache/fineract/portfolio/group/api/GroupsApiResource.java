@@ -27,6 +27,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -51,6 +52,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -86,6 +88,9 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
+import org.apache.fineract.portfolio.group.command.GroupCreateCommand;
+import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
+import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.data.GroupRoleData;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
@@ -133,6 +138,7 @@ public class GroupsApiResource {
     private final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService;
     private final GSIMReadPlatformService gsimReadPlatformService;
     private final SqlValidator sqlValidator;
+    private final CommandDispatcher dispatcher;
 
     @GET
     @Path("template")
@@ -326,16 +332,10 @@ public class GroupsApiResource {
             + "Mandatory Fields: name, officeId, active, activationDate (if active=true)\n\n"
             + "Optional Fields: externalId, staffId, clientMembers")
     @AlternativeOperationId("create_8")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsResponse.class)))
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createGroup() //
-                .withJson(apiRequestBodyAsJson) //
-                .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+    public GroupCreateResponse create(@RequestBody(required = true) @Valid GroupCreateRequest request) {
+        var command = new GroupCreateCommand();
+        command.setPayload(request);
+        return dispatcher.<GroupCreateRequest, GroupCreateResponse>dispatch(command).get();
     }
 
     @POST
@@ -349,7 +349,6 @@ public class GroupsApiResource {
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffResponse.class)))
     public String unassignLoanOfficer(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .unassignGroupStaff(groupId) //
                 .withJson(apiRequestBodyAsJson) //
